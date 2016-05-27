@@ -121,7 +121,7 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
 
     private void init(final PdfObject Shading, final GenericColorSpace shadingColorSpace, final PdfObjectReader currentPdfFile, final float[][] matrix) {
 
-        /**
+        /*
          * read axial specific values not read in generic
          */
         final boolean[] extension = Shading.getBooleanArray(PdfDictionary.Extend);
@@ -129,26 +129,20 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
             isExtended = extension;
         }
 
-        /**
-         * get colorspace
-         */
         this.shadingColorSpace = shadingColorSpace;
         this.Shading = Shading;
 
-        /**
-         * read standard shading values
-         */
         shadingType = Shading.getInt(PdfDictionary.ShadingType);
 
         background = Shading.getFloatArray(PdfDictionary.Background);
 
-        /**
+        /*
          * these values appear in several types of shading but not all
          */
         final PdfObject functionObj = Shading.getDictionary(PdfDictionary.Function);
         final byte[][] keys = Shading.getKeyArray(PdfDictionary.Function);
 
-        /**
+        /*
          * setup the translation function
          */
         if (functionObj != null) {
@@ -184,7 +178,7 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
 
                 function = new PDFFunction[subFunction.length];
 
-                /**
+                /*
                  * get values for sub stream Function
                  */
                 for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {

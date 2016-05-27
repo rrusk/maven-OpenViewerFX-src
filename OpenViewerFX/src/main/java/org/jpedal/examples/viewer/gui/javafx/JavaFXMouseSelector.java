@@ -122,7 +122,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
     ContextMenu cm;
     private void createRightClickMenu() {
         
-        /**
+        /*
          * Setup Items and Menus.
          */
         cm = new ContextMenu();
@@ -142,7 +142,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
         find = new MenuItem(Messages.getMessage("PdfRightClick.find"));
         speakHighlighted = new MenuItem("Speak Highlighted text");
 
-        /**
+        /*
          * Setup Menu Item Listeners.
          */
         copy.setOnAction(new EventHandler<ActionEvent>() {
@@ -211,7 +211,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
         find.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent t) {
-                /**
+                /*
                  * ensure co-ords in right order
                  */
                 final int[] coords = decode_pdf.getPages().getCursorBoxOnScreenAsArray();
@@ -379,7 +379,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
             });
         
         
-        /**
+        /*
          * Add Items to Main Menu.
          */
         if (decode_pdf != null && decode_pdf.isOpen()) {
@@ -469,7 +469,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                 if ((id == -1) &&  (clickCount > 1)) {
                         switch (clickCount) {
                             case 1: //single click adds caret to page
-                                /**
+                                /*
                                  * Does nothing yet. IF above prevents this case
                                  * from ever happening Add Caret code here and
                                  * add shift click code for selection. Also
@@ -521,7 +521,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
     public void mousePressed(final MouseEvent e) {
         if ((decode_pdf.getDisplayView() == Display.SINGLE_PAGE || (activateMultipageHighlight && decode_pdf.getDisplayView() == Display.CONTINUOUS && decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING)) 
             && (isOtherKey(e))) {
-                /**
+                /*
                  * remove any outline and reset variables used to track change
                  */
                 decode_pdf.updateCursorBoxOnScreen(null, 0); //remove box
@@ -567,7 +567,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
 
                 if (currentCommands.extractingAsImage) {
 
-                    /**
+                    /*
                      * remove any outline and reset variables used to track
                      * change
                      */

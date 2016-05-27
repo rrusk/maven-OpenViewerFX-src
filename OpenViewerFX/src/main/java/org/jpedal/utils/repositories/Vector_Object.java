@@ -65,7 +65,7 @@ public class Vector_Object implements Serializable
     //current max size
     int  max_size = 250;
     
-    /**
+    /*
      * flags to indicate which type of custom serialization is taking place
      */
     private static final Integer GENERIC = 1;
@@ -132,9 +132,6 @@ public class Vector_Object implements Serializable
         items = new Object[max_size];
     }
     
-    
-    
-    ///////////////////////////////////
     /**
      * extract underlying data
      */
@@ -143,7 +140,7 @@ public class Vector_Object implements Serializable
         return items;
     }
     
-    /////////////////////////////////////
+    
     /**
      * pull item from top as in LIFO stack
      */
@@ -157,7 +154,7 @@ public class Vector_Object implements Serializable
         return ( items[current_item] );
     }
     
-    /////////////////////////////////////
+    
     /**
      * put item at top as in LIFO stack
      */
@@ -169,7 +166,7 @@ public class Vector_Object implements Serializable
         
         current_item++;
     }
-    ////////////////////////////////////
+    
     /**
      * see if value present
      */
@@ -186,7 +183,7 @@ public class Vector_Object implements Serializable
         }
         return flag;
     }
-    ///////////////////////////////////
+    
     /**
      * add an item
      */
@@ -202,7 +199,7 @@ public class Vector_Object implements Serializable
         
         
     }
-    ///////////////////////////////////
+    
     /**
      * set an element
      */
@@ -214,9 +211,9 @@ public class Vector_Object implements Serializable
         
         items[id] = new_name;
     }
-    ///////////////////////////////////
+    
     /**
-     * remove element at
+     * return element at
      */
     public final Object elementAt( final int id )
     {
@@ -226,7 +223,7 @@ public class Vector_Object implements Serializable
             return items[id];
         }
     }
-    ///////////////////////////////////
+    
     /**
      * replace underlying data
      */
@@ -234,7 +231,7 @@ public class Vector_Object implements Serializable
     {
         items = new_items;
     }
-    ///////////////////////////////////
+    
     /**
      * clear the array
      */
@@ -256,7 +253,7 @@ public class Vector_Object implements Serializable
         }
         current_item = 0;
     }
-    ///////////////////////////////////
+    
     /**
      * return the size+1 as in last item (so an array of 0 values is 1)
      */
@@ -264,7 +261,7 @@ public class Vector_Object implements Serializable
     {
         return current_item + 1;
     }
-    ///////////////////////////////////
+    
     /**
      * remove element at
      */
@@ -284,7 +281,7 @@ public class Vector_Object implements Serializable
         //reduce counter
         current_item--;
     }
-    ////////////////////////////////////
+    
     /**
      * check the size of the array and increase if needed
      */
@@ -324,7 +321,7 @@ public class Vector_Object implements Serializable
         //size of array as first item
         os.writeObject(max_size);
         
-        /**
+        /*
          * iterate through each item in the collection, and if its an object that
          * wont serialize automaticaly, then perform a custom serialization, otherwise
          * let the default serialization handle it
@@ -334,12 +331,12 @@ public class Vector_Object implements Serializable
             
             if(nextObj instanceof BasicStroke){
                 //basicStrokes++;
-                /** write out a flag to indicate this is a BasicStroke object */
+                /* write out a flag to indicate this is a BasicStroke object */
                 os.writeObject(BASICSTROKE);
                 
                 final BasicStroke stroke=(BasicStroke) items[i];
                 
-                /** write out the raw elements of the BasicStroke */
+                /* write out the raw elements of the BasicStroke */
                 os.writeFloat(stroke.getLineWidth());
                 os.writeInt(stroke.getEndCap());
                 os.writeInt(stroke.getLineJoin());
@@ -348,12 +345,12 @@ public class Vector_Object implements Serializable
                 os.writeFloat(stroke.getDashPhase());
             }else if(nextObj instanceof Rectangle2D){
                 //basicStrokes++;
-                /** write out a flag to indicate this is a BasicStroke object */
+                /* write out a flag to indicate this is a BasicStroke object */
                 os.writeObject(RECT);
                 
                 final Rectangle2D rect=(Rectangle2D) items[i];
                 
-                /** write out the raw elements of the Rect */
+                /* write out the raw elements of the Rect */
                 os.writeDouble(rect.getBounds2D().getX());
                 os.writeDouble(rect.getBounds2D().getY());
                 os.writeDouble(rect.getBounds2D().getWidth());
@@ -362,61 +359,61 @@ public class Vector_Object implements Serializable
                 
             }else if(nextObj instanceof BufferedImage){
                 //bufferedImages++;
-                /** write out a flag to indicate this is a BufferedImage object */
+                /* write out a flag to indicate this is a BufferedImage object */
                 os.writeObject(BUFFERED_IMAGE);
                 
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 
-                /** store the image in a byte array */
+                /* store the image in a byte array */
                 ImageIO.write((RenderedImage) nextObj, "png", baos);
                 
-                /** write the image as a byte array to the stream */
+                /* write the image as a byte array to the stream */
                 os.writeObject(baos.toByteArray());
                 
             }else if(nextObj instanceof GeneralPath){
                 //generalPaths++;
-                /** write out a flag to indicate this is a GeneralPath object */
+                /* write out a flag to indicate this is a GeneralPath object */
                 os.writeObject(Vector_Object.GENERAL_PATH);
                 
-                /** use out custom path serializer to serialize the path */
+                /* use out custom path serializer to serialize the path */
                 PathSerializer.serializePath(os, ((Shape)items[i]).getPathIterator(new AffineTransform()));
                 
             }else if(nextObj instanceof T1Glyph){
                 //t1glyphs++;
-                /** write out a flag to indicate this is a T1Glyph object */
+                /* write out a flag to indicate this is a T1Glyph object */
                 os.writeObject(T1GLYPH);
                 
                 ((T1Glyph)nextObj).flushArea();
                 
-                /** use default serialization to serialize the object except the paths */
+                /* use default serialization to serialize the object except the paths */
                 os.writeObject(nextObj);
                 
-                /** now serialize the paths to the stream */
+                /* now serialize the paths to the stream */
                 ((T1Glyph)nextObj).writePathsToStream(os);
                 
             }else if(nextObj instanceof TTGlyph){
                 //ttglyphs++;
-                /** write out a flag to indicate this is a TTGlyph object */
+                /* write out a flag to indicate this is a TTGlyph object */
                 os.writeObject(TTGLYPH);
                 
                 ((TTGlyph)nextObj).flushArea();
                 
-                /** use default serialization to serialize the object except the paths */
+                /* use default serialization to serialize the object except the paths */
                 os.writeObject(nextObj);
                 
-                /** now serialize the paths to the stream */
+                /* now serialize the paths to the stream */
                 ((TTGlyph)nextObj).writePathsToStream(os);
                 
             }else if(nextObj instanceof T3Glyph){
                 
                 //t3glyphs++;
                 
-                /** write out a flag to indicate this is a TTGlyph object */
+                /* write out a flag to indicate this is a TTGlyph object */
                 os.writeObject(T3GLYPH);
                 
                 //((T3Glyph)nextObj).flushArea();  not needed at present
                 
-                /**convert to data stream and save*/
+                /*convert to data stream and save*/
                 ((T3Glyph)nextObj).writePathsToStream(os);
                 
                 
@@ -424,17 +421,17 @@ public class Vector_Object implements Serializable
                 
                 //paints++;
                 
-                /** write out a flag to indicate this is a Texture object */
+                /* write out a flag to indicate this is a Texture object */
                 os.writeObject(TEXTUREDPAINT);
                 
-                /** write the image as a byte array to the stream */
+                /* write the image as a byte array to the stream */
                 final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 
-                /** store the image in a byte array */
+                /* store the image in a byte array */
                 ImageIO.write(((TexturePaint)nextObj).getImage(), "png", baos);
                 os.writeObject(baos.toByteArray());
                 
-                /**and anchor as well*/
+                /*and anchor as well*/
                 final Rectangle2D rect=((TexturePaint)nextObj).getAnchorRect();
                 os.writeDouble(rect.getBounds2D().getX());
                 os.writeDouble(rect.getBounds2D().getY());
@@ -443,30 +440,30 @@ public class Vector_Object implements Serializable
                 
             }else if(nextObj instanceof Area){
                 //areas++;
-                /** write out a flag to indicate this is a TTGlyph object */
+                /* write out a flag to indicate this is a TTGlyph object */
                 os.writeObject(AREA);
                 
                 final Area area=(Area) items[i];
                 
-                /** extract the PathIterator from the Area object */
+                /* extract the PathIterator from the Area object */
                 final PathIterator pathIterator = area.getPathIterator(new AffineTransform());
                 
-                /** use out custom path serializer to serialize the path */
+                /* use out custom path serializer to serialize the path */
                 PathSerializer.serializePath(os,pathIterator);
                 
             }else{
           
-                /**
+                /*
                  * if the object is not on our list to custom serialize, then let the
                  * default serialization handle it
                  */
                 
                 try{
                     
-                    /** write out a flag to indicate this is a generic object */
+                    /* write out a flag to indicate this is a generic object */
                     os.writeObject(GENERIC);
                     
-                    /** serialize the object to the stream */
+                    /* serialize the object to the stream */
                     os.writeObject(nextObj);
                     
                 }catch(final Exception e){
@@ -491,7 +488,7 @@ public class Vector_Object implements Serializable
         
         final ObjectInput os=new ObjectInputStream(bis);
         
-        /** read fromt the stream the number of objects in this collection */
+        /* read fromt the stream the number of objects in this collection */
         final int size= (Integer) os.readObject();
         
         max_size = size;
@@ -501,18 +498,18 @@ public class Vector_Object implements Serializable
         Object nextObject;
         Integer type;
         
-        /**
+        /*
          * iterate through each object in the input stream, and store into our
          * internal collection
          */
         for (int i = 0; i < size; i++) {
             
-            /** read what type this object is going to be */
+            /* read what type this object is going to be */
             type=(Integer) os.readObject();
             
             if(type.compareTo(BASICSTROKE)==0){
                 
-                /** retrieve the raw data from the BasicStroke */
+                /* retrieve the raw data from the BasicStroke */
                 final float w = os.readFloat();
                 final int current_line_cap_style = os.readInt();
                 final int current_line_join_style = os.readInt();
@@ -520,7 +517,7 @@ public class Vector_Object implements Serializable
                 final float[] current_line_dash_array = (float[]) os.readObject();
                 final float current_line_dash_phase = os.readFloat();
                 
-                /** create a new BasicStroke object based on the raw data */
+                /* create a new BasicStroke object based on the raw data */
                 nextObject = new BasicStroke( w, current_line_cap_style, current_line_join_style, mitre_limit, current_line_dash_array, current_line_dash_phase );
             }else if (type.compareTo(RECT)==0){
                 
@@ -533,37 +530,37 @@ public class Vector_Object implements Serializable
                 
             }else if(type.compareTo(BUFFERED_IMAGE)==0){
                 
-                /** read in the bytes that make up this image */
+                /* read in the bytes that make up this image */
                 final byte[] bytes = (byte[]) os.readObject();
                 
-                /** read the bytes in and rebuild the image */
+                /* read the bytes in and rebuild the image */
                 nextObject = DefaultImageHelper.read(bytes);
                 
             }else if(type.compareTo(GENERAL_PATH)==0){
                 
-                /** use our custom path deserializer to read in the path */
+                /* use our custom path deserializer to read in the path */
                 nextObject = PathSerializer.deserializePath(os);
                 
             }else if(type.compareTo(T1GLYPH)==0){
                 
-                /** read in the entire glyph, except the paths */
+                /* read in the entire glyph, except the paths */
                 final T1Glyph glyph = (T1Glyph) os.readObject();
                 
-                /**
+                /*
                  * we now need to extract the paths for this glyph from the stream
                  */
                 
-                /** the number of paths in the glyph */
+                /* the number of paths in the glyph */
                 final int count = (Integer) os.readObject();
                 
                 final GeneralPath[] paths = new GeneralPath[count];
                 
-                /** iterate through the stream, and deserialize each path */
+                /* iterate through the stream, and deserialize each path */
                 for(int j=0; j<count; j++){
                     paths[j] = PathSerializer.deserializePath(os);
                 }
                 
-                /**
+                /*
                  * now we need to create a new Vector_Path object, and pass in the
                  * paths we have just exrtracted from the sream
                  */
@@ -571,31 +568,31 @@ public class Vector_Object implements Serializable
                 vp.set(paths);
                 vp.setCurrent_item(paths.length);
                 
-                /** set the Vector_Path object in the glyph */
+                /* set the Vector_Path object in the glyph */
                 glyph.setPaths(vp);
                 
                 nextObject = glyph;
                 
             }else if(type.compareTo(TTGLYPH)==0){
                 
-                /** read in the entire glyph, except the paths */
+                /* read in the entire glyph, except the paths */
                 final TTGlyph glyph = (TTGlyph) os.readObject();
                 
-                /**
+                /*
                  * we now need to extract the paths for this glyph from the stream
                  */
                 
-                /** the number of paths in the glyph */
+                /* the number of paths in the glyph */
                 final int count = (Integer) os.readObject();
                 
                 final GeneralPath[] paths = new GeneralPath[count];
                 
-                /** iterate through the stream, and deserialize each path */
+                /* iterate through the stream, and deserialize each path */
                 for(int j=0; j<count; j++){
                     paths[j] = PathSerializer.deserializePath(os);
                 }
                 
-                /**
+                /*
                  * now we need to create a new Vector_Path object, and pass in the
                  * paths we have just exrtracted from the sream
                  */
@@ -603,7 +600,7 @@ public class Vector_Object implements Serializable
                 vp.set(paths);
                 vp.setCurrent_item(paths.length);
                 
-                /** set the Vector_Path object in the glyph */
+                /* set the Vector_Path object in the glyph */
                 glyph.setPaths(vp);
                 
                 nextObject = glyph;
@@ -616,10 +613,10 @@ public class Vector_Object implements Serializable
                 //restore image
                 final byte[] bytes = (byte[]) os.readObject();
                 
-                /** read the bytes in and rebuild the image */
+                /* read the bytes in and rebuild the image */
                 final BufferedImage img = DefaultImageHelper.read(bytes);
                 
-                /**and the rectangle*/
+                /*and the rectangle*/
                 final float x = os.readFloat();
                 final float y = os.readFloat();
                 final float w = os.readFloat();
@@ -631,15 +628,15 @@ public class Vector_Object implements Serializable
                 
             }else if(type.compareTo(AREA)==0){
                 
-                /** deserialize the path that makes up this Area */
+                /* deserialize the path that makes up this Area */
                 final GeneralPath path = PathSerializer.deserializePath(os);
                 
-                /** create a new Area based on the path */
+                /* create a new Area based on the path */
                 nextObject = new Area(path);
                 
             }else{
                 
-                /**
+                /*
                  * this object has been serialized using the default mechanism,
                  * so just deserialize normaly
                  */

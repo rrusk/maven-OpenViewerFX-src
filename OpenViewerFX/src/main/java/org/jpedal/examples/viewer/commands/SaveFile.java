@@ -73,55 +73,64 @@ public class SaveFile {
             //set default name to current file name
             final int approved = chooser.showSaveDialog(null);
             if (approved == JFileChooser.APPROVE_OPTION) {
+                
+//                if(SwingMouseAnnotations.getAnnotations().size()>0){
+//                    //Add annotations to output
+//                    try {
+//                        SwingAnnotationPanel.saveAnnotation(commonValues.getSelectedFile(), chooser.getSelectedFile().getAbsolutePath());
+//                    } catch (IOException ex) {
+//                        LogWriter.writeLog("Exception : "+ex+" Attempting to save annotations.");
+//                    }
+//                } else {
 
-                FileInputStream fis = null;
-                FileOutputStream fos = null;
+                    FileInputStream fis = null;
+                    FileOutputStream fos = null;
 
-                file = chooser.getSelectedFile();
-                fileToSave = file.getAbsolutePath();
+                    file = chooser.getSelectedFile();
+                    fileToSave = file.getAbsolutePath();
 
-                if (!fileToSave.endsWith(".pdf")) {
-                    fileToSave += ".pdf";
-                    file = new File(fileToSave);
-                }
-
-                if (fileToSave.equals(commonValues.getSelectedFile())) {
-                    return;
-                }
-
-                if (file.exists()) {
-                    final int n = currentGUI.showConfirmDialog(fileToSave + '\n'
-                            + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + '\n'
-                            + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
-                            Messages.getMessage("PdfViewerMessage.Resave"), JOptionPane.YES_NO_OPTION);
-                    if (n == 1) {
-                        continue;
+                    if (!fileToSave.endsWith(".pdf")) {
+                        fileToSave += ".pdf";
+                        file = new File(fileToSave);
                     }
-                }
 
-                try {
-                    fis = new FileInputStream(commonValues.getSelectedFile());
-                    fos = new FileOutputStream(fileToSave);
-
-                    final byte[] buffer = new byte[4096];
-                    int bytes_read;
-
-                    while ((bytes_read = fis.read(buffer)) != -1) {
-                        fos.write(buffer, 0, bytes_read);
+                    if (fileToSave.equals(commonValues.getSelectedFile())) {
+                        return;
                     }
-                } catch (final Exception e1) {
 
-                    //e1.printStackTrace();
+                    if (file.exists()) {
+                        final int n = currentGUI.showConfirmDialog(fileToSave + '\n'
+                                + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + '\n'
+                                + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
+                                Messages.getMessage("PdfViewerMessage.Resave"), JOptionPane.YES_NO_OPTION);
+                        if (n == 1) {
+                            continue;
+                        }
+                    }
+
+                    try {
+                        fis = new FileInputStream(commonValues.getSelectedFile());
+                        fos = new FileOutputStream(fileToSave);
+
+                        final byte[] buffer = new byte[4096];
+                        int bytes_read;
+
+                        while ((bytes_read = fis.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytes_read);
+                        }
+                    } catch (final Exception e1) {
+
+                        //e1.printStackTrace();
                     currentGUI.showMessageDialog(Messages.getMessage("PdfViewerException.NotSaveInternetFile")+ ' ' +e1);
-                }
+                    }
 
-                try {
-                    fis.close();
-                    fos.close();
-                } catch (final IOException e2) {
-                    LogWriter.writeLog("Exception attempting close IOStream: " + e2); 
-                }
-
+                    try {
+                        fis.close();
+                        fos.close();
+                    } catch (final IOException e2) {
+                        LogWriter.writeLog("Exception attempting close IOStream: " + e2);
+                    }
+//                }
                 finished = true;
             } else {
                 return;

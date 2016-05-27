@@ -75,7 +75,7 @@ public class FontResolver {
              */
             if(pdfStreamDecoder.parserOptions.isFlattenedForm() && newFont==null){
 
-                newFont=new FontObject("1 0 R");
+                newFont=new FontObject("0 0 R");
                 
                 fontID = resolveFlattenedFont(fontID, newFont);
             }

@@ -229,13 +229,13 @@ public class StandardFonts {
         
         widthTableStandard = null;
         
-        /**names of CID fonts supplied by Adobe*/
+        /*names of CID fonts supplied by Adobe*/
         //CIDFonts =null;
         
-        /**lookup table for java fonts*/
+        /*lookup table for java fonts*/
         javaFontList=null;
         
-        /**java font versions of fonts*/
+        /*java font versions of fonts*/
         javaFonts=null;
         
         files_names=null;
@@ -248,7 +248,7 @@ public class StandardFonts {
     }
     
     //////////////////////////////////////////////////
-    /**
+    /*
      * create lookup array so we can quickly test if
      * we have one of the 14 fonts so we can test quickly
      */
@@ -366,16 +366,20 @@ public class StandardFonts {
                 //write values to table, converting from Octal
                 final StringTokenizer values = new StringTokenizer(line);
                 
+                final int tokenCount=values.countTokens();
+                
                 //trap for space and lines which cause problems in Zapf
-                if ((!line.contains("space")) && (values.countTokens() > 1)) {
+                if (tokenCount>1 && (!line.contains("space"))) {
                     
+                    switch(tokenCount){
                     //ignore first as token but read as char
-                    if (values.countTokens() == 3) {
+                        case 3:
                         char_value = values.nextToken();
                         NAME = values.nextToken();
                         VAL = values.nextToken();
+                        break;
                         
-                    }else if (values.countTokens() == 4) {
+                        case 4:
                         hexVal=values.nextToken();
                         
                         values.nextToken(); //ignore in this case
@@ -383,26 +387,32 @@ public class StandardFonts {
                         VAL = values.nextToken();
                         
                         char_value=Character.toString((char)Integer.parseInt(hexVal,16));
+                        break;
                         
-                    } else { //zapf values
-                        if(values.countTokens()==2){
+                        case 2: //zapf values
                             char_value = " ";
                             NAME = values.nextToken();
                             VAL = values.nextToken();
-                        }else{
+                        break;
+                        
+                        default:
                             char_value = values.nextToken();
                             NAME = values.nextToken();
                             VAL = values.nextToken();
-                        }
+                        
                     }
-                    
-                    unicode_name_mapping_table.put(key + NAME, char_value);
+                
+                    if(tokenCount!=2){ //do not add forZapf
+                        unicode_name_mapping_table.put(key + NAME, char_value);
+                    }
                     
                     glyphToChar[key].put(NAME, Integer.parseInt(VAL));
                     
                     //20021104 added to make sure names in list as well
                     //if (file_name.equals("zapf.cfg"))
-                    unicode_name_mapping_table.put(NAME, char_value);
+                    if(tokenCount!=2){ //do not add forZapf
+                        unicode_name_mapping_table.put(NAME, char_value);
+                    }
                     
                     //convert if there is a value
                     if (Character.isDigit(VAL.charAt(0))) {
@@ -593,8 +603,8 @@ public class StandardFonts {
         }
     }
     
-    /**used internally when we needed to convert bytes to MacROman to build new tables*/
-    /**private static String byteToEncodedString(String value,String enc) throws Exception{
+    /*used internally when we needed to convert bytes to MacROman to build new tables*/
+    /*private static String byteToEncodedString(String value,String enc) throws Exception{
     
      String s=null;
 
@@ -669,7 +679,7 @@ public class StandardFonts {
     public  static void checkLoaded( final int enc) {
         
         
-        /**load mapping if we need it and initialise storage*/
+        /*load mapping if we need it and initialise storage*/
         if((enc==MAC)&&(MAC_char_encoding_table==null)){
             
             MAC_char_encoding_table = new String[335];
@@ -773,20 +783,10 @@ public class StandardFonts {
                 //extract values
                 while (values.hasMoreTokens()) {
                     next_command = values.nextToken();
-                    /**
-                         if (next_command.equals("C"))
-                         char_number = values.nextToken();*/
                     if (next_command.equals("WX")) {
                         width = Float.parseFloat(values.nextToken()) / 1000;
                     } else if (next_command.equals("N")) {
                         char_name = values.nextToken();
-                        /**
-                         if (next_command.equals("B")) {
-                         x1 = Integer.parseInt(values.nextToken());
-                         y1 = Integer.parseInt(values.nextToken());
-                         x2 = Integer.parseInt(values.nextToken());
-                         y2 = Integer.parseInt(values.nextToken());
-                         }*/
                     }
                 }
                 
@@ -853,7 +853,7 @@ public class StandardFonts {
         
         BufferedReader input_stream =null;
         
-        /**load if not already loaded*/
+        /*load if not already loaded*/
         if(adobeMap==null){
             try {
                 //initialise
@@ -973,7 +973,7 @@ public class StandardFonts {
         
         final Map<String, String> fontDetails=new HashMap<String, String>();
         
-        /**read in font data*/
+        /*read in font data*/
         if(type==TRUETYPE || type==TRUETYPE_COLLECTION){
             
             //FontData closed in routine
@@ -993,7 +993,7 @@ public class StandardFonts {
         fontNames[0]="";
         
         
-        /**read in font data*/
+        /*read in font data*/
         if(type==TRUETYPE || type==TRUETYPE_COLLECTION){
             
             //FontData closed in routine

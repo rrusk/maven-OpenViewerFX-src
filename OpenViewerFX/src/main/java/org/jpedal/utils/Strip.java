@@ -62,18 +62,14 @@ public class Strip
         final int rawLength=all_tags.length();
         StringBuilder general_buffer = new StringBuilder(rawLength);
         StringBuilder tag=new StringBuilder(rawLength);
-        
-        /**safety trap*/
+
         if (all_tags == null) {
             return general_buffer;
         }
         
         
         if(isXMLExtraction){
-            
-            /**
-             * general values
-             */
+
             char next_token;
             char start = ' ';
             boolean inToken = false;
@@ -164,16 +160,13 @@ public class Strip
         StringBuilder general_buffer = new StringBuilder();
         StringBuilder tag=new StringBuilder();
         
-        /**safety trap*/
         if (all_tags == null) {
             return general_buffer;
         }
         
         if(isXMLExtraction){
             
-            /**
-             * general values
-             */
+
             char next_token;
             char start = ' ';
             boolean inToken = false;
@@ -229,33 +222,6 @@ public class Strip
         char c;
         
         final int length=content_buffer.length();
-        
-        /**
-         * StringBuffer cb=new StringBuffer();
-         * cb.setLength(length);
-         * 
-         * for(int ii=0;ii<length;ii++){
-         * //System.out.println(ii+" "+length);
-         * cb.setCharAt(ii,content_buffer.charAt(ii));
-         * }
-         * 
-         * int len2=cb.length();
-         */
-        
-//		//remove all start spaces
-//		for( int i = 0;i < length;i++ )
-//		{
-//			c = content_buffer.charAt( i );
-//
-//			if( c == ' '  ){
-//				content_buffer.deleteCharAt( i );
-//				length--;
-//				i--;
-//				if(length==0)
-//					break;
-//			}else
-//				i=length;
-//		}
 
         for (int i = length - 1; i > -1; i--) {
 
@@ -401,28 +367,7 @@ public class Strip
         final StringBuffer output_data;
         
         if(isXMLExtraction){
-            /**
-             * ////////////////////////
-             * String current_token = "";
-             * StringBuffer old=new StringBuffer();
-             * StringTokenizer data_As_tokens = new StringTokenizer( input,"<>", true );
-             * 
-             * while( data_As_tokens.hasMoreTokens() ){
-             * String next_item = data_As_tokens.nextToken();
-             * if( ( next_item.equals( "<" ) ) & ( ( data_As_tokens.hasMoreTokens() ) ) ) {
-             * //get token
-             * current_token = next_item + data_As_tokens.nextToken() +data_As_tokens.nextToken();
-             * 
-             * //the tab in the data
-             * if( current_token.equals( "<Space" ) )
-             * old.append('\t');
-             * 
-             * }else
-             * old.append( next_item );
-             * }/**/
-            ////////////////////////////
-            //new code
-            
+
             final byte[] rawData=StringUtils.toBytes(input);
             final int length=rawData.length;
             int ptr=0;

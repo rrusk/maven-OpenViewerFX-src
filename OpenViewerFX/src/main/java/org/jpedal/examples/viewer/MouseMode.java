@@ -40,6 +40,8 @@ public class MouseMode {
     public static final int MOUSE_MODE_TEXT_SELECT = 0;
 
     public static final int MOUSE_MODE_PANNING = 1;
+    
+    public static final int MOUSE_MODE_ANNOTATION = 2;
 
     int mouseMode;
 

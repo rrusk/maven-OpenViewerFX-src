@@ -1031,7 +1031,7 @@ public class GenericColorSpace  implements Cloneable, Serializable {
     /**
      * convert byte[] datastream JPEG to an image in RGB
      */
-    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
         
         //see if LUV
         if(decodeParms!=null && decodeParms.getInt(PdfDictionary.ColorTransform)==1 && this.value!=ColorSpaces.DeviceGray) {
@@ -1088,7 +1088,7 @@ public class GenericColorSpace  implements Cloneable, Serializable {
      * convert byte[] datastream JPEG to an image in RGB
      * @throws PdfException
      */
-    public BufferedImage JPEG2000ToRGBImage(byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final int d) throws PdfException {
+    public BufferedImage JPEG2000ToRGBImage(byte[] data, final int w, final int h, final int pX, final int pY, final int d) throws PdfException {
 
         BufferedImage image;
         try {

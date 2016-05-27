@@ -338,7 +338,7 @@ public class SeparationColorSpace extends GenericColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage( final byte[] data, final int ww, final int hh, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+    public BufferedImage JPEGToRGBImage( final byte[] data, final int ww, final int hh, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
         
         BufferedImage image;
         ByteArrayInputStream in = null;
@@ -417,7 +417,7 @@ public class SeparationColorSpace extends GenericColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h, final float[] decodeArray, final int pX, final int pY, final int d) throws PdfException{
+    public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h, final int pX, final int pY, final int d) throws PdfException{
         
         
         BufferedImage image;

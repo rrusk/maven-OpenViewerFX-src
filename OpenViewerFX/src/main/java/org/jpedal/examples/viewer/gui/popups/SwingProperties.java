@@ -249,12 +249,9 @@ public class SwingProperties extends JPanel {
     //Speech Options
     JComboBox<String> voiceSelect;
     
-    
     final JPanel highlightBoxColor = new JPanel();
-//    JPanel highlightTextColor = new JPanel();
-final JPanel viewBGColor = new JPanel();
+    final JPanel viewBGColor = new JPanel();
     final JPanel pdfDecoderBackground = new JPanel();
-    //	JPanel sideBGColor = new JPanel();
     final JPanel foreGroundColor = new JPanel();
     final JCheckBox invertHighlight = new JCheckBox("Highlight Inverts Page");
     final JCheckBox replaceDocTextCol = new JCheckBox("Replace Document Text Colors");
@@ -335,7 +332,6 @@ final JPanel viewBGColor = new JPanel();
             confirm.setEnabled(true);
         }
         
-        //		this.swingGUI = swingGUI;
         propertiesDialog.setLocationRelativeTo((Component)currentGUI.getFrame());
         propertiesDialog.setVisible(true);
     }
@@ -421,7 +417,6 @@ final JPanel viewBGColor = new JPanel();
         invertHighlight.setToolTipText(Messages.getMessage("PdfPreferences.invertHighlight.toolTip"));
         showMouseSelectionBox.setToolTipText(Messages.getMessage("PdfPreferences.showMouseSelection.toolTip"));
         highlightBoxColor.setToolTipText(Messages.getMessage("PdfPreferences.highlightBox.toolTip"));
-//        highlightTextColor.setToolTipText(Messages.getMessage("PdfPreferences.highlightText.toolTip"));
         
         //Set up the properties window gui components
         resolution = new JTextField();
@@ -648,7 +643,7 @@ final JPanel viewBGColor = new JPanel();
             }
         });
         cancel.setToolTipText("Leave preferences window without saving changes");
-        //		Save the properties into a new file
+        //Save the properties into a new file
         save.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(final ActionEvent e) {
@@ -758,19 +753,13 @@ final JPanel viewBGColor = new JPanel();
         resolution.addKeyListener(numericalKeyListener);
         maxMultiViewers.addKeyListener(numericalKeyListener);
         
-        /**
-         * Set the current properties from the properties file
-         */
+        //Set the current properties from the properties file
         setLayout(new BorderLayout());
         
-        //		JButtonBar toolbar = new JButtonBar(JButtonBar.VERTICAL);
         final JPanel toolbar = new JPanel();
         
         final BoxLayout layout = new BoxLayout(toolbar, BoxLayout.Y_AXIS);
         toolbar.setLayout(layout);
-        
-        //if(PdfDecoder.isRunningOnMac)
-        //	toolbar.setPreferredSize(new Dimension(120,0));
         
         add(new ButtonBarPanel(toolbar, gui), BorderLayout.CENTER);
         
@@ -815,9 +804,8 @@ final JPanel viewBGColor = new JPanel();
         if(border.isSelected()){
             borderStyle = 1;
         }
-        /**
-         * set preferences from all but menu options
-         */
+        
+        //set preferences from all but menu options
         properties.setValue("borderType", String.valueOf(borderStyle));
         properties.setValue("useHinting", String.valueOf(useHinting.isSelected()));
         properties.setValue("startView", String.valueOf(pageMode));
@@ -874,9 +862,6 @@ final JPanel viewBGColor = new JPanel();
     class ButtonBarPanel extends JPanel {
         
         private Component currentComponent;
-        
-        //		Switch between idependent and properties dependent
-        //private boolean newPreferencesCode = true;
         
         ButtonBarPanel(final JPanel toolbar, final GUIFactory gui) {
             setLayout(new BorderLayout());
@@ -935,9 +920,7 @@ final JPanel viewBGColor = new JPanel();
          */
         private JPanel createGeneralSettings(){
             
-            /**
-             * Set values from Properties file
-             */
+            //Set values from Properties file
             loadStringValue(resolution, "resolution");
             
             loadBooleanValue(useHinting, "useHinting");
@@ -1062,19 +1045,18 @@ final JPanel viewBGColor = new JPanel();
          */
         private JPanel createPageDisplaySettings(){
             
-            /**
-             * Set values from Properties file
-             */
+            //Set values from Properties file
             loadBooleanValue(enhancedViewer, "enhancedViewerMode");
-            loadBooleanValue(enhanceFractionalLines, "enhanceFractionalLines");
-            loadBooleanValue(border, "borderType");
+            loadBooleanValue(enhanceFractionalLines, "enhanceFractionalLines");            
             loadBooleanValue(enhancedFacing, "enhancedFacingMode");
             loadBooleanValue(thumbnailScroll, "previewOnSingleScroll");
             
             loadStringValue(pageInsets, "pageInsets", "25");
             
+            final String borderType = properties.getValue("borderType").toLowerCase();
+            border.setSelected(!borderType.isEmpty() && Integer.parseInt(borderType) == 1);
             
-            String propValue = properties.getValue("startView");
+            final String propValue = properties.getValue("startView");
             if(!propValue.isEmpty()){
                 int mode = Integer.parseInt(propValue);
                 if(mode<Display.SINGLE_PAGE || mode>Display.PAGEFLOW) {
@@ -1527,21 +1509,6 @@ final JPanel viewBGColor = new JPanel();
             final Color currentBox = new Color(hBoxColor);
             highlightBoxColor.setBackground(currentBox);
             
-            
-            
-//            propValue = properties.getValue("highlightTextColor");
-//            int hTextColor = 0;
-//            if(!propValue.isEmpty()){
-//                hTextColor = Integer.parseInt(propValue);
-//            }else{
-//                if(DecoderOptions.backgroundColor!=null)
-//                    hTextColor = DecoderOptions.backgroundColor.getRGB();
-//                
-//            }
-//            final Color currentText = new Color(hTextColor);
-//            highlightTextColor.setBackground(currentText);
-            
-            
             final JButton hBoxButton = new JButton(Messages.getMessage("PdfPreferences.ChangeHighlightColor"));
             hBoxButton.addActionListener(new ActionListener(){
                 @Override
@@ -1556,32 +1523,17 @@ final JPanel viewBGColor = new JPanel();
             
             loadBooleanValue(invertHighlight, "invertHighlights");
             
-//            final JButton hTextButton = new JButton(Messages.getMessage("PdfPreferences.ChangeHighlightTextColor"));
-//            hTextButton.addActionListener(new ActionListener(){
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    Color c = JColorChooser.showDialog(null, "Highlighted Text Color", currentText);
-//                    highlightTextColor.setBackground(c);
-//                }
-//            });
-            
             final JLabel hCompLabel = new JLabel(Messages.getMessage("PdfPreferences.ChangeHighlightTransparency"));
             
-            /**
-             * Dependent of invert value, set highlight options to enabled / disabled
-             */
+            //Dependent of invert value, set highlight options to enabled / disabled
             if(invertHighlight.isSelected()){
                 highlightBoxColor.setEnabled(false);
-//                highlightTextColor.setEnabled(false);
                 highlightComposite.setEnabled(false);
-//                hTextButton.setEnabled(false);
                 hBoxButton.setEnabled(false);
                 hCompLabel.setEnabled(false);
             }else{
                 highlightBoxColor.setEnabled(true);
-//                highlightTextColor.setEnabled(true);
                 highlightComposite.setEnabled(true);
-//                hTextButton.setEnabled(true);
                 hBoxButton.setEnabled(true);
                 hCompLabel.setEnabled(true);
             }
@@ -1591,16 +1543,12 @@ final JPanel viewBGColor = new JPanel();
                 public void actionPerformed(final ActionEvent e) {
                     if(((AbstractButton)e.getSource()).isSelected()){
                         highlightBoxColor.setEnabled(false);
-//                        highlightTextColor.setEnabled(false);
                         highlightComposite.setEnabled(false);
-//                        hTextButton.setEnabled(false);
                         hBoxButton.setEnabled(false);
                         hCompLabel.setEnabled(false);
                     }else{
                         highlightBoxColor.setEnabled(true);
-//                        highlightTextColor.setEnabled(true);
                         highlightComposite.setEnabled(true);
-//                        hTextButton.setEnabled(true);
                         hBoxButton.setEnabled(true);
                         hCompLabel.setEnabled(true);
                     }
@@ -1627,30 +1575,6 @@ final JPanel viewBGColor = new JPanel();
                 }
             });
             
-            
-            //            propValue = properties.getValue("sbbgColor");
-            //            int sbbgColor = 0;
-            //            if(propValue.length()>0){
-            //            	sbbgColor = Integer.parseInt(propValue);
-            //            }else{
-            //                if(DecoderOptions.backgroundColor!=null)
-            //                	sbbgColor = DecoderOptions.backgroundColor.getRGB();
-            //
-            //            }
-            //            final Color SideBarColor = new Color(sbbgColor);
-            //            sideBGColor.setBackground(SideBarColor);
-            //
-            //
-            //            final JButton SideBarButton = new JButton(Messages.getMessage("PdfPreferences.ChangeSideBarColor"));
-            //            SideBarButton.addActionListener(new ActionListener(){
-            //                public void actionPerformed(ActionEvent e) {
-            //                    JColorChooser cc = new JColorChooser(SideBarColor);
-            //                    Color c = cc.showDialog(null, "SideBar Background Color", SideBarColor);
-            //                    sideBGColor.setBackground(c);
-            //
-            //                }
-            //            });
-            
             propValue = properties.getValue("vfgColor");
             int vfgColor = 0;
             if(!propValue.isEmpty()){
@@ -1674,9 +1598,7 @@ final JPanel viewBGColor = new JPanel();
             loadBooleanValue(changeTextAndLineArt, "changeTextAndLineart");
             loadBooleanValue(replaceDocTextCol, "replaceDocumentTextColors");
             
-            /**
-             * Dependent of invert value, set highlight options to enabled / disabled
-             */
+            //Dependent of invert value, set highlight options to enabled / disabled
             if(replaceDocTextCol.isSelected()){
                 FGButton.setEnabled(true);
                 foreGroundColor.setEnabled(true);
@@ -1702,8 +1624,6 @@ final JPanel viewBGColor = new JPanel();
                 }
             });
             
-            
-            
             propValue = properties.getValue("pdfDisplayBackground");
             int pdbColor = 0;
             if(!propValue.isEmpty()){
@@ -1711,7 +1631,6 @@ final JPanel viewBGColor = new JPanel();
             }
             final Color PDBColor = new Color(pdbColor);
             pdfDecoderBackground.setBackground(PDBColor);
-            
             
             final JButton PDBButton = new JButton(Messages.getMessage("PdfPreferences.ChangeDisplayBackgroundColor"));
             PDBButton.addActionListener(new ActionListener(){
@@ -1725,9 +1644,7 @@ final JPanel viewBGColor = new JPanel();
             
             loadBooleanValue(replaceDisplayBGCol, "replacePdfDisplayBackground");
             
-            /**
-             * Dependent of invert value, set highlight options to enabled / disabled
-             */
+            //Dependent of invert value, set highlight options to enabled / disabled
             if(replaceDisplayBGCol.isSelected()){
                 PDBButton.setEnabled(true);
                 pdfDecoderBackground.setEnabled(true);
@@ -1777,19 +1694,6 @@ final JPanel viewBGColor = new JPanel();
             c.gridx = 1;
             c.weightx = 1;
             pane.add(hBoxButton, c);
-            
-//            c.gridy++;
-//            
-//            c.insets = new Insets(5,0,0,5);
-//            c.gridwidth = 1;
-//            c.gridx = 0;
-//            c.weightx = 0;
-//            highlightTextColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-//            pane.add(highlightTextColor, c);
-//            c.insets = new Insets(5,0,0,0);
-//            c.gridwidth = 1;
-//            c.gridx = 1;
-//            pane.add(hTextButton, c);
             
             c.gridy++;
             
@@ -1894,20 +1798,7 @@ final JPanel viewBGColor = new JPanel();
             c.gridx = 0;
             pane.add(Box.createVerticalGlue(), c);
             
-            //            c.insets = new Insets(5,0,0,5);
-            //            c.gridx = 0;
-            //            sideBGColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            //            pane.add(sideBGColor, c);
-            //            c.insets = new Insets(5,0,0,0);
-            //            c.gridwidth = 1;
-            //            c.gridx = 1;
-            //            c.weightx = 1;
-            //            pane.add(SideBarButton, c);
-            //
-            //            c.gridy++;
-            
-            //pane.add(tabs, BorderLayout.CENTER);
-           panel.add(scroll, BorderLayout.CENTER); 
+            panel.add(scroll, BorderLayout.CENTER); 
             
             return panel;
             

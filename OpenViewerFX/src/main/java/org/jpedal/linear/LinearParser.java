@@ -128,7 +128,7 @@ public class LinearParser {
             final byte[] data=new byte[dataLength+1];
             
             System.arraycopy(buffer,start,data,0,dataLength);
-            linearObj=new LinearizedObject("1 0 R");
+            linearObj=new LinearizedObject("0 0 R");
             linearObj.setStatus(PdfObject.UNDECODED_DIRECT);
             linearObj.setUnresolvedData(data, PdfDictionary.Linearized);
             

@@ -72,14 +72,11 @@ public class ThumbnailDecoder {
             
             //Produce image at 50% scaling to prevent massive memory issues at large scalings
             //Also improves thumbnail quality at higher resolutions
-            final float scaling = decode_pdf.getScaling();
+            float scaling = decode_pdf.getScaling();
             if(scaling>0.5f) {
-                decode_pdf.setScaling(0.5f);
+                scaling = 0.5f;
             }
-            final BufferedImage pageImage = decode_pdf.getPageAsImage(pageNumber);
-            if(scaling>0.5f) {
-                decode_pdf.setScaling(scaling);
-            }
+            final BufferedImage pageImage = decode_pdf.getPageAsImage(pageNumber, scaling);
             
             formRenderer.getCompData().setRasterizeForms(originalRasterize);
             

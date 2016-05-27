@@ -465,37 +465,40 @@ public class ColorObjectDecoder {
         final int keyLength;
         int endPoint=i;
 
-        //roll on to start
-        while(raw[endPoint]=='/' || raw[endPoint]==32 ||raw[endPoint]==10 ||raw[endPoint]==13) {
-            endPoint++;
-        }
-
-        final int startPt=endPoint;
-
-        //get name length
-        while(endPoint<raw.length){
-            if(raw[endPoint]=='/' || raw[endPoint]==' ' || raw[endPoint]==13 || raw[endPoint]==10) {
-                break;
+        if(raw[i]!='/' || raw[i+1]!='/'){ //allow for no name (case 24915) /Separation//DeviceCMYK 246 0 R
+         
+            //roll on to start
+            while(raw[endPoint]=='/' || raw[endPoint]==32 ||raw[endPoint]==10 ||raw[endPoint]==13) {
+                endPoint++;
             }
 
-            endPoint++;
+            final int startPt=endPoint;
+
+            //get name length
+            while(endPoint<raw.length){
+                if(raw[endPoint]=='/' || raw[endPoint]==' ' || raw[endPoint]==13 || raw[endPoint]==10) {
+                    break;
+                }
+
+                endPoint++;
+            }
+
+            //read name
+            //set value
+            keyLength=endPoint-startPt;
+            final byte[] stringBytes=new byte[keyLength];
+            System.arraycopy(raw,startPt,stringBytes,0,keyLength);
+
+            //store value
+            pdfObject.setName(PdfDictionary.Name,stringBytes);
+
+            if(debugColorspace) {
+                System.out.println(padding + "name=" + new String(stringBytes) + ' ' + pdfObject);
+            }
+
+            i=endPoint;
         }
-
-        //read name
-        //set value
-        keyLength=endPoint-startPt;
-        final byte[] stringBytes=new byte[keyLength];
-        System.arraycopy(raw,startPt,stringBytes,0,keyLength);
-
-        //store value
-        pdfObject.setName(PdfDictionary.Name,stringBytes);
-
-        if(debugColorspace) {
-            System.out.println(padding + "name=" + new String(stringBytes) + ' ' + pdfObject);
-        }
-
-        i=endPoint;
-
+        
         if(raw[i]!=47) {
             i++;
         }
@@ -684,7 +687,7 @@ public class ColorObjectDecoder {
 
     static void showData(final PdfObject pdfObject, final byte[] raw, final int i) {
 
-        System.out.println(padding+"Reading colorspace into "+pdfObject+" ref="+pdfObject.getObjectRefAsString()+" i="+i+" chars="+(char)raw[i]+(char)raw[i+1]+(char)raw[i+2]+(char)raw[i+3]+(char)raw[i+4]);
+        System.out.println(padding+"Reading colorspace into "+pdfObject+" ref="+pdfObject.getObjectRefAsString());//+" i="+i+" chars="+(char)raw[i]+(char)raw[i+1]+(char)raw[i+2]+(char)raw[i+3]+(char)raw[i+4]);
 
         System.out.println(padding+"------------>");
         for(int ii=i;ii<raw.length;ii++){

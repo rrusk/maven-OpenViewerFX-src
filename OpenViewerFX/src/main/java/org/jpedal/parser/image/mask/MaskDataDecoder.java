@@ -465,7 +465,7 @@ public class MaskDataDecoder {
             maskData=JPEGDecoder.getBytesFromJPEG(maskData,maskColorData,newSMask);
             newSMask.setMixedArray(PdfDictionary.Filter,null);
             newSMask.setDecodedStream(maskData);
-        }else if(smaskData.isJPX()){
+        }else if(1==2 && smaskData.isJPX()){
             maskData=JPeg2000ImageDecoder.getBytesFromJPEG2000(maskData);
             newSMask.setMixedArray(PdfDictionary.Filter,null);
             newSMask.setDecodedStream(maskData);

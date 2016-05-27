@@ -32,14 +32,16 @@
  */
 package org.jpedal.parser.image;
 
-import org.jpedal.parser.image.downsample.RawImageSaver;
-import org.jpedal.parser.image.mask.MaskDecoder;
-import org.jpedal.parser.image.mask.MaskDataDecoder;
-import org.jpedal.parser.image.mask.SMaskDecoder;
-import org.jpedal.parser.image.downsample.DownSampler;
 import com.idrsolutions.pdf.color.shading.BitReader;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.TexturePaint;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import org.jpedal.color.*;
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ErrorTracker;
@@ -53,7 +55,6 @@ import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.PdfImageData;
 import org.jpedal.objects.PdfPageData;
-import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.BaseDecoder;
@@ -61,10 +62,18 @@ import org.jpedal.parser.ParserOptions;
 import org.jpedal.parser.PdfObjectCache;
 import org.jpedal.parser.ValueTypes;
 import org.jpedal.parser.image.data.ImageData;
-import org.jpedal.parser.image.utils.*;
+import org.jpedal.parser.image.downsample.DownSampler;
+import org.jpedal.parser.image.downsample.RawImageSaver;
+import org.jpedal.parser.image.mask.MaskDataDecoder;
+import org.jpedal.parser.image.mask.MaskDecoder;
+import org.jpedal.parser.image.mask.SMaskDecoder;
+import org.jpedal.parser.image.utils.ConvertMaskToImage;
+import org.jpedal.render.SwingDisplay;
 import org.jpedal.utils.LogWriter;
 
 public class ImageDecoder extends BaseDecoder{
+
+    private boolean cacheLargeImages;
     
     //Allow print to use transparency in printing instead of removing it
     public static boolean allowPrintTransparency;
@@ -136,15 +145,15 @@ public class ImageDecoder extends BaseDecoder{
             cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(),"x");
             
             
-            if(depth==1 && decodeColorData.getID()== ColorSpaces.DeviceRGB && XObject.getDictionary(PdfDictionary.Mask)==null){
-                
-                final byte[] data=decodeColorData.getIndexedMap();
-                
-                //no index or first colour is white so use grayscale
-                if(decodeColorData.getIndexedMap()==null || (data.length==6 && data[0]==0 && data[1]==0 && data[2]==0)) {
-                    decodeColorData = new DeviceGrayColorSpace();
-                }
-            }
+//            if(depth==1 && decodeColorData.getID()== ColorSpaces.DeviceRGB && XObject.getDictionary(PdfDictionary.Mask)==null){
+//                
+//                final byte[] data=decodeColorData.getIndexedMap();
+//                
+//                //no index or first colour is white so use grayscale
+//                if(decodeColorData.getIndexedMap()==null || (data.length==6 && data[0]==0 && data[1]==0 && data[2]==0)) {
+//                    decodeColorData = new DeviceGrayColorSpace();
+//                }
+//            }
         }
         
         //fix for odd itext file (/PDFdata/baseline_screens/debug3/Leistung.pdf)
@@ -189,7 +198,7 @@ public class ImageDecoder extends BaseDecoder{
         return decodeColorData;
     }
     
-    public BufferedImage processImageXObject(PdfObject XObject, String image_name, byte[] objectData, final boolean saveRawData, final String details) throws PdfException {
+    public BufferedImage processImageXObject(PdfObject XObject, String image_name, byte[] objectData, final String details) throws PdfException {
         
         BufferedImage image=null;
         
@@ -231,10 +240,12 @@ public class ImageDecoder extends BaseDecoder{
                     XObject.setDecodedStream(objectData);
                 }else if(imageData.isJPX()){
                     objectData=JPeg2000ImageDecoder.getBytesFromJPEG2000(objectData);
+                    if(decodeColorData.getID() == ColorSpaces.DeviceN){
+                        objectData = ((DeviceNColorSpace)decodeColorData).getRGBBytes(objectData, imageData.getWidth(), imageData.getHeight());
+                    }
                     imageData.setObjectData(objectData);
                     XObject.setMixedArray(PdfDictionary.Filter,null);
-                    XObject.setDecodedStream(objectData);                    
-                    
+                    XObject.setDecodedStream(objectData);       
                     decodeColorData=new DeviceRGBColorSpace();
                 }
                 
@@ -318,7 +329,7 @@ public class ImageDecoder extends BaseDecoder{
         
         //allow user to process image
         if(customImageHandler != null && !(customImageHandler instanceof ImageDataHandler)){
-            image= customImageHandler.processImageData(gs,XObject);
+            image= customImageHandler.processImageData(gs,XObject); //user gets raw JPEG data
         }
         
         //deal with special case of 1x1 pixel backed onto large inverted Smask which would be very slow in Generic code
@@ -328,11 +339,12 @@ public class ImageDecoder extends BaseDecoder{
             image = ConvertMaskToImage.convert(newSMask, currentPdfFile);
             
         }else if(customImageHandler==null ||(image==null && !customImageHandler.alwaysIgnoreGenericHandler())) {
-            image = processImage(decodeColorData,
-                    image_name,
-                    imageData,
-                    isMask,
-                    XObject, saveRawData);
+            image = processImage(decodeColorData, imageData, isMask, XObject);
+            
+            if(image!=null && !current.isHTMLorSVG() && !parserOptions.renderDirectly() && parserOptions.isPageContent() && parserOptions.imagesNeeded()) {
+                objectStoreStreamRef.saveStoredImage(image_name,ImageCommands.addBackgroundToMask(image, isMask),false,parserOptions.createScaledVersion(),"tif");          
+            }
+        
         }
         
         //add details to string so we can pass back
@@ -461,6 +473,12 @@ public class ImageDecoder extends BaseDecoder{
         String value = System.getProperty("org.jpedal.printTransparency");
         if(value!=null){
             ImageDecoder.allowPrintTransparency = parserOptions.isPrinting() && value.equalsIgnoreCase("true");
+        }
+        
+        //Set flag to allow tunring on/off transparency optimisations in printing
+        value = System.getProperty("org.jpedal.viewerLargeImageCaching");
+        if(value!=null){
+            cacheLargeImages = value.equalsIgnoreCase("true");
         }
     }
     
@@ -772,64 +790,116 @@ public class ImageDecoder extends BaseDecoder{
      * read in the image and process and save raw image
      */
     BufferedImage processImage(GenericColorSpace decodeColorData,
-            final String name,
             final ImageData imageData, final boolean imageMask,
-            final PdfObject XObject, final boolean saveRawData) throws PdfException {
+            final PdfObject XObject) throws PdfException {
         
         //track its use
         cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(), "x");
         
-        final int rawd=imageData.getDepth();
+        float[] decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
         
-        int sampling=1;
-        
-        final float[] decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
-        final boolean arrayInverted=ArrayUtils.isArrayInverted(decodeArray);
-        
-        final PdfArrayIterator Filters =imageData.getFilter(XObject);
+        imageData.getFilter(XObject);
         
         BufferedImage image = null;//
         
         //allow user to process image
         if(customImageHandler instanceof ImageDataHandler){
             image = customImageHandler.processImageData(gs, XObject);
+        } else if (imageData.isJPX()) {
+            removeJPXEncodingFromImageData(imageData, XObject);
+        } else if(imageData.isDCT()) {
+                
+            int adobeColorTransform = 1;
+            PdfObject decodeParms=XObject.getDictionary(PdfDictionary.DecodeParms);
+            if(decodeParms!=null){
+                adobeColorTransform = decodeParms.getInt(PdfDictionary.ColorTransform);
+            }
+
+            byte[] objectData;
+            try {
+                objectData = JPEGDecoder.getUnconvertedBytesFromJPEG(imageData.getObjectData(), adobeColorTransform);
+                if (objectData == null) { //fix for lgpl version
+                    objectData = JPEGDecoder.getBytesFromJPEGWithImageIO(imageData.getObjectData(), decodeColorData, XObject);
+                    decodeColorData = new DeviceRGBColorSpace();
+                    imageData.setCompCount(3);
+                    decodeArray = null;
+                }
+            } catch (Exception e) {
+
+                LogWriter.writeLog("[PDF] Exception " + e + " Processing JPEG data in ImageDecoder");
+
+                objectData = JPEGDecoder.getBytesFromJPEGWithImageIO(imageData.getObjectData(), decodeColorData, XObject);
+                decodeColorData = new DeviceRGBColorSpace();
+                imageData.setCompCount(3);
+                decodeArray = null;
+            }
+            XObject.setMixedArray(PdfDictionary.Filter, null);
+            XObject.setDecodedStream(objectData);
+            imageData.setObjectData(objectData);
+            imageData.setDCT(false);
+            imageData.setDepth(8);
+            
+            imageData.wasDCT(true);
         }
+        
+        if(image!=null){
+            return image;
+        }else{
+            return convertDataToImage(imageMask, imageData, XObject, decodeColorData, decodeArray);
+        }
+    }
+
+    static void removeJPXEncodingFromImageData(final ImageData imageData, final PdfObject XObject) {
+        
+        final byte[] objectData = JPeg2000ImageDecoder.getUnconvertedBytesFromJPEG2000(imageData.getObjectData());
+        imageData.setObjectData(objectData);
+        XObject.setMixedArray(PdfDictionary.Filter, null);
+        XObject.setDecodedStream(objectData);
+        imageData.setDepth(8);
+        imageData.setIsJPX(false);
+    }
+
+    private BufferedImage convertDataToImage(final boolean imageMask, final ImageData imageData, final PdfObject XObject, GenericColorSpace decodeColorData, float[] decodeArray) {
+        
+        int sampling=1;
+        
+        BufferedImage image;
         
         //setup any imageMask
-        final byte[] maskCol =new byte[4];
+        byte[] maskCol =null;
         if (imageMask) {
-            ImageCommands.getMaskColor(maskCol, gs);
+            maskCol=ImageCommands.getMaskColor(gs);
         }
-        
+
         //setup sub-sampling
         if(parserOptions.isRenderPage() && streamType!= ValueTypes.PATTERN){
             setDownsampledImageSize(imageData, XObject,multiplyer,decodeColorData);
         }
-        
+
         //down-sample size if displaying (some cases excluded at present)
         if(parserOptions.isRenderPage() &&
                 decodeColorData.getID()!=ColorSpaces.ICC &&
-                (arrayInverted || decodeArray==null || decodeArray.length==0)&&
+                (imageData.isArrayInverted() || decodeArray==null || decodeArray.length==0)&&
                 (imageData.getDepth()==1 || imageData.getDepth()==8)
                 && imageData.getpX()>0 && imageData.getpY()>0 && (SamplingFactory.isPrintDownsampleEnabled || !parserOptions.isPrinting())){
-            
+
             sampling=setSampling(imageData, decodeColorData);
-            
+
             if(sampling>1 && multiplyer>1){
                 sampling = (int) (sampling/ multiplyer);
             }
         }
-        
+
         //get sampling and exit from this code as we don't need to go further
         if(getSamplingOnly){
-            
+
             int w=imageData.getWidth();
             int h=imageData.getHeight();
-            
+
             if(imageData.getpX()>0 && imageData.getpY()>0){
                 final float scaleX=(((float)w)/imageData.getpX());
                 final float scaleY=(((float)h)/imageData.getpY());
-                
+
                 if(scaleX>100 || scaleY>100){
                     //ignore 
                 }else if(scaleX<scaleY){
@@ -841,63 +911,78 @@ public class ImageDecoder extends BaseDecoder{
             return null;
         }
         
-       
-     /*
-        if(decodeColorData.getID()==ColorSpaces.DeviceRGB && maskCol!=null && imageData.getDepth()==1 ){
-                
-            }else{
-            boolean saveData = false;
-            //flatten out high res raw data in this case so we can store and resample (see deebug3/DOC002.PDF and DOC003.PDF
-            if (imageMask && imageData.getWidth() > 2000 && imageData.getHeight() > 2000 && imageData.getDepth() == 1 && decodeColorData.getID() == ColorSpaces.DeviceRGB && gs.CTM[0][0] > 0 && gs.CTM[1][1] > 0) {
-                saveData = true;
-            }
-
-            //choose whether we cache raw data so we can redecode images at different resolutions in Viewer
-            if (imageData.getDepth() == 1 && (decodeColorData.getID() != ColorSpaces.DeviceRGB || index == null)) {
-
-                if ((true || (!imageMask && saveRawData && decodeColorData.getID() == ColorSpaces.DeviceGray))) {
-                    System.out.println("org.jpedal.DevFlags.currentFile=" + org.jpedal.DevFlags.currentFile);
-
-                    //ObjectStore.copy(org.jpedal.DevFlags.currentFile,
-                   //         "/Users/markee/Desktop/bw/" + org.jpedal.DevFlags.currentFile.substring(org.jpedal.DevFlags.currentFile.lastIndexOf("/") + 1));
-                }
-            }
-            }
-        /**/
+        //handle any decode array
+        if(decodeArray!=null && decodeArray.length > 0 && decodeColorData.getIndexedMap()==null){ //for the moment ignore if indexed (we may need to recode)
+          ImageCommands.applyDecodeArray(imageData.getObjectData(), imageData.getDepth(), decodeArray,decodeColorData.getID());
+          
+          imageData.setIsArrayInverted(!imageData.isArrayInverted());
+        }
         
+        //apply any transfer function directly to data (does not work on DCT data)
+        final PdfObject TR=gs.getTR();
+        if(TR!=null){ //array of values
+            ImageCommands.applyTR(imageData, TR, currentPdfFile);
+        }     
+        
+
         //switch to 8 bit and reduce bw image size by averaging
-        if(sampling>1){
-            
-            boolean saveData=false;
-            //flatten out high res raw data in this case so we can store and resample (see deebug3/DOC002.PDF and DOC003.PDF
-            if(imageMask && imageData.getWidth()>2000  && imageData.getHeight()>2000 && imageData.getDepth()==1 && decodeColorData.getID()==ColorSpaces.DeviceRGB && gs.CTM[0][0]>0 && gs.CTM[1][1]>0){
-                saveData=true;
-            }
-            
-            byte[] index=decodeColorData.getIndexedMap();
-        
-            //choose whether we cache raw data so we can redecode images at different resolutions in Viewer
-            if(imageData.getDepth()==1 && (decodeColorData.getID()!=ColorSpaces.DeviceRGB || index==null)){
+        if(sampling>1 && !imageData.wasDCT()){
 
-                if((saveData ||(!imageMask && saveRawData && decodeColorData.getID()==ColorSpaces.DeviceGray ))){
-                    RawImageSaver.saveRawOneBitDataForResampling(imageCount, parserOptions, objectStoreStreamRef,saveData,imageData, arrayInverted, decodeColorData, maskCol);
+            //choose whether we cache raw data so we can redecode images at different resolutions in Viewer
+            if(cacheLargeImages && decodeColorData.getIndexedMap()==null){
+                
+                if(SwingDisplay.testSampling){
+                    System.out.println("cached image full size= "+imageData.getWidth()+", "+imageData.getHeight()+" Bits="+imageData.getDepth()+
+                            " "+decodeColorData+" maskCol="+maskCol+" count="+imageData.getCompCount()+" bytes="+imageData.getObjectData().length);
                 }
+                
+                RawImageSaver.saveRawDataForResampling(objectStoreStreamRef,imageData, decodeColorData, maskCol,parserOptions.getPageNumber() + String.valueOf(imageCount));
             }
-            
-            decodeColorData = DownSampler.downSampleImage(decodeColorData, imageData, imageMask, arrayInverted, maskCol, sampling, Filters);
+
+            decodeColorData = DownSampler.downSampleImage(decodeColorData, imageData, maskCol, sampling);
         }
         
-        if(image==null){
-            image= ImageDataToJavaImage.convertImageDataToJavaImage(currentPdfFile, parserOptions,
-                    gs, current, imageData, decodeArray, Filters, decodeColorData, imageMask,maskCol, arrayInverted, XObject, rawd, errorTracker);
-        }
         
-        if(image!=null && !current.isHTMLorSVG() && !parserOptions.renderDirectly() && parserOptions.isPageContent() && parserOptions.imagesNeeded()) {
-            
-            if (image.getSampleModel().getNumBands() == 1) {
-                objectStoreStreamRef.saveStoredImage(name,ImageCommands.addBackgroundToMask(image, isMask),false,parserOptions.createScaledVersion(),"tif");
-            }else{           
-                objectStoreStreamRef.saveStoredImage(name,ImageCommands.addBackgroundToMask(image, isMask),false,parserOptions.createScaledVersion(),"jpg");
+        if (maskCol!=null) {
+            image = ImageDataToJavaImage.makeMaskImage(parserOptions, gs, current,imageData, decodeColorData, maskCol);           
+        } else { //handle other types
+
+            LogWriter.writeLog( imageData.getWidth() + "W * " + imageData.getHeight() + "H BPC=" + imageData.getDepth() + ' ' + decodeColorData);
+
+            image =ImageDataToJavaImage.makeImage(decodeColorData,imageData);
+
+        }
+
+        if(image == null && !imageData.isRemoved()){
+            parserOptions.imagesProcessedFully=false;
+        }
+
+        if (maskCol!=null && gs.nonstrokeColorSpace.getColor().isTexture()) {  //case 19095 vistair
+
+            float mm[][] = gs.CTM;
+            int w=imageData.getWidth();
+            int h=imageData.getHeight();
+
+            AffineTransform affine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
+
+            BufferedImage temp = ((PatternColorSpace)gs.nonstrokeColorSpace).getRawImage(affine);
+            BufferedImage scrap = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+            if(temp!=null){
+                TexturePaint tp = new TexturePaint(temp, new Rectangle(0,0,temp.getWidth(),temp.getHeight()));
+                Graphics2D g2 = scrap.createGraphics();
+                g2.setPaint(tp);
+                Rectangle rect = new Rectangle(0,0,w,h);
+                g2.fill(rect);
+            }
+
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    if (image.getRGB(x, y) == -16777216) { //255 0 0 0
+                        int pRGB = scrap.getRGB(x, y);
+                        image.setRGB(x, y, pRGB);
+                    }
+                }
             }
         }
         

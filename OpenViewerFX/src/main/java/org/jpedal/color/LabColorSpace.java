@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jpedal.examples.handlers.DefaultImageHelper;
 import org.jpedal.io.ColorSpaceConvertor;
-import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
 /**
@@ -122,7 +121,7 @@ public class LabColorSpace extends GenericColorSpace {
      * </p>
      */
     @Override
-    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
         
         BufferedImage image;
         //ByteArrayInputStream in = null;

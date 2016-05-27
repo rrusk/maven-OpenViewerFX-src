@@ -58,6 +58,8 @@ import org.jpedal.utils.LogWriter;
  */
 public class PatternColorSpace extends GenericColorSpace{
     
+    public static boolean useMemoryEfficentPaint;
+    
     boolean newFlag;
     
     //local copy so we can access File data
@@ -118,11 +120,7 @@ public class PatternColorSpace extends GenericColorSpace{
 //            currentColor=new PdfColor(0,255,0);
 //            return ;
 //        }
-        
-        /**
-         * decode Pattern on first use
-         */
-        
+
         //ensure read
         currentPdfFile.checkResolved(PatternObj);
         
@@ -157,9 +155,6 @@ public class PatternColorSpace extends GenericColorSpace{
         }
         
         if(!newFlag){
-            /**
-             * setup appropriate type
-             */
             if(shadingType == 1) { //tiling
                  currentColor = setupTilingNew(PatternObj,streamData);  
             } else if(shadingType == 2) { //shading                
@@ -361,6 +356,8 @@ public class PatternColorSpace extends GenericColorSpace{
             rotatedAffine = affine;
             affine = new AffineTransform();
             mm = new float[][]{{1f, 0f, 0f}, {0f, 1f, 0f}, {0f, 0f, 1f}};
+        }else if(useMemoryEfficentPaint){
+            return new TilingPaint(PatternObj, streamData, this);
         }
         
         //System.out.println("mm="+mm[0][0]+" "+mm[0][1]+" "+mm[1][0]+" "+mm[1][1]+" "+mm[2][0]+" "+mm[2][1]+" "+isRotated);
@@ -465,7 +462,7 @@ public class PatternColorSpace extends GenericColorSpace{
    
     
     
-    private PatternDisplay decodePatternContent(final PdfObject PatternObj, final float[][] matrix, final byte[] streamData, final ObjectStore localStore) {
+    public PatternDisplay decodePatternContent(final PdfObject PatternObj, final float[][] matrix, final byte[] streamData, final ObjectStore localStore) {
         
         final PdfObject Resources=PatternObj.getDictionary(PdfDictionary.Resources);
         
@@ -484,12 +481,11 @@ public class PatternColorSpace extends GenericColorSpace{
         try{
             glyphDecoder.setRenderer(glyphDisplay);
             
-            /**read the resources for the page*/
             if (Resources != null){
                 glyphDecoder.readResources(Resources,true);
             }
             
-            /**
+            /*
              * setup matrix so scales correctly
              **/
             final GraphicsState currentGraphicsState=new GraphicsState(0,0);
@@ -499,7 +495,7 @@ public class PatternColorSpace extends GenericColorSpace{
                 currentGraphicsState.CTM =matrix;
             }
             
-            /**
+            /*
              * add in a colour (may well need further development)
              */
             if (strokCol == null) {
@@ -521,16 +517,9 @@ public class PatternColorSpace extends GenericColorSpace{
     /**
      */
     private PdfPaint setupShading(final PdfObject PatternObj, final float[][] matrix) {
-        
-        /**
-         * get the shading object
-         */
-        
+
         final PdfObject Shading=PatternObj.getDictionary(PdfDictionary.Shading);
-        
-        /**
-         * work out colorspace
-         */
+
         final PdfObject ColorSpace=Shading.getDictionary(PdfDictionary.ColorSpace);
         
         //convert colorspace and get details

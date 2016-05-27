@@ -118,7 +118,7 @@ public class DO extends ImageDecoder {
 
                 //process the image and save raw version
                 
-                BufferedImage image = processImageXObject(XObject, name, objectData, false, details);
+                BufferedImage image = processImageXObject(XObject, name, objectData, details);
 
                 //fix for oddity in Annotation
                 if (image != null && image.getWidth() == 1 && image.getHeight() == 1 && parserOptions.isType3Font()) {

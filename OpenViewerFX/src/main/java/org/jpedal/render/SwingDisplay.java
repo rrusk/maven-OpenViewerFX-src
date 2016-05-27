@@ -36,9 +36,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,7 +44,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
-import org.jpedal.color.ColorSpaces;
+import org.jpedal.color.DeviceRGBColorSpace;
+import org.jpedal.color.GenericColorSpace;
 import org.jpedal.color.PdfColor;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.exception.PdfException;
@@ -59,6 +57,10 @@ import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfShape;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.parser.DecoderOptions;
+import org.jpedal.parser.ParserOptions;
+import org.jpedal.parser.image.ImageDataToJavaImage;
+import org.jpedal.parser.image.data.ImageData;
+import org.jpedal.parser.image.downsample.DownSampler;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 import org.jpedal.utils.repositories.*;
@@ -66,29 +68,34 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
  public class SwingDisplay extends GUIDisplay{
     
+    
+     //debug flag for testing new image rescaling
+    public static final boolean testSampling=false;
+    
+    
     //Flag to prevent drawing highlights too often.
     boolean ignoreHighlight;
     
     float lastStrokeOpacity=-1;
     float lastFillOpacity=-1;
     
-    /**stop screen being cleared on next repaint*/
+    //stop screen being cleared on next repaint
     private boolean noRepaint;
     
-    /**track items painted to reduce unnecessary calls*/
+    //track items painted to reduce unnecessary calls
     private int lastItemPainted=-1;
 
-    /**tell renderer to optimise calls if possible*/
+    //tell renderer to optimise calls if possible
     private boolean optimsePainting;
     
     private int pageX1=9999, pageX2=-9999, pageY1=-9999, pageY2=9999;
     
-    /**used to cache single image*/
+    //used to cache single image
     private BufferedImage singleImage;
     
     private int imageCount;
     
-    /**hint for conversion ops*/
+    //hint for conversion ops
     private static final RenderingHints hints;
     
     private final Map<String, Integer> cachedWidths=new HashMap<String, Integer>(10);
@@ -107,7 +114,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     
     private Map<String, double[]> storedImageValues=new HashMap<String, double[]>(10);
     
-    /**text highlights if needed*/
+    //text highlights if needed
     private int[] textHighlightsX;
     
     //allow user to diable g2 setting
@@ -128,67 +135,58 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     private Vector_Double af3;
     private Vector_Double af4;
     
-    /**TR for text*/
+    //TR for text
     private Vector_Int TRvalues;
     
-    /**font sizes for text*/
+    //font sizes for text
     private Vector_Int fs;
     
-    /**line widths if not 0*/
+    //line widths if not 0
     private Vector_Int lw;
     
-    /**holds rectangular outline to test in redraw*/
+    //holds rectangular outline to test in redraw*/
     private Vector_Shape clips;
     
-    /**holds object type*/
+    //holds object type
     private Vector_Object javaObjects;
     
-    /**holds fill type*/
+    //holds fill type
     private Vector_Int textFillType;
     
-    /**holds object type*/
+    //holds object type
     private Vector_Float opacity;
     
-    /**holds blends*/
+    //holds blends
     private Vector_Int BMvalues;
     
     //used to track col changes
     int lastFillTextCol,lastFillCol,lastStrokeCol;
     
-    /**used to track strokes*/
+    //used to track strokes
     Stroke lastStroke;
     
     //trakc affine transform changes
     private double[] lastAf=new double[4];
     
-    /**used to minimise TR and font changes by ignoring duplicates*/
+    //used to minimise TR and font changes by ignoring duplicates
     private int lastTR=2,lastFS=-1,lastLW=-1;
     
-    /**ensure colors reset if text*/
+    //ensure colors reset if text
     boolean resetTextColors=true;
     
     boolean fillSet,strokeSet;
     
-    
-    
-    /**
-     * If highlgihts are not null and no highlgihts are drawn
-     *  then it is likely a scanned page. Treat differently.
-     */
+    //If highlgihts are not null and no highlgihts are drawn
+    //then it is likely a scanned page. Treat differently.
     private boolean needsHighlights = true;
     
     private int paintThreadCount;
     private int paintThreadID;
     
-    /**
-     * For IDR internal use only
-     */
+    //For IDR internal use only
     private boolean[] drawnHighlights;
     
-//    protected int type =DynamicVectorRenderer.DISPLAY_SCREEN;
-    
     static {
-        
         hints =new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         hints.put(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
     }
@@ -223,7 +221,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         objectType=new Vector_Int(defaultSize);
         
         opacity=new Vector_Float(defaultSize);
-        //BMvalues=new Vector_Int(defaultSize);
         
         currentItem = 0;
     }
@@ -424,10 +421,10 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
     private boolean renderFailed;
     
-    /**optional frame for user to pass in - if present, error warning will be displayed*/
+    //optional frame for user to pass in - if present, error warning will be displayed
     private Container frame;
     
-    /**make sure user only gets 1 error message a session*/
+    //make sure user only gets 1 error message a session
     private static boolean userAlerted;
     
     
@@ -441,9 +438,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         final int currentThreadID=++paintThreadID;
         paintThreadCount++;
         
-        /**
-         * Keep track of drawn highlights so we don't draw multiple times
-         */
+        //Keep track of drawn highlights so we don't draw multiple times
         if(highlights!=null){
             drawnHighlights = new boolean[highlights.length];
             for(int i=0; i!=drawnHighlights.length; i++) {
@@ -467,8 +462,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         }
         
         final boolean debug=false;
-        
-        //int paintedCount=0;
         
         String fontUsed;
         float a=0,b = 0,c=0,d=0;
@@ -543,14 +536,13 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         Area clipToUse=null;
         boolean newClip=false;
         
-        /**/
         if(noRepaint) {
             noRepaint = false;
         } else if(lastItemPainted==-1){
-            paintBackground(dirtyRegion);/**/
+            paintBackground(dirtyRegion);
         }
         
-        /**save raw scaling and apply any viewport*/
+        //save raw scaling and apply any viewport
         AffineTransform rawScaling=null;
         
         if(g2!=null){
@@ -582,12 +574,10 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             fillCol=this.fillCol;
         }
         
-        /*
-         * now draw all objects
-         */
+        //now draw all objects
         for(int i=0; i<count;i++){
             
-            //    if(i>4800)
+            //if(i>4800)
             //break;
             
         	//Set item we are currently rendering
@@ -606,9 +596,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                 return;
             }
             
-            /*
-             * generate glyph for text
-             */
+            //generate glyph for text
             if(type<0){
                 
                 //lazy initialisation on factory
@@ -669,9 +657,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                     imageUsed = -1;
                 }
                 
-                /*
-                 * workout area occupied by glyf
-                 */
+                //workout area occupied by glyf
                 if(currentArea==null) {
                     currentArea = getObjectArea(afValues1, fsValues, afValues2, afValues3, afValues4, pageObjects, areas, type, x, y, fsCount, afCount, i);
                 }
@@ -687,16 +673,9 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                         ignoreItem = true;
                     }
                 
-                //                }else if((optimiseDrawing)&&(rotation==0)&&(dirtyRegion!=null)&&(type!=DynamicVectorRenderer.STROKEOPACITY)&&
-                //                        (type!=DynamicVectorRenderer.FILLOPACITY)&&(type!=DynamicVectorRenderer.CLIP)
-                //                        &&(currentArea!=null)&&
-                //                        ((!dirtyRegion.intersects(currentArea))))
-                //                    ignoreItem=true;
-                
                 if(ignoreItem || (lastItemPainted!=-1 && i<lastItemPainted)){
                     //keep local counts in sync
                     switch (type) {
-                        
                         case DynamicVectorRenderer.SHAPE:
                             sCount++;
                             break;
@@ -744,8 +723,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                         }
                         isInitialised=true;
                     }
-                    
-                    //paintedCount++;
                     
                     if(currentTR==GraphicsState.INVISIBLE){
                         needsHighlights = true;
@@ -883,20 +860,12 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             
                             textFillType=textFill[tCount];
                             
-                            //    					if(textColor==null || (textColor!=null && !(endItem!=-1 && i>=endItem) && !checkColorThreshold(((PdfPaint) text_color[tCount]).getRGB()))){ //Not specified an overriding color
-                            
                             if(textFillType==GraphicsState.STROKE) {
                                 textStrokeCol = (PdfPaint) text_color[tCount];
                             } else {
                                 textFillCol = (PdfPaint) text_color[tCount];
                             }
                             
-                            //    					}else{ //Use specified overriding color
-                            //    						if(textFillType==GraphicsState.STROKE)
-                            //    							textStrokeCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-                            //        					else
-                            //        						textFillCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-                            ////    					}
                             tCount++;
                             break;
                         case DynamicVectorRenderer.FILLCOLOR:
@@ -907,11 +876,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             
                             if(!colorsLocked){
                                 fillCol=(PdfPaint) fill_color[fillCount];
-                                
-                                //    						if(textColor!=null && !(endItem!=-1 && i>=endItem) && checkColorThreshold(fillCol.getRGB())){
-                                //    							fillCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-                                //    						}
-                                
                             }
                             fillCount++;
                             
@@ -925,10 +889,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             if(!colorsLocked){
                                 
                                 strokeCol=(PdfPaint)stroke_color[strokeCount];
-                                
-                                //    						if(textColor!=null && !(endItem!=-1 && i>=endItem) && checkColorThreshold(strokeCol.getRGB())){
-                                //    							strokeCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-                                //    						}
                                 
                                 if(strokeCol!=null) {
                                     strokeCol.setScaling(cropX, cropH, scaling, 0, 0);
@@ -1095,6 +1055,11 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         //Reset to minus 1 as rendering loop has ended
         itemToRender = -1;
         
+        if(g2!=null){
+            //restore clip as not needed when adding highlights
+            g2.setClip(defaultClip);
+        }
+        
         if(highlights!=null) {
             for (int h = 0; h != highlights.length; h++) {
                 renderHighlight(highlights[h], g2);
@@ -1111,14 +1076,9 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         }
         
         if(g2!=null){
-            //restore defaults
-            g2.setClip(defaultClip);
-            
+            //restore transform
             g2.setTransform(rawScaling);
         }
-        
-        //if(DynamicVectorRenderer.debugPaint)
-        //	System.err.println("Painted "+paintedCount);
         
         //tell user if problem
         if(frame!=null && renderFailed && !userAlerted){
@@ -1178,7 +1138,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         if(endItem!=-1 && endItem<i){
             s = g2.getClip();
             g2.setClip(defaultClip);
-
         }
         
         renderShape(defaultClip, fillType,strokeCol,fillCol, currentStroke, (Shape)currentObject,strokeOpacity,fillOpacity);
@@ -1258,135 +1217,14 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
              Object currentObject, final float fillOpacity,
             final float x, final float y, final int iCount, final int afCount, final int imageUsed, final int i){
         
-        int sampling=1,w1=0,pY,defaultSampling=1;
         
-        // generate unique value to every image on given page (no more overighting stuff in the hashmap)
+        //generate unique value to every image on given page (no more overighting stuff in the hashmap)
         final String key = Integer.toString(this.rawPageNumber) + Integer.toString(iCount);
         
         if(!isType3Font && objectStoreRef.isRawImageDataSaved(key)){
-            
-            float  scalingToUse=scaling;
-            
-            //fix for rescaling on Enkelt-Scanning_-_Bank-10.10.115.166_-_12-12-2007_-_15-27-57jpg50-300.pdf
-            if(scaling<1) {
-                scalingToUse = 1f;
-            }
-            
-            final int defaultX= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_pX);
-            final int pX=(int)(defaultX*scalingToUse);
-            
-            final int defaultY= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_pY);
-            pY=(int)(defaultY*scalingToUse);
-            
-            w1= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_WIDTH);
-            final int h1= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_HEIGHT);
-            
-            final byte[] maskCol=(byte[]) objectStoreRef.getRawImageDataParameter(key,ObjectStore.IMAGE_MASKCOL);
-            
-            final int colorspaceID= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_COLORSPACE);
-            
-            BufferedImage image=null;
-            
-            /**
-             * down-sample size if displaying
-             */
-            if(pX>0){
-                
-                //see what we could reduce to and still be big enough for page
-                int newW=w1,newH=h1;
-                
-                final int smallestH=pY<<2; //double so comparison works
-                final int smallestW=pX<<2;
-                
-                //cannot be smaller than page
-                while(newW>smallestW && newH>smallestH){
-                    sampling <<= 1;
-                    newW >>= 1;
-                    newH >>= 1;
-                }
-                
-                int scaleX=w1/pX;
-                if(scaleX<1) {
-                    scaleX = 1;
-                }
-                
-                int scaleY=h1/pY;
-                if(scaleY<1) {
-                    scaleY = 1;
-                }
-                
-                //choose smaller value so at least size of page
-                sampling=scaleX;
-                if(sampling>scaleY) {
-                    sampling = scaleY;
-                }
-                
-                /**
-                 * work out default as well for ratio
-                 */
-                
-                //see what we could reduce to and still be big enough for page
-                int defnewW=w1,defnewH=h1;
-                
-                final int defsmallestH=pY<<2; //double so comparison works
-                final int defsmallestW=pX<<2;
-                
-                //cannot be smaller than page
-                while(defnewW>defsmallestW && defnewH>defsmallestH){
-                    defaultSampling <<= 1;
-                    defnewW >>= 1;
-                    defnewH >>= 1;
-                }
-                
-                int defscaleX=w1/defaultX;
-                if(defscaleX<1) {
-                    defscaleX = 1;
-                }
-                
-                int defscaleY=h1/defaultY;
-                if(defscaleY<1) {
-                    defscaleY = 1;
-                }
-                
-                //choose smaller value so at least size of page
-                defaultSampling=defscaleX;
-                if(defaultSampling>defscaleY) {
-                    defaultSampling = defscaleY;
-                }
-                
-                //rescan all pixels and down-sample image
-                if((scaling>1f || lastScaling>1f)&& sampling>=1 && (lastScaling!=scaling)){
-                    
-                    newW=w1/sampling;
-                    newH=h1/sampling;
-                    
-                    image=resampleImageData(sampling, w1, h1, maskCol,newW, newH, key,colorspaceID);
-                    
-                }
-            }
-            
-            /**
-             * reset image stored by renderer
-             */
-            if(image!=null){
-                //reset our track if only graphics
-                if(singleImage!=null) {
-                    singleImage = image;
-                }
-                
-                pageObjects[i]=image;
-                currentObject=image;
-            }
+            currentObject=getResampledImage(key, pageObjects, i, currentObject);
         }
-            
-        double aa=1;
-        if(sampling>=1 && scaling>1 && w1>0) //factor in any scaling
-        {
-            aa = ((float) sampling) / defaultSampling;
-        }
-
-        final AffineTransform imageAf=new AffineTransform(afValues1[afCount]*aa,afValues2[afCount]*aa,afValues3[afCount]*aa,afValues4[afCount]*aa,x,y);
-
+        
         //get image and reload if needed
         BufferedImage img=null;
         if(currentObject!=null) {
@@ -1396,125 +1234,153 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         }
 
         if(img!=null) {
+            final AffineTransform imageAf=new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
+
             renderImage(imageAf, img, fillOpacity, null, x, y);
         }
     }
     
-    private BufferedImage resampleImageData(final int sampling, final int w1, final int h1, final byte[] maskCol, final int newW, final int newH, final String key, final int ID) {
+    private Object getResampledImage(final String key, final Object[] pageObjects1, final int i, Object currentObject) {
         
-        //get data
-        final byte[] data= objectStoreRef.getRawImageData(key);
-        
-        
-        //make 1 bit indexed flat
-        byte[] index=null;
-        if(maskCol!=null && ID!=ColorSpaces.DeviceRGB) {
-            index = maskCol;
+        int sampling=1,w1=0,pY,defaultSampling=1;
+        float  scalingToUse=scaling;
+        //fix for rescaling on Enkelt-Scanning_-_Bank-10.10.115.166_-_12-12-2007_-_15-27-57jpg50-300.pdf
+        if(scaling<1) {
+            scalingToUse = 1f;
         }
+        final int defaultX= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_pX);
+        final int pX=(int)(defaultX*scalingToUse);
+        final int defaultY= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_pY);
+        pY=(int)(defaultY*scalingToUse);
+        w1= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_WIDTH);
+        final int h1= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_HEIGHT);
+        final int bpc= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_DEPTH);
+        final byte[] maskCol=(byte[]) objectStoreRef.getRawImageDataParameter(key,ObjectStore.IMAGE_MASKCOL);
+        //final int colorspaceID= (Integer) objectStoreRef.getRawImageDataParameter(key, ObjectStore.IMAGE_COLORSPACE);
         
-        int size=newW*newH;
-        if(index!=null) {
-            size *= 3;
-        }
-        
-        final byte[] newData=new byte[size];
-        
-        final int[] flag={1,2,4,8,16,32,64,128};
-        
-        final int origLineLength= (w1+7)>>3;
-        
-        int offset=0;
-        
-        for(int y1=0;y1<newH;y1++){
-            for(int x1=0;x1<newW;x1++){
-                
-                int bytes=0,count1=0;
-                
-                //allow for edges in number of pixels left
-                int wCount=sampling,hCount=sampling;
-                final int wGapLeft=w1-x1;
-                final int hGapLeft=h1-y1;
-                if(wCount>wGapLeft) {
-                    wCount = wGapLeft;
-                }
-                if(hCount>hGapLeft) {
-                    hCount = hGapLeft;
-                }
-                
-                //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
-                int ptr;
-                byte currentByte;
-                for(int yy=0;yy<hCount;yy++){
-                    for(int xx=0;xx<wCount;xx++){
-                        
-                        ptr=((yy+(y1*sampling))*origLineLength)+(((x1*sampling)+xx)>>3);
-                        if(ptr<data.length){
-                            currentByte=data[ptr];
-                        }else{
-                            currentByte=(byte)255;
-                        }
-                        
-                        final int bit=currentByte & flag[7-(((x1*sampling)+xx)& 7)];
-                        
-                        if(bit!=0) {
-                            bytes++;
-                        }
-                        count1++;
-                        
-                    }
-                }
-                
-                //set value as white or average of pixels
-                if(count1>0){
-                    
-                    if(index==null){
-                        newData[x1+(newW*y1)]=(byte)((255*bytes)/count1);
-                    }else{
-                        for(int ii=0;ii<3;ii++){
-                            if(bytes/count1<0.5f) {
-                                newData[offset] = (byte) ((((maskCol[ii] & 255))));
-                            } else {
-                                newData[offset] = (byte) 255;
-                            }
-                            
-                            offset++;
-                            
-                        }
-                    }
-                }else{
-                    if(index==null){
-                        newData[x1+(newW*y1)]=(byte) 255;
-                    }else{
-                        for(int ii=0;ii<3;ii++){
-                            newData[offset]=(byte) 255;
-                            
-                            offset++;
-                        }
-                    }
+        BufferedImage image=null;
+        //down-sample size if displaying
+        if(pX>0){
+            
+            //see what we could reduce to and still be big enough for page
+            int newW=w1,newH=h1;
+            
+            final int smallestH=pY<<2; //double so comparison works
+            final int smallestW=pX<<2;
+            
+            //cannot be smaller than page
+            while(newW>smallestW && newH>smallestH){
+                sampling <<= 1;
+                newW >>= 1;
+                newH >>= 1;
+            }
+            
+            //System.out.println("sampling="+sampling+" w,h="+w1+" "+h1+" newW,H"+newW+" "+newH+" pX="+pX+" pY="+pY);
+            
+            int scaleX=w1/pX;
+            if(scaleX<1) {
+                scaleX = 1;
+            }
+            
+            int scaleY=h1/pY;
+            if(scaleY<1) {
+                scaleY = 1;
+            }
+            
+            //choose smaller value so at least size of page
+            sampling=scaleX;
+            if(sampling>scaleY) {
+                sampling = scaleY;
+            }
+            
+            //see what we could reduce to and still be big enough for page
+            int defnewW=w1,defnewH=h1;
+            
+            final int defsmallestH=pY<<2; //double so comparison works
+            final int defsmallestW=pX<<2;
+            
+            //cannot be smaller than page
+            while(defnewW>defsmallestW && defnewH>defsmallestH){
+                defaultSampling <<= 1;
+                defnewW >>= 1;
+                defnewH >>= 1;
+            }
+            
+            int defscaleX=w1/defaultX;
+            if(defscaleX<1) {
+                defscaleX = 1;
+            }
+            
+            int defscaleY=h1/defaultY;
+            if(defscaleY<1) {
+                defscaleY = 1;
+            }
+            
+            //choose smaller value so at least size of page
+            defaultSampling=defscaleX;
+            if(defaultSampling>defscaleY) {
+                defaultSampling = defscaleY;
+            }
+            
+            //rescan all pixels and down-sample image
+            if((scaling>1f || lastScaling>1f)&& sampling>=1 && (lastScaling!=scaling)){
+                try{
+                    image=resampleImageData(sampling, w1, h1, bpc,maskCol,key);
+                }catch(Exception e){
+                    //tell user and log
+                    LogWriter.writeLog("Exception rescaling image: " + e.getMessage());
                 }
             }
         }
         
-        /**
-         * build the image
-         */
-        final BufferedImage image;
-        final Raster raster;
-        int type=BufferedImage.TYPE_BYTE_GRAY;
-        final DataBuffer db = new DataBufferByte(newData, newData.length);
-        int[] bands = {0};
-        int count=1;
+        //reset image stored by renderer
+        if (image!=null) {
+            //reset our track if only graphics
+            if(singleImage!=null) {
+                singleImage = image;
+            }
+            pageObjects1[i] = image;
+            currentObject=image;
+        }
+        return currentObject;
+    }
+    
+    private BufferedImage resampleImageData(final int sampling, final int w1, final int h1, int bpc,final byte[] maskCol, final String key) {
         
+        //get data
+        final byte[] data= objectStoreRef.getRawImageData(key);
         
-        if(maskCol==null && (w1*h1*3==data.length)){// && ID!=ColorSpaces.DeviceRGB){ //use this set of values for this case
-            type=BufferedImage.TYPE_INT_RGB;
-            bands = new int[]{0,1,2};
-            count=3;
+        ImageData imageData=new ImageData(data);
+        imageData.setWidth(w1);
+        imageData.setHeight(h1);
+        imageData.setCompCount(4);
+        imageData.setDepth(bpc);
+        
+        if(testSampling){
+            System.out.println("resampleImageData="+data+" "+w1+" "+h1+" "+sampling+" bytes="+imageData.getObjectData().length);
         }
         
-        image =new BufferedImage(newW,newH,type);
-        raster =Raster.createInterleavedRaster(db,newW,newH,newW*count,count,bands,null);
-        image.setData(raster);
+        GenericColorSpace decodeColorData=new DeviceRGBColorSpace();
+        
+        BufferedImage image;
+        
+        if(sampling>1){
+            decodeColorData = DownSampler.downSampleImage(decodeColorData, imageData, maskCol, sampling);
+        }
+        
+        if (maskCol!=null) {
+            image = ImageDataToJavaImage.makeMaskImage(new ParserOptions(), null, null,imageData, decodeColorData, maskCol);           
+        } else { //handle other types
+
+            LogWriter.writeLog( imageData.getWidth() + "W * " + imageData.getHeight() + "H BPC=" + imageData.getDepth() + ' ' + decodeColorData);
+
+            image =ImageDataToJavaImage.makeImage(decodeColorData,imageData);
+
+        }
+        
+        if(testSampling){
+            System.out.println("image now="+image.getWidth()+" "+image.getHeight());
+        }
         
         return image;
     }
@@ -1613,9 +1479,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     @Override
     public void drawText(final float[][] Trm, final String text, final GraphicsState currentGraphicsState, final float x, final float y, final Font javaFont) {
         
-        /**
-         * set color first
-         */
+        //set color first
         PdfPaint currentCol;
         
         if(Trm!=null){
@@ -1723,8 +1587,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         final AffineTransform upside_down=new AffineTransform(CTM[0][0],CTM[0][1],CTM[1][0],CTM[1][1],0,0);
             
         upside_down.getMatrix(nextAf);
-
-        //System.out.println(y+" "+h+" "+nextAf[3]);
+        
         this.drawAffine(nextAf);
         lastAf[0]=nextAf[0];
         lastAf[1]=nextAf[1];
@@ -1922,18 +1785,20 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     @Override
     public void drawShape(final PdfShape pdfShape, final GraphicsState currentGraphicsState, final int cmd) {
         
-        Shape currentShape=pdfShape.getShape();
+        final Shape currentShape=pdfShape.getShape();
         
         final int fillType=currentGraphicsState.getFillType();
         PdfPaint currentCol;
         
         int newCol;
         
-        //check for 1 by 1 complex shape and replace with dot
-        if(currentShape.getBounds().getWidth()==1 &&
-                currentShape.getBounds().getHeight()==1 && currentGraphicsState.getLineWidth()<1) {
-            currentShape = new Rectangle(currentShape.getBounds().x, currentShape.getBounds().y, 1, 1);
-        }
+        //Moved to BaseDisplay and only used for screen. Kept here incase of future issue.
+        //This way it is only used if image is too small after scaling
+//        //check for 1 by 1 complex shape and replace with dot
+//        if(currentShape.getBounds().getWidth()==1 &&
+//                currentShape.getBounds().getHeight()==1 && currentGraphicsState.getLineWidth()<1) {
+//            currentShape = new Rectangle(currentShape.getBounds().x, currentShape.getBounds().y, 1, 1);
+//        }
         
         //stroke and fill (do fill first so we don't overwrite Stroke)
         if (fillType == GraphicsState.FILL || fillType == GraphicsState.FILLSTROKE) {
@@ -1980,12 +1845,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         if((lastStroke!=null)&&(lastStroke.equals(newStroke))){
             
         }else{
-//            //Adjust line width to 1 if less than 1 
-//            //ignore if using T3Display (such as ap image generation in html / svg conversion
-//            if((((BasicStroke)newStroke).getLineWidth()<1 && ((BasicStroke)newStroke).getLineWidth()!=0) &&
-//                    !(this instanceof T3Display)){
-//                newStroke = new BasicStroke(1,((BasicStroke)newStroke).getEndCap(), ((BasicStroke)newStroke).getLineJoin(), ((BasicStroke)newStroke).getMiterLimit(), ((BasicStroke)newStroke).getDashArray(), ((BasicStroke)newStroke).getDashPhase());
-//            }
             lastStroke=newStroke;
             drawStroke((newStroke));
         }
@@ -2142,9 +2001,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             return ;
         }
 
-        /**
-         * remember end of items from PDF page
-         */
+        //remember end of items from PDF page
         if(endItem==-1){
             
             endItem=currentItem;
@@ -2210,7 +2067,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
   
     @Override
     public void flushAdditionalObjOnPage(){
-        //reset and remove all from page
         
         //reset pointer
         if(endItem!=-1) {
@@ -2296,7 +2152,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         objectType.addElement(DynamicVectorRenderer.STROKECOLOR);
         areas.addElement(null);
         
-        //stroke_color.addElement(new Color (currentCol.getRed(),currentCol.getGreen(),currentCol.getBlue()));
         stroke_color.addElement(currentCol);
         
         x_coord=RenderUtils.checkSize(x_coord,currentItem);
@@ -2398,19 +2253,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             //see if different size
             if(bounds.x!=oldBounds.x || bounds.y!=oldBounds.y || bounds.width!=oldBounds.width || bounds.height!=oldBounds.height){
                 resetClip=true;
-            }else{  //if both rectangle and same size skip
-                
-                /**kieran pointed out code should always be rectangle so disabled
-                //final int count = isRectangle(bounds);
-                //final int count2 = isRectangle(oldBounds);
-                
-                //if(count==6 && count2==6){
-                    
-                }else 
-                    if(!clip.equals(lastClip)){ //only do slow test at this point
-                    resetClip=true;
-                }
-                */
             }
         }
         
@@ -2446,9 +2288,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     public void drawEmbeddedText(final float[][] Trm, final int fontSize, final PdfGlyph embeddedGlyph,
     final Object javaGlyph, int type, final GraphicsState gs, final double[] at, final String glyf, final PdfFont currentFontData, final float glyfWidth) {
         
-        /**
-         * set color first
-         */
+        //set color first
         PdfPaint currentCol;
         
         final int text_fill_type = gs.getTextRenderType();
@@ -2545,7 +2385,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                 checkWidth(rectParams);
                 
             }else{
-                /**now text*/
+                //now text
                 int realSize=fontSize;
                 if(realSize<0) {
                     realSize = -realSize;
@@ -2792,20 +2632,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         //save page
         bos.write(rawPageNumber);
         
-        //the WeakHashMaps are local caches - we ignore
-        
-        //we do not copy across hires images
-        
-        //we need to copy these in order
-        
-        //if we write a count for each we can read the count back and know how many objects
-        //to read back
-        
-        //write these values first
-        //pageNumber;
-        //objectStoreRef;
-        //isPrinting;
-        
         text_color.trim();
         stroke_color.trim();
         fill_color.trim();
@@ -2885,9 +2711,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             }
         }
         
-        /**
-         * new fonts
-         */
+        //new fonts
         RenderUtils.writeToStream(bos, fontCount);
 
         for (String key : newFontsToSend) {
@@ -2898,12 +2722,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             fontsAlreadyOnClient.add(key);
         }
         
-        /**
-         * new data on existing fonts
-         */
-        /**
-         * new fonts
-         */
+        //new data on existing fonts
         RenderUtils.writeToStream(bos, updateCount);
 
         for (String key : fontsAlreadySent) {
@@ -2929,7 +2748,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     public void checkFontSaved(final Object glyph, final String name, final PdfFont currentFontData) {
         
         //save glyph at start
-        /**now text*/
         pageObjects.addElement(glyph);
         objectType.addElement(DynamicVectorRenderer.MARKER);
         areas.addElement(null);

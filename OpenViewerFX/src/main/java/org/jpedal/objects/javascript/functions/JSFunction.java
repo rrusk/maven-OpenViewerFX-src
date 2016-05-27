@@ -276,7 +276,7 @@ public class JSFunction {
 
         final List<String> rawValues=new ArrayList<String>();
 
-        /**
+        /*
          * first value is command
          */
         if(ptr!=-1){
@@ -306,7 +306,7 @@ public class JSFunction {
             }
         }
 
-        /**
+        /*
          * break into values allowing for nested values
          */
         final StringTokenizer tokens=new StringTokenizer(js,"(,);",true);
@@ -524,7 +524,7 @@ public class JSFunction {
     				//allow for null value in Date
     				if(useDefaultValues && nextVal==null){
     					paddedValue= String.valueOf(gc.get(Calendar.HOUR));
-    					/** added to make the testing be more predictable */
+    					/* added to make the testing be more predictable */
     					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
     						paddedValue = "10";
 							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
@@ -541,7 +541,7 @@ public class JSFunction {
     				//allow for null value in Date
     				if(useDefaultValues && nextVal==null){
     					paddedValue= String.valueOf(gc.get(Calendar.HOUR_OF_DAY));
-    					/** added to make the testing be more predictable */
+    					/* added to make the testing be more predictable */
     					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
     						paddedValue = "10";
 							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
@@ -557,7 +557,7 @@ public class JSFunction {
     				//allow for null value in Date
     				if(useDefaultValues && nextVal==null){
     					paddedValue= String.valueOf(gc.get(Calendar.MINUTE));
-    					/** added to make the testing be more predictable */
+    					/* added to make the testing be more predictable */
     					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
     						paddedValue = "10";
 							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
@@ -597,7 +597,7 @@ public class JSFunction {
     				//allow for null value in Date
     				if(useDefaultValues && nextVal==null){
     					paddedValue= String.valueOf(gc.get(Calendar.SECOND));
-    					/** added to make the testing be more predictable */
+    					/* added to make the testing be more predictable */
     					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
     						paddedValue = "10";
 							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
@@ -624,7 +624,7 @@ public class JSFunction {
     				//allow for null value in Date
     				if(useDefaultValues && nextVal==null){
     					nextVal= String.valueOf(gc.get(Calendar.YEAR));
-    					/** added to make the testing be more predictable */
+    					/* added to make the testing be more predictable */
     					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
     						nextVal = "2010";
 //							new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs

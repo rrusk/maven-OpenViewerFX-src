@@ -206,6 +206,21 @@ public class Parser {
         externalHandlers.setDVR(fileAcces);
         
     }
+    
+    /**
+     * Create a new Parser object using this variables values
+     * @return Parser object
+     */
+    public Parser createNewParser(){
+        Parser parser = new Parser(this.externalHandlers, this.options, this.fileAcces, this.res, this.resultsFromDecode);
+        int extractionMode = this.extractionMode;
+        parser.setRenderMode(renderMode);
+        parser.setExtractionMode(extractionMode);
+        parser.setGenerateGlyphOnRender(generateGlyphOnRender);
+        parser.setParms(displayRotation, scaling, indent, specialMode);
+        parser.setStatusBar(statusBar);
+        return parser;
+    }
 
     /**
      * NOT PART OF API - added for client and only works in custom build
@@ -251,19 +266,17 @@ public class Parser {
             try{
                 isBackgroundDecoding = true;
 
-                /** check in range */
                 if (i > fileAcces.getPageCount()) {
 
                     LogWriter.writeLog("Page out of bounds");
                     
                 } else {
 
-                    /** get pdf object id for page to decode */
                     final String currentPageOffset = getIO().getReferenceforPage(i);
 
                     final AcroRenderer formRenderer=externalHandlers.getFormRenderer();
 
-                    /**
+                    /*
                      * decode the file if not already decoded, there is a valid
                      * object id and it is unencrypted
                      */
@@ -274,7 +287,6 @@ public class Parser {
                                     "File not open - did you call closePdfFile() inside a loop and not reopen");
                         }
 
-                        /** read page or next pages */
                         final PdfObject pdfObject=new PageObject(currentPageOffset);
                         getIO().readObject(pdfObject);
                         final PdfObject Resources=pdfObject.getDictionary(PdfDictionary.Resources);
@@ -337,7 +349,6 @@ public class Parser {
                 throw new PdfException("File not open - did you call closePdfFile() inside a loop and not reopen");
             }
 
-            /** get pdf object id for page to decode */
             final String currentPageOffset = getIO().getReferenceforPage(pageIndex);
 
             final PdfPageData pageData=fileAcces.getPdfPageData();
@@ -625,13 +636,13 @@ public class Parser {
 
             currentDisplay=customDVR;
 
-            /**intercept code to render and image and flag text as invisible or visible*/
+            /*intercept code to render and image and flag text as invisible or visible*/
             if (customDVR.isHTMLorSVG()) {// Special case for HTML and SVG to allow for the available text modes.
 
 
                 fileAcces.setDVR(currentDisplay);
 
-                /**
+                /*
                  * flag if content is structured so we can use this in HTML
                  */             
                 this.structTreeRootObj=res.getPdfObject(PdfResources.StructTreeRootObj);
@@ -687,10 +698,8 @@ public class Parser {
 
                 DevFlags.currentPage = page;
                 
-                /** flush renderer */
                 currentDisplay.flush();
 
-                /** check in range */
                 if (page > fileAcces.getPageCount() || page < 1) {
 
                     LogWriter.writeLog("Page out of bounds");
@@ -699,7 +708,7 @@ public class Parser {
 
                 } else{
 
-                    /**
+                    /*
                      * title changes to give user something to see under timer
                      * control
                      */
@@ -712,7 +721,7 @@ public class Parser {
 
                     fileAcces.setPageNumber(page);
 
-                    /**
+                    /*
                      * sanity check I/O and Pdfobject and initi PDF object
                      */
                     if (getIO() == null) {
@@ -757,14 +766,14 @@ public class Parser {
                     setResultsFromDecode(page, current);
 
 
-                    /** turn off status bar update */
+                    /* turn off status bar update */
                     if (t != null) {
                         t.stop();
                         statusBar.setProgress(100);
 
                     }
                     
-                    /**
+                    /*
                      * handle acroform data to display
                      */
                     if (options.getRenderPage() && !isDuplicate && (renderMode & PdfDecoderInt.REMOVE_NOFORMS) != PdfDecoderInt.REMOVE_NOFORMS && !formRenderer.ignoreForms()) {
@@ -833,7 +842,7 @@ public class Parser {
     }
 
     private PdfObject getPdfObject(final int page, PdfObject pdfObject) {
-        /** get pdf object id for page to decode */
+
         if(pdfObject==null){
             pdfObject=new PageObject(getIO().getReferenceforPage(page));
 
@@ -850,7 +859,8 @@ public class Parser {
     }
 
     private void handleJSInLayer(final AcroRenderer formRenderer, final PdfLayerList layers) {
-        /**
+
+        /*
          * execute any JS needed (true flushes list)
          */
         final Iterator<String> commands=layers.getJSCommands();
@@ -875,7 +885,6 @@ public class Parser {
         final PdfStreamDecoder current;//location for non-XFA res
         PdfObject Resources=pdfObject.getDictionary(PdfDictionary.Resources);
 
-        /** read page or next pages */
         if(formRenderer.isXFA() && formRenderer.useXFA()){
             current = formRenderer.getStreamDecoder(getIO(), res.getPdfLayerList(), false);
             Resources=(PdfObject) formRenderer.getFormResources()[0];//XFA in Acroforms
@@ -893,7 +902,6 @@ public class Parser {
             warnOnceOnForms=formRenderer.showFormWarningMessage(page);
         }
         
-        /** set hires mode or not for display */
         current.setXMLExtraction(options.isXMLExtraction());
 
         currentDisplay.setCustomColorHandler((ColorHandler) externalHandlers.getExternalHandler(Options.ColorHandler));
@@ -957,7 +965,7 @@ public class Parser {
             }
         }
 
-        /**
+        /*
          * set flags after decode
          */
         fontsInFile = (String) current.getObjectValue(PdfDictionary.Font);

@@ -85,7 +85,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
             int count=0;
 
-            /** find out how many items are in the collection */
+            /* find out how many items are in the collection */
             for (int i = 0; i < generalPaths.length; i++) {
                 if(generalPaths[i]==null){
                     count = i;
@@ -93,10 +93,10 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                 }
             }
 
-            /** write out the number of items are in the collection */
+            /* write out the number of items are in the collection */
             os.writeObject(count);
 
-            /** iterate throught the collection, and write out each path individualy */
+            /* iterate throught the collection, and write out each path individualy */
             for (int i = 0; i < count; i++) {
                 final PathIterator pathIterator = generalPaths[i].getPathIterator(new AffineTransform());
                 PathSerializer.serializePath(os, pathIterator);
@@ -137,7 +137,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             }catch(final Exception e){
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
-        }/***/
+        }
 
 
         //if(idx==2060)
@@ -211,7 +211,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                 oldStroke.getDashArray(),
                 oldStroke.getDashPhase()));
 
-        /**drawn the paths*/
+        /* drawn the paths*/
         for(int jj=0;jj<paths.size()-1;jj++){
 
             if((type & GraphicsState.FILL)==GraphicsState.FILL){
@@ -234,7 +234,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
         if(glyphShape==null){
 
-            /**drawn the paths*/
+            /* drawn the paths*/
             final GeneralPath path=paths.elementAt(0);
 
             for(int jj=1;jj<paths.size()-1;jj++) {
@@ -262,7 +262,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             return;
         }
 
-        /**
+        /*
          * scan data and adjust glyfs after first if do not end in contour
          */
 
@@ -359,7 +359,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             int p2=(j+2)%fc;
             int pm1=(j-1)%fc;
 
-            /**special cases
+            /* special cases
              *
              *round up to last point at end
              *First point
@@ -512,7 +512,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                         System.out.println("curveto " + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2 + ' ' + x3 + ' ' + y3);
                     }
 
-                    /**if end after curve, roll back so we pick up the end*/
+                    /* if end after curve, roll back so we pick up the end*/
                     if( checkEnd && endOfContour[j]){
 
                         isEnd=true;
@@ -573,7 +573,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             }
         }
 
-        /**
+        /*
          * store so we can draw glyf as set of paths
          */
         paths.addElement(current_path);

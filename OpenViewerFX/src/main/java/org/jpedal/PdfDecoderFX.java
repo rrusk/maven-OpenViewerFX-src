@@ -673,7 +673,19 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     @Override
     public BufferedImage getPageAsImage(final int pageIndex) throws PdfException {
         
-        return getPageAsImage(pageIndex, false);
+        return getPageAsImage(pageIndex, false, scaling);
+        
+    }
+    
+    /**
+     * generate BufferedImage of a page in current file with the given scaling
+     *
+     * Page size is defined by CropBox
+     */
+    @Override
+    public BufferedImage getPageAsImage(final int pageIndex, final float scaling) throws PdfException {
+        
+        return getPageAsImage(pageIndex, false, scaling);
         
     }
     
@@ -686,13 +698,13 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     @Override
     public BufferedImage getPageAsTransparentImage(final int pageIndex) throws PdfException {
         
-        return getPageAsImage(pageIndex, true);
+        return getPageAsImage(pageIndex, true, scaling);
     }
     
     /**
      * generate BufferedImage of a page in current file
      */
-    private BufferedImage getPageAsImage(final int pageIndex, final boolean imageIsTransparent) throws PdfException {
+    private BufferedImage getPageAsImage(final int pageIndex, final boolean imageIsTransparent, final float scaling) throws PdfException {
         
         parser.setParms(displayRotation, scaling, 0, specialMode);
         

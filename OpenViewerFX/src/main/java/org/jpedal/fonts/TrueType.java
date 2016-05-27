@@ -313,13 +313,13 @@ public class  TrueType extends PdfFont {
     @Override
     public Rectangle getBoundingBox() {
         
-        if(BBox==null){
+//        if(BBox==null){
             if(isFontEmbedded && !isFontSubstituted) {
                 BBox=new Rectangle((int)FontBBox[0], (int)FontBBox[1], (int)(FontBBox[2]-FontBBox[0]), (int)(FontBBox[3]-FontBBox[1])); 
             } else {
                 BBox=super.getBoundingBox();
             }
-        }
+//        }
         
         return BBox;
     }

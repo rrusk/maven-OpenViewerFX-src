@@ -261,13 +261,13 @@ public class JPEGDecoder {
         return image;
     }
    
-    private static byte[] getBytesFromJPEGWithImageIO(final byte[] data, GenericColorSpace decodeColorData,final PdfObject XObject) {
+    public static byte[] getBytesFromJPEGWithImageIO(final byte[] data, GenericColorSpace decodeColorData,final PdfObject XObject) {
         
         byte[] db=null;
         Raster ras=null;
         
         try {
-            BufferedImage img=decodeColorData.JPEGToRGBImage(data, XObject.getInt(PdfDictionary.Width), XObject.getInt(PdfDictionary.Height), null, -1, -1, false, XObject);
+            BufferedImage img=decodeColorData.JPEGToRGBImage(data, XObject.getInt(PdfDictionary.Width), XObject.getInt(PdfDictionary.Height), null, -1, -1, false);
             
             //System.out.println(decodeColorData+" "+img);
             if(img.getType()==BufferedImage.TYPE_INT_RGB){ //we need byte in rgb
@@ -315,7 +315,12 @@ public class JPEGDecoder {
             boolean isMask=XObject instanceof MaskObject;
             boolean isDeviceN = decodeColorData instanceof DeviceNColorSpace;
             if(!isDeviceN){
-                db = JDeliHelper.getBytesFromJPEG(isInverted, data, isMask);
+                try{
+                    db = JDeliHelper.getBytesFromJPEG(isInverted, data, isMask);
+                }catch(Exception e){ //case 24799 try to fix the file in jdeli if time permits
+                    LogWriter.writeLog("Jpeg Data Corrupted Switching to Old Compression "+e);
+                    db=getBytesFromJPEGWithImageIO(data, decodeColorData, XObject);   
+                }
             }
             if(db==null){
                 db=getBytesFromJPEGWithImageIO(data, decodeColorData, XObject);   
@@ -327,6 +332,10 @@ public class JPEGDecoder {
         
         return db;
         
+    }
+    
+    public static byte[] getUnconvertedBytesFromJPEG(byte [] data, int  adobeColorTransform) throws Exception{
+        return JDeliHelper.getUnconvertedBytesFromJPEG(data, adobeColorTransform);     
     }
 }
 

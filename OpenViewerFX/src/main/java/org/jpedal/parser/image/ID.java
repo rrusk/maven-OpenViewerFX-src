@@ -32,6 +32,7 @@
  */
 package org.jpedal.parser.image;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.color.DeviceRGBColorSpace;
@@ -206,12 +207,30 @@ public class ID extends ImageDecoder {
                     imageData.setObjectData(i_data);
                     imageData.setCompCount(decodeColorData.getColorSpace().getNumComponents());
         
-                    image=processImage(decodeColorData,
-                            image_name,
-                        imageData,
-                            inline_imageMask,
-                            XObject,false);
+                    image=processImage(decodeColorData, imageData, inline_imageMask, XObject);
 
+                    //transparency slows down printing so try to reduce if possible in printing
+                    if(inline_imageMask && !ImageDecoder.allowPrintTransparency && parserOptions.isPrinting() && image!=null && imageData.getDepth()==1){
+
+                        //setup any imageMask
+                        final byte[] maskCol=ImageCommands.getMaskColor(gs);
+                        
+                        if(maskCol!=null && maskCol[0]==0 && maskCol[1]==0 && maskCol[2]==0 && maskCol[3]==0){
+                            final int iw=image.getWidth();
+                            final int ih=image.getHeight();
+                            final BufferedImage newImage=new BufferedImage(iw,ih,BufferedImage.TYPE_BYTE_GRAY);
+
+                            newImage.getGraphics().setColor(Color.WHITE);
+                            newImage.getGraphics().fillRect(0,0,iw,ih);
+                            newImage.getGraphics().drawImage(image, 0, 0, null);
+                            image=newImage;
+                        }
+                    }
+                    
+                    if(image!=null && !current.isHTMLorSVG() && !parserOptions.renderDirectly() && parserOptions.isPageContent() && parserOptions.imagesNeeded()) {
+                        objectStoreStreamRef.saveStoredImage(image_name,ImageCommands.addBackgroundToMask(image, isMask),false,parserOptions.createScaledVersion(),"tif");          
+                    }
+        
                     //generate name including filename to make it unique
                     currentImage = image_name;
 

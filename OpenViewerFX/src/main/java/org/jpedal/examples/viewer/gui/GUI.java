@@ -36,8 +36,8 @@ package org.jpedal.examples.viewer.gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.tree.TreeNode;
 import org.jpedal.FileAccess;
@@ -163,7 +163,7 @@ public abstract class GUI implements GUIFactory {
     //flag if generated so we setup once for each file
     protected boolean bookmarksGenerated;
     protected GUISearchWindow searchFrame;
-    protected String pageTitle,bookmarksTitle, signaturesTitle,layersTitle;
+    protected String pageTitle,bookmarksTitle, signaturesTitle,layersTitle, annotationTitle;
 
     public static final boolean debugFX=false;
 
@@ -1277,6 +1277,7 @@ public abstract class GUI implements GUIFactory {
         bookmarksTitle = Messages.getMessage("PdfViewerJPanel.bookmarks");
         layersTitle = Messages.getMessage("PdfViewerJPanel.layers");
         signaturesTitle = Messages.getMessage("PdfViewerJPanel.signatures");
+        annotationTitle = Messages.getMessage("PdfViewerJPanel.annotations");
     }
 
     @Override

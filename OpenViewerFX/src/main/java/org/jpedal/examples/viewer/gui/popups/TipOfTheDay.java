@@ -104,7 +104,7 @@ public class TipOfTheDay extends JDialog {
 		mainPanelConstraints.weightx = 0;
 		mainPanelConstraints.insets = new Insets(10,10,0,10);
 		
-		/**
+		/*
 		 * add the top panel to the Dialog, this is the image, and the title "Did you know ... ?"
 		 */
 		addTopPanel(mainPanelConstraints);
@@ -114,7 +114,7 @@ public class TipOfTheDay extends JDialog {
 		mainPanelConstraints.weighty = 1;
 		mainPanelConstraints.weightx = 1;
 		
-		/**
+		/*
 		 * add the main JEditorPane to the Dialog which displays the html files
 		 */
 		addCenterTip(mainPanelConstraints);
@@ -125,7 +125,7 @@ public class TipOfTheDay extends JDialog {
 		mainPanelConstraints.weightx = 0;
 		mainPanelConstraints.insets = new Insets(0,7,0,10);
 		
-		/**
+		/*
 		 * add the JCheckBox to the Dialog which allows the user to enable/disable displaying on
 		 * startup
 		 */
@@ -134,7 +134,7 @@ public class TipOfTheDay extends JDialog {
 		mainPanelConstraints.gridy = 3;
 		mainPanelConstraints.insets = new Insets(0,0,10,10);
 		
-		/**
+		/*
 		 * add the navigation buttons at the bottom of the panel which allows the user to move
 		 * forwards/backwards through the tips, and also allows the Dialog to be closed.
 		 */
@@ -219,7 +219,7 @@ public class TipOfTheDay extends JDialog {
 	private void changeTip(final int ammount) {
 		currentTip += ammount;
 		
-		/** wrap the current tip if needed */
+		/* wrap the current tip if needed */
 		if(currentTip == tipPaths.size()) {
             currentTip = 0;
         } else if(currentTip == -1) {
@@ -244,7 +244,7 @@ public class TipOfTheDay extends JDialog {
 		try {
 			final URL url = getClass().getResource(tipRoot); //"/org/jpedal/examples/viewer/res/tips"
 			
-			/**
+			/*
 			 * allow for it in jar
 			 */
 			if(url.toString().startsWith("jar")){

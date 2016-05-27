@@ -102,26 +102,26 @@ public class ObjectDecoder implements Serializable {
             ObjectUtils.showData(pdfObject, i, length, raw, padding);
         }
         
-        /**
+        /*
          * main loop for read all values from Object data and store in PDF object
          */
         i = readObjectDataValues(pdfObject, i, raw, length);
         
-        /**
+        /*
          * look for stream afterwards
          */
         if(!pdfObject.ignoreStream() && pdfObject.getGeneralType(-1)!=PdfDictionary.ID) {
             Stream.readStreamData(pdfObject, i, raw, length, objectReader);
         }
         
-        /**
+        /*
          * we need full names for Forms
          */
         if(pdfObject.getObjectType()==PdfDictionary.Form) {
             Form.setFieldNames(pdfObject, objectReader);
         }
         
-        /**
+        /*
          * reset indent in debugging
          */
         if(debugFastCode){
@@ -159,7 +159,7 @@ public class ObjectDecoder implements Serializable {
                 i = stripComment(length, i, raw);
             }
             
-            /**
+            /*
              * exit conditions
              */
             if ((i>=length ||
@@ -169,7 +169,7 @@ public class ObjectDecoder implements Serializable {
                 break;
             }
             
-            /**
+            /*
              * process value
              */
             if(raw[i]==60 && raw[i+1]==60){
@@ -221,7 +221,7 @@ public class ObjectDecoder implements Serializable {
                     i = ObjectUtils.handleUnknownType(i, raw, length);
                 }
                 
-                /**
+                /*
                  * now read value
                  */
                 if(PDFkeyInt==-1 || pdfKeyType==-1){
@@ -270,7 +270,7 @@ public class ObjectDecoder implements Serializable {
     }
     
     private void getKeyType(final PdfObject pdfObject, final int i, final byte[] raw, final int length, final int keyLength, final int keyStart, final int type) {
-        /**
+        /*
          * get Dictionary key and type of value it takes
          */
         if(debugFastCode)//used in debug
@@ -638,7 +638,7 @@ public class ObjectDecoder implements Serializable {
     }
     
     private int setDictionaryValue(final PdfObject pdfObject,int i, final byte[] raw, final boolean ignoreRecursion) {
-        /**
+        /*
          * workout actual end as not always returned right
          */
         int end=i;
@@ -1010,9 +1010,7 @@ public class ObjectDecoder implements Serializable {
                     j++;
                 }
                 
-                /**
-                 * get generation number
-                 */
+                // get generation number
                 keyStart = j;
                 
                 //move cursor to end of reference

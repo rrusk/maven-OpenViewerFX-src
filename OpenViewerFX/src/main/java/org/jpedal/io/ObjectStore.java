@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.jpedal.examples.handlers.DefaultImageHelper;
+import org.jpedal.render.SwingDisplay;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Strip;
 
@@ -113,6 +114,9 @@ public class ObjectStore {
 
     /**paramter stored on cached images*/
     public static final Integer IMAGE_COLORSPACE= 6;
+    
+    /**paramter stored on cached images*/
+    public static final Integer IMAGE_DEPTH= 7;
 
     /**period after which we assumes files must be dead (ie from crashed instance)
      * default is four hour image time*/
@@ -130,6 +134,7 @@ public class ObjectStore {
 
     private final Map<Integer,Integer> imagesOnDiskAsBytesW=new HashMap<Integer,Integer>();
     private final Map<Integer,Integer> imagesOnDiskAsBytesH=new HashMap<Integer,Integer>();
+    private final Map<Integer,Integer> imagesOnDiskAsBytesD=new HashMap<Integer,Integer>();
     private final Map<Integer,Integer> imagesOnDiskAsBytespX=new HashMap<Integer,Integer>();
     private final Map<Integer,Integer> imagesOnDiskAsBytespY=new HashMap<Integer,Integer>();
     private final Map<Integer, byte[]> imagesOnDiskMask= new HashMap<Integer, byte[]>();
@@ -249,7 +254,7 @@ public class ObjectStore {
             currentFilePath = "";
         }
 
-        /**
+        /*
          * work through to get last / or \
          * first we make sure there is one in the name.
          * We could use the properties to get the correct value but the
@@ -269,20 +274,20 @@ public class ObjectStore {
             }
         }
 
-        /**strip any ending from name*/
+        /*strip any ending from name*/
         final int pointer = name.lastIndexOf('.');
         if (pointer != -1) {
             name = name.substring(0, pointer);
         }
 
-        /**remove any spaces using my own class and enforce lower case*/
+        /*remove any spaces using my own class and enforce lower case*/
         name = Strip.stripAllSpaces(name);
         currentFilename = name.toLowerCase();
 
         //System.err.println("8");
     }
 
-    /**
+    /*
      * save raw CMYK data in CMYK directory - We extract the DCT encoded image
      * stream and save as a file with a .jpeg ending so we have the raw image -
      * This works for DeviceCMYK -
@@ -291,19 +296,17 @@ public class ObjectStore {
      * @param name is of type String
      * @return boolean
      */
-    public boolean saveRawCMYKImage(final byte[] image_data, String name) {
+    /*public boolean saveRawCMYKImage(final byte[] image_data, String name) {
 
         //assume successful
         boolean isSuccessful=true;
         name = removeIllegalFileNameCharacters(name);
 
-        /**create/check directories exists*/
         final File cmyk_d = new File(cmyk_dir);
         if (!cmyk_d.exists()) {
             cmyk_d.mkdirs();
         }
 
-        /**stream the data out - not currently Buffered*/
         try {
             final FileOutputStream a =new FileOutputStream(cmyk_dir + name + ".jpg");
             tempFileNames.put(cmyk_dir + name + ".jpg","#");
@@ -319,7 +322,7 @@ public class ObjectStore {
         }
 
         return isSuccessful;
-    }
+    }/*/
 
     /**
      * save buffered image as JPEG or tif
@@ -449,17 +452,21 @@ public class ObjectStore {
             System.out.println("Flush files on close");
         }
         
-        /**
+        /*
          * flush any image data serialized as bytes
          */
         Iterator filesTodelete = imagesOnDiskAsBytes.keySet().iterator();
         while(filesTodelete.hasNext()) {
             final Object file = filesTodelete.next();
-
+            
             if(file!=null){
                 final File delete_file = new File(imagesOnDiskAsBytes.get(file));
                 if(delete_file.exists()) {
                     delete_file.delete();
+                    
+                    if(SwingDisplay.testSampling){
+                        System.out.println("deleted file as "+delete_file.getAbsolutePath());
+                    }
                 }
             }
         }
@@ -468,6 +475,7 @@ public class ObjectStore {
         imagesOnDiskAsBytes.clear();
         imagesOnDiskAsBytesW.clear();
         imagesOnDiskAsBytesH.clear();
+        imagesOnDiskAsBytesD.clear();
         imagesOnDiskAsBytespX.clear();
         imagesOnDiskAsBytespY.clear();
         imagesOnDiskMask.clear();
@@ -552,7 +560,7 @@ public class ObjectStore {
                 /**/
             }
 
-            /**flush cmyk directory as well*/
+            /*flush cmyk directory as well*/
             final File cmyk_d = new File(cmyk_dir);
             if (cmyk_d.exists()) {
 /*			boolean filesExist = false;
@@ -592,7 +600,7 @@ public class ObjectStore {
             final String[] file_list = cmyk_d.list();
 
             if (file_list.length > 0) {
-                /**check separator on target dir and exists*/
+                /*check separator on target dir and exists*/
                 if (!target_dir.endsWith(separator)) {
                     target_dir += separator;
                 }
@@ -639,7 +647,7 @@ public class ObjectStore {
             unclipped_file_name += ".jpg";
         }
 
-        /**
+        /*
          * fudge to write out high quality then try low if failed
          */
         try { //write out data to create image in temp dir
@@ -926,10 +934,7 @@ public class ObjectStore {
 
             pagesOnDisk.clear();
 
-
-
-
-            /**
+            /*
              * flush any pages serialized as bytes
              */
 
@@ -967,7 +972,7 @@ public class ObjectStore {
 
         flush();
 
-        /**
+        /*
          * try to redelete files again
          */
         for (final String o : undeletedFiles.keySet()) {
@@ -1041,7 +1046,7 @@ public class ObjectStore {
 
     }
 
-    public void saveRawImageData(final String pageImgCount, final byte[] bytes, final int w, final int h, final int pX, final int pY, final byte[] maskCol, final int colorSpaceID) {
+    public void saveRawImageData(final String pageImgCount, final byte[] bytes, final int w, final int h, final int bpc, final int pX, final int pY, final byte[] maskCol, final int colorSpaceID) {
 
         try {
             //System.out.println("ObjectStore.temp_dir="+ObjectStore.temp_dir);
@@ -1057,6 +1062,7 @@ public class ObjectStore {
             imagesOnDiskAsBytes.put(key,ff.getAbsolutePath());
             imagesOnDiskAsBytesW.put(key, w);
             imagesOnDiskAsBytesH.put(key, h);
+            imagesOnDiskAsBytesD.put(key,bpc);
 
             imagesOnDiskAsBytespX.put(key, pX);
             imagesOnDiskAsBytespY.put(key, pY);
@@ -1065,6 +1071,10 @@ public class ObjectStore {
 
             if(debugCache) {
                 System.out.println("save to image cache " + pageImgCount + ' ' + ff.getAbsolutePath());
+            }
+            
+            if(SwingDisplay.testSampling){
+                System.out.println(pageImgCount+" save cached image as "+ff.getAbsolutePath()+" "+this);
             }
 
 
@@ -1133,6 +1143,9 @@ public class ObjectStore {
             return imagesOnDiskAsBytesW.get(Integer.valueOf(imageID));
         }else if(key.equals(IMAGE_HEIGHT)){
             return imagesOnDiskAsBytesH.get(Integer.valueOf(imageID));
+        }else if(key.equals(IMAGE_DEPTH)){
+            return imagesOnDiskAsBytesD.get(Integer.valueOf(imageID));
+        
         }else if(key.equals(IMAGE_pX)){
             return imagesOnDiskAsBytespX.get(Integer.valueOf(imageID));
         }else if(key.equals(IMAGE_pY)){

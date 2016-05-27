@@ -34,7 +34,6 @@ package org.jpedal.parser.image.downsample;
 
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
-import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.parser.image.data.ImageData;
 
 /**
@@ -44,27 +43,31 @@ import org.jpedal.parser.image.data.ImageData;
 public class DownSampler {
     
     
-    public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData, final ImageData imageData, final boolean imageMask, final boolean arrayInverted, final byte[] maskCol, int sampling, final PdfArrayIterator Filters) {
+    public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData, 
+            final ImageData imageData, final byte[] maskCol, final int sampling) {
         
-        imageData.setIsDownsampled(true);
+        if(sampling>1){ //safety check
             
-        byte[] index=decodeColorData.getIndexedMap();
-        
-        if(imageData.getDepth()==1 && (decodeColorData.getID()!=ColorSpaces.DeviceRGB || index==null)){
-            
-            //make 1 bit indexed flat
-            
-            if(index!=null) {
-                index = decodeColorData.convertIndexToRGB(index);
-                decodeColorData.setIndex(index, index.length/3);
+            imageData.setIsDownsampled(true);
+
+            byte[] index=decodeColorData.getIndexedMap();
+
+            if(imageData.getDepth()==1 && (decodeColorData.getID()!=ColorSpaces.DeviceRGB || index==null)){
+
+                //make 1 bit indexed flat
+
+                if(index!=null) {
+                    index = decodeColorData.convertIndexToRGB(index);
+                    decodeColorData.setIndex(index, index.length/3);
+                }
+
+                decodeColorData=OneBitDownSampler.downSample(sampling, imageData, maskCol, index, decodeColorData);
+
+            }else if(imageData.getDepth()==8){
+                decodeColorData=EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
             }
-            
-            decodeColorData=OneBitDownSampler.downSample(sampling, imageData, imageMask, arrayInverted, maskCol, index, decodeColorData);
-            
-        }else if(imageData.getDepth()==8 && (Filters==null || (!imageData.isDCT() && !imageData.isJPX()))){
-            decodeColorData=EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
+
         }
-        
         return decodeColorData;
     }
 }

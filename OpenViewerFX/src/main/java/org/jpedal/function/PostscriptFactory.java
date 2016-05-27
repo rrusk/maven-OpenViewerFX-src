@@ -623,7 +623,7 @@ public class PostscriptFactory {
 			break;
 
 		case PostscriptFactory.PS_copy:
-			/**
+			/*
 			 * In PS the function is designed to work with any object or
 			 * type. Due to smaller amount of types and procedures implemented
 			 * by adobe, we shall only implement one case (when int is a param).
@@ -849,7 +849,7 @@ public class PostscriptFactory {
 
 		case PostscriptFactory.PS_if:
 
-			/**
+			/*
 			 * No examples found to properly test this method.
 			 * According to doc first would recieve a instruction
 			 * set, which execution depends on second being true(exec)
@@ -967,7 +967,7 @@ public class PostscriptFactory {
 			first = pop();
 			second = pop();
 
-			/**
+			/*
 			 *  If the result would happend to be outside of integer range
 			 *  the PS_type should be set to real, for the time being I am leaving
 			 *  it as integer though as the other situation is quite unliekly to
@@ -1130,7 +1130,7 @@ public class PostscriptFactory {
                 push(second - first, PS_INTEGER);
             }
 
-			/**
+			/*
 			 *  If the result would happend to be outside of integer range
 			 *  the PS_type should be set to real, for the time being I am leaving
 			 *  it as integer though as the other situation is quite unliekly to
@@ -1407,7 +1407,7 @@ public class PostscriptFactory {
 			//we have value so get Command ID
 			if(nextVal!=null){
 
-				/**
+				/*
 				 * execute command or read value
 				 */
 				if(nextVal.length==1 && (nextVal[0]==START_BRACE || nextVal[0]==END_BRACE)){ //recursion

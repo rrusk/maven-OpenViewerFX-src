@@ -48,6 +48,6 @@ public interface ImageHelper {
 
     Raster readRasterFromJPeg(byte[] data) throws IOException;
 
-    BufferedImage JPEG2000ToRGBImage(byte[] data, int w, int h, float[] decodeArray, int pX, int pY) throws PdfException;
+    BufferedImage JPEG2000ToRGBImage(byte[] data, int w, int h, int pX, int pY) throws PdfException;
 
 }

@@ -242,7 +242,7 @@ public class MaskDecoder {
     
     public static BufferedImage createMaskImage(final boolean isPrinting, final GraphicsState gs, final boolean isType3Font, 
             final DynamicVectorRenderer current, final byte[] data, final int w, final int h, final ImageData imageData, 
-            final boolean imageMask, final int d, final GenericColorSpace decodeColorData, final byte[] maskCol) {
+            final int d, final GenericColorSpace decodeColorData, final byte[] maskCol) {
         
         BufferedImage image=null;
         
@@ -261,13 +261,13 @@ public class MaskDecoder {
             boolean hasObjectBehind=true;
             
             //added as found file with huge number of tiny tiles
-            if(h>=20 || imageData.getMode()!=ImageCommands.ID){ //not worth it for inline image
+            if(current!=null && gs!=null && (h>=20 || imageData.getMode()!=ImageCommands.ID)){ //not worth it for inline image
                 hasObjectBehind = current.hasObjectsBehind(gs.CTM);
             }
             
             //remove empty images in some files
             boolean isBlank=false,keepNonTransparent=false;
-            if(imageMask && d==1 && decodeColorData.getID()==ColorSpaces.DeviceRGB && maskCol[0]==0 && maskCol[1]==0 && maskCol[2]==0){
+            if(maskCol!=null && d==1 && decodeColorData.getID()==ColorSpaces.DeviceRGB && maskCol[0]==0 && maskCol[1]==0 && maskCol[2]==0){
                 
                 //see if blank (assume true and disprove) and remove as totally see-through
                 isBlank=true;

@@ -55,94 +55,73 @@ public class PdfGroupingAlgorithms {
     
     private static final String SystemSeparator = System.getProperty("line.separator");
     
-    //public PdfGroupingAlgorithms() {}
-	
-	/** ==============START OF ARRAYS================ */
-	/**
-	 * content is stored in a set of arrays. We have tried various methods (ie
-	 * create composite object, etc) and none are entirely satisfactory. The
-	 * beauty of this method is speed.
-	 */
-
-	/**
-	 * flag to show this item has been merged into another and should be
-	 * ignored. This allows us to repeat operations on live elements without
-	 * lots of deleting.
-	 */
+	//flag to show this item has been merged into another and should be ignored.
 	private boolean[] isUsed;
 
-	/** co-ords of object (x1,y1 is top left) */
+	//co-ords of object (x1,y1 is top left)
 	private float[] f_x1, f_x2, f_y1, f_y2;
 	
-	/**track if we removed space from end*/
+	//track if we removed space from end
 	private boolean[] hadSpace;
 	
-	/**hold colour info*/
+	//hold colour info
 	private String[] f_colorTag;
 	
-	/**hold writing mode*/
+	//hold writing mode
 	private int[] writingMode;
 	
-	/** font sizes in pixels */
+	//font sizes in pixels
 	private int[] fontSize;
 
-	/** amount of space a space uses in this font/size */
+	//amount of space a space uses in this font/size
 	private float[] spaceWidth;
 
-	/** actual text */
+	//actual text
 	private StringBuilder[] content;
 
-	/** raw number of text characters */
+	//raw number of text characters
 	private int[] textLength;
 
-	/** ==============END OF ARRAYS================ */
-
-    /**
-	 * handle on page data object. We extract data from this into local arrays
-	 * and return grouped content into object at end. This is done for speed.
-	 */
+    //Hold data from pdf so we can create local version
 	private final PdfData pdf_data;
 
-	/** flag to show if output for table is CSV or XHTML */
+	//flag to show if output for table is CSV or XHTML
 	private boolean isXHTML = true;
 
-	/** slot to insert next value - used when we split fragments for table code */
+	//slot to insert next value - used when we split fragments for table code
 	private int nextSlot;
 
-	/** vertical breaks for table calculation */
+	//vertical breaks for table calculation
 	private Vector_Int lineBreaks = new Vector_Int();
 
-	/** holds details as we scan lines for table */
+	//holds details as we scan lines for table
 	private Vector_Object lines;
 
-	/** lookup table used to sort into correct order for table */
+	//lookup table used to sort into correct order for table
 	private Vector_Int lineY2;
 
-	/**
-	 * marker char used in content (we bury location for each char so we can
-	 * split)
-	 */
+	//marker char used in content (we bury location for each char so we can split)
 	private static final String MARKER = PdfData.marker;
 	public static final char MARKER2= MARKER.charAt(0);
 
-	/** counters for cols and rows and pointer to final object we merge into */
+	//counters for cols and rows and pointer to final object we merge into
 	private int max_rows, master;
 	
-	/**flag to show color info is being extracted*/
+	//flag to show color info is being extracted
 	private boolean colorExtracted;
 	
-	/** used to calculate correct order for table lines */
+	//used to calculate correct order for table lines
 	private int[] line_order;
 
-	/** amount we resize arrays holding content with if no space */
+	//amount we resize arrays holding content with if no space
     private static final int increment = 100;
 
 	public static boolean useUnrotatedCoords;
 
-	/**flag to show if tease created on findText*/
+	//flag to show if tease created on findText
 	private boolean includeTease;
 
-	/**teasers for findtext*/
+	//teasers for findtext
 	private String[] teasers;
 
 	private final List<String> multipleTermTeasers = new ArrayList<String>();
@@ -151,16 +130,17 @@ public class PdfGroupingAlgorithms {
 
     private boolean isXMLExtraction=true;
 
-    /*
-      * Variables to allow cross line search results
-      */
-	/**Value placed between result areas to show they are part of the same result*/
+	//Value placed between result areas to show they are part of the same result
 	private static final int linkedSearchAreas=-101;
 	
-	/** create a new instance, passing in raw data */
+	/**
+     * Create a new instance, passing in raw data
+     * @param pdf_data PdfData from the pdf to search
+     * @param isXMLExtraction Boolean flag to specify if output should be xml
+     */
 	public PdfGroupingAlgorithms(final PdfData pdf_data, final boolean isXMLExtraction) {
 		this.pdf_data = pdf_data;
-	this.isXMLExtraction=isXMLExtraction;
+        this.isXMLExtraction=isXMLExtraction;
 		colorExtracted=pdf_data.isColorExtracted();
     }
 	
@@ -173,7 +153,7 @@ public class PdfGroupingAlgorithms {
 
 		final boolean hasUnderline = false;
 
-		/**get 2 lines without any XML or spaces so we can look at last char*/
+		//get 2 lines without any XML or spaces so we can look at last char
         final StringBuilder line1;
         final StringBuilder line2;
         if(isXMLExtraction){
@@ -184,13 +164,13 @@ public class PdfGroupingAlgorithms {
 			line2 = Strip.trim(rawLine2);
 		}
 		
-		/**get lengths and if appropriate perform tests*/
+		//get lengths and if appropriate perform tests
 		final int line1Len = line1.length();
 		final int line2Len = line2.length();
-		//System.out.println(line1Len+" "+line2Len);
+		
 		if((line1Len>1)&&(line2Len>1)){
 
-			/**get chars to test*/
+			//get chars to test
 			final char line1Char2 = line1.charAt(line1Len - 1);
 			final char line1Char1 = line1.charAt(line1Len - 2);
 			final char line2Char1 = line2.charAt(0);
@@ -278,7 +258,7 @@ public class PdfGroupingAlgorithms {
                             diff=-diff;
                         }
 
-                        /** stop spurious matches on overlapping text*/
+                        //stop spurious matches on overlapping text
 						if (fontDiff==0 && (midX > f_x1[n])&& (midX < f_x2[n])
 							&& (diff< 10)
 							&& (midY < f_y1[n])&& (midY > f_y2[n])) {
@@ -352,7 +332,7 @@ public class PdfGroupingAlgorithms {
             sep = " ";
         }
 
-		/** add an XML tag to flag multiple spaces */
+		//add an XML tag to flag multiple spaces
 		if (spaceCount > 1 && addMultiplespaceXMLTag && writingMode==PdfData.HORIZONTAL_LEFT_TO_RIGHT) {
             sep = " <SpaceCount space=\"" + spaceCount + "\" />";
         }
@@ -490,13 +470,7 @@ public class PdfGroupingAlgorithms {
 		final float[] f_y1 = new float[count];
 		final float[] f_y2 = new float[count];
 		
-		//set defaults and calculate dynamic values
-		//int text_length;
-//		count = count-increment;
         float x1,x2,y1,y2;
-		//float last_pt,min,max,pt,linePos,character_spacing;
-		//String raw, char_width = "",currentColor;
-		//StringBuilder text = new StringBuilder();
 
 		int currentPoint = 0;
 		
@@ -504,14 +478,10 @@ public class PdfGroupingAlgorithms {
 		for (int i = 0; i < count; i++) {
             
 			//extract values
-			//character_spacing = pdf_data.f_character_spacing[i];
-			//raw = pdf_data.contents[i];
 			x1 = pdf_data.f_x1[i];
-			//currentColor=pdf_data.colorTag[i];
 			x2 = pdf_data.f_x2[i];
 			y1 = pdf_data.f_y1[i];
 			y2 = pdf_data.f_y2[i];
-			//text_length = pdf_data.text_length[i];
 			final int mode=pdf_data.f_writingMode[i];
 
 			boolean accepted = false;
@@ -541,9 +511,8 @@ public class PdfGroupingAlgorithms {
                     }
                     break;
             }
+            
 			//if at least partly in the area, process
-			
-			
 			if(accepted){
                 
                 content[currentPoint] = new StringBuilder(pdf_data.contents[i]);
@@ -799,10 +768,9 @@ public class PdfGroupingAlgorithms {
 		while (tokens.hasMoreTokens()) {
 
 			//encoding in data
-			temp_token = tokens.nextToken(); //see
-																		 // if
-																		 // first
-																		 // marker
+			temp_token = tokens.nextToken();
+			
+            //see if first marker
 			if (temp_token.equals(MARKER)) {
 				tokens.nextToken(); //point character starts
 				tokens.nextToken(); //second marker
@@ -842,9 +810,7 @@ public class PdfGroupingAlgorithms {
 			//extract values for data
 			raw = this.pdf_data.contents[i];
 
-            /**
-             * set pointers so left to right text
-             */
+            //set pointers so left to right text
             switch (currentWritingMode) {
                 case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
                     x1=this.f_x1[i];
@@ -896,9 +862,11 @@ public class PdfGroupingAlgorithms {
 							currentX = Float.parseFloat(value);
 							try {
 
-								//add x to list or increase counter at start
-								// or on space
-								//add points either side of space
+								/* 
+                                 * add x to list or increase counter at start
+								 * or on space
+								 * add points either side of space
+                                 */
 								if (lastValue.isEmpty() || (lastValue.indexOf(' ') != -1)) {
 
 									intX = (int) currentX;
@@ -969,25 +937,26 @@ public class PdfGroupingAlgorithms {
 		}
 	}
 
-        private boolean isFragmentWithinArea(final Fragment fragment, final float minX, final float minY, final float maxX, final float maxY){
-            
-            //if at least partly in the area, process
-            if ((fragment.getWritingMode() == PdfData.HORIZONTAL_LEFT_TO_RIGHT || fragment.getWritingMode() == PdfData.HORIZONTAL_RIGHT_TO_LEFT)) {
+    private boolean isFragmentWithinArea(final Fragment fragment, final float minX, final float minY, final float maxX, final float maxY) {
 
-                final float textHeight = fragment.getY1() - fragment.getY2();
+        //if at least partly in the area, process
+        if ((fragment.getWritingMode() == PdfData.HORIZONTAL_LEFT_TO_RIGHT || fragment.getWritingMode() == PdfData.HORIZONTAL_RIGHT_TO_LEFT)) {
 
-                if (((fragment.getY2() > minY && fragment.getY1() < maxY) || //Check is file is enclosed by highlight
-                        ((fragment.getY2() > minY && maxY - fragment.getY2() > textHeight * 0.5) || (fragment.getY1() < maxY && fragment.getY1() - minY > textHeight * 0.5))) && //Check is partially enclosed by highlight
-                        (minX + maxX) > 0 && //Widt of area is not 0. This case was found in torture.pdf
-                        !(fragment.getX2() < minX) && !(fragment.getX1() > maxX)) { //Ensure the text is within the x axis
-                    return true;
-                }
-            } else if (((fragment.getWritingMode() == PdfData.VERTICAL_BOTTOM_TO_TOP || fragment.getWritingMode() == PdfData.VERTICAL_TOP_TO_BOTTOM))
-                    && (fragment.getX1() > minX && fragment.getX2() < maxX && fragment.getY1() > minY && fragment.getY2() < maxY)) {
+            final float textHeight = fragment.getY1() - fragment.getY2();
+
+            if (((fragment.getY2() > minY && fragment.getY1() < maxY) || //Check is file is enclosed by highlight
+                    ((fragment.getY2() > minY && maxY - fragment.getY2() > textHeight * 0.5) || (fragment.getY1() < maxY && fragment.getY1() - minY > textHeight * 0.5))) && //Check is partially enclosed by highlight
+                    (minX + maxX) > 0 && //Widt of area is not 0. This case was found in torture.pdf
+                    !(fragment.getX2() < minX) && !(fragment.getX1() > maxX)) { //Ensure the text is within the x axis
                 return true;
             }
-            return false;
+        } else if (((fragment.getWritingMode() == PdfData.VERTICAL_BOTTOM_TO_TOP || fragment.getWritingMode() == PdfData.VERTICAL_TOP_TO_BOTTOM))
+                && (fragment.getX1() > minX && fragment.getX2() < maxX && fragment.getY1() > minY && fragment.getY2() < maxY)) {
+            return true;
         }
+        return false;
+    }
+    
     /**
      * Method splitFragments adds raw fragments to processed fragments breaking
      * up any with vertical lines through or what looks like tabbed spaces
@@ -1025,10 +994,7 @@ public class PdfGroupingAlgorithms {
             }
 
             if (isFragmentWithinArea(fragment, minX, minY, maxX, maxY)) {
-
-                /**
-                 * find lines
-                 */
+                
                 //look for possible vertical or horizontal lines in the data
                 if (!linesScanned && findLines) {
                     findVerticalLines(minX, minY, maxX, maxY, fragment.getWritingMode());
@@ -1052,10 +1018,7 @@ public class PdfGroupingAlgorithms {
 
                 linePos = -1;
 
-                /**
-                 * work through text, using embedded markers to work out whether
-                 * each letter is IN or OUT
-                 */
+                //work through text, using embedded markers to find in area
                 final char[] line = fragment.getRawData().toCharArray();
 
                 final int end = line.length;
@@ -1070,18 +1033,12 @@ public class PdfGroupingAlgorithms {
 
                 boolean isFirstValue = true, breakPointset = false;
 
-                /**
-                 * work through text, using embedded markers to work out whether
-                 * each letter is IN or OUT
-                 */
+                //work through text, using embedded markers to find in area
                 while (pointer < end) {
 
                     //only data between min and y locations
                     while (true) {
 
-                        /**
-                         * read value
-                         */
                         if (line[pointer] != MARKER2) {
                             //find second marker and get width
                             final int startPointer = pointer;
@@ -1159,9 +1116,7 @@ public class PdfGroupingAlgorithms {
                         }
                     }
 
-                    /**
-                     * make sure font not sliced off on first value
-                     */
+                    //make sure font not sliced off on first value
                     if (isFirstValue) {
 
                         isFirstValue = false;
@@ -1169,10 +1124,7 @@ public class PdfGroupingAlgorithms {
                             text.append(Fonts.getActiveFontTag(text.toString(), fragment.getRawData()));
                         }
                     }
-
-                    /**
-                     * we now have a valid value inside the selected area so perform tests
-                     */
+                    
                     //see if a break occurs
                     boolean is_broken = false;
                     if (findLines && fragment.getCharacterSpacing() > 0 && text.toString().endsWith(" ")) {
@@ -1315,11 +1267,14 @@ public class PdfGroupingAlgorithms {
 
             if (ptr > 0) {
                 
-                if(textValue.length()==2){ //Catch for issue 22796.
-                    //This is an estimate, the only other way to achieve this is
-                    //to get the font for each bit of text so we can determine 
-                    //the length of the characters used to be 100% accurate but 
-                    //the font data is not accessible from here.
+                if(textValue.length()==2){ 
+                    /*
+                     * Catch for issue 22796.
+                     * This is an estimate, the only other way to achieve this is
+                     * to get the font for each bit of text so we can determine 
+                     * the length of the characters used to be 100% accurate but 
+                     * the font data is not accessible from here.
+                     */
                     pt += Float.parseFloat(char_width)*0.7;
                 }else{
                     pt += ptr * (Float.parseFloat(char_width) / textValue.length());
@@ -1442,7 +1397,7 @@ public class PdfGroupingAlgorithms {
             return false;
         }
 		
-		/** see if ends with punctuation */
+		//see if ends with punctuation
 		boolean endsWithPunctuation = false;
 		final int textLength = textValue.length();
 		int ii = textLength - 1;
@@ -1535,7 +1490,6 @@ public class PdfGroupingAlgorithms {
 				//no color tag
 			    if(pdf_data.isColorExtracted()&&(!current_text.toString().endsWith(GenericColorSpace.ce))){
 			    	
-			    	//se
 			    	//if ends </font> add </color>
 			    	//otherwise add </font></color>
 			    	if(!current_text.toString().endsWith(Fonts.fe)) {
@@ -1548,7 +1502,6 @@ public class PdfGroupingAlgorithms {
                 }        		    
 			}
 			
-			/***/
 			//add to vacant slot or create new slot
 			int count = f_x1.length;
 			
@@ -1634,7 +1587,7 @@ public class PdfGroupingAlgorithms {
 				
 				nextSlot++;
 
-			} /***/
+			}
 
 		}
 	}
@@ -1682,7 +1635,6 @@ public class PdfGroupingAlgorithms {
 
 	}
 
-	//////////////////////////////////////////////////
 	/**
 	 * get list of unused fragments and put in list and sort in sorted_items
 	 */
@@ -1743,7 +1695,6 @@ public class PdfGroupingAlgorithms {
 		return sorted_items;
 	}
 
-	//////////////////////////////////////////////////////////////////////
 	/**
 	 * create rows of data from preassembled indices, adding separators. Each
 	 * row is built to a temp array and then row created - we don't know how
@@ -1754,42 +1705,28 @@ public class PdfGroupingAlgorithms {
 		final boolean keep_alignment_information,
 		final boolean keep_width_information, final int currentWritingMode) throws PdfException {
 
-		/**
-		 * create local copies of arrays 
-		 */
+		//create local copies of arrays
 		final float[] f_x1;
         final float[] f_x2;
 
-        /**
-         * set pointers so left to right text
-         */
+        //set pointers so left to right text
         switch (currentWritingMode) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
                 f_x1=this.f_x1;
                 f_x2=this.f_x2;
-                //f_y1=this.f_y1;
-                //f_y2=this.f_y2;
                 break;
             case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
                 f_x2=this.f_x1;
                 f_x1=this.f_x2;
-                //f_y1=this.f_y1;
-                //f_y2=this.f_y2;
                 break;
             case PdfData.VERTICAL_BOTTOM_TO_TOP:
                 f_x1=this.f_y2;
                 f_x2=this.f_y1;
-                //f_y1=this.f_x2;
-                //f_y2=this.f_x1;
                 break;
             case PdfData.VERTICAL_TOP_TO_BOTTOM:
                 f_x1=this.f_y1;
                 f_x2=this.f_y2;
-                //f_y2=this.f_x1;
-                //f_y1=this.f_x2;
-                /**
-                 * fiddle x,y co-ords so it works
-                 */
+                //fiddle x,y co-ords so it works
                 
                 //get max size
                 int maxX=0;
@@ -1807,7 +1744,7 @@ public class PdfGroupingAlgorithms {
                 throw new PdfException("Illegal value "+currentWritingMode+"for currentWritingMode");
         }
 
-		int item, i;//, current_col = -1;
+		int item, i;
 
 		int itemsInTable = 0, items_added = 0;
 		//pointer to current element on each row
@@ -1824,9 +1761,7 @@ public class PdfGroupingAlgorithms {
 			empty_cell = "";
 		}
 
-		/**
-		 * set number of items on each line, column count and populate empty rows
-		 */
+		//set number of items on each line, column count and populate empty rows
 		final int[] itemCount = new int[max_rows];
 		for (i = 0; i < max_rows; i++) {
 			itemCount[i] = ((Vector_Int) lines.elementAt(i)).size() - 1;
@@ -1855,9 +1790,7 @@ public class PdfGroupingAlgorithms {
 
 			if (items_added < itemsInTable) {
 
-				/** 
-				 * work out cell x boundaries on basis of objects 
-				 */
+				//work out cell x boundaries on basis of objects
 				for (i = 0; i < max_rows; i++) { //get width for column
 					if (itemCount[i] > currentItem[i]) { //item  id
 						
@@ -1878,9 +1811,7 @@ public class PdfGroupingAlgorithms {
 				cell_x1.addElement(x1); //save left margin
 				x2 = min_x2; //set default right margin
 
-				/**
-				 * workout end and next column start by scanning all items
-				 */
+				//workout end and next column start by scanning all items
 				for (i = 0;i < max_rows;i++) { //slot the next item on each row together work out item
 					item = ((Vector_Int) lines.elementAt(i)).elementAt(currentItem[i]);
 					c_x1 = f_x1[item];
@@ -1911,10 +1842,7 @@ public class PdfGroupingAlgorithms {
                     next_x1 = x2;
                 }
 			
-				/**
-				 * count items in table and workout raw totals for alignment.
-				 * Also work out widest x2 in column
-				 */
+				//Count items in table, workout raw totals for alignment and widest x2 in column.
 				for (i = 0;i < max_rows;i++) { //slot the next item on each row together
 
 					//work out item
@@ -1933,9 +1861,7 @@ public class PdfGroupingAlgorithms {
 					}
 				}
 				
-				/**
-				 * work out gap and include empty space between cols and save
-				 */
+				//work out gap and include empty space between cols and save
 				if (i == 0) {
                     left_gap = x1;
                 }
@@ -1949,7 +1875,7 @@ public class PdfGroupingAlgorithms {
                 
 				widths.addElement(width);
 
-				/** workout the alignment */
+				//workout the alignment
 				final float x1_diff = (total_x1 / items_in_column) - x1;
 				final float x2_diff = x2 - (total_x2 / items_in_column);
 				if (x1_diff < 1) {
@@ -1966,13 +1892,11 @@ public class PdfGroupingAlgorithms {
 						//work out item
 						item =((Vector_Int) lines.elementAt(i)).elementAt(currentItem[i]);
 						c_x1 = f_x1[item];
-						//c_x2 = f_x2[item];
 						all_done = false;
 
 					} else {
 						item = -1;
 						c_x1 = -1;
-						//c_x2 = -1;
 					}
 
 					if ((item == -1) & (items_added <= itemsInTable)) {
@@ -1996,10 +1920,7 @@ public class PdfGroupingAlgorithms {
             }
 		}
 
-		//===================================================================
-		/**
-		 * now assemble rows
-		 */
+		//now assemble rows
 		for (int row = 0; row < max_rows; row++) {
             final StringBuilder line_content = new StringBuilder(100);
 			
@@ -2091,16 +2012,12 @@ public class PdfGroupingAlgorithms {
 	 */
 	private void createLinesInTable(final int itemCount, int[] items, final boolean addSpaceXMLTag, final int mode) throws PdfException {
 
-        /**
-		 * reverse order if text right to left
-		 */
+        //reverse order if text right to left
 		if(mode==PdfData.HORIZONTAL_RIGHT_TO_LEFT) {
             items=reverse(items);
         }
 		
-		/**
-		 * create and populate local copies of arrays
-		 */
+		//create and populate local copies of arrays
 		final float[] f_x1;
         final float[] f_x2;
         final float[] f_y1;
@@ -2272,7 +2189,7 @@ public class PdfGroupingAlgorithms {
 		x2 = v[2];
 		y2 = v[3];
 		
-		/** return the content as an Element */
+		//Return the content as an Element
 		final Map<String, String> table_content = new HashMap<String, String>();
 
 		LogWriter.writeLog("extracting Text As Table");
@@ -2301,28 +2218,19 @@ public class PdfGroupingAlgorithms {
             return table_content;
         }
 		
-		/**
-		 * check orientation and get preferred. Items not correct will
-		 * be ignored
-		 */
+		//check orientation and get preferred. Items not correct will be ignored
 		final int writingMode=getWritingMode(items,item_count);
 
 		final String message ="Table Merging algorithm being applied " + (item_count) + " items";
 		LogWriter.writeLog(message);
 		
-		/**
-		 * scan all items joining best fit to right of each fragment to build
-		 * lines
-		 */
+		//scan all items joining best fit to right of each fragment to build lines
 		if (item_count > 1) {
 
 			//workout the raw lines
 			createLinesInTable(item_count, items,isXHTML,writingMode);
 
-			/**
-			 * generate lookup with lines in correct order (minus used to get
-			 * correct order down the page)
-			 */
+			//generate lookup with lines in correct order (minus used to get correct order down the page)
 			int dx=1;
 			if(writingMode==PdfData.HORIZONTAL_LEFT_TO_RIGHT || writingMode==PdfData.VERTICAL_TOP_TO_BOTTOM) {
                 dx=-1;
@@ -2352,7 +2260,7 @@ public class PdfGroupingAlgorithms {
 
 		if(processed_value!=null){
 			
-//			cleanup data if needed by removing duplicate font tokens
+			//cleanup data if needed by removing duplicate font tokens
 			if (!isCSV) {
                 processed_value = Fonts.cleanupTokens(processed_value);
             }
@@ -2370,16 +2278,7 @@ public class PdfGroupingAlgorithms {
 	/** make sure co-ords valid and throw exception if not */
 	private static int[] validateCoordinates(int x1, int y1, int x2, int y2) {
 		if ((x1 > x2) | (y1 < y2)) {
-
-//			String errorMessage = "Invalid parameters for text rectangle. ";
 			if (x1 > x2){
-//				errorMessage =
-//					errorMessage
-//						+ "x1 value ("
-//						+ x1
-//						+ ") must be LESS than x2 ("
-//						+ x2
-//						+ "). ";
 				final int temp = x1;
 				x1 = x2;
 				x2 = temp;
@@ -2387,19 +2286,11 @@ public class PdfGroupingAlgorithms {
 			}
 			
 			if (y1 < y2){
-//				errorMessage =
-//					errorMessage
-//						+ "y1 value ("
-//						+ y1
-//						+ ") must be MORE than y2 ("
-//						+ y2
-//						+ "). ";
 				final int temp = y1;
 				y1 = y2;
 				y2 = temp;
 				LogWriter.writeLog("y1 < y2, coordinates were swapped to validate");
 			}
-//			throw new PdfException(errorMessage);
 		}
 		return new int[]{x1,y1,x2,y2};
 	}
@@ -2429,14 +2320,14 @@ public class PdfGroupingAlgorithms {
 		final String punctuation)
 		throws PdfException {
 
-		/** make sure co-ords valid and throw exception if not */
+		//make sure co-ords valid and throw exception if not
 		final int[] v = validateCoordinates(x1, y1, x2, y2);
 		x1 = v[0];
 		y1 = v[1];
 		x2 = v[2];
 		y2 = v[3];
 
-		/** extract the raw fragments (Note order or parameters passed) */
+		//extract the raw fragments (Note order or parameters passed)
 		if (breakFragments) {
             copyToArrays(x1, y2, x2, y1, true, true,false,punctuation,true);
         } else {
@@ -2445,7 +2336,7 @@ public class PdfGroupingAlgorithms {
 
 		
 		
-		/** delete any hidden text */
+		//delete any hidden text
 		removeEncoding();
 
 		//eliminate shadows and also merge overlapping text
@@ -2454,28 +2345,20 @@ public class PdfGroupingAlgorithms {
 		final int[] items = getsortedUnusedFragments(true, false);
 		final int count = items.length;
 
-		/**if no values return null
-		 */
+		//if no values return null
 		if(count==0){
 			LogWriter.writeLog("Less than 1 text item on page");
 			
 			return null;
 		}
 		
-		/**
-		 * check orientation and get preferred. Items not correct will
-		 * be ignored
-		 */
+		//check orientation and get preferred. Items not correct will be ignored
 		final int writingMode=getWritingMode(items,count);
 
-			/**
-			 * build set of lines from text
-			 */
+			//build set of lines from text
 			createLines(count, items,writingMode,true,false,false, false);
 
-			/**
-			 * alter co-ords to rotated if requested
-			 */
+			//alter co-ords to rotated if requested
 			float[] f_x1=null,f_x2=null,f_y1=null,f_y2=null;
 
 			if(useUnrotatedCoords || writingMode==PdfData.HORIZONTAL_LEFT_TO_RIGHT){
@@ -2493,7 +2376,6 @@ public class PdfGroupingAlgorithms {
 				f_x2=this.f_y1;
 				f_y1=this.f_x2;
 				f_y2=this.f_x1;
-
 			}else if(writingMode==PdfData.VERTICAL_TOP_TO_BOTTOM){
 				f_x1=this.f_y1;
 				f_x2=this.f_y2;
@@ -2501,14 +2383,12 @@ public class PdfGroupingAlgorithms {
 				f_y1=this.f_x2;
 			}
 
-		/** put into a Vector */
+		//put into a Vector
 		final List<String> values = new ArrayList<String>();
 			
 			for (int i = 0; i < content.length; i++) {
 				if (content[i] != null) {
-
-//					System.out.println(">>>>>"+content[i]);
-
+                    
 					if((colorExtracted)&&(isXMLExtraction)){
 						if(!content[i].toString().toLowerCase().startsWith(GenericColorSpace.cb)){
 							content[i].insert(0,f_colorTag[master]);
@@ -2597,7 +2477,7 @@ public class PdfGroupingAlgorithms {
             throw new PdfException("[PDF] Request to breakfragments and width not added. Please add call to init(true) of PdfDecoder to your code.");
         }
 	
-		/** make sure co-ords valid and throw exception if not */
+		//make sure co-ords valid and throw exception if not
 		final int[] v = validateCoordinates(x1, y1, x2, y2);
 		x1 = v[0];
 		y1 = v[1];
@@ -2607,55 +2487,40 @@ public class PdfGroupingAlgorithms {
 		final int master;
         final int count;
 
-        /** extract the raw fragments (Note order or parameters passed) */
+        //extract the raw fragments (Note order or parameters passed)
 		if (breakFragments) {
             copyToArrays(x1, y2, x2, y1, (isXMLExtraction), false,false,null,false);
         } else {
             copyToArrays();
         }
 		
-		/** 
-		 * delete any hidden text 
-		 */
+		//delete any hidden text
 		removeEncoding();
 		
-		/**
-		* eliminate shadows and also merge overlapping text
-		*/
+		//eliminate shadows and also merge overlapping text
 		cleanupShadowsAndDrownedObjects(false);
 		
-		/** get the fragments as an array */
+		//get the fragments as an array
 		final int[] items = getsortedUnusedFragments(true, false);
 		count = items.length;
 
-		/**if no values return null
-		 */
+		//if no values return null
 		if(count==0){
 			LogWriter.writeLog("Less than 1 text item on page");
 			
 			return null;
 		}
 		
-		/**
-		 * check orientation and get preferred. Items not correct will
-		 * be ignored
-		 */
+		//check orientation and get preferred. Items not correct will be ignored
 		final int writingMode=getWritingMode(items,count);
 			
-			/**
-			 * build set of lines from text
-			 */
+			//build set of lines from text
 			createLines(count, items,writingMode,false,isXMLExtraction,false, false);
 
-        /**
-               * roll lines together
-               */
-			
+            //roll lines together
 			master = mergeLinesTogether(writingMode,estimateParagraphs,x1,x2,y1,y2);
 
-			/**
-			 * add final deliminators 
-			 */
+			//add final deliminators
 			if(isXMLExtraction){
 				content[master] =new StringBuilder(Fonts.cleanupTokens(content[master].toString()));
 				content[master].insert(0,"<p>");
@@ -2675,27 +2540,6 @@ public class PdfGroupingAlgorithms {
             return buffer;
         }
 
-         /**
-        if(PdfDecoder.inDemo){
-            int icount=buffer.length(),count=0;
-            boolean inToken=false;
-            for(int i=0;i<icount;i++){
-                char c=buffer.charAt(i);
-                if(c=='<')
-                    inToken=true;
-                else if(c=='>')
-                    inToken=false;
-                else if((c!=' ')&&(!inToken)){
-                    count++;
-                    if(count>4){
-                        count=0;
-                        buffer.setCharAt(i,'1');
-                    }
-                }
-            }
-		}
-		/**/
-
         //sort out & to &amp;
         if(isXMLExtraction){
             String buf=buffer.toString();
@@ -2714,39 +2558,39 @@ public class PdfGroupingAlgorithms {
             final boolean removeInvalidXMLValues = true;
             if (removeInvalidXMLValues) {
             
-	            /**
+	            /*
 				 * Restricted Char ::=
 				 *	[#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
 				 *  [#x1-#x8] | [#x11-#x12] | [#x14-#x31] | [#x127-#x132] | [#x134-#x159]
 				 */
 			
-				/** set mappings */
+				//set mappings
 				final Map<String, String> asciiMappings = new HashMap<String, String>();
-				/** [#x1-#x8] */
+				//[#x1-#x8]
 				for (int i = 1; i <= 8; i++) {
                     asciiMappings.put("&#" + i + ';', "");
                 }
 				
-				/** [#x11-#x12] */
+				//[#x11-#x12]
 				for (int i = 11; i <= 12; i++) {
                     asciiMappings.put("&#" + i + ';', "");
                 }
 				
-				/** [#x14-#x31] */
+				//[#x14-#x31]
 				for (int i = 14; i <= 31; i++) {
                     asciiMappings.put("&#" + i + ';', "");
                 }
 				
-				/** [#x127-#x132] */
+				//[#x127-#x132]
 				//for (int i = 127; i <= 132; i++)
 					//asciiMappings.put("&#" + i + ";", "");
 				
-				/** [#x134-#x159] */
+				//[#x134-#x159]
 				//for (int i = 134; i <= 159; i++)
 					//asciiMappings.put("&#" + i + ";", "");
 				
 				
-				/** substitute illegal XML characters for mapped values */
+				//substitute illegal XML characters for mapped values
                 for (final Object o : asciiMappings.keySet()) {
                     final String character = (String) o;
                     final String mappedCharacter = asciiMappings.get(character);
@@ -2783,32 +2627,6 @@ public class PdfGroupingAlgorithms {
         }
         
         return mode;
-        
-//        /**
-//         * get first value
-//         */
-//        int orientation=writingMode[items[0]];
-//
-//        //exit if first is horizontal
-//        if(orientation==PdfData.HORIZONTAL_LEFT_TO_RIGHT || orientation==PdfData.HORIZONTAL_RIGHT_TO_LEFT) {
-//            return orientation;
-//        }
-//
-//        /**
-//         * scan items looking at orientation - exit if we find horizontal
-//         */
-//        for (int j = 1; j < count; j++) {
-//
-//            final int c=items[j];
-//
-//            if ((!isUsed[c]) && (writingMode[c]==PdfData.HORIZONTAL_LEFT_TO_RIGHT || writingMode[c]==PdfData.HORIZONTAL_RIGHT_TO_LEFT)){
-//                    orientation=writingMode[c];
-//                    j=count;
-//                    LogWriter.writeLog("Text of multiple orientations found. Only horizontal text used.");
-//                }
-//            }
-//      
-//        return orientation;
     }
 
 	/**
@@ -2825,9 +2643,7 @@ public class PdfGroupingAlgorithms {
 		//used for working out alignment
 		final int middlePage;
 		
-		/**
-		 * create local copies of 
-		 */
+		//create local copies of 
 		final float[] f_x1;
         final float[] f_x2;
         final float[] f_y1;
@@ -2874,9 +2690,7 @@ public class PdfGroupingAlgorithms {
 		final int count = indices.length;
 		final int master = indices[count - 1];
 	
-		/**
-		 * now loop through all lines merging
-		 */
+		//now loop through all lines merging
         int ClastChar,MlastChar,CFirstChar;
 
 		for (int i = count - 2; i > -1; i--) {
@@ -2884,9 +2698,6 @@ public class PdfGroupingAlgorithms {
 			final int child = indices[i];
 			separator = new StringBuilder();
 			
-				/** add formatting in to retain structure */
-				//text to see if lasts ends with . and next starts with capital
-
 				//-1 if no chars
 				ClastChar=getLastChar(content[child]);
 				
@@ -3150,24 +2961,18 @@ public class PdfGroupingAlgorithms {
 
 		final boolean debug=false;
 
-		/**
-		 * create local copies of arrays 
-		 */
+		//create local copies of arrays
 		final float[] f_x1;
         final float[] f_x2;
         final float[] f_y1;
         final float[] f_y2;
 
-        /**
-		 * reverse order if text right to left
-		 */
+        //reverse order if text right to left
 		if(mode==PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode==PdfData.VERTICAL_TOP_TO_BOTTOM) {
             items=reverse(items);
         }
 
-        /**
-         * set pointers so left to right text
-         */
+        //set pointers so left to right text
         switch (mode) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
                 f_x1=this.f_x1;
@@ -3197,160 +3002,87 @@ public class PdfGroupingAlgorithms {
                 throw new PdfException("Illegal value "+mode+"for currentWritingMode");
         }
         
-		/**
-		 * scan items joining best fit to right of each fragment to build
-		 * lines. This is tedious and processor intensive but necessary as the
-		 * order cannot be guaranteed
-		 */
+		//scan items joining best fit to right of each fragment to build lines.
 		for (int j = 0; j < count; j++) {
 			    
 			int id = -1, i;
 			final int c=items[j];
 			
 			//float smallest_gap = -1, gap, yMidPt;
-			if(!isUsed[c] && this.writingMode[c]==mode) {
-				
-				if(debug) {
-                    System.out.println("Look for match with "+removeHiddenMarkers(content[c].toString()));
+			if (!isUsed[c] && this.writingMode[c] == mode) {
+
+                if (debug) {
+                    System.out.println("Look for match with " + removeHiddenMarkers(content[c].toString()));
                 }
-                        
-					for (int j2 = 0; j2 < count && id==-1; j2++) {
-                        //System.out.println("j2=="+j2);
-						i=items[j2];
 
-						if(!isUsed[i] && c!=i && this.writingMode[c]==this.writingMode[i] && f_x1[i]!=f_x2[i]){
+                for (int j2 = 0; j2 < count && id == -1; j2++) {
 
-							//amount of variation in bottom of text
-							//int baseLineDifference = (int) (f_y2[i] - f_y2[c]);
-							//if (baseLineDifference < 0) {
-                                //baseLineDifference = -baseLineDifference;
-                            //}
-							
-							//amount of variation in bottom of text
-							//int topLineDifference = (int) (f_y1[i] - f_y1[c]);
-							//if (topLineDifference < 0) {
-                                //topLineDifference = -topLineDifference;
-                            //}
+                    i = items[j2];
 
-							// line gap
-							//int lineGap = (int) (f_x1[i] - f_x2[c]);
-							
-							//Check if fragments are closer from the other end
-							//if(!isSearch && lineGap>(int) (f_x1[c] - f_x2[i])) {
-                              //  lineGap = (int) (f_x1[c] - f_x2[i]);
-                            //}
-							
-							//int fontSizeChange=fontSize[c]-fontSize[i];
-							//if(fontSizeChange<0) {
-                                //fontSizeChange=-fontSizeChange;
-                            //}
-                            
-                            //Get central points
-                            float mx = f_x1[c] + ((f_x2[c] - f_x1[c])/2);
-                            float my = f_y2[c] + ((f_y1[c] - f_y2[c])/2);
-                            float cx = f_x1[i] + ((f_x2[i] - f_x1[i])/2);
-                            float cy = f_y2[i] + ((f_y1[i] - f_y2[i])/2);
-                            
-                            float smallestHeight = (f_y1[c] - f_y2[c]);
-                            float fontDifference = (f_y1[i] - f_y2[i])-smallestHeight;
-                            if(fontDifference<0){
-                                smallestHeight = (f_y1[i] - f_y2[i]);
-                            }
-                            
-                            //Don't merge is font of 1 is twice the size
-                            if(Math.abs(fontDifference)<smallestHeight*2){
+                    if (!isUsed[i] && c != i && this.writingMode[c] == this.writingMode[i] && f_x1[i] != f_x2[i]) {
+
+                        //Get central points
+                        float mx = f_x1[c] + ((f_x2[c] - f_x1[c]) / 2);
+                        float my = f_y2[c] + ((f_y1[c] - f_y2[c]) / 2);
+                        float cx = f_x1[i] + ((f_x2[i] - f_x1[i]) / 2);
+                        float cy = f_y2[i] + ((f_y1[i] - f_y2[i]) / 2);
+
+                        float smallestHeight = (f_y1[c] - f_y2[c]);
+                        float fontDifference = (f_y1[i] - f_y2[i]) - smallestHeight;
+                        if (fontDifference < 0) {
+                            smallestHeight = (f_y1[i] - f_y2[i]);
+                        }
+
+                        //Don't merge is font of 1 is twice the size
+                        if (Math.abs(fontDifference) < smallestHeight * 2) {
                                 //Check for the same line by checking the center of 
-                                //child is within master area
-                                if(Math.abs(my-cy)<(smallestHeight*0.5)){
-                                    if(mx<cx){//Child on right
-                                        //System.out.println("distance : "+f_x1[c]+", "+f_x2[c]+" :: "+f_x1[i]+", "+f_x2[i]);
-                                        float distance = f_x1[i]-f_x2[c];
-                                        //System.out.println("distance : "+distance);
-                                        if(distance<=smallestHeight/2){
-                                            id = i;
-                                        }
+                            //child is within master area
+                            if (Math.abs(my - cy) < (smallestHeight * 0.5)) {
+                                if (mx < cx) {//Child on right
+                                    float distance = f_x1[i] - f_x2[c];
+                                    if (distance <= smallestHeight / 2) {
+                                        id = i;
                                     }
-//                                else{//Child on left
-//                                    float distance = f_x1[c]-f_x2[i];
-//                                    if(distance<=smallestHeight/4){
-//                                        id = i;
-//                                    }
-//                                }
                                 }
                             }
-                            //Match has been found
-                            if(id!=-1){
-                                
-                                float possSpace=f_x1[id]-f_x2[c];					
-                                if(mode==PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode==PdfData.VERTICAL_TOP_TO_BOTTOM) {
-                                    possSpace=-possSpace;
-                                }
-//                                else{
-//                                	if(mode==PdfData.VERTICAL_BOTTOM_TO_TOP) {
-//                                		possSpace=(f_x2[c]-f_x1[id]);
-//                                	}
-//                                }
-                        
-                                //add space if gap between this and last object
-                                separator =isGapASpace(c,id,possSpace,addMultiplespaceXMLTag,mode);
-					
-                                /** merge if adjoin */
-                                if ((breakOnSpace)&&(hadSpace!=null)&&((hadSpace[c])||(separator.startsWith(" ")))) {
-                                    break;
-                                }
-                                //System.out.println("c=="+c);
-                                //System.out.println("id=="+id);
-                                if (debug) {
-                                    System.out.println("Merge items "+c+" & "+id);
-                                    System.out.println("c  : "+removeHiddenMarkers(content[c].toString()));
-                                    System.out.println("id : "+removeHiddenMarkers(content[id].toString()));
-                                    System.out.println("");
-                                }
-                                if ((isSearch && (i!=c && 
-									((f_x1[i] > f_x1[c] && mode!=PdfData.VERTICAL_TOP_TO_BOTTOM) ||
-									(f_x1[i] < f_x1[c] && mode==PdfData.VERTICAL_TOP_TO_BOTTOM) && 
-									writingMode[c]==mode)))
-									||
-									(!isSearch && (i!=c &&((f_x1[i] > f_x1[c] && mode!=PdfData.VERTICAL_TOP_TO_BOTTOM)||
-									f_x1[i] < f_x1[c] && mode==PdfData.VERTICAL_TOP_TO_BOTTOM && writingMode[c]==mode
-									)))
-									) { //see if on right
-                                merge(c,id,separator,true);
-                                }
-                    
-                                id = -1;
+                        }
+                        //Match has been found
+                        if (id != -1) {
+
+                            float possSpace = f_x1[id] - f_x2[c];
+                            if (mode == PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode == PdfData.VERTICAL_TOP_TO_BOTTOM) {
+                                possSpace = -possSpace;
                             }
-						}
-					}
 
-//					//merge on next right item or exit when no more matches
-//					if (id == -1) {
-//                        break;
-//                    }
-//
-//					float possSpace=f_x1[id]-f_x2[c];					
-//				    if(mode==PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode==PdfData.VERTICAL_TOP_TO_BOTTOM) {
-//                        possSpace=-possSpace;
-//                    } else if(mode==PdfData.VERTICAL_BOTTOM_TO_TOP) {
-//                        possSpace=(f_x2[id]-f_x1[c]);
-//                    }
-//                        
-//					//add space if gap between this and last object
-//					separator =isGapASpace(c,id,possSpace,addMultiplespaceXMLTag,mode);
-//					
-//					/** merge if adjoin */
-//					if ((breakOnSpace)&&(hadSpace!=null)&&((hadSpace[c])||(separator.startsWith(" ")))) {
-//                        break;
-//                    }
-//					
-//					merge(c,id,separator,true);
+                            //add space if gap between this and last object
+                            separator = isGapASpace(c, id, possSpace, addMultiplespaceXMLTag, mode);
 
+                            //merge if adjoin
+                            if ((breakOnSpace) && (hadSpace != null) && ((hadSpace[c]) || (separator.startsWith(" ")))) {
+                                break;
+                            }
 
+                            if (debug) {
+                                System.out.println("Merge items " + c + " & " + id);
+                                System.out.println("c  : " + removeHiddenMarkers(content[c].toString()));
+                                System.out.println("id : " + removeHiddenMarkers(content[id].toString()));
+                                System.out.println("");
+                            }
 
-					//id = -1; //reset
-					//smallest_gap = 1000000; //and reset the gap
+                            if ((isSearch && (i != c
+                                    && ((f_x1[i] > f_x1[c] && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
+                                    || (f_x1[i] < f_x1[c] && mode == PdfData.VERTICAL_TOP_TO_BOTTOM)
+                                    && writingMode[c] == mode)))
+                                    || (!isSearch && (i != c && ((f_x1[i] > f_x1[c] && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
+                                    || f_x1[i] < f_x1[c] && mode == PdfData.VERTICAL_TOP_TO_BOTTOM && writingMode[c] == mode)))) { //see if on right
+                                merge(c, id, separator, true);
+                            }
 
-			}
+                            id = -1;
+                        }
+                    }
+                }
+            }
 		}
 	}
     
@@ -3363,24 +3095,18 @@ public class PdfGroupingAlgorithms {
 
 		final boolean debug=false;
 
-		/**
-		 * create local copies of arrays 
-		 */
+		//create local copies of arrays
 		final float[] f_x1;
         final float[] f_x2;
         final float[] f_y1;
         final float[] f_y2;
 
-        /**
-		 * reverse order if text right to left
-		 */
+        //reverse order if text right to left
 		if(mode==PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode==PdfData.VERTICAL_TOP_TO_BOTTOM) {
             items=reverse(items);
         }
 
-        /**
-         * set pointers so left to right text
-         */
+        //set pointers so left to right text
         switch (mode) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
                 f_x1=this.f_x1;
@@ -3410,11 +3136,7 @@ public class PdfGroupingAlgorithms {
                 throw new PdfException("Illegal value "+mode+"for currentWritingMode");
         }
 
-		/**
-		 * scan items joining best fit to right of each fragment to build
-		 * lines. This is tedious and processor intensive but necessary as the
-		 * order cannot be guaranteed
-		 */
+		//Scan items joining best fit to right of each fragment to build lines.
 		for (int j = 0; j < count; j++) {
 			
 			int id = -1, i;
@@ -3467,12 +3189,6 @@ public class PdfGroupingAlgorithms {
 
 								if(debug) {
                                     System.out.println("case1 lineGap="+lineGap);
-//							//Case removed as it broke one file and had no effect on other files
-//							}else if (sameLineOnly && (lineGap > (fontSize[c]*10)|| lineGap > (fontSize[i]*10)) ) { //JUMP IN TEXT SIZE ACROSS COL
-//								//ignore
-//
-//								if(debug)
-//									System.out.println("case2");
                                 }		
                             }else if (sameLineOnly && baseLineDifference > 1 && lineGap > 2 * fontSize[c] && (fontSize[c] == fontSize[i])) { //TEXT SLIGHTLY OFFSET
 								//ignore
@@ -3545,7 +3261,7 @@ public class PdfGroupingAlgorithms {
 					//add space if gap between this and last object
 					separator =isGapASpace(c,id,possSpace,addMultiplespaceXMLTag,mode);
 					
-					/** merge if adjoin */
+					//merge if adjoin
 					if ((breakOnSpace) &&
                             (((hadSpace!=null)&&((hadSpace[c])||(separator.startsWith(" ")))) ||
                             (!separator.isEmpty()))) {
@@ -3698,32 +3414,6 @@ public class PdfGroupingAlgorithms {
 
                             return -1; // the second word is above the first, so pick the second
                     }
-
-
-                    //Orginal code kept incase of mistake.
-//					if (rotation == 0 || rotation == 180) {
-//						if (r1.y == r2.y) { // the two words on on the same level so pick the one on the left
-//							if (r1.x > r2.x)
-//								return 1;
-//							else
-//								return -1;
-//						} else if (r1.y > r2.y) { // the first word is above the second, so pick the first
-//							return -1;
-//						}
-//
-//						return 1; // the second word is above the first, so pick the second
-//					}
-//					else { // rotation == 90 or 270
-//						if (r1.x == r2.x) { // the two words on on the same level so pick the one on the left
-//							if (r1.y > r2.y)
-//								return 1;
-//							else
-//								return -1;
-//						} else if (r1.x > r2.x) // the first word is above the second, so pick the first
-//							return 1;
-//
-//						return -1; // the second word is above the first, so pick the second
-//					}
                 }
             }
 			return -1; // the second word is above the first, so pick the second
@@ -3742,8 +3432,7 @@ public class PdfGroupingAlgorithms {
 	 * @param terms the terms to search for
 	 * @param searchType searchType the search type made up from one or more constants obtained from the SearchType class
 	 * @param listener an implementation of SearchListener is required, this is to enable searching to be cancelled
-	 * @return a SortedMap containing a collection of Rectangle describing the location of found text, mapped to a String
-	 * which is the matching teaser 
+	 * @return a SortedMap containing a collection of Rectangle describing the location of found text, mapped to a String which is the matching teaser 
 	 * @throws PdfException If the co-ordinates are not valid
 	 */
 	public SortedMap findMultipleTermsInRectangleWithMatchingTeasers(final int x1, final int y1, final int x2, final int y2, final int rotation,
@@ -3763,7 +3452,7 @@ public class PdfGroupingAlgorithms {
 		
 		for (int i = 0; i < highlights.size(); i++) {
 
-			/*highlights.get(i) is a rectangle or a rectangle[]*/
+			//highlights.get(i) is a rectangle or a rectangle[]
 			highlightsWithTeasers.put(highlights.get(i),  multipleTermTeasers.get(i));
 		}
 
@@ -3807,7 +3496,7 @@ public class PdfGroupingAlgorithms {
 		
 		for (int i = 0; i < highlights.size(); i++) {
 
-			/*highlights.get(i) is a rectangle or a rectangle[]*/
+			//highlights.get(i) is a rectangle or a rectangle[]
 			highlightsWithTeasers.put(highlights.get(i),  multipleTermTeasers.get(i));
 		}
 
@@ -3860,7 +3549,6 @@ public class PdfGroupingAlgorithms {
 
         for (final String term : terms) {
             if (listener != null && listener.isCanceled()) {
-//				System.out.println("RETURNING EARLY");
                 break;
             }
 
@@ -3912,7 +3600,6 @@ public class PdfGroupingAlgorithms {
 
         for (final String term : terms) {
             if (listener != null && listener.isCanceled()) {
-//				System.out.println("RETURNING EARLY");
                 break;
             }
 
@@ -4090,8 +3777,8 @@ public class PdfGroupingAlgorithms {
 		return textValue;
 	}
 
-	/**return text teasers from findtext if generateTeasers() called  
-	 * before find
+	/**
+     * return text teasers from findtext if generateTeasers() called before find
 	 */
 	public String[] getTeasers() {
 		
@@ -4125,10 +3812,7 @@ public class PdfGroupingAlgorithms {
     
     private int[] getWritingModeCounts(int[] items){
         
-		/**
-		 * check orientation and get preferred. Items not correct will be
-		 * ignored
-		 */
+		//check orientation and get preferred. Items not correct will be ignored
 		int l2r = 0;
 		int r2l = 0;
 		int t2b = 0;
@@ -4322,7 +4006,7 @@ public class PdfGroupingAlgorithms {
 
                     getResultCoords(coordsText, mode, resultStart, termStarts, termEnds, valuesSwapped, resultCoords);
 
-						//If only finding first occurance,
+                    //If only finding first occurance,
                     //Stop searching this text data for search term.
                     if (firstOccuranceOnly) {
                         foundFirst = true;
@@ -4330,7 +4014,7 @@ public class PdfGroupingAlgorithms {
                     }
                 }
 
-							//If only finding first occurance and first is found,
+				//If only finding first occurance and first is found,
                 //Stop searching all text data for this search term.
                 if (firstOccuranceOnly && foundFirst) {
                     break;
@@ -4395,7 +4079,7 @@ public class PdfGroupingAlgorithms {
         boolean startFound = false;
         boolean endFound = false;
 
-						//Cycle through coord text looking for coords of this result
+		//Cycle through coord text looking for coords of this result
         //Ignore first value as it is known to be the first marker
         for (int pointer = 1; pointer < coordText.length(); pointer++) {
 
@@ -4440,7 +4124,7 @@ public class PdfGroupingAlgorithms {
             final String text = coordText.substring(startPointer, pointer);
             pointInLine += text.length();
 
-									//Start of term not found yet.
+			//Start of term not found yet.
             //Point in line is equal to or greater than start of the term.
             //Store coords and mark start as found.
             if (!startFound && pointInLine >= termStarts) {
@@ -4451,7 +4135,8 @@ public class PdfGroupingAlgorithms {
                 resultStart = new int[]{(int) currentX, currentY};
                 startFound = true;
             }
-            						//End of term not found yet.
+            
+            //End of term not found yet.
             //Point in line is equal to or greater than end of the term.
             //Store coords and mark end as found.
             if (!endFound && pointInLine >= termEnds) {
@@ -4464,7 +4149,7 @@ public class PdfGroupingAlgorithms {
                 endFound = true;
             }
 
-							//Using multi line option.
+			//Using multi line option.
             //Start of term found.
             //End of term not found.
             //New line character found.
@@ -4476,13 +4161,13 @@ public class PdfGroupingAlgorithms {
                 //Set start of term as not found
                 startFound = false;
 
-										//Set this point in line as start of next term
+				//Set this point in line as start of next term
                 //Guarantees next character is found as 
                 //start of the next part of the search term
                 termStarts = pointInLine;
             }
 
-									//In multiline mode we progress the line number when we find a \n
+			//In multiline mode we progress the line number when we find a \n
             //This is to allow the correct calculation of y coords
             if (text.contains("\n")) {
                 lineCounter++;
@@ -4503,7 +4188,7 @@ public class PdfGroupingAlgorithms {
 
         //Store teasers so they can be retrieved by different search methods
         if (usingMultipleTerms) {
-						//Store all teasers for so they may be returned as a sorted map
+			//Store all teasers for so they may be returned as a sorted map
             //Only used for one method controled by the above flag
             for (int i = 0; i != resultTeasers.size(); i++) {
                 multipleTermTeasers.add(resultTeasers.elementAt(i));

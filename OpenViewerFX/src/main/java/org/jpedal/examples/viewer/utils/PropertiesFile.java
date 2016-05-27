@@ -204,6 +204,7 @@ public class PropertiesFile {
       "Show the bookmarks tab, when applicable, on the side tab bar","Bookmarkstab", "true",
       "Show the layers tab, when applicable, on the side tab bar","Layerstab", "true",
       "Show the signatures tab, when applicable, on the side tab bar","Signaturestab", "true",
+      "Show the annotations tab, when applicable, on the side tab bar","AnnotationTab", "false",
         "ENDCHILDREN",
       "This removes the menu bar entirely if set to false","ShowMenubar", "true",
       "This removes the button bar entirely if set to false","ShowButtons", "true",
@@ -795,7 +796,7 @@ public class PropertiesFile {
                     }else{
                         
                         //Is it running in the IDE
-                        if(properties[position+1].equals("7.0.29")){
+                        if(properties[position+1].equals("7.1.27")){
                             //Do nothing as we are in the IDE
                             //Refactor for testing purposes
                             //refactorProperties  = true;

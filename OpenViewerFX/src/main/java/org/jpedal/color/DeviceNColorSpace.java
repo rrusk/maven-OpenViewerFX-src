@@ -185,7 +185,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage(final byte[] data, final int ww, final int hh, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int ww, final int hh, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
         
         BufferedImage image=null;
         
@@ -266,5 +266,29 @@ public class DeviceNColorSpace extends SeparationColorSpace {
         image.setData(raster);
         
         return image;
+    }
+    
+    public byte[] getRGBBytes(final byte[] rawData,final int w, final int h) {             
+        final byte[] rgb=new byte[w*h*3];        
+        final int bytesCount=rawData.length;
+        final int byteCount= rawData.length/componentCount;
+        final float[] values=new float[componentCount];
+        int j=0,j2=0;
+        for(int i=0;i<byteCount;i++){
+            if(j>=bytesCount) {
+                break;
+            }
+            for(int comp=0;comp<componentCount;comp++){
+                values[comp]=((rawData[j] & 255)/255f);
+                j++;
+            }
+            setColor(values,componentCount);
+            final int foreground =altCS.currentColor.getRGB();
+            rgb[j2]=(byte) ((foreground>>16) & 0xFF);
+            rgb[j2+1]=(byte) ((foreground>>8) & 0xFF);
+            rgb[j2+2]=(byte) ((foreground) & 0xFF);
+            j2 += 3;            
+        }
+        return rgb;
     }
 }

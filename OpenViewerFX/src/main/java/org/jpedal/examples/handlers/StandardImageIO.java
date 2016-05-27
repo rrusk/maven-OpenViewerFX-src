@@ -173,15 +173,13 @@ public class StandardImageIO implements ImageHelper {
      * @param data  (binary data for image file - PNG, TIF, JPEG)
      * @param w   image width in pixels
      * @param h   image height in pixels
-     * @param decodeArray PDF object value showing min/max with 1 paired valued per channel (ie [0 1 0 1 0 1 0 1]
-     *                    can be float range 0-1 or int 0 -255). if 1 0 invert the value
      * @param pX  sensible image width in pixels (ie what we should downscale to)
      * @param pY  sensible image height in pixels (ie what we should downscale to)
      * @return
      * @throws PdfException
      */
     @Override
-    public BufferedImage JPEG2000ToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY) throws PdfException {
+    public BufferedImage JPEG2000ToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY) throws PdfException {
 
         return null;
     }

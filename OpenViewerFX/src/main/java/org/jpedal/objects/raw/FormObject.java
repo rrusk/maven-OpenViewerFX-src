@@ -200,7 +200,7 @@ public class FormObject extends PdfObject{
     
     protected Rectangle BBox;
 
-    protected float[] C,IC,QuadPoints,RD,Rect;
+    protected float[] C,IC,QuadPoints,RD,Rect,L,Vertices;
 
 	protected boolean[] flags;
 
@@ -1193,7 +1193,13 @@ public class FormObject extends PdfObject{
 
         case PdfDictionary.RD:
         	return RD;
-
+            
+        case PdfDictionary.L:
+            return L;
+              
+        case PdfDictionary.Vertices:
+            return Vertices;
+            
             default:
             	return super.getFloatArray(id);
 
@@ -1225,6 +1231,14 @@ public class FormObject extends PdfObject{
                     Rect=value;
 	        break;
 
+	        case PdfDictionary.L:
+                    L=value;
+	        break;
+              
+            case PdfDictionary.Vertices:
+                Vertices=value;
+            break;
+            
             default:
             	super.setFloatArray(id, value);
         }

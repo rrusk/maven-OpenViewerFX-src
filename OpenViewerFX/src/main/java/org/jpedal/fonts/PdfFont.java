@@ -454,7 +454,6 @@ public class PdfFont implements Serializable {
             enc=StandardFonts.SYMBOL;
         }
         
-        /**save encoding */
         fontEnc=enc;
         
         StandardFonts.checkLoaded(enc);
@@ -512,7 +511,6 @@ public class PdfFont implements Serializable {
         
         String return_value = null;
         
-        /***/
         if(isCIDFont){
             
             //	test for unicode
@@ -591,7 +589,7 @@ public class PdfFont implements Serializable {
             stream=currentPdfFile.readStream(Encoding,true,true,false, false,false, Encoding.getCacheName(currentPdfFile.getObjectReader()));
             encodingName=CMapName;
             
-            /**
+            /*
              * tidy up stream so it works nicely with
              * our simple Parser
              */
@@ -608,7 +606,7 @@ public class PdfFont implements Serializable {
         
         //System.out.println("Name="+encodingName+" "+encodingType);
         
-        /**allow for odd file created by SAP*/
+        /*allow for odd file created by SAP*/
         //baseline_screens/idoq/UAT 9001001438 INV_I58234.pdf
         
         if(!isIdentity && fontObject!=null){
@@ -627,12 +625,12 @@ public class PdfFont implements Serializable {
         //isSingleByte=true;
         //}
         
-        /**put encoding in lookup table*/
+        /* put encoding in lookup table*/
         if(CIDstream==null) {
             CIDfontEncoding=encodingName;
         }
         
-        /** if not 2 standard encodings
+        /* if not 2 standard encodings
          * 	load CMAP
          */
         if(isIdentity){
@@ -840,7 +838,11 @@ public class PdfFont implements Serializable {
         if (mapped_char != null) { //convert name into character
             
             // First check if the char has been mapped specifically for this
-            String char_mapping =StandardFonts.getUnicodeName(this.fontEnc +mapped_char);
+            String char_mapping =null;
+            
+            if(this.fontEnc!=-1){ //ignore if no encoding set
+                StandardFonts.getUnicodeName(this.fontEnc +mapped_char);
+            }
             
             if (char_mapping != null) {
                 return_value = char_mapping;
@@ -941,13 +943,6 @@ public class PdfFont implements Serializable {
         return new Font(glyphs.font_family_name, glyphs.style, size);
         
     }
-    
-    /**
-     * reset font handle
-     *
-     public final void unsetUnscaledFont() {
-     unscaledFont=null;
-     }*/
     
     /**
      * get font name as a string from ID (ie Tf /F1) and load if one of Adobe 14
@@ -1109,7 +1104,6 @@ public class PdfFont implements Serializable {
         
         String CMapName=null;
         
-        /**read encoding values*/
         final PdfObject Encoding=pdfObject.getDictionary(PdfDictionary.Encoding);
         if(Encoding!=null){
             CMapName=handleCIDEncoding(Encoding, pdfObject);
@@ -1123,7 +1117,6 @@ public class PdfFont implements Serializable {
             hasDoubleBytes=uniReader.hasDoubleByteValues();
         }
         
-        /**read widths*/
         //@speed may need optimising - done as string for moment
         String widths=Descendent.getName(PdfDictionary.W);
 
@@ -1138,7 +1131,6 @@ public class PdfFont implements Serializable {
             setCIDFontWidths(widths);
         }
         
-        /**set default width*/
         final int Width=Descendent.getInt(PdfDictionary.DW);
         if(Width>=0) {
             defaultWidth=(Width)/1000f;
@@ -1158,7 +1150,6 @@ public class PdfFont implements Serializable {
         
         final PdfObject FontDescriptor = Descendent.getDictionary(PdfDictionary.FontDescriptor);
         
-        /**set CIDtoGIDMap*/
         final PdfObject CIDToGID=Descendent.getDictionary(PdfDictionary.CIDToGIDMap);
         if(CIDToGID!=null){
             final byte[] stream=currentPdfFile.readStream(CIDToGID,true,true,false, false,false, null);
@@ -1315,9 +1306,7 @@ public class PdfFont implements Serializable {
         //generic setup
         init(fontID, renderPage);
         
-        /**
-         * get FontDescriptor object - if present contains metrics on glyphs
-         */
+        // get FontDescriptor object - if present contains metrics on glyphs
         final PdfObject pdfFontDescriptor=pdfObject.getDictionary(PdfDictionary.FontDescriptor);
         
         setName(pdfObject);
@@ -1326,10 +1315,7 @@ public class PdfFont implements Serializable {
     }
     
     protected void setName(final PdfObject pdfObject) {
-        
-        /**
-         * get name of font
-         */
+
         // Get fontName
         String baseFontName= pdfObject.getName(PdfDictionary.BaseFont);
         if(baseFontName==null) {
@@ -1348,9 +1334,7 @@ public class PdfFont implements Serializable {
         objID = pdfObject.getObjectRefID();
         glyphs.setObjID(objID);
 
-        /**
-         * get name less any suffix (needs abcdef+ removed from start)
-         **/
+        // get name less any suffix (needs abcdef+ removed from start)
         truncatedName= pdfObject.getStringValue(PdfDictionary.BaseFont, PdfDictionary.REMOVEPOSTSCRIPTPREFIX);
         if(truncatedName==null) {
             truncatedName= pdfObject.getStringValue(PdfDictionary.FontName, PdfDictionary.REMOVEPOSTSCRIPTPREFIX);
@@ -1417,11 +1401,14 @@ public class PdfFont implements Serializable {
             
         }
     }
+
+    private float descent;
+    public float getDescent() {
+        return descent;
+    }
     
     protected void setBoundsAndMatrix(final PdfObject pdfFontDescriptor) {
-        /**
-         * get any dimensions if present
-         */
+
         if(pdfFontDescriptor!=null){
             final double[] newFontmatrix=pdfFontDescriptor.getDoubleArray(PdfDictionary.FontMatrix);
             if(newFontmatrix!=null) {
@@ -1437,12 +1424,12 @@ public class PdfFont implements Serializable {
 //            if(value!=0)
 //                ascent=value;
 //
-//            value=pdfFontDescriptor.getFloatNumber(PdfDictionary.Descent);
+            descent = pdfFontDescriptor.getFloatNumber(PdfDictionary.Descent);
 //            if(value!=0)
 //                descent=value;
+            } else {
+                descent = 0;
             }
-            
-            
         }
     }
     
@@ -1497,7 +1484,7 @@ public class PdfFont implements Serializable {
         }
         
         
-        /**
+        /*
          * handle differences from main encoding
          */
         final PdfArrayIterator Diffs=Encoding.getMixedArray(PdfDictionary.Differences);
@@ -1607,9 +1594,6 @@ public class PdfFont implements Serializable {
             }
         }
         
-        /**
-         * setup Encoding
-         */
         int EncodingType=PdfDictionary.Unknown;
         
         if(Encoding!=null){
@@ -1868,7 +1852,7 @@ public class PdfFont implements Serializable {
      */
     public Rectangle getBoundingBox() {
         
-        if(BBox==null){
+//        if(BBox==null){
             //if one of standard fonts, use value from afm file
             final float[] standardBB=StandardFonts.getFontBounds(getFontName());
             
@@ -1881,7 +1865,7 @@ public class PdfFont implements Serializable {
             }else {
                 BBox=new Rectangle((int)(standardBB[0]),(int)(standardBB[1]),(int)(standardBB[2]-standardBB[0]),(int)(standardBB[3]-standardBB[1]));
             }
-        }
+//        }
         
         return BBox;
     }

@@ -113,7 +113,7 @@ public class JavaFXPreferences {
         }
     }
 
-    /**
+    /*
      * Declare Objects for General Menu.
      */
     private static TextField resolutionTF;
@@ -124,7 +124,7 @@ public class JavaFXPreferences {
     private static CheckBox openDocCB;
     private static Button clearRecentDocsBtn;
 
-    /**
+    /*
      * Declare Objects for Page Layout Menu.
      */
     private static CheckBox enhancedViewerCB;
@@ -135,7 +135,7 @@ public class JavaFXPreferences {
     private static CheckBox enablePageFlipCB;
     private static CheckBox scrollableThumbsCB;
 
-    /**
+    /*
      * Declare Objects for Interface Meu.
      */
     private static TextField winTitleTF;
@@ -150,7 +150,7 @@ public class JavaFXPreferences {
     private static ComboBox<String> voiceSelect;
     private static ComboBox<String> transitionSelect;
     
-    /**
+    /*
      * Declare Objects for Color Menu.
      */
     private static ColorPicker highlightsPicker;
@@ -163,7 +163,7 @@ public class JavaFXPreferences {
     private static CheckBox replaceDisplayCB;
     private static ColorPicker displayBGColorPicker;
     
-    /**
+    /*
      * Declare Objects for Printing Menu.
      */
     private static ComboBox<String> printerCombo=new ComboBox<String>();
@@ -178,7 +178,7 @@ public class JavaFXPreferences {
     private static void init(final GUIFactory currentGUI) {
         speech = (Speech)currentGUI.getPdfDecoder().getExternalHandler(Options.SpeechEngine);
         
-        /**
+        /*
          * Initialise Objects for General Menu.
          */
         resolutionTF = new TextField();
@@ -195,7 +195,7 @@ public class JavaFXPreferences {
             }
         });
 
-        /**
+        /*
          * Initialise Objects for Page Layout Menu.
          */
         enhancedViewerCB = new CheckBox(Messages.getMessage("PdfCustomGui.enhancedViewer"));
@@ -214,7 +214,7 @@ public class JavaFXPreferences {
         enablePageFlipCB = new CheckBox(Messages.getMessage("PdfCustomGui.enhancedFacing"));
         scrollableThumbsCB = new CheckBox(Messages.getMessage("PdfCustomGui.thumbnailScroll"));
 
-        /**
+        /*
          * Initialise Objects for Interface Menu.
          */
         winTitleTF = new TextField();
@@ -250,15 +250,12 @@ public class JavaFXPreferences {
         transitionSelect = new ComboBox<String>(transitionOptions);
         transitionSelect.getSelectionModel().select(0);
         
-        /**
-         * Initialise Objects for Colour Menu.
-         */
-        /**
+        /*
          * Initialise Objects for Menu Menu.
          */
         tabs = new TabPane();
         
-        /**
+        /*
          * Initialise Objects for Printing Menu.
          */
         
@@ -286,7 +283,6 @@ public class JavaFXPreferences {
 
     /**
      * Ensure Dialog is Setup & Display Preference Dialog.
-     *
      */
     private static void showPreferenceWindow(final GUIFactory currentGUI) {
 
@@ -297,7 +293,7 @@ public class JavaFXPreferences {
         borderPane.setCenter(getGeneralContent()); //Set General as the Default.
         borderPane.setBottom(setupBottomBar(currentGUI));    //Add the Bottom Buttons.
 
-        /**
+        /*
          * Finalise Stage Setup.
          */
         preferenceDialog = new FXDialog(null, Modality.APPLICATION_MODAL, borderPane, 550, 450);
@@ -312,7 +308,7 @@ public class JavaFXPreferences {
      */
     private static ScrollPane setupSideNavBar() {
 
-        /**
+        /*
          * Setup SideBar Buttons.
          */
         final VBox vBox = new VBox();
@@ -338,7 +334,7 @@ public class JavaFXPreferences {
         vBox.getChildren().addAll(buttonsArr);
         vBox.setAlignment(Pos.CENTER);
 
-        /**
+        /*
          * Add SideBar Button Listeners.
          */
         buttonsGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
@@ -348,7 +344,7 @@ public class JavaFXPreferences {
 
                 for (int i = 0; i < buttonsArr.length; ++i) {
                     if (buttonsGroup.getSelectedToggle() == buttonsArr[i]) {
-                        /**
+                        /*
                          * Update the Current Main Content.
                          */
                         updateDisplay(i);
@@ -358,7 +354,7 @@ public class JavaFXPreferences {
             }
         });
 
-        /**
+        /*
          * Setup SideBar.
          */
         final ScrollPane scrollPane = new ScrollPane();
@@ -414,7 +410,7 @@ public class JavaFXPreferences {
      */
     private static HBox setupBottomBar(final GUIFactory currentGUI) {
 
-        /**
+        /*
          * Setup Buttons.
          */
         final Button resetBtn = new Button(Messages.getMessage("PdfPreferences.ResetToDefault"));
@@ -422,7 +418,7 @@ public class JavaFXPreferences {
         final Button saveAsBtn = new Button(Messages.getMessage("PdfPreferences.SaveAs"));
         final Button cancelBtn = new Button("Cancel");
 
-        /**
+        /*
          * Setup HBox.
          */
         final HBox hBox = new HBox();
@@ -432,7 +428,7 @@ public class JavaFXPreferences {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         hBox.getChildren().addAll(resetBtn, spacer, okBtn, saveAsBtn, cancelBtn);
 
-        /**
+        /*
          * Setup Button Listeners.
          */
         okBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -457,7 +453,7 @@ public class JavaFXPreferences {
                 //The properties file used when jpedal opened
                 final String lastProperties = currentGUI.getPropertiesFileLocation();
                 
-                /**
+                /*
                  * Setup File Chooser.
                  */
                 final FileChooser chooser = new FileChooser();
@@ -466,7 +462,7 @@ public class JavaFXPreferences {
                 
                 final File xmlFile = chooser.showSaveDialog(null);
                 
-                /**
+                /*
                  * Start Save Protocol.
                  */
                 if(xmlFile != null){
@@ -480,7 +476,7 @@ public class JavaFXPreferences {
                     }
                 }
                 
-                /**
+                /*
                  * Reset Location.
                  */
                 currentGUI.setPropertiesFileLocation(lastProperties);
@@ -529,7 +525,7 @@ public class JavaFXPreferences {
         title.setText(Messages.getMessage("PdfPreferences.GeneralTitle"));
         title.setFont(titleFont); //only needs to be set once.
 
-        /**
+        /*
          * Setup General Options.
          */
         final Text generalOptions = new Text(Messages.getMessage("PdfPreferences.GeneralSection"));
@@ -538,7 +534,7 @@ public class JavaFXPreferences {
         final HBox resolutionHBox = new HBox();
         resolutionHBox.getChildren().addAll(new Label(Messages.getMessage("PdfViewerViewMenu.Resolution")), resolutionTF);
 
-        /**
+        /*
          * Setup Startup Options.
          */
         final Text startupOptions = new Text(Messages.getMessage("PdfPreferences.StartUp"));
@@ -550,7 +546,7 @@ public class JavaFXPreferences {
         contentVBox.setPadding(new Insets(contentGap));
         contentVBox.setSpacing(contentGap);
 
-        /**
+        /*
          * Finalise Containers.
          */
         contentScrollPane.setContent(contentVBox);
@@ -567,7 +563,7 @@ public class JavaFXPreferences {
         final VBox contentVBox = new VBox();
         title.setText(Messages.getMessage("PdfPreferences.PageDisplayTitle"));
 
-        /**
+        /*
          * Setup General Options.
          */
         final Text generalOptions = new Text(Messages.getMessage("PdfPreferences.GeneralSection"));
@@ -577,7 +573,7 @@ public class JavaFXPreferences {
 
         pageInsetsHBox.getChildren().addAll(new Label(Messages.getMessage("PdfViewerViewMenu.pageInsets")), pageInsetsTF);
 
-        /**
+        /*
          * Setup Display Modes Options.
          */
         final Text displayOptions = new Text(Messages.getMessage("PdfPreferences.DisplayModes"));
@@ -590,7 +586,7 @@ public class JavaFXPreferences {
         contentVBox.setPadding(new Insets(contentGap));
         contentVBox.setSpacing(contentGap);
 
-        /**
+        /*
          * Finalise Containers.
          */
         contentScrollPane.setContent(contentVBox);
@@ -606,13 +602,13 @@ public class JavaFXPreferences {
         contentScrollPane = new ScrollPane();
         title.setText(Messages.getMessage("PdfPreferences.InterfaceTitle"));
 
-        /**
+        /*
          * Setup the TabPane.
          */
         final TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        /**
+        /*
          * Setup the Appearance Tab.
          */
         final Tab appearance = new Tab(Messages.getMessage("PdfPreferences.AppearanceTab"));
@@ -647,7 +643,7 @@ public class JavaFXPreferences {
         appearanceVBox.setSpacing(contentGap);
         appearance.setContent(appearanceVBox);
 
-        /**
+        /*
          * Setup the Mouse Tab.
          */
         final Tab mouse = new Tab(Messages.getMessage("PdfPreferences.Mouse"));
@@ -661,7 +657,7 @@ public class JavaFXPreferences {
         mouseVBox.setSpacing(contentGap);
         mouse.setContent(mouseVBox);
 
-        /**
+        /*
          * Setup the Speech Tab.
          */
         final Tab speech = new Tab(Messages.getMessage("PdfPreferences.Voice"));
@@ -675,7 +671,7 @@ public class JavaFXPreferences {
         speechVBox.setSpacing(contentGap);
         speech.setContent(speechVBox);
 
-        /**
+        /*
          * Finalise Containers.
          */
         tabPane.getTabs().addAll(appearance, mouse, speech);
@@ -697,7 +693,7 @@ public class JavaFXPreferences {
         contentScrollPane = new ScrollPane();
         title.setText("Color");
         final VBox contentVBox = new VBox();
-        /**
+        /*
          * Setup Highlights Option.
          */
         final Text highlightsTitle = new Text("Highlights");
@@ -735,7 +731,7 @@ public class JavaFXPreferences {
             }
         });
 
-        /**
+        /*
          * Setup Display Colors Option.
          */
         final Text displayTitle = new Text("Display Colors");
@@ -967,13 +963,13 @@ public class JavaFXPreferences {
 
         final VBox contentVBox = new VBox();
 
-        /**
+        /*
          * Setup General Options.
          */
         final Text generalOptions = new Text(Messages.getMessage("PdfPreferences.GeneralSection"));
         generalOptions.setFont(titleFont);
 
-        /**
+        /*
          * Setup Default Printer and Page Size Options.
          */
         final HBox printerHBox = new HBox();
@@ -988,7 +984,7 @@ public class JavaFXPreferences {
         final HBox blackListHBox = new HBox();
         blackListHBox.getChildren().addAll(new Label(Messages.getMessage("PdfViewerPrint.blacklist")), blackListTF);
 
-        /**
+        /*
          * Finalise Containers.
          */
         contentVBox.setPadding(new Insets(contentGap));
@@ -1045,7 +1041,7 @@ public class JavaFXPreferences {
         //Setup Copy Details Buttons.
         final Button copyBtn = createCopyDetailsButton(details);
 
-        /**
+        /*
          * Finalise Containers.
          */
         contentVBox.setPadding(new Insets(contentGap));
@@ -1217,7 +1213,7 @@ public class JavaFXPreferences {
     
     private static void updateSettings(final GUIFactory currentGUI) {
 
-        /**
+        /*
          * Update General Settings.
          */
         properties.setValue("resolution", String.valueOf(resolutionTF.getText()));
@@ -1228,7 +1224,7 @@ public class JavaFXPreferences {
         properties.setValue("openLastDocument", String.valueOf(openDocCB.isSelected()));
         //clearRecentDocsBtn.isSelected();
 
-        /**
+        /*
          * Update Page Display Settings.
          */
         properties.setValue("enhancedViewerMode", String.valueOf(enhancedViewerCB.isSelected()));
@@ -1239,7 +1235,7 @@ public class JavaFXPreferences {
         properties.setValue("enhancedFacingMode", String.valueOf(enablePageFlipCB.isSelected()));
         properties.setValue("previewOnSingleScroll", String.valueOf(scrollableThumbsCB.isSelected()));
 
-        /**
+        /*
          * Update Interface Settings.
          */
         properties.setValue("windowTitle", String.valueOf(winTitleTF.getText()));
@@ -1261,7 +1257,7 @@ public class JavaFXPreferences {
             properties.setValue("voice", String.valueOf(voiceSelect.getValue()));
         }
 
-        /**
+        /*
          * Update Colour Settings.
          */
         //Save Highlights Color.
@@ -1285,10 +1281,7 @@ public class JavaFXPreferences {
         col = textColorPicker.getValue();
         properties.setValue("vfgColor", String.valueOf(shiftColorSpaceToSwing(col)));
                 
-        /**
-         * Update Menu Settings.
-         */
-        /**
+        /*
          * Update Printing Settings.
          */
         if ((printerCombo.getValue()).startsWith("System Default")) {
@@ -1338,7 +1331,7 @@ public class JavaFXPreferences {
 
     private static void loadSettings() {
 
-        /**
+        /*
          * Load General Settings.
          */
         String propValue = properties.getValue("resolution");
@@ -1383,7 +1376,7 @@ public class JavaFXPreferences {
             openDocCB.setSelected(false);
         }
 
-        /**
+        /*
          * Load Page Layout Settings.
          */
         propValue = properties.getValue("enhancedViewerMode");
@@ -1440,7 +1433,7 @@ public class JavaFXPreferences {
             scrollableThumbsCB.setSelected(false);
         }
 
-        /**
+        /*
          * Load Interface Settings.
          */
         propValue = properties.getValue("windowTitle");
@@ -1516,7 +1509,7 @@ public class JavaFXPreferences {
             transitionSelect.getSelectionModel().select(propValue);
         }
         
-        /**
+        /*
          * Load Printing Settings.
          */
 
@@ -1547,7 +1540,7 @@ public class JavaFXPreferences {
             blackListTF.setText(propValue);
         }
         
-        /**
+        /*
          * Load Color Settings.
          */
         propValue = properties.getValue("highlightBoxColor");

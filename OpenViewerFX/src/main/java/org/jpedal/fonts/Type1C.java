@@ -1114,19 +1114,6 @@ public class Type1C extends Type1{
             }
             
             if(jarFile==null){
-                /**
-		            	from=new BufferedInputStream(new FileInputStream(substituteFont));
-                
-		              //write
-		                byte[] buffer = new byte[65535];
-		                int bytes_read;
-		                while ((bytes_read = from.read(buffer)) != -1)
-		                    to.write(buffer, 0, bytes_read);
-
-		                to.close();
-		                from.close();
-
-		                /**/
 
                 final File file=new File(substituteFont);
                 final InputStream is = new FileInputStream(file);
@@ -1149,27 +1136,7 @@ public class Type1C extends Type1{
                             + file.getName());
                 }
                 is.close();
-                // new BufferedReader
-                //              (new InputStreamReader(loader.getResourceAsStream("org/jpedal/res/cid/" + encodingName), "Cp1252"));
-                /**
-		                FileReader from2=null;
-		                try {
-		                    from2 = new FileReader(substituteFont);
-		                                //new BufferedReader);
-		                    //outputStream = new FileWriter("characteroutput.txt");
 
-		                    int c;
-		                    while ((c = from2.read()) != -1) {
-		                        to.write(c);
-		                    }
-		                } finally {
-		                    if (from2 != null) {
-		                        from2.close();
-		                    }
-		                    if (to != null) {
-		                        to.close();
-		                    }
-		                }/**/
             }else{
                 from= new BufferedInputStream(jarFile);
                 
@@ -1184,17 +1151,13 @@ public class Type1C extends Type1{
                 
                 bytes=to.toByteArray();
             }
-            /**load the font*/
+
+
             try{
                 isFontSubstituted=true;
                 
-                //if (substituteFont.indexOf(".afm") != -1)
                 readType1FontFile(bytes);
-                //else
-                //  readType1CFontFile(to.toByteArray(),null);
-                
-                
-                
+
             } catch (final Exception e) {
                 LogWriter.writeLog("[PDF]Substitute font="+substituteFont+"Type 1 exception=" + e);
             }
@@ -1203,7 +1166,7 @@ public class Type1C extends Type1{
             
             final PdfObject FontFile=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile);
             
-            /** try type 1 first then type 1c/0c */
+            /* try type 1 first then type 1c/0c */
             if (FontFile != null) {
                 try {
                     final byte[] stream=currentPdfFile.readStream(FontFile,true,true,false, false,false, FontFile.getCacheName(currentPdfFile.getObjectReader()));
@@ -1246,7 +1209,7 @@ public class Type1C extends Type1{
         //generic setup
         init(fontID, renderPage);
         
-        /**
+        /*
          * get FontDescriptor object - if present contains metrics on glyphs
          */
         final PdfObject pdfFontDescriptor=pdfObject.getDictionary(PdfDictionary.FontDescriptor);
@@ -1326,7 +1289,7 @@ public class Type1C extends Type1{
         int start; //pointers within table
         final int size=2;
         
-        /**
+        /*
          * read Header
          */
         final int major;
@@ -1354,7 +1317,7 @@ public class Type1C extends Type1{
             top = fontDataAsObject.getByte(2);
         }
         
-        /**
+        /*
          * read names index
          */
         // read name index for the first font
@@ -1367,7 +1330,7 @@ public class Type1C extends Type1{
             offsize = fontDataAsObject.getByte(top + size);
         }
         
-        /**
+        /*
          * get last offset and use to move to top dict index
          */
         top += (size+1);  //move pointer to start of font names
@@ -1379,7 +1342,7 @@ public class Type1C extends Type1{
         }
         
         
-        /**
+        /*
          * read the dict index
          */
         if(isByteArray){
@@ -1402,22 +1365,22 @@ public class Type1C extends Type1{
             dicEnd = start + getWord(fontDataAsObject, top + offsize, offsize);
         }
         
-        /**
+        /*
          * read string index
          */
         final String[] strings=readStringIndex(fontDataAsArray, fontDataAsObject, start, offsize, count);
         
-        /**
+        /*
          * read global subroutines (top set by Strings code)
          */
         readGlobalSubRoutines(fontDataAsArray,fontDataAsObject);
         
-        /**
+        /*
          * decode the dictionary
          */
         decodeDictionary(fontDataAsArray, fontDataAsObject, dicStart, dicEnd, strings);
         
-        /**
+        /*
          * allow  for subdictionaries in CID  font
          */
         if(FDSelect!=-1 ){
@@ -1532,7 +1495,7 @@ public class Type1C extends Type1{
             
         }
         
-        /**
+        /*
          * get number of glyphs from charstrings index
          */
         top = charstrings;
@@ -1563,18 +1526,18 @@ public class Type1C extends Type1{
             System.out.println("=======Encoding===============");
         }
         
-        /**
+        /*
          * set encoding if not set
          */
         setEncoding(fontDataAsArray, fontDataAsObject,nGlyphs,names);
         
-        /**
+        /*
          * read glyph index
          */
         top = charstrings;
         readGlyphs(fontDataAsArray, fontDataAsObject, nGlyphs, names);
         
-        /**/
+
         for (int i=0; i< privateDictOffset.length; i++) {
             currentFD = i;
             final int dict = privateDictOffset[i];
@@ -1613,10 +1576,7 @@ public class Type1C extends Type1{
             }
         }
         currentFD = -1;
-        /**/
-        /**
-         * set flags to tell software to use these descritpions
-         */
+
         isFontEmbedded = true;
         
         glyphs.setFontEmbedded(true);
@@ -2573,14 +2533,14 @@ public class Type1C extends Type1{
     @Override
     public Rectangle getBoundingBox() {
         
-        if(BBox==null){
+//        if(BBox==null){
             if(isFontEmbedded) {
                 BBox=new Rectangle((int)FontBBox[0], (int)FontBBox[1],
                         (int)(FontBBox[2]-FontBBox[0]), (int)(FontBBox[3]-FontBBox[1]));  
             } else {
                 BBox=super.getBoundingBox();
             }
-        }
+//        }
         
         return BBox;
     }

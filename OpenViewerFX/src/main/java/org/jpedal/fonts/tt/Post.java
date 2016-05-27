@@ -114,7 +114,7 @@ public class Post extends Table {
 			currentFontFile.getNextUint32();//uint32 	minMemType1 	Minimum memory usage when a TrueType font is downloaded as a Type 1 font
 			currentFontFile.getNextUint32();//uint32 	maxMemType1 	Maximum memory usage when a TrueType font is downloaded as a Type 1 font
 			
-			/**
+			/*
 			 * create lookup table for mac format
 			 */
 			final int numberOfGlyphs;
@@ -134,7 +134,7 @@ public class Post extends Table {
 					final int[] glyphNameIndex=new int[numberOfGlyphs];
 					int numberOfNewGlyphs=0;
 					
-					/**read glyphs and work out how many strings*/
+					/*read glyphs and work out how many strings*/
 					for(int i=0;i<numberOfGlyphs;i++){
 						glyphNameIndex[i]=currentFontFile.getNextUint16();
 						if(glyphNameIndex[i]>257 && glyphNameIndex[i]<32768) {
@@ -142,13 +142,13 @@ public class Post extends Table {
                         }
 					}
 					
-					/**now read the strings*/
+					/*now read the strings*/
 					final String[] names=new String[numberOfNewGlyphs];
 					for(int i=0;i<numberOfNewGlyphs;i++){
 						names[i]=currentFontFile.getString();
                         //System.out.println("names["+i+"]="+names[i]);
                     }
-					/**
+					/*
                      * now add in non-standard strings
                      * 
                      * (quite a lot of error checking needed for dodgy fonts)
@@ -168,7 +168,7 @@ public class Post extends Table {
 					
 					final int[] glyphOffset=new int[numberOfGlyphs];
 					
-					/**read glyphs and work out how many strings*/
+					//read glyphs and work out how many strings
 					for(int i=0;i<numberOfGlyphs;i++){
 						glyphOffset[i]=currentFontFile.getNextint8();
 						translateToID.put(macEncoding[glyphOffset[i]+i], glyphOffset[i]);

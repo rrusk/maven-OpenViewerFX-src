@@ -204,6 +204,7 @@ abstract class GUIDisplay extends BaseDisplay implements DynamicVectorRenderer{
                 case DynamicVectorRenderer.STROKEDSHAPE:
                     gs=new GraphicsState();
                     gs.setFillType(GraphicsState.STROKE);
+                    gs.setStrokeColor(new PdfColor(colors[i].getRed(),colors[i].getGreen(),colors[i].getBlue()));
                     drawShape(new SwingShape((Shape) obj[i]),gs, Cmd.S);
                                         
                     break;

@@ -66,14 +66,14 @@ public class JPedalSettings {
     /**allow user to define color for text when highlighted*/
     public static final Integer TEXT_INVERTED_COLOUR = 5;
     
-    /**allow user to define custom upscaling val to improve quality of extr images*/
+    /*allow user to define custom upscaling val to improve quality of extr images*/
     //public static final Integer IMAGE_UPSCALE =new Integer(6);
     
     /**allow user to set a flag to use hi res settings*/
     @Deprecated
     public static final Integer IMAGE_HIRES = 7;
     
-    /**allow user to extract best quality images at the cost of memory */
+    /*allow user to extract best quality images at the cost of memory */
     //public static final Integer EXTRACT_AT_BEST_QUALITY = new Integer(8);
 
     /**allow user to limit the amount of scaling on Best quality*/
@@ -88,7 +88,7 @@ public class JPedalSettings {
     /**allow user to set highlight to invert colours on area of page*/
     public static final Integer INVERT_HIGHLIGHT = 12;
     
-    /**allow user to set highlight mode*/
+    /*allow user to set highlight mode*/
     //public static final Integer TEXT_HIGHLIGHT_MODE = new Integer(13);
 
     /**allow user to stop some forms being printed*/
@@ -123,11 +123,7 @@ public class JPedalSettings {
     
     /**Integer to flag enhance thin lines*/
     public static final Integer ENHANCE_FRACTIONAL_LINES = 24;
-    
-    /**
-     * Values for use with TEXT_HIGHLIGHT_MODE
-     */
-    
+
     /**Possible value for TEXT_HIGHLIGHT_MODE use legacy highlighting mode*/
     public static final Integer LEGACY_HIGHLIGHTING = 140;
 

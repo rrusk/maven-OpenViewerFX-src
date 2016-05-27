@@ -59,45 +59,45 @@ import org.w3c.dom.Node;
 
 public abstract class SharedViewer implements ViewerInt{
 	
-    /**Location of Preferences Files*/
+    //Location of Preferences Files
     public static final String PREFERENCES_DEFAULT = "jar:/org/jpedal/examples/viewer/res/preferences/Default.xml";
     public static final String PREFERENCES_NO_GUI = "jar:/org/jpedal/examples/viewer/res/preferences/NoGUI.xml";
     public static final String PREFERENCES_NO_SIDE_BAR = "jar:/org/jpedal/examples/viewer/res/preferences/NoSideTabOrTopButtons.xml";
     public static final String PREFERENCES_OPEN_AND_NAV_ONLY = "jar:/org/jpedal/examples/viewer/res/preferences/OpenAndNavOnly.xml";
     public static final String PREFERENCES_BEAN = "jar:/org/jpedal/examples/viewer/res/preferences/Bean.xml";
     
-    /**repository for general settings*/
+    //repository for general settings
     protected Values commonValues=new Values();
 
-    /**All printing functions and access methods to see if printing active 
-     * - accessed from Commands and GUI */
+    //All printing functions and access methods to see if printing active 
+    //accessed from Commands and GUI
     PrinterInt currentPrinter;
 
-	/**PDF library and panel*/
+	//PDF library and panel
 	PdfDecoderInt decode_pdf;
 
-	/**encapsulates all thumbnail functionality - just ignore if not required*/
+	//encapsulates all thumbnail functionality - just ignore if not required
 	GUIThumbnailPanel thumbnails;
 
-	/**values saved on file between sessions*/
+	//values saved on file between sessions
 	PropertiesFile properties=new PropertiesFile();
 	
-	/**general GUI functions*/
+	//general GUI functions
 	protected GUIFactory currentGUI;
 
-	/**search window and functionality*/
+	//search window and functionality
 	GUISearchWindow searchFrame;
 
-	/**command functions*/
+	//command functions
 	protected Commands currentCommands;
 
-    /**warn user if viewer not setup fully*/
+    //warn user if viewer not setup fully
     private boolean isSetup;
     
-    /**tell software to exit on close - default is true*/
+    //tell software to exit on close - default is true
     public static boolean exitOnClose=true;
     
-    /**Throw runtime exception when user tries to open document after close() has been called*/
+    //Throw runtime exception when user tries to open document after close() has been called
     public static boolean closeCalled;
 
     /**
@@ -124,9 +124,7 @@ public abstract class SharedViewer implements ViewerInt{
 
         commonValues.maxViewY=0;// ensure reset for any viewport
 
-        /**
-         * open any default file and selected page
-         */
+        //open any default file and selected page
         if(defaultFile!=null){
 
             final File testExists=new File(defaultFile);
@@ -147,7 +145,7 @@ public abstract class SharedViewer implements ViewerInt{
 
                 currentGUI.setViewerTitle(null);
 
-                /**see if user set Page*/
+                //see if user set Page
                 final String page=System.getProperty("org.jpedal.page");
                 final String bookmark=System.getProperty("org.jpedal.bookmark");
                 if(page!=null && !isURL){
@@ -194,9 +192,7 @@ public abstract class SharedViewer implements ViewerInt{
 
         commonValues.maxViewY=0;// ensure reset for any viewport
 
-        /**
-         * open any default file and selected page
-         */
+        //open any default file and selected page
         if(defaultFile!=null){
 
             final File testExists=new File(defaultFile);
@@ -263,10 +259,7 @@ public abstract class SharedViewer implements ViewerInt{
             suppressViewerPopups = true;
         }
 
-        /**
-         *  set search window position here to ensure
-         *  that gui has correct value
-         */
+        //set search window position here to ensure that gui has correct value
         final String searchType = properties.getValue("searchWindowType");
         if(searchType!=null && !searchType.isEmpty()){
             final int type = Integer.parseInt(searchType);
@@ -280,7 +273,7 @@ public abstract class SharedViewer implements ViewerInt{
         //Set search frame here
         currentGUI.setSearchFrame(searchFrame);
 
-        /**switch on thumbnails if flag set*/
+        //switch on thumbnails if flag set
         final String setThumbnail=System.getProperty("org.jpedal.thumbnail");
         if(setThumbnail!=null){
             if(setThumbnail.equals("true")) {
@@ -293,13 +286,9 @@ public abstract class SharedViewer implements ViewerInt{
             thumbnails.setThumbnailsEnabled(true);
         }
 
-        /**
-         * non-GUI initialisation
-         **/
-
         //allow user to override messages
         //<link><a name="locale" />
-        /**
+        /*
          * allow user to define country and language settings
          *
          * you will need a file called messages_XX.properties in
@@ -322,7 +311,6 @@ public abstract class SharedViewer implements ViewerInt{
 
 
         final String customBundle=System.getProperty("org.jpedal.bundleLocation");
-        //customBundle="org.jpedal.international.messages"; //test code
 
         if(customBundle!=null){
 
@@ -352,18 +340,14 @@ public abstract class SharedViewer implements ViewerInt{
             init(null);
         }
 
-        /**
-         * gui setup, create gui, load properties
-         */
+        //gui setup, create gui, load properties
         currentGUI.init(currentCommands);
 
         if(searchFrame.getViewStyle()==GUISearchWindow.SEARCH_TABBED_PANE) {
             currentGUI.searchInTab(searchFrame);
         }
 
-        /**
-         * setup window for warning if renderer has problem
-         */
+        //setup window for warning if renderer has problem
         if(!SharedViewer.isFX){
             ((SwingDisplay)decode_pdf.getDynamicRenderer()).setMessageFrame((Container)currentGUI.getFrame());
         }
@@ -377,11 +361,6 @@ public abstract class SharedViewer implements ViewerInt{
         
         final boolean wasUpdateAvailable = false;
 
-//        propValue = properties.getValue("automaticupdate");
-//        if (!suppressViewerPopups && !propValue.isEmpty() && propValue.equals("true")) {
-//            wasUpdateAvailable = Update.checkForUpdates(false, currentGUI);
-//        }
-
         propValue = properties.getValue("displaytipsonstartup");
         if(!suppressViewerPopups && !wasUpdateAvailable && !propValue.isEmpty() && propValue.equals("true")){
             currentCommands.executeCommand(Commands.TIP,null);
@@ -390,14 +369,13 @@ public abstract class SharedViewer implements ViewerInt{
         //flag so we can warn user if they call executeCommand without it setup
         isSetup=true;
     }
+    
     /**
      * setup the viewer
      */
     protected void init(final ResourceBundle bundle) {
 
-        /**
-         * load correct set of messages
-         */
+        //load correct set of messages
         if(bundle==null){
 
             //load locale file
@@ -427,7 +405,7 @@ public abstract class SharedViewer implements ViewerInt{
         //org.jpedal.objects.javascript.ExpressionEngine marksTest=new TestEngine();
         //decode_pdf.addExternalHandler(marksTest, Options.ExpressionEngine);
 
-        /**debugging code to create a log*/
+        //debugging code to create a log
         //LogWriter.setupLogFile("v");
         //LogWriter.log_name =  "/mnt/shared/log.txt";
 
@@ -435,7 +413,7 @@ public abstract class SharedViewer implements ViewerInt{
         DecoderOptions.embedWidthData = true;
 
         //<link><a name="customann" />
-        /**
+        /*
          * ANNOTATIONS code
          *
          * replace Annotations with your own custom annotations using paint code
@@ -454,8 +432,7 @@ public abstract class SharedViewer implements ViewerInt{
 
         //don't extract text and images (we just want the display)
 
-		/**/
-        /**
+        /*
          * FONT EXAMPLE CODE showing JPedal's functionality to set values for
          * non-embedded fonts.
          *
@@ -466,7 +443,7 @@ public abstract class SharedViewer implements ViewerInt{
          */
 
         //<link><a name="fontmapping" />
-        /**
+        /*
          * FONT EXAMPLE - Replace global default for non-embedded fonts.
          *
          * You can replace Lucida as the standard font used for all non-embedded and substituted fonts
@@ -475,7 +452,7 @@ public abstract class SharedViewer implements ViewerInt{
          * use Webdings, webdings or webDings for Java font Webdings
          */
 
-        /** Removed to save time on startup - uncomment if it causes problems
+        /* Removed to save time on startup - uncomment if it causes problems
          try{
          //choice of example font to stand-out (useful in checking results to ensure no font missed.
          //In general use Helvetica or similar is recommended
@@ -496,9 +473,9 @@ public abstract class SharedViewer implements ViewerInt{
          }
          System.exit(1);
 
-         }/***/
+         }/**/
 
-        /**
+        /*
          * IMPORTANT note on fonts for EXAMPLES
          *
          * USEFUL TIP : The Viewer displays a list of fonts used on the
@@ -539,7 +516,7 @@ public abstract class SharedViewer implements ViewerInt{
          *
          */
 
-        /**
+        /*
          * FONT EXAMPLE - Use fonts placed in jar for substitution (1.4 and above only)
          *
          * This allows users to store fonts in the jar and use these for
@@ -548,7 +525,7 @@ public abstract class SharedViewer implements ViewerInt{
         //decode_pdf.addSubstituteFonts(fontPath,enforceMapping)
 
         //<link><a name="substitutedfont" />
-        /**
+        /*
          * FONT EXAMPLE - Use fonts located on machine for substitution
          *
          * This code explains how to use JPedal to substitute fonts which are
@@ -588,7 +565,7 @@ public abstract class SharedViewer implements ViewerInt{
         FontMappings.setFontReplacements();
 
         //decode_pdf.setFontDirs(new String[]{"C:/windows/fonts/","C:/winNT/fonts/"});
-        /**
+        /*
          * FONT EXAMPLE - Use Standard Java fonts for substitution
          *
          * This code tells JPedal to substitute fonts which are not embedded.
@@ -618,7 +595,7 @@ public abstract class SharedViewer implements ViewerInt{
         //decode_pdf.setSubstitutedFontAliases("Times New Roman",nameInPDF);
 
         //<link><a name="imageHandler" />
-        /**
+        /*
          * add in external handlers for code - 2 examples supplied
          *
 
@@ -630,7 +607,7 @@ public abstract class SharedViewer implements ViewerInt{
 
          /**/
 //<link><a name="customMessageOutput" />
-        /**
+        /*
          * divert all message to our custom code
          *
 
@@ -808,9 +785,7 @@ public abstract class SharedViewer implements ViewerInt{
     @SuppressWarnings("UnusedReturnValue")
     public Object executeCommand(final int commandID, final Object[] args){
 
-        /**
-         * far too easy to miss this step (I did!) so warn user
-         */
+        //far too easy to miss this step (I did!) so warn user
         if(!isSetup){
             throw new RuntimeException("You must call viewer.setupViewer(); before you call any commands");
         }

@@ -49,24 +49,16 @@ import org.jpedal.utils.Messages;
  */
 public class PageNavigator {
 
-    /**
-     * whether page turn is currently animating
-     */
+    //whether page turn is currently animating
     private static boolean pageTurnAnimating;
 
-    /**
-     * flag to track if page decoded twice
-     */
+    //flag to track if page decoded twice
     private static int lastPageDecoded = -1;
 
-    /**
-     * Objects required to load Tiff
-     */
+    //Objects required to load Tiff
     private static TiffHelper tiffHelper;
 
-    /**
-     * Flag to prevent page changing is page changing currently taking place (prevent viewer freezing)
-     */
+    //Flag to prevent page changing is page changing currently taking place (prevent viewer freezing)
     private static boolean pageChanging;
     
     public static void gotoPage(String page, final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf) {
@@ -85,9 +77,7 @@ public class PageNavigator {
                 return;
             }
 
-            /**
-             * adjust for double jump on facing
-             */
+            //adjust for double jump on facing
             if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
                 if ((decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) && (newPage & 1) == 1 && newPage != 1) {
                     newPage--;
@@ -167,12 +157,12 @@ public class PageNavigator {
 
     public static void goForwardPage(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
         if (args == null) {
-            if (commonValues.getSelectedFile() != null) //					forward(1);
+            if (commonValues.getSelectedFile() != null) //forward(1);
             {
                 navigatePages(1, commonValues, decode_pdf, currentGUI);
             }
         } else {
-            if (commonValues.getSelectedFile() != null) //					forward(Integer.parseInt((String) args[0]));
+            if (commonValues.getSelectedFile() != null) //forward(Integer.parseInt((String) args[0]));
             {
                 navigatePages(Integer.parseInt((String) args[0]), commonValues, decode_pdf, currentGUI);
             }
@@ -189,12 +179,12 @@ public class PageNavigator {
 
     public static void goBackPage(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
         if (args == null) {
-            if (commonValues.getSelectedFile() != null) //					back(1);
+            if (commonValues.getSelectedFile() != null) //back(1);
             {
                 navigatePages(-1, commonValues, decode_pdf, currentGUI);
             }
         } else {
-            if (commonValues.getSelectedFile() != null) //					back(Integer.parseInt((String) args[0]));
+            if (commonValues.getSelectedFile() != null) //back(Integer.parseInt((String) args[0]));
             {
                 navigatePages(-Integer.parseInt((String) args[0]), commonValues, decode_pdf, currentGUI);
             }
@@ -212,10 +202,10 @@ public class PageNavigator {
     public static void goFBackPage(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
         if (args == null) {
             if (commonValues.getSelectedFile() != null) {
-                if (commonValues.getCurrentPage() <= 10) //						back(commonValues.getCurrentPage() - 1);
+                if (commonValues.getCurrentPage() <= 10) //back(commonValues.getCurrentPage() - 1);
                 {
                     navigatePages(-(commonValues.getCurrentPage() - 1), commonValues, decode_pdf, currentGUI);
-                } else //						back(10);
+                } else //back(10);
                 {
                     navigatePages(-10, commonValues, decode_pdf, currentGUI);
                 }
@@ -244,8 +234,7 @@ public class PageNavigator {
 
     private static void changePage(PdfDecoderInt decode_pdf, GUIFactory currentGUI, Values commonValues, int updatedTotal) {
         commonValues.setCurrentPage(updatedTotal);
-        //currentGUI.setPageNumber();
-
+        
         if (decode_pdf.getDisplayView() == Display.CONTINUOUS
                 || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
 
@@ -260,28 +249,20 @@ public class PageNavigator {
 
         currentGUI.resetStatusMessage("Loading Page " + commonValues.getCurrentPage());
 
-        /**
-         * reset as rotation may change!
-         */
+        //reset as rotation may change!
         decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
 
         //decode the page
         if (commonValues.isPDF()) {
             currentGUI.decodePage();
         }
-
-		//if scaling to window reset screen to fit rotated page
-        //if(currentGUI.getSelectedComboIndex(Commands.SCALING)<3)
-        //currentGUI.zoom();
     }
     
     private static void navigatePagePrevious(int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
         int updatedTotal = getUpdatedPageNumber(decode_pdf.getDisplayView(), commonValues.getCurrentPage(), decode_pdf.getPageCount(), count);
 
-        /**
-         * example code to show how to check if page is now available
-         */
+        //example code to show how to check if page is now available
         //if loading on linearized thread, see if we can actually display
         if (!decode_pdf.isPageAvailable(updatedTotal)) {
             currentGUI.showMessageDialog("Page " + updatedTotal + " is not yet loaded");
@@ -291,21 +272,17 @@ public class PageNavigator {
 
         if (!Values.isProcessing()) { //lock to stop multiple accesses
 
-            /**
-             * if in range update count and decode next page. Decoded pages are
-             * cached so will redisplay almost instantly
-             */
+            //if in range update count and decode next page. 
+            //Decoded pages are cached so will redisplay almost instantly
             if (updatedTotal <= commonValues.getPageCount()) {
 
                 if (commonValues.isMultiTiff()) {
                     changeTiffPage(commonValues, decode_pdf, currentGUI, count, updatedTotal);
                 } else {
-                    /**
-                     * adjust for double jump on facing
-                     */
+                    //adjust for double jump on facing
                     if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
                         if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) {
-                            //                                updatedTotal++;
+                            //updatedTotal++;
 
                             if (updatedTotal > commonValues.getPageCount()) {
                                 updatedTotal = commonValues.getPageCount();
@@ -319,7 +296,7 @@ public class PageNavigator {
                                 count = ((updatedTotal) / 2) - ((commonValues.getCurrentPage()) / 2);
                             }
                         } else {
-                            //                                updatedTotal++;
+                            //updatedTotal++;
 
                             if ((updatedTotal & 1) == 0) {
                                 updatedTotal--;
@@ -329,9 +306,7 @@ public class PageNavigator {
                         }
                     }
 
-                    /**
-                     * animate if using drag in facing
-                     */
+                    //animate if using drag in facing
                     if (count == 1 && decode_pdf.getDisplayView() == Display.FACING
                             && decode_pdf.getPages().getBoolean(Display.BoolValue.TURNOVER_ON)
                             && decode_pdf.getPageCount() != 2
@@ -364,19 +339,15 @@ public class PageNavigator {
 
         if (!Values.isProcessing()) { //lock to stop multiple accesses
 
-            /**
-             * if in range update count and decode next page. Decoded pages are
-             * cached so will redisplay almost instantly
-             */
+            //if in range update count and decode next page. Decoded pages are
+            //cached so will redisplay almost instantly
             if (updatedTotal >= 1) {
 
                 if (commonValues.isMultiTiff()) {
                     changeTiffPage(commonValues, decode_pdf, currentGUI, count, updatedTotal);
                 } else {
 
-                    /**
-                     * adjust for double jump on facing
-                     */
+                    //adjust for double jump on facing
                     if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
                         if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) {
                             if (count == -1) {
@@ -405,9 +376,7 @@ public class PageNavigator {
                         }
                     }
 
-                    /**
-                     * animate if using drag in facing
-                     */
+                    //animate if using drag in facing
                     if (count == -1 && decode_pdf.getDisplayView() == Display.FACING
                             && decode_pdf.getPages().getBoolean(Display.BoolValue.TURNOVER_ON)
                             && currentGUI.getPageTurnScalingAppropriate()
@@ -469,8 +438,7 @@ public class PageNavigator {
         lastPageDecoded = commonValues.getTiffImageToLoad() + 1;
         currentGUI.setPageNumber();
 
-							//Display new page
-
+		//Display new page
         decode_pdf.repaint();
 
 
@@ -481,9 +449,7 @@ public class PageNavigator {
             commonValues.setBufferedImg(tiffHelper.getImage(commonValues.getTiffImageToLoad()));
 
             if (commonValues.getBufferedImg() != null) {
-                /**
-                 * flush any previous pages
-                 */
+                //flush any previous pages
                 decode_pdf.getDynamicRenderer().flush();
                 decode_pdf.getPages().refreshDisplay();
 

@@ -91,7 +91,7 @@ public class JavaFXTipOfTheDay {
         setupStage();
         bottomButtons();
         
-        /**
+        /*
          * Code to Handle Auto Startup.
          */
 		final String propValue = properties.getValue("displaytipsonstartup");
@@ -111,13 +111,13 @@ public class JavaFXTipOfTheDay {
    
     private static void setupStage(){
         
-        /**
+        /*
          * Setup the Main Stage.
          */
         tipOfDayPopup = new FXDialog(null, Modality.APPLICATION_MODAL, border, 500, 400);
         tipOfDayPopup.setTitle("Tip Of The Day");
         
-        /**
+        /*
          * Setup Did You Know Top Element.
          */
         final HBox titleBar = new HBox();
@@ -126,7 +126,7 @@ public class JavaFXTipOfTheDay {
         titleBar.setPadding(new Insets(10,0,20,10));
         border.setTop(titleBar);
         
-        /**
+        /*
          * Setup the Default WebView.
          */
         final VBox middle = new VBox();
@@ -149,7 +149,7 @@ public class JavaFXTipOfTheDay {
      */
     private static void bottomButtons (){
         
-        /**
+        /*
          * Setup the Next Button.
          */
         final HBox bottomButtons = new HBox();
@@ -169,7 +169,7 @@ public class JavaFXTipOfTheDay {
             }
         });
         
-        /**
+        /*
          * Setup the Previous Button.
          */
         final Button prevTip = new Button ("Previous Tip");
@@ -207,7 +207,7 @@ public class JavaFXTipOfTheDay {
 		try {
 			final URL url = JavaFXTipOfTheDay.class.getResource(tipRoot); //"/org/jpedal/examples/viewer/res/tips"
 			
-			/**
+			/*
 			 * allow for it in jar
 			 */
 			if(url.toString().startsWith("jar")){

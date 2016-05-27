@@ -726,7 +726,9 @@ public class Array extends ObjectDecoder{
 
                     //include end bracket
                     j2++;
-
+                }else if(arrayData[j2+1]=='<' && arrayData[j2+2]=='<'){ //allow for straight into a <<>>
+                    j2++;
+                    
                 }else if(arrayData[j2]=='<'){
 
                     hexString =true;

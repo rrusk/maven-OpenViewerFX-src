@@ -55,7 +55,7 @@ public class PaperSizes {
 
     final Map<String, String> paperNames=new HashMap<String, String>();
 
-    /**default for paper selection*/
+    //default for paper selection
     private int defaultPageIndex;
     private String defaultSize;
 
@@ -84,22 +84,19 @@ public class PaperSizes {
         return names;
     }
 
-    /**return selected Paper*/
+    //return selected Paper
     public MarginPaper getSelectedPaper(final Object id) {
         return paperDefinitions.get(id);
     }
 
-    /**
-     * method to setup specific Paper sizes
-     * - add your own here to extend list
-     */
+    //method to setup specific Paper sizes - add your own here to extend list
     private static void addCustomPaperSizes(){
 
     	//String printDescription;
     	//MarginPaper paper;
     	//defintion for each Paper - must match
 
-            /**
+        /*
     	//A4 (border)
 		printDescription="A4";
 		paper = new Paper();
@@ -107,8 +104,9 @@ public class PaperSizes {
 		paper.setImageableArea(43, 43, 509, 756);
 		paperDefinitions.put(printDescription,paper);
         paperList.add(printDescription);
-               /**/
-        /**
+        /**/
+        
+        /*
 		//A4 (borderless)
 		printDescription="A4 (borderless)";
         paper = new Paper();
@@ -118,7 +116,7 @@ public class PaperSizes {
         paperList.add(printDescription);
         /**/
 
-    /**
+        /*
 		//A5
 		printDescription="A5";
 		paper = new Paper();
@@ -134,8 +132,9 @@ public class PaperSizes {
 		paper.setImageableArea(43,43,526,706);
 		paperDefinitions.put(printDescription,paper);
         paperList.add(printDescription);
-    /**/
-        /**
+        /**/
+        
+        /*
 		//custom
 		printDescription="Custom 2.9cm x 8.9cm";
 		int customW=(int) (29*2.83);
@@ -145,9 +144,9 @@ public class PaperSizes {
 		paper.setImageableArea(0,0,customW,customH); //MUST BE SET ALSO
 		paperDefinitions.put(printDescription,paper);
         paperList.add(printDescription);
-		*/
+		/**/
 
-		/** kept in but commented out for general usage
+		/* kept in but commented out for general usage
 		//architectural D (1728x2592)
 		printDescription="Architectural D";
 		paper = new Paper();

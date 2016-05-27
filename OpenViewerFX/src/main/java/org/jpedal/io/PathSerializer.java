@@ -65,14 +65,12 @@ public class PathSerializer {
 			final float[] array = new float[6];
 			final int type = pi.currentSegment(array);
 			
-			/** add details of each segment to the list*/
 			list.add(type);
 			list.add(array);
 			
 			pi.next();
 		}
 		
-		/** writes out the list which contains all the components of the path */
 		os.writeObject(list);
 
 	}
@@ -87,19 +85,17 @@ public class PathSerializer {
 	 */
 	public static GeneralPath deserializePath(final ObjectInput os) throws ClassNotFoundException, IOException{
 		
-		/** deserialize the windingRule for the path */
 		final Integer windingRule = (Integer) os.readObject();
 		if(windingRule == null) {
             return null;
         }
 		
-		/** deserialize the list which contains all the raw path data */
 		final List list = (List) os.readObject();
 		
 		final GeneralPath path = new GeneralPath();
 		path.setWindingRule(windingRule);
 		
-		/**
+		/*
 		 * iterate over the list, and rebuild the path from the
 		 * individual movements stored inside the list
 		 */
@@ -130,7 +126,6 @@ public class PathSerializer {
 			}
 		}
 		
-		/** return the rebuilt path */
 		return path;
 	}
 }

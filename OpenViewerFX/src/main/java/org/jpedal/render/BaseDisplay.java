@@ -297,7 +297,7 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     }
 
     void renderShape(final Shape defaultClip, final int fillType, PdfPaint strokeCol, PdfPaint fillCol,
-	    final Stroke shapeStroke, final Shape currentShape, final float strokeOpacity,
+	    final Stroke shapeStroke, Shape currentShape, final float strokeOpacity,
 	    final float fillOpacity) {
 
     	boolean clipChanged=false;
@@ -306,6 +306,14 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
 	final Composite comp = g2.getComposite();
 
+    
+        //check for 1 x 1 complex shape (after scaling) and replace with dot
+        if(type ==DISPLAY_SCREEN && currentShape.getBounds().getWidth()*scaling==1 &&
+                currentShape.getBounds().getHeight()*scaling==1 && ((BasicStroke)shapeStroke).getLineWidth()*scaling<1) {
+            currentShape = new Rectangle(currentShape.getBounds().x, currentShape.getBounds().y, 1, 1);
+        }
+        
+    
 	//stroke and fill (do fill first so we don't overwrite Stroke)
 	if (fillType == GraphicsState.FILL || fillType == GraphicsState.FILLSTROKE) {
                 // Fill color is null if the shape is a pattern

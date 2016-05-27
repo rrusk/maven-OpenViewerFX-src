@@ -36,18 +36,19 @@ import org.jpedal.io.PdfFilteredReader;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.parser.image.utils.ArrayUtils;
 
 public class ImageData {
 
     int pX,pY;
         
-    int width, height, depth = 1;
+    int width, height, depth = 1, rawDepth=1;
 
     boolean imageMask;
 
     byte[] objectData;
     
-    boolean isDCT,isJPX,isJBIG;
+    boolean isDCT,isJPX,isJBIG, wasDCT;
     private int numComponents;
     
     boolean isDownsampled;
@@ -55,6 +56,12 @@ public class ImageData {
     int mode;
     
     private boolean removed;
+    
+    boolean arrayInverted;
+    
+    public ImageData(final byte[] objectData) {
+        this.objectData=objectData;
+    }
     
     public ImageData(PdfObject XObject,byte[] objectData) {
 
@@ -66,12 +73,15 @@ public class ImageData {
         int newDepth = XObject.getInt(PdfDictionary.BitsPerComponent);
         if (newDepth != PdfDictionary.Unknown) {
             depth = newDepth;
+            rawDepth=depth;
         }
-
+        
         imageMask= XObject.getBoolean(PdfDictionary.ImageMask);
         
+        final float[] decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
         
-
+        arrayInverted=ArrayUtils.isArrayInverted(decodeArray);
+        
     }
 
     public ImageData(int mode) {
@@ -152,6 +162,10 @@ public class ImageData {
         return isJPX;
     }
     
+    public void setDCT(boolean isDCT){
+        this.isDCT = isDCT;
+    }
+    
     public boolean isDCT() {
         return isDCT;
     }
@@ -199,5 +213,33 @@ public class ImageData {
      */
     public void setRemoved(boolean removed) {
         this.removed = removed;
+    }
+
+    public boolean isArrayInverted() {
+        return this.arrayInverted;
+    }
+    
+    public void setIsArrayInverted(boolean b) {
+        arrayInverted=b;
+    }
+
+    public int getRawDepth() {
+       return rawDepth;
+    }
+
+    public void setIsJPX(boolean b) {
+        isJPX=b;
+    }
+
+    public void setIsDCT(boolean b) {
+         isDCT=b;
+    }
+
+    public boolean wasDCT() {
+        return wasDCT;
+    }
+    
+    public void wasDCT(boolean b) {
+        wasDCT=b;
     }
 }

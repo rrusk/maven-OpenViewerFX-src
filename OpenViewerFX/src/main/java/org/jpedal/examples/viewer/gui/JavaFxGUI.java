@@ -35,6 +35,8 @@ package org.jpedal.examples.viewer.gui;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimerTask;
 import javafx.animation.KeyFrame;
@@ -51,8 +53,8 @@ import javafx.geometry.*;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -80,9 +82,9 @@ import org.jpedal.examples.viewer.*;
 import org.jpedal.examples.viewer.commands.OpenFile;
 import org.jpedal.examples.viewer.commands.javafx.JavaFXOpenFile;
 import org.jpedal.examples.viewer.gui.generic.*;
+import org.jpedal.examples.viewer.gui.javafx.*;
 import org.jpedal.examples.viewer.gui.javafx.FXViewerTransitions.TransitionDirection;
 import org.jpedal.examples.viewer.gui.javafx.FXViewerTransitions.TransitionType;
-import org.jpedal.examples.viewer.gui.javafx.*;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXInputDialog;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXMessageDialog;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXOptionDialog;
@@ -3596,7 +3598,20 @@ public class JavaFxGUI extends GUI implements GUIFactory {
                 commonValues.setPageCount(decode_pdf.getPageCount());
                 commonValues.setCurrentPage(decode_pdf.getPageNumber());
 
-                final String value = pageCounter2.getText().trim();
+                String value = pageCounter2.getText().trim();
+                
+                //Check if mapped and if so set the actual page number
+                //This is updated later to the correct page label
+                if (decode_pdf.getIO().getPageLabels().containsValue(value)) {
+                    Set<Map.Entry<Integer, String>> entries = decode_pdf.getIO().getPageLabels().entrySet();
+                    for (Map.Entry<Integer, String> e : entries) {
+                        if (e.getValue().equals(value)) {
+                            value = e.getKey().toString();
+                            break;
+                        }
+                    }
+                }
+                
                 currentCommands.executeCommand(Commands.GOTO, new Object[]{value});
             }
         });

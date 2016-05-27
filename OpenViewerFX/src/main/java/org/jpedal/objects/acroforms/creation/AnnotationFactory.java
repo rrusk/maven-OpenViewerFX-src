@@ -32,10 +32,12 @@
  */
 package org.jpedal.objects.acroforms.creation;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -77,6 +79,31 @@ public class AnnotationFactory {
             case PdfDictionary.StrickOut :
                 commentIcon = getStrickOutIcon(form);
                 break;
+            case PdfDictionary.Caret :
+                commentIcon = getCaretIcon(form);
+                break;
+            case PdfDictionary.FileAttachment :
+                commentIcon = getFileAttachmentIcon();
+                break;
+            case PdfDictionary.Line :
+                commentIcon = getLineIcon(form);
+                break;
+            case PdfDictionary.Polygon :
+                commentIcon = getPolyIcon(form, false);
+                break;
+            case PdfDictionary.PolyLine :
+                commentIcon = getPolyIcon(form, true);
+                break;
+            case PdfDictionary.Circle :
+                commentIcon = getCircleIcon(form);
+                break;
+            case PdfDictionary.Squiggly:
+                commentIcon = getSquigglyIcon(form);
+                break;
+            case PdfDictionary.Sound:
+                commentIcon = getSoundIcon(form);
+                break;
+                
         }
         
         return commentIcon;
@@ -212,6 +239,47 @@ public class AnnotationFactory {
         return icon;
     }
     
+    private static BufferedImage getSquigglyIcon(final PdfObject form){
+        
+        Color color = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
+        
+        float[] quad = form.getFloatArray(PdfDictionary.QuadPoints);
+        if (quad == null) {
+            quad = form.getFloatArray(PdfDictionary.Rect);
+        }
+        
+        Rectangle bounds = getFormBounds((FormObject)form, quad);
+            
+        final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
+        final Graphics g = icon.getGraphics();
+        
+        if (quad.length >= 8) {
+            for (int hi = 0; hi != quad.length; hi += 8) {
+                final int x = (int) quad[hi] - bounds.x;
+                int y = (int) quad[hi + 5] - bounds.y;
+                //Adjust y for display
+                y = (bounds.height - y) - (int) (quad[hi + 1] - quad[hi + 5]);
+                final int width = (int) (quad[hi + 2] - quad[hi]);
+                final int height = (int) (quad[hi + 1] - quad[hi + 5]);
+                final int step = 6;
+                final int bottom = y + height-1;
+                final int top = bottom-(step/2);
+                try {
+                    g.setColor(color);
+                    
+                    for(int i=0; i<width; i+=step){
+                        g.drawLine(x+i, bottom, x+i+(step/2), top);
+                        g.drawLine(x+i+(step/2), top, x+i+step, bottom);
+                    }
+                } catch (final Exception e) {
+                    LogWriter.writeLog("Exception: " + e.getMessage());
+                }
+            }
+        }
+        
+        return icon;
+    }
+    
     private static BufferedImage getSquareIcon(final PdfObject form){
         Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
         Color ic = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.IC));
@@ -227,6 +295,101 @@ public class AnnotationFactory {
             g.fillRect(0, 0, bounds.width, bounds.height);
             g.setColor(c);
             FormRenderUtilsG2.renderBorder(g, (FormObject)form, 0,0,icon.getWidth(), icon.getHeight());
+            
+            return icon;
+        }
+        //Return a small empty image as no highlight to make.
+        return null;
+    }
+    
+    private static BufferedImage getCircleIcon(final PdfObject form){
+        Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
+        Color ic = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.IC));
+        
+        float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        if (quad != null) {
+            
+            Rectangle bounds = getFormBounds((FormObject)form, quad);
+            
+            final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
+            final Graphics2D g = (Graphics2D)icon.getGraphics();
+            g.setColor(ic);
+            g.fillOval(1, 1, bounds.width-2, bounds.height-2);
+            g.setColor(c);
+            g.drawOval(1, 1, bounds.width-2, bounds.height-2);
+            
+            return icon;
+        }
+        //Return a small empty image as no highlight to make.
+        return null;
+    }
+    
+    private static BufferedImage getLineIcon(final PdfObject form){
+        Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
+        
+        float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        float[] line = form.getFloatArray(PdfDictionary.L);
+        if (quad != null && line != null) {
+            
+            Rectangle bounds = getFormBounds((FormObject)form, quad);
+            
+            final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
+            final Graphics2D g = (Graphics2D)icon.getGraphics();
+            g.setColor(c);
+            g.drawLine((int)line[0]-bounds.x, (int)(bounds.height-(line[1]-bounds.y)), (int)line[2]-bounds.x, (int)(bounds.height-(line[3]-bounds.y)));
+            
+            return icon;
+        }
+        //Return a small empty image as no highlight to make.
+        return null;
+    }
+    
+    private static BufferedImage getPolyIcon(final PdfObject form, final boolean line){
+        Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
+//        Color ic = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.IC));
+        
+        float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        float[] vertices = form.getFloatArray(PdfDictionary.Vertices);
+        
+        if (quad != null && vertices!=null) {
+            
+            Rectangle bounds = getFormBounds((FormObject)form, quad);
+            
+            final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
+            final Graphics2D g = (Graphics2D)icon.getGraphics();
+            g.setColor(c);
+            float lastX = vertices[0];
+            float lastY = vertices[1];
+            for(int i=2; i!=vertices.length; i+=2){
+                g.drawLine((int)lastX-bounds.x, (int)(bounds.height-(lastY-bounds.y)), (int)vertices[i]-bounds.x, (int)(bounds.height-(vertices[i+1]-bounds.y)));
+                lastX = vertices[i];
+                lastY = vertices[i+1];
+            }
+            if(!line){
+                g.drawLine((int)lastX-bounds.x, (int)(bounds.height-(lastY-bounds.y)), (int)vertices[0]-bounds.x, (int)(bounds.height-(vertices[1]-bounds.y)));
+            }
+            return icon;
+        }
+        //Return a small empty image as no highlight to make.
+        return null;
+    }
+    
+    private static BufferedImage getCaretIcon(final PdfObject form){
+        Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
+        float[] rd = form.getFloatArray(PdfDictionary.RD);
+        
+        float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        if (quad != null) {
+            
+            Rectangle bounds = getFormBounds((FormObject)form, quad);
+            
+            final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
+            final Graphics2D g = (Graphics2D)icon.getGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g.setStroke(new BasicStroke(rd[1]));
+            g.setColor(c);
+            g.drawLine(0, bounds.height, bounds.width/2, 0);
+            g.drawLine(bounds.width/2, 0, bounds.width, bounds.height);
             
             return icon;
         }
@@ -389,6 +552,39 @@ public class AnnotationFactory {
         }
 
         return commentIcon;
+    }
+    
+    private static BufferedImage getFileAttachmentIcon(){
+        
+        final String iconFile = "/org/jpedal/objects/acroforms/res/FileAttachment.png";
+        
+        BufferedImage icon = null;
+        try {
+            icon = ImageIO.read(AnnotationFactory.class.getResource(iconFile));
+        } catch (final IOException e){
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
+        
+        return icon;
+    }
+    
+    private static BufferedImage getSoundIcon(final PdfObject form){
+        
+        String iconFile = "/org/jpedal/objects/acroforms/res/Speaker.png";
+        
+        String name = form.getName(PdfDictionary.Name);
+        if(name!=null && name.equals("Mic")){
+            iconFile = "/org/jpedal/objects/acroforms/res/Microphone.png";
+        }
+        
+        BufferedImage icon = null;
+        try {
+            icon = ImageIO.read(AnnotationFactory.class.getResource(iconFile));
+        } catch (final IOException e){
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
+        
+        return icon;
     }
     
     /**

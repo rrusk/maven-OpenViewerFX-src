@@ -169,9 +169,9 @@ public class PdfFileReader
             pdfObject.setCompressedStream(isCompressed);
 
             //any stream
-            final byte[] raw ;//stream=null;
+            final byte[] raw;
 
-            /**read raw object data*/
+            /*read raw object data*/
             if(isCompressed){
                 raw = readCompressedObject(pdfObject);
             }else{
@@ -260,7 +260,7 @@ public class PdfFileReader
 
             }
 
-            /**get offsets table see if in this stream*/
+            /*get offsets table see if in this stream*/
             offsetStart=new HashMap<String, String>();
             offsetEnd=new HashMap<String, String>();
             First=compressedObj.getInt(PdfDictionary.First);
@@ -286,7 +286,7 @@ public class PdfFileReader
             lastFirst=First;
         }
 
-        /**put bytes in stream*/
+        /*put bytes in stream*/
         final int start=First+Integer.parseInt(startID);
         int end=compressedStream.length;
 
@@ -341,7 +341,7 @@ public class PdfFileReader
                 }
             }
 
-            if(stream!=null){ /**decode and save stream*/
+            if(stream!=null){ /*decode and save stream*/
 
                 //decrypt the stream
                 try{
@@ -389,7 +389,7 @@ public class PdfFileReader
                     length = newLength;
                 }
 
-                /**allow for no width or length*/
+                /*allow for no width or length*/
                 if(height*width==1) {
                     width = length;
                 }
@@ -432,7 +432,7 @@ public class PdfFileReader
                     length=1;
                 }else if(stream!=null && length!=-1 && length<stream.length ){
 
-                    /**make sure length correct*/
+                    /*make sure length correct*/
                     //if(stream.length!=length){
                     if(stream.length!=length && length>0){//<--  last item breaks jbig??
                         final byte[] newStream=new byte[length];
@@ -461,10 +461,9 @@ public class PdfFileReader
                     LogWriter.writeLog("Exception: " + e.getMessage());
                 }
 
-                /**resize if length supplied*/
-                if((length!=1)&&(length<streamLength)){
+                /*resize if length supplied*/
+                if(length!=1 && length<streamLength){
 
-                    /**make sure length correct*/
                     final byte[] newStream=new byte[length];
                     System.arraycopy(bytes, 0, newStream, 0, length);
 
@@ -541,7 +540,7 @@ public class PdfFileReader
 
         long pointer;
 
-        /**read the object or block*/
+        /*read the object or block*/
         try {
 
             byte currentByte;
@@ -560,7 +559,7 @@ public class PdfFileReader
                         start = pointer;
                     }
 
-                    /**adjust buffer if less than bytes left in file*/
+                    /*adjust buffer if less than bytes left in file*/
                     if (pointer + bufSize > eof) {
                         bufSize = (int) (eof - pointer);
                     }
@@ -575,7 +574,7 @@ public class PdfFileReader
 
                 }
 
-                /**write out and look for endobj at end*/
+                /*write out and look for endobj at end*/
                 //lastByte=currentByte;
                 currentByte = buffer[i];
 
@@ -682,10 +681,10 @@ public class PdfFileReader
         //final boolean inStream=false;
         boolean ignoreByte;
 
-        /**adjust buffer if less than bytes left in file*/
-        long pointer ;//lastEndStream=-1,objStart=-1;
+        /* adjust buffer if less than bytes left in file*/
+        long pointer ;
 
-        /**read the object or block*/
+        /* read the object or block*/
         try {
 
             byte currentByte ;//lastByte;
@@ -722,7 +721,7 @@ public class PdfFileReader
 //                    }
 //                       blocksRead++;
 
-                    /**
+                    /*
                      * read the next block
                      */
                     pointer = getPointer();
@@ -731,7 +730,7 @@ public class PdfFileReader
                         start = pointer;
                     }
 
-                    /**adjust buffer if less than bytes left in file*/
+                    /* adjust buffer if less than bytes left in file*/
                     if (pointer + bufSize > eof) {
                         bufSize = (int) (eof - pointer);
                     }
@@ -739,7 +738,6 @@ public class PdfFileReader
                     bufSize += 6;
                     buffer = new byte[bufSize];
 
-                    /**get bytes into buffer*/
                     pdf_datafile.read(buffer);
 
                     offset += i;
@@ -747,16 +745,11 @@ public class PdfFileReader
 
                 }
 
-                /**write out and look for endobj at end*/
-                //lastByte=currentByte;
+                /* write out and look for endobj at end*/
                 currentByte = buffer[i];
                 ignoreByte=false;
 
-                //track comments
-                //if(currentByte=='%')
-                //lastComment=realPos;
-
-                /**check for endobj at end - reset if not*/
+                /*check for endobj at end - reset if not*/
                 if (currentByte == ObjectDecoder.endPattern[charReached])// &&  !inStream)
                 {
                     charReached++;
@@ -764,14 +757,9 @@ public class PdfFileReader
                     charReached = 0;
                 }
 
-                //also scan for <SPACE>obj after endstream incase no endobj
-                //if(streamFound &&currentByte == endObj[charReached2] &&  !inStream)
-                //    charReached2++;
-                //else
-                    charReached2 = 0;
+                charReached2 = 0;
 
                 //look for start of stream and set inStream true
-
                 if((startStreamFound) && (hasValues || currentByte!=13 && currentByte!=10)){ //avoid trailing CR/LF
                         array.write(currentByte);
                         hasValues=true;
@@ -789,7 +777,7 @@ public class PdfFileReader
                 }
 
 
-                /**if length not set we go on endstream in data*/
+                /*if length not set we go on endstream in data*/
                 if(!lengthSet){
 
                     //also scan for /Length if it had a valid size
@@ -810,8 +798,6 @@ public class PdfFileReader
                     }
 
                     charReached=0;
-                    //charReached2=0;
-                    //lastEnd=realPos;
 
                 }
 
@@ -1043,7 +1029,7 @@ public class PdfFileReader
         //any stream
         final byte[] raw ;
 
-        /**read raw object data*/
+        /*read raw object data*/
         if(isCompressed){
             raw = readCompressedObjectData(pdfObject,offset);
         }else{
@@ -1114,7 +1100,7 @@ public class PdfFileReader
 
             }
 
-            /**get offsets table see if in this stream*/
+            /* get offsets table see if in this stream*/
             offsetStart=new HashMap<String, String>();
             offsetEnd=new HashMap<String, String>();
             First=compressedObj.getInt(PdfDictionary.First);
@@ -1140,7 +1126,7 @@ public class PdfFileReader
             lastFirst=First;
         }
 
-        /**put bytes in stream*/
+        /*put bytes in stream*/
         final int start=First+Integer.parseInt(startID);
         int end=compressedStream.length;
 
@@ -1177,7 +1163,7 @@ public class PdfFileReader
 
         if(raw==null){
 
-            /**read raw object data*/
+            /* read raw object data*/
             if(isCompressed){
                 raw = readCompressedObjectAsByteArray(pdfObject, objectID, gen);
             }else{
@@ -1194,7 +1180,6 @@ public class PdfFileReader
 
         }
         
-        /**/
         //check first 10 bytes
         int j=0;
         if(raw.length>15){
@@ -1268,7 +1253,7 @@ public class PdfFileReader
             final ObjectDecoder objDecoder=new ObjectDecoder(this);
             objDecoder.readDictionaryAsObject(compressedObj,0,raw);
 
-            /**get offsets table see if in this stream*/
+            /* get offsets table see if in this stream*/
             offsetStart=new HashMap<String, String>();
             offsetEnd=new HashMap<String, String>();
 
@@ -1301,7 +1286,7 @@ public class PdfFileReader
             lastFirst=First;
         }
 
-        /**put bytes in stream*/
+        /* put bytes in stream*/
         final int start=First+Integer.parseInt(startID);
         int end=compressedStream.length;
         final String endID= offsetEnd.get(String.valueOf(objectID));
@@ -1333,7 +1318,6 @@ public class PdfFileReader
             return binary_data;
         }
 
-        /**read an array*/
         if(pageContents!=null){
 
             final int count=pageContents.length;
@@ -1343,13 +1327,6 @@ public class PdfFileReader
 
             //read all objects for page into stream
             for(int ii=0;ii<count;ii++) {
-
-                //if(pageContents[ii].length==0)
-                //	break;
-
-                //get the data for an object
-                //currentPdfFile.resetCache();
-                //decoded_stream_data =currentPdfFile.readStream(new String(pageContents[ii]),true);
 
                 streamData=new StreamObject(new String(pageContents[ii]));
                 streamData.isDataExternal(pdfObject.isDataExternal());//flag if being read from external stream
@@ -1435,9 +1412,6 @@ public class PdfFileReader
     public void setupDecryption(final PdfObject encryptObj) throws PdfSecurityException {
 
         try{
-            /**
-             * instance as appropriate
-             */
             final byte[] ID=refTable.getID();
             if(certificate!=null) {
                 decryption = new DecryptionFactory(ID, certificate, key);

@@ -79,7 +79,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
     /**used to count up hints*/
     private int hintCount;
     
-    /** I byte ops in CFF DIct table *
+    /* I byte ops in CFF DIct table *
      * private static String[] raw1ByteValues =
      * {
      * "version",
@@ -115,7 +115,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
      * "BCD",
      * "-Reserved-" };/**/
     
-    /** 2 byte ops in CFF DIct table *
+    /* 2 byte ops in CFF DIct table *
      * private static String[] raw2ByteValues =
      * {
      * "Copyright",
@@ -827,7 +827,6 @@ public class T1Glyphs extends PdfJavaGlyphs {
             final String displayValue, final float currentWidth, final String key) {
         
         
-        /**flush cache if needed*/
         if(Trm!=null && (lastTrm[0][0]!=Trm[0][0] || lastTrm[1][0]!=Trm[1][0] || lastTrm[0][1]!=Trm[0][1] || lastTrm[1][1]!=Trm[1][1])){
             lastTrm=Trm;
             flush();
@@ -838,7 +837,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
         
         if (transformedGlyph2 == null) {
             
-            /**create new stack for glyph*/
+            /*create new stack for glyph*/
             operandsRead = new double[max];
             operandReached=0;
             
@@ -854,7 +853,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
             setEmbeddedCachedShape(rawInt, transformedGlyph2);
         }
         
-        /**
+        /*
          * Save glyph number into object
          */
         //Try fetching number using glyph
@@ -890,9 +889,6 @@ public class T1Glyphs extends PdfJavaGlyphs {
         
         allowAll=false; //used by T1 to make sure sbw of hsbw
         
-        /**
-         * get the stream of commands for the glyph
-         */
         if(isCID){
             glyphStream= charStrings.get(String.valueOf(rawInt));
         }else{
@@ -909,7 +905,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
                 }
             }
             
-            /**
+            /*
              * get the bytestream of commands and reset global values
              */
             glyphStream = charStrings.get(glyph);
@@ -925,9 +921,6 @@ public class T1Glyphs extends PdfJavaGlyphs {
             }
         }
         
-        /**
-         * if valid stream then decode
-         */
         if(glyphStream!=null){
 
             decodeGlyphStream(factory, glyph, rawInt, glyphStream);
@@ -951,14 +944,14 @@ public class T1Glyphs extends PdfJavaGlyphs {
         int potentialWidth = 0;
 
         h=100000;
-        /**set length for 1C*/
+        /*set length for 1C*/
         if(is1C){
             operandsRead=new double[max];
             operandReached=0;
             allowAll=true;
         }
 
-        /**
+        /*
          * work through the commands decoding and extracting numbers (operands are FIRST)
          */
 
@@ -1204,7 +1197,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
             }
         }
 
-        /**set values to adjust glyph vertically*/
+        /*set values to adjust glyph vertically*/
         factory.setYMin((float)(ymin));
 
     }

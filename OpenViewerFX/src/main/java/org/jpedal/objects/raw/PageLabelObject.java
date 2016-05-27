@@ -40,7 +40,7 @@ import org.jpedal.utils.StringUtils;
  */
 public class PageLabelObject extends PdfObject {
 
-    private int ST=-1; //note default is 1
+    private int St=-1; //note default is 1
     
     String P;
     byte[] rawP;
@@ -93,8 +93,8 @@ public class PageLabelObject extends PdfObject {
 
         switch(id){
 
-	        case PdfDictionary.ST:
-	        	ST=value;
+	        case PdfDictionary.St:
+	        	St=value;
 	        break;
 	
 
@@ -108,8 +108,8 @@ public class PageLabelObject extends PdfObject {
 
         switch(id){
 
-	        case PdfDictionary.ST:
-	            return ST;
+	        case PdfDictionary.St:
+	            return St;
 	        
             default:
             	return super.getInt(id);

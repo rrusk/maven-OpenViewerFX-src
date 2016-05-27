@@ -37,7 +37,6 @@ import java.awt.image.BufferedImage;
 import org.jpedal.JDeliHelper;
 import org.jpedal.examples.handlers.DefaultImageHelper;
 import org.jpedal.exception.PdfException;
-import org.jpedal.objects.raw.PdfObject;
 
 /**
  * handle DeviceCMYKColorSpace
@@ -176,7 +175,7 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
      */
     @Override
     public final BufferedImage JPEGToRGBImage(
-            final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+            final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
 
         return nonRGBJPEGToRGBImage(data, w, h, decodeArray, pX, pY);
 
@@ -226,9 +225,9 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
      * @throws PdfException
      */
     @Override
-    public BufferedImage JPEG2000ToRGBImage(final byte[] data, int w, int h, final float[] decodeArray, final int pX, final int pY, final int d) throws PdfException {
+    public BufferedImage JPEG2000ToRGBImage(final byte[] data, int w, int h, final int pX, final int pY, final int d) throws PdfException {
 
-        BufferedImage image = DefaultImageHelper.JPEG2000ToRGBImage(data, w, h, decodeArray, pX, pY);
+        BufferedImage image = DefaultImageHelper.JPEG2000ToRGBImage(data, w, h, pX, pY);
 
         if (image != null) {
             return image;

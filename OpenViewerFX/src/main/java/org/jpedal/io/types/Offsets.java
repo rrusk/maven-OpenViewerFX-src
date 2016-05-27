@@ -116,9 +116,9 @@ public class Offsets extends Vector_Int{
 
         }
 
-        /**
+        /*
          * loop to calc all object lengths
-         * */
+         */
         int  start=offsets[id[i]],end;
 
         //find next xref
@@ -185,7 +185,7 @@ public class Offsets extends Vector_Int{
             startLine=i;
             endLine=-1;
 
-            /**
+            /*
              * read line locations
              */
             //move to start of value ignoring spaces or returns
@@ -215,7 +215,7 @@ public class Offsets extends Vector_Int{
 
             i++;
 
-            /**
+            /*
              * decode the line
              */
             tokenCount=0;
@@ -264,7 +264,7 @@ public class Offsets extends Vector_Int{
 
                     if ((flag=='n')) { // only add objects in use
 
-                        /**
+                        /*
                          * assume not valid and test to see if valid
                          */
                         boolean isValid=false;
@@ -279,7 +279,6 @@ public class Offsets extends Vector_Int{
 
                         if(bufSize>0){
 
-                            /** get bytes into buffer */
                             final byte[] buffer = getBytes(id, bufSize,pdf_datafile);
 
                             //look for space o b j
@@ -344,7 +343,7 @@ public class Offsets extends Vector_Int{
     void storeObjectOffset(final int current_number, final int current_offset, final int current_generation, final boolean isEntryCompressed, final boolean isBumData)
     {
 
-        /**
+        /*
          * check it does not already exist
          */
         int existing_generation = 0;

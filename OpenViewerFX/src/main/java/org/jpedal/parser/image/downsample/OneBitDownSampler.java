@@ -59,12 +59,18 @@ class OneBitDownSampler {
         return new DeviceRGBColorSpace();
     }
     
-    public static GenericColorSpace downSample(int sampling, ImageData imageData, boolean imageMask, boolean arrayInverted, byte[] maskCol, byte[] index, GenericColorSpace decodeColorData) {
+    public static GenericColorSpace downSample(int sampling, final ImageData imageData,
+            final byte[] maskCol, final byte[] index, GenericColorSpace decodeColorData) {
+        
+        
+        final boolean imageMask=(maskCol!=null);
         
         byte[] data=imageData.getObjectData();
         
         int newW=imageData.getWidth()/sampling;
         int newH=imageData.getHeight()/sampling;
+        
+        final boolean arrayInverted=imageData.isArrayInverted();
         
         int size=newW*newH;
         

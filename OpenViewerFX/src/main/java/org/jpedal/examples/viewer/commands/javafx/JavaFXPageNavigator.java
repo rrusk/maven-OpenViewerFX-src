@@ -52,22 +52,22 @@ import org.jpedal.utils.Messages;
  */
 public class JavaFXPageNavigator {
 
-    /**
+    /*
      * whether page turn is currently animating
      */
     private static boolean pageTurnAnimating;
 
-    /**
+    /*
      * flag to track if page decoded twice
      */
     private static int lastPageDecoded = -1;
 
-    /**
+    /*
      * Objects required to load Tiff 
      */
     private static TiffHelper tiffHelper;
 
-    /**
+    /*
      * Flag to prevent page changing is page changing currently taking place (prevent viewer freezing)
      */
     private static boolean pageChanging;
@@ -88,7 +88,7 @@ public class JavaFXPageNavigator {
                 return;
             }
 
-            /**
+            /*
              * adjust for double jump on facing
              */
             if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
@@ -256,7 +256,7 @@ public class JavaFXPageNavigator {
 			//new page number
 			int updatedTotal = commonValues.getCurrentPage() + count;
 			if (count > 0) {
-				/**
+				/*
 				 * example code to show how to check if page is now available
 				 */
 				//if loading on linearized thread, see if we can actually display
@@ -268,7 +268,7 @@ public class JavaFXPageNavigator {
 
 				if (!Values.isProcessing()) { //lock to stop multiple accesses
 
-					/**
+					/*
 					 * if in range update count and decode next page. Decoded pages
 					 * are cached so will redisplay almost instantly
 					 */
@@ -289,7 +289,7 @@ public class JavaFXPageNavigator {
                             //((PdfDecoder)decode_pdf).repaint();
                             
 						} else {
-							/**
+							/*
 							 * adjust for double jump on facing
 							 */
 							if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
@@ -318,7 +318,7 @@ public class JavaFXPageNavigator {
 								}
 							}
 
-                            /**
+                            /*
 							 * animate if using drag in facing
 							 */
 							if (count == 1 && decode_pdf.getDisplayView() == Display.FACING
@@ -424,7 +424,7 @@ public class JavaFXPageNavigator {
 								}
 
 								currentGUI.resetStatusMessage("Loading Page " + commonValues.getCurrentPage());
-								/**
+								/*
 								 * reset as rotation may change!
 								 */
 								decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
@@ -454,7 +454,7 @@ public class JavaFXPageNavigator {
 
 				if (!Values.isProcessing()) { //lock to stop multiple accesses
 
-					/**
+					/*
 					 * if in range update count and decode next page. Decoded pages
 					 * are cached so will redisplay almost instantly
 					 */
@@ -473,7 +473,7 @@ public class JavaFXPageNavigator {
 
 						} else {
 
-							/**
+							/*
 							 * adjust for double jump on facing
 							 */
 							if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
@@ -504,7 +504,7 @@ public class JavaFXPageNavigator {
 								}
 							}
 
-                            /**
+                            /*
 							 * animate if using drag in facing
 							 */
 							if (count == -1 && decode_pdf.getDisplayView() == Display.FACING
@@ -611,7 +611,7 @@ public class JavaFXPageNavigator {
 
 								currentGUI.resetStatusMessage("loading page " + commonValues.getCurrentPage());
 
-								/**
+								/*
 								 * reset as rotation may change!
 								 */
 								decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
@@ -654,7 +654,7 @@ public class JavaFXPageNavigator {
             commonValues.setBufferedImg(tiffHelper.getImage(commonValues.getTiffImageToLoad()));
 
             if (commonValues.getBufferedImg() != null) {
-                /**
+                /*
                  * flush any previous pages
                  */
                 decode_pdf.getDynamicRenderer().flush();

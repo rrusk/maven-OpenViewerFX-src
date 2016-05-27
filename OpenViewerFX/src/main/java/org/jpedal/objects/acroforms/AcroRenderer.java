@@ -412,7 +412,7 @@ public class AcroRenderer{
         }
     }
     
-    private static boolean flattenForms,ignoreAllForms;
+    private static final boolean flattenForms,ignoreAllForms;
     
     static{
       
@@ -492,11 +492,11 @@ public class AcroRenderer{
                         }
                         
                     }else{
-                        if(annotList!=null && annotList.length>page && annotList[page]!=null && !isContainXFAStream){
-                            annotList[page].resetToStart();
+                        if(annotList!=null && annotList.length>page && annotList[page]!=null){
                             
-                            //create lookup and array for values to set order correctly in HTML
-                            if(formFactory.getType()==FormFactory.HTML){
+                            if(!isContainXFAStream && formFactory.getType()==FormFactory.HTML){
+                                annotList[page].resetToStart();
+                                
                                 final Map<String, String> annotOrder=new HashMap<String, String>();
                                 
                                 final int count2=annotList[page].getTokenCount();
@@ -509,6 +509,7 @@ public class AcroRenderer{
                                 formFactory.setAnnotOrder(annotOrder);
                             }
                             
+                            //We need to do this regardless
                             annotList[page].resetToStart();
                         }
                         count=Acount-1;
@@ -796,8 +797,8 @@ public class AcroRenderer{
     }
 
     /**
-     * Utility method to ensure formObject is actually an annotation before we continue
-     * @return True if annotation
+     * Utility method to check if  formObject should have a popup
+     * @return True if popup should exist
      */
     static boolean allowsPopup(FormObject formObject){
         
@@ -1386,7 +1387,7 @@ public class AcroRenderer{
     }
     
     public boolean ignoreForms() {
-        return ignoreForms;
+        return ignoreForms || ignoreAllForms;
     }
     
     public void dispose() {

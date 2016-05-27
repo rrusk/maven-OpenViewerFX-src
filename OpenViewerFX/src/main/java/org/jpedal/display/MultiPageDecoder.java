@@ -128,7 +128,7 @@ public abstract class MultiPageDecoder {
         
         offsets=(DisplayOffsets) pdf.getExternalHandler(Options.DisplayOffsets);
         
-        /**cache current page*/
+        /*cache current page*/
         if(currentDisplay!=null) {
             currentPageViews.put(pageNumber, currentDisplay);
         }
@@ -409,9 +409,7 @@ public abstract class MultiPageDecoder {
     }
 
     public void decodeMorePages(int page, int originalStart, int originalEnd) {
-        /**
-         * decode or get cached page data. If it is still in cache we just need a repaint
-         */    
+
         if(currentPageViews.get(page)==null){
 
             decodePage(page, originalStart, originalEnd);
@@ -443,12 +441,12 @@ public abstract class MultiPageDecoder {
             
             
         }
-        /** get pdf object id for page to decode */
+        /* get pdf object id for page to decode */
         final String currentPageOffset = pdf.getIO().getReferenceforPage(page);
         if (debugLayout) {
             System.out.println("Decoding page " + page + " currentPageOffset=" + currentPageOffset + " range=" + originalStart + ' ' + originalEnd);
         }
-        /**
+        /*
          * decode the file if not already decoded and stored
          */
         if (currentPageOffset != null || (formRenderer.isXFA() && formRenderer.useXFA())) {
@@ -473,7 +471,6 @@ public abstract class MultiPageDecoder {
         //ensure set (needed for XFA)
         pdfObject.setPageNumber(pageNumber);
 
-        /** read page or next pages */
         currentPdfFile.readObject(pdfObject);
 
         final PdfObject Resources=pdfObject.getDictionary(PdfDictionary.Resources);
@@ -488,7 +485,7 @@ public abstract class MultiPageDecoder {
         
         final PdfStreamDecoder current=formRenderer.getStreamDecoder(currentPdfFile, fileAccess.getRes().getPdfLayerList(),true);
 
-        /**
+        /*
          * draw acroform data onto Panel
          */
         if (formRenderer != null && pdf.isForm()) {

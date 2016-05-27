@@ -63,7 +63,7 @@ public interface PdfDecoderInt {
     /**
      * build number of this version
      */
-    String version = "7.0.29";
+    String version = "7.1.27";
     /**
      * flag to show extraction mode should include any text
      */
@@ -88,7 +88,7 @@ public interface PdfDecoderInt {
      * flag to show extraction of clipped images at highest res
      */
     int TEXTCOLOR = 64;
-    /**
+    /*
      * flag to show extraction of raw cmyk images
      */
     //int CMYKIMAGES = 128;
@@ -224,6 +224,8 @@ public interface PdfDecoderInt {
     int getPDFHeight();
 
     BufferedImage getPageAsImage(int pageIndex) throws PdfException;
+    
+    BufferedImage getPageAsImage(int pageIndex, float scaling) throws PdfException;
 
     BufferedImage getPageAsHiRes(int pageIndex) throws PdfException;
 

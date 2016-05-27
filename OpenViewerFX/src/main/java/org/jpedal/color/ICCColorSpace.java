@@ -295,7 +295,7 @@ extends GenericColorSpace {
      */
     @Override
     public BufferedImage JPEGToRGBImage(
-            final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+            final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
         
         if(data.length>9 && data[6] == 'J' && data[7] == 'F' && data[8] == 'I' && data[9] == 'F'){
             return nonRGBJPEGToRGBImage(data,w,h, null,pX,pY);
@@ -311,13 +311,13 @@ extends GenericColorSpace {
      * @throws org.jpedal.exception.PdfException
      */
     @Override
-    public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h, final float[] decodeArray,
+    public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h,
             final int pX, final int pY, final int d) throws PdfException {
         
         byte[] index=this.getIndexedMap();
         
         if(cs.getNumComponents()==3 || index!=null) {
-            return super.JPEG2000ToRGBImage(data, w, h, decodeArray, pX, pY,d);
+            return super.JPEG2000ToRGBImage(data, w, h, pX, pY,d);
         }else{
             return  JPEG2000ToImage(data, pX, pY);
         }

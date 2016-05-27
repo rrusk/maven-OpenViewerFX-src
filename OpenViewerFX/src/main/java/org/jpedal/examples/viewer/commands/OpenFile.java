@@ -88,12 +88,9 @@ public class OpenFile {
         inputStream = null;
 
         if (args == null) {
-            /**
-             * warn user on forms
-             */
+            
+            //warn user on forms
             SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
-
-//            currentGUI.resetNavBar();
             
             final String newFile = selectURL(commonValues, searchFrame, currentGUI, decode_pdf,properties, thumbnails);
             if (newFile != null) {
@@ -125,22 +122,16 @@ public class OpenFile {
                     newFile = null;
                 }
 
-                /**
-                 * decode pdf
-                 */
+                //decode pdf
                 if (newFile != null) {
 
                     commonValues.setFileSize(0);
                     currentGUI.setViewerTitle(null);
 
-                    /**
-                     * open the file
-                     */
+                    //open the file
                     if (!Values.isProcessing()) {
 
-                        /**
-                         * if running terminate first
-                         */
+                        //if running terminate first
                         thumbnails.terminateDrawing();
 
                         decode_pdf.flushObjectValues(true);
@@ -168,9 +159,7 @@ public class OpenFile {
                     }
 
                 } else { // no file selected so redisplay old
-
                     decode_pdf.repaint();
-                    // currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NoSelection"));
                 }
             }
         }
@@ -185,9 +174,7 @@ public class OpenFile {
 
         if (args == null) {
 
-            /**
-             * warn user on forms
-             */
+            //warn user on forms
             SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
 
             if (org.jpedal.examples.viewer.utils.Printer.isPrinting()) {
@@ -214,7 +201,6 @@ public class OpenFile {
                 if ((commonValues.getSelectedFile() != null) && !Values.isProcessing()) {
                     // reset the viewableArea before opening a new file
                     decode_pdf.resetViewableArea();
-                    /**/
 
                     try {
                         isPDf = true;
@@ -258,9 +244,8 @@ public class OpenFile {
                             if (password == null) {
                                 password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
                             }
-                            /**
-                             * try and reopen with new password
-                             */
+                            
+                            //try and reopen with new password
                             if (password != null) {
                                 decode_pdf.setEncryptionPassword(password);
                                 // decode_pdf.verifyAccess();
@@ -268,7 +253,6 @@ public class OpenFile {
                                 if (decode_pdf.isFileViewable()) {
                                     fileCanBeOpened = true;
                                 }
-
                             }
 
                             if (!fileCanBeOpened) {
@@ -285,9 +269,7 @@ public class OpenFile {
 
                             currentGUI.getRecentDocument().addToFileList(commonValues.getSelectedFile());
 
-                            /**
-                             * reset values
-                             */
+                            //reset values
                             commonValues.setCurrentPage(1);
                         }
 
@@ -302,16 +284,13 @@ public class OpenFile {
                 if (args[0] instanceof InputStream) {
 
                     inputStream = (InputStream) args[0];
-
-//                    currentGUI.resetNavBar();
+                    
                     final String newFile = "InputStream-" + System.currentTimeMillis() + ".pdf";
 
                     commonValues.setSelectedFile(newFile);
                     commonValues.setFileIsURL(true);
 
-                    /**
-                     * decode pdf
-                     */
+                    //decode pdf
                     if (inputStream != null) {
                         try {
                             commonValues.setFileSize(0);
@@ -320,25 +299,19 @@ public class OpenFile {
                             e.printStackTrace();
                         }
 
-                        /**
-                         * open the file
-                         */
+                        //open the file
                         if (!Values.isProcessing()) {
 
-                            /**
-                             * if running terminate first
-                             */
+                            //if running terminate first
                             thumbnails.terminateDrawing();
 
                             decode_pdf.flushObjectValues(true);
 
-                            // reset the viewableArea before opening a new file
+                            //reset the viewableArea before opening a new file
                             decode_pdf.resetViewableArea();
 
                             currentGUI.stopThumbnails();
-
-                            //if (!currentGUI.isSingle())
-                            //  openNewMultiplePage(commonValues.getSelectedFile());
+                            
                             try {
                                 //Set to true to show our default download window
                                 openFile(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
@@ -353,8 +326,6 @@ public class OpenFile {
 
                     } else { // no file selected so redisplay old
                         decode_pdf.repaint();
-
-                        // currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NoSelection"));
                     }
 
                 } else {
@@ -382,21 +353,14 @@ public class OpenFile {
                         file = null;
                     }
 
-                    /**
-                     * decode
-                     */
+                    //decode
                     if (file != null) {
-                        /**
-                         * save path so we reopen her for later selections
-                         */
+                        //save path so we reopen her for later selections
                         try {
                             commonValues.setInputDir(file.getParentFile().getCanonicalPath());
                             open(file.getAbsolutePath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
-                            /**
-                             * see if second value as Named Dest and store
-                             * object ref if set
-                             */
+                            //see if second value as Named Dest and store object ref if set
                             String bookmarkPage = null;
                             if (args.length > 1 && args[1] instanceof String) { //it may be a named destination ( ie bookmark=Test1)
 
@@ -443,10 +407,6 @@ public class OpenFile {
 
         currentGUI.removePageListener();
         
-//        currentGUI.setDisplayView(Display.SINGLE_PAGE, decode_pdf.getPageAlignment());
-        
-//        currentGUI.resetNavBar();
-
         final boolean isURL = file.startsWith("http:") || file.startsWith("file:");
         try {
 
@@ -464,16 +424,12 @@ public class OpenFile {
             LogWriter.writeLog("Exception " + e + " getting paths");
         }
 
-        /**
-         * check file exists
-         */
+        //check file exists
         final File testFile = new File(commonValues.getSelectedFile());
         if (!isURL && !testFile.exists()) {
             currentGUI.showMessageDialog(Messages.getMessage("PdfViewerFile.text") + commonValues.getSelectedFile() + Messages.getMessage("PdfViewerNotExist"));
 
-            /**
-             * open the file
-             */
+            //open the file
         } else if (commonValues.getSelectedFile() != null && !Values.isProcessing()) {
 
             if (currentGUI.isSingle()) {
@@ -484,7 +440,6 @@ public class OpenFile {
 
             //reset the viewableArea before opening a new file
             decode_pdf.resetViewableArea();
-            /**/
 
             openFile(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
@@ -492,8 +447,6 @@ public class OpenFile {
         
         
         if(isPDf){ 
-            //When opening set displaymode to -1 to force viewer to intialise display mode
-            decode_pdf.getDecoderOptions().setDisplayView(-1);
             currentGUI.setDisplayView(decode_pdf.getDecoderOptions().getPageMode(), decode_pdf.getPageAlignment());
         }
     }
@@ -549,9 +502,7 @@ public class OpenFile {
         }
         
         commonValues.setCurrentPage(1);
-
-        //Thread t = new Thread(new Runnable(){
-        //public void run() {
+        
         try {
             final boolean fileCanBeOpened = openUpFile(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
@@ -569,11 +520,6 @@ public class OpenFile {
             
             LogWriter.writeLog(Messages.getMessage("PdfViewerError.Exception") + ' ' + e + ' ' + Messages.getMessage("PdfViewerError.DecodeFile"));
         }
-        //}
-
-        //});
-        //t.start();
-        //commonValues.setProcessing(false);
     }
 
     /**
@@ -598,24 +544,15 @@ public class OpenFile {
             decode_pdf.closePdfFile();
         }
 
-        /**
-         * ensure all data flushed from PdfDecoder before we decode the file
-         */
-        //decode_pdf.flushObjectValues(true);
+        //ensure all data flushed from PdfDecoder before we decode the file
         try {
-            //System.out.println("commonValues.isPDF() = "+commonValues.isPDF()+" <<<");
-            /**
-             * opens the pdf and reads metadata
-             */
+            //opens the pdf and reads metadata
             if (commonValues.isPDF()) {
                 if (inputStream != null || selectedFile.startsWith("http") || selectedFile.startsWith("file:") || selectedFile.startsWith("jar:")) {
                     try {
 
                         //<link><a name="linearized" />
-                        /**
-                         * code below checks if file linearized and loads rest
-                         * in background if it is
-                         */
+                        //code below checks if file linearized and loads rest in background if it is
                         boolean isLinearized = false;
 
                         //use for all inputStream as we can't easily test
@@ -649,18 +586,14 @@ public class OpenFile {
                                 t.setDaemon(true);
                                 t.start();
                                 dlp.startDownload();
-
-                                //currentGUI.showMessageDialog("cached 4");
+                                
                                 final File tempFile = dlp.getFile();
-
-                                //currentGUI.showMessageDialog("about to open "+tempFile.getCanonicalPath());
+                                
                                 decode_pdf.openPdfFile(tempFile.getCanonicalPath());
-                                //currentGUI.showMessageDialog("opened");
                             }
 
                         } else {
-
-                            //currentGUI.showMessageDialog("loading linearized");
+                            
                             //update viewer to show this
                             currentGUI.setViewerTitle("Loading linearized PDF " + commonValues.getSelectedFile());
 
@@ -695,7 +628,6 @@ public class OpenFile {
 
                                         try {
                                             Thread.sleep(1000);
-                                            //System.out.println(".");
                                         } catch (final InterruptedException e) {
                                             e.printStackTrace();
                                         }
@@ -733,7 +665,6 @@ public class OpenFile {
                             fis = new FileInputStream(commonValues.getSelectedFile());
                             fis.read(bytes);
                             decode_pdf.openPdfArray(bytes);
-                            //System.out.println("open via decode_pdf.openPdfArray(bytes)");
 
                         } catch (final Exception e) {
                             e.printStackTrace();  
@@ -843,12 +774,10 @@ public class OpenFile {
                     
                 }
             }
-            //<<>>
+            
             currentGUI.updateStatusMessage("opening file");
 
-            /**
-             * popup window if needed
-             */
+            //popup window if needed
             if ((fileCanBeOpened) && (decode_pdf.isEncrypted()) && (!decode_pdf.isFileViewable())) {
                 fileCanBeOpened = false;
 
@@ -856,9 +785,8 @@ public class OpenFile {
                 if (password == null) {
                     password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
                 }
-                /**
-                 * try and reopen with new password
-                 */
+                
+                //try and reopen with new password
                 if (password != null) {
                     decode_pdf.setEncryptionPassword(password);
                     //decode_pdf.verifyAccess();
@@ -887,9 +815,7 @@ public class OpenFile {
 
                 currentGUI.getRecentDocument().addToFileList(commonValues.getSelectedFile());
 
-                /**
-                 * reset values
-                 */
+                //reset values
                 commonValues.setCurrentPage(1);
             }
 
@@ -927,9 +853,7 @@ public class OpenFile {
             searchFrame.removeSearchWindow(false);
         }
 
-        /**
-         * create the file chooser to select the file
-         */
+        //create the file chooser to select the file
         final JFileChooser chooser = new JFileChooser(commonValues.getInputDir());
         chooser.setName("chooser");
         if (commonValues.getSelectedFile() != null) {
@@ -948,13 +872,9 @@ public class OpenFile {
 
         final File file = chooser.getSelectedFile();
 
-        /**
-         * decode
-         */
+        //decode
         if (file != null && state == JFileChooser.APPROVE_OPTION) {
-
-//            currentGUI.resetNavBar();
-
+            
             final String ext = file.getName().toLowerCase();
             final boolean isValid = ((ext.endsWith(".pdf")) || (ext.endsWith(".fdf"))
                     || (ext.endsWith(".tif")) || (ext.endsWith(".tiff"))
@@ -962,9 +882,7 @@ public class OpenFile {
                     || (ext.endsWith(".jpg")) || (ext.endsWith(".jpeg")));
 
             if (isValid) {
-                /**
-                 * save path so we reopen her for later selections
-                 */
+                //save path so we reopen her for later selections
                 try {
                     commonValues.setInputDir(chooser.getCurrentDirectory().getCanonicalPath());
                     open(file.getAbsolutePath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
@@ -992,22 +910,16 @@ public class OpenFile {
 
         if (commonValues.isPDF() && ((decode_pdf.isOpen() || !commonValues.isPDF() || decode_pdf.getJPedalObject(PdfDictionary.Linearized) != null))) {
 
-            /**
-             * get PRODUCER and if OCR disable text printing
-             */
+            //get PRODUCER and if OCR disable text printing
             final PdfFileInformation currentFileInformation = decode_pdf.getFileInformationData();
 
-            /**
-             * switch all on by default
-             */
+            //switch all on by default
             decode_pdf.setRenderMode(PdfDecoderInt.RENDERIMAGES + PdfDecoderInt.RENDERTEXT);
 
             final String[] values = currentFileInformation.getFieldValues();
             final String[] fields = PdfFileInformation.getFieldNames();
 
-            /**
-             * holding all creators that produce OCR pdf's
-             */
+            //holding all creators that produce OCR pdf's
             final String[] ocr = {"TeleForm", "dgn2pdf","ABBYY FineReader 8.0 Professional Edition"};
 
             for (int i = 0; i < fields.length; i++) {
@@ -1026,9 +938,7 @@ public class OpenFile {
             }
         }
 
-        /**
-         * special customisations for images
-         */
+        //special customisations for images
         if (commonValues.isPDF()) {
             commonValues.setPageCount(decode_pdf.getPageCount());
         } else if (!commonValues.isMultiTiff()) {
@@ -1044,9 +954,7 @@ public class OpenFile {
         //values extraction mode,dpi of images, dpi of page as a factor of 72
         decode_pdf.setExtractionMode(PdfDecoderInt.TEXT, currentGUI.getScaling());
 
-        /**
-         * update the display, including any rotation
-         */
+        //update the display, including any rotation
         currentGUI.setPageNumber();
 
         currentGUI.resetRotationBox();
@@ -1122,38 +1030,25 @@ public class OpenFile {
 
         }
         
-        //ensure immediate redraw of blank screen
-        //decode_pdf.invalidate();
-        //decode_pdf.repaint();
-        
-        /**
-         * decode
-         */
+        //decode
         if (selectedFile != null ) {
             try {
                 
                 commonValues.setFileSize(0);
                 
-                /** save path so we reopen her for later selections */
-                //commonValues.setInputDir(new URL(commonValues.getSelectedFile()).getPath());
-                
+                //save path so we reopen her for later selections                
                 currentGUI.setViewerTitle(null);
                 
             } catch (final Exception e) {
                 System.err.println(Messages.getMessage("PdfViewerError.Exception")+ ' ' + e + ' ' +Messages.getMessage("PdfViewerError.GettingPaths"));
             }
             
-            /**
-             * open the file
-             */
+            //open the file
             if ((selectedFile != null) && (!Values.isProcessing())) {
                 
-                /**
-                 * trash previous display now we are sure it is not needed
-                 */
-                //decode_pdf.repaint();
+                //trash previous display now we are sure it is not needed
                 
-                /** if running terminate first */
+                //if running terminate first
                 thumbnails.terminateDrawing();
                 
                 decode_pdf.flushObjectValues(true);

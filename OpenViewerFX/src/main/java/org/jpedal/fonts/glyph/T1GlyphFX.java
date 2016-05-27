@@ -32,7 +32,6 @@
  */
 package org.jpedal.fonts.glyph;
 
-import java.awt.Rectangle;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -278,7 +277,7 @@ public class T1GlyphFX extends BaseT1Glyph
                         break;
                     }
 
-                    final Rectangle b=paths[i].getBounds();
+                    final java.awt.Rectangle b=paths[i].getBounds();
                     if(i==0){
                         minX=b.x;
                         minY=b.y;

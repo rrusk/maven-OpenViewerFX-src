@@ -106,7 +106,7 @@ public class MarkedContentGenerator {
         //read values as needed
         this.currentPdfFile.checkResolved(structTreeRootObj);
         
-        /**
+        /*
          * create the empty XMLtree and root to add data onto
          **/
         if(!isHTML){
@@ -121,7 +121,7 @@ public class MarkedContentGenerator {
             //choose appropriate method
             if(hasTree){
                 
-                /**
+                /*
                  * scan PDF and add nodes to XML tree
                  */
                 buildTree(structTreeRootObj);
@@ -157,7 +157,6 @@ public class MarkedContentGenerator {
         
         doc =  db.newDocument();
         
-        /**add creator comment*/
         doc.appendChild(doc.createComment(" Created from JPedal "));
         doc.appendChild(doc.createComment(" http://www.idrsolutions.com "));
         
@@ -167,10 +166,7 @@ public class MarkedContentGenerator {
      * scan down PDF struct object, creating XML tree
      */
     private void buildTree(PdfObject structTreeRootObj) {
-        
-        /**
-         * create root and attach
-         **/
+
         root = doc.createElement("TaggedPDF-doc");
         doc.appendChild(root);
         
@@ -178,7 +174,7 @@ public class MarkedContentGenerator {
     }
 
     public void traverseContentTree(PdfObject structTreeRootObj) {
-        /**
+        /*
          * read struct K value and decide what type
          * (can be dictionary or Array so we check both options)
          */
@@ -452,7 +448,6 @@ public class MarkedContentGenerator {
             try{
                 isDecoding=true;
                     
-                /** the ObjectStore for this file */
                 final ObjectStore objectStoreRef = new ObjectStore();
 
                 final PdfStreamDecoder current = new PdfStreamDecoder(currentPdfFile,layers);

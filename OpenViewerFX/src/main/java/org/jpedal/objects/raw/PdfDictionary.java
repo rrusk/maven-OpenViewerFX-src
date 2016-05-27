@@ -839,7 +839,7 @@ public class PdfDictionary {
     
     public static final int Squiggly=1517846914;
     
-    public static final int ST=8996;
+    public static final int St=9028;
 
     public static final int Stamp=1144077667;
 
@@ -944,8 +944,10 @@ public class PdfDictionary {
 
     public static final int Validate = 1516404846;
     
-    public static final int VerticesPerRow = -1180057884;
+    public static final int Vertices = 1600681863;
 
+    public static final int VerticesPerRow = -1180057884;
+    
     public static final int View=641283399;
     
     public static final int ViewState=2103872382;
@@ -1841,7 +1843,7 @@ public class PdfDictionary {
                 if(type==Linearized) {
                     return VALUE_IS_INT;
                 } else {
-                    return PDFkey;
+                    return VALUE_IS_FLOAT_ARRAY;
                 }
 
             case Lang:
@@ -2268,7 +2270,7 @@ public class PdfDictionary {
             case Sound:
                 return VALUE_IS_UNREAD_DICTIONARY;
 
-            case ST:
+            case St:
                 return VALUE_IS_INT;
                 
             case State:
@@ -2404,6 +2406,9 @@ public class PdfDictionary {
                 
             case VerticesPerRow:
                     return VALUE_IS_INT;
+   
+            case Vertices:
+                    return VALUE_IS_FLOAT_ARRAY;
 
            case VP:
                 return VALUE_IS_OBJECT_ARRAY;

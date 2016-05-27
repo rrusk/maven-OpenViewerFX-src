@@ -98,7 +98,7 @@ public abstract class PDFtoImageConvertor {
 
         final ObjectStore localStore = new ObjectStore();
 
-        /** read page or next pages */
+        /* read page or next pages */
         final PdfObject pdfObject=new PageObject(currentPageOffset);
         currentPdfFile.readObject(pdfObject);
 
@@ -176,7 +176,7 @@ public abstract class PDFtoImageConvertor {
 
             externalHandlers.addHandlers(currentImageDecoder2);
 
-            /** bare minimum to get value*/
+            /* bare minimum to get value*/
             multiplyer=currentImageDecoder2.decodePageContentForImageSampling(pdfObject);
 
             int bestQualityMaxScalingToUse = 0;
@@ -205,7 +205,7 @@ public abstract class PDFtoImageConvertor {
             multiplyer = 1;
         }
 
-        /**
+        /*
          * setup positions,transformations and image
          */
         imageScaling = PDFtoImageConvertorSwing.setPageParametersForImage(scaling*multiplyer, pageIndex,pageData);
@@ -216,7 +216,7 @@ public abstract class PDFtoImageConvertor {
 
         resultsFromDecode.update(currentImageDecoder, false);
         
-        /**
+        /*
          * draw acroform data onto Panel
          */
         if (formRenderer != null && formRenderer.hasFormsOnPage(pageIndex) && !formRenderer.ignoreForms()) {

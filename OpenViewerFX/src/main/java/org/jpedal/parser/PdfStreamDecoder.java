@@ -193,7 +193,7 @@ public class PdfStreamDecoder extends BaseDecoder{
     static{
         SamplingFactory.setDownsampleMode(null);
         
-        /**
+        /*
          * we have PDFs which crashes JVM so workaround to avoid this.
          */
         final String maxShapes=System.getProperty("org.jpedal.maxShapeCount");
@@ -276,7 +276,7 @@ public class PdfStreamDecoder extends BaseDecoder{
             //save for later
             if (parserOptions.isRenderPage()){
                 
-                /**
+                /*
                  * check setup and throw exception if null
                  */
                 if(current==null) {
@@ -366,7 +366,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 
                 break;
                 
-                /**
+                /*
                  * pass in status bar object
                  *
                  */
@@ -378,7 +378,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 this.layers=(PdfLayerList) obj;
                 break;
                 
-                /**
+                /*
                  * used internally for structured content extraction.
                  */
             case ValueTypes.MarkedContent:
@@ -403,7 +403,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 }
                 break;
                 
-                /**
+                /*
                  * setup stream decoder to render directly to g2
                  * (used by image extraction)
                  */
@@ -417,7 +417,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 }
                 break;
                 
-                /** should be called after constructor or other methods may not work*/
+                /* should be called after constructor or other methods may not work*/
             case ValueTypes.ObjectStore:
                 objectStoreStreamRef = (ObjectStore)obj;
                     
@@ -588,7 +588,7 @@ public class PdfStreamDecoder extends BaseDecoder{
             statusBar.resetStatus("stream");
         }
         
-        /**
+        /*
          * loop to read stream and decode
          */
         while (true) {
@@ -612,12 +612,12 @@ public class PdfStreamDecoder extends BaseDecoder{
                 dataPointer=-dataPointer;
                 try{
                     
-                    /**
+                    /*
                      * call method to handle commands
                      */
                     final int commandType=Cmd.getCommandType(commandID);
                     
-                    /**text commands first and all other
+                    /*text commands first and all other
                      * commands if not found in first
                      **/
                     switch(commandType){
@@ -1209,14 +1209,11 @@ public class PdfStreamDecoder extends BaseDecoder{
         
         switch(key){
             
-            /**
-             * currentPage number
-             */
-            case ValueTypes.PageNum:
+           case ValueTypes.PageNum:
                 parserOptions.setPageNumber(value);
                 break;
                 
-                /**
+                /*
                  * tells program to try and use Java's font printing if possible
                  * as work around for issue with PCL printing
                  */
@@ -1234,7 +1231,7 @@ public class PdfStreamDecoder extends BaseDecoder{
         
         parserOptions.init(isPageContent, renderPage, renderMode, extractionMode, isPrinting, useJavaFX);
         
-        /**
+        /*
          * flags
          */
         

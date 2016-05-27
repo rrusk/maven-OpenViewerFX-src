@@ -71,9 +71,9 @@ public class DefaultImageHelper{
 
     }
 
-    public static BufferedImage JPEG2000ToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY) throws PdfException {
+    public static BufferedImage JPEG2000ToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY) throws PdfException {
 
 
-        return customHelper.JPEG2000ToRGBImage(data, w, h, decodeArray, pX, pY);
+        return customHelper.JPEG2000ToRGBImage(data, w, h, pX, pY);
     }
 }

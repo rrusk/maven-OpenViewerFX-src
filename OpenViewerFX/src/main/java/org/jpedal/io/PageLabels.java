@@ -55,6 +55,8 @@ public class PageLabels extends HashMap<Integer, String>{
                                                 "O", "P", "Q", "R", "S", "T", "U", "V", "X", "W", "Y", "Z"};
     static final int[] power={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
         
+    static boolean storePageLabels;
+    
     PageLabels(PdfFileReader objectReader, int pageCount) {
         this.objectReader=objectReader;
         this.pageCount=pageCount;
@@ -64,55 +66,79 @@ public class PageLabels extends HashMap<Integer, String>{
       
         PdfArrayIterator numList =pageObj.getMixedArray(PdfDictionary.Nums);
         
-        if(numList!=null && objectReader!=null){
-             
-            int startPage,endPage,numbType,ST,pageNum=1;
+        if(numList!=null && objectReader!=null && numList.hasMoreTokens()){
+            
+            int endPage,numbType,St,pageNum;
             String convertedPage,pageLabel;
+            PageLabelObject labelObj;
+
+            //read first page values
+            int startPage=numList.getNextValueAsInteger(true)+1;
+
             while(numList.hasMoreTokens()){
-                
-                //read Page 
-                startPage=numList.getNextValueAsInteger()+1;
-                
+
                 //read LabelObject
-                String key=numList.getNextValueAsString(true);
-                final PageLabelObject labelObj  = new PageLabelObject(key);
-                objectReader.readObject(labelObj);
+                labelObj  = getObject(numList.getNextValueAsByte(true));
 
                 numbType=labelObj.getNameAsConstant(PdfDictionary.S);
                 pageLabel=labelObj.getTextStreamValue(PdfDictionary.P);
                
-                ST=labelObj.getInt(PdfDictionary.ST);
-                if(ST>0){
-                    pageNum=ST;
-                }else{
-                    pageNum=1;
+                if (numbType==20 && pageLabel==null) {
+                    storePageLabels = false;
+                }
+                else {
+                    storePageLabels = true;
                 }
                 
-                if(numList.hasMoreTokens()){
-                   endPage=numList.getNextValueAsInteger(false)+1; 
-                }else{
-                    endPage=pageCount+1;
-                }
-                
-                //now decode type of naming and fill range
-                for(int page=startPage;page<endPage;page++){
-                    
-                    if(pageLabel!=null){
-                        convertedPage= pageLabel;
-                        if(ST>0){
-                            pageLabel=pageLabel.concat(getNumberValue(numbType, ST));  
-                            ST++;
-                        }
+                St=labelObj.getInt(PdfDictionary.St);
+                    if(St>0){
+                        pageNum=St;
                     }else{
-                        convertedPage = getNumberValue(numbType, pageNum);
+                        pageNum=1;
                     }
-                        
-                    this.put(page, convertedPage);
                     
-                    pageNum++;
-                }            
-            }
+                    if(numList.hasMoreTokens()){
+                       endPage=numList.getNextValueAsInteger(true)+1;
+                    }else{
+                        endPage=pageCount+1;
+                    }
+
+                    //now decode type of naming and fill range
+                    for(int page=startPage;page<endPage;page++){
+                        
+                        if(pageLabel!=null){
+                            convertedPage = pageLabel + getNumberValue(numbType, pageNum);  
+                        }else{
+                            convertedPage = getNumberValue(numbType, pageNum);
+                        }
+                        
+                        //Second parameter is needed for if no P or ST set but page labels are different
+                        if (storePageLabels || !convertedPage.equals(Integer.toString(page))){
+                            this.put(page, convertedPage);
+                        }
+                        pageNum++;
+                    }
+
+                    startPage=endPage;
+                }
         }
+    }
+
+    private PageLabelObject getObject(byte[] data) {
+        
+        final PageLabelObject labelObj  = new PageLabelObject(new String(data));
+
+        if(data[0]=='<') {
+            labelObj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            labelObj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        labelObj.setUnresolvedData(data,PdfDictionary.PageLabels);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(this.objectReader);
+        objectDecoder.checkResolved(labelObj);
+        
+        return labelObj;
     }
 
     static String getNumberValue(int numbType, int page) {
@@ -141,7 +167,7 @@ public class PageLabels extends HashMap<Integer, String>{
                 break;
                 
             default:
-                convertedPage=String.valueOf(page);
+                convertedPage="";
         }
         return convertedPage;
     }

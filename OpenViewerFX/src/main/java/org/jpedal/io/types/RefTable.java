@@ -92,12 +92,12 @@ public class RefTable {
         int i = 1019;
         final StringBuilder startRef = new StringBuilder(10);
         
-        /**move to end of file and read last 1024 bytes*/
+        /* move to end of file and read last 1024 bytes*/
         final int block=1024;
         byte[] lastBytes = new byte[block];
         long end;
         
-        /**
+        /*
          * set endpoint, losing null chars and anything before EOF
          */
         final int[] EndOfFileMarker={37,37,69,79};
@@ -106,7 +106,7 @@ public class RefTable {
         try {
             end=eof;
             
-            /**
+            /*
              * lose nulls and other trash from end of file
              */
             final int bufSize=255;
@@ -200,7 +200,7 @@ public class RefTable {
             
         }
         
-        /**trap buggy files*/
+        /*trap buggy files*/
         if(i==-1){
             try {
                 closeFile();
@@ -226,7 +226,7 @@ public class RefTable {
             i++;
         }
         
-        /**convert xref to string to get pointer*/
+        /*convert xref to string to get pointer*/
         if (startRef.length() > 0) {
             pointer = Integer.parseInt(startRef.toString());
         }
@@ -331,7 +331,7 @@ public class RefTable {
         byte[] Bytes  ;
         int bufSize = 1024;
         
-        /**read and decode 1 or more trailers*/
+        /*read and decode 1 or more trailers*/
         while (true) {
             
             try {
@@ -354,7 +354,7 @@ public class RefTable {
                 break;
             }
             
-            /**get trailer*/
+            //get trailer
             int i = 0;
             
             final int maxLen=Bytes.length;
@@ -383,7 +383,7 @@ public class RefTable {
             }
             
             i++;
-            final PdfObject pdfObject=new CompressedObject("1 0 R");
+            final PdfObject pdfObject=new CompressedObject("0 0 R");
             Dictionary.readDictionary(pdfObject, i, Bytes, -1, true,currentPdfFile, false);
             
             //move to beyond >>
@@ -422,10 +422,7 @@ public class RefTable {
                 
                 boolean hasRef=true;
                 
-                /**
-                 * handle spaces and comments
-                 */
-                while (Bytes[i] ==10 || Bytes[i] ==13) {
+               while (Bytes[i] ==10 || Bytes[i] ==13) {
                     i++;
                 }
                 
@@ -465,7 +462,7 @@ public class RefTable {
                         i++;
                     }
                     
-                    /**convert xref to string to get pointer*/
+                    /*convert xref to string to get pointer*/
                     if (s!=i) {
                         pointer = NumberUtils.parseInt(s, i, Bytes);
                     }
@@ -483,7 +480,7 @@ public class RefTable {
             if (pointer == -1){
                 LogWriter.writeLog("No startRef");
                 
-                /**now read the objects for the trailers*/
+                /*now read the objects for the trailers*/
             } else if (Bytes[i] == 120 && Bytes[i+1] == 114 && Bytes[i+2] == 101 && Bytes[i+3] == 102) { //make sure starts xref
                 
                 i = 5;
@@ -495,7 +492,7 @@ public class RefTable {
                 
                 current = offset.readXRefs(current, Bytes, endTable, i,eof,pdf_datafile);
                 
-                /**now process trailer values - only first set of table values for root, encryption and info*/
+                /*now process trailer values - only first set of table values for root, encryption and info*/
                 if (rootObj==null) {
                     
                     rootObj=pdfObject.getDictionary(PdfDictionary.Root);
@@ -602,14 +599,14 @@ public class RefTable {
         
         while (pointer != -1) {
             
-            /**
+            /*
              * get values to read stream ref
              */
             movePointer(pointer);
             
             final byte[] raw = objectReader.readObjectData(-1, null);
             
-            /**read the object name from the start*/
+            /*read the object name from the start*/
             final StringBuilder objectName=new StringBuilder();
             char current1,last=' ';
             int matched=0, i1 =0;
@@ -673,7 +670,7 @@ public class RefTable {
                 }
             }
             
-            /**
+            /*
              * now process trailer values - only first set of table values for
              * root, encryption and info
              */
@@ -681,9 +678,6 @@ public class RefTable {
                 
                 rootObj=pdfObject.getDictionary(PdfDictionary.Root);
                 
-                /**
-                 * handle encryption
-                 */
                 encryptObj=pdfObject.getDictionary(PdfDictionary.Encrypt);
                 
                 if (encryptObj != null) {
@@ -761,7 +755,7 @@ public class RefTable {
         
         while (true) {
             
-            /** adjust buffer if less than 1024 bytes left in file */
+            /* adjust buffer if less than 1024 bytes left in file */
             if (pointer + bufSize > eof) {
                 bufSize = eof - pointer;
             }
@@ -784,7 +778,7 @@ public class RefTable {
             
             firstRead=false; //switch off
             
-            /**look for xref or obj */
+            /*look for xref or obj */
             for (int i = 0; i < bufSize; i++) {
                 
                 final byte currentByte = buffer[i];
@@ -793,7 +787,7 @@ public class RefTable {
                     System.out.print((char) currentByte);
                 }
                 
-                /** check for xref OR end - reset if not */
+                /* check for xref OR end - reset if not */
                 if (currentByte == oldPattern[charReached_legacy] && type!=COMPRESSED){
                     charReached_legacy++;
                     type=LEGACY;
@@ -829,7 +823,7 @@ public class RefTable {
             
         }
         
-        /**
+        /*
          * throw exception if no match or tell user which type
          */
         if(type==UNSET){

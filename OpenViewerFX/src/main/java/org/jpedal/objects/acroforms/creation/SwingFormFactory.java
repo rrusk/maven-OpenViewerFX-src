@@ -191,6 +191,62 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         
         return but;
     }
+        
+    private JButton createAnnotationLine(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
+            
+    private JButton createAnnotationPoly(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
+    
+    private JButton createAnnotationCaret(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
+    
+    private JButton createAnnotationFileAttachment(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
+    
+    private JButton createAnnotationCircle(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
+    
+     private JButton createAnnotationSquiggly(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
+    
+    private JButton createAnnotationSound(final FormObject form) {
+        JButton but = setupAnnotationButton(form);
+        but.setBackground(new Color(0, 0, 0, 0));
+        but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
+        
+        return but;
+    }
     
     /**
      * setup annotations display with popups, etc
@@ -204,7 +260,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         if(subtype == PdfDictionary.Popup){
             return createAnnotationPopup(form);
         }
-        /**
+        /*
          * @kieran - there are several types of annotation (Underline, highlight, Ink).
          *
          * We implemented them by adding a button and putting the content on the button's image
@@ -227,6 +283,23 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
                     return createAnnotationStrikeOut(form);
                 case PdfDictionary.Square :
                     return createAnnotationSquare(form);
+                case PdfDictionary.Caret :
+                    return createAnnotationCaret(form);
+                case PdfDictionary.Line :
+                    return createAnnotationLine(form);
+                case PdfDictionary.Polygon :
+                    return createAnnotationPoly(form);
+                case PdfDictionary.PolyLine :
+                    return createAnnotationPoly(form);
+                case PdfDictionary.Circle : 
+                    return createAnnotationCircle(form);
+                case PdfDictionary.Squiggly : 
+                    return createAnnotationSquiggly(form);
+                case PdfDictionary.FileAttachment :
+                    return createAnnotationFileAttachment(form);
+                case PdfDictionary.Sound :
+                    return createAnnotationSound(form);
+                    
             }
         }
         
@@ -619,7 +692,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
             
             comboBox = new JComboBox<String>(items);
             
-            /**
+            /*
              * allow background colour in cells
              */
             final Color backgroundColor = FormObject.generateColor(form.getDictionary(PdfDictionary.MK).getFloatArray(PdfDictionary.BG));
@@ -808,7 +881,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
             	doc.setParagraphAttributes(0, doc.getLength(), center, false);
             }
             
-            /**
+            /*
              * ensure we sync back to FormObject if altered
              */
             newTextarea.getDocument().addDocumentListener(new TextDocumentListener(newTextarea,form));
@@ -837,7 +910,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
           	
           	doc.setParagraphAttributes(0, doc.getLength(), center, false);
           }
-            /**
+            /*
              * ensure we sync back to FormObject if altered
              */
             newTextarea.getDocument().addDocumentListener(new TextDocumentListener(newTextarea,form));
@@ -1085,7 +1158,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
             c.setBlinkRate(0);
         }
         
-        /**
+        /*
          * ensure we sync back to FormObject if altered
          */
         textcomp.getDocument().addDocumentListener(new TextDocumentListener(textcomp,form));
@@ -1099,7 +1172,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
      */
     private void setupButton(final AbstractButton comp, final FormObject form) {
         
-        /**
+        /*
          * put in group (just store first time as you cannot have 1 button in group)
          */
         String name=form.getTextStreamValue(PdfDictionary.T);
@@ -1185,7 +1258,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         
         comp.addMouseListener((MouseListener)formsActionHandler.setHoverCursor());
         
-        /**
+        /*
          * ensure we sync back to FormObject if altered
          */
         comp.addChangeListener(new RadioListener(comp,form));

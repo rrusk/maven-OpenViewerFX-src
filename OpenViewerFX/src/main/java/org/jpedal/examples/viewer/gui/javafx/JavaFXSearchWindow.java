@@ -79,10 +79,10 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
  */
 public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     
-    /**Flag to show search has happened and needs reset*/
+    /*Flag to show search has happened and needs reset*/
     public boolean hasSearched;
     
-    /**flag to show searching taking place*/
+    /*flag to show searching taking place*/
     public boolean isSearch;
     
     int firstPageWithResults;
@@ -95,7 +95,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     final GUIFactory currentGUI;
     PdfDecoderInt decode_pdf;
     
-    /**flag to stop multiple listeners*/
+    /*flag to stop multiple listeners*/
     private boolean isSetup;
     
     boolean usingMenuBarSearch;
@@ -257,7 +257,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                     
                 }
                 
-                /**
+                /*
                  * show time and memory usage
                  */
                 if(GUI.debugFX){
@@ -290,7 +290,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     
     public boolean requestInterupt;
     
-    /**
+    /*
      * deletes message when user starts typing
      */
     private boolean deleteOnClick;
@@ -309,13 +309,13 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     Button searchButton;
     ObservableList<String> listModel;
     
-    /**Search this page only*/
+    /*Search this page only*/
     boolean singlePageSearch;
     
-    /**Current Search value*/
+    /*Current Search value*/
     String[] searchTerms = {""};
     
-    /**number fo search items*/
+    /*number of search items*/
     private int itemFoundCount;
     
     final Map<Integer, Integer> textPages=new HashMap<Integer, Integer>();
@@ -339,7 +339,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
         
         //		System.out.println("clicked pdf = "+decode_pdf.getClass().getName() + "@" + Integer.toHexString(decode_pdf.hashCode()));
         
-        /**
+        /*
          * pop up new window to search text (initialise if required
          */
         if(!backGroundSearch){
@@ -541,14 +541,13 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
             resultsList = new JavaFXSearchList(listModel, textPages, textRectangles);
             resultsList.setId("results");
             
-            //<link><a name="search" />
-            /**
+            /*
              * highlight text on item selected
              */
             resultsList.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
                 @Override
                 public void changed(final ObservableValue<? extends Number> ov, final Number t, final Number t1) {
-                    /**
+                    /*
                      * Only do something on mouse button up, prevents this code
                      * being called twice on mouse click
                      */
@@ -578,7 +577,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                                     
                                     currentGUI.resetStatusMessage(Messages.getMessage("PdfViewer.LoadingPage") + ' ' + commonValues.getCurrentPage());
                                     
-                                    /**
+                                    /*
                                      * reset as rotation may change!
                                      */
                                     decode_pdf.setPageParameters(scaling, commonValues.getCurrentPage());
@@ -596,7 +595,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                                     }
                                 }
                                 
-                                /**
+                                /*
                                  * Highlight all search results on page.
                                  */
                                 if ((searchTypeParameters & SearchType.HIGHLIGHT_ALL_RESULTS) == SearchType.HIGHLIGHT_ALL_RESULTS) {
@@ -850,7 +849,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                     System.err.println("Implementation of tab bar not here yet for JavaFX");
                 }
                 
-                /**
+                /*
                  * Finalise the Stage, add items and scene.
                  */
                 final BorderPane bp = new BorderPane();
@@ -901,7 +900,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
         }
     }
     
-    /**
+    /*
      * Reset search text and menu bar buttons when opening new page
      */
     @Override
@@ -1119,7 +1118,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
         
         final SortedMap highlightsWithTeasers = grouping.findTextWithinInAreaWithTeasers(x1, y1, x2, y2, pageSize.getRotation(page), searchTerms, searchTypeParameters, listener);
         
-        /**
+        /*
          * update data structures with results from this page
          */
         if (!highlightsWithTeasers.isEmpty()) {

@@ -88,7 +88,7 @@ public class JavaFXOpenFile {
 
         if (args == null) {
 
-            /**
+            /*
              * warn user on forms
              */
             SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
@@ -117,7 +117,6 @@ public class JavaFXOpenFile {
                 if ((commonValues.getSelectedFile() != null) && !Values.isProcessing()) {
                     // reset the viewableArea before opening a new file
                     decode_pdf.resetViewableArea();
-                    /**/
 
                     try {
                         commonValues.setMultiTiff(false);
@@ -153,7 +152,7 @@ public class JavaFXOpenFile {
                             if (password == null) {
                                 password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
                             }
-                            /**
+                            /*
                              * try and reopen with new password
                              */
                             if (password != null) {
@@ -180,7 +179,7 @@ public class JavaFXOpenFile {
 
                             currentGUI.getRecentDocument().addToFileList(commonValues.getSelectedFile());
 
-                            /**
+                            /*
                              * reset values
                              */
                             commonValues.setCurrentPage(1);
@@ -204,7 +203,7 @@ public class JavaFXOpenFile {
                     commonValues.setSelectedFile(newFile);
                     commonValues.setFileIsURL(true);
 
-                    /**
+                    /*
                      * decode pdf
                      */
                     if (inputStream != null) {
@@ -215,12 +214,12 @@ public class JavaFXOpenFile {
                             e.printStackTrace();
                         }
 
-                        /**
+                        /*
                          * open the file
                          */
                         if (!Values.isProcessing()) {
 
-                            /**
+                            /*
                              * if running terminate first
                              */
                             thumbnails.terminateDrawing();
@@ -274,11 +273,11 @@ public class JavaFXOpenFile {
                         file = null;
                     }
 
-                    /**
+                    /*
                      * decode
                      */
                     if (file != null) {
-                        /**
+                        /*
                          * save path so we reopen her for later selections
                          */
                         try {
@@ -286,7 +285,7 @@ public class JavaFXOpenFile {
                             
                             open(file.getAbsolutePath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
-                            /**
+                            /*
                              * see if second value as Named Dest and store
                              * object ref if set
                              */
@@ -337,7 +336,7 @@ public class JavaFXOpenFile {
         inputStream = null;
 
         if (args == null) {
-            /**
+            /*
              * warn user on forms
              */
             SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
@@ -374,7 +373,7 @@ public class JavaFXOpenFile {
                     newFile = null;
                 }
 
-                /**
+                /*
                  * decode pdf
                  */
                 if (newFile != null) {
@@ -382,12 +381,12 @@ public class JavaFXOpenFile {
                     commonValues.setFileSize(0);
                     currentGUI.setViewerTitle(null);
 
-                    /**
+                    /*
                      * open the file
                      */
                     if (!Values.isProcessing()) {
 
-                        /**
+                        /*
                          * if running terminate first
                          */
                         thumbnails.terminateDrawing();
@@ -517,7 +516,7 @@ public class JavaFXOpenFile {
             LogWriter.writeLog("Exception " + e + " getting paths");
         }
 
-        /**
+        /*
          * check file exists
          */
         final File testFile = new File(commonValues.getSelectedFile());
@@ -531,7 +530,6 @@ public class JavaFXOpenFile {
 
             //reset the viewableArea before opening a new file
             //decode_pdf.resetViewableArea();
-            /**/
 
             openFile(commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
@@ -545,12 +543,12 @@ public class JavaFXOpenFile {
 
         if (commonValues.isPDF() && ((decode_pdf.isOpen() || !commonValues.isPDF() || decode_pdf.getJPedalObject(PdfDictionary.Linearized) != null))) {
 
-            /**
+            /*
              * get PRODUCER and if OCR disable text printing
              */
             final PdfFileInformation currentFileInformation = decode_pdf.getFileInformationData();
 
-            /**
+            /*
              * switch all on by default
              */
             decode_pdf.setRenderMode(PdfDecoderInt.RENDERIMAGES + PdfDecoderInt.RENDERTEXT);
@@ -558,7 +556,7 @@ public class JavaFXOpenFile {
             final String[] values = currentFileInformation.getFieldValues();
             final String[] fields = PdfFileInformation.getFieldNames();
 
-            /**
+            /*
              * holding all creators that produce OCR pdf's
              */
             final String[] ocr = {"TeleForm", "dgn2pdf", "ABBYY FineReader 8.0 Professional Edition"};
@@ -579,7 +577,7 @@ public class JavaFXOpenFile {
             }
         }
 
-        /**
+        /*
          * special customisations for images
          */
         if (commonValues.isPDF()) {
@@ -597,7 +595,7 @@ public class JavaFXOpenFile {
         //values extraction mode,dpi of images, dpi of page as a factor of 72
         decode_pdf.setExtractionMode(PdfDecoderInt.TEXT, currentGUI.getScaling());
 
-        /**
+        /*
          * update the display, including any rotation
          */
         currentGUI.setPageNumber();
@@ -638,21 +636,20 @@ public class JavaFXOpenFile {
 
         decode_pdf.closePdfFile();
         
-        /**
+        /*
          * ensure all data flushed from PdfDecoder before we decode the file
          */
         //decode_pdf.flushObjectValues(true);
         try {
             //System.out.println("commonValues.isPDF() = "+commonValues.isPDF()+" <<<");
-            /**
+            /*
              * opens the pdf and reads metadata
              */
             if (commonValues.isPDF()) {
                 if (inputStream != null || selectedFile.startsWith("http") || selectedFile.startsWith("file:") || selectedFile.startsWith("jar:")) {
                     try {
 
-                        //<link><a name="linearized" />
-                        /**
+                        /*
                          * code below checks if file linearized and loads rest
                          * in background if it is
                          */
@@ -851,10 +848,9 @@ public class JavaFXOpenFile {
 
                 }
             }
-            //<<>>
             currentGUI.updateStatusMessage("opening file");
 
-            /**
+            /*
              * popup window if needed
              */
             if ((fileCanBeOpened) && (decode_pdf.isEncrypted()) && (!decode_pdf.isFileViewable())) {
@@ -864,7 +860,7 @@ public class JavaFXOpenFile {
                 if (password == null) {
                     password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
                 }
-                /**
+                /*
                  * try and reopen with new password
                  */
                 if (password != null) {
@@ -895,7 +891,7 @@ public class JavaFXOpenFile {
 
                 currentGUI.getRecentDocument().addToFileList(commonValues.getSelectedFile());
 
-                /**
+                /*
                  * reset values
                  */
                 commonValues.setCurrentPage(1);
@@ -951,7 +947,7 @@ public class JavaFXOpenFile {
 
         file = chooser.showOpenDialog((Window)currentGUI.getFrame());
 
-        /**
+        /*
          * decode
          */
         if (file != null) {
@@ -963,7 +959,7 @@ public class JavaFXOpenFile {
                     || (ext.endsWith(".jpg")) || (ext.endsWith(".jpeg")));
 
             if (isValid) {
-                /**
+                /*
                  * save path so we reopen her for later selections
                  */
                 try {
@@ -1087,7 +1083,7 @@ public class JavaFXOpenFile {
         //decode_pdf.invalidate();
         //decode_pdf.repaint();
         
-        /**
+        /*
          * decode
          */
         if (selectedFile != null ) {
@@ -1095,7 +1091,7 @@ public class JavaFXOpenFile {
                 
                 commonValues.setFileSize(0);
                 
-                /** save path so we reopen her for later selections */
+                /* save path so we reopen her for later selections */
                 //commonValues.setInputDir(new URL(commonValues.getSelectedFile()).getPath());
                 
                 currentGUI.setViewerTitle(null);
@@ -1104,17 +1100,17 @@ public class JavaFXOpenFile {
                 System.err.println(Messages.getMessage("PdfViewerError.Exception")+ ' ' + e + ' ' +Messages.getMessage("PdfViewerError.GettingPaths"));
             }
             
-            /**
+            /*
              * open the file
              */
             if ((selectedFile != null) && (!Values.isProcessing())) {
                 
-                /**
+                /*
                  * trash previous display now we are sure it is not needed
                  */
                 //decode_pdf.repaint();
                 
-                /** if running terminate first */
+                /* if running terminate first */
                 thumbnails.terminateDrawing();
                 
                 decode_pdf.flushObjectValues(true);
@@ -1136,155 +1132,4 @@ public class JavaFXOpenFile {
         
         return selectedFile;
     }
-    
-    //////////////////////////////TEMP JAVAFX////////////////////////////////////////
-    /**
-     * Temporary JavaFX method to open PDFFiles until this class has finished JavaFXImplementation.
-     * @param decode_pdf
-     * @param commonValues 
-     */
-//    private static void openPDFFile(final PdfDecoderInt decode_pdf, final Values commonValues){
-//        ///////////////////TEMPORARY OPENFILE CODE//////////////////
-//        FileChooser chooser = new FileChooser();
-//        chooser.setTitle("Open PDF file");
-//        
-//        //Open directory from existing directory
-//        if (file != null) {
-//            File existDirectory = file.getParentFile();
-//            if (existDirectory.exists()) {
-//                chooser.setInitialDirectory(existDirectory);
-//            }
-//        }
-//
-//        //Set extension filter
-//        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PDF files (*.pdf)", "*.pdf");
-//        chooser.getExtensionFilters().add(extFilter);
-//
-//        file = chooser.showOpenDialog(null);
-//
-//        if (file != null) {
-//            Platform.runLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    
-//                    loadPDFFile(decode_pdf, commonValues);
-//                }
-//            });
-//        }
-//    }
-//    
-//    /**
-//     * Temporary JavaFX method to open PDFFiles until this class has finished JavaFXImplementation.
-//     * @param decode_pdf
-//     * @param commonValues 
-//     */
-//    private static void loadPDFFile(PdfDecoderInt decode_pdf, Values commonValues) {
-//        if (file == null) {
-//            return;
-//        }
-//
-//        String PDFfile = file.getAbsolutePath();
-//        
-//        Text fileLoc = new Text("No PDF Selected");
-//        fileLoc.setText(PDFfile);
-//
-//        try {
-//
-//            //Open the pdf file so we can check for encryption
-//            decode_pdf.openPdfFile(file.getAbsolutePath());
-//
-//            /**
-//             * This code block deals with user input and JVM passwords in
-//             * Encrypted PDF documents.
-//             */
-//            if (decode_pdf.isEncrypted()) {
-//
-//                int passwordCount = 0;        //Monitors how many attempts there have been to the password
-//                closePasswordPrompt = false;  //Do not close the prompt box
-//
-//                //While the PDF content is not viewable, repeat until the correct password is found
-//                while (!decode_pdf.isFileViewable() && !closePasswordPrompt) {
-//
-//                    /**
-//                     * See if there's a JVM flag for the password & Use it if
-//                     * there is Otherwise prompt the user to enter a password
-//                     */
-//                    if (System.getProperty("org.jpedal.password") != null) {
-//                        password = System.getProperty("org.jpedal.password");
-//                    } else if (!closePasswordPrompt) {
-//                        showPasswordPrompt(passwordCount);
-//                    }
-//
-//                    //If we have a password, try and open the PdfFile again with the password
-//                    if (password != null) {
-//                        //pdf.setEncryptionPassword(password);
-//                        decode_pdf.openPdfFile(file.getAbsolutePath(), password);
-//                    }
-//                    passwordCount = passwordCount + 1; //Increment he password attempt
-//
-//                }
-//
-//            }
-//            
-//            try {
-//                decode_pdf.decodePage(commonValues.getCurrentPage());
-//            } catch (Exception ex) {
-//                Logger.getLogger(JavaFXOpenFile.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//
-//        } catch (PdfException ex) {
-//            ex.printStackTrace();
-//            // If the pdf failed to open, don't decode it.
-//            return;
-//        }
-//    }
-//    
-//    /**
-//     * Temporary JavaFX method to open PDFFiles until this class has finished JavaFXImplementation.
-//     * 
-//     * This method will show a popup box and request for a password.
-//     * 
-//     * If the user does not enter the correct password it will ask them to try again.
-//     * If the user presses the Cross button, the password prompt will close.
-//     * 
-//     * @param passwordCount is an int which represents the current input attempt
-//     */
-//    private static void showPasswordPrompt(final int passwordCount){
-//        
-//        //Setup password prompt content
-//        final Stage enterPasswordStage = new Stage();
-//        Button okButton = new Button("Ok");
-//        Text titleText = new Text("Password Request");
-//        final TextField inputPasswordField = new TextField("Please Enter Password");
-//        
-//        //If the user has attempted to enter the password more than once, change the text
-//        if(passwordCount >= 1){
-//            titleText.setText("Incorrect Password");
-//            inputPasswordField.setText("Please Try Again");
-//        }
-//        
-//        //Setup the password prompt & add children
-//        enterPasswordStage.initModality(Modality.WINDOW_MODAL);
-//        enterPasswordStage.setScene(new Scene(VBoxBuilder.create().children(titleText, inputPasswordField, okButton).
-//        alignment(Pos.CENTER).padding(new Insets(10)).build()));
-//              
-//        //If the Ok button is pressed, store the user input as the password
-//        okButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override public void handle(ActionEvent e) {
-//                password = inputPasswordField.getText();
-//                enterPasswordStage.hide();
-//            }
-//        });
-//        
-//        //Check whether stage is closed with the cross button, if it is stop requesting password.
-//        enterPasswordStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-//          public void handle(WindowEvent we) {
-//              closePasswordPrompt = true;
-//          }
-//        });   
-//        
-//        //Halt everything until the Ok button / Cross button is pressed
-//        enterPasswordStage.showAndWait();
-//        
-//    }
 }

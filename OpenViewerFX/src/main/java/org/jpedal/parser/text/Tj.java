@@ -214,7 +214,7 @@ public class Tj extends BaseDecoder {
         
         glyphs = currentFontData.getGlyphData();
         
-        /**set colors*/
+        /*set colors*/
         if(parserOptions.isRenderText() && gs.getTextRenderType()!=GraphicsState.INVISIBLE){
             gs.setStrokeColor(gs.strokeColorSpace.getColor());
             gs.setNonstrokeColor(gs.nonstrokeColorSpace.getColor());
@@ -223,7 +223,7 @@ public class Tj extends BaseDecoder {
         final StringBuffer current_value =processTextArray(characterStream, startCommand, dataPointer, multiplyer,multipleTJs);
         
 
-        /**get fontsize and ensure positive*/
+        /*get fontsize and ensure positive*/
         int fontSize= glyphData.getFontSize();
         if(fontSize==0) {
             fontSize = (int) currentTextState.getTfs();
@@ -251,7 +251,7 @@ public class Tj extends BaseDecoder {
                 contentHandler.setText(current_value, x1, y1, x2, y2);
             } else if (parserOptions.isTextExtracted()) {
                 
-                /**
+                /*
                  * save item and add in graphical elements
                  */
                 pdfData.addRawTextElement(
@@ -281,7 +281,7 @@ public class Tj extends BaseDecoder {
         lastWidth = 0;
         currentWidth = 0;
         
-        /** create temp matrix for current text location and factor in scaling*/
+        /* create temp matrix for current text location and factor in scaling*/
         Trm = Matrix.multiply(currentTextState.Tm, gs.CTM);
         
     }
@@ -296,7 +296,7 @@ public class Tj extends BaseDecoder {
         
         isHTML=current.isHTMLorSVG();
         
-        /**
+        /*
          * global and local values
          */
         resetValues(glyphData);
@@ -336,7 +336,7 @@ public class Tj extends BaseDecoder {
             startCommand++;
         }
         
-        /**set character size */
+        /*set character size */
         glyphData.setDefaultCharSize(currentFontData);
         
         charSpacing = currentTextState.getCharacterSpacing() / TFS;
@@ -347,7 +347,7 @@ public class Tj extends BaseDecoder {
             Trm[2][1]=currentTextState.Tm[2][1];
         }
         
-        /**define matrix used for converting to correctly scaled matrix and multiply to set Trm*/
+        /*define matrix used for converting to correctly scaled matrix and multiply to set Trm*/
         float[][] temp = new float[3][3];
         temp[0][0] = rawTFS * currentTextState.getHorizontalScaling();
         temp[1][1] = rawTFS;
@@ -394,12 +394,12 @@ public class Tj extends BaseDecoder {
             }
         }
         
-        /**
+        /*
          * workout fontScale, direction
          */
         final int fontSize=calcFontSize(glyphData,currentTextState,Trm);
         
-        /**
+        /*
          * text printing mode to get around problems with PCL printers
          */
         Font javaFont=null;
@@ -414,7 +414,7 @@ public class Tj extends BaseDecoder {
             javaFont = currentFontData.getJavaFontX(fontSize);
         }
         
-        /**extract starting x and y values (we update Trm as we work through text)*/
+        /*extract starting x and y values (we update Trm as we work through text)*/
         final float x= Trm[2][0];
         
         //track text needs to be moved up in highlight
@@ -422,7 +422,7 @@ public class Tj extends BaseDecoder {
             isTextShifted = true;
         }
         
-        /**now work through all glyphs and render/decode*/
+        /*now work through all glyphs and render/decode*/
         int i = startCommand;
         
         StringBuffer buff = null;
@@ -441,7 +441,7 @@ public class Tj extends BaseDecoder {
             //read next value ignoring spaces, tabs etc
             i=CharReader.getNextValue(i,stream,glyphData,isCID);
            
-            /**either handle glyph, process leading or handle a deliminator*/
+            /*either handle glyph, process leading or handle a deliminator*/
             if (glyphData.isText()) { //process if still in text
             
                 lastTextChar = glyphData.getRawChar(); //remember last char so we can avoid a rollon at end if its a space
@@ -505,7 +505,7 @@ public class Tj extends BaseDecoder {
                 temp[2][2] = 1;
                 Trm = Matrix.multiply(temp, Trm); //multiply to get new Tm
                 
-                /**save pointer in case its just multiple spaces at end*/
+                /*save pointer in case its just multiple spaces at end*/
                 if (glyphData.getRawChar() == ' ' && glyphData.getLastChar() != ' '){
                     TrmBeforeSpace = Trm;
                 }
@@ -548,7 +548,7 @@ public class Tj extends BaseDecoder {
                     currentWidth = currentFontData.getWidth(idx);
                 }
                 
-                /**
+                /*
                  * XFA docs can contain non-embedded fonts like Callibri and Myriad Pro
                  * which have no defined width so in this case we use Arial size instead
                  */
@@ -587,7 +587,7 @@ public class Tj extends BaseDecoder {
                 //debug code to lock out text if not in area
                 //System.out.println(currentWidth+"=========="+" glyphData.rawInt="+glyphData.getRawInt()+" idx="+idx+" d="+glyphData.getDisplayValue()+"< uni="+glyphData.getUnicodeValue()+"< "+currentFontData+" "+currentFontData.getFontName()+" "+currentFontData.getBaseFontName());
              
-                /**
+                /*
                  * used by form code to return a value for FormStream.decipherTextFromAP
                  * There are actually 4 ways we render the text underneath and it was in ONE. Not having the fonts
                  * map caused one of the alteratives to be used so string was never populated and rest of code broke.
@@ -596,7 +596,7 @@ public class Tj extends BaseDecoder {
                     buff.append(glyphData.getDisplayValue());
                 }
                 
-                /**if we have a valid character and we are rendering, draw it */
+                /*if we have a valid character and we are rendering, draw it */
                 
                 currentTextState.setLastKerningAdded(glyphData.getSpacingAdded());
                 glyphData.setSpacingAdded(0);
@@ -609,10 +609,10 @@ public class Tj extends BaseDecoder {
                             (textPrint==PdfDecoderInt.TEXTSTRINGPRINT || (PdfStreamDecoder.useTextPrintingForNonEmbeddedFonts  &&
                             (!currentFontData.isFontEmbedded || currentFontData.isFontSubstituted()))))){
                         
-                        /**support for TR7*/
+                        /*support for TR7*/
                         if(Tmode==GraphicsState.CLIPTEXT){
 
-                            /**set values used if rendering as well*/
+                            /*set values used if rendering as well*/
                             final boolean isSTD= DecoderOptions.isRunningOnMac ||StandardFonts.isStandardFont(currentFontData.getBaseFontName(),false);
                             final Area transformedGlyph2= glyphs.getStandardGlyph(Trm, glyphData.getRawInt(), glyphData.getDisplayValue(), currentWidth, isSTD);
                             
@@ -645,7 +645,7 @@ public class Tj extends BaseDecoder {
                     }
                 }
                 
-                /**now we have plotted it we update pointers and extract the text*/
+                /*now we have plotted it we update pointers and extract the text*/
                 if(currentFontData.isFontVertical()){
                     currentWidth -= charSpacing;
                 }else{
@@ -704,7 +704,7 @@ public class Tj extends BaseDecoder {
         
         Trm=updateMatrixPosition(widthIsVertical, Trm, glyphData.getLeading(), currentWidth, currentTextState);
         
-        /** now workout the rectangular shape this text occupies
+        /* now workout the rectangular shape this text occupies
          * by creating a box of the correct width/height and transforming it
          * (this routine could undoutedly be better coded but it works and I
          * don't want to break it!!)
@@ -718,7 +718,7 @@ public class Tj extends BaseDecoder {
     }
     
     static float[][] updateMatrixPosition(boolean widthIsVertical, float[][] Trm, float leading, float currentWidth, TextState currentTextState) {
-        /**all text is now drawn (if required) and text has been decoded*/
+        /*all text is now drawn (if required) and text has been decoded*/
         
         //final move to get end of shape
         float[][] temp = new float[3][3];
@@ -756,16 +756,16 @@ public class Tj extends BaseDecoder {
     
     private StringBuffer setExtractedText(final char lastTextChar, final float x, StringBuffer textData, final boolean hasContent) {
         
-        /**roll on if last char is not a space - otherwise restore to before spaces*/
+        /*roll on if last char is not a space - otherwise restore to before spaces*/
         if (lastTextChar == ' '){
             
             Trm = TrmBeforeSpace;
         }
         
-        /**calculate rectangular shape of text*/
+        /*calculate rectangular shape of text*/
         calcCoordinates(x, Trm, charSpacing);
         
-        /**
+        /*
          * if we have an /ActualText use that instead with the width data at start of original
          */
         if(textData!=null && actualText!=null && !actualText.isEmpty()){
@@ -782,7 +782,7 @@ public class Tj extends BaseDecoder {
             actualText=null;
         }
         
-        /**return null for no text*/
+        /*return null for no text*/
         if (textData.length() == 0 || !hasContent) //return null if no text
         {
             textData = null;
@@ -814,7 +814,7 @@ public class Tj extends BaseDecoder {
             
             PdfGlyph glyph;
             
-            /**
+            /*
              * store info needed to create glyph on first render or create now
              */
             if(parserOptions.generateGlyphOnRender() && !parserOptions.renderDirectly()){
@@ -915,7 +915,7 @@ public class Tj extends BaseDecoder {
                     fontType = -fontType;
                 }
                 
-                /**
+                /*
                  * add glyph outline to shape in TR7 mode
                  */
                 if((Tmode==GraphicsState.CLIPTEXT)){
@@ -925,7 +925,7 @@ public class Tj extends BaseDecoder {
                         
                         final Area glyphShape=(Area) (glyph.getShape()).clone();
                         
-                        /**
+                        /*
                          * some truetype fonts are using the 1000x1000 image in
                          * PDF2Image (viewer works) so this code handles this.
                          *
@@ -1011,7 +1011,7 @@ public class Tj extends BaseDecoder {
         
         int fontSize;
         
-        /**workout if horizontal or vertical plot and set values*/
+        /*workout if horizontal or vertical plot and set values*/
         if (Trm[1][1] != 0) {
             glyphData.setHorizontal(true);
             currentTextState.writingMode = PdfData.HORIZONTAL_LEFT_TO_RIGHT;
@@ -1119,7 +1119,7 @@ public class Tj extends BaseDecoder {
                 textData.append(spaces);
             }
             
-            /**add data to output*/
+            /*add data to output*/
             
             //turn chars less than 32 into escape
             final int length=unicodeValue.length();
@@ -1235,7 +1235,7 @@ public class Tj extends BaseDecoder {
             xx -= 1;
             ww += 2;
             
-            /**
+            /*
              * Calculate the y coords for text here
              * x coords are calculated in the method
              * calcCoordinates(float x, float[][] rawTrm, boolean horizontal, float max_height, int fontSize, float y)

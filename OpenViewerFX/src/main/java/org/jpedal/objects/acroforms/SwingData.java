@@ -72,12 +72,10 @@ public class SwingData extends GUIData {
     
     boolean g2SwingRenderComplete;
 	
-    /**
-     * panel components attached to
-     */
+    //panel components attached to
     private JPanel panel;
     
-    /**scaling used for readOnly text icons drawn as images*/
+    //scaling used for readOnly text icons drawn as images
     public static int readOnlyScaling=-1;
     
     public SwingData() {
@@ -162,8 +160,6 @@ public class SwingData extends GUIData {
                 	//if we dont have the combobox print it
                     scaleComponent(formObject,1, rotation, comp, false,indent, isPrinting);
                     
-                    //Rectangle rect = comp.getBounds();
-                    
                     //work out new translate after rotate deduced from FixImageIcon
                     final AffineTransform at;
                     switch(360-rotation){
@@ -195,7 +191,6 @@ public class SwingData extends GUIData {
                             g2.translate(comp.getBounds().x - insetW, comp.getBounds().y + cropOtherY[page]);
                             
                             g2.transform (at);
-                            //					g2.translate(-rect.width, -rect.height );
                             g2.translate(-insetW, -insetH );//will prob need this to work
                             
                             break;
@@ -255,9 +250,7 @@ public class SwingData extends GUIData {
                     }
                 }
                 
-                /**
-                 *  fix for bug in Java 1.6.0_10 onwards with right aligned values
-                 */
+                //fix for bug in Java 1.6.0_10 onwards with right aligned values
                 boolean isPainted=false;
                 
                 //hack for a very sepcific issue so rather leave
@@ -274,7 +267,6 @@ public class SwingData extends GUIData {
                         field.setSize(source.getSize());
                         field.setBorder(source.getBorder());
                         field.setHorizontalAlignment(JTextField.RIGHT);
-                        //field.setText(new String(createCharArray(' ', maxLengthForTextOnPage - source.getText().length())) + source.getText());
                         
                         //Rog's modified code
                         int additionalBlanks = 0;
@@ -320,7 +312,6 @@ public class SwingData extends GUIData {
                             field.setText(newText);
                         }
                         
-                        ////
                         field.paint(g2);
                         isPainted=true;
                     }
@@ -423,7 +414,7 @@ public class SwingData extends GUIData {
         //Revert back font before continuing
         g2.setFont(backup);
         
-        /**
+        /*
          * Type must be Border W width in points (if 0 no border, default =1) S
          * style - (default =S) S=solid, D=dashed (pattern specified by D entry
          * below), B=beveled(embossed appears to above page), I=inset(engraved
@@ -542,8 +533,6 @@ public class SwingData extends GUIData {
         
         // setup scaling
         final AffineTransform aff = g2.getTransform();
-//        aff.scale(1, -1);
-//        aff.translate(0, -pageHeight - insetH);
         aff.scale(1,1);
         g2.setTransform(aff);
 
@@ -603,7 +592,6 @@ public class SwingData extends GUIData {
                         
                         if (newLength > maxLengthForTextOnPage && text.getHorizontalAlignment() == JTextField.RIGHT) {
                             maxLengthForTextOnPage = newLength;
-                            // System.out.println(maxLengthForTextOnPage+ " "+text.getText());
                         }
                     }
                 }
@@ -678,55 +666,44 @@ public class SwingData extends GUIData {
                         renderComponent(g2, formObject, comp2, currentRotation, false, currentIndent, isPrinting);
                         dummyPanel.remove(comp2);
                         
-                    }else{
-                    	//Handle popup without component
-//                    	if(formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Popup){
-//
-//                    		renderComponent(g2, formObject, currentRotation, false, isPrinting);
-//                    		
-//                    	}else { //if printing improve quality on AP images
+                    } else {
 
-                    		boolean customPrintoverRide = false;
-                    		if (customFormPrint != null) {
+                        boolean customPrintoverRide = false;
+                        if (customFormPrint != null) {
 
-                    			//setup scalings
-                    			scaleComponent(formObject,1, rotation, comp, false, indent, isPrinting);
+                            //setup scalings
+                            scaleComponent(formObject, 1, rotation, comp, false, indent, isPrinting);
+                            customPrintoverRide = customFormPrint.print(g2, formObject, this);
 
-                    			//comp.paint(g2);
-                    			customPrintoverRide = customFormPrint.print(g2, formObject,this);
-                    			//g2.setTransform(ax);
+                        }
 
-                    		}
+                        if (!customPrintoverRide) {
+                            //this is where the cust1/display_error file line went, but it affects costena printing.
+                            if (comp instanceof AbstractButton) {
+                                final Object obj = ((AbstractButton) comp).getIcon();
 
-                    		if (!customPrintoverRide) {
-                    			//this is where the cust1/display_error file line went, but it affects costena printing.
-                    			if (comp instanceof AbstractButton) {
-                    				final Object obj = ((AbstractButton) comp).getIcon();
+                                if (obj != null) {
+                                    if (obj instanceof FixImageIcon) {
+                                        ((FixImageIcon) (obj)).setPrinting(true, 1);
+                                    } else if (readOnlyScaling > 0 && obj instanceof ReadOnlyTextIcon) {
+                                        ((ReadOnlyTextIcon) (obj)).setPrinting(true, readOnlyScaling);
+                                    }
+                                }
+                            }
+                            dummyPanel.add(comp);
 
-                    				if (obj != null) {
-                    					if (obj instanceof FixImageIcon) {
-                    						((FixImageIcon) (obj)).setPrinting(true, 1);
-                    					} else if (readOnlyScaling > 0 && obj instanceof ReadOnlyTextIcon) {
-                    						((ReadOnlyTextIcon) (obj)).setPrinting(true, readOnlyScaling);
-                    					}
-                    				}
-                    			}
-                    			dummyPanel.add(comp);
+                            renderComponent(g2, formObject, comp, currentRotation, false, currentIndent, isPrinting);
+                            dummyPanel.remove(comp);
 
-
-                    			renderComponent(g2, formObject, comp, currentRotation, false, currentIndent, isPrinting);
-                    			dummyPanel.remove(comp);
-
-                    			if (comp instanceof AbstractButton) {
-                    				final Object obj = ((AbstractButton) comp).getIcon();
-                    				if (obj instanceof FixImageIcon) {
-                    					((FixImageIcon) (obj)).setPrinting(false, 1);
-                    				} else if (obj instanceof ReadOnlyTextIcon) {
-                    					((ReadOnlyTextIcon) (obj)).setPrinting(false, 1);
-                    				}
-                    			}
-                    		}
-//                    	}
+                            if (comp instanceof AbstractButton) {
+                                final Object obj = ((AbstractButton) comp).getIcon();
+                                if (obj instanceof FixImageIcon) {
+                                    ((FixImageIcon) (obj)).setPrinting(false, 1);
+                                } else if (obj instanceof ReadOnlyTextIcon) {
+                                    ((ReadOnlyTextIcon) (obj)).setPrinting(false, 1);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -736,13 +713,7 @@ public class SwingData extends GUIData {
         
         // put componenents back
         if (currentPage == pageIndex && panel != null) {
-            // createDisplayComponentsForPage(pageIndex,this.panel,this.displayScaling,this.rotation);
-            // panel.invalidate();
-            // panel.repaint();
-            
-            //forceRedraw=true;
             resetScaledLocation(displayScaling, rotation, indent);
-            
         }
         
     }
@@ -763,11 +734,7 @@ public class SwingData extends GUIData {
             if (nextVal !=null) {
                 
                 formObject= nextVal;
-                
                 checkGUIObjectResolved(formObject);
-                
-                //comp = (Component) formObject.getGUIComponent();
-                
             }
         }
     }
@@ -783,16 +750,13 @@ public class SwingData extends GUIData {
         }
         
         final int curPage=formObject.getPageNumber();
-        /**
-         * work out if visible in Layer
-         */
+        
+        //work out if visible in Layer
         if (layers != null) {
             
             final String layerName = formObject.getLayerName();
             
-            // do not display
             if (layerName != null && layers.isLayerName(layerName)) {
-                
                 final boolean isVisible = layers.isVisible(layerName);
                 curComp.setVisible(isVisible);
             }
@@ -806,9 +770,7 @@ public class SwingData extends GUIData {
             bounds = cropComponent(formObject, scale, rotate, redraw, false);
         }
         
-        /**
-         * rescale the font size
-         */
+        //rescale the font size
         final Font resetFont = curComp.getFont();
         if (resetFont != null) {
             //send in scale, rotation, and curComp as they could be from the print routines,
@@ -831,7 +793,7 @@ public class SwingData extends GUIData {
                 ((JComponent) curComp).setBorder(generateBorderfromForm(formObject, scale));
             }
         
-        // factor in offset if multiple pages displayed
+        //factor in offset if multiple pages displayed
         if (xReached != null) {
             bounds[0] += xReached[curPage];
             bounds[1] += yReached[curPage];
@@ -862,9 +824,7 @@ public class SwingData extends GUIData {
         
         curComp.setBounds(boundRect);
         
-        /**
-         * rescale the icons if any
-         */
+        //rescale the icons if any
         if (curComp instanceof AbstractButton) {
             final AbstractButton but = ((AbstractButton) curComp);
             
@@ -920,9 +880,7 @@ public class SwingData extends GUIData {
     /** allows the text to be autosized at any point from anywhere by only knowing the ref. */
     @Override
     public void setAutoFontSize(final FormObject formObject){
-        
         recalcFontSize(displayScaling,rotation,formObject, (Component) formObject.getGUIComponent());
-        
     }
     
     /** returns Border as is swing specific class */
@@ -948,7 +906,6 @@ public class SwingData extends GUIData {
         final Rectangle rect = formObject.getBoundingRectangle();
         final int curPage=formObject.getPageNumber();
         
-        
         final float[] box= {rect.x,rect.y, rect.width + rect.x,rect.height + rect.y};
         
         //NOTE if needs adding in ULC check SpecialOptions.SINGLE_PAGE
@@ -971,62 +928,52 @@ public class SwingData extends GUIData {
         final int w;
         final int h;
 
-        {
-            switch(r){
-                case 0:
-                    
-                    x100 = box[0];
-                    //if we are drawing on screen take off cropX if printing or extracting we dont need to do this.
-                    if (redraw) {
-                        x100 -= cropX;
-                    }
-                    
-                    y100 = mediaH - box[3]-cropOtherY[curPage]+1;
+        switch (r) {
+            case 0:
+                x100 = box[0];
+                //if we are drawing on screen take off cropX if printing or extracting we dont need to do this.
+                if (redraw) {
+                    x100 -= cropX;
+                }
+
+                y100 = mediaH - box[3] - cropOtherY[curPage] + 1;
+                w100 = (box[2] - box[0]);
+                h100 = (box[3] - box[1]);
+
+                break;
+            case 90:
+                x100 = box[1] - cropY;
+                y100 = box[0] - cropX + 1;
+                if (!positionOnly) {
+                    w100 = (box[3] - box[1]);
+                    h100 = (box[2] - box[0]);
+                } else {
                     w100 = (box[2] - box[0]);
                     h100 = (box[3] - box[1]);
-                    
-                    break;
-                case 90:
-                    
-                    // new hopefully better routine
-                    x100 = box[1]-cropY;
-                    y100 = box[0]-cropX+1;
-                    if(!positionOnly){
-                    	w100 = (box[3] - box[1]);
-                    	h100 = (box[2] - box[0]);
-                    }else{
-                    	w100 = (box[2] - box[0]);
-                    	h100 = (box[3] - box[1]);
-                    }
-                    break;
-                case 180:
-
-                	// new hopefully better routine
-                	w100 = box[2] - box[0];
-                	h100 = box[3] - box[1];
-                	if(!positionOnly){
-                		y100 = box[1]-cropY+1;
-                		x100 = mediaW-box[2]-cropOtherX;
-                	}else{
-                		w100 = (box[2] - box[0]);
-                		h100 = (box[3] - box[1]);
-                	}
-                	break;
-                case 270:
-                    
-                    // new hopefully improved routine
-                	if(!positionOnly){
-                		w100 = (box[3] - box[1]);
-                		h100 = (box[2] - box[0]);
-                	}else{
-                		 w100 = (box[2] - box[0]);
-                         h100 = (box[3] - box[1]);
-                	}
-                    x100 = mediaH -box[3]-cropOtherY[curPage];
-                    y100 = mediaW-box[2]-cropOtherX+1;
-                    
-                    break;
-            }/**/
+                }
+                break;
+            case 180:
+                w100 = box[2] - box[0];
+                h100 = box[3] - box[1];
+                if (!positionOnly) {
+                    y100 = box[1] - cropY + 1;
+                    x100 = mediaW - box[2] - cropOtherX;
+                } else {
+                    w100 = (box[2] - box[0]);
+                    h100 = (box[3] - box[1]);
+                }
+                break;
+            case 270:
+                if (!positionOnly) {
+                    w100 = (box[3] - box[1]);
+                    h100 = (box[2] - box[0]);
+                } else {
+                    w100 = (box[2] - box[0]);
+                    h100 = (box[3] - box[1]);
+                }
+                x100 = mediaH - box[3] - cropOtherY[curPage];
+                y100 = mediaW - box[2] - cropOtherX + 1;
+                break;
         }
         
         x = (int) (x100*s);
@@ -1048,7 +995,7 @@ public class SwingData extends GUIData {
     @Override
     protected void removeAllComponentsFromScreen() {
         
-       // System.out.println("removeAllComponentsFromScreen");
+        //System.out.println("removeAllComponentsFromScreen");
         //01032012 be care if you ever re-enable as big performace hit on Abacus code (see slow.pdf)
         
         //		Iterator formIter = rawFormData.values().iterator();
@@ -1100,9 +1047,9 @@ public class SwingData extends GUIData {
         
         final Component retComponent=(Component) rawField;
         
-        // append state to name so we can retrieve later if needed
+        //append state to name so we can retrieve later if needed
         String name2 = formObject.getTextStreamValue(PdfDictionary.T);
-        if (name2 != null) {// we have some empty values as well as null
+        if (name2 != null) {//we have some empty values as well as null
             final String stateToCheck = formObject.getNormalOnState();
             if (stateToCheck != null && !stateToCheck.isEmpty()) {
                 name2 = name2 + "-(" + stateToCheck + ')';
@@ -1111,7 +1058,7 @@ public class SwingData extends GUIData {
             retComponent.setName(name2);
         }
         
-        // make visible
+        //make visible
         scaleComponent(formObject,displayScaling, rotation, retComponent, true, indent, false);
         
     }
@@ -1127,14 +1074,6 @@ public class SwingData extends GUIData {
             return;
         }
         
-//        if(!SwingUtilities.isEventDispatchThread()){
-//            try{
-//            throw new RuntimeException("xx");
-//            }catch(Exception ee){
-//                ee.printStackTrace();
-//           
-//            }
-//        }
         // needed as code called recursively otherwise
         if (forceRedraw || currentScaling != lastScaling || currentRotation != oldRotation || currentIndent != oldIndent){// || SwingUtilities.isEventDispatchThread()) {
             
@@ -1157,8 +1096,7 @@ public class SwingData extends GUIData {
 
                 // reset all locations
                 for (int j=0;j<count;j++) {
-
-                    //formObject = (FormObject) formsOrdered[currentPage].get(count-1-j); //broken version
+                    
                     formObject = formsOrdered[currentPage].get(j); //example where order matters see 19071
                     
                     formObject.setCurrentScaling(currentScaling);
@@ -1232,8 +1170,6 @@ public class SwingData extends GUIData {
                         comp= formObject.getGUIComponent();
                         
                         if (comp != null) {
-                            
-                            //((JComponent)comp).setVisible(false);
                             panel.remove((Component)comp);
                         }
                     }

@@ -52,13 +52,13 @@ import javafx.scene.shape.*;
 public class JavaFXShape implements Serializable, PdfShape
 {
 
-    /**used to stop lots of huge, complex shapes.
+    /*used to stop lots of huge, complex shapes.
      * Note we DO NOT reset as we reuse this object and
      * it stores cumulative count
      */
     int complexClipCount;
 
-    /**flag to show if image is for clip*/
+    /*flag to show if image is for clip*/
     private boolean isClip;
     
     private Path path = new Path();
@@ -139,7 +139,7 @@ public class JavaFXShape implements Serializable, PdfShape
         // returns an empty path as null breaks stuff.
         return new java.awt.geom.GeneralPath();
         
-        /**
+        /*
          * Code kept in case it needs to be used in future:
          */
         
@@ -169,7 +169,7 @@ public class JavaFXShape implements Serializable, PdfShape
 //                current_area.transform( CTM_transform );
 //        }
 
-        /**
+        /*
          * fix for single rotated lines with thickness
          */
 //        if(current_path!=null && CTM[0][0]==1 && CTM[1][1]==-1 && current_path.getBounds().height==1 && thickness>10 ){
@@ -248,7 +248,7 @@ public class JavaFXShape implements Serializable, PdfShape
         path.setFillRule(windingRule);
     }
 
-    /**
+    /*
      * show the shape segments for debugging
      *
      static final private void showShape( Shape current_shape )
@@ -282,7 +282,7 @@ public class JavaFXShape implements Serializable, PdfShape
      break;
      }
      }
-     }/**/
+     }*/
 
     /**
      * number of segments in current shape (0 if no shape or none)
@@ -333,7 +333,7 @@ public class JavaFXShape implements Serializable, PdfShape
         throw new UnsupportedOperationException("getShape Not supported yet.");
     }
 
-    /**
+    /*
      * ==== DEBUG CODE ====
      * Prints out all the draw commands in the path
      */

@@ -180,14 +180,20 @@ public class SMaskDecoder {
             return rescaleComponent(data, sw, sh, dw, dh);
         }else{//rgb image
             int dim = sw*sh;
+            
+            //sanity check
+            int maxSize=data.length/3;
+            if(dim>maxSize){
+                dim=maxSize;
+            }
             byte[] rr = new byte[dim];
             byte[] gg = new byte[dim];
             byte[] bb = new byte[dim];
             int p = 0;
             for (int i = 0; i < dim; i++) {
-                rr[i] = data[p++];
-                gg[i] = data[p++];
-                bb[i] = data[p++];
+                    rr[i] = data[p++];
+                    gg[i] = data[p++];
+                    bb[i] = data[p++];
             }
             rr = rescaleComponent(rr, sw, sh, dw, dh);
             gg = rescaleComponent(gg, sw, sh, dw, dh);

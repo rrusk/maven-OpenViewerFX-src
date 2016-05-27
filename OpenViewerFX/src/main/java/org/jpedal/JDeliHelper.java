@@ -95,6 +95,19 @@ public class JDeliHelper {
         return null;
     }
     
+    public static byte[] getUnconvertedBytesFromJPEG2000(final byte[] data) throws Exception {
+        
+        return null;
+    }
+    
+    public static byte[] getUnconvertedBytesFromJPEG(final byte[] data) throws Exception {
+        return null;
+    } 
+    
+    public static byte[] getUnconvertedBytesFromJPEG(final byte[] data, int adobeColorTransform) throws Exception {
+        return null;
+    }
+    
     public static byte[] getBytesFromJPEG(final byte[] data) throws Exception {
         
         Raster ras= getRasterFromJPEG2000(data);

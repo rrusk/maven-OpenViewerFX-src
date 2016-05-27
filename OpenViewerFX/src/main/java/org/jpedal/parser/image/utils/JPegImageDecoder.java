@@ -39,7 +39,6 @@ import org.jpedal.color.DeviceCMYKColorSpace;
 import org.jpedal.color.DeviceRGBColorSpace;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.external.ErrorTracker;
-import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.ParserOptions;
 import org.jpedal.parser.image.data.ImageData;
 import org.jpedal.utils.LogWriter;
@@ -51,16 +50,16 @@ import org.jpedal.utils.LogWriter;
 public class JPegImageDecoder {
     
     
-    public static BufferedImage decode(final int w, final int h, final boolean arrayInverted,
+    public static BufferedImage decode(final int w, final int h,
             final GenericColorSpace decodeColorData, byte[] data, final float[] decodeArray, final ImageData imageData,
-            final PdfObject XObject, ErrorTracker errorTracker, ParserOptions parserOptions) {
+            ErrorTracker errorTracker, ParserOptions parserOptions) {
         
         GenericColorSpace jpegDecodeColorData=decodeColorData;
         
         BufferedImage image=null;
         
         //handle JPEGS
-        LogWriter.writeLog("JPeg Image " + w + "W * " + h + 'H' + " arrayInverted=" + arrayInverted);
+        LogWriter.writeLog("JPeg Image " + w + "W * " + h + 'H' );
         
         /*
         try {
@@ -95,7 +94,7 @@ public class JPegImageDecoder {
             if(altDecodeColorData!=null){
                 
                 try{
-                    image=altDecodeColorData.JPEGToRGBImage(data, w, h, decodeArray,imageData.getpX() , imageData.getpY() , arrayInverted, XObject);
+                    image=altDecodeColorData.JPEGToRGBImage(data, w, h, decodeArray,imageData.getpX() , imageData.getpY() , imageData.isArrayInverted());
                     
                     //if it returns image it worked flag and switch over
                     if(image!=null){
@@ -123,7 +122,7 @@ public class JPegImageDecoder {
         if(!decodedOnAltColorspace){
             //separation, renderer
             try{
-                image=jpegDecodeColorData.JPEGToRGBImage(data, w, h, decodeArray,imageData.getpX(),imageData.getpY() , arrayInverted, XObject);
+                image=jpegDecodeColorData.JPEGToRGBImage(data, w, h, decodeArray,imageData.getpX(),imageData.getpY() , imageData.isArrayInverted());
                 
                 //flag if YCCK
                 if(jpegDecodeColorData.isImageYCCK()) {

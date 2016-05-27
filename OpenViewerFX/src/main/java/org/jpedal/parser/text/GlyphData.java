@@ -67,6 +67,8 @@ public class GlyphData {
     private float actualWidth;
     
     private int rawInt,valueForHTML=-1;
+    
+    private int possibleVal;
 
     public int getRawInt() {
         return rawInt;
@@ -343,6 +345,14 @@ public class GlyphData {
 
     void setFirstTime(boolean b) {
         firstTime=b;
+    }
+
+    void setPossibleValue(int val) {
+        possibleVal=val;
+    }
+
+    int getPossibleValue() {
+        return possibleVal;
     }
     
 }

@@ -35,13 +35,10 @@ package org.jpedal.parser.image;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import org.jpedal.color.ColorSpaces;
-import org.jpedal.color.GenericColorSpace;
 import org.jpedal.constants.PDFflags;
 import org.jpedal.function.FunctionFactory;
 import org.jpedal.function.PDFFunction;
-import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.io.DecryptionFactory;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
@@ -49,16 +46,13 @@ import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.FunctionObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
-import org.jpedal.render.DynamicVectorRenderer;
+import org.jpedal.parser.image.data.ImageData;
 
 public class ImageCommands {
     
     public static final int ID=0;
     
     public static final int XOBJECT=2;
-    
-    @SuppressWarnings("CanBeFinal")
-    static boolean sharpenDownsampledImages;
     
     public static boolean trackImages;
     
@@ -74,130 +68,21 @@ public class ImageCommands {
         final String imgSetting=System.getProperty("org.jpedal.trackImages");
         if(imgSetting!=null) {
             trackImages = (imgSetting.toLowerCase().contains("true"));
-        }
-        
-        final String nodownsamplesharpen=System.getProperty("org.jpedal.sharpendownsampledimages");
-        if(nodownsamplesharpen!=null) {
-            sharpenDownsampledImages = (nodownsamplesharpen.toLowerCase().contains("true"));
-        }
-        
+        }    
     }
     
     /**
-     * make transparent
      */
-    static BufferedImage makeBlackandWhiteTransparent(final BufferedImage image) {
+    static byte[] getMaskColor(final GraphicsState gs) {
         
-        final Raster ras=image.getRaster();
+        final byte[] maskCol=new byte[4];
         
-        final int w=ras.getWidth();
-        final int h=ras.getHeight();
-        
-        //image=ColorSpaceConvertor.convertToARGB(image);
-        final BufferedImage newImage=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
-        
-        boolean validPixelsFound=false,transparent,isBlack;
-        final int[] values=new int[3];
-        
-        final int[] transparentPixel={255,0,0,0};
-        for(int y=0;y<h;y++){
-            for(int x=0;x<w;x++){
-                
-                //get raw color data
-                ras.getPixels(x,y,1,1,values);
-                
-                //see if white
-                transparent=(values[0]>245 && values[1]>245 && values[2]>245);
-                isBlack=(values[0]<10 && values[1]<10 && values[2]<10);
-                
-                
-                //if it matched replace and move on
-                if(transparent || isBlack) {
-                    newImage.getRaster().setPixels(x,y,1,1,transparentPixel);
-                }else{
-                    validPixelsFound=true;
-                    
-                    final int[] newPixel=new int[4];
-                    
-                    newPixel[3]=255;
-                    newPixel[0]=values[0];
-                    newPixel[1]=values[1];
-                    newPixel[2]=values[2];
-                    
-                    newImage.getRaster().setPixels(x,y,1,1,newPixel);
-                }
-            }
-        }
-        
-        if(validPixelsFound) {
-            return newImage;
-        } else {
-            return null;
-        }
-        
-    }
-   
-    /**
-     * CMYK overprint mode
-     */
-    static BufferedImage simulateOP(BufferedImage image, final boolean whiteIs255) {
-        
-        final Raster ras=image.getRaster();
-        image= ColorSpaceConvertor.convertToARGB(image);
-        final int w=image.getWidth();
-        final int h=image.getHeight();
-        
-        boolean hasNoTransparent=false;// pixelsSet=false;
-        
-        //reset
-        //minX=w;
-        //minY=h;
-        //maxX=-1;
-        //maxY=-1;
-        
-        final int[] transparentPixel={255,0,0,0};
-        final int[] values=new int[4];
-        
-        boolean transparent;
-        
-        for(int y=0;y<h;y++){
-            for(int x=0;x<w;x++){
-                
-                //get raw color data
-                ras.getPixel(x,y,values);
-                
-                //see if black
-                if(whiteIs255){
-                    transparent=values[0]>243 && values[1]>243 && values[2]>243;
-                }else{
-                    transparent=values[1]<3 && values[2]<3 && values[3]<3;
-                }
-                
-                //if it matched replace and move on
-                if(transparent){
-                    image.getRaster().setPixel(x,y,transparentPixel);
-                }else{
-                    hasNoTransparent=true;
-                }
-            }
-        }
-        
-        if(hasNoTransparent){
-            return image;
-        }else {
-            return null;
-        }
-        
-    }
-    
-    /**
-     * @param maskCol
-     */
-    static void getMaskColor(final byte[] maskCol, final GraphicsState gs) {
         final int foreground =gs.nonstrokeColorSpace.getColor().getRGB();
         maskCol[0]=(byte) ((foreground>>16) & 0xFF);
         maskCol[1]=(byte) ((foreground>>8) & 0xFF);
         maskCol[2]=(byte) ((foreground) & 0xFF);
+        
+        return maskCol;
     }
     
     /**
@@ -223,60 +108,6 @@ public class ImageCommands {
         return true;
     }
     
-    static BufferedImage simulateOverprint(final GenericColorSpace decodeColorData,
-            final byte[] data, final boolean isDCT, final boolean isJPX, BufferedImage image,
-            final int colorspaceID, final DynamicVectorRenderer current, final GraphicsState gs) {
-        
-        //simulate overPrint //currentGraphicsState.getNonStrokeOP() &&
-        if((colorspaceID==ColorSpaces.DeviceCMYK || colorspaceID==ColorSpaces.ICC) && gs.getOPM()==1.0f){
-            //if((colorspaceID==ColorSpaces.DeviceCMYK || colorspaceID==ColorSpaces.ICC) && gs.getOPM()==1.0f){
-            
-            //try to keep as binary if possible
-            boolean isBlank=false;
-            
-            //indexed colors
-            final byte[] index = decodeColorData.getIndexedMap();
-            
-            //see if allblack
-            if(index==null && current.hasObjectsBehind(gs.CTM)){
-                
-                isBlank=true; //assume true and disprove
-                for(int ii=0;ii<data.length;ii++){
-                    //                    if(index!=null){
-                    //                        int colUsed=(data[ii] &255)*3;
-                    //                        if(colorspaceID+2<index.length && index[colUsed]==0 && index[colUsed+1]==0 && index[colUsed+2]==0){
-                    //                            ii=data.length;
-                    //                            isBlank=false;
-                    //                        }
-                    //                    }else
-                    if(data[ii]!=0){
-                        ii=data.length;
-                        isBlank=false;
-                    }
-                }
-            }
-            
-            //if so reject
-            if(isBlank){
-                image.flush();
-                image=null;
-            }else if(gs.getNonStrokeOP()){    
-                if((isDCT || isJPX)){
-                    image=ImageCommands.simulateOP(image,false);
-                }else if(gs.getNonStrokeOP()){
-                    if(colorspaceID==ColorSpaces.DeviceCMYK) {
-                        image = ImageCommands.simulateOP(image, false);//image.getType()==1);
-                    } else {
-                        image = ImageCommands.simulateOP(image, image.getType() == 1);
-                    }
-                }
-            }
-        }
-        
-        return image;
-    }
-    
-    
     static BufferedImage addBackgroundToMask(BufferedImage image, final boolean isMask) {
         
         if(isMask){
@@ -298,24 +129,61 @@ public class ImageCommands {
     /**
      * apply TR
      */
-    static BufferedImage applyTR(final BufferedImage image, final PdfObject TR, final PdfObjectReader currentPdfFile) {
-        
-        /*
-         * get TR function first
-         **/
-        final PDFFunction[] functions =new PDFFunction[4];
+    static void applyTR(final ImageData imageData, final PdfObject TR, final PdfObjectReader currentPdfFile) {
 
-        boolean hasFunction = false;
+        try {
+            final PDFFunction[] functions = getFunctions(TR, currentPdfFile);
+
+            if (functions!=null) {
+
+                final int w = imageData.getWidth();
+                final int h = imageData.getHeight();
+                final byte[] data = imageData.getObjectData();
+
+                final int compCount = imageData.getCompCount();
+
+                //System.out.println(data.length + " " + w + " " + h + " " + (data.length / (w * h)) + " " + compCount);
+
+                int ptr = 0;
+
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+
+                        for (int a = 0; a < compCount; a++) {
+                            final float[] raw = {(data[ptr] & 255) / 255f};
+
+                            if (functions[a] != null) {
+                                final float[] processed = functions[a].compute(raw);
+
+                                data[ptr] = (byte) (255 * processed[0]);
+                            }
+                            ptr++;
+
+                        }
+                    }
+                }
+
+                //imageData.setObjectData(data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+        }
+    }
+    
+    
+    private static PDFFunction[] getFunctions(final PdfObject TR, final PdfObjectReader currentPdfFile) {
+        
+        PDFFunction[] functions =null;
 
         int total=0;
-        
         final byte[][] kidList = TR.getKeyArray(PdfDictionary.TR);
-        
         if(kidList!=null) {
             total = kidList.length;
+            functions =new PDFFunction[total];
         }
         
-        //get functions
+        
+        //read functions
         for(int count=0;count<total;count++){
             
             if(kidList[count]==null) {
@@ -336,44 +204,11 @@ public class ImageCommands {
             
             if(Function!=null) {
                 functions[count] = FunctionFactory.getFunction(Function, currentPdfFile);
-                hasFunction = true;
             }
             
         }
-        
-        if (!hasFunction){
-          return image;
-        }
-
-        final Raster ras=image.getRaster();
-
-        final int[] values=new int[4];
-        
-        for(int y=0;y<image.getHeight();y++){
-            for(int x=0;x<image.getWidth();x++){
-                
-                
-                //get raw color data
-                ras.getPixels(x,y,1,1,values);
-                
-                for(int a=0;a<3;a++){
-                    final float[] raw={values[a]/255f};
-                    
-                    if(functions[a]!=null){
-                        final float[] processed=functions[a].compute(raw);
-                        
-                        values[a]= (int) (255*processed[0]);
-                    }
-                }
-                
-                image.getRaster().setPixels(x,y,1,1,values);
-            }
-        }
-        
-        return image;
-        
+        return functions;
     }
-    
     
     /**
      * apply DecodeArray
@@ -437,6 +272,22 @@ public class ImageCommands {
                     j = 0;
                 }
                 data[ii]=(byte)currentByte;
+            }
+        }else if (d == 8 && maxValue == 1 && type == ColorSpaces.DeviceCMYK) {
+
+            int tempDecode[] = new int[decodeArray.length];
+            for (int i = 0; i < decodeArray.length; i++) {
+                tempDecode[i] = (int) (decodeArray[i] * 255);
+            }
+            int j = 0;
+            for (int ii = 0; ii < data.length; ii++) {
+                int pp = (data[ii] & 0xff);
+                pp = (pp * (tempDecode[j + 1] - tempDecode[j]) / 255) + tempDecode[j];
+                j += 2;
+                if (j == decodeArray.length) {
+                    j = 0;
+                }
+                data[ii] = (byte) pp;
             }
         }else{
             /*

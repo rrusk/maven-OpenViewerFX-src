@@ -96,7 +96,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
             rawInt=CIDToGIDMap[rawInt];
            
         }
-        /**flush cache if needed*/
+        /* flush cache if needed*/
         if(Trm!=null && (lastTrm[0][0]!=Trm[0][0])|(lastTrm[1][0]!=Trm[1][0])|
                 (lastTrm[0][1]!=Trm[0][1])|(lastTrm[1][1]!=Trm[1][1])){
             lastTrm=Trm;
@@ -317,7 +317,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
      */
     public static String[] readFontNames(final FontData fontData, final int mode) {
 
-        /**setup read the table locations*/
+        /* setup read the table locations*/
         final FontFile2 currentFontFile=new FontFile2(fontData);
 
         //get type
@@ -327,7 +327,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
         final String[] fontNames=new String[fontCount];
 
-        /**read tables for names*/
+        /* read tables for names*/
         for(int i=0;i<fontCount;i++){
 
             currentFontFile.setSelectedFontIndex(i);
@@ -370,7 +370,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
      */
     public static void addStringValues(final FontData fontData, final Map<String, String> fontDetails) {
 
-        /**setup read the table locations*/
+        /* setup read the table locations*/
         final FontFile2 currentFontFile=new FontFile2(fontData);
 
         //get type
@@ -378,7 +378,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
         final int fontCount=currentFontFile.getFontCount();
 
-        /**read tables for names*/
+        /* read tables for names*/
         for(int i=0;i<fontCount;i++){
 
             currentFontFile.setSelectedFontIndex(i);
@@ -412,7 +412,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
         isCID=TTstreamisCID;
 
-        /**setup read the table locations*/
+        /* setup read the table locations*/
         if(fontDataAsArray!=null) {
             currentFontFile = new FontFile2(fontDataAsArray);
         } else {
@@ -433,14 +433,11 @@ public class TTGlyphs extends PdfJavaGlyphs {
             }
         }
 
-        /**read tables*/
         currentHead=new Head(currentFontFile);
 
         currentPost=new Post(currentFontFile);
 
         //currentName=new Name(currentFontFile);
-
-
 
         final Maxp currentMaxp =new Maxp(currentFontFile);
         glyphCount= currentMaxp.getGlyphCount();

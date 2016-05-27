@@ -34,8 +34,6 @@ package org.jpedal.color;
 
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import org.jpedal.objects.raw.MaskObject;
-import org.jpedal.objects.raw.PdfObject;
 
 
 /**
@@ -131,13 +129,9 @@ public class DeviceGrayColorSpace extends GenericColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage( final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted, final PdfObject XObject) {
+    public BufferedImage JPEGToRGBImage( final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
         
-        //not appropriate for MaskObject case so use super version
-        if(XObject instanceof MaskObject){
-            return super.JPEGToRGBImage(data,w,h,decodeArray,pX,pY,arrayInverted,XObject);
-        }else{
-            return JPEGDecoder.grayJPEGToRGBImage( data, pX, pY,  arrayInverted);
-        }
+        return JPEGDecoder.grayJPEGToRGBImage( data, pX, pY,  arrayInverted);
+        
     }
 }
