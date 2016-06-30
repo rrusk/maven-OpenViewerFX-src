@@ -40,6 +40,7 @@ import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.gui.GUI.PageCounter;
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.io.TiffHelper;
+import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
@@ -450,7 +451,7 @@ public class PageNavigator {
 
             if (commonValues.getBufferedImg() != null) {
                 //flush any previous pages
-                decode_pdf.getDynamicRenderer().flush();
+                decode_pdf.getDynamicRenderer().writeCustom(DynamicVectorRenderer.FLUSH, null);
                 decode_pdf.getPages().refreshDisplay();
 
                 Images.addImage(decode_pdf, commonValues);

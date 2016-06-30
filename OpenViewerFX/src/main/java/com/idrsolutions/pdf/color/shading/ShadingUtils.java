@@ -195,5 +195,43 @@ public class ShadingUtils {
         inversedAffine.transform(ff, 0, ff, 0, 1);
         return ff;
     }
+    
+//    /**
+//     * 
+//     * @param t in the range 0-1
+//     * @param p p0,p1,m0,m1
+//     * @return 
+//     */
+//    public static float hermiteUnitInterval(float t, float [] p) {
+//        float t2 = t * t;
+//        float t3 = t2 * t;
+//        return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t) * p[2] + (-2 * t3 + 3 * t2) * p[1] + (t3 - t2) * p[3];
+//    }
+//    
+//    /**
+//     * returns Hermite points (p0,p1,m0,m1)
+//     * @param b 
+//     * @return 
+//     */
+//    public static float[] bezierToHermite(float [] b){
+//        return new float[]{b[0],b[3],3*(b[1]-b[0]),3*(b[3]-b[2])};
+////        commented out matrix version of above calculation
+////        float [][] BEZ_HERMITE = {{1,0,0,0},{0,0,0,1},{-3,3,0,0},{0,0,-3,3}};
+////        float [][] bezierPoints = {{b[0]},{b[1]},{b[2]},{b[3]}};
+////        float [][] result = Matrix.multiplyAny(BEZ_HERMITE, bezierPoints);
+////        return new float[]{result[0][0],result[1][0],result[2][0],result[3][0]};
+//    }
+//    
+//
+//    public static void main(String[] args) {
+//        
+//        float [][] HERMITE_A = {{1,0,0,0},{0,0,1,0},{-3,3,-2,-1},{2,-2,1,1}};
+//        
+//        float [] bPoints = new float[]{9,10,4,10};
+//        float [] hPoints = bezierToHermite(bPoints);
+//        System.out.println(hermiteUnitInterval(0.5f, hPoints));
+// 
+//    }
+
 
 }

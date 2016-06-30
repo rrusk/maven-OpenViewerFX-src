@@ -49,7 +49,7 @@ import org.jpedal.utils.StringUtils;
 /**
  * holds actual data for PDF file to process
  */
-public class PdfObject implements Cloneable{
+public class PdfObject {
     
     protected boolean maybeIndirect;
     protected boolean isFullyResolved=true;
@@ -1501,23 +1501,6 @@ public class PdfObject implements Cloneable{
 
         return new PdfObject();
     }
-    
-    @Override
-    public Object clone()
-    {
-        Object o = null;
-        try
-        {
-            o = super.clone();
-        }
-        catch( final CloneNotSupportedException e ){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-        
-        return o;
-    }
-    
-    
     
     public boolean decompressStreamWhenRead() {
         return false;

@@ -1166,12 +1166,34 @@ public class Type1C extends Type1{
             
             final PdfObject FontFile=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile);
             
+            
             /* try type 1 first then type 1c/0c */
             if (FontFile != null) {
                 try {
                     final byte[] stream=currentPdfFile.readStream(FontFile,true,true,false, false,false, FontFile.getCacheName(currentPdfFile.getObjectReader()));
                     if(stream!=null) {
-                        readType1FontFile(stream);
+                        
+                        int length1 = FontFile.getInt(PdfDictionary.Length1);
+                        int length2 = FontFile.getInt(PdfDictionary.Length2);
+                
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        bos.write(stream, 0, length1);
+
+                        byte[] encData = new byte[length2];
+                        System.arraycopy(stream, length1, encData, 0, length2);
+
+                        boolean isBinary = !(isHexDigit(stream[0]) && isHexDigit(stream[1])
+                                && isHexDigit(stream[2]) && isHexDigit(stream[3]));
+
+                        if (isBinary) {
+                            encData = decryptBinary(encData, 55665, 4);
+                        } else {
+                            encData = decryptASCII(encData, 55665, 4);
+                        }
+
+                        bos.write(encData);
+                                                
+                        readType1FontFileNew(bos.toByteArray());
                     }
                 } catch (final Exception e) {
                     LogWriter.writeLog("Exception: "+e.getMessage());
@@ -2617,7 +2639,55 @@ public class Type1C extends Type1{
         }
     }
     
+    private static byte[] decryptBinary(byte[] data, int key, int discard) {
+        int c1 = 52845;
+        int c2 = 22719;
+        int r = key;
+        int count = data.length;
+        byte[] decrypted = new byte[count-discard];
+        int p = 0;
+        for (int i = 0; i < count; i++) {
+            int value = data[i] & 0xff;
+            if(i>=discard){
+                decrypted[p++] = (byte) (value ^ (r >> 8));
+            }
+            
+            r = ((value + r) * c1 + c2) & ((1 << 16) - 1);
+        }
+        return decrypted;
+    }
+    
+    private static byte[] decryptASCII(byte[] data, int key, int discard) {
+        int c1 = 52845;
+        int c2 = 22719;
+        int r = key;
+        int count = data.length;
+        int maybeLength = count >>> 1;
+        byte[] decrypted = new byte[maybeLength];
+
+        int i, j;
+        for (i = 0, j = 0; i < count; i++) {
+            int digit1 = data[i] & 0xff;
+            if (!isHexDigit(digit1)) {
+                continue;
+            }
+            i++;
+            int digit2 = 0;
+            while (i < count && !isHexDigit(digit2 = data[i])) {
+                i++;
+            }
+            if (i < count) {
+                int value = Integer.parseInt(Character.toString((char) digit1)+Character.toString((char) digit2), 16);
+                decrypted[j++] = (byte) (value ^ (r >> 8));
+                r = ((value + r) * c1 + c2) & ((1 << 16) - 1);
+            }
+        }
+        return decrypted;
+    }
+    
+    private static boolean isHexDigit(int code) {
+        return (code >= 48 && code <= 57) || (code >= 65 && code <= 70) || (code >= 97 && code <= 102);
+    }
+
+    
 }
-
-
-

@@ -1324,7 +1324,10 @@ public class AcroRenderer{
         switch(value) {
 
             case EMBEDDED_FILES:
-
+                
+                if(currentPdfFile.getNamesLookup()==null){
+                    return null;
+                }
                 return currentPdfFile.getNamesLookup().getEmbeddedFiles();
 
             default:

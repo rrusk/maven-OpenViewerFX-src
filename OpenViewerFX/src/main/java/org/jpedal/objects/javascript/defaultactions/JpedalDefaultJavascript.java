@@ -112,7 +112,7 @@ public class JpedalDefaultJavascript{
 		}
 		if ( jsDate == null ) {
 			org.mozilla.javascript.Context.throwAsScriptRuntimeEx( new RuntimeException( "Not a Date()" ));
-		}
+        }
 		
 		Calendar date = Calendar.getInstance();
 		date.setTime(jsDate);
@@ -204,7 +204,7 @@ public class JpedalDefaultJavascript{
 
 		if ( date == null ) {
 			org.mozilla.javascript.Context.throwAsScriptRuntimeEx( new RuntimeException( "Not a Date()" ));
-		}
+        }
 		
 		/** added to make the testing be more predictable */
 		if(testingSetStaticDate){

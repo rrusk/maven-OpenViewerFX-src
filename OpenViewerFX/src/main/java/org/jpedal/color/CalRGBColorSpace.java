@@ -76,7 +76,7 @@ public class CalRGBColorSpace extends  GenericColorSpace{
      * CalRGB to RGB
      */
     @Override
-    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h, boolean arrayInverted){
+    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h){
         
         final int size = w * h;
         float cl,ca,cb;
@@ -105,7 +105,7 @@ public class CalRGBColorSpace extends  GenericColorSpace{
         
         BufferedImage image;
         
-        data=dataToRGBByteArray(data, width, height, false);
+        data=dataToRGBByteArray(data, width, height);
         
         final DataBuffer db = new DataBufferByte(data, data.length);
         

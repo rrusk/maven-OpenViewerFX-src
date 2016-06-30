@@ -228,7 +228,7 @@ public class F {
         /*
          * draw the shape as image
          */
-        final GraphicsState gs1 = (GraphicsState)gs.clone();
+        final GraphicsState gs1 = gs.deepCopy();
         gs1.CTM=new float[][]{{smaskImage.getWidth(),0,1},{0,-smaskImage.getHeight(),1},{0,0,0}};
 
         /*

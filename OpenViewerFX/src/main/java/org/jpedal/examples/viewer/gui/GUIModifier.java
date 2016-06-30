@@ -270,6 +270,9 @@ public class GUIModifier {
             case PropertyTags.OPENFILEBUTTON:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.OPENFILE, set);
                 break;
+            case PropertyTags.SAVEFILEBUTTON:
+                setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.SAVE, set);
+                break;
             case PropertyTags.PRINTBUTTON:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.PRINT, set);
                 break;
@@ -308,6 +311,9 @@ public class GUIModifier {
                 break;
             case PropertyTags.MOUSEMODEBUTTON:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.MOUSEMODE, set);
+                break;
+            case PropertyTags.OPENSYSTEMDEFAULT:
+                setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.OPENINSYSTEMDEFAULT, set);
                 break;
             default :
                 used = false;

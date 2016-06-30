@@ -65,12 +65,18 @@ public class CommandParser {
     /**current op*/
     private int currentOp;
 
+    int streamSize;
+
+
     public CommandParser(final byte[] characterStr) {
         this.characterStream=characterStr;
+
+        streamSize=characterStr.length;
+
     }
 
 
-    int getCommandValues(int dataPointer, final int streamSize, final int tokenNumber) {
+    int getCommandValues(int dataPointer, final int tokenNumber) {
 
         final boolean debug=false;
 
@@ -303,6 +309,9 @@ public class CommandParser {
 
                     if(current==62 && last==62 &&(type==1))  //'>'=62
                     {
+                        if(characterStream[dataPointer+1]=='>'){ //all fpr >> and >
+                            dataPointer++; //roll on in case no gap (ie case 25436)
+                        }
                         isBreak = true;
                     }
 

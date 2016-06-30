@@ -82,14 +82,20 @@ public class ArrayUtils {
         return i;
     }
     
+    public static boolean isNull(final byte[] arrayData, final int j2){
+        return arrayData[j2]=='n' && arrayData[j2+1]=='u' && arrayData[j2+2]=='l' && arrayData[j2+3]=='l';
+    }
+    
     public static int skipComment(final byte[] raw, int i) {
         
-        while(raw[i]!=10 && raw[i]!=13){
+        final int len=raw.length;
+        
+        while(i<len && raw[i]!=10 && raw[i]!=13){
             i++;
         }
         
         //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==9) {
+        while(i<len &&(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==9)) {
             i++;
         }
         
@@ -145,12 +151,80 @@ public class ArrayUtils {
     }
 
     public static int skipSpaces(final byte[] data, int start) {
+        
+        final int len=data.length;
+        
         //now skip any spaces to key or text
-        while(data[start]==10 || data[start]==13 || data[start]==32) {
+        while(start<len && (data[start]==10 || data[start]==13 || data[start]==32)) {
             start++;
         }
 
         return start;
+    }
+    
+    public static int skipToEndOfKey(final byte[] data, int start) {
+        
+        int len=data.length;
+        
+        //now skip any spaces to key or text
+        while(start<len && (Character.isLetterOrDigit((char)data[start])||data[start]=='_'|| data[start]=='.' || data[start]=='#' || data[start]=='-')) {
+            start++;
+        }
+
+        return start;
+    }
+
+    static boolean isSpace(final byte[] arrayData, final int endPtr) {
+        return (arrayData[endPtr] == 32 || arrayData[endPtr] == 13 || arrayData[endPtr] == 10);
+    }
+    
+    
+    static boolean isNumber(byte[] arrayData, int j2) {
+        
+        boolean isNumber=true;
+        
+        int count=arrayData.length;
+        
+        j2=skipSpaces(arrayData,j2);
+        
+        while(isNumber && j2<count){
+            
+            if((arrayData[j2]>='0' && arrayData[j2]<='9')) {
+                //part of number char
+                j2++;
+            }else{
+                isNumber=false;
+            }     
+        }
+        
+        return isNumber;      
+    }
+
+    static boolean isRef(byte[] arrayData, int j2) {
+        
+        boolean isRef=true;
+        
+        int count=arrayData.length, elementCount=0;
+        
+        j2=skipSpaces(arrayData,j2);
+        
+        while(isRef && j2<count && arrayData[j2]!='R'){
+            
+            if((arrayData[j2]>='0' && arrayData[j2]<='9')) {
+                //part of number char
+                j2++;
+            }else if(isSpace(arrayData,j2)){
+                
+                elementCount++;
+                
+                j2=skipSpaces(arrayData,j2);
+            }else{
+                isRef=false;
+            }     
+        }
+        
+        return isRef && elementCount==2;
+               
     }
 }
 

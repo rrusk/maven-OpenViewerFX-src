@@ -162,6 +162,11 @@ public class DO extends ImageDecoder {
                                 cache.setImposedKey(key, id);
                             }
                         }
+                        
+                        if (parserOptions.isClippedImagesExtracted()) {
+                         //   generateTransformedImage(image, name);
+                        }
+            
                     } else {
 
                         if (parserOptions.isClippedImagesExtracted()  || isForHTML) {

@@ -39,9 +39,6 @@ import java.util.Map;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.sun.LZWDecoder;
-import org.jpedal.sun.LZWDecoder2;
-import org.jpedal.sun.TIFFLZWDecoder;
-
 /**
  * LZW
  */
@@ -104,9 +101,8 @@ public class LZW extends BaseFilter implements PdfFilter {
                 // 9allow for not a full 8
                 // bits
 
-                final TIFFLZWDecoder lzw_decode = new TIFFLZWDecoder();
-
-                lzw_decode.decode(data, processed_data);
+                final TiffLZW lzw_decode = new TiffLZW();
+                lzw_decode.decompress(data, processed_data);
 
                 return applyPredictor(predictor, processed_data, colors, bitsPerComponent1, columns);
             }
@@ -135,8 +131,8 @@ public class LZW extends BaseFilter implements PdfFilter {
             // decompress cached object
             if (bis != null) {
 
-                final LZWDecoder2 lzw2 = new LZWDecoder2();
-                lzw2.decode(null, streamCache, bis);
+                final TiffLZWBuffer lzw2 = new TiffLZWBuffer();
+                lzw2.decompress(streamCache, bis);
 
             }
 

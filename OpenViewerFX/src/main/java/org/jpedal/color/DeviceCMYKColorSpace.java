@@ -57,6 +57,18 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
     public void clearCache() {
         lastC = -1;
     }
+    
+    @Override
+    public void invalidateCaching(int color){
+        
+        super.invalidateCaching(color);
+        
+        lastC = -1;
+        lastM = -1;
+        lastY = -1;
+        lastK = -1;
+         
+    }
 
     public DeviceCMYKColorSpace() {
 
@@ -152,7 +164,7 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
                 bb[2] = (int) (255 * (1 - y) * (1 - k));
             }
             this.currentColor = new PdfColor(bb[0], bb[1], bb[2]);
-
+            
         }
     }
 
@@ -175,9 +187,9 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
      */
     @Override
     public final BufferedImage JPEGToRGBImage(
-            final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+            final byte[] data, final int w, final int h, final int pX, final int pY) {
 
-        return nonRGBJPEGToRGBImage(data, w, h, decodeArray, pX, pY);
+        return nonRGBJPEGToRGBImage(data, w, h, pX, pY);
 
     }
 
@@ -185,7 +197,7 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
      * default RGB implementation just returns data
      */
     @Override
-    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h, boolean arrayInverted) {
+    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h) {
 
         int pixelCount = w * h * 4;
         final int dataSize = data.length;

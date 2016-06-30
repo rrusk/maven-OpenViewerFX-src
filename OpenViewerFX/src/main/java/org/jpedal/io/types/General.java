@@ -191,8 +191,8 @@ public class General {
                         }
                     }
 
-                    final Array objDecoder=new Array(objectReader, jj2, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY);
-                    objDecoder.readArray(ignoreRecursion, newData, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=new KeyArray(objectReader, jj2, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY, newData);
+                    objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     i=j;
                     break;
 
@@ -307,8 +307,8 @@ public class General {
                 System.out.println(padding + "Array ");
             }
 
-            final Array objDecoder=new Array(objectReader, jj, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY);
-            jj=objDecoder.readArray(ignoreRecursion, data, pdfObject, PDFkeyInt);
+            final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY, data);
+            jj=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                 /**/
         }else if(typeFound==0){
             if(debugFastCode) {
@@ -434,8 +434,8 @@ public class General {
             }
         }
 
-        final Array objDecoder=new Array(objectReader, jj2, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY);
-        objDecoder.readArray(ignoreRecursion, newData, pdfObject, PDFkeyInt);
+        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj2, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY, newData);
+        objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
         i=j;
 
         return i;

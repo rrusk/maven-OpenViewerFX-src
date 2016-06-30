@@ -41,7 +41,7 @@ import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.SharedViewer;
 import org.jpedal.examples.viewer.Values;
-import org.jpedal.examples.viewer.commands.SaveForm;
+import org.jpedal.examples.viewer.commands.SaveFile;
 import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
@@ -74,7 +74,7 @@ public class JavaFXExit {
         /*
          * warn user on forms
          */
-        SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
+        SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
         if(decode_pdf.getDisplayView()==Display.PAGEFLOW){
             decode_pdf.getPages().stopGeneratingPage();

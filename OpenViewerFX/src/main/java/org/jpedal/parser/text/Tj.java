@@ -626,7 +626,7 @@ public class Tj extends BaseDecoder {
                         }
                         
                         if(glyphData.getDisplayValue()!=null && !glyphData.getDisplayValue().startsWith("&#")){
-                            if(isHTML || current.getType()==DynamicVectorRenderer.CREATE_EPOS) {
+                            if(isHTML) {
                                 current.drawEmbeddedText(Trm, fontSize, null, null, DynamicVectorRenderer.TEXT, gs, null, glyphData.getDisplayValue(), currentFontData, -100);
                             } else {
                                 current.drawText(Trm, glyphData.getDisplayValue(), gs, Trm[2][0], -Trm[2][1], javaFont);

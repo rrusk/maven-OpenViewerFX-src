@@ -35,7 +35,6 @@ package org.jpedal.parser.color;
 import org.jpedal.color.*;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
-import org.jpedal.objects.PdfPageData;
 import org.jpedal.objects.raw.ColorSpaceObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -47,7 +46,7 @@ import org.jpedal.utils.StringUtils;
  */
 public class CS {
    
-    public static void execute(final boolean isLowerCase, final String colorspaceObject, final GraphicsState gs, final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final boolean isPrinting, final int pageNum, final PdfPageData pageData, final boolean alreadyUsed) {
+    public static void execute(final boolean isLowerCase, final String colorspaceObject, final GraphicsState gs, final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final boolean isPrinting, final boolean alreadyUsed) {
 
         //set flag for stroke
         final boolean isStroke = !isLowerCase;
@@ -100,7 +99,7 @@ public class CS {
         if(newColorSpace.getID()==ColorSpaces.Pattern){
 
             //at this point we only know it is Pattern so need to pass in WHOLE array
-            newColorSpace.setPattern(cache.patterns,pageData.getMediaBoxWidth(pageNum), pageData.getMediaBoxHeight(pageNum),gs.CTM);
+            newColorSpace.setPattern(cache.patterns);
             newColorSpace.setGS(gs);
         }
 

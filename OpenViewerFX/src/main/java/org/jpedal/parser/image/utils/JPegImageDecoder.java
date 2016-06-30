@@ -51,7 +51,7 @@ public class JPegImageDecoder {
     
     
     public static BufferedImage decode(final int w, final int h,
-            final GenericColorSpace decodeColorData, byte[] data, final float[] decodeArray, final ImageData imageData,
+            final GenericColorSpace decodeColorData, byte[] data, final ImageData imageData,
             ErrorTracker errorTracker, ParserOptions parserOptions) {
         
         GenericColorSpace jpegDecodeColorData=decodeColorData;
@@ -94,7 +94,7 @@ public class JPegImageDecoder {
             if(altDecodeColorData!=null){
                 
                 try{
-                    image=altDecodeColorData.JPEGToRGBImage(data, w, h, decodeArray,imageData.getpX() , imageData.getpY() , imageData.isArrayInverted());
+                    image=altDecodeColorData.JPEGToRGBImage(data, w, h,imageData.getpX() , imageData.getpY());
                     
                     //if it returns image it worked flag and switch over
                     if(image!=null){
@@ -122,7 +122,7 @@ public class JPegImageDecoder {
         if(!decodedOnAltColorspace){
             //separation, renderer
             try{
-                image=jpegDecodeColorData.JPEGToRGBImage(data, w, h, decodeArray,imageData.getpX(),imageData.getpY() , imageData.isArrayInverted());
+                image=jpegDecodeColorData.JPEGToRGBImage(data, w, h, imageData.getpX(),imageData.getpY());
                 
                 //flag if YCCK
                 if(jpegDecodeColorData.isImageYCCK()) {

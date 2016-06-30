@@ -32,13 +32,13 @@
  */
 package org.jpedal.parser.gs;
 
-import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.TextState;
 import org.jpedal.parser.ParserOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.LogWriter;
+import org.jpedal.utils.repositories.Vector_Int;
 import org.jpedal.utils.repositories.Vector_Object;
 
 public class GraphicsStates {
@@ -54,6 +54,8 @@ public class GraphicsStates {
 
     /**stack for graphics states*/
     private Vector_Object nonstrokeColorStateStack;
+    
+    private Vector_Int nonstrokeColorValueStack,strokeColorValueStack;
 
     /**stack for graphics states*/
     private Vector_Object textStateStack;
@@ -77,15 +79,20 @@ public class GraphicsStates {
 
             graphicsStateStack = new Vector_Object(10);
             textStateStack = new Vector_Object(10);
+            
             strokeColorStateStack= new Vector_Object(20);
             nonstrokeColorStateStack= new Vector_Object(20);
+            
+            nonstrokeColorValueStack= new Vector_Int(20);
+            strokeColorValueStack= new Vector_Int(20);
+            
             //clipStack=new Vector_Object(20);
         }
 
         depth++;
 
         //store
-        graphicsStateStack.push(gs.clone());
+        graphicsStateStack.push(gs.deepCopy());
 
         //store clip
         //		Area currentClip=gs.getClippingShape();
@@ -95,13 +102,22 @@ public class GraphicsStates {
         //			clipStack.push(currentClip.clone());
         //		}
         //store text state (technically part of gs)
-        textStateStack.push(gs.getTextState().clone());
+        textStateStack.push(gs.getTextState().deepCopy());
 
         //save colorspaces
-        nonstrokeColorStateStack.push(gs.nonstrokeColorSpace.clone());
-        strokeColorStateStack.push(gs.strokeColorSpace.clone());
+        nonstrokeColorStateStack.push(gs.nonstrokeColorSpace);
+        strokeColorStateStack.push(gs.strokeColorSpace);
+        
+        //preserve colors
+        final int strokeColorData = gs.strokeColorSpace.getColor().getRGB();
+        final int nonStrokeColorData = gs.nonstrokeColorSpace.getColor().getRGB();
 
-        current.resetOnColorspaceChange();
+        strokeColorValueStack.push(strokeColorData);
+        nonstrokeColorValueStack.push(nonStrokeColorData);
+
+        //System.out.println(gs.nonstrokeColorSpace+" "+gs.strokeColorSpace);
+        
+        current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
 
     }
 
@@ -128,16 +144,11 @@ public class GraphicsStates {
             gs.strokeColorSpace=(GenericColorSpace) strokeColorStateStack.pull();
             gs.nonstrokeColorSpace=(GenericColorSpace) nonstrokeColorStateStack.pull();
 
-            int id=gs.strokeColorSpace.getID();
-            if(id == ColorSpaces.Separation || id == ColorSpaces.DeviceN) {
-                gs.strokeColorSpace.restoreColorStatus();
-            }
-
-            //and the non-stroke
-            id=gs.nonstrokeColorSpace.getID();
-            if(id==ColorSpaces.Separation || id == ColorSpaces.DeviceN) {
-                gs.nonstrokeColorSpace.restoreColorStatus();
-            }
+            final int strokeColorData=strokeColorValueStack.pull();
+            final int nonStrokeColorData= nonstrokeColorValueStack.pull();
+            
+            gs.resetColorSpaces(strokeColorData, nonStrokeColorData);
+            
         }
         
         //save for later
@@ -145,7 +156,7 @@ public class GraphicsStates {
 
             current.drawClip(gs,parserOptions.defaultClip,false) ;
 
-            current.resetOnColorspaceChange();
+            current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
 
             /*
              * align display

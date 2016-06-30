@@ -37,8 +37,7 @@ import java.awt.event.ActionListener;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import javax.swing.JMenuItem;
-import org.jpedal.PdfDecoderInt;
-import org.jpedal.examples.viewer.commands.SaveForm;
+import org.jpedal.examples.viewer.commands.SaveFile;
 import org.jpedal.examples.viewer.utils.Printer;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
@@ -204,7 +203,7 @@ public class RecentDocuments implements RecentDocumentsFactory {
     
     @Override
     public void createMenuItems(final String fileNameToAdd, final int position, final GUIFactory currentGUI,
-                                final Values commonValues, final PdfDecoderInt decode_pdf) {
+                                final Values commonValues) {
                 
         final String shortenedFileName = RecentDocuments.getShortenedFileName(fileNameToAdd);
         recentDocuments[position] = new JMenuItem(position + 1 + ": " + shortenedFileName);
@@ -225,7 +224,7 @@ public class RecentDocuments implements RecentDocumentsFactory {
                     /*
                      * warn user on forms
                      */
-                    SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
+                    SaveFile.handleUnsaveForms(currentGUI, commonValues);
                     final JMenuItem item = (JMenuItem) e.getSource();
                     final String fileName = item.getName();
 

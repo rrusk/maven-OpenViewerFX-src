@@ -145,7 +145,7 @@ public class JavaFXOutline extends Tab implements GUIOutline{
         }
     }
     
-    public class OutlineNode extends TreeItem<Label>{
+    public final class OutlineNode extends TreeItem<Label>{
         private final String objectRef;
         private String page;
         

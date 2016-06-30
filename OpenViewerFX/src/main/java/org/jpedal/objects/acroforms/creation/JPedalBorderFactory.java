@@ -32,9 +32,14 @@
  */
 package org.jpedal.objects.acroforms.creation;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Stroke;
 import javax.swing.BorderFactory;
-import javax.swing.border.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -181,24 +186,5 @@ public class JPedalBorderFactory {
 
 }
 
-    class DashBorder extends LineBorder {
 
-        //make getters and setters for stroke as exercise
-        Stroke stroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1, new float[]{5, 5}, 10);
-
-        DashBorder(final Stroke stroke, final Color borderColor) {
-
-            super(borderColor);
-            this.stroke=stroke;
-        }
-
-        @Override
-        public void paintBorder(final Component c, final Graphics g, final int x, final int y, final int width, final int height) {
-            final Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setStroke(stroke);
-
-            super.paintBorder(c, g2d, x, y, width, height);
-            g2d.dispose();
-        }
-    }
 

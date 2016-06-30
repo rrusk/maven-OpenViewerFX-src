@@ -281,8 +281,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     }
     
     /* remove all page objects and flush queue */
-    @Override
-    public void flush() {
+    private void flush() {
         
         singleImage=null;
         
@@ -371,54 +370,6 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         
     }
     
-    /* remove all page objects and flush queue */
-    @Override
-    public void dispose() {
-        
-        singleImage=null;
-        
-        shapeType=null;
-        pageObjects=null;
-        objectType=null;
-        areas=null;
-        clips=null;
-        x_coord=null;
-        y_coord=null;
-        textFillType=null;
-        text_color=null;
-        fill_color=null;
-        stroke_color=null;
-        stroke=null;
-        
-        TRvalues=null;
-        
-        fs=null;
-        
-        lw=null;
-        
-        af1=null;
-        af2=null;
-        af3=null;
-        af4=null;
-        
-        opacity=null;
-        
-        BMvalues=null;
-
-        lastClip=null;
-        
-        lastStroke=null;
-        
-        lastAf=null;
-        
-        fonts=null;
-        fontsUsed=null;
-        
-        imageID=null;
-        
-        storedImageValues=null;
-    }
-
     private boolean renderFailed;
     
     //optional frame for user to pass in - if present, error warning will be displayed
@@ -1242,7 +1193,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     
     private Object getResampledImage(final String key, final Object[] pageObjects1, final int i, Object currentObject) {
         
-        int sampling=1,w1=0,pY,defaultSampling=1;
+        int sampling=1,w1,pY;
         float  scalingToUse=scaling;
         //fix for rescaling on Enkelt-Scanning_-_Bank-10.10.115.166_-_12-12-2007_-_15-27-57jpg50-300.pdf
         if(scaling<1) {
@@ -1301,25 +1252,8 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             
             //cannot be smaller than page
             while(defnewW>defsmallestW && defnewH>defsmallestH){
-                defaultSampling <<= 1;
                 defnewW >>= 1;
                 defnewH >>= 1;
-            }
-            
-            int defscaleX=w1/defaultX;
-            if(defscaleX<1) {
-                defscaleX = 1;
-            }
-            
-            int defscaleY=h1/defaultY;
-            if(defscaleY<1) {
-                defscaleY = 1;
-            }
-            
-            //choose smaller value so at least size of page
-            defaultSampling=defscaleX;
-            if(defaultSampling>defscaleY) {
-                defaultSampling = defscaleY;
             }
             
             //rescan all pixels and down-sample image
@@ -1357,7 +1291,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         imageData.setDepth(bpc);
         
         if(testSampling){
-            System.out.println("resampleImageData="+data+" "+w1+" "+h1+" "+sampling+" bytes="+imageData.getObjectData().length);
+            System.out.println("resampleImageData bytes="+data.length+" "+w1+" "+h1+" "+sampling+" bytes="+imageData.getObjectData().length);
         }
         
         GenericColorSpace decodeColorData=new DeviceRGBColorSpace();
@@ -1895,13 +1829,31 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         
     }
     
-    /**reset on colorspace change to ensure cached data up to data*/
+    /**
+     * Add output to correct area so we can assemble later.
+     * Can also be used for any specific code features (ie setting a value)
+     */
     @Override
-    public void resetOnColorspaceChange(){
-        
-        fillSet=false;
-        strokeSet=false;
-        
+    public synchronized void writeCustom(final int section, final Object str) {
+
+        switch(section){
+            
+            case RESET_COLORSPACE:
+                fillSet=false;
+                strokeSet=false;
+                break;
+            
+            case FLUSH_ADDITIONAL_OBJECTS_ON_PAGE:
+                flushAdditionalObjOnPage();
+                break;
+             
+            case FLUSH:
+                flush();
+                break;
+                
+            default:
+                super.writeCustom(section, str);
+        }
     }
     
     /*save shape colour*/
@@ -2065,8 +2017,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         drawUserContent(type, obj, colors);
     }
   
-    @Override
-    public void flushAdditionalObjOnPage(){
+    private void flushAdditionalObjOnPage(){
         
         //reset pointer
         if(endItem!=-1) {
@@ -2267,7 +2218,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             if(clip==null){
                 clips.addElement(null);
             }else{
-                clips.addElement(BaseDisplay.convertPDFClipToJavaClip(clip));
+                clips.addElement(ClipUtils.convertPDFClipToJavaClip(clip));
             }
             
             x_coord=RenderUtils.checkSize(x_coord,currentItem);
@@ -2516,7 +2467,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                 throw new PdfException("Unknown version in serialised object " + version);
             }
             
-            final int isHires=bis.read(); //0=no,1=yes
+            bis.read(); //0=no,1=yes old hires flag
             
             rawPageNumber =bis.read();
             

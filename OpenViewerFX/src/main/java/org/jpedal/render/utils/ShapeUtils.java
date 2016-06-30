@@ -27,22 +27,43 @@
 
  *
  * ---------------
- * FontHandler.java
+ * ClipUtils.java
  * ---------------
  */
-package org.jpedal.external;
+package org.jpedal.render.utils;
 
-import org.jpedal.fonts.PdfFont;
-import org.jpedal.io.PdfObjectReader;
-import org.jpedal.objects.raw.PdfObject;
-import org.jpedal.render.DynamicVectorRenderer;
+
+import java.awt.Shape;
+import java.awt.geom.PathIterator;
 
 /**
- *
- * @author markee
+ * static helper methods for Clip code
  */
-public interface FontHandler {
+public class ShapeUtils {
 
-    void processFont(boolean isHTML, PdfFont restoredFont, DynamicVectorRenderer current, PdfObject newFont, PdfObjectReader currentPdfFile);
     
+    public static boolean isSimpleOutline(final Shape path) {
+
+        int count = 0;
+        final PathIterator i = path.getPathIterator(null);
+        float[] values = new float[6];
+
+        while (!i.isDone() && count < 6) { //see if rectangle or complex clip
+            //Get value before next called otherwise issues with pathIterator ending breaks everything
+            int value = i.currentSegment(values);
+
+            i.next();
+
+            count++;
+
+            //If there is a curve, class as complex outline
+            if(value==PathIterator.SEG_CUBICTO || value==PathIterator.SEG_QUADTO){
+                count = 6;
+            }
+
+
+        }
+        return count<6;
+    }
+
 }

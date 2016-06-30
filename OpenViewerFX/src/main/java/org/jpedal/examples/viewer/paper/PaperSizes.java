@@ -85,7 +85,7 @@ public class PaperSizes {
     }
 
     //return selected Paper
-    public MarginPaper getSelectedPaper(final Object id) {
+    public MarginPaper getSelectedPaper(final String id) {
         return paperDefinitions.get(id);
     }
 

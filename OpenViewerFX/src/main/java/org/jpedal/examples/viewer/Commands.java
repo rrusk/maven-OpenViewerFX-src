@@ -100,6 +100,7 @@ public class Commands {
     public static final int EXTRACTASIMAGE = 34;
     public static final int ROTATELEFT = 35;
     public static final int ROTATERIGHT = 36;
+    public static final int OPENINSYSTEMDEFAULT = 37;
     //0-49 handled in executeMenuBarCommands(final int ID, Object[] args)
     
     //50-249 handled in executeDisplayCommands(final int ID, Object[] args)
@@ -357,7 +358,7 @@ public class Commands {
                 
                 final String fileNameToAdd=recentDocs[i];
                 
-                currentGUI.getRecentDocument().createMenuItems(fileNameToAdd, i, currentGUI, commonValues, decode_pdf);
+                currentGUI.getRecentDocument().createMenuItems(fileNameToAdd, i, currentGUI, commonValues);
                 
             }catch(final Exception ee){
                 ee.printStackTrace();

@@ -33,35 +33,43 @@
 package org.jpedal.render;
 
 
+import com.idrsolutions.pdf.color.shading.ShadingFactory;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.*;
 import javafx.scene.shape.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
-import org.jpedal.color.ColorSpaces;
-import org.jpedal.color.PatternColorSpace;
+import org.jpedal.color.*;
 import org.jpedal.exception.PdfException;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.glyph.PdfGlyph;
 import org.jpedal.fonts.tt.TTGlyph;
+import org.jpedal.function.FunctionFactory;
+import org.jpedal.function.PDFFunction;
+import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.ObjectStore;
+import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
+import org.jpedal.objects.raw.FunctionObject;
+import org.jpedal.objects.raw.PatternObject;
 import org.jpedal.objects.raw.PdfDictionary;
+import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
+import org.jpedal.utils.Matrix;
 import org.jpedal.utils.repositories.Vector_Int;
 import org.jpedal.utils.repositories.Vector_Object;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
@@ -97,12 +105,6 @@ public class FXDisplay extends GUIDisplay {
         yy = y;
 
     }
-    
-    @Override
-    public void flushAdditionalObjOnPage(){
-        throw new RuntimeException("NOt used in JavaFX implementation - please redecode the page");
-    }
-    
 
     public FXDisplay(final int pageNumber, final ObjectStore newObjectRef, final boolean isPrinting) {
 
@@ -114,9 +116,26 @@ public class FXDisplay extends GUIDisplay {
 
     }
     
-    /* remove all page objects and flush queue */
+    /**
+     * Add output to correct area so we can assemble later.
+     * Can also be used for any specific code features (ie setting a value)
+     */
     @Override
-    public void flush() {
+    public synchronized void writeCustom(final int section, final Object str) {
+
+        switch(section){
+            
+            case FLUSH:
+                flush();
+                break;
+                
+            default:
+                super.writeCustom(section, str);
+        }
+    }
+    
+    /* remove all page objects and flush queue */
+    private void flush() {
         
        // children.clear();
         pageObjects.clear();
@@ -248,7 +267,7 @@ public class FXDisplay extends GUIDisplay {
         currentShape.getTransforms().add(javafx.scene.transform.Transform.affine(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]));
         
         //if Pattern, convert to Image with Pattern on instead
-        if(currentGraphicsState.nonstrokeColorSpace.getID()==ColorSpaces.Pattern){
+        if(currentGraphicsState.nonstrokeColorSpace.getID()==ColorSpaces.Pattern){            
             drawPatternedShape(currentGraphicsState, (Path) currentShape);
         }else{
             setFXParams(currentShape,currentGraphicsState.getFillType(),currentGraphicsState, changeLineArtAndText);
@@ -269,23 +288,32 @@ public class FXDisplay extends GUIDisplay {
     }
     
     private void drawPatternedShape(final GraphicsState currentGraphicsState, final Path currentShape){
-//        if(true) return;
-        final PatternColorSpace fillCS=(PatternColorSpace)currentGraphicsState.nonstrokeColorSpace;
-        //get Image as BufferedImage and convert to javafx WritableImage
-        final BufferedImage imageForPattern = fillCS.getImageForPatternedShape(currentGraphicsState);
-        if(imageForPattern == null) {
-            return;
-        }
-        Image fxImage = SwingFXUtils.toFXImage(imageForPattern, null);        
-        double iw = fxImage.getWidth();
-        double ih = fxImage.getHeight();        
+        final PatternColorSpace patternCS=(PatternColorSpace)currentGraphicsState.nonstrokeColorSpace;
+        Bounds bounds = currentShape.getBoundsInParent();
+        
+        PatternObject patternObj = patternCS.getPatternObj();
+        final int patternType = patternObj.getInt(PdfDictionary.PatternType);
+        if (patternType == 1) { //tiling pattern
+            //get Image as BufferedImage and convert to javafx WritableImage
+            final BufferedImage imageForPattern = patternCS.getImageForPatternedShape(currentGraphicsState);
+            if (imageForPattern == null) {
+                return;
+            }
+            Image fxImage = SwingFXUtils.toFXImage(imageForPattern, null);
+            double iw = fxImage.getWidth();
+            double ih = fxImage.getHeight();
 //        final double xPos=currentShape.getBoundsInParent().getMinX();
 //        final double yPos=currentShape.getBoundsInParent().getMinY();
 //        double pw = currentShape.getBoundsInLocal().getWidth();
 //        double ph = currentShape.getBoundsInLocal().getHeight();  
-        ImagePattern pattern = new ImagePattern(fxImage, 0, 0, iw, ih,false);
-        currentShape.setStroke(new Color(0, 0, 0, 0));
-        currentShape.setFill(pattern);
+            ImagePattern pattern = new ImagePattern(fxImage, 0, 0, iw, ih,false);
+            currentShape.setStroke(new Color(0, 0, 0, 0));
+            currentShape.setFill(pattern);
+            
+        } else {
+            currentShape.setFill(getShadingPaint(patternObj, patternCS, bounds));
+        }
+        
         addToScene(currentShape);
         
 //        if(true) return;
@@ -306,6 +334,137 @@ public class FXDisplay extends GUIDisplay {
         //addToScene(patternView, currentShape);
     }
     
+    private static Paint getShadingPaint(PatternObject patternObj, PatternColorSpace patternCS, Bounds bounds) {
+        final PdfObject shading = patternObj.getDictionary(PdfDictionary.Shading);
+        final PdfObject shadeCS = shading.getDictionary(PdfDictionary.ColorSpace);
+        final PdfObjectReader currentPdfFile = patternCS.getObjectReader();
+        float[][] matrix = {{1,0,0},{0,1,0},{0,0,1}};
+        final float[] inputs=patternObj.getFloatArray(PdfDictionary.Matrix);
+        if(inputs!=null){
+            matrix = new float[][]{{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
+        }
+        //convert colorspace and get details
+        GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, shadeCS);
+
+        //use alternate as preference if CMYK
+        if (newColorSpace.getID() == ColorSpaces.ICC && shadeCS.getParameterConstant(PdfDictionary.Alternate) == ColorSpaces.DeviceCMYK) {
+            newColorSpace = new DeviceCMYKColorSpace();
+        }
+
+        final int shadingType = shading.getInt(PdfDictionary.ShadingType);
+        final float[] background = shading.getFloatArray(PdfDictionary.Background);
+
+        final PdfObject functionObj = shading.getDictionary(PdfDictionary.Function);
+        final byte[][] keys = shading.getKeyArray(PdfDictionary.Function);
+        PDFFunction [] function = null;
+        if (functionObj != null) {
+            function = new PDFFunction[1];
+            function[0] = FunctionFactory.getFunction(functionObj, currentPdfFile);
+        } else if (keys != null) {
+            int functionCount = 0;
+            if (keys != null) {
+                functionCount = keys.length;
+            }
+            PdfObject functionsObj;
+            if (keys != null) {
+                final PdfObject[] subFunction = new PdfObject[functionCount];
+                String id;
+                for (int i = 0; i < functionCount; i++) {
+                    id = new String(keys[i]);
+                    if (id.startsWith("<<")) {
+                        functionsObj = new FunctionObject(1);
+                        final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
+                        objectDecoder.readDictionaryAsObject(functionsObj, 0, keys[i]);
+                    } else {
+                        functionsObj = new FunctionObject(id);
+                        currentPdfFile.readObject(functionsObj);
+                    }
+                    subFunction[i] = functionsObj;
+                }
+                function = new PDFFunction[subFunction.length];
+                for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {
+                    function[i1] = FunctionFactory.getFunction(subFunction[i1], currentPdfFile);
+                }
+            }
+        }
+        
+        if (shadingType == 2) {
+            return getAxialPaint(newColorSpace, background, shading, matrix, function, bounds);
+        } else {
+            return new Color(0, 0, 0, 0);
+        }
+
+    }
+
+    private static Paint getAxialPaint(GenericColorSpace shadingColorSpace, float[] background, PdfObject shadingObject, float[][] mm, PDFFunction[] function, Bounds bounds) {
+        
+        float[] domain = shadingObject.getFloatArray(PdfDictionary.Domain);
+        if (domain == null) {
+            domain = new float[]{0.0f, 1.0f};
+        }
+        boolean [] extension = shadingObject.getBooleanArray(PdfDictionary.Extend);
+        if (extension == null) {
+            extension = new boolean[]{false, false};
+        }
+        
+        Color bgColor = new Color(0,0,0,0);
+        
+        if(background != null){
+            shadingColorSpace.setColor(background, 4);
+            shadingColorSpace.getColor();
+            PdfPaint pp = shadingColorSpace.getColor();
+            int rgb = pp.getRGB();
+            bgColor = new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
+        }
+        
+        Color colorE0 = bgColor;
+        Color colorE1 = bgColor;
+                        
+        float[] coords = shadingObject.getFloatArray(PdfDictionary.Coords);
+
+        float x0 = coords[0];
+        float y0 = coords[1];
+        float x1 = coords[2];
+        float y1 = coords[3];
+        
+        float[] temp = Matrix.transformPoint(mm, x0, y0);
+        x0 = temp[0];
+        y0 = temp[1];
+        
+        temp = Matrix.transformPoint(mm, x1, y1);
+        x1 = temp[0];
+        y1 = temp[1];
+       
+        float t0 = domain[0];
+        float t1 = domain[1];
+       
+        Color colorT0 = calculateColor(t0, shadingColorSpace, function);
+        Color colorT1 = calculateColor(t1, shadingColorSpace, function);
+        
+        colorE0 = extension[0] ? colorT0 : colorE0;
+        colorE1 = extension[1] ? colorT1 : colorE1;
+        
+        Stop[] stops = {new Stop(0,colorE0),new Stop(0.01, colorT0), new Stop(0.99, colorT1), new Stop(1,colorE1)};
+//        Stop[] stops = new Stop[]{new Stop(0.1, colorT0), new Stop(0.9, colorT1)};
+        if(1==2){
+            Matrix.show(mm);
+            double bx = bounds.getMinX();
+            double by = bounds.getMinY();
+            double mx = bounds.getMaxX();
+            double my = bounds.getMaxY();
+
+            System.out.println(bx+by+mx+my);
+        }
+        return new LinearGradient(x0, y0, x1, y1, false, CycleMethod.NO_CYCLE, stops);
+    }
+    
+    private static Color calculateColor(final float val, GenericColorSpace shadingColorSpace, PDFFunction[] function) {
+        final float[] colValues = ShadingFactory.applyFunctions(function, new float[]{val});
+        shadingColorSpace.setColor(colValues, colValues.length);
+        PdfPaint pp = shadingColorSpace.getColor();
+        int rgb = pp.getRGB();
+        return new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
+    }    
 
     protected static void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, boolean allowColorChange){
 

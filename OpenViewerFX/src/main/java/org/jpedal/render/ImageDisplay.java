@@ -47,7 +47,7 @@ import org.jpedal.objects.PdfShape;
 import org.jpedal.parser.Cmd;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
-public class ImageDisplay extends BaseDisplay implements DynamicVectorRenderer {
+public class ImageDisplay extends G2Display implements DynamicVectorRenderer {
 
     public ImageDisplay(final int pageNumber, final boolean addBackground, final int defaultSize, final ObjectStore newObjectRef) {
 

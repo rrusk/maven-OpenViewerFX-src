@@ -49,7 +49,7 @@ import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.commands.Images;
 import org.jpedal.examples.viewer.commands.OpenFile;
-import org.jpedal.examples.viewer.commands.SaveForm;
+import org.jpedal.examples.viewer.commands.SaveFile;
 import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.examples.viewer.gui.generic.GUISearchWindow;
 import org.jpedal.examples.viewer.gui.popups.DownloadProgress;
@@ -63,6 +63,7 @@ import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.raw.OutlineObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
@@ -91,7 +92,7 @@ public class JavaFXOpenFile {
             /*
              * warn user on forms
              */
-            SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
+            SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
             if (org.jpedal.examples.viewer.utils.Printer.isPrinting()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPrintWait.message"));
@@ -339,7 +340,7 @@ public class JavaFXOpenFile {
             /*
              * warn user on forms
              */
-            SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
+            SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
 //            currentGUI.resetNavBar();
             
@@ -476,7 +477,7 @@ public class JavaFXOpenFile {
                 processPage(commonValues, decode_pdf, currentGUI, thumbnails);
             } else {
                 currentGUI.setViewerTitle(Messages.getMessage("PdfViewer.NoFile"));
-                decode_pdf.getDynamicRenderer().flush();
+                decode_pdf.getDynamicRenderer().writeCustom(DynamicVectorRenderer.FLUSH, null);
                 decode_pdf.getPages().refreshDisplay();
                 currentGUI.scaleAndRotate();
                 commonValues.setPageCount(1);

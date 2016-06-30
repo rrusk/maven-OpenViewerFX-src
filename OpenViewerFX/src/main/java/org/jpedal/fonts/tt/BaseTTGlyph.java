@@ -879,8 +879,6 @@ public abstract class BaseTTGlyph extends PdfGlyph {
         //Combine sets of glyph points to get whole glyph
         final int[] allX = new int[coordCount];
         final int[] allY = new int[coordCount];
-        final int[] unscaledX = new int[coordCount];
-        final int[] unscaledY = new int[coordCount];
         final boolean[] allOnCurve = new boolean[coordCount];
         final boolean[] allEndOfContour = new boolean[coordCount];
         final int[] allEndIndex = new int[this.compCount];
@@ -906,8 +904,6 @@ public abstract class BaseTTGlyph extends PdfGlyph {
             for (int j=0; j<componentLengths[i]; j++) {
                 allX[offset+j] = scaledX[j];
                 allY[offset+j] = scaledY[j];
-                unscaledX[offset+j] = pX[j];
-                unscaledY[offset+j] = pY[j];
                 allOnCurve[offset+j] = onCurve[j];
                 allEndOfContour[offset+j] = endOfContour[j];
                 allEndIndex[i] = endIndex;

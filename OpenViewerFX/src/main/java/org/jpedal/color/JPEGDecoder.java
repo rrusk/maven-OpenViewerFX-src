@@ -210,7 +210,7 @@ public class JPEGDecoder {
         return ras;
     }
     
-    static BufferedImage grayJPEGToRGBImage(final byte[] data, final int pX, final int pY, final boolean arrayInverted) {
+    static BufferedImage grayJPEGToRGBImage(final byte[] data, final int pX, final int pY) {
         
         BufferedImage image=null;
         
@@ -232,9 +232,9 @@ public class JPEGDecoder {
                 int ptr=0;
                 for(int ii=0;ii<byteLength;ii++){
                     
-                    if(arrayInverted){ //flip if needed
-                        rawData[ii]=(byte) (rawData[ii]^255);
-                    }
+                    //if(arrayInverted){ //flip if needed
+                    //    rawData[ii]=(byte) (rawData[ii]^255);
+                    //}
                     
                     rgbData[ptr]=rawData[ii];
                     ptr++;
@@ -267,7 +267,7 @@ public class JPEGDecoder {
         Raster ras=null;
         
         try {
-            BufferedImage img=decodeColorData.JPEGToRGBImage(data, XObject.getInt(PdfDictionary.Width), XObject.getInt(PdfDictionary.Height), null, -1, -1, false);
+            BufferedImage img=decodeColorData.JPEGToRGBImage(data, XObject.getInt(PdfDictionary.Width), XObject.getInt(PdfDictionary.Height), -1, -1);
             
             //System.out.println(decodeColorData+" "+img);
             if(img.getType()==BufferedImage.TYPE_INT_RGB){ //we need byte in rgb

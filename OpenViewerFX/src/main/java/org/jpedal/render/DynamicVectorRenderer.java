@@ -38,13 +38,15 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
 import org.jpedal.exception.PdfException;
-import org.jpedal.external.FontHandler;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.glyph.PdfGlyph;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfShape;
 
 public interface DynamicVectorRenderer  {
+
+    
+    int FontMode=1;
 
     int TEXT=1;
 	int SHAPE=2;
@@ -112,6 +114,18 @@ public interface DynamicVectorRenderer  {
 	int COLOR_REPLACEMENT_THRESHOLD=4;
 	int ENHANCE_FRACTIONAL_LINES=5; //Any line with width <1 is set to 1 to ensure visible (0 to turn off, 1 to turn on)
 	
+    int TOKEN_NUMBER=6; 
+    
+    int CUSTOM_IMAGE_HANDLER=7;
+	int CUSTOM_COLOR_HANDLER=8;
+	
+    int FLUSH=43;
+    
+    int FLUSH_ADDITIONAL_OBJECTS_ON_PAGE=42;
+    int PAINT_BACKGROUND=41;
+    int PAGE_DECODING_FINISHED=19;
+    int RESET_COLORSPACE=18;
+	
     /**
      * Used to pass in Graphics2D for all versions
      * @param g2
@@ -121,23 +135,6 @@ public interface DynamicVectorRenderer  {
     void eliminateHiddenText(Shape currentShape, GraphicsState gs, int segmentCount, boolean ignoreScaling);
 
     /**
-     * Used by HTML/SVG to convert fonts
-     * @return
-     */
-    FontHandler getFontHandler();
-
-	/** 
-     * Remove all dynamic page objects and flush queue 
-     */
-	void flush();
-
-	/**
-     * Dispose method should only be called once component finished with as
-     * removes static resources as well
-     */
-	void dispose();
-
-    /**
      * Renders all the objects onto the g2 surface for screen display
      * 
      * @param highlights
@@ -145,12 +142,6 @@ public interface DynamicVectorRenderer  {
      * @param userAnnot
      */
 	void paint(Rectangle[] highlights, AffineTransform viewScaling, Rectangle userAnnot);
-
-    /**
-     *
-     * @param dirtyRegion
-     */
-    void paintBackground(final Shape dirtyRegion);
 
 	/** Saves text object with attributes for rendering
      *
@@ -203,11 +194,6 @@ public interface DynamicVectorRenderer  {
      */
     void drawShape(Object currentShape, GraphicsState currentGraphicsState);
 
-	/** 
-     * Reset on colorspace change to ensure cached data up to data
-     */
-	void resetOnColorspaceChange();
-	
 	/**
      * save opacity settings
      *
@@ -226,11 +212,6 @@ public interface DynamicVectorRenderer  {
      */
 
 	void drawAdditionalObjectsOverPage(int[] type, Color[] colors, Object[] obj) throws PdfException;
-
-    /**
-     * Remove all GUI display values added by user for page
-     */
-    void flushAdditionalObjOnPage();
 
     /**
      *
@@ -271,23 +252,6 @@ public interface DynamicVectorRenderer  {
      */
     void setScalingValues(double cropX, double cropH, float scaling);
 
-    /**
-     *
-     * @param customImageHandler
-     */
-    void setCustomImageHandler(org.jpedal.external.ImageHandler customImageHandler);
-
-    /**
-     *
-     * @param colorController
-     */
-    void setCustomColorHandler(org.jpedal.external.ColorHandler colorController);
-
-	/**
-	 * Execute operations to do once page done
-	 */
-	void flagDecodingFinished();
-
 	/**
 	 * Turn object into byte[] so we can move across
 	 * this way should be much faster than the stadard Java serialise.
@@ -301,33 +265,12 @@ public interface DynamicVectorRenderer  {
 	byte[] serializeToByteArray(Set<String> fontsAlreadyOnClient) throws IOException;
 
     /**
-     * Checks to see if an object is hidden behind the rectangular outline of 
-     * another (does not allow for any transparency)
-     * 
-     * @param CTM
-     * @return
-     */
-    boolean hasObjectsBehind(float[][] CTM);
-
-    /**
      * Generic method to set any values as an object
      * 
      * @param key key value defined in this interface or inheriting class
      * @param obj value for key settings
      */
     void writeCustom(int key, Object obj);
-
-    /**
-     * Allow us to identify different types of renderer (ie HTML, Screen, Image)
-     * @return value defined in this interface or inheriting class 
-     */
-	int getType();
-
-	/** Allow tracking of specific commands so we can spot separete TJ commands
-     *
-     * @param tokenNumber
-     */
-	void updateTokenNumber(int tokenNumber);
 
     /**
      * Generic method to set int values

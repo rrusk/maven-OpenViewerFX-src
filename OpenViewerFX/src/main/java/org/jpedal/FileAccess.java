@@ -401,10 +401,6 @@ public class FileAccess {
         
         currentPdfFile=null;
 
-        if(currentDisplay!=null) {
-            currentDisplay.dispose();
-        }
-        
         currentDisplay=null;
         
         bb += 1;
@@ -772,7 +768,7 @@ public class FileAccess {
         
         lastPageDecoded = -1;
 
-        currentDisplay.flush();
+        currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH, null);
 
     }
 

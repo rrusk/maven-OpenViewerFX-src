@@ -36,8 +36,8 @@ package org.jpedal.examples.viewer.gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.TreeNode;
 import org.jpedal.FileAccess;
@@ -762,7 +762,7 @@ public abstract class GUI implements GUIFactory {
         if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
             currentGUI.setPageCounterText(PageCounter.PAGECOUNTER2, currentGUI.getPageLabel(commonValues.getCurrentPage()));
             if(pageLabelDiffers(commonValues.getCurrentPage())){
-                currentGUI.setPageCounterText(PageCounter.PAGECOUNTER3, "(" +String.valueOf(commonValues.getCurrentPage()) + ' ' + Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()+")");
+                currentGUI.setPageCounterText(PageCounter.PAGECOUNTER3, "(" + commonValues.getCurrentPage() + ' ' + Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()+")");
             }else{
                 currentGUI.setPageCounterText(PageCounter.PAGECOUNTER3, Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount());
             }
@@ -995,7 +995,7 @@ public abstract class GUI implements GUIFactory {
         /*adds listeners to GUI widgets to track changes*/
 
         //rest forms changed flag to show no changes
-        commonValues.setFormsChanged(false);
+        //commonValues.setFormsChanged(false);
 
         /*see if flag set - not default behaviour*/
         boolean showMessage=false;

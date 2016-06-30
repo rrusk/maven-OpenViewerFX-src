@@ -211,8 +211,8 @@ public class ColorObjectDecoder {
         }
 
         //read Components
-        final Array objDecoder=new Array(objectReader,i, endPoint, PdfDictionary.VALUE_IS_STRING_ARRAY);
-        i=objDecoder.readArray(false, raw, pdfObject, PdfDictionary.Components);
+        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader,i, endPoint, PdfDictionary.VALUE_IS_STRING_ARRAY, raw);
+        i=objDecoder.readArray(false, pdfObject, PdfDictionary.Components);
 
         while(raw[i]==93 || raw[i]==32 || raw[i]==10 || raw[i]==13) {
             i++;

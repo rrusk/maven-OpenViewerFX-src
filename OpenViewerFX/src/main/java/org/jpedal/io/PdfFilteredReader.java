@@ -195,7 +195,7 @@ public class PdfFilteredReader {
                         //We do not write back to stream.
                         
                         if(data==null){ //hack to read into byte[] and spool back for cache
-                            System.err.println("should not come here");
+                            
                             data=new byte[bis.available()];
                             bis.read(data);
                             

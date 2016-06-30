@@ -52,7 +52,7 @@ import org.jpedal.utils.Strip;
 /**
  * Holds Maps which are used to map font names onto actual fonts and files
  */
-public class FontMappings {
+public final class FontMappings {
     
     /**ensure fonts setup only once*/
     public static boolean fontsInitialised;

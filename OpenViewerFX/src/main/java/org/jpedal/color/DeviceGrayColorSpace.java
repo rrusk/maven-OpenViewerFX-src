@@ -87,7 +87,7 @@ public class DeviceGrayColorSpace extends GenericColorSpace {
      * create rgb version of gray
      */
     @Override
-    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h, boolean arrayInverted){
+    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h){
         
         final int size=data.length;
         final byte[] newData=new byte[size*3];
@@ -129,9 +129,9 @@ public class DeviceGrayColorSpace extends GenericColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage( final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+    public BufferedImage JPEGToRGBImage( final byte[] data, final int w, final int h, final int pX, final int pY) {
         
-        return JPEGDecoder.grayJPEGToRGBImage( data, pX, pY,  arrayInverted);
+        return JPEGDecoder.grayJPEGToRGBImage( data, pX, pY);
         
     }
 }

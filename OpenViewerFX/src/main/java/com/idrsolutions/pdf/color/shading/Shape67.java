@@ -35,6 +35,7 @@ package com.idrsolutions.pdf.color.shading;
 import java.awt.Color;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +54,8 @@ public class Shape67 {
     private int nSteps = 10; // used to find c1,c2,d1,d2 length steps
     private final List<TinyPatch> patches = new ArrayList<TinyPatch>();
     private TinyPatch lastFound; //cache last found to
+    private final double minX;
+    private final double minY;
 
     /**
      * @param sp size 12 points array
@@ -69,36 +72,27 @@ public class Shape67 {
         shape.curveTo(sp[7].getX(), sp[7].getY(), sp[8].getX(), sp[8].getY(), sp[9].getX(), sp[9].getY());
         shape.curveTo(sp[10].getX(), sp[10].getY(), sp[11].getX(), sp[11].getY(), sp[0].getX(), sp[0].getY());
         shape.closePath();
+        Rectangle2D bounds = shape.getBounds2D();
+        minY = bounds.getMinY();
+        minX = bounds.getMinX();
     }
 
     public GeneralPath getShape() {
         return shape;
     }
 
+    public double getMinX() {
+        return minX;
+    }
 
-//    private double getC1Length() {
-//        return curveLength(pointsArr[9], pointsArr[10], pointsArr[11], pointsArr[0], nSteps);
-//    }
-//    private double getC2Length() {
-//        return curveLength(pointsArr[3], pointsArr[4], pointsArr[5], pointsArr[6], nSteps);
-//    }
-//    private double getD1Length() {
-//        return curveLength(pointsArr[0], pointsArr[1], pointsArr[2], pointsArr[3], nSteps);
-//    }
-//    private double getD2Length() {
-//        return curveLength(pointsArr[6], pointsArr[7], pointsArr[8], pointsArr[9], nSteps);
-//    }
-//    private static double curveLength(Point2D p1, Point2D p2, Point2D p3, Point2D p4, int nSteps) {
-//        double distance = 0;
-//        Point2D oldPoint = p1;
-//        for (int i = 1; i <= nSteps; i++) {
-//            float t = (1.0f / nSteps) * i;
-//            Point2D p = ShadingUtils.findDistancedPoint(t, p1, p2, p3, p4);
-//            distance += oldPoint.distance(p);
-//            oldPoint = p;
-//        }
-//        return distance;
-//    }
+    public double getMinY() {
+        return minY;
+    }
+
+    public void setSteps(int steps) {
+        nSteps = steps;
+    }
+
     private static Point2D[] curvePoints(Point2D p1, Point2D p2, Point2D p3, Point2D p4, int nSteps) {
         Point2D[] arr = new Point2D[nSteps + 1];
         arr[0] = p1;
@@ -110,7 +104,7 @@ public class Shape67 {
         return arr;
     }
 
-    private static float[][] linePoints(Point2D p1, Point2D p2) {       
+    private static float[][] linePoints(Point2D p1, Point2D p2) {
         float[][] arr = new float[3][2];
         arr[0][0] = (float) p1.getX();
         arr[0][1] = (float) p1.getY();
@@ -160,7 +154,7 @@ public class Shape67 {
             pointColors[i] = new int[]{colorsArr[i].getRed(), colorsArr[i].getGreen(), colorsArr[i].getBlue(), colorsArr[i].getAlpha()};
         }
 
-        float vMinus, uMinus, scx, scy, sdx, sdy, sbx, sby;
+        float vMinus, uMinus, scx, scy, sdx, sdy, sbx, sby, sx, sy;
 
         for (int i = 0; i < szv; i++) {
             v += stepV;
@@ -180,8 +174,8 @@ public class Shape67 {
                 sby = (float) (vMinus * ((1 - u) * C1[0].getY() + u * C1[C1.length - 1].getY())
                         + v * (uMinus * C2[0].getY() + u * C2[C2.length - 1].getY()));
 
-                float sx = scx + sdx - sbx;
-                float sy = scy + sdy - sby;
+                sx = scx + sdx - sbx;
+                sy = scy + sdy - sby;
 
                 xy[i][j] = new Point2D.Float(sx, sy);
 
@@ -219,7 +213,7 @@ public class Shape67 {
         }
 
         for (TinyPatch patch : patches) {
-            if (isPointInPoly(patch.points, p)) {
+            if (patch.minX <= p.getX() && patch.minY <= p.getY() && isPointInPoly(patch.points, p)) {
                 lastFound = patch;
                 Color[] colors = patch.colors;
                 Point2D[] points = patch.points;
@@ -294,8 +288,7 @@ public class Shape67 {
             for (int j = 0; j < d; j++) {
                 Point2D[] patchPoints = {xy[i][j], xy[i][j + 1], xy[i + 1][j + 1], xy[i + 1][j]};
                 Color[] patchColors = {cc[i][j], cc[i][j + 1], cc[i + 1][j + 1], cc[i + 1][j]};
-                TinyPatch tiny = new TinyPatch(patchPoints, patchColors);
-                if (isPointInPoly(tiny.points, p)) {
+                if (isPointInPoly(patchPoints, p)) {
                     depth++;
                     return recurseTrapezoidal(p, patchPoints, patchColors, isRecursive, depth);
                 }
@@ -306,19 +299,23 @@ public class Shape67 {
 
     }
 
-
     private static class TinyPatch {
-        
+
         final Color[] colors;
         final Point2D[] points;
+        double minX, minY;
 
         public TinyPatch(Point2D[] points, Color[] colors) {
             this.colors = colors;
             this.points = points;
+            for (Point2D p : points) {
+                minX = Math.min(minX, p.getX());
+                minY = Math.min(minY, p.getY());
+            }
         }
     }
-        
-    private static boolean isPointInPoly(Point2D[] points,Point2D p){
+
+    private static boolean isPointInPoly(Point2D[] points, Point2D p) {
         boolean c = false;
         int nvert = points.length;
         double px = p.getX();
@@ -329,21 +326,17 @@ public class Shape67 {
             pj = points[j];
             double piY = pi.getY();
             double pjY = pj.getY();
-            
-            if ((piY > py) != (pjY > py)){
-                
+
+            if ((piY > py) != (pjY > py)) {
+
                 double piX = pi.getX();
-            
+
                 if ((px < (pj.getX() - piX) * (py - piY) / (pjY - piY) + piX)) {
                     c = !c;
                 }
             }
         }
         return c;
-    }
-    
-    public void setSteps(int steps){
-        nSteps = steps;
     }
 
 }

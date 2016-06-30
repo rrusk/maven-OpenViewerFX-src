@@ -70,7 +70,7 @@ public class ObjectReader {
 
         //old version
         if(bufSize<1 || newCacheSize!=-1 || fileIsBroken) {
-            return readObjectDataXX(bufSize, pdfObject);
+            return readUnsizedObjectData(bufSize, pdfObject);
         }
 
         byte[] dataRead=null;
@@ -91,7 +91,7 @@ public class ObjectReader {
         return dataRead;
     }
 
-    private byte[] readObjectDataXX(int bufSize, final PdfObject pdfObject){
+    private byte[] readUnsizedObjectData(int bufSize, final PdfObject pdfObject){
 
         int newCacheSize=-1,startStreamCount=0,charReached = 0,charReached3=0;
         boolean startStreamFound=false;

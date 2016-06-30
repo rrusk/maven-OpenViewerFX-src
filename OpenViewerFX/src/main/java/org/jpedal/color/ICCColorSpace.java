@@ -295,12 +295,12 @@ extends GenericColorSpace {
      */
     @Override
     public BufferedImage JPEGToRGBImage(
-            final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+            final byte[] data, final int w, final int h, final int pX, final int pY) {
         
         if(data.length>9 && data[6] == 'J' && data[7] == 'F' && data[8] == 'I' && data[9] == 'F'){
-            return nonRGBJPEGToRGBImage(data,w,h, null,pX,pY);
+            return nonRGBJPEGToRGBImage(data,w,h, pX,pY);
         }else {
-            return algorithmicICCToRGB(data,w,h,pX,pY,decodeArray);
+            return algorithmicICCToRGB(data,w,h,pX,pY);
         }
         
     }
@@ -325,7 +325,7 @@ extends GenericColorSpace {
     
     
     private BufferedImage algorithmicICCToRGB(
-            byte[] data, int w, int h, final int pX, final int pY, final float[] decodeArray) {
+            byte[] data, int w, int h, final int pX, final int pY) {
         
         BufferedImage image = null;
         
@@ -357,7 +357,7 @@ extends GenericColorSpace {
             
             //some images need this
             if(iir.getRawImageType(0)==null || alternative==-1) {
-                return nonRGBJPEGToRGBImage(data,w,h, decodeArray,pX,pY);
+                return nonRGBJPEGToRGBImage(data,w,h, pX,pY);
             }
             
             ras=cleanupRaster(ras,pX,pY,componentCount);

@@ -39,6 +39,7 @@ import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.utils.FileFilterer;
 import org.jpedal.examples.viewer.utils.ItextFunctions;
+import org.jpedal.external.ExternalHandlers;
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.objects.acroforms.ReturnValues;
 import org.jpedal.utils.Messages;
@@ -116,9 +117,15 @@ public class SaveForm {
                 }
             }
 
-            final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
-            ItextFunctions.saveFormsData(fileToSave);
-
+            if(currentGUI.getAnnotationPanel().annotationAdded()){
+                currentGUI.getAnnotationPanel().saveAnnotations(commonValues.getSelectedFile(), fileToSave);
+            }
+            
+            if(ExternalHandlers.isITextPresent()){
+                final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
+                ItextFunctions.saveFormsData(fileToSave);
+            }
+            
             /*
              * reset flag and graphical clue
              */
@@ -146,5 +153,6 @@ public class SaveForm {
         }
         
         commonValues.setFormsChanged(false);
+        currentGUI.setViewerTitle(null);
     }
 }

@@ -93,14 +93,14 @@ public class SMaskDecoder {
         } else if (imageData.isDCT() || imageData.isJPX() || imageData.isJBIG()) {      
          
         } else if(colorSpace.getID()==ColorSpaces.DeviceGray){
-            objectData=colorSpace.dataToRGBByteArray(objectData,iw,ih,false);
+            objectData=colorSpace.dataToRGBByteArray(objectData,iw,ih);
             if(matte!=null){
                 matte = new float[]{matte[0],matte[0],matte[0]};
             }
         } else if(colorSpace.getID()==ColorSpaces.CalRGB){
         } else if(colorSpace.getID()==ColorSpaces.DeviceRGB){
         } else {
-            objectData=colorSpace.dataToRGBByteArray(objectData,iw,ih,false);   
+            objectData=colorSpace.dataToRGBByteArray(objectData,iw,ih);   
         }
         
         maskData = ColorSpaceConvertor.normaliseTo8Bit(sd,sw, sh, maskData);

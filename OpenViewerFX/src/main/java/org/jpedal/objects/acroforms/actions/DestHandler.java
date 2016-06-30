@@ -33,7 +33,8 @@
 package org.jpedal.objects.acroforms.actions;
 
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.io.types.Array;
+import org.jpedal.io.types.ArrayDecoder;
+import org.jpedal.io.types.ArrayFactory;
 import org.jpedal.objects.raw.OutlineObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -90,8 +91,8 @@ public class DestHandler {
                 //replace char so subroutine works -ignored but used as flag in routine
                 raw[0]= 0;
 
-                final Array objDecoder=new Array(currentPdfFile.getObjectReader(), 0, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names);
-                objDecoder.readArray(false, raw, aData, PdfDictionary.Dest);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(currentPdfFile.getObjectReader(), 0, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names, raw);
+                objDecoder.readArray(false, aData, PdfDictionary.Dest);
                 newObj = aData;
             }else{
                 if(debugDest) {

@@ -60,6 +60,8 @@ public class PdfFont implements Serializable {
     PdfObject ToUnicode;
     
     String truncatedName;
+    
+    private boolean isArial;
 
     private boolean isWidthVertical;
     
@@ -1044,7 +1046,7 @@ public class PdfFont implements Serializable {
             width =  widthTable[charInt];
         }
         
-        if(isCIDFont && rawCMAP!=null && width==noWidth){
+        if(isCIDFont && rawCMAP!=null && (width==noWidth || (hasCIDToGIDMap && isArial))){ //case 25600 - fudge until we have more exmaples
             int ptr=rawCMAP[charInt];
             if(ptr>0){
                 width =  widthTable[ptr];
@@ -1358,6 +1360,10 @@ public class PdfFont implements Serializable {
             StandardFonts.loadStandardFontWidth(glyphs.logicalfontName);
         }else {
             glyphs.logicalfontName=truncatedName;
+        }
+        
+        if(glyphs.logicalfontName.equals("Arial")){
+            isArial=true;
         }
         
     }

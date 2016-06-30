@@ -873,7 +873,7 @@ public class Dictionary {
             if (PDFkeyInt == PdfDictionary.ColorSpace || id == PdfDictionary.ColorSpace || pdfObject.getPDFkeyInt() == PdfDictionary.ColorSpace){
                 return ColorObjectDecoder.processColorSpace(pdfObject, pdfObject.getObjectRefAsString(), i, raw,objectReader);
             }else if (possibleArrayStart != -1 && (PDFkeyInt == PdfDictionary.Mask || PDFkeyInt == PdfDictionary.TR || PDFkeyInt == PdfDictionary.OpenAction)) {
-                return Array.processArray(pdfObject, raw, PDFkeyInt, possibleArrayStart, objectReader);
+                return ArrayFactory.processArray(pdfObject, raw, PDFkeyInt, possibleArrayStart, objectReader);
             }
             
             if (raw[i] == '%') { // if %comment roll onto next line

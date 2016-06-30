@@ -334,11 +334,21 @@ public class SeparationColorSpace extends GenericColorSpace {
         
     }
     
+    @Override
+    public void invalidateCaching(int color){
+        
+        super.invalidateCaching(color);
+        
+        altCS.invalidateCaching(color);
+         
+        altCS.setColor(new PdfColor(color));
+    }
+    
     /**
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage( final byte[] data, final int ww, final int hh, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+    public BufferedImage JPEGToRGBImage( final byte[] data, final int ww, final int hh, final int pX, final int pY) {
         
         BufferedImage image;
         ByteArrayInputStream in = null;
@@ -392,7 +402,7 @@ public class SeparationColorSpace extends GenericColorSpace {
                 
             }else{
                 //convert the image in general case
-                image=createImage(w, h, rawData, arrayInverted);
+                image=createImage(w, h, rawData);
             }
         } catch (final Exception ee) {
             image = null;
@@ -448,7 +458,7 @@ public class SeparationColorSpace extends GenericColorSpace {
                 if(getID()==ColorSpaces.DeviceN){
                     image=createImageN(iw, ih, rawData);
                 }else{
-                    image=createImage(iw, ih, rawData, false);
+                    image=createImage(iw, ih, rawData);
                 }
             } catch (final Exception ee) {
                 image = null;
@@ -534,7 +544,7 @@ public class SeparationColorSpace extends GenericColorSpace {
         try {
             
             //convert data
-            image=createImage(w, h, data, false);
+            image=createImage(w, h, data);
             
         } catch (final Exception ee) {
             image = null;
@@ -550,7 +560,7 @@ public class SeparationColorSpace extends GenericColorSpace {
      * convert separation stream to RGB and return as an image
      */
     @Override
-    public byte[]  dataToRGBByteArray(final byte[] rgb, final int w, final int h, final boolean arrayInverted) {
+    public byte[]  dataToRGBByteArray(final byte[] rgb, final int w, final int h) {
         
         final int pixelCount=3*w*h;
         final byte[] imageData=new byte[pixelCount];
@@ -568,12 +578,8 @@ public class SeparationColorSpace extends GenericColorSpace {
             
             final int value = (aRgb & 255);
             
-            if (lookuptable[0][value] == -1) {
-                if (arrayInverted) {
-                    setColor(1f - (value / 255f));
-                } else {
-                    setColor(value / 255f);
-                }
+            if (lookuptable[0][value] == -1) {               
+                setColor(value / 255f);
                 
                 lookuptable[0][value] = ((Color) this.getColor()).getRed();
                 lookuptable[1][value] = ((Color) this.getColor()).getGreen();
@@ -593,11 +599,11 @@ public class SeparationColorSpace extends GenericColorSpace {
     /**
      * turn raw data into an image
      */
-    BufferedImage createImage(final int w, final int h, final byte[] rgb, final boolean arrayInverted) {
+    BufferedImage createImage(final int w, final int h, final byte[] rgb) {
         
         final BufferedImage image;
         
-        byte[]imageData=dataToRGBByteArray(rgb,w,h,arrayInverted);
+        byte[]imageData=dataToRGBByteArray(rgb,w,h);
         
         //create the RGB image
         image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
@@ -675,46 +681,4 @@ public class SeparationColorSpace extends GenericColorSpace {
         return altCS.getColor();
         
     }
-    
-    /**
-     * clone graphicsState
-     */
-    @Override
-    public final Object clone()
-    {
-        
-        this.setColorStatus();
-        
-        final Object o;
-        try{
-            o = super.clone();
-        }catch( final Exception e ){
-
-            LogWriter.writeLog("Unable to close "+e);
-            
-            throw new RuntimeException("Unable to clone object");
-        }
-        
-        return o;
-    }
-    
-    private void setColorStatus(){
-        
-        final int foreground=altCS.currentColor.getRGB();
-        
-        r= ((foreground>>16) & 0xFF);
-        g= ((foreground>>8) & 0xFF);
-        b=((foreground) & 0xFF);
-        
-    }
-    
-    @Override
-    public void restoreColorStatus(){
-        
-        altCS.currentColor=new PdfColor(r,g,b);
-        
-        //values may now be wrong in cache code so force reset
-        altCS.clearCache();
-    }
-    
 }

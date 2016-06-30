@@ -70,8 +70,6 @@ class OneBitDownSampler {
         int newW=imageData.getWidth()/sampling;
         int newH=imageData.getHeight()/sampling;
         
-        final boolean arrayInverted=imageData.isArrayInverted();
-        
         int size=newW*newH;
         
         if(imageMask){
@@ -120,7 +118,7 @@ class OneBitDownSampler {
                             currentByte=0;
                         }
                         
-                        if(imageMask && !arrayInverted) {
+                        if(imageMask) {
                             currentByte = (byte) (currentByte ^ 255);
                         }
                         
@@ -139,11 +137,7 @@ class OneBitDownSampler {
                 if(count>0){
                     if(imageMask){
                         for(int ii=0;ii<4;ii++){
-                            if(arrayInverted) {
-                                newData[(offset * 4) + ii] = (byte) (255 - (((maskCol[ii] & 255) * bytes) / count));
-                            } else {
-                                newData[(offset * 4) + ii] = (byte) ((((maskCol[ii] & 255) * bytes) / count));
-                            }
+                            newData[(offset * 4) + ii] = (byte) ((((maskCol[ii] & 255) * bytes) / count));
                         }
                         
                     }else if(index!=null && imageData.getDepth()==1){

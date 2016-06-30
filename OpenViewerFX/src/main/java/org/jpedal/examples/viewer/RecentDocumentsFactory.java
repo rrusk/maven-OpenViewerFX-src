@@ -33,7 +33,6 @@
 
 package org.jpedal.examples.viewer;
 
-import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
 
@@ -52,6 +51,6 @@ public interface RecentDocumentsFactory {
     void addToFileList(String selectedFile);
     
     void createMenuItems(String fileNameToAdd, int position, GUIFactory currentGUI,
-                         Values commonValues, PdfDecoderInt decode_pdf);
+                         Values commonValues);
     
 }

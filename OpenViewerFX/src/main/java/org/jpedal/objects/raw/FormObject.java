@@ -436,8 +436,8 @@ public class FormObject extends PdfObject{
 	        		if(parentPdfObj!=null){
             			final PdfObject BSdic = parentPdfObj.getDictionary(PdfDictionary.BS);
             			if(BSdic!=null){
-            				return (PdfObject)BSdic.clone();
-            			}
+                                return BSdic;
+                        }
             		}
 					BS = new FormObject();
 	        	}
@@ -498,8 +498,8 @@ public class FormObject extends PdfObject{
             		if(parentPdfObj!=null){
             			final PdfObject MKdic = parentPdfObj.getDictionary(PdfDictionary.MK);
             			if(MKdic!=null){
-            				return (PdfObject)MKdic.clone();
-            			}
+                            return MKdic;
+                        }
             		}
             		MK=new MKObject();
             	}
@@ -932,25 +932,13 @@ public class FormObject extends PdfObject{
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
         int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
+        int id = 0;
+        
         try{
 
             //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	//System.out.println((char)next);
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
+            id = PdfDictionary.generateChecksum(keyStart, keyLength, raw);
+            
             /*
              * not standard
              */
@@ -2635,6 +2623,13 @@ public class FormObject extends PdfObject{
         }
         return flags;
     }
+    
+    public void setFieldFlags(int pos, boolean value){
+        if(flags==null) {
+            flags = new boolean[32];
+        }
+        flags[pos] = value;
+    }
 
     /** set the state which is defined as the On state for this form
      * <br>usually different for each child so that the selected child can be found by the state 
@@ -2940,8 +2935,10 @@ public class FormObject extends PdfObject{
     	
     	TI=form.TI;
     	
-    	MK = (form.MK==null) ? null : (PdfObject)form.MK.clone();
+        
+        MK = (form.MK == null) ? null : form.MK;
 
+    	
         //align any set values
         this.setSelected(form.isSelected);
     	
@@ -2977,6 +2974,12 @@ public class FormObject extends PdfObject{
 		}				
         return Farray;
 	}
+        
+        public void setCharactersitics(int pos, boolean value){
+            getCharacteristics();
+            Farray[pos] = value;
+        }
+
 
 	/**
 	 * @return the default text size for this field

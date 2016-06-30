@@ -42,7 +42,6 @@ import java.awt.image.*;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import javax.imageio.ImageIO;
@@ -64,7 +63,7 @@ import org.w3c.dom.NodeList;
  * Provides Color functionality and conversion for pdf
  * decoding
  */
-public class GenericColorSpace  implements Cloneable, Serializable {
+public class GenericColorSpace {
     
     boolean isConverted;
 
@@ -72,10 +71,7 @@ public class GenericColorSpace  implements Cloneable, Serializable {
     float[] rawValues;
     
     Map patterns; //holds new PdfObjects
-    
-    /**for Patterns*/
-    float[][] CTM;
-    
+   
     /**size for indexed colorspaces*/
     private int size;
     
@@ -256,37 +252,6 @@ public class GenericColorSpace  implements Cloneable, Serializable {
         return alternative;
     }
     
-    /**store color setting when we push to stack*/
-    int r;
-    int g;
-    int b;
-    
-    
-    
-    public void restoreColorStatus(){
-        
-        currentColor=new PdfColor(r,g,b);
-        
-    }
-    
-    /**
-     * clone graphicsState
-     */
-    @Override
-    public Object clone()
-    {
-        //this.setColorStatus();
-        
-        final Object o;
-        try{
-            o = super.clone();
-        }catch( final Exception e ){
-            throw new RuntimeException("Unable to clone object "+e);
-        }
-        
-        return o;
-    }
-    
     /**any indexed colormap*/
     byte[] IndexedColorMap;
     
@@ -299,8 +264,6 @@ public class GenericColorSpace  implements Cloneable, Serializable {
     /**handle to graphics state / only set and used by Pattern*/
     GraphicsState gs;
     
-    int pageWidth,pageHeight;
-    
     /**
      * <p>Convert DCT encoded image bytestream to sRGB</p>
      * <p>It uses the internal Java classes
@@ -311,7 +274,7 @@ public class GenericColorSpace  implements Cloneable, Serializable {
      * stopped working so I am still using 1.3</p>
      */
     protected final BufferedImage nonRGBJPEGToRGBImage(
-            final byte[] data, int w, int h, final float[] decodeArray, final int pX, final int pY) {
+            final byte[] data, int w, int h, final int pX, final int pY) {
         
         boolean isProcessed=false;
         
@@ -360,38 +323,8 @@ public class GenericColorSpace  implements Cloneable, Serializable {
             
             Raster ras=iir.readRaster(0,null);
             
-            //invert
-            if(decodeArray!=null){
-                
-                //decodeArray=Strip.removeArrayDeleminators(decodeArray).trim();
-                
-                if((decodeArray.length==6 && decodeArray[0]==1f && decodeArray[1]==0f &&
-                        decodeArray[2]==1f && decodeArray[3]==0f &&
-                        decodeArray[4]==1f && decodeArray[5]==0f )||
-                        (decodeArray.length>2 &&
-                        decodeArray[0]==1f && decodeArray[1]==0)){
-                    
-                    final DataBuffer buf=ras.getDataBuffer();
-                    
-                    final int count=buf.getSize();
-                    
-                    for(int ii=0;ii<count;ii++) {
-                        buf.setElem(ii,255-buf.getElem(ii));
-                    }
-                }else if(decodeArray.length==6 &&
-                        decodeArray[0]==0f && decodeArray[1]==1f &&
-                        decodeArray[2]==0f && decodeArray[3]==1f &&
-                        decodeArray[4]==0f && decodeArray[5]==1f){
-                    // }else if(decodeArray.indexOf("0 1 0 1 0 1 0 1")!=-1){//identity
-                    // }else if(decodeArray.indexOf("0.0 1.0 0.0 1.0 0.0 1.0 0.0 1.0")!=-1){//identity
-                }else if(decodeArray!=null && decodeArray.length>0){
-                    LogWriter.writeLog("CMYK decode array "+java.util.Arrays.toString(decodeArray)+" not implemented");
-                }
-            }
-
-
-            if(cs.getNumComponents()==1 && cmykType==0){ //it is actually gray
-                image=JPEGDecoder.grayJPEGToRGBImage( data, pX, pY,  false);
+            if(cmykType==0 && cs.getNumComponents()==1){ //it is actually gray
+                image=JPEGDecoder.grayJPEGToRGBImage( data, pX, pY);
                 if(image!=null){
                     isProcessed=true;
                 }
@@ -1031,7 +964,7 @@ public class GenericColorSpace  implements Cloneable, Serializable {
     /**
      * convert byte[] datastream JPEG to an image in RGB
      */
-    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY) {
         
         //see if LUV
         if(decodeParms!=null && decodeParms.getInt(PdfDictionary.ColorTransform)==1 && this.value!=ColorSpaces.DeviceGray) {
@@ -1069,17 +1002,17 @@ public class GenericColorSpace  implements Cloneable, Serializable {
             image=JPEGDecoder.JPEGToRGBImageFromLUV(data, pX, pY);
         }
         
-        if(arrayInverted && this.value ==ColorSpaces.DeviceGray ) {
-            
-            final DataBufferByte rgb = (DataBufferByte) image.getRaster().getDataBuffer();
-            final byte[] rawData=rgb.getData();
-            
-            for(int aa=0;aa<rawData.length;aa++){  //flip the bytes
-                rawData[aa]= (byte) (rawData[aa]^255);
-            }
-            
-            image.setData(Raster.createRaster(image.getSampleModel(),new DataBufferByte(rawData,rawData.length),null));
-        }
+//        if(arrayInverted && this.value ==ColorSpaces.DeviceGray ) {
+//            
+//            final DataBufferByte rgb = (DataBufferByte) image.getRaster().getDataBuffer();
+//            final byte[] rawData=rgb.getData();
+//            
+//            for(int aa=0;aa<rawData.length;aa++){  //flip the bytes
+//                rawData[aa]= (byte) (rawData[aa]^255);
+//            }
+//            
+//            image.setData(Raster.createRaster(image.getSampleModel(),new DataBufferByte(rawData,rawData.length),null));
+//        }
         
         return image;
     }
@@ -1162,7 +1095,7 @@ public class GenericColorSpace  implements Cloneable, Serializable {
     /**
      * default RGB implementation just returns data
      */
-    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h, boolean arrayInverted){
+    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h){
         
         return data;
     }
@@ -1324,14 +1257,10 @@ public class GenericColorSpace  implements Cloneable, Serializable {
     /**
      * pass in list of patterns
      */
-    public void setPattern(final Map patterns, final int pageWidth, final int pageHeight, final float[][] CTM) {
+    public void setPattern(final Map patterns) {
         
         this.patterns=patterns;
         
-        this.pageWidth=pageWidth;
-        this.pageHeight=pageHeight;
-        this.CTM=CTM;
-        //System.out.println("set pattern called");
     }
     
     /** used by generic decoder to asign color*/
@@ -1444,6 +1373,10 @@ public class GenericColorSpace  implements Cloneable, Serializable {
 
         return image;
         
+    }
+
+    public void invalidateCaching(int color) {
+        //does nothing
     }
     
 }

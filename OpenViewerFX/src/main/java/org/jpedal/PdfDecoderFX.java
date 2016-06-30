@@ -1618,7 +1618,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     public void clearScreen() {
         final DynamicVectorRenderer currentDisplay= fileAccess.getDynamicRenderer();
         
-        currentDisplay.flush();
+        currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH, null);
         pages.refreshDisplay();
     }
     

@@ -38,22 +38,17 @@ import java.awt.geom.GeneralPath;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
-import org.jpedal.color.DeviceGrayColorSpace;
-import org.jpedal.color.GenericColorSpace;
-import org.jpedal.color.PdfColor;
-import org.jpedal.color.PdfPaint;
+import org.jpedal.color.*;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.fonts.glyph.JavaFXSupport;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
-import org.jpedal.utils.LogWriter;
 
 /**
  * holds the graphics state as stream decoded
  */
-@SuppressWarnings("MagicConstant")
-public class GraphicsState implements Cloneable
+public class GraphicsState 
 {
 
     //hold image co-ords
@@ -786,22 +781,16 @@ public class GraphicsState implements Cloneable
     /**
      * custom clone method
      */
-    @Override
-    public final Object clone(){
-
-        try {
-            super.clone();
-        } catch (CloneNotSupportedException ex) {
-            LogWriter.writeLog("Unable to clone "+ex);
-        }
+   
+    public final  GraphicsState deepCopy(){
         
         final GraphicsState newGS=new GraphicsState();
 
         newGS.x=x;
         newGS.y=y;
 
-        if(TR!=null) {
-            newGS.TR = (PdfObject) TR.clone();
+        if (TR != null) {
+            newGS.TR = TR;
         }
 
         newGS.maxNonstrokeAlpha=maxNonstrokeAlpha;
@@ -1002,6 +991,21 @@ public class GraphicsState implements Cloneable
                 + " opm:" + OPM + " sAlpha:" + strokeAlpha + " nsAlpha:" + nonstrokeAlpha
                 + " msAlpha:" + maxStrokeAlpha + " mnsAlpha:"+maxNonstrokeAlpha+" smask:"+SMask;
         return str;
-    }    
-    
+    }
+
+    public void resetColorSpaces(final int strokeColorData, final int nonStrokeColorData) {
+
+       // System.out.println("reset "+nonstrokeColorSpace+"="+nonStrokeColorData+" ");
+        
+        if(strokeColorSpace.getID()!=ColorSpaces.Pattern){
+             strokeColorSpace.invalidateCaching(strokeColorData);
+            strokeColorSpace.setColor(new PdfColor(strokeColorData));
+            
+        }
+        
+        if(nonstrokeColorSpace.getID()!=ColorSpaces.Pattern){
+            nonstrokeColorSpace.invalidateCaching(nonStrokeColorData);
+            nonstrokeColorSpace.setColor(new PdfColor(nonStrokeColorData));
+        }
+    }
 }

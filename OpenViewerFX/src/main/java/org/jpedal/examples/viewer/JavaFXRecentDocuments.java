@@ -36,7 +36,6 @@ import java.util.Stack;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
-import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.utils.Printer;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
@@ -157,7 +156,7 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
 
  
     @Override
-    public void createMenuItems(final String fileNameToAdd, final int position, final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf) {
+    public void createMenuItems(final String fileNameToAdd, final int position, final GUIFactory currentGUI, final Values commonValues) {
      
         
         final String shortenedFileName = RecentDocuments.getShortenedFileName(fileNameToAdd);

@@ -63,7 +63,6 @@ import org.jpedal.parser.PdfObjectCache;
 import org.jpedal.parser.ValueTypes;
 import org.jpedal.parser.image.data.ImageData;
 import org.jpedal.parser.image.downsample.DownSampler;
-import org.jpedal.parser.image.downsample.RawImageSaver;
 import org.jpedal.parser.image.mask.MaskDataDecoder;
 import org.jpedal.parser.image.mask.MaskDecoder;
 import org.jpedal.parser.image.mask.SMaskDecoder;
@@ -758,13 +757,7 @@ public class ImageDecoder extends BaseDecoder{
                     //						pdfData.addImageElement(xx,yy,w,h,currentImage);
                     //					}
                 }
-                //add to screen being drawn
-                if (parserOptions.renderImages() || !parserOptions.isPageContent()) {
-                    gs.x=x;
-                    gs.y=y;
-                    current.drawImage(parserOptions.getPageNumber(),image,gs,false,image_name, -1);
-                }
-                
+               
                 //save if required
                 if((parserOptions.isPageContent() && parserOptions.isFinalImagesExtracted()) &&
                         
@@ -795,9 +788,7 @@ public class ImageDecoder extends BaseDecoder{
         
         //track its use
         cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(), "x");
-        
-        float[] decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
-        
+       
         imageData.getFilter(XObject);
         
         BufferedImage image = null;//
@@ -822,7 +813,7 @@ public class ImageDecoder extends BaseDecoder{
                     objectData = JPEGDecoder.getBytesFromJPEGWithImageIO(imageData.getObjectData(), decodeColorData, XObject);
                     decodeColorData = new DeviceRGBColorSpace();
                     imageData.setCompCount(3);
-                    decodeArray = null;
+                    imageData.setDecodeArray(null);
                 }
             } catch (Exception e) {
 
@@ -831,7 +822,7 @@ public class ImageDecoder extends BaseDecoder{
                 objectData = JPEGDecoder.getBytesFromJPEGWithImageIO(imageData.getObjectData(), decodeColorData, XObject);
                 decodeColorData = new DeviceRGBColorSpace();
                 imageData.setCompCount(3);
-                decodeArray = null;
+                imageData.setDecodeArray(null);
             }
             XObject.setMixedArray(PdfDictionary.Filter, null);
             XObject.setDecodedStream(objectData);
@@ -845,7 +836,7 @@ public class ImageDecoder extends BaseDecoder{
         if(image!=null){
             return image;
         }else{
-            return convertDataToImage(imageMask, imageData, XObject, decodeColorData, decodeArray);
+            return convertDataToImage(imageMask, imageData, XObject, decodeColorData);
         }
     }
 
@@ -859,7 +850,7 @@ public class ImageDecoder extends BaseDecoder{
         imageData.setIsJPX(false);
     }
 
-    private BufferedImage convertDataToImage(final boolean imageMask, final ImageData imageData, final PdfObject XObject, GenericColorSpace decodeColorData, float[] decodeArray) {
+    private BufferedImage convertDataToImage(final boolean imageMask, final ImageData imageData, final PdfObject XObject, GenericColorSpace decodeColorData) {
         
         int sampling=1;
         
@@ -879,7 +870,7 @@ public class ImageDecoder extends BaseDecoder{
         //down-sample size if displaying (some cases excluded at present)
         if(parserOptions.isRenderPage() &&
                 decodeColorData.getID()!=ColorSpaces.ICC &&
-                (imageData.isArrayInverted() || decodeArray==null || decodeArray.length==0)&&
+                imageData.getMode()!=ImageCommands.ID &&
                 (imageData.getDepth()==1 || imageData.getDepth()==8)
                 && imageData.getpX()>0 && imageData.getpY()>0 && (SamplingFactory.isPrintDownsampleEnabled || !parserOptions.isPrinting())){
 
@@ -912,10 +903,10 @@ public class ImageDecoder extends BaseDecoder{
         }
         
         //handle any decode array
+        final float[] decodeArray=imageData.getDecodeArray();
         if(decodeArray!=null && decodeArray.length > 0 && decodeColorData.getIndexedMap()==null){ //for the moment ignore if indexed (we may need to recode)
           ImageCommands.applyDecodeArray(imageData.getObjectData(), imageData.getDepth(), decodeArray,decodeColorData.getID());
           
-          imageData.setIsArrayInverted(!imageData.isArrayInverted());
         }
         
         //apply any transfer function directly to data (does not work on DCT data)
@@ -930,13 +921,18 @@ public class ImageDecoder extends BaseDecoder{
 
             //choose whether we cache raw data so we can redecode images at different resolutions in Viewer
             if(cacheLargeImages && decodeColorData.getIndexedMap()==null){
+
+                decodeColorData.dataToRGBByteArray(imageData.getObjectData(), imageData.getWidth(), imageData.getHeight());
                 
                 if(SwingDisplay.testSampling){
                     System.out.println("cached image full size= "+imageData.getWidth()+", "+imageData.getHeight()+" Bits="+imageData.getDepth()+
-                            " "+decodeColorData+" maskCol="+maskCol+" count="+imageData.getCompCount()+" bytes="+imageData.getObjectData().length);
+                            " "+decodeColorData+" count="+imageData.getCompCount()+" bytes="+imageData.getObjectData().length);
                 }
                 
-                RawImageSaver.saveRawDataForResampling(objectStoreStreamRef,imageData, decodeColorData, maskCol,parserOptions.getPageNumber() + String.valueOf(imageCount));
+                objectStoreStreamRef.saveRawImageData(parserOptions.getPageNumber() + String.valueOf(imageCount),imageData.getObjectData(),
+                        imageData.getWidth(),imageData.getHeight(),imageData.getDepth(), imageData.getpX(), imageData.getpY(),
+                        maskCol,ColorSpaces.DeviceRGB);
+        
             }
 
             decodeColorData = DownSampler.downSampleImage(decodeColorData, imageData, maskCol, sampling);
@@ -1043,7 +1039,7 @@ public class ImageDecoder extends BaseDecoder{
     }
     
     
-    private void setDownsampledImageSize(ImageData imageData, PdfObject XObject, float multiplyer, GenericColorSpace decodeColorData) {
+    private void setDownsampledImageSize(final ImageData imageData, final PdfObject XObject, final float multiplyer, final GenericColorSpace decodeColorData) {
         
         int w=imageData.getWidth();
         int h=imageData.getHeight();

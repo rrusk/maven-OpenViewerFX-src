@@ -46,7 +46,7 @@ import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.mask.MaskUtils;
-import org.jpedal.render.BaseDisplay;
+import org.jpedal.render.ClipUtils;
 import org.jpedal.render.DynamicVectorRenderer;
 
 public class FormFlattener {
@@ -405,12 +405,34 @@ public class FormFlattener {
                 pdfStreamDecoder.gs.CTM = new float[][]{{matrix[0] * yScale, matrix[1] * yScale, 0}, {matrix[2] * yScale, matrix[3] * yScale, 0}, {x, y, 1}};
             }
         }else{
-            pdfStreamDecoder.gs.CTM = new float[][]{{1,0,0},{0,1,0},{x,y,1}};
-            newClip=new Area(new Rectangle((int)BBox[0],(int)BBox[1],(int)BBox[2],(int)BBox[3]));
+            //If using AP, is a widget and not a signature there is a chance of incorrect AP scaling.
+            //Set CTM based on different between Form bounds and AP bounds
+            if (imgObj != null &&
+                    form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Widget &&
+                    form.getNameAsConstant(PdfDictionary.FT) != PdfDictionary.Sig) {
+                float[] values = imgObj.getFloatArray(PdfDictionary.BBox);
+                if (values != null) {
+                    float xScale = (BBox[2] - BBox[0]) / (values[2] - values[0]);
+                    if (xScale < 0) {
+                        xScale = -xScale;
+                    }
+                    float yScale = (BBox[3] - BBox[1]) / (values[3] - values[1]);
+                    if (yScale < 0) {
+                        yScale = -yScale;
+                    }
+                    pdfStreamDecoder.gs.CTM = new float[][]{{xScale, 0, 0}, {0, yScale, 0}, {x, y, 1}};
+                } else {
+                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
+                }
+                newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
+            } else {
+                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
+                newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
+            }
         }
         
         //Convert clip here
-        newClip = BaseDisplay.convertPDFClipToJavaClip(newClip);
+        newClip = ClipUtils.convertPDFClipToJavaClip(newClip);
         
         drawForm(imgObj, form, pdfStreamDecoder, newClip, isHTML, BBox, x, y, formData, APobjN, oldGS);
       

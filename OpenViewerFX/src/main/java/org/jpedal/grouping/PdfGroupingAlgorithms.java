@@ -457,7 +457,7 @@ public class PdfGroupingAlgorithms {
 		final int count = pdf_data.getRawTextElementCount();
 
 		//local lists for faster access
-		final boolean[] isUsed = new boolean[count];
+		//final boolean[] isUsed = new boolean[count];
 		final int[] fontSize = new int[count];
 		final int[] writingMode=new int[count];
 		final float[] spaceWidth = new float[count];
@@ -615,7 +615,7 @@ public class PdfGroupingAlgorithms {
 		this.f_y2 = new float[currentPoint];
 		
 		for(int i=0; i!=currentPoint; i++){
-			this.isUsed[i] = isUsed[i];
+			//this.isUsed[i] = isUsed[i];
 			this.fontSize[i] = fontSize[i];
 			this.writingMode[i]=writingMode[i];
 			this.spaceWidth[i] = spaceWidth[i];
@@ -3263,8 +3263,7 @@ public class PdfGroupingAlgorithms {
 					
 					//merge if adjoin
 					if ((breakOnSpace) &&
-                            (((hadSpace!=null)&&((hadSpace[c])||(separator.startsWith(" ")))) ||
-                            (!separator.isEmpty()))) {
+                            (((hadSpace!=null)&&((hadSpace[c])||(separator.startsWith(" ")))))) {
                         break;
                     }
 					

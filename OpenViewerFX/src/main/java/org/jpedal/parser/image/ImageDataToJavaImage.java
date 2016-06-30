@@ -157,7 +157,7 @@ public class ImageDataToJavaImage {
             
             imageData.setRemoved(true);
         }else {
-            image = MaskDecoder.createMaskImage((parserOptions.isPrinting() && !ImageDecoder.allowPrintTransparency), gs, parserOptions.isType3Font(), current,data, w, h, imageData, d, decodeColorData, maskCol);
+            image = MaskDecoder.createMaskImage((parserOptions.isPrinting() && !ImageDecoder.allowPrintTransparency), parserOptions.isType3Font(), data, w, h, imageData, d, decodeColorData, maskCol);
         }
         return image;
     }

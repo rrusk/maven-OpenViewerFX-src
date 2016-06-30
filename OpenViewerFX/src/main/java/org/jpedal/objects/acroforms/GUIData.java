@@ -155,8 +155,8 @@ public abstract class GUIData {
 
 		//ExternalHandlers.isXFAPresent() will only be true in forms version of PDF2HTML
         if(!ExternalHandlers.isXFAPresent() && (formFactoryType==FormFactory.HTML || formFactoryType==FormFactory.SVG)){
-                
-            if((formObject.getDictionary(PdfDictionary.RichMediaContent)!=null || subtype==PdfDictionary.Link)){
+             
+            if(subtype!=PdfDictionary.Widget && AcroRenderer.isAnnotation(formObject)){                
                 retComponent = formFactory.annotationButton(formObject);
             }
             

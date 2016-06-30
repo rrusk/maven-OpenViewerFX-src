@@ -42,7 +42,6 @@ import org.jpedal.constants.SpecialOptions;
 import org.jpedal.display.Display;
 import org.jpedal.display.PageOffsets;
 import org.jpedal.exception.PdfException;
-import org.jpedal.external.ColorHandler;
 import org.jpedal.external.ErrorTracker;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.external.Options;
@@ -212,13 +211,23 @@ public class Parser {
      * @return Parser object
      */
     public Parser createNewParser(){
+        //Get original DVR
+        DynamicVectorRenderer dvr = fileAcces.getDynamicRenderer();
+        
+        //Creating a new parser overrides the existing DVR, this is not desired
         Parser parser = new Parser(this.externalHandlers, this.options, this.fileAcces, this.res, this.resultsFromDecode);
+        
+        //Add DVR back to fileaccess to prevent render issues oepning side tab bar
+        fileAcces.setDVR(dvr);
+        
+        //Set the other values
         int extractionMode = this.extractionMode;
         parser.setRenderMode(renderMode);
         parser.setExtractionMode(extractionMode);
         parser.setGenerateGlyphOnRender(generateGlyphOnRender);
         parser.setParms(displayRotation, scaling, indent, specialMode);
         parser.setStatusBar(statusBar);
+        
         return parser;
     }
 
@@ -698,7 +707,7 @@ public class Parser {
 
                 DevFlags.currentPage = page;
                 
-                currentDisplay.flush();
+                currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH,null);
 
                 if (page > fileAcces.getPageCount() || page < 1) {
 
@@ -788,22 +797,19 @@ public class Parser {
                         formRenderer.getFormFactory().indexAllKids();
                         
                         //critical we enable this code in standard mode to render forms
-                        if (!formRenderer.useXFA()) {
-                        
-                            if (currentDisplay.getType() == DynamicVectorRenderer.CREATE_HTML || currentDisplay.getType() == DynamicVectorRenderer.CREATE_SVG) {
+                        if (!formRenderer.useXFA() && currentDisplay.isHTMLorSVG()) {
 
-                                java.util.List[] formsOrdered = formRenderer.getCompData().getFormList(true);
+                            java.util.List[] formsOrdered = formRenderer.getCompData().getFormList(true);
 
-                                //get unsorted components and iterate over forms
-                                for (Object nextVal : formsOrdered[page]) {
+                            //get unsorted components and iterate over forms
+                            for (Object nextVal : formsOrdered[page]) {
 
-                                    if (nextVal != null) {
+                                if (nextVal != null) {
 
-                                        formRenderer.getFormFlattener().drawFlattenedForm(current,(PdfObject) nextVal, true, (PdfObject) formRenderer.getFormResources()[0]);
+                                    formRenderer.getFormFlattener().drawFlattenedForm(current,(PdfObject) nextVal, true, (PdfObject) formRenderer.getFormResources()[0]);
 
-                                    }
                                 }
-                            }
+                            }                           
                         }
                         
                         if(specialMode!= SpecialOptions.NONE &&
@@ -838,7 +844,7 @@ public class Parser {
         }
 
         //tell software page all done
-        fileAcces.getDynamicRenderer().flagDecodingFinished();
+        fileAcces.getDynamicRenderer().writeCustom(DynamicVectorRenderer.PAGE_DECODING_FINISHED, null);
     }
 
     private PdfObject getPdfObject(final int page, PdfObject pdfObject) {
@@ -904,7 +910,7 @@ public class Parser {
         
         current.setXMLExtraction(options.isXMLExtraction());
 
-        currentDisplay.setCustomColorHandler((ColorHandler) externalHandlers.getExternalHandler(Options.ColorHandler));
+        currentDisplay.writeCustom(DynamicVectorRenderer.CUSTOM_COLOR_HANDLER,(externalHandlers.getExternalHandler(Options.ColorHandler)));
 
         current.setParameters(true, options.getRenderPage(), renderMode, extractionMode,false,useJavaFX);
 

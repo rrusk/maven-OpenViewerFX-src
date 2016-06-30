@@ -67,7 +67,7 @@ class JavaFXDetails {
 
     }
     
-    public static class Model {
+    public static final class Model {
 
         private final SimpleStringProperty one;
 

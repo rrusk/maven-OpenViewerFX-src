@@ -76,7 +76,7 @@ public class PageMoveTracker {
     /**
      * used to update statusBar object if exists
      */
-    private class PageListener extends TimerTask {
+    private final class PageListener extends TimerTask {
         
         final Display pages;
         

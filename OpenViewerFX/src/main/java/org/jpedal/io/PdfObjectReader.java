@@ -511,10 +511,16 @@ public class PdfObjectReader {
     }
     
     public void readPageLabels(int pageCount) {
-
+        
         if(pageObj!=null){            
             pageLabels=new PageLabels(this.objectReader,pageCount);
-            pageLabels.readLabels(pageObj);            
+            try{
+                pageLabels.readLabels(pageObj);
+            }catch(Exception e){
+                //issue with values so use raw logical sequence
+                pageLabels=null;
+                LogWriter.writeLog(e.toString());
+            }            
         }
     }
 

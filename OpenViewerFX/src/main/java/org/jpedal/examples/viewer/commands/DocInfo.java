@@ -405,7 +405,7 @@ public class DocInfo {
     /**
      * list of all fonts properties in sorted order
      */
-    private static DefaultMutableTreeNode populateAvailableFonts(final DefaultMutableTreeNode top, final String filter) {
+    private static void populateAvailableFonts(final DefaultMutableTreeNode top, final String filter) {
 
         //get list
         if (FontMappings.fontSubstitutionTable != null) {
@@ -469,7 +469,6 @@ public class DocInfo {
                 }
             }
         }
-        return top;
     }
 
     /**
@@ -574,9 +573,9 @@ public class DocInfo {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 if (!sortFontsByDir) {
-                    DefaultMutableTreeNode fontlist = new DefaultMutableTreeNode("Fonts");
+                    final DefaultMutableTreeNode fontlist = new DefaultMutableTreeNode("Fonts");
                     sortFontsByDir = true;
-                    fontlist = populateAvailableFonts(fontlist, filter.getText());
+                    populateAvailableFonts(fontlist, filter.getText());
                     displayAvailableFonts(fontlist);
                 }
             }
@@ -586,9 +585,9 @@ public class DocInfo {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 if (sortFontsByDir) {
-                    DefaultMutableTreeNode fontlist = new DefaultMutableTreeNode("Fonts");
+                    final DefaultMutableTreeNode fontlist = new DefaultMutableTreeNode("Fonts");
                     sortFontsByDir = false;
-                    fontlist = populateAvailableFonts(fontlist, filter.getText());
+                    populateAvailableFonts(fontlist, filter.getText());
                     displayAvailableFonts(fontlist);
                 }
             }
@@ -602,7 +601,7 @@ public class DocInfo {
             @Override
             public void keyReleased(final KeyEvent e) {
                 final DefaultMutableTreeNode fontlist = new DefaultMutableTreeNode("Fonts");
-                DefaultMutableTreeNode populateAvailableFonts = populateAvailableFonts(fontlist, ((JTextComponent) e.getSource()).getText());
+                populateAvailableFonts(fontlist, ((JTextComponent) e.getSource()).getText());
                 displayAvailableFonts(fontlist);
             }
 
@@ -616,7 +615,7 @@ public class DocInfo {
                 = new DefaultMutableTreeNode("Fonts");
 
         //Populate font list and build tree
-        top = populateAvailableFonts(top, null);
+        populateAvailableFonts(top, null);
         final JTree fontTree = new JTree(top);
         //Added to keep the tree left aligned when top parent is closed
         fontDetails.add(fontTree, BorderLayout.WEST);

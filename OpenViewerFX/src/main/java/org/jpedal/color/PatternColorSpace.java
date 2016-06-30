@@ -67,9 +67,6 @@ public class PatternColorSpace extends GenericColorSpace{
     
     private boolean colorsReversed;
     
-    /**new pattern code image*/
-    BufferedImage patternImage;
-    
     PatternObject PatternObj;
     
     final GenericColorSpace patternColorSpace;
@@ -78,8 +75,6 @@ public class PatternColorSpace extends GenericColorSpace{
     
     PdfPaint strokCol;
     
-    // Store the pattern cell for JavaFX
-    private BufferedImage fullImage;
     /**
      * Just initialises variables
      * @param currentPdfFile
@@ -537,6 +532,10 @@ public class PatternColorSpace extends GenericColorSpace{
     public PatternObject getPatternObj() {
         currentPdfFile.checkResolved(PatternObj);
         return PatternObj;
+    }
+    
+    public PdfObjectReader getObjectReader(){
+        return currentPdfFile;
     }
     
 }

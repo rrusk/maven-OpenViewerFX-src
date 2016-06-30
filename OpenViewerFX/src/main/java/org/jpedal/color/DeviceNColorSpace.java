@@ -167,7 +167,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
       //  try {
             
             //convert data
-            image=createImage(w, h, data,false);
+            image=createImage(w, h, data);
             
 //        } catch (final  ee) {
 //            image = null;
@@ -185,7 +185,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage(final byte[] data, final int ww, final int hh, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int ww, final int hh, final int pX, final int pY) {
         
         BufferedImage image=null;
         
@@ -201,7 +201,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
                 final DataBufferByte rgb = (DataBufferByte) ras.getDataBuffer();
                 
                 //convert the image
-                image=createImage(w, h, rgb.getData(),arrayInverted);
+                image=createImage(w, h, rgb.getData());
             }
 //        } catch (final Exception ee) {
 //            
@@ -219,7 +219,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
      * turn raw data into an image
      */
     @Override
-    BufferedImage createImage(final int w, final int h, final byte[] rawData, final boolean arrayInverted) {
+    BufferedImage createImage(final int w, final int h, final byte[] rawData) {
         
         final BufferedImage image;
         

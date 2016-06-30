@@ -37,13 +37,13 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import org.jpedal.PdfDecoderInt;
-import org.jpedal.external.ColorHandler;
 import org.jpedal.external.CustomPrintHintingHandler;
 import org.jpedal.external.ErrorTracker;
 import org.jpedal.external.Options;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.layers.PdfLayerList;
+import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.render.SwingDisplay;
 
 public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements PrintStreamDecoder  {
@@ -67,7 +67,7 @@ public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements Pri
 
         swingDisplay.setPrintPage(currentPrintPage);
 
-        current.setCustomColorHandler((ColorHandler) pdf.getExternalHandler(Options.ColorHandler));
+        current.writeCustom(DynamicVectorRenderer.CUSTOM_COLOR_HANDLER, pdf.getExternalHandler(Options.ColorHandler));
 
         current.setG2(g2);
         current.paint(null,scaling,userAnnot);
@@ -82,7 +82,7 @@ public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements Pri
             current=new SwingDisplay(parserOptions.getPageNumber(),objectStoreStreamRef,true);
             
             if(customImageHandler!=null && current!=null) {
-                current.setCustomImageHandler(customImageHandler);
+                current.writeCustom(DynamicVectorRenderer.CUSTOM_IMAGE_HANDLER, customImageHandler);
             }
         }else{
             super.setObjectValue(key,obj);

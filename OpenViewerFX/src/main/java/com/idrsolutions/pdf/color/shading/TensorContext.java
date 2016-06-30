@@ -353,7 +353,9 @@ public class TensorContext implements PaintContext {
 
         List<Shape67> foundList = new ArrayList<Shape67>();
         for (Shape67 sh : shapes) {
-            if (sh.getShape().intersects(rect2D)) {
+            if (sh.getMinX()<rect2D.getMaxX() 
+                    && sh.getMinY()<rect2D.getMaxY() 
+                    && sh.getShape().intersects(rect2D)) {
                 foundList.add(sh);
             }
         }

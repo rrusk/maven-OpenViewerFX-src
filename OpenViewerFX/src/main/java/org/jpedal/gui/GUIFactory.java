@@ -380,4 +380,9 @@ public interface GUIFactory {
     void triggerPageTurnAnimation(final PdfDecoderInt decode_pdf, final Values commonValues, final int updatedTotal, final boolean rightTurn);
     
     String getPageLabel(int pageNumber);
+    
+    public void addAnnotationPanel(GUIAnnotationPanel panel);
+    
+    public GUIAnnotationPanel getAnnotationPanel();
+    
 }

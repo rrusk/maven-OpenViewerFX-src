@@ -140,4 +140,25 @@ public class Matrix {
             //System.out.println( row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )" );
         }
     }
+    
+    public static float[][] multiplyAny(float[][] m1, float[][] m2) {
+        int c0 = m1[0].length; 
+        int r1 = m2.length;    
+        if(c0 != r1) {
+            return null; 
+        }
+        int r0 = m1.length;   
+        int c1 = m2[0].length; 
+        float[][] mResult = new float[r0][c1];
+        for(int i = 0; i < r0; i++) {
+            for(int j = 0; j < c1; j++) {
+                for(int k = 0; k < c0; k++) {
+                    mResult[i][j] += m1[i][k] * m2[k][j];
+                }
+            }
+        }
+        return mResult;
+    }
+
+    
 }

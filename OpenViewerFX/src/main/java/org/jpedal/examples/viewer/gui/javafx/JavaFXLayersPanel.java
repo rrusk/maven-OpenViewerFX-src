@@ -91,7 +91,8 @@ public class JavaFXLayersPanel extends Tab implements GUILayersPanel {
         final Map<String, String> metaData = layersObject.getMetaData();
         
         final Iterator<String> metaDataKeys=metaData.keySet().iterator();
-        Object nextKey, value;
+        Object nextKey;
+        String value;
         while(metaDataKeys.hasNext()){
 
             nextKey=metaDataKeys.next();

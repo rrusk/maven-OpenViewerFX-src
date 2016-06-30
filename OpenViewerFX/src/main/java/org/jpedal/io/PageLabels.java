@@ -43,20 +43,18 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class PageLabels extends HashMap<Integer, String>{
 
-    final PdfFileReader objectReader;
-    
-    final int pageCount;
-    
-    static final String symbolLowerCase[]={"m","cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i"};
-    static final String symbolUpperCase[]={"M","CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-    static final String lettersLowerCase[]={"a","b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m","n", 
+    private final PdfFileReader objectReader;
+
+    private final int pageCount;
+
+    private static final String symbolLowerCase[]={"m","cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i"};
+    private static final String symbolUpperCase[]={"M","CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+    private static final String lettersLowerCase[]={"a","b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m","n",
                                                 "o", "p", "q", "r", "s", "t", "u", "v", "x", "w", "y", "z"};
-    static final String lettersUpperCase[]={"A","B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M","N", 
+    private static final String lettersUpperCase[]={"A","B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M","N",
                                                 "O", "P", "Q", "R", "S", "T", "U", "V", "X", "W", "Y", "Z"};
-    static final int[] power={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
-        
-    static boolean storePageLabels;
-    
+    private static final int[] power={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+
     PageLabels(PdfFileReader objectReader, int pageCount) {
         this.objectReader=objectReader;
         this.pageCount=pageCount;
@@ -71,56 +69,57 @@ public class PageLabels extends HashMap<Integer, String>{
             int endPage,numbType,St,pageNum;
             String convertedPage,pageLabel;
             PageLabelObject labelObj;
+            boolean isFirstToken = true;
 
             //read first page values
             int startPage=numList.getNextValueAsInteger(true)+1;
 
-            while(numList.hasMoreTokens()){
+            while (numList.hasMoreTokens()) {
 
                 //read LabelObject
-                labelObj  = getObject(numList.getNextValueAsByte(true));
+                labelObj = getObject(numList.getNextValueAsByte(true));
 
-                numbType=labelObj.getNameAsConstant(PdfDictionary.S);
-                pageLabel=labelObj.getTextStreamValue(PdfDictionary.P);
-               
-                if (numbType==20 && pageLabel==null) {
-                    storePageLabels = false;
-                }
-                else {
-                    storePageLabels = true;
-                }
-                
-                St=labelObj.getInt(PdfDictionary.St);
-                    if(St>0){
-                        pageNum=St;
-                    }else{
-                        pageNum=1;
-                    }
-                    
-                    if(numList.hasMoreTokens()){
-                       endPage=numList.getNextValueAsInteger(true)+1;
-                    }else{
-                        endPage=pageCount+1;
-                    }
+                numbType = labelObj.getNameAsConstant(PdfDictionary.S);
+                pageLabel = labelObj.getTextStreamValue(PdfDictionary.P);
 
-                    //now decode type of naming and fill range
-                    for(int page=startPage;page<endPage;page++){
-                        
-                        if(pageLabel!=null){
-                            convertedPage = pageLabel + getNumberValue(numbType, pageNum);  
-                        }else{
-                            convertedPage = getNumberValue(numbType, pageNum);
-                        }
-                        
-                        //Second parameter is needed for if no P or ST set but page labels are different
-                        if (storePageLabels || !convertedPage.equals(Integer.toString(page))){
-                            this.put(page, convertedPage);
-                        }
-                        pageNum++;
+                St = labelObj.getInt(PdfDictionary.St);
+                if (St > 0) {
+                    pageNum = St;
+                } else {
+                    pageNum = 1;
+                }
+
+                // Do not store PageLabels if the only token is /S /D (default behavior). E.g. sample_pdfs_html/12jul/1997.pdf
+                // Do store in any other case (even if P matches page number). E.g. sample_pdfs_html/12jul/1130MA0711w.pdf
+                // This is the same behavior as Adobe Reader.
+                if (isFirstToken && numbType == PdfDictionary.D &&
+                        pageLabel == null && St <= 0 && !numList.hasMoreTokens()) {
+                    break;
+                }
+                isFirstToken = false;
+
+                if (numList.hasMoreTokens()) {
+                    endPage = numList.getNextValueAsInteger(true) + 1;
+                } else {
+                    endPage = pageCount + 1;
+                }
+
+                //now decode type of naming and fill range
+                for (int page = startPage; page < endPage; page++) {
+
+                    if (pageLabel != null) {
+                        convertedPage = pageLabel + getNumberValue(numbType, pageNum);
+                    } else {
+                        convertedPage = getNumberValue(numbType, pageNum);
                     }
 
-                    startPage=endPage;
+                    this.put(page, convertedPage);
+
+                    pageNum++;
                 }
+
+                startPage = endPage;
+            }
         }
     }
 
@@ -141,7 +140,7 @@ public class PageLabels extends HashMap<Integer, String>{
         return labelObj;
     }
 
-    static String getNumberValue(int numbType, int page) {
+    private static String getNumberValue(int numbType, int page) {
         
         String convertedPage;
     
@@ -171,8 +170,8 @@ public class PageLabels extends HashMap<Integer, String>{
         }
         return convertedPage;
     }
-      
-    static String convertToRoman(int arabicNumber, final String[] symbols){
+
+    private static String convertToRoman(int arabicNumber, final String[] symbols){
         
         final StringBuilder romanNumeral=new StringBuilder();
         int repeat;

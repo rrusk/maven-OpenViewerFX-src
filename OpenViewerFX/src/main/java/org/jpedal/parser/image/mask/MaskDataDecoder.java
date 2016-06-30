@@ -315,7 +315,7 @@ public class MaskDataDecoder {
         }else if(!imageData.isDCT() && !imageData.isJPX()){
             
             //convert the data to rgb (last parameter is used in CalRGB so left in to make method same in all)
-            objectData=decodeColorData.dataToRGBByteArray(objectData,w,h,false);
+            objectData=decodeColorData.dataToRGBByteArray(objectData,w,h);
             
             //System.out.println(maskColorSpace.getParameterConstant(PdfDictionary.ColorSpace)+" "+newSMask.getObjectRefAsString());
             
@@ -352,7 +352,7 @@ public class MaskDataDecoder {
         }else if(!imageData.isDCT() && !imageData.isJPX() && d!=1){ //we do not want to convert 1 bit
             
             //convert the data to rgb (last parameter is used in CalRGB so left in to make method same in all)
-            objectData=decodeColorData.dataToRGBByteArray(objectData,w,h,false);
+            objectData=decodeColorData.dataToRGBByteArray(objectData,w,h);
             
             //System.out.println(maskColorSpace.getParameterConstant(PdfDictionary.ColorSpace)+" "+newSMask.getObjectRefAsString());
             

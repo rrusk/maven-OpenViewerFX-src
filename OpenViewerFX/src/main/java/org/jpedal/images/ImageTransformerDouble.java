@@ -35,14 +35,15 @@ package org.jpedal.images;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.objects.GraphicsState;
-import org.jpedal.render.BaseDisplay;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Matrix;
 
@@ -117,7 +118,7 @@ public class ImageTransformerDouble {
 
             final Area unscaled_clip=getUnscaledClip((Area) clip.clone());
 
-            final int segCount=BaseDisplay.isRectangle(final_clip);
+            final int segCount=isRectangle(final_clip);
 
             clipImage(unscaled_clip,final_clip,segCount);
 
@@ -129,6 +130,19 @@ public class ImageTransformerDouble {
         }else{
             current_image = ColorSpaceConvertor.convertToARGB(current_image);
         }
+    }
+    
+    static int isRectangle(final Shape bounds) {
+
+        int count = 0;
+        final PathIterator i = bounds.getPathIterator(null);
+
+        while (!i.isDone() && count < 8) { //see if rectangle or complex clip
+            i.next();
+            count++;
+        }
+
+        return count;
     }
 
     /**

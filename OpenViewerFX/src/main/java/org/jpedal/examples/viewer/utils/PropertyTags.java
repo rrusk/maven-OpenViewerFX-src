@@ -119,6 +119,8 @@ public class PropertyTags {
     public static final int HELPFORUM = -987283872;
     public static final int BUTTONSMENU = -74233760;
     public static final int OPENFILEBUTTON = -1792397928;
+    public static final int SAVEFILEBUTTON = 1773511947;
+    public static final int OPENSYSTEMDEFAULT = 431770312;
     public static final int PRINTBUTTON = 1765018623;
     public static final int SEARCHBUTTON = 715064058;
     public static final int PROPERTIESBUTTON = 255067717;

@@ -358,12 +358,14 @@ public class RefTable {
             int i = 0;
             
             final int maxLen=Bytes.length;
+            boolean trailerNotFound=true;
             
             //for(int a=0;a<100;a++)
             //	System.out.println((char)Bytes[i+a]);
-            while (i <maxLen) {//look for trailer keyword
+            while (i <maxLen-7) {//look for trailer keyword
                 if (Bytes[i] == 116 && Bytes[i + 1] == 114 && Bytes[i + 2] == 97 && Bytes[i + 3] == 105 &&
                         Bytes[i + 4] == 108 && Bytes[i + 5] == 101 && Bytes[i + 6] == 114) {
+                    trailerNotFound=false;
                     break;
                 }
                 
@@ -373,7 +375,7 @@ public class RefTable {
             //save endtable position for later
             endTable = i;
             
-            if(i==Bytes.length) {
+            if(i==Bytes.length || trailerNotFound) {
                 break;
             }
             

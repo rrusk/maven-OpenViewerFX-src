@@ -37,15 +37,12 @@ import java.awt.image.*;
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.io.ColorSpaceConvertor;
-import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.ImageCommands;
 import org.jpedal.parser.image.data.ImageData;
-import org.jpedal.render.DynamicVectorRenderer;
-import org.jpedal.utils.LogWriter;
 
-/**
+ /**
  *
  * @author markee
  */
@@ -78,6 +75,9 @@ public class MaskDecoder {
         
         if(objectData == null && d == 8){
             objectData = new byte[w*h];
+        }else if( objectData != null && d == 1 && decodeColorData.getID() == ColorSpaces.DeviceGray){ //refer to case 25110
+            objectData = ColorSpaceConvertor.normaliseTo8Bit(d, w, h, objectData);
+            d = 8;
         }
         
         objectData = MaskDataDecoder.convertData(decodeColorData, objectData, w, h, imageData, d, 1, null);
@@ -240,9 +240,9 @@ public class MaskDecoder {
     }
 
     
-    public static BufferedImage createMaskImage(final boolean isPrinting, final GraphicsState gs, final boolean isType3Font, 
-            final DynamicVectorRenderer current, final byte[] data, final int w, final int h, final ImageData imageData, 
-            final int d, final GenericColorSpace decodeColorData, final byte[] maskCol) {
+    public static BufferedImage createMaskImage(final boolean isPrinting, final boolean isType3Font,
+                                                final byte[] data, final int w, final int h, final ImageData imageData,
+                                                final int d, final GenericColorSpace decodeColorData, final byte[] maskCol) {
         
         BufferedImage image=null;
         
@@ -256,14 +256,6 @@ public class MaskDecoder {
             image.setData(raster);
             
         }else{
-            
-            //try to keep as binary if possible
-            boolean hasObjectBehind=true;
-            
-            //added as found file with huge number of tiny tiles
-            if(current!=null && gs!=null && (h>=20 || imageData.getMode()!=ImageCommands.ID)){ //not worth it for inline image
-                hasObjectBehind = current.hasObjectsBehind(gs.CTM);
-            }
             
             //remove empty images in some files
             boolean isBlank=false,keepNonTransparent=false;
@@ -293,39 +285,19 @@ public class MaskDecoder {
                 }
             }
             
-            if(!isBlank){  //done above so ignore
-                if(!isPrinting && maskCol[0]==0 && maskCol[1]==0 && maskCol[2]==0 && !hasObjectBehind && !isType3Font && decodeColorData.getID()!=ColorSpaces.DeviceRGB){
+            if(!isBlank && !keepNonTransparent){ //done above so ignore
                     
-                    if(d==1){
-                        final WritableRaster raster =Raster.createPackedRaster(new DataBufferByte(data, data.length), w, h, 1, null);
-                        image =new BufferedImage(w,h,BufferedImage.TYPE_BYTE_BINARY);
-                        image.setData(raster);
-                        
-                    }else{ //down-sampled above //never called
-                        final int[] bands = {0};
-                        
-                        final Raster raster =Raster.createInterleavedRaster(new DataBufferByte(data, data.length),w,h,w,1,bands,null);
-                        
-                        image =new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
-                        image.setData(raster);
-                        
-                    }
-                }else if(!keepNonTransparent){
-                    
-                    if(d==8 && imageData.isDownsampled()){ //never called
-                        
-                        final byte[] newIndex={(maskCol[0]),(maskCol[1]), (maskCol[2]),(byte)255,(byte)255,(byte)255};
-                        image = ColorSpaceConvertor.convertIndexedToFlat(d,w, h, data, newIndex, true,true);
-                        
-                    }else if((w<4000 && h<4000)|| hasObjectBehind){   //needed for hires
-                        final byte[] newIndex={maskCol[0],maskCol[1],maskCol[2],(byte)255,(byte)255,(byte)255};
-                        image = ColorSpaceConvertor.convertIndexedToFlat(1,w, h, data, newIndex, true,false);
-                        
-                    }else{
-                        LogWriter.writeLog("Image too big "+w+ ' '+h+ ' ');
-                    }
+                if(d==8 && imageData.isDownsampled()){ //never called
+
+                    final byte[] newIndex={(maskCol[0]),(maskCol[1]), (maskCol[2]),(byte)255,(byte)255,(byte)255};
+                    image = ColorSpaceConvertor.convertIndexedToFlat(d,w, h, data, newIndex, true,true);
+
+                }else{// if(w<4000 && h<4000){   //needed for hires
+                    final byte[] newIndex={maskCol[0],maskCol[1],maskCol[2],(byte)255,(byte)255,(byte)255};
+                    image = ColorSpaceConvertor.convertIndexedToFlat(1,w, h, data, newIndex, true,false);
+
                 }
-            }
+            }           
         }
         return image;
     }  

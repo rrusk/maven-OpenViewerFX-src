@@ -723,7 +723,9 @@ public abstract class SharedActionHandler implements ActionHandler {
             System.out.println("DefaultActionHandler.gotoDest()");
         }
         
+        //Can be a direct Dest on Annot -  we collapse together for our viewer
         PdfArrayIterator Dest = DestHandler.getDestFromObject(aData);
+        
         if (Dest!=null) {
             
             if (eventType == MOUSECLICKED) {
@@ -808,7 +810,7 @@ public abstract class SharedActionHandler implements ActionHandler {
                     
                     if(pageRef.endsWith(" R")) {
                         page = decode_pdf.getPageFromObjectRef(pageRef);
-                    } else if(possiblePage>0){ //can also be a number (cant check range as not yet open)
+                    } else if(possiblePage>0 && possiblePage!=PdfDictionary.Null){ //can also be a number but not null (cant check range as not yet open)
                         page=possiblePage;
                     }
                     

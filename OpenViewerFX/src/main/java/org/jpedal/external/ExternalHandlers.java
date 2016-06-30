@@ -101,6 +101,10 @@ public class ExternalHandlers {
        return isXFAPresent;
     }
     
+    public static boolean isITextPresent() {
+       return false;
+    }
+    
     public static JavaFXSupport getFXHandler() {
         return javaFXSupport;
     }

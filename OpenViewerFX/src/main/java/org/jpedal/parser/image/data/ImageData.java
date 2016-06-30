@@ -36,7 +36,7 @@ import org.jpedal.io.PdfFilteredReader;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
-import org.jpedal.parser.image.utils.ArrayUtils;
+import org.jpedal.parser.image.ImageCommands;
 
 public class ImageData {
 
@@ -53,11 +53,10 @@ public class ImageData {
     
     boolean isDownsampled;
   
-    int mode;
+    int mode=ImageCommands.XOBJECT;
     
     private boolean removed;
-    
-    boolean arrayInverted;
+    private float[] decodeArray;
     
     public ImageData(final byte[] objectData) {
         this.objectData=objectData;
@@ -78,10 +77,8 @@ public class ImageData {
         
         imageMask= XObject.getBoolean(PdfDictionary.ImageMask);
         
-        final float[] decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
-        
-        arrayInverted=ArrayUtils.isArrayInverted(decodeArray);
-        
+       // decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
+       
     }
 
     public ImageData(int mode) {
@@ -191,6 +188,9 @@ public class ImageData {
             Filters = null;
         }
         
+        decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
+       
+        
         return Filters;
     }
 
@@ -215,14 +215,6 @@ public class ImageData {
         this.removed = removed;
     }
 
-    public boolean isArrayInverted() {
-        return this.arrayInverted;
-    }
-    
-    public void setIsArrayInverted(boolean b) {
-        arrayInverted=b;
-    }
-
     public int getRawDepth() {
        return rawDepth;
     }
@@ -241,5 +233,13 @@ public class ImageData {
     
     public void wasDCT(boolean b) {
         wasDCT=b;
+    }
+
+    public void setDecodeArray(float[] value) {
+        decodeArray=value;
+    }
+
+    public float[] getDecodeArray() {
+       return decodeArray;
     }
 }

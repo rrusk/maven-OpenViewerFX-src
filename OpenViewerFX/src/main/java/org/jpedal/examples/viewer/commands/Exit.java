@@ -73,7 +73,7 @@ public class Exit {
         /*
          * warn user on forms
          */
-        SaveForm.handleUnsaveForms(currentGUI, commonValues, decode_pdf);
+        SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
         /*
          * create the dialog

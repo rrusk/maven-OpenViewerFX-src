@@ -55,7 +55,11 @@ public class PdfColor extends Color implements PdfPaint,Paint{
 	private static final long serialVersionUID = 1L;
 
 	protected boolean isPattern;
-	
+
+	public PdfColor(int raw) {
+		super(((raw >> 16) & 255),((raw >> 8) & 255),((raw) & 255));
+	}
+
 	@Override
     public void setScaling(final double cropX, final double cropH, final float scaling, final float textX, final float textY){
 		//this.cropX=(int)cropX;

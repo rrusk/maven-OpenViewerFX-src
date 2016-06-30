@@ -235,8 +235,8 @@ public class ObjectDecoder implements Serializable {
                 //special case if Dest defined as names object and indirect
             }else if(raw[i]=='[' && level==0 && pdfObject.getObjectType()==PdfDictionary.Outlines){
                 
-                final Array objDecoder=new Array(objectReader,i, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names);
-                objDecoder.readArray(false, raw, pdfObject, PdfDictionary.Dest);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader,i, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names,raw);
+                objDecoder.readArray(false, pdfObject, PdfDictionary.Dest);
                 
             }
             
@@ -420,50 +420,50 @@ public class ObjectDecoder implements Serializable {
                 
                 //Strings
             }case PdfDictionary.VALUE_IS_STRING_ARRAY:{
-                final Array objDecoder=new Array(objectReader,i, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY);
-                i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader,i, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY,raw);
+                i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                 break;
                 
                 //read Object Refs in [] (may be indirect ref)
             }case PdfDictionary.VALUE_IS_BOOLEAN_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_BOOLEAN_ARRAY);
-                i=objDecoder.readArray(false, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_BOOLEAN_ARRAY,raw);
+                i=objDecoder.readArray(false, pdfObject, PDFkeyInt);
                 break;
                 
                 //read Object Refs in [] (may be indirect ref)
             }case PdfDictionary.VALUE_IS_KEY_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY);
-                i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=new KeyArray(objectReader, i, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY,raw);
+                i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                 break;
                 
                 //read numbers in [] (may be indirect ref)
             }case PdfDictionary.VALUE_IS_MIXED_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY);
-                i=objDecoder.readArray(ignoreRecursion && PDFkeyInt!=PdfDictionary.Nums, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
+                i=objDecoder.readArray(ignoreRecursion && PDFkeyInt!=PdfDictionary.Nums, pdfObject, PDFkeyInt);
                 break;
                 
                 //read numbers in [] (may be indirect ref) same as Mixed but allow for recursion and store as objects
             }case PdfDictionary.VALUE_IS_OBJECT_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_OBJECT_ARRAY);
-                i=objDecoder.readArray(false, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_OBJECT_ARRAY,raw);
+                i=objDecoder.readArray(false, pdfObject, PDFkeyInt);
                 break;
                 
                 //read numbers in [] (may be indirect ref)
             }case PdfDictionary.VALUE_IS_DOUBLE_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_DOUBLE_ARRAY);
-                i=objDecoder.readArray(false, raw, pdfObject,PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_DOUBLE_ARRAY,raw);
+                i=objDecoder.readArray(false,  pdfObject,PDFkeyInt);
                 break;
                 
                 //read numbers in [] (may be indirect ref)
             }case PdfDictionary.VALUE_IS_INT_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_INT_ARRAY);
-                i=objDecoder.readArray(false, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_INT_ARRAY,raw);
+                i=objDecoder.readArray(false, pdfObject, PDFkeyInt);
                 break;
                 
                 //read numbers in [] (may be indirect ref)
             }case PdfDictionary.VALUE_IS_FLOAT_ARRAY:{
-                final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_FLOAT_ARRAY);
-                i=objDecoder.readArray(false, raw, pdfObject, PDFkeyInt);
+                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_FLOAT_ARRAY,raw);
+                i=objDecoder.readArray(false, pdfObject, PDFkeyInt);
                 break;
                 
                 //read String (may be indirect ref)
@@ -575,38 +575,38 @@ public class ObjectDecoder implements Serializable {
         switch (PDFkeyInt) {
             case PdfDictionary.XFA:
                 {
-                    final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY);
-                    i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
+                    i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     break;
                 }
             case PdfDictionary.K:
                 {
-                    final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY);
-                    i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY,raw);
+                    i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     break;
                 }
             case PdfDictionary.C:
                 {
-                    final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_FLOAT_ARRAY);
-                    i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_FLOAT_ARRAY,raw);
+                    i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     break;
                 }
             case PdfDictionary.IC:
                 {
-                    final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_FLOAT_ARRAY);
-                    i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_FLOAT_ARRAY,raw);
+                    i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     break;
                 }
             case PdfDictionary.OCGs:
                 {
-                    final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY);
-                    i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=new KeyArray(objectReader, i, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY,raw);
+                    i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     break;
                 }
             default:
                 {
-                    final Array objDecoder=new Array(objectReader, i, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY);
-                    i=objDecoder.readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, i, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY,raw);
+                    i=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
                     break;
                 }
         }

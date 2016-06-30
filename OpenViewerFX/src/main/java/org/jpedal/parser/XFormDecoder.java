@@ -36,7 +36,6 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import org.jpedal.PdfDecoderInt;
-import org.jpedal.color.GenericColorSpace;
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.objects.GraphicsState;
@@ -45,7 +44,6 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.ImageCommands;
 import org.jpedal.parser.image.XForm;
 import org.jpedal.parser.image.mask.MaskUtils;
-import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Matrix;
 
@@ -186,9 +184,9 @@ public class XFormDecoder {
                     pdfStreamDecoder.formName = pdfStreamDecoder.formName + '_' + name;
                 }
 
-                //preserve colorspaces
-                final GenericColorSpace mainStrokeColorData=(GenericColorSpace) pdfStreamDecoder.gs.strokeColorSpace.clone();
-                final GenericColorSpace mainnonStrokeColorData=(GenericColorSpace) pdfStreamDecoder.gs.nonstrokeColorSpace.clone();
+                //preserve colors
+                int mainStrokeColorData =  pdfStreamDecoder.gs.strokeColorSpace.getColor().getRGB();
+                int mainnonStrokeColorData = pdfStreamDecoder.gs.nonstrokeColorSpace.getColor().getRGB();
 
                 //set form line width if appropriate
                 if(lineWidthInForm>0) {
@@ -343,9 +341,8 @@ public class XFormDecoder {
 
                 pdfStreamDecoder.gs.scaleFactor=scaleF;
 
-                /*restore old colorspace and fonts*/
-                pdfStreamDecoder.gs.strokeColorSpace=mainStrokeColorData;
-                pdfStreamDecoder.gs.nonstrokeColorSpace=mainnonStrokeColorData;
+                /*restore old colorspace*/
+                pdfStreamDecoder.gs.resetColorSpaces(mainStrokeColorData,mainnonStrokeColorData);
 
                 //put back original state
                 pdfStreamDecoder.cache.restore(mainCache);
@@ -385,7 +382,7 @@ public class XFormDecoder {
             System.out.println("createMaskForm " + newSMask);
         }
         
-        if(newSMask==null && pdfStreamDecoder.current.getType()==DynamicVectorRenderer.CREATE_T3){ //needs to be normal for actual Mask
+        if(newSMask==null && !pdfStreamDecoder.current.isHTMLorSVG()){ //needs to be normal for actual Mask
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.STROKE, pdfStreamDecoder.gs.getAlpha(GraphicsState.STROKE), PdfDictionary.Normal);
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.FILL, pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL), PdfDictionary.Normal);
         }
@@ -394,7 +391,7 @@ public class XFormDecoder {
 
         MaskUtils.createMaskForm(XObject, name, newSMask, pdfStreamDecoder.gs, pdfStreamDecoder.current, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer, useTransparancy,blendMode);
 
-if(newSMask==null && pdfStreamDecoder.current.getType()==DynamicVectorRenderer.CREATE_T3){ //needs to be normal for actual Mask
+        if(newSMask==null && !pdfStreamDecoder.current.isHTMLorSVG()){ //needs to be normal for actual Mask
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.STROKE, pdfStreamDecoder.gs.getAlpha(GraphicsState.STROKE), blendMode);
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.FILL, pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL), blendMode);
         }

@@ -52,7 +52,7 @@ import org.jpedal.utils.LogWriter;
  *
  * functions shared by Swing and FX but not lower level Display implementations
  */
-abstract class GUIDisplay extends BaseDisplay implements DynamicVectorRenderer{
+abstract class GUIDisplay extends G2Display implements DynamicVectorRenderer{
 
     
     private boolean needsHorizontalInvert;

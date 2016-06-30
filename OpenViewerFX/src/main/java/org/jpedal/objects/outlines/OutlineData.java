@@ -37,7 +37,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.io.types.Array;
+import org.jpedal.io.types.ArrayDecoder;
+import org.jpedal.io.types.ArrayFactory;
 import org.jpedal.objects.raw.OutlineObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -181,8 +182,8 @@ public class OutlineData {
                             if(ref!=null && ref.startsWith("[")){
 
                                 final byte[] raw=StringUtils.toBytes(ref);
-                                final Array objDecoder=new Array(currentPdfFile.getObjectReader(),0, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names);
-                                objDecoder.readArray(false, raw, Aobj, PdfDictionary.Dest);
+                                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(currentPdfFile.getObjectReader(),0, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names,raw);
+                                objDecoder.readArray(false, Aobj, PdfDictionary.Dest);
                                 DestObj=Aobj.getMixedArray(PdfDictionary.Dest);
                             }else if(ref!=null){
                             	Aobj=new OutlineObject(ref);
@@ -231,7 +232,9 @@ public class OutlineData {
                 DestObjs.put(ID, Aobj);
             }
 
-            if(page!=-1) {
+            if(page==PdfDictionary.Null){
+                child.setAttribute("page", "-1");
+            }else if(page!=-1) {
                 child.setAttribute("page", String.valueOf(page));
             }
 

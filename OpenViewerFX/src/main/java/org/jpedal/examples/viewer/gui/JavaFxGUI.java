@@ -34,11 +34,7 @@ package org.jpedal.examples.viewer.gui;
 
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TimerTask;
+import java.util.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.Transition;
@@ -53,8 +49,8 @@ import javafx.geometry.*;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -82,9 +78,9 @@ import org.jpedal.examples.viewer.*;
 import org.jpedal.examples.viewer.commands.OpenFile;
 import org.jpedal.examples.viewer.commands.javafx.JavaFXOpenFile;
 import org.jpedal.examples.viewer.gui.generic.*;
-import org.jpedal.examples.viewer.gui.javafx.*;
 import org.jpedal.examples.viewer.gui.javafx.FXViewerTransitions.TransitionDirection;
 import org.jpedal.examples.viewer.gui.javafx.FXViewerTransitions.TransitionType;
+import org.jpedal.examples.viewer.gui.javafx.*;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXInputDialog;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXMessageDialog;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXOptionDialog;
@@ -735,7 +731,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
     }
     /*
-     *Allows user to embed viewer into own applicationÃ�
+     *Allows user to embed viewer into own applicationÃƒï¿½
      */
 
     @Override
@@ -2289,7 +2285,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             }
             
             if(pageLabelDiffers(currentPage)){
-                pageCounter3.setText("(" +String.valueOf(currentPage) + ' ' + Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()+")"); //$NON-NLS-1$
+                pageCounter3.setText("(" + currentPage + ' ' + Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()+")"); //$NON-NLS-1$
             }else{
                 pageCounter3.setText(Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()); //$NON-NLS-1$
             }
@@ -3242,13 +3238,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
      */
     @Override
     protected void setupComboBoxes() {
-
-        /*
-         * setup scaling, rotation and quality values which are displayed for
-         * user to choose
-         */
-        final String[] qualityValues = {Messages.getMessage("PdfViewerToolbarComboBox.imageQual")};
-
+       
         final String[] rotationValues = {"0", "90", "180", "270"};
 
         final String[] scalingValues = {Messages.getMessage("PdfViewerScaleWindow.text"), Messages.getMessage("PdfViewerScaleHeight.text"),
@@ -3602,7 +3592,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
                 
                 //Check if mapped and if so set the actual page number
                 //This is updated later to the correct page label
-                if (decode_pdf.getIO().getPageLabels().containsValue(value)) {
+                if (decode_pdf.getIO().getPageLabels()!=null && decode_pdf.getIO().getPageLabels().containsValue(value)) {
                     Set<Map.Entry<Integer, String>> entries = decode_pdf.getIO().getPageLabels().entrySet();
                     for (Map.Entry<Integer, String> e : entries) {
                         if (e.getValue().equals(value)) {
@@ -4036,6 +4026,17 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             customFXHandle.vvalueProperty().addListener(viewListener);
             customFXHandle.hvalueProperty().addListener(viewListener);
         }
+    }
+
+    @Override
+    public void addAnnotationPanel(GUIAnnotationPanel panel) {
+        LogWriter.writeLog("JavaFxGUI.addAnnotationPanel is not available in FX Viewer. "+panel);
+    }
+
+    @Override
+    public GUIAnnotationPanel getAnnotationPanel() {
+        LogWriter.writeLog("JavaFxGUI.getAnnotationPanel is not available in FX Viewer.");
+        return null;
     }
 
     //class to repaint multiple views

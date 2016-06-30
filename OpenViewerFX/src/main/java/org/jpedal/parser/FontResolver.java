@@ -33,7 +33,6 @@
 package org.jpedal.parser;
 
 import org.jpedal.exception.PdfException;
-import org.jpedal.external.FontHandler;
 import org.jpedal.fonts.FontMappings;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.StandardFonts;
@@ -42,6 +41,7 @@ import org.jpedal.objects.raw.FontObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.render.DynamicVectorRenderer;
+import org.jpedal.render.output.HTMLFontHandler;
 import org.jpedal.utils.LogWriter;
 
 public class FontResolver {
@@ -99,9 +99,8 @@ public class FontResolver {
                     
                     restoredFont = pdfFontFactory.createFont(fallbackToArial, newFont, fontID, pdfStreamDecoder.objectStoreStreamRef, pdfStreamDecoder.parserOptions.isRenderPage(), pdfStreamDecoder.errorTracker, pdfStreamDecoder.isPrinting);
 
-                    FontHandler fontHandler = current.getFontHandler();
-                    if (fontHandler != null) {
-                        fontHandler.processFont(isHTML, restoredFont, current, newFont, pdfStreamDecoder.currentPdfFile);
+                    if (isHTML) {
+                        HTMLFontHandler.processFont(restoredFont, current, newFont, pdfStreamDecoder.currentPdfFile);
                     }
                    
                 } catch (final PdfException e) {

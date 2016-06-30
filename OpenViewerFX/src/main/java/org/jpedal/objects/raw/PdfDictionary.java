@@ -638,6 +638,8 @@ public class PdfDictionary {
     public static final int Normal=1111314299;
 
     public static final int Nums=507854147;
+    
+    public static final int Null=69561;
 
     public static final int O=31;
 
@@ -2074,15 +2076,19 @@ public class PdfDictionary {
                 return VALUE_IS_UNREAD_DICTIONARY;
 
             case P:
-                if(type==Form || type==MCID || type==FS || type==MK) {
-                    return VALUE_IS_UNREAD_DICTIONARY;
-                } else if(type==PdfDictionary.Metadata) {
-                    return VALUE_IS_DICTIONARY;
-                } else if(type==PdfDictionary.PageLabels) {
-                    return VALUE_IS_TEXTSTREAM;    
-                } else {
-                    return VALUE_IS_INT;
-                }
+        switch (type) {
+            case Form:
+            case MCID:
+            case FS:
+            case MK:
+                return VALUE_IS_UNREAD_DICTIONARY;
+            case PdfDictionary.Metadata:
+                return VALUE_IS_DICTIONARY;
+            case PdfDictionary.PageLabels:
+                return VALUE_IS_TEXTSTREAM;
+            default:
+                return VALUE_IS_INT;
+        }
 
             case PageLabels:
                 return VALUE_IS_DICTIONARY;

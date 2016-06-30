@@ -33,6 +33,7 @@
 package org.jpedal.fonts;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.StringTokenizer;
 import org.jpedal.utils.LogWriter;
@@ -534,6 +535,76 @@ public class Type1 extends PdfFont {
     public Type1() {
     }
     
+    protected final void readType1FontFileNew(final byte[] content) throws Exception {
+        
+        LogWriter.writeLog("Embedded Type1 font used "+getBaseFontName());
+        
+        final BufferedReader br =new BufferedReader(new StringReader(new String(content)));
+        
+        String line;
+        
+        while (true) {
+            
+            line = br.readLine();
+            
+            if (line == null) {
+                break;
+            }
+            
+            if (line.startsWith("/Encoding 256 array")) {
+                readDiffEncoding(br);
+            } else if(line.startsWith("/lenIV")){
+                final StringTokenizer vals=new StringTokenizer(line);
+                vals.nextToken(); //drop first value
+                skipBytes=Integer.parseInt(vals.nextToken());
+            }else if(line.contains("/FontMatrix")){
+                
+                int startP;
+                final int endP;
+                String values="";
+                
+                startP=line.indexOf('[');
+                if(startP!=-1){
+                    endP=line.indexOf(']');
+                    values=line.substring(startP+1,endP);
+                }else{
+                    startP=line.indexOf('{');
+                    if(startP!=-1){
+                        endP=line.indexOf('}');
+                        values=line.substring(startP+1,endP);
+                    }
+                }
+                final StringTokenizer matrixValues=new StringTokenizer(values);
+                
+                for(int i=0;i<6;i++) {
+                    FontMatrix[i]=Double.parseDouble(matrixValues.nextToken());
+                }
+            }
+        }
+        
+        if(br!=null){
+            try{
+                br.close();
+            }catch (final Exception e) {
+                LogWriter.writeLog("Exception " + e + " closing stream");
+            }
+        }
+        
+        //read the eexec part (which can be binary or ascii
+        int glyphCount=0;
+        if(this.renderPage) {
+            glyphCount=readEncodedContentNew(content);
+        }
+        this.glyphs.setGlyphCount(glyphCount);
+        
+        if(!renderPage || glyphCount>0) {
+            isFontEmbedded = true;
+        }
+        
+        glyphs.setFontEmbedded(true);        
+        
+    }
+    
     /** Handle encoding for type1 fonts */
     protected final void readType1FontFile(final byte[] content) throws Exception {
         
@@ -678,6 +749,246 @@ public class Type1 extends PdfFont {
             
         }
     }
+    
+    /**
+     * read the encoded part from a type 1 font
+     */
+    private int readEncodedContentNew(byte[] cont) throws Exception {
+        
+        int glyphCount=0;
+        String line  ;
+        final String rd="rd";
+        final String nd="nd";
+        final int size = cont.length;
+        int charstringStart = -1;
+        int end = -1;
+        int i;
+        
+        for (i = 4; i < size; i++) { //find the start of /CharStrings (which is exec
+            if ((cont[i - 3] == 101)&& (cont[i - 2] == 120)&& (cont[i - 1] == 101)&& (cont[i] == 99)) {
+                charstringStart = i + 1;
+                while (cont[charstringStart] == 10 || cont[charstringStart] == 13) {
+                    charstringStart++;
+                }
+                i = size;
+            }
+        }
+        
+        if (charstringStart != -1) { //find the end
+            for (i = charstringStart; i < size - 10; i++) {
+                if ((cont[i] == 99)&& (cont[i + 1] == 108)&& (cont[i + 2] == 101)&& (cont[i + 3] == 97)&& (cont[i + 4] == 114)&& (cont[i + 5] == 116)&& (cont[i + 6] == 111)&& (cont[i + 7] == 109)&& (cont[i + 8] == 97)&& (cont[i + 9] == 114)&& (cont[i + 10] == 107)) {
+                    end = i - 1;
+                    while ((cont[end] == 10) || (cont[end] == 13)) {
+                        end--;
+                    }
+                    i = size;
+                }
+            }
+        }
+        
+        if (end == -1) {
+            end = size;
+        }
+        
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        int len = (end-charstringStart);
+        
+        bos.write(cont, charstringStart, len);
+        bos.close();
+        
+        //read values from the stream
+        final BufferedReader br =new BufferedReader(new StringReader(new String(cont)));
+        
+        while (true) {
+            
+            line = br.readLine();
+            
+            if (line == null) {
+                break;
+            }
+            
+            //get new value for n second value
+            if(line.startsWith("/lenIV")){
+                final StringTokenizer vals=new StringTokenizer(line);
+                vals.nextToken(); //drop first value
+                skipBytes=Integer.parseInt(vals.nextToken());
+                //System.out.println(line);
+            }
+        }
+        
+        br.close();
+        
+        //find dictionary entries
+        final int l=cont.length;
+        int p=0;
+        charstringStart=-1;
+        int subrsStart=-1;
+        int blueValuesStart = -1;
+        int otherBluesStart = -1;
+        int familyBluesStart = -1;
+        int familyOtherBluesStart = -1;
+        int blueScaleStart = -1;
+        int blueShiftStart = -1;
+        int blueFuzzStart = -1;
+        int stdHWStart = -1;
+        int stdVWStart = -1;
+        int stemSnapHStart = -1;
+        int stemSnapVStart = -1;
+        int forceBoldStart = -1;
+        int languageGroupStart = -1;
+        
+        final char[] charstringsChars = "/CharStrings".toCharArray();
+        final char[] subrsChars = "/Subrs".toCharArray();
+        final char[] blueValuesChars = "/BlueValues".toCharArray();
+        final char[] otherBluesChars = "/OtherBlues".toCharArray();
+        final char[] familyBluesChars = "/FamilyBlues".toCharArray();
+        final char[] familyOtherBluesChars = "/FamilyOtherBlues".toCharArray();
+        final char[] blueScaleChars = "/BlueScale".toCharArray();
+        final char[] blueShiftChars = "/BlueShift".toCharArray();
+        final char[] blueFuzzChars = "/BlueFuzz".toCharArray();
+        final char[] stdHWChars = "/StdHW".toCharArray();
+        final char[] stdVWChars = "/StdVW".toCharArray();
+        final char[] stemSnapHChars = "/StemSnapH".toCharArray();
+        final char[] stemSnapVChars = "/StemSnapV".toCharArray();
+        final char[] forceBoldChars = "/ForceBold".toCharArray();
+        final char[] languageGroupChars = "/LanguageGroup".toCharArray();
+        
+        while(p<l){
+            
+            if(p==l) {
+                break;
+            }
+            
+            if (charstringStart == -1 && (p+11<l) && checkForString(cont, p, charstringsChars)) {
+                charstringStart=p+11;
+            } else if(subrsStart == -1 && (p+5<l) && checkForString(cont, p, subrsChars)) {
+                subrsStart=p+6;
+            } else if(blueValuesStart == -1 && (p+11<l) && checkForString(cont, p, blueValuesChars)) {
+                blueValuesStart=p+11;
+            } else if(otherBluesStart == -1 && (p+11<l) && checkForString(cont, p, otherBluesChars)) {
+                otherBluesStart=p+11;
+            } else if(familyBluesStart == -1 && (p+12<l) && checkForString(cont, p, familyBluesChars)) {
+                familyBluesStart=p+12;
+            } else if(familyOtherBluesStart == -1 && (p+17<l) && checkForString(cont, p, familyOtherBluesChars)) {
+                familyOtherBluesStart=p+17;
+            } else if(blueScaleStart == -1 && (p+10<l) && checkForString(cont, p, blueScaleChars)) {
+                blueScaleStart=p+10;
+            } else if(blueShiftStart == -1 && (p+10<l) && checkForString(cont, p, blueShiftChars)) {
+                blueShiftStart=p+10;
+            } else if(blueFuzzStart == -1 && (p+9<l) && checkForString(cont, p, blueFuzzChars)) {
+                blueFuzzStart=p+9;
+            } else if(stdHWStart == -1 && (p+6<l) && checkForString(cont, p, stdHWChars)) {
+                stdHWStart=p+6;
+            } else if(stdVWStart == -1 && (p+6<l) && checkForString(cont, p, stdVWChars)) {
+                stdVWStart=p+6;
+            } else if(stemSnapHStart == -1 && (p+10<l) && checkForString(cont, p, stemSnapHChars)) {
+                stemSnapHStart=p+10;
+            } else if(stemSnapVStart == -1 && (p+10<l) && checkForString(cont, p, stemSnapVChars)) {
+                stemSnapVStart=p+10;
+            } else if(forceBoldStart == -1 && (p+10<l) && checkForString(cont, p, forceBoldChars)) {
+                forceBoldStart=p+10;
+            } else if(languageGroupStart == -1 && (p+14<l) && checkForString(cont, p, languageGroupChars)) {
+                languageGroupStart=p+14;
+            }
+            
+            if(subrsStart>-1 && charstringStart>-1 &&
+                    blueValuesStart>-1 && otherBluesStart>-1 &&
+                    familyBluesStart>-1 && familyOtherBluesStart>-1 &&
+                    blueScaleStart>-1 && blueShiftStart>-1 && blueFuzzStart>-1 &&
+                    stdHWStart>-1 && stdVWStart>-1 &&
+                    stemSnapHStart>-1 && stemSnapVStart>-1 &&
+                    forceBoldStart>-1 && languageGroupStart>-1) {
+                break;
+            }
+            
+            p++;
+            
+        }
+        
+        /*extract charstrings*/
+        if(charstringStart==-1){
+            this.isFontSubstituted=false;
+            
+            LogWriter.writeLog("No glyph data found");
+        
+        }else {
+            glyphCount=extractFontData(skipBytes,cont,charstringStart,rd,l,nd);
+        }
+        
+        /*extract subroutines*/
+        if(subrsStart>-1) {
+            extractSubroutineData(skipBytes,cont,subrsStart,charstringStart,rd,l,nd);
+        }
+        
+        if(blueValuesStart>-1) {
+            blueValues = readIntArray(cont, blueValuesStart);
+        }
+        
+        if (otherBluesStart>-1) {
+            otherBlues = readIntArray(cont, otherBluesStart);
+        }
+        
+        if (familyBluesStart>-1) {
+            familyBlues = readIntArray(cont, familyBluesStart);
+        }
+        
+        if (familyOtherBluesStart>-1) {
+            familyOtherBlues = readIntArray(cont, familyOtherBluesStart);
+        }
+        
+        if (stdHWStart>-1) {
+            stdHW = readReal(cont, stdHWStart);
+        }
+        
+        if (stdVWStart>-1) {
+            stdVW = readReal(cont, stdVWStart);
+        }
+        
+        if (stemSnapHStart>-1) {
+            stemSnapH = readIntArray(cont, stemSnapHStart);
+        }
+        
+        if (stemSnapVStart>-1) {
+            stemSnapV = readIntArray(cont, stemSnapVStart);
+        }
+        
+        if (blueScaleStart>-1) {
+            blueScale = readReal(cont, blueScaleStart);
+        }
+        
+        if (blueShiftStart>-1) {
+            blueShift = readInteger(cont, blueShiftStart);
+        }
+        
+        if (blueFuzzStart>-1) {
+            blueFuzz = readInteger(cont, blueFuzzStart);
+        }
+        
+        if (forceBoldStart>-1) {
+            int j = forceBoldStart;
+            int forceBoldEnd = -1;
+            while (j < l && forceBoldEnd == -1) {
+                if (checkForString(cont, j, DEF_CHARS)) {
+                    forceBoldEnd = j;
+                }
+                j++;
+            }
+            final String val = new String(cont, forceBoldStart, forceBoldEnd-forceBoldStart);
+            try {
+                forceBold = Boolean.parseBoolean(val);
+            } catch(final NumberFormatException e) {
+                LogWriter.writeLog("Exception " + e);
+            }
+        }
+        
+        if (languageGroupStart>-1) {
+            languageGroup = readInteger(cont, languageGroupStart);
+        }
+        
+        return glyphCount;
+    }
+        
+    
     /**
      * read the encoded part from a type 1 font
      */

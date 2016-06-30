@@ -164,6 +164,7 @@ public class PropertiesFile {
         "ENDCHILDREN",
       "Show the content of the Button bar, button bar remain but empty if false","ButtonsMenu", "true",
       "Show the open file button on the button bar","Openfilebutton", "true",
+      "Show the save file button on the button bar","Savefilebutton", "false",
       "Show the print button on the button bar","Printbutton", "true",
       "Show the search button on the button bar","Searchbutton", "true",
       "Show the document properties button on the button bar","Propertiesbutton", "false",
@@ -177,6 +178,7 @@ public class PropertiesFile {
       "Show the rss feed button on the button bar","RSSbutton", "true",
       "Show the cursor button on the button bar","CursorButton", "true",
       "Show the mouse mode button on the button bar","MouseModeButton", "true",
+      "Show the open in system default button on the button bar","OpenSystemDefault", "false",
         "ENDCHILDREN",
       "Show the contents of the display options bar, Display options bar remain empty if false","DisplayOptionsMenu", "true",
       "Show the scaling options on the display options bar","Scalingdisplay", "true",
@@ -796,7 +798,7 @@ public class PropertiesFile {
                     }else{
                         
                         //Is it running in the IDE
-                        if(properties[position+1].equals("7.1.27")){
+                        if(properties[position+1].equals("7.2.30")){
                             //Do nothing as we are in the IDE
                             //Refactor for testing purposes
                             //refactorProperties  = true;

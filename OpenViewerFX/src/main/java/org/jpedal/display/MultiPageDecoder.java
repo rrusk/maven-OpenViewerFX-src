@@ -595,7 +595,9 @@ public abstract class MultiPageDecoder {
             keys = keysToTrash.keySet().iterator();
 
             while (keys.hasNext()) {
-                currentPageViews.remove(keys.next());
+                final Integer currentKey = (Integer) keys.next();
+                final int keyValue = currentKey;
+                currentPageViews.remove(keyValue);
             }
 
             //}

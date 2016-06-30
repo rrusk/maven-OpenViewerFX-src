@@ -121,7 +121,7 @@ public class LabColorSpace extends GenericColorSpace {
      * </p>
      */
     @Override
-    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final float[] decodeArray, final int pX, final int pY, final boolean arrayInverted) {
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY) {
         
         BufferedImage image;
         //ByteArrayInputStream in = null;
@@ -176,7 +176,7 @@ public class LabColorSpace extends GenericColorSpace {
      * Lab to RGB
      */
     @Override
-    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h, boolean arrayInverted){
+    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h){
         
         final int imgSize = w * h;
         
@@ -210,7 +210,7 @@ public class LabColorSpace extends GenericColorSpace {
         
         try {
             
-            data=dataToRGBByteArray(data, width, height, false);
+            data=dataToRGBByteArray(data, width, height);
         
             image =new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             final Raster raster = ColorSpaceConvertor.createInterleavedRaster(data, width, height);

@@ -65,6 +65,7 @@ import org.jpedal.parser.image.ID;
 import org.jpedal.parser.image.ImageDecoder;
 import org.jpedal.parser.shape.*;
 import org.jpedal.parser.text.*;
+import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.Vector_Int;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
@@ -288,7 +289,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 final int pageNum=parserOptions.getPageNumber();
                 
                 //Paint background here to ensure we all for changed background color in extraction modes
-                current.paintBackground(new Rectangle(pageData.getCropBoxX(pageNum), pageData.getCropBoxY(pageNum),
+                current.writeCustom(DynamicVectorRenderer.PAINT_BACKGROUND, new Rectangle(pageData.getCropBoxX(pageNum), pageData.getCropBoxY(pageNum),
                         pageData.getCropBoxWidth(pageNum), pageData.getCropBoxHeight(pageNum)));
             }
             
@@ -399,7 +400,7 @@ public class PdfStreamDecoder extends BaseDecoder{
             case ValueTypes.ImageHandler:
                 this.customImageHandler = (ImageHandler)obj;
                 if(customImageHandler!=null && current!=null) {
-                    current.setCustomImageHandler(this.customImageHandler);
+                    current.writeCustom(DynamicVectorRenderer.CUSTOM_IMAGE_HANDLER, this.customImageHandler);
                 }
                 break;
                 
@@ -422,7 +423,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 objectStoreStreamRef = (ObjectStore)obj;
                     
                 if(customImageHandler!=null && current!=null) {
-                    current.setCustomImageHandler(customImageHandler);
+                    current.writeCustom(DynamicVectorRenderer.CUSTOM_IMAGE_HANDLER, customImageHandler);
                 }
                 
                 break;
@@ -603,7 +604,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 statusBar.percentageDone = (90 * dataPointer) / streamSize;
             }
             
-            dataPointer=parser.getCommandValues(dataPointer,streamSize,tokenNumber);
+            dataPointer=parser.getCommandValues(dataPointer,tokenNumber);
             final int commandID=parser.getCommandID();
             
             //use negative flag to show commands found
@@ -677,7 +678,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                             
                             if(!getSamplingOnly){
                                 if(commandID!=Cmd.SCN && commandID!=Cmd.scn && commandID!=Cmd.SC && commandID!=Cmd.sc) {
-                                    current.resetOnColorspaceChange();
+                                    current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
                                 }
                                 
                                 switch(commandID){
@@ -695,7 +696,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                                             CSInUse = colorspaceObject;
                                         }
                                         
-                                        CS.execute(isLowerCase, colorspaceObject, gs, cache, currentPdfFile, isPrinting, parserOptions.getPageNumber(), pageData, alreadyUsed);
+                                        CS.execute(isLowerCase, colorspaceObject, gs, cache, currentPdfFile, isPrinting, alreadyUsed);
                                         break;
                                     }
                                     case Cmd.CS :
@@ -711,7 +712,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                                             CSInUse = colorspaceObject;
                                         }
                                         
-                                        CS.execute(isLowerCase, colorspaceObject, gs, cache, currentPdfFile, isPrinting, parserOptions.getPageNumber(), pageData, alreadyUsed);
+                                        CS.execute(isLowerCase, colorspaceObject, gs, cache, currentPdfFile, isPrinting, alreadyUsed);
                                         break;
                                         
                                     case Cmd.rg :
@@ -1350,7 +1351,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                 break;
                 
             case Cmd.ET :
-                current.resetOnColorspaceChange();
+                current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
 
                 if(gs.getTextRenderType()==GraphicsState.CLIPTEXT){
                     current.drawClip(gs,null,false);
@@ -1495,6 +1496,6 @@ public class PdfStreamDecoder extends BaseDecoder{
 
     public void incrementTokenNumber() {
         tokenNumber++;
-        current.updateTokenNumber(tokenNumber);
+        current.setValue(DynamicVectorRenderer.TOKEN_NUMBER,tokenNumber);
     }
 }

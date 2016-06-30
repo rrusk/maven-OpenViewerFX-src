@@ -46,14 +46,14 @@ import org.jpedal.objects.raw.PdfObject;
  *
  * returns the correct colorspace, decoding the values
  */
-public class ColorspaceFactory {
+public final class ColorspaceFactory {
     
     private ColorspaceFactory(){}
     
     /**
      * used by commands which implicitly set colorspace
      */
-    public static final GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, final PdfObject colorSpace, final Map<String, GenericColorSpace> colorspacesObjects) {
+    public static GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, final PdfObject colorSpace, final Map<String, GenericColorSpace> colorspacesObjects) {
         
         //see if we already have it
         final String key;
@@ -91,7 +91,7 @@ public class ColorspaceFactory {
      * used by commands which implicitly set colorspace
      * 
      */
-    public static final GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, PdfObject colorSpace) {
+    public static GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, PdfObject colorSpace) {
         
         currentPdfFile.checkResolved(colorSpace);
         
