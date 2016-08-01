@@ -44,97 +44,37 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class ArrayFactory {
 
-    public static ArrayDecoder getDecoder(PdfFileReader objectReader, int i, int endPt, int type,byte[] raw) {
-        
-        switch (type) {
-
-            case PdfDictionary.VALUE_IS_KEY_ARRAY:
-                return new KeyArray(objectReader, i, endPt, type, raw);
-
-            case PdfDictionary.VALUE_IS_MIXED_ARRAY:
-                return new MixedArray(objectReader, i, endPt, type, raw);
-
-            case PdfDictionary.VALUE_IS_OBJECT_ARRAY:
-                return new ObjectArray(objectReader, i, endPt, type, raw);
-
-            default:
-                return new SimpleArray(objectReader, i, endPt, type, raw);
-        }
-    }
-
-    public static ArrayDecoder getDecoder(PdfFileReader objectReader, int i, int length, int type, Object[] values, int currentElement, byte[] raw) {
+    public static ArrayDecoder getDecoder(final PdfFileReader objectReader, int i, final int type, final byte[] raw) {
 
         switch (type) {
 
+            case PdfDictionary.VALUE_IS_BOOLEAN_ARRAY:
+                return new BooleanArray(objectReader, i, raw);
+
+            case PdfDictionary.VALUE_IS_FLOAT_ARRAY:
+                return new FloatArray(objectReader, i, raw);
+
+            case PdfDictionary.VALUE_IS_DOUBLE_ARRAY:
+                return new DoubleArray(objectReader, i, raw);
+
+            case PdfDictionary.VALUE_IS_INT_ARRAY:
+                return new IntArray(objectReader, i, raw);
+
             case PdfDictionary.VALUE_IS_KEY_ARRAY:
-                return new KeyArray(objectReader, i, length, type, values, currentElement, raw);
+                return new KeyArray(objectReader, i,  raw);
 
             case PdfDictionary.VALUE_IS_MIXED_ARRAY:
-                return new MixedArray(objectReader, i, length, type, values, currentElement, raw);
+                return new Array(objectReader, i, type, raw);
 
             case PdfDictionary.VALUE_IS_OBJECT_ARRAY:
-                return new ObjectArray(objectReader, i, length, type, values, currentElement, raw);
+                return new ObjectArray(objectReader, i, raw);
 
             default:
-                return new SimpleArray(objectReader, i, length, type,values, currentElement,raw);
+                return new StringArray(objectReader, i, raw);
         }
     }
-    
-    /**
-    public void readArray(final boolean ignoreRecursion, final byte[] raw, final PdfObject pdfObject, final int PDFkeyInt) {  
-            
-        //read new
-        byte[][] newValues = pdfObject.getKeyArray(PDFkeyInt);
-
-        //reread old 
-        //readArray(ignoreRecursion, raw, pdfObject, PDFkeyInt);
-
-        //read new
-        byte[][] oldValues = pdfObject.getKeyArray(PDFkeyInt);
-
-        boolean areIdentical = compare(oldValues, newValues);
-        if (!areIdentical) {
-            System.exit(1);
-        }
-                
-        
-    }
-    
-    private static boolean compare(byte[][] oldValues, byte[][] newValues) {
-        if((oldValues==null && newValues!=null) || (oldValues!=null && newValues==null)){
-            System.out.println("One is null old="+oldValues+" new="+newValues);
-            return false;
-        }
-        
-        if((oldValues.length!=newValues.length)){
-            System.out.println("Different lengths old="+oldValues.length+" new="+newValues.length);
-            return false;
-        }
-        
-        int count=oldValues.length;
-        
-        for(int i=0;i<count;i++){
-            if((oldValues[i]==null && newValues[i]!=null) || (oldValues[i]!=null && newValues[i]==null)){
-                System.out.println("One is null old="+oldValues[i]+" new="+newValues[i]);
-                return false;
-            }else if(!String.valueOf(oldValues[i]).equals(String.valueOf(oldValues[i]))){
-                for(int j=0;j<i+1;j++){
-                    System.out.println(j+" old="+new String(oldValues[j])+" new="+new String(newValues[j]));
-                }
-                return false;
-            }
-        }
-        
-        return true;
-    }/**/
-    
+ 
     public static int processArray(final PdfObject pdfObject, final byte[] raw, final int PDFkeyInt, final int possibleArrayStart, final PdfFileReader objectReader) {
-        
-        final int i;//find end
-        int endPoint = possibleArrayStart;
-        while (raw[endPoint] != ']' && endPoint <= raw.length) {
-            endPoint++;
-        }
         
         //convert data to new Dictionary object and store
         final PdfObject valueObj = ObjectFactory.createObject(PDFkeyInt, null, pdfObject.getObjectType(), pdfObject.getID());
@@ -154,10 +94,8 @@ public class ArrayFactory {
             type = PdfDictionary.VALUE_IS_KEY_ARRAY;
         }
         
-        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, possibleArrayStart, endPoint, type, raw);
-        i=objDecoder.readArray(pdfObject.ignoreRecursion(),valueObj, PDFkeyInt);
+        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, possibleArrayStart, type, raw);
+        return objDecoder.readArray(valueObj, PDFkeyInt);
         
-        //rollon
-        return i;
     }
 }

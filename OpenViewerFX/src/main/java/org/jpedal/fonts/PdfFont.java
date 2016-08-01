@@ -50,6 +50,7 @@ import org.jpedal.objects.raw.*;
 import org.jpedal.parser.DecoderOptions;
 import org.jpedal.parser.PdfFontFactory;
 import org.jpedal.utils.LogWriter;
+import org.jpedal.utils.NumberUtils;
 
 /**
  * contains all generic pdf font data for fonts.<P>
@@ -256,168 +257,58 @@ public class PdfFont implements Serializable {
     }
     
     /**Method to add the widths of a CID font*/
-    private void setCIDFontWidths(String values) {
-        
-        //remove first and last []
-        values = values.substring(1, values.length() - 1).trim();
-        
-        //trap for empty values
-        if(values.isEmpty()) {
-            return;
-        }
-        
+    private void setCIDFontWidths( Object[] values) {
+         
         widthTable=new float[65536];
-        
+
         //set all values to -1 so I can spot ones with no value
         for(int ii=0;ii<65536;ii++) {
             widthTable[ii]=noWidth;
         }
         
-        final StringTokenizer widthValues = new StringTokenizer(values, " []",true);
-        String currentValue ="",lastValue="",nextValue="";
-        
-        int pointer=0,lastPointer=0;
-        
-        while(widthValues.hasMoreTokens()){
-            nextValue = widthValues.nextToken();
-            if(!nextValue.equals(" ")) {
-                break;
-            }
-        }
-        
-        boolean isDone=false;
-        
-        while (true) {
-            
-            if(isDone) {
-                break;
-            }
-            
-            if(nextValue.equals("R")){ //allow for special odd case  0 1449 0 R and read data directly
+        int ptr=0, count=values.length,start,end;
+        float nextWidth;
+        byte[] nextNumber = null,rawNextWidth;
+        Object o;
+        for(int i=0;i<count;i++){
+
+            o=values[i];
+            if(o instanceof byte[]){
                 
-                final String ref=lastValue+' '+currentValue+" R";
-                
-                final int number=Integer.parseInt(lastValue);
-                final int generation=Integer.parseInt(currentValue);
-                
-                pointer=lastPointer;
-                
-                //get the list directly from 14449 0 R
-                final FontObject widthObj=new FontObject(ref);
-                final byte[] data=currentPdfFile.getObjectReader().readObjectAsByteArray(widthObj, currentPdfFile.getObjectReader().isCompressed(number,generation),number,generation);
-                
-                //clean up extra data around value which can cause an error in our code
-                //and parse
-                String text=new String(data);
-                final int start=text.indexOf('[');
-                final int end=text.lastIndexOf(']');
-                if(start>-1 && end>-1 && start<end){
-                    text=text.substring(start,end);
-                }
-                
-                final StringTokenizer widthValues2 = new StringTokenizer(text, " []");
-                String val;
-                
-                while(widthValues2.hasMoreTokens()){
-                    val = widthValues2.nextToken();
-                    widthTable[pointer]=Float.parseFloat(val)/1000f;
-                    pointer++;
-                }
-                
-                
-                //read next value
-                if(widthValues.hasMoreTokens()){
-                    while(widthValues.hasMoreTokens()){
-                        nextValue = widthValues.nextToken();
-                        if(!nextValue.equals(" ")) {
-                            break;
-                        }
+                if(nextNumber!=null){ //part of a range
+                   start=ptr; 
+                   nextNumber=((byte[])o);
+                   end=NumberUtils.parseInt(0, nextNumber.length, nextNumber);
+                   
+                   //we also need to read last value of series 
+                   i++;
+                   nextNumber=((byte[])values[i]);
+                   
+                   nextWidth=NumberUtils.parseFloat(0, nextNumber.length, nextNumber)/1000f;
+                   
+                   for(int i2=start;i2<=end;i2++){
+                       widthTable[i2]= nextWidth;
                     }
-                }else {
-                    isDone=true;
-                }
+           // final byte[] decodeByteData= (byte[]) DecodeParmsArray[i];
+
+                   nextNumber=null;
+                }else{ //single value
+                    nextNumber=((byte[])o);
                 
+                    ptr=NumberUtils.parseInt(0, nextNumber.length, nextNumber);
+        }   
             }else{
-                
-                lastValue= currentValue;
-                currentValue=nextValue;
-                
-                lastPointer=pointer;
-                pointer = Integer.parseInt(currentValue);
-                
-                while(true){
-                    currentValue = widthValues.nextToken();
-                    if(!currentValue.equals(" ")) {
-                        break;
-                    }
+    
+                nextNumber=null;
+                for(Object widths: (Object[])o){
+                    rawNextWidth=((byte[])widths);
+                    nextWidth=NumberUtils.parseFloat(0, rawNextWidth.length, rawNextWidth)/1000f;
+                    widthTable[ptr]= nextWidth;
+                    ptr++;
                 }
-                
-                //process either range or []
-                if (currentValue.equals("[")) {
-                    while(true){
-                        
-                        while(true){
-                            currentValue = widthValues.nextToken();
-                            if(!currentValue.equals(" ")) {
-                                break;
-                            }
-                        }
-                        
-                        if(currentValue.equals("]")) {
-                            break;
-                        }
-                        
-                        widthTable[pointer]=Float.parseFloat(currentValue)/1000f;
-                        pointer++;
-                        
-                    }
-                    
-                    if(widthValues.hasMoreTokens()){
-                        while(widthValues.hasMoreTokens()){
-                            nextValue = widthValues.nextToken();
-                            if(!nextValue.equals(" ")) {
-                                break;
-                            }
-                        }
-                    }else {
-                        isDone=true;
-                    }
-                    
-                } else {
-                    
-                    final int endPointer = 1 + Integer.parseInt(currentValue);
-                    
-                    lastValue=currentValue;
-                    while(true){
-                        currentValue = widthValues.nextToken();
-                        if(!currentValue.equals(" ")) {
-                            break;
-                        }
-                    }
-                    
-                    if(widthValues.hasMoreTokens()){
-                        while(widthValues.hasMoreTokens()){
-                            nextValue = widthValues.nextToken();
-                            if(!nextValue.equals(" ")) {
-                                break;
-                            }
-                        }
-                    }else {
-                        isDone=true;
-                    }
-                    
-                    if(!nextValue.equals("R")){
-                        
-                        for (int ii = pointer; ii < endPointer; ii++) {
-                            widthTable[ii]=Float.parseFloat(currentValue)/1000f;
-                        }
-                    }
-                    
-                }
-            }
+            }   
         }
     }
-    
     
     /**flag if CID font*/
     public final boolean isCIDFont() {
@@ -1117,13 +1008,12 @@ public class PdfFont implements Serializable {
             final UnicodeReader uniReader=new UnicodeReader(currentPdfFile.readStream(ToUnicode,true,true,false, false,false, ToUnicode.getCacheName(currentPdfFile.getObjectReader())));
             unicodeMappings=uniReader.readUnicode();
             hasDoubleBytes=uniReader.hasDoubleByteValues();
-        }
+        }   
         
-        //@speed may need optimising - done as string for moment
-        String widths=Descendent.getName(PdfDictionary.W);
+        Object[] widths= Descendent.getObjectArray(PdfDictionary.W);
 
         //allow for vertical
-        final String verticalWidths=Descendent.getName(PdfDictionary.W2);
+        final Object[] verticalWidths=Descendent.getObjectArray(PdfDictionary.W2);
         if(verticalWidths!=null){
             widths=verticalWidths;
             isWidthVertical=true;

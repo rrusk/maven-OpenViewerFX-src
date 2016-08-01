@@ -125,7 +125,7 @@ public class PdfObject {
     private PdfFileReader objReader;
     private String cacheName;
     
-    private byte[][] Filter, Nums,TR;
+    private byte[][] ColorSpaceArray, Filter, Nums,TR;
     
     private byte[][] keys;
     
@@ -969,6 +969,11 @@ public class PdfObject {
         
         switch(id){
             
+            case PdfDictionary.ColorSpace:
+                
+                ColorSpaceArray=value;
+                break;
+                
             case PdfDictionary.Filter:
                 
                 Filter=value;
@@ -1390,6 +1395,9 @@ public class PdfObject {
         
         switch(id){
             
+            case PdfDictionary.ColorSpace:
+                return new PdfArrayIterator(ColorSpaceArray);
+                
             case PdfDictionary.Filter:
                 return new PdfArrayIterator(Filter);
                 

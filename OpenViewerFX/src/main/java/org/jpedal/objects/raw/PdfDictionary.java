@@ -1457,8 +1457,8 @@ public class PdfDictionary {
                 return VALUE_IS_INT;
 
             case ColorSpace:
-                if(type==XObject) {
-                    return VALUE_IS_UNREAD_DICTIONARY;
+                if(1==2) {
+                    return VALUE_IS_MIXED_ARRAY;
                 } else {
                     return VALUE_IS_UNREAD_DICTIONARY;
                 }
@@ -1842,7 +1842,7 @@ public class PdfDictionary {
                 return VALUE_IS_UNREAD_DICTIONARY;
 
             case L:
-                if(type==Linearized) {
+                if(type==Linearized || type==PdfDictionary.MCID || type==PdfDictionary.Names) {
                     return VALUE_IS_INT;
                 } else {
                     return VALUE_IS_FLOAT_ARRAY;
@@ -2429,13 +2429,15 @@ public class PdfDictionary {
                         return VALUE_IS_VARIOUS;
                     case PdfDictionary.MCID:
                         return VALUE_IS_FLOAT;
+                    case PdfDictionary.Font:
+                        return VALUE_IS_OBJECT_ARRAY;    
                     default:
                         return VALUE_IS_TEXTSTREAM;
                 }
 
             case W2:
-                return VALUE_IS_TEXTSTREAM;
-
+                return VALUE_IS_OBJECT_ARRAY;
+           
             case Win:
         		return VALUE_IS_DICTIONARY;
 

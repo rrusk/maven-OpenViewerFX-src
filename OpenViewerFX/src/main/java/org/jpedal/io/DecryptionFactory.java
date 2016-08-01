@@ -45,17 +45,6 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.BlockCipherPadding;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.jpedal.constants.PDFflags;
 import org.jpedal.exception.PdfSecurityException;
 import org.jpedal.objects.raw.PdfArrayIterator;
@@ -151,6 +140,8 @@ public class DecryptionFactory {
 
     private Key key;
 
+    private BaseDecryption decryptionMethods;
+    
     public DecryptionFactory(final byte[] ID, final byte[] encryptionPassword){
         this.ID=ID;
         this.encryptionPassword=encryptionPassword;
@@ -421,29 +412,8 @@ public class DecryptionFactory {
     /**
      * workout key from OE or UE
      */
-    private static byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException {
-
-        final int ELength= rawValue.length;
-        final byte[] returnKey = new byte[ELength];
-        
-        try{
-
-            //setup Cipher
-            final BlockCipher cbc = new CBCBlockCipher(new AESFastEngine());
-            cbc.init(false, new KeyParameter(key));
-
-            //translate bytes
-            int nextBlockSize;
-            for(int i=0;i<ELength;i += nextBlockSize){
-                cbc.processBlock(rawValue, i, returnKey, i);
-                nextBlockSize=cbc.getBlockSize();
-            }
-            
-        }catch(final Exception e){
-            throw new PdfSecurityException("Exception "+e.getMessage()+" with v5 encoding");
-        }
-
-        return returnKey;
+    private byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException {
+        return decryptionMethods.v5Decrypt(rawValue, key);
 
     }
 
@@ -578,6 +548,13 @@ public class DecryptionFactory {
             SetSecurity.init();
         }
 
+        if (SetSecurity.useBouncyCastle) {
+            decryptionMethods = new BouncyCastleDecryption();
+        }
+        else {
+            decryptionMethods = new JCADecryption();
+        }
+        
         //check type of filter and type and see if supported
         final int v = encyptionObj.getInt(PdfDictionary.V);
 
@@ -727,7 +704,7 @@ public class DecryptionFactory {
 
         if(recipients!=null){
 
-            final byte[] envelopedData=SetSecurity.extractCertificateData(recipients,certificate,key);
+            final byte[] envelopedData=extractCertificateData(recipients,certificate,key);
 
             /*
              * use match to create the key
@@ -753,7 +730,18 @@ public class DecryptionFactory {
         }
     }
 
-    /**
+     /**
+     * cycle through all possible values to find match (only tested with Bouncy castle)
+     * @param certificate
+     * @param key
+     */
+    public byte[] extractCertificateData(final byte[][] recipients, final Certificate certificate, final Key key) {
+        return decryptionMethods.readCertificate(recipients, certificate, key);
+    }
+    
+    
+    
+     /**
      * reads the line/s from file which make up an object
      * includes move
      */
@@ -1107,30 +1095,8 @@ public class DecryptionFactory {
      * @return
      * @throws Exception
      */
-    private static byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData)
-            throws Exception {
-        
-        final KeyParameter keyParam = new KeyParameter(encKey);
-        final CipherParameters params = new ParametersWithIV(keyParam, ivData);
-
-        // setup AES cipher in CBC mode with PKCS7 padding
-        final BlockCipherPadding padding = new PKCS7Padding();
-        final BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(
-                new CBCBlockCipher(new AESEngine()), padding);
-        cipher.reset();
-        cipher.init(false, params);
-
-        // create a temporary buffer to decode into (it'll include padding)
-        final byte[] buf = new byte[cipher.getOutputSize(encData.length)];
-        int len = cipher.processBytes(encData, 0, encData.length, buf, 0);
-        len += cipher.doFinal(buf, len);
-
-        // remove padding
-        final byte[] out = new byte[len];
-        System.arraycopy(buf, 0, out, 0, len);
-
-        // return string representation of decoded bytes
-        return out;
+    private byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData) throws Exception {
+        return decryptionMethods.decodeAES(encKey, encData, ivData);
     }   
     
 }

@@ -301,14 +301,14 @@ public class FormObject extends PdfObject{
 
 	protected byte[][] Kids;
 	
-	private String htmlName;
+	private String htmlElementId;
 
-    public void setHTMLName(final String name) {
-		htmlName = name;
+    public void setHTMLElementId(final String htmlElementId) {
+		this.htmlElementId = htmlElementId;
 	}
 	
-	public String getHTMLName(){
-		return htmlName;
+	public String getHTMLElementId(){
+		return htmlElementId;
 	}
 
     public FormObject(final String ref) {

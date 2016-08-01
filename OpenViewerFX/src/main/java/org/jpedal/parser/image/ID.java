@@ -227,10 +227,6 @@ public class ID extends ImageDecoder {
                         }
                     }
                     
-                    if(image!=null && !current.isHTMLorSVG() && !parserOptions.renderDirectly() && parserOptions.isPageContent() && parserOptions.imagesNeeded()) {
-                        objectStoreStreamRef.saveStoredImage(image_name,ImageCommands.addBackgroundToMask(image, isMask),false,parserOptions.createScaledVersion(),"tif");          
-                    }
-        
                     //generate name including filename to make it unique
                     currentImage = image_name;
 
@@ -238,8 +234,10 @@ public class ID extends ImageDecoder {
 
                 if (image != null){
 
-                    if(current.isHTMLorSVG()){
-                        generateTransformedImage(image, image_name);
+                    if(current.isHTMLorSVG()){                                    
+                        current.drawImage(parserOptions.getPageNumber(), image, gs, false, image_name, -3);
+                        current.drawImage(parserOptions.getPageNumber(),image,gs,false,image_name, -2);
+                     
                     }else{
 
                         gs.x=gs.CTM[2][0];

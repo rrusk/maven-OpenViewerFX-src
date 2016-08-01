@@ -335,7 +335,7 @@ public class PdfArrayIterator {
 		
 		return value;
 	}
-
+    
     /** returns the next value as a byte[], and if <b>rollon</b> is true moves the count onto the next token*/
 	public byte[] getNextValueAsByte(final boolean rollon) {
 
@@ -382,8 +382,11 @@ public class PdfArrayIterator {
             
             //System.out.println("String="+new String(raw));
 
-            return PdfDictionary.getIntKey(0,raw.length,raw);
-
+            if(raw[0]=='/'){ //allod for already a key (ie in ColorSpace Array)
+                return PdfDictionary.getIntKey(1,raw.length-1,raw);
+            }else{
+                return PdfDictionary.getIntKey(0,raw.length,raw);
+            }
 		}else {
             throw new RuntimeException("Out of range exception with PdfArrayIterator");
         }

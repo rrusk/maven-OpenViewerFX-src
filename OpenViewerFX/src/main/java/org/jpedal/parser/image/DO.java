@@ -129,29 +129,14 @@ public class DO extends ImageDecoder {
                 //save transformed image
                 if (image != null) {
 
-                    if (!isForHTML) {
+                    if(isForHTML){                     
+                        current.drawImage(parserOptions.getPageNumber(), image, gs, false, name, -3);
+                        current.drawImage(parserOptions.getPageNumber(),image,gs,false,name, -2);
+                    }else{
 
-                        gs.x = gs.CTM[2][0];
-                        gs.y = gs.CTM[2][1];
-
-                        /*save details if we are tracking*/
-                        if(parserOptions.isFinalImagesExtracted() || parserOptions.isRawImagesExtracted()){
-                            int w=(int)Math.abs(gs.CTM[0][0]);
-                            if(w==0) {
-                                w = (int) Math.abs(gs.CTM[0][1]);
-                            }
-
-                            int h=(int)Math.abs(gs.CTM[1][1]);
-                            if(h==0) {
-                                h = (int) Math.abs(gs.CTM[1][0]);
-                            }
-
-                            pdfImages.setImageInfo(currentImage, parserOptions.getPageNumber(), gs.x, gs.y, w, h);
-                        }
-
-                        if(parserOptions.renderDirectly()){ //in own bit as other code not needed
-                            current.drawImage(parserOptions.getPageNumber(), image, gs, false, name, -1);
-                        }else{
+                        if(parserOptions.renderImages()){
+                            gs.x = gs.CTM[2][0];
+                            gs.y = gs.CTM[2][1];
 
                             final int id = current.drawImage(parserOptions.getPageNumber(), image, gs, false, name, previousUse);
 
@@ -163,20 +148,16 @@ public class DO extends ImageDecoder {
                             }
                         }
                         
-                        if (parserOptions.isClippedImagesExtracted()) {
-                         //   generateTransformedImage(image, name);
-                        }
-            
-                    } else {
-
-                        if (parserOptions.isClippedImagesExtracted()  || isForHTML) {
-                            generateTransformedImage(image, name);
-                        } else {
-                            try {
-                                generateTransformedImageSingle(image, name);
-                            } catch (final Exception e) {
-                                LogWriter.writeLog("Exception " + e + " on transforming image in file");
-                            }
+                        if(parserOptions.isPageContent() && ImageCommands.isExtractionAllowed(currentPdfFile)){
+                            if (parserOptions.isClippedImagesExtracted()) {
+                                generateClippedImage(image);
+                            } else if(parserOptions.isFinalImagesExtracted() || parserOptions.isRawImagesExtracted()){
+                                try {
+                                    generateTransformedImageSingle(image);
+                                } catch (final Exception e) {
+                                    LogWriter.writeLog("Exception " + e + " on transforming image in file");
+                                }
+                            }  
                         }
                     }
 

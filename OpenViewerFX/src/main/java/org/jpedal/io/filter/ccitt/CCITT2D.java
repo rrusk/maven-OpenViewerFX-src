@@ -272,9 +272,6 @@ public class CCITT2D extends CCITT1D implements CCITTDecoder {
                     break;
 
                 default:  // Vertical
-                    if( code > 8 ) {
-                        throw new RuntimeException("CCITT unexpected value");
-                    }
 
                     curr[currIndex++] = currentChangeElement[0] + ( code - 5 );
 

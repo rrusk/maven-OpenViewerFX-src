@@ -1552,10 +1552,10 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                 }
             }
             if(rawKey==null){
-                objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem,image,false,false,"tif");
+                objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem,image,false,"png");
                 imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem);
             }else{
-                objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false,false,"tif");
+                objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false,"png");
                 imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem+ '_' +rawKey);
             }
 

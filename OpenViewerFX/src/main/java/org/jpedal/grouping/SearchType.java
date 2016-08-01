@@ -75,9 +75,15 @@ public class SearchType {
 	 * Used to describe a search that matches regular expressions with the search term
 	 */
 	public static final int USE_REGULAR_EXPRESSIONS = 32;
-        
-        /**
+    
+    /**
 	 * Used to describe a search that will only search within highlighted areas
 	 */
 	public static final int SEARCH_HIGHLIGHTS_ONLY = 64;
+    
+    /**
+	 * Used to ignore space characters from the search term and underlying text.
+     * Useful when number of spaces in gaps is unknown.
+	 */
+	public static final int IGNORE_SPACE_CHARACTERS = 128;
 }

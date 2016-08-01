@@ -1188,7 +1188,7 @@ public class Type1C extends Type1{
                         if (isBinary) {
                             encData = decryptBinary(encData, 55665, 4);
                         } else {
-                            encData = decryptASCII(encData, 55665, 4);
+                            encData = decryptASCII(encData, 55665);
                         }
 
                         bos.write(encData);
@@ -2657,7 +2657,7 @@ public class Type1C extends Type1{
         return decrypted;
     }
     
-    private static byte[] decryptASCII(byte[] data, int key, int discard) {
+    private static byte[] decryptASCII(byte[] data, int key) {
         int c1 = 52845;
         int c2 = 22719;
         int r = key;

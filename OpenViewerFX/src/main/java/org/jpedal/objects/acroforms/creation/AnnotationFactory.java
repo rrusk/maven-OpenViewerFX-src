@@ -33,12 +33,15 @@
 package org.jpedal.objects.acroforms.creation;
 
 import java.awt.*;
+import java.awt.geom.CubicCurve2D;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import org.jpedal.color.DeviceCMYKColorSpace;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.acroforms.FormRenderUtilsG2;
+import static org.jpedal.objects.acroforms.creation.SwingFormFactory.curveInk;
 import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -98,10 +101,270 @@ public class AnnotationFactory {
             case PdfDictionary.Sound:
                 commentIcon = getSoundIcon(form);
                 break;
-                
+            case PdfDictionary.Ink:
+                commentIcon = getInkIcon(form);
+                break;
         }
         
         return commentIcon;
+    }
+    
+    private static BufferedImage getInkIcon(PdfObject form){
+        float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        if (quad != null) {
+
+            Rectangle bounds = getFormBounds((FormObject) form, quad);
+            final Object[] InkListArray = form.getObjectArray(PdfDictionary.InkList);
+            final BufferedImage icon1 = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
+            scanInkListTree(InkListArray, form, icon1.getGraphics());
+            return icon1;
+        }
+        return null;
+    }
+    
+    public static float[] scanInkListTree(final Object[] InkListArray, final PdfObject form, final Graphics g) {
+        
+        float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        if (quad == null) {
+            return null;
+        }
+         
+        Rectangle bounds = getFormBounds((FormObject) form, quad);
+        
+        float minX = 0;
+        float minY = 0;
+        float maxX = 0;
+        float maxY = 0;
+        
+        float[] vals = null;
+        final Graphics2D g2 = (Graphics2D) g;
+        //if specific DecodeParms for each filter, set othereise use global
+        if(InkListArray !=null){
+            
+            final int count= InkListArray.length;
+            
+            float x;
+            float y;
+            
+            boolean isFirstPoint = true;
+            
+            //If Graphics not set, don't draw anything.
+            if(g!=null){
+                final float[] underlineColor = form.getFloatArray(PdfDictionary.C);
+                Color c1 = new Color(0);
+                if(underlineColor!=null){
+                    switch(underlineColor.length){
+                        case 0:
+                            //Should not happen. Do nothing. Annotation is transparent
+                            break;
+                        case 1:
+                            //DeviceGrey colorspace
+                            c1 = new Color(underlineColor[0],underlineColor[0],underlineColor[0],1.0f);
+                            break;
+                        case 3:
+                            //DeviceRGB colorspace
+                            c1 = new Color(underlineColor[0],underlineColor[1],underlineColor[2],1.0f);
+                            break;
+                        case 4:
+                            //DeviceCMYK colorspace
+                            final DeviceCMYKColorSpace cmyk = new DeviceCMYKColorSpace();
+                            cmyk.setColor(underlineColor, 4);
+                            c1 = new Color(cmyk.getColor().getRGB());
+                            
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                
+                g2.setColor(new Color(0.0f,0.0f,0.0f,0.0f));
+                g2.fillRect(0, 0, bounds.width, bounds.height);
+                g2.setColor(c1);
+                g2.setPaint(c1);
+            }
+            
+            for(int i=0;i<count;i++){
+                
+                if(InkListArray[i] instanceof byte[]){
+                    final byte[] decodeByteData= (byte[]) InkListArray[i];
+                    
+                    if(vals==null){
+                        vals = new float[count];
+                    }
+                    
+                    if(decodeByteData!=null){
+                        final String val= new String(decodeByteData);
+                        final float v = Float.parseFloat(val);
+                        
+                        switch(i%2){
+                            case 0 :
+                                if(isFirstPoint){
+                                    minX = v;
+                                    maxX = v;
+                                }else{
+                                    if(v<minX) {
+                                        minX = v;
+                                    }
+                                    if(v>maxX) {
+                                        maxX = v;
+                                    }
+                                }
+                                x = (v - bounds.x);
+                                vals[i] = x;
+                                break;
+                            case 1 :
+                                if(isFirstPoint){
+                                    minY = v;
+                                    maxY = v;
+                                    isFirstPoint = false;
+                                }else{
+                                    if(v<minY) {
+                                        minY = v;
+                                    }
+                                    if(v>maxY) {
+                                        maxY = v;
+                                    }
+                                }
+                                y = bounds.height - (v - bounds.y);
+                                vals[i] = y;
+                                
+                                //x = 0;
+                                //y = 0;
+                                
+                                break;
+                        }
+                        //                        System.out.println("val="+val);
+                        
+                    }
+                }else{
+                    // System.out.println(">>");
+                    final float[] r = scanInkListTree((Object[]) InkListArray[i], form, g);
+                    if(isFirstPoint){
+                        minX = r[0];
+                        maxX = r[2];
+                        minY = r[1];
+                        maxY = r[3];
+                        isFirstPoint = false;
+                    }else{
+                        if(r[0]<minX) {
+                            minX = r[0];
+                        }
+                        if(r[2]>maxX) {
+                            maxX = r[2];
+                        }
+                        if(r[1]<minY) {
+                            minY = r[1];
+                        }
+                        if(r[3]>maxY) {
+                            maxY = r[3];
+                        }
+                    }
+                    // System.out.println("<<");
+                }
+            }
+        }
+        
+        if(vals!=null){
+            if(vals.length<6){ //Only use lines on ink
+            for(int i=0; i<vals.length; i++){
+                if(i%2==0){ //X coord
+                    if(vals[i]<minX) {
+                        minX = vals[i];
+                    }
+                    
+                    if(vals[i]>maxX) {
+                        maxX = vals[i];
+                    }
+                }else{ //Y coord
+                    if(vals[i]<minY) {
+                        minY = vals[i];
+                    }
+                    
+                    if(vals[i]>maxY) {
+                        maxY = vals[i];
+                    }
+                }
+            }
+            
+            float xOffset = 0;
+            float yOffset = 0;
+            
+            if(minX < 0) {
+                xOffset = Math.abs(minX);
+            }
+            if(minY < 0) {
+                yOffset = Math.abs(minY);
+            }
+            
+            minX += xOffset;
+            maxX += xOffset;
+            minY += yOffset;
+            maxY += yOffset;
+            
+            if(g2!=null){
+                
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setStroke(new BasicStroke(1.52f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                
+                for(int i=0; i<vals.length; i+=4){
+                    final Line2D.Float line = new Line2D.Float(vals[0], vals[1], vals[2], vals[3]);
+                    g2.draw(line);
+                }
+            }
+            }else{ //Enough armguments so curve ink
+                final float[] values = curveInk(vals);
+            for(int i=0; i<values.length; i++){
+                if(i%2==0){ //X coord
+                    if(values[i]<minX) {
+                        minX = values[i];
+                    }
+                    
+                    if(values[i]>maxX) {
+                        maxX = values[i];
+                    }
+                }else{ //Y coord
+                    if(values[i]<minY) {
+                        minY = values[i];
+                    }
+                    
+                    if(values[i]>maxY) {
+                        maxY = values[i];
+                    }
+                }
+            }
+            
+            float xOffset = 0;
+            float yOffset = 0;
+            
+            if(minX < 0) {
+                xOffset = Math.abs(minX);
+            }
+            if(minY < 0) {
+                yOffset = Math.abs(minY);
+            }
+            
+            minX += xOffset;
+            maxX += xOffset;
+            minY += yOffset;
+            maxY += yOffset;
+            
+            if(g2!=null){
+                
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setStroke(new BasicStroke(1.52f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                
+                for(int i=0; i<values.length; i+=8){
+                    
+                    
+                    final CubicCurve2D curve = new CubicCurve2D.Double(values[i]+xOffset, values[i+1]+yOffset, values[i+2]+xOffset, values[i+3]+yOffset
+                            , values[i+4]+xOffset, values[i+5]+yOffset, values[i+6]+xOffset, values[i+7]+yOffset);
+                    g2.draw(curve);
+                }
+            }
+            }
+        }
+        
+        return new float[]{minX, minY, maxX, maxY};
     }
     
     private static Color convertFloatArrayToColor(float[] values){

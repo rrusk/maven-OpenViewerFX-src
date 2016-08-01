@@ -55,6 +55,7 @@ import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.PdfImageData;
 import org.jpedal.objects.PdfPageData;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.BaseDecoder;
@@ -130,29 +131,33 @@ public class ImageDecoder extends BaseDecoder{
         final int height=imageData.getHeight();
         final int depth=imageData.getDepth();
         
-        final PdfObject ColorSpace=XObject.getDictionary(PdfDictionary.ColorSpace);
+        final PdfObject ColorSpaceAsDict=XObject.getDictionary(PdfDictionary.ColorSpace);
         
         //handle colour information
         GenericColorSpace decodeColorData=new DeviceRGBColorSpace();
         
-        if(ColorSpace!=null){
-            decodeColorData= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace, cache.XObjectColorspaces);
+        if(ColorSpaceAsDict!=null){
+            decodeColorData= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpaceAsDict, cache.XObjectColorspaces);
             
             decodeColorData.setPrinting(parserOptions.isPrinting());
             
             //track colorspace use
             cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(),"x");
+         
+        }else if(PdfDictionary.getKeyType(PdfDictionary.ColorSpace, -1)==PdfDictionary.VALUE_IS_MIXED_ARRAY){
             
+            final PdfArrayIterator ColorSpace=XObject.getMixedArray(PdfDictionary.ColorSpace);
+        
+            System.out.println(">>"+XObject.getObjectRefAsString());
             
-//            if(depth==1 && decodeColorData.getID()== ColorSpaces.DeviceRGB && XObject.getDictionary(PdfDictionary.Mask)==null){
-//                
-//                final byte[] data=decodeColorData.getIndexedMap();
-//                
-//                //no index or first colour is white so use grayscale
-//                if(decodeColorData.getIndexedMap()==null || (data.length==6 && data[0]==0 && data[1]==0 && data[2]==0)) {
-//                    decodeColorData = new DeviceGrayColorSpace();
-//                }
-//            }
+            decodeColorData= ColorspaceFactory.getColorSpaceInstance(XObject.getObjectRefAsString(), currentPdfFile, ColorSpace, cache.XObjectColorspaces);
+            
+            decodeColorData.setPrinting(parserOptions.isPrinting());
+            
+            System.out.println(" ColorSpace="+decodeColorData);
+            //track colorspace use
+            cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(),"x");
+            
         }
         
         //fix for odd itext file (/PDFdata/baseline_screens/debug3/Leistung.pdf)
@@ -339,11 +344,6 @@ public class ImageDecoder extends BaseDecoder{
             
         }else if(customImageHandler==null ||(image==null && !customImageHandler.alwaysIgnoreGenericHandler())) {
             image = processImage(decodeColorData, imageData, isMask, XObject);
-            
-            if(image!=null && !current.isHTMLorSVG() && !parserOptions.renderDirectly() && parserOptions.isPageContent() && parserOptions.imagesNeeded()) {
-                objectStoreStreamRef.saveStoredImage(image_name,ImageCommands.addBackgroundToMask(image, isMask),false,parserOptions.createScaledVersion(),"tif");          
-            }
-        
         }
         
         //add details to string so we can pass back
@@ -483,300 +483,151 @@ public class ImageDecoder extends BaseDecoder{
     
     /**
      * save the current image, clipping and
-     *  resizing. This gives us a
-     * clipped hires copy. In reparse, we don't
-     * need to repeat some actions we know already done.
+     *  resizing clip. This gives us a  clipped hires copy. 
      */
-    public void generateTransformedImage(BufferedImage image, final String image_name) {
+    public void generateClippedImage(BufferedImage image) {
+       
+        final int pageRotation=pageData.getRotation(parserOptions.getPageNumber());
+
+        //object to scale and clip. Creating instance does the scaling
+        final ImageTransformerDouble image_transformation = new ImageTransformerDouble(gs, image, parserOptions.createScaledVersion(), 1, pageRotation);
         
-        float x = 0;
-        float y = 0;
-        final float w;
-        final float h;
+        //extract images either scaled/clipped or scaled then clipped
+        if(image_transformation!=null){
+            image_transformation.doubleScaleTransformShear();
+
+            //get intermediate image and save
+            image = image_transformation.getImage();
+        }
         
-        //if valid image then process
-        //for the moment lock out rotated images as code broken (applies rotated clip to unrotated image)
-        if (image != null){
-            
-            ImageTransformerDouble image_transformation=null;
-            
-            final boolean isHTML=current.isHTMLorSVG();
-            
-            if(isHTML) {
-                current.drawImage(parserOptions.getPageNumber(), image, gs, false, image_name, -3);
-            }
-            
-            /*
-             * scale the raw image to correct page size (at 72dpi)
-             */
-            
-            //this code is generic code being reused for HTML so breaks on several cases which we just lock out (ie rotation)
-            final int pageRotation=pageData.getRotation(parserOptions.getPageNumber());
-                
-            //if down-sampling image, we use larger size in HTML
-            //to preserve image quality. ie if image is 1200x1200 for 600x600 hole
-            //(which is 900x900 when we scale up again, we keep image as 900x900 not 600x600
-            //if image is already 600x600 we DO NOT upscale
-            //still needs to be debugged (especially rotated pages)
+        //convert mask into proper image if saving clipped images
+        if(isMask){
+            image = convertMaskToImage(image,gs.nonstrokeColorSpace.getColor().getRGB());
+        }
+        
+        //@suda - image saved here is being saved out as garbage. Do we need to alter colorspace or issue in our image decoder.      
+        //releate comment in JDeliHelper
+        if(objectStoreStreamRef.saveStoredImage("CLIP_"+currentImage, image, false, "png")) {
+            errorTracker.addPageFailureMessage("Problem saving " + image);
+        }
+        
+        //complete the image and workout co-ordinates
+        image_transformation.completeImage();
 
-            //object to scale and clip. Creating instance does the scaling
-            if(!isHTML){
-                image_transformation = new ImageTransformerDouble(gs, image, parserOptions.createScaledVersion(), 1, pageRotation);
-            }
+        //get final image to allow for way we draw 'upside down'
+        image = image_transformation.getImage();
 
-            //extract images either scaled/clipped or scaled then clipped
-            if(image_transformation!=null){
-                image_transformation.doubleScaleTransformShear();
+        //allow for null image returned (ie if too small)
+        if (image != null) {
 
-                //get intermediate image and save
-                image = image_transformation.getImage();
-            }
-            
-            
-            //save the scaled/clipped version of image if allowed
-            if(!isHTML){
-                
-                String image_type = objectStoreStreamRef.getImageType(currentImage);
-                if(image_type==null) {
-                    image_type = "tif";
-                }
-                
-                BufferedImage outputImage=image;
-                
-                //convert mask into proper image if saving clipped images
-                if(isMask){
-                    
-                    final int foreground = gs.nonstrokeColorSpace.getColor().getRGB();
-                    
-                    final int[] maskCol = new int[4];
-                    
-                    maskCol[0] = ((foreground >> 16) & 0xFF);
-                    maskCol[1] = ((foreground >> 8) & 0xFF);
-                    maskCol[2] = ((foreground) & 0xFF);
-                    maskCol[3] = 255;
-                    
-                    final BufferedImage img = new BufferedImage(outputImage.getWidth(), outputImage.getHeight(), outputImage.getType());
-                    
-                    final Raster src = outputImage.getRaster();
-                    final WritableRaster dest = img.getRaster();
-                    final int[] values = new int[4];
-                    for (int yy = 0; yy < outputImage.getHeight(); yy++) {
-                        for (int xx = 0; xx < outputImage.getWidth(); xx++) {
-                            
-                            //get raw color data
-                            src.getPixel(xx, yy, values);
-                            
-                            //System.out.println(values[0]+" "+values[1]+" "+values[2]+" "+values[3]+" ");
-                            //if not transparent, fill with color
-                            if (values[3] > 2) {
-                                dest.setPixel(xx, yy, maskCol);
-                            }
-                        }
-                    }
-                    outputImage = img;
-                    
-                }
-                
-                if(objectStoreStreamRef.saveStoredImage(
-                        "CLIP_"+currentImage,
-                        outputImage,
-                        false,
-                        false,
-                        image_type)) {
-                    errorTracker.addPageFailureMessage("Problem saving " + image);
-                }
-            }
-            
-            /*
-             * HTML5/JavaFX code is piggybacking on existing functionality to extract hires clipped image.
-             * We do not need other functionality so we ignore that
-             */
-            if(isHTML){
-                
-                if (image != null) {
-                    
-                    gs.x=x;
-                    gs.y=y;
-                    
-                    current.drawImage(parserOptions.getPageNumber(),image,gs,false,image_name, -2);
-                    
-                }
-            }else{
-                
-                if(parserOptions.isFinalImagesExtracted() || parserOptions.renderImages()) {
-                    image_transformation.doubleScaleTransformScale();
-                }
-                
-                //complete the image and workout co-ordinates
-                image_transformation.completeImage();
+            //store  final image on disk & in memory
+            if(parserOptions.imagesNeeded()){
                 
                 //get initial values
+                float x = image_transformation.getImageX();
+                float y = image_transformation.getImageY();
+                float w = image_transformation.getImageW();
+                float h = image_transformation.getImageH();
+
+                pdfImages.setImageInfo(currentImage, parserOptions.getPageNumber(), x, y, w, h);
+            }
+//
+//            //save the scaled/clipped version of image if allowed
+//            if(parserOptions.isFinalImagesExtracted()){
+//                
+//                image_transformation.doubleScaleTransformScale();
+//                
+//                objectStoreStreamRef.saveStoredImage(
+//                        currentImage,
+//                        ImageCommands.addBackgroundToMask(image, isMask),
+//                        false,
+//                        "png");
+//
+//            }
+        }  
+    }
+
+    private static BufferedImage convertMaskToImage(final BufferedImage outputImage, final int foreground) {
+        
+        final int[] maskCol = {((foreground >> 16) & 0xFF), ((foreground >> 8) & 0xFF),((foreground) & 0xFF),255};
+        
+        final BufferedImage img = new BufferedImage(outputImage.getWidth(), outputImage.getHeight(), outputImage.getType());
+        final Raster src = outputImage.getRaster();
+        final WritableRaster dest = img.getRaster();
+        final int[] values = new int[4];
+        final int w=outputImage.getWidth(),h=outputImage.getHeight();
+        for (int yy = 0; yy < h; yy++) {
+            for (int xx = 0; xx < w; xx++) {
+                
+                //get raw color data
+                src.getPixel(xx, yy, values);
+                
+                //System.out.println(values[0]+" "+values[1]+" "+values[2]+" "+values[3]+" ");
+                //if not transparent, fill with color
+                if (values[3] > 2) {
+                    dest.setPixel(xx, yy, maskCol);
+                }
+            }
+        }
+        return img;
+    }
+    
+    /**
+     * save the current image in raw and scaled/clipped version
+     * @param image
+     */
+    public void generateTransformedImageSingle(BufferedImage image) {
+        
+        //
+        if(parserOptions.isRawImagesExtracted()){
+            objectStoreStreamRef.saveStoredImage('R'+currentImage,image,false, "png");
+        }
+         
+        // get clipped image and co-ords
+        final Area clipping_shape = gs.getClippingShape();
+
+        //object to scale and clip. Creating instance does the scaling
+        final ImageTransformer image_transformation =new ImageTransformer(gs,image);
+
+        //get initial values
+        float x = image_transformation.getImageX();
+        float y = image_transformation.getImageY();
+        float w = image_transformation.getImageW();
+        float h = image_transformation.getImageH();
+
+        //apply clip as well if exists and not inline image
+        if (customImageHandler!=null && clipping_shape != null && clipping_shape.getBounds().getWidth()>1 &&
+                clipping_shape.getBounds().getHeight()>1 && !customImageHandler.imageHasBeenScaled()) {
+
+            //see if clip is wider than image and ignore if so
+            if (!clipping_shape.contains(x, y, w, h)) {
+                //do the clipping
+                image_transformation.clipImage(clipping_shape);
+
+                //get ALTERED values
                 x = image_transformation.getImageX();
                 y = image_transformation.getImageY();
                 w = image_transformation.getImageW();
                 h = image_transformation.getImageH();
-                
-                //get final image to allow for way we draw 'upside down'
-                image = image_transformation.getImage();
-                
-                //allow for null image returned (ie if too small)
-                if (image != null) {
-                    
-                    //store  final image on disk & in memory
-                    if(parserOptions.imagesNeeded()){
-                        pdfImages.setImageInfo(currentImage, parserOptions.getPageNumber(), x, y, w, h);
-                    }
-                    
-                    //add to screen being drawn
-                    if ((parserOptions.renderImages() || !parserOptions.isPageContent())) {
-                        gs.x=x;
-                        gs.y=y;
-                        current.drawImage(parserOptions.getPageNumber(),image,gs,false,image_name, -1);
-                    }
-                    
-                    //save if required
-                    if((!parserOptions.renderDirectly() && parserOptions.isPageContent() && parserOptions.isFinalImagesExtracted()) &&
-                            
-                            //save the scaled/clipped version of image if allowed
-                            (ImageCommands.isExtractionAllowed(currentPdfFile))){
-                        String image_type = objectStoreStreamRef.getImageType(currentImage);
-                        if(image_type==null) //Fm can generate null value
-                        {
-                            image_type = "jpg";
-                        }
-                        
-                        objectStoreStreamRef.saveStoredImage(
-                                currentImage,
-                                ImageCommands.addBackgroundToMask(image, isMask),
-                                false,
-                                false,
-                                image_type);
-                        
-                    }
-                }
             }
-        } else{ 
-            //flag no image and reset clip
-            LogWriter.writeLog("NO image written");
-        }    
-    }
-    
-    /**
-     * save the current image, clipping and resizing.Id reparse, we don't
-     * need to repeat some actions we know already done.
-     * @param image
-     */
-    public void generateTransformedImageSingle(BufferedImage image, final String image_name) {
-        
-        float x, y, w, h;
-        
-        //if valid image then process
-        if (image != null) {
-            
-            // get clipped image and co-ords
-            final Area clipping_shape = gs.getClippingShape();
-            
-            /*
-             * scale the raw image to correct page size (at 72dpi)
-             */
-            
-            //object to scale and clip. Creating instance does the scaling
-            final ImageTransformer image_transformation;
-            
-            //object to scale and clip. Creating instance does the scaling
-            image_transformation =new ImageTransformer(gs,image);
-            
-            //get initial values
-            x = image_transformation.getImageX();
-            y = image_transformation.getImageY();
-            w = image_transformation.getImageW();
-            h = image_transformation.getImageH();
-            
-            //get back image, which will become null if TOO small
-            image = image_transformation.getImage();
-            
-            //apply clip as well if exists and not inline image
-            if (image != null && customImageHandler!=null && clipping_shape != null && clipping_shape.getBounds().getWidth()>1 &&
-                    clipping_shape.getBounds().getHeight()>1 && !customImageHandler.imageHasBeenScaled()) {
-                
-                //see if clip is wider than image and ignore if so
-                final boolean ignore_image = clipping_shape.contains(x, y, w, h);
-                
-                if (!ignore_image) {
-                    //do the clipping
-                    image_transformation.clipImage(clipping_shape);
-                    
-                    //get ALTERED values
-                    x = image_transformation.getImageX();
-                    y = image_transformation.getImageY();
-                    w = image_transformation.getImageW();
-                    h = image_transformation.getImageH();
-                }
-            }
-            
-            //alter image to allow for way we draw 'upside down'
-            image = image_transformation.getImage();
-            
-            //allow for null image returned (ie if too small)
-            if (image != null) {
-                
-                //store  final image on disk & in memory
-                if(parserOptions.isFinalImagesExtracted() || parserOptions.isRawImagesExtracted()){
-                    pdfImages.setImageInfo(currentImage, parserOptions.getPageNumber(), x, y, w, h);
-                    
-                    //					if(includeImagesInData){
-                    //
-                    //						float xx=x;
-                    //						float yy=y;
-                    //
-                    //						if(clipping_shape!=null){
-                    //
-                    //							int minX=(int)clipping_shape.getBounds().getMinX();
-                    //							int maxX=(int)clipping_shape.getBounds().getMaxX();
-                    //
-                    //							int minY=(int)clipping_shape.getBounds().getMinY();
-                    //							int maxY=(int)clipping_shape.getBounds().getMaxY();
-                    //
-                    //							if((xx>0 && xx<minX)||(xx<0))
-                    //								xx=minX;
-                    //
-                    //							float currentW=xx+w;
-                    //							if(xx<0)
-                    //								currentW=w;
-                    //							if(maxX<(currentW))
-                    //								w=maxX-xx;
-                    //
-                    //							if(yy>0 && yy<minY)
-                    //								yy=minY;
-                    //
-                    //							if(maxY<(yy+h))
-                    //								h=maxY-yy;
-                    //
-                    //						}
-                    //
-                    //						pdfData.addImageElement(xx,yy,w,h,currentImage);
-                    //					}
-                }
-               
-                //save if required
-                if((parserOptions.isPageContent() && parserOptions.isFinalImagesExtracted()) &&
-                        
-                        //save the scaled/clipped version of image if allowed
-                        (ImageCommands.isExtractionAllowed(currentPdfFile))){
-                    
-                    final String image_type = objectStoreStreamRef.getImageType(currentImage);
-                    objectStoreStreamRef.saveStoredImage(
-                            currentImage,
-                            ImageCommands.addBackgroundToMask(image, isMask),
-                            false,
-                            false,
-                            image_type);
-                    
-                }
-            }
-        } else {
-            LogWriter.writeLog("NO image written");
         }
+
+        image = image_transformation.getImage();
+
+        //allow for null image returned (ie if too small)
+        if (image != null) {
+
+            pdfImages.setImageInfo(currentImage, parserOptions.getPageNumber(), x, y, w, h);
+            
+            //save the scaled/clipped version of image if allowed
+            if(parserOptions.isFinalImagesExtracted()){
+
+                objectStoreStreamRef.saveStoredImage(
+                        currentImage,
+                        ImageCommands.addBackgroundToMask(image, isMask),
+                        false, "png");
+            }
+        }     
     }
     
     /**

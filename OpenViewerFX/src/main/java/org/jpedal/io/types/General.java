@@ -49,7 +49,7 @@ import org.jpedal.utils.NumberUtils;
 public class General {
 
     
-    public static int readGeneral(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final boolean map, final boolean ignoreRecursion, final PdfFileReader objectReader,Object PDFkey, int endPt){
+    public static int readGeneral(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final boolean map, final boolean ignoreRecursion, final PdfFileReader objectReader,Object PDFkey){
 
         int keyStart;
 
@@ -191,13 +191,14 @@ public class General {
                         }
                     }
 
-                    final ArrayDecoder objDecoder=new KeyArray(objectReader, jj2, endPt, PdfDictionary.VALUE_IS_KEY_ARRAY, newData);
-                    objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
+                    final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj2, PdfDictionary.VALUE_IS_KEY_ARRAY, newData);
+                    objDecoder.readArray(pdfObject, PDFkeyInt);
                     i=j;
                     break;
 
                 }else if(PDFkeyInt== PdfDictionary.OpenAction && data[i]=='R'){
-                    return readOpenAction(pdfObject, PDFkeyInt, ignoreRecursion, objectReader, endPt, j, newData);
+                    readOpenAction(pdfObject, PDFkeyInt, objectReader, newData);
+                    return j;
                 }else{
 
                     data=newData;
@@ -307,8 +308,8 @@ public class General {
                 System.out.println(padding + "Array ");
             }
 
-            final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj, endPt, PdfDictionary.VALUE_IS_STRING_ARRAY, data);
-            jj=objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
+            final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj,PdfDictionary.VALUE_IS_STRING_ARRAY, data);
+            jj=objDecoder.readArray(pdfObject, PDFkeyInt);
                 /**/
         }else if(typeFound==0){
             if(debugFastCode) {
@@ -423,8 +424,8 @@ public class General {
         return ptr;
     }
 
-    private static int readOpenAction(PdfObject pdfObject, int PDFkeyInt, boolean ignoreRecursion, PdfFileReader objectReader, int endPt, int j, byte[] newData) {
-        int i;//get the object data and pass in
+    private static void readOpenAction(final PdfObject pdfObject, int PDFkeyInt, final PdfFileReader objectReader, final byte[] newData) {
+       
         int jj2=0;
         while(newData[jj2]!='['){
             jj2++;
@@ -434,10 +435,8 @@ public class General {
             }
         }
 
-        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj2, endPt, PdfDictionary.VALUE_IS_MIXED_ARRAY, newData);
-        objDecoder.readArray(ignoreRecursion, pdfObject, PDFkeyInt);
-        i=j;
-
-        return i;
+        final ArrayDecoder objDecoder=new Array(objectReader, jj2, PdfDictionary.VALUE_IS_MIXED_ARRAY, newData);
+        objDecoder.readArray(pdfObject, PDFkeyInt);
+        
     }
 }

@@ -726,7 +726,7 @@ public abstract class SharedActionHandler implements ActionHandler {
         //Can be a direct Dest on Annot -  we collapse together for our viewer
         PdfArrayIterator Dest = DestHandler.getDestFromObject(aData);
         
-        if (Dest!=null) {
+        if (Dest!=null && Dest.hasMoreTokens()) {
             
             if (eventType == MOUSECLICKED) {
                 
@@ -1026,6 +1026,72 @@ public abstract class SharedActionHandler implements ActionHandler {
             } else {
                 setCursor(eventType);
             }
+        }else{
+            if (eventType == MOUSECLICKED) {
+                
+                PdfObject data = aData.getDictionary(PdfDictionary.A);
+
+                if (data != null) {
+                    //Add code here
+                    String filename = data.getTextStreamValue(PdfDictionary.F);
+
+                    if (filename == null) {
+                        final PdfObject fDic = data.getDictionary(PdfDictionary.F);
+
+                        if (fDic != null) {
+                            filename = fDic.getTextStreamValue(PdfDictionary.F);
+                        }
+                    }
+
+                    //add path if none present
+                    if (filename != null && filename.indexOf('/') == -1 && filename.indexOf('\\') == -1) {
+                        filename = decode_pdf.getObjectStore().getCurrentFilepath() + filename;
+                    }
+
+                //removed \\ checking from iff so slashIndex will work, and
+                    //stop null pointer exceptions, \\ will also be quicker.
+                    if (filename != null) {
+
+                        //if we have any \\ then replace with / for Windows
+                        int index = filename.indexOf('\\');
+                        while (index != -1) {
+                            //for some reason String.replaceAll didnt like "\\" so done custom
+                            filename = filename.substring(0, index)
+                                    + '/' + filename.substring(index + ("\\".length()), filename.length());
+                            index = filename.indexOf('\\');
+                        }
+
+                        //if we dont start with a /,./ or ../ or #:/ then add ./
+                        final int slashIndex = filename.indexOf(":/");
+                        if ((slashIndex == -1 || slashIndex > 1) && !filename.startsWith("/")) {
+                            final File fileStart = new File(decode_pdf.getFileName());
+                            filename = fileStart.getParent() + '/' + filename;
+                        }
+
+                    //resolve any ../ by removing
+                        //(ie /home/test/Downloads/hyperlinks2/Data/../Start.pdf to
+                        // /home/test/Downloads/hyperlinks2/Start.pdf)
+                        index = filename.indexOf("/../");
+                        if (index != -1) {
+                            int start = index - 1;
+                            while (start > 0) {
+                                if ((filename.charAt(start) == '/') || start == 0) {
+                                    break;
+                                }
+                                start--;
+                            }
+
+                            if (start > 0) {
+                                filename = filename.substring(0, start) + filename.substring(index + 3, filename.length());
+                            }
+
+                        }
+                    }
+                    changeTo(filename, 1, null, null, true);
+                }
+            }else{
+                setCursor(eventType);
+            }
         }
         
         return page;
@@ -1208,6 +1274,13 @@ public abstract class SharedActionHandler implements ActionHandler {
     public void D(final Object e, final FormObject formObj) {
         if (showMethods) {
             System.out.println("DefaultActionHandler.D()");
+        }
+        
+        //Check its not an annotation or is a widget (used for interactive forms)
+        if(formObj.getParameterConstant(PdfDictionary.Type)!=PdfDictionary.Annot ||
+                formObj.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Widget){
+            gui.getValues().setFormsChanged(true);
+            gui.setViewerTitle(null);
         }
         
         javascript.execute(formObj, PdfDictionary.D, ActionHandler.FOCUS_EVENT, ' ');

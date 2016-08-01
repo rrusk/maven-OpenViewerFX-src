@@ -870,7 +870,7 @@ public class Dictionary {
             
             //some items like MAsk can be [19 19] or stream
             //and colorspace is law unto itself
-            if (PDFkeyInt == PdfDictionary.ColorSpace || id == PdfDictionary.ColorSpace || pdfObject.getPDFkeyInt() == PdfDictionary.ColorSpace){
+            if ((PDFkeyInt == PdfDictionary.ColorSpace || id == PdfDictionary.ColorSpace || pdfObject.getPDFkeyInt() == PdfDictionary.ColorSpace) && PdfDictionary.getKeyType(id,0)!=PdfDictionary.VALUE_IS_MIXED_ARRAY){
                 return ColorObjectDecoder.processColorSpace(pdfObject, pdfObject.getObjectRefAsString(), i, raw,objectReader);
             }else if (possibleArrayStart != -1 && (PDFkeyInt == PdfDictionary.Mask || PDFkeyInt == PdfDictionary.TR || PDFkeyInt == PdfDictionary.OpenAction)) {
                 return ArrayFactory.processArray(pdfObject, raw, PDFkeyInt, possibleArrayStart, objectReader);

@@ -47,6 +47,7 @@ import org.jpedal.JDeliHelper;
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.io.PdfObjectReader;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -93,6 +94,10 @@ public class SeparationColorSpace extends GenericColorSpace {
         setType(ColorSpaces.Separation);
         
         processColorToken(currentPdfFile, colorSpace);
+    }
+
+    SeparationColorSpace(PdfObjectReader currentPdfFile, PdfArrayIterator colorSpace) {
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
     
     protected void processColorToken(final PdfObjectReader currentPdfFile, PdfObject colorSpace) {

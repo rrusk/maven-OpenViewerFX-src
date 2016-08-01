@@ -205,14 +205,9 @@ public class ColorObjectDecoder {
 
     static int readDeviceNvalue(final PdfObject pdfObject, int i, final byte[] raw, final PdfFileReader objectReader) {
 
-        int endPoint=i;
-        while(endPoint<raw.length && raw[endPoint]!=']') {
-            endPoint++;
-        }
-
         //read Components
-        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader,i, endPoint, PdfDictionary.VALUE_IS_STRING_ARRAY, raw);
-        i=objDecoder.readArray(false, pdfObject, PdfDictionary.Components);
+        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader,i, PdfDictionary.VALUE_IS_STRING_ARRAY, raw);
+        i=objDecoder.readArray(pdfObject, PdfDictionary.Components);
 
         while(raw[i]==93 || raw[i]==32 || raw[i]==10 || raw[i]==13) {
             i++;

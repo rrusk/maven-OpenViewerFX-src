@@ -42,7 +42,7 @@ import org.jpedal.utils.LogWriter;
 public class ArrayUtils {
     
     
-    static boolean handleIndirect(final int endPoint, final byte[] raw, int aa){
+    static boolean handleIndirect(final byte[] raw, int aa){
         
         boolean indirect=true;
         
@@ -53,7 +53,7 @@ public class ArrayUtils {
             aa++;
             
             //allow for ref (ie 7 0 R)
-            if(aa>=endPoint || aa>=length) {
+            if(aa>=length) {
                 break;
             }
             
@@ -225,6 +225,10 @@ public class ArrayUtils {
         
         return isRef && elementCount==2;
                
+    }
+
+    static boolean isEndObj(final byte[] arrayData, final int j2) {
+       return arrayData[j2]=='e' && arrayData[j2+1]=='n' && arrayData[j2+2]=='d' && arrayData[j2+3]=='o' && arrayData[j2+4]=='b' && arrayData[j2+5]=='j';
     }
 }
 

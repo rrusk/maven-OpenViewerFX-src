@@ -87,4 +87,6 @@ public interface GUISearchWindow {
     void setUpdateListDuringSearch(boolean updateListDuringSearch);
     
     void dispose();
+    
+    void selectSearchOptions(int options);
 }

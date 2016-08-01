@@ -67,13 +67,15 @@ public class FontObject extends PdfObject {
     double[] FontMatrix;
 
     byte[][] Differences;
+    
+    Object[] W,W2;
 
     private byte[] rawBaseFont,rawCharSet, rawCMapName,
     rawFontName,rawFontStretch,
-    rawOrdering, rawRegistry, rawW, rawW2;
+    rawOrdering, rawRegistry;
 
     private String BaseFont,CharSet, CMapName,
-    FontName,FontStretch, Ordering,Registry, W, W2;
+    FontName,FontStretch, Ordering,Registry;
     private int[] DW2;
 
     public FontObject(final String ref) {
@@ -703,14 +705,6 @@ public class FontObject extends PdfObject {
                 rawRegistry=value;
             break;
 
-            case PdfDictionary.W:
-                rawW=value;
-            break;
-
-            case PdfDictionary.W2:
-                rawW2=value;
-                break;
-
             default:
                 super.setTextStreamValue(id,value);
 
@@ -758,24 +752,6 @@ public class FontObject extends PdfObject {
 
                 return FontStretch;
 
-            case PdfDictionary.W:
-
-                //setup first time
-                if(W==null && rawW!=null) {
-                    W = new String(rawW);
-                }
-
-                return W;
-
-            case PdfDictionary.W2:
-
-                //setup first time
-                if(W2==null && rawW2!=null) {
-                    W2 = new String(rawW2);
-                }
-
-                return W2;
-
             default:
                 return super.getName(id);
 
@@ -813,25 +789,6 @@ public class FontObject extends PdfObject {
                 }
 
                 return Registry;
-
-            case PdfDictionary.W:
-
-                //setup first time
-                if(W==null && rawW!=null) {
-                    W = new String(rawW);
-                }
-
-                return W;
-
-            case PdfDictionary.W2:
-
-                //setup first time
-                if(W2==null && rawW2!=null) {
-                    W2 = new String(rawW2);
-                }
-
-                return W2;
-
 
             default:
                 return super.getTextStreamValue(id);
@@ -926,4 +883,41 @@ public class FontObject extends PdfObject {
     public boolean decompressStreamWhenRead() {
 		return true;
 	}
+   
+    @Override
+    public Object[] getObjectArray(final int id) {
+        
+        switch(id){
+            
+            case PdfDictionary.W:
+                return W;                
+                
+            case PdfDictionary.W2:
+                return W2; 
+                
+            default:    
+                return super.getObjectArray(id);
+        }
+        
+    }
+    
+    @Override
+    public void setObjectArray(final int id, final Object[] objectValues) {
+        
+        switch(id){
+            
+            case PdfDictionary.W:
+                
+                W= objectValues;
+                break;
+                
+            case PdfDictionary.W2:
+                
+                W2= objectValues;
+                break;    
+                
+            default:
+                super.setObjectArray(id, objectValues);
+        }
+    }
 }

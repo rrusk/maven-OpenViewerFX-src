@@ -27,39 +27,20 @@
 
  *
  * ---------------
- * GUIAnnotationPanel.java
+ * BaseDecryption.java
  * ---------------
  */
-package org.jpedal.examples.viewer.gui.generic;
+package org.jpedal.io;
 
-import java.awt.Color;
-import org.jpedal.PdfDecoderInt;
+import java.security.Key;
+import java.security.cert.Certificate;
+import org.jpedal.exception.PdfSecurityException;
 
-public interface GUIAnnotationPanel {
+public interface BaseDecryption {
+ 
+    byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException; 
     
-    boolean addPanel();
+    byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData) throws Exception;
     
-    
-    Object getAnnotationType();
-    
-    void clearAnnotationType();
-    
-    
-    void addAnnotationForWriting(Object annot);
-    
-    void addUnsavedAnnotationsToPage(PdfDecoderInt decode_pdf);
-
-    void addAnnotationToDisplay(PdfDecoderInt decode_pdf, int[] types, Color[] cols, Object[] objs);
-    
-    boolean annotationAdded();
-
-    void clearAnnotations();
-    
-    void saveAnnotations(String input, String output);
-    
-    void saveForms(String input, String output, Object[] objArr);
-    
-    void dispose();
-    
-    Object getDisplayPanel();
+    byte[] readCertificate(final byte[][] recipients, final Certificate certificate, final Key key);
 }

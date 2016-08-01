@@ -339,98 +339,6 @@ public class MCObject extends PdfObject {
         }
     }
 
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
-
-    	switch(id){
-
-            default:
-			return super.getMixedArray(id);
-        }
-	}
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
-
-    @Override
-    public int[] getIntArray(final int id) {
-
-        switch(id){
-
-            default:
-            	return super.getIntArray(id);
-        }
-    }
-
-    @Override
-    public void setIntArray(final int id, final int[] value) {
-
-        switch(id){
-
-            default:
-            	super.setIntArray(id, value);
-        }
-    }
-
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            default:
-            	super.setMixedArray(id, value);
-        }
-    }
-
-    @Override
-    public float[] getFloatArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getFloatArray(id);
-
-        }
-    }
-    
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.Matrix:
-//	            Matrix=value;
-//	        break;
-
-            default:
-            	super.setFloatArray(id, value);
-        }
-    }
 
     @Override
     public void setName(final int id, final byte[] value) {
@@ -645,20 +553,24 @@ public class MCObject extends PdfObject {
     }
 
     @Override
-    public byte[][] getStringArray(final int id) {
+    public PdfArrayIterator getMixedArray(final int id) {
 
         switch(id){
 
             case PdfDictionary.K:
-                return deepCopy(Karray);
+                if(Karray==null){
+                    return null;
+                }else {
+                    return new PdfArrayIterator(Karray);
+                }
 
             default:
-            	return super.getStringArray(id);
+            	return super.getMixedArray(id);
         }
     }
 
     @Override
-    public void setStringArray(final int id, final byte[][] value) {
+    public void setMixedArray(final int id, final byte[][] value) {
 
         switch(id){
 

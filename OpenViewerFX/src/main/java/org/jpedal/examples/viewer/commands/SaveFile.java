@@ -32,17 +32,20 @@
  */
 package org.jpedal.examples.viewer.commands;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.utils.FileFilterer;
 import org.jpedal.examples.viewer.utils.ItextFunctions;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.gui.GUIFactory;
+import org.jpedal.objects.acroforms.ReturnValues;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
@@ -79,12 +82,19 @@ public class SaveFile {
     
     private static final FileFilterer pdf = new FileFilterer(new String[]{"pdf"}, "Pdf (*.pdf)");
     private static final FileFilterer fdf = new FileFilterer(new String[]{"fdf"}, "fdf (*.fdf)");
+    private static final FileFilterer png = new FileFilterer(new String[] {"png"}, "Png (*.png)");
+    private static final FileFilterer tif = new FileFilterer(new String[] {"tif"}, "Tiff (*.tif)");
+    private static final FileFilterer jpg = new FileFilterer(new String[] {"jpg"}, "Jpg (*.jpg)");
         
-    private static void saveFile(final GUIFactory currentGUI, final Values commonValues) {
+    
+     private static void saveFile(final GUIFactory currentGUI, final Values commonValues) {
         final JFileChooser chooser = new JFileChooser(commonValues.getInputDir());
         chooser.setSelectedFile(new File(commonValues.getInputDir() + '/' + commonValues.getSelectedFile()));
         chooser.addChoosableFileFilter(pdf);
         chooser.addChoosableFileFilter(fdf);
+        chooser.addChoosableFileFilter(png);
+        chooser.addChoosableFileFilter(tif);
+        chooser.addChoosableFileFilter(jpg);
         chooser.setFileFilter(pdf);
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -94,12 +104,36 @@ public class SaveFile {
             String filter = chooser.getFileFilter().getDescription().toLowerCase();
             if (filter.startsWith("all") || filter.startsWith("pdf") || filter.startsWith("fdf")) {
                 saveAsPdf(chooser.getSelectedFile(), currentGUI, commonValues);
+            } else if (filter.startsWith("png") || filter.startsWith("tif") || filter.startsWith("jpg")) {
+                saveAsImage(chooser.getSelectedFile(), currentGUI, filter.substring(0, 3));
+            }
+        }
+    }
+   
+    private static void saveAsImage(File file, final GUIFactory currentGUI, String ext) throws IllegalArgumentException {
+        PdfDecoderInt decoder = currentGUI.getPdfDecoder();
+        for (int i = 1; i <= decoder.getPageCount(); i++) {
+            try {
+                final String separator = System.getProperty("file.separator");
+
+                BufferedImage imageToSave = decoder.getPageAsImage(i, 1);
+
+                File f = new File(file.getPath().replace("." + ext, "").replace(".pdf", ""));
+                f.mkdir();
+                String filename = f.getAbsolutePath() + separator + file.getName().replace(".pdf", "") + "_" + i + "." + ext;
+                if (ext.equals("png") || ext.equals("jpg") || ext.equals("tif")) {
+                    decoder.getObjectStore().saveStoredImage(filename, imageToSave, true, ext);
+                } else {
+                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.ImagesSaveUnsupported")+" "+ext);
+                    LogWriter.writeLog("Saving as "+ext +" is currenty unsupported.");
+                }
+            } catch (Exception ex) {
+                LogWriter.writeLog("Exception attempting to Save as image: " + ex);
             }
         }
     }
     
-    private static void saveAsPdf(File file, final GUIFactory currentGUI, final Values commonValues) {
-
+    private static void saveAsPdf(File file, final GUIFactory currentGUI, final Values commonValues){
         String fileToSave = file.getAbsolutePath();
         File tempFile = null;
         
@@ -107,10 +141,6 @@ public class SaveFile {
             fileToSave += ".pdf";
             file = new File(fileToSave);
         }
-
-//        if (fileToSave.equals(commonValues.getSelectedFile())) {
-//            return;
-//        }
 
         if (file.exists()) {
             final int n = currentGUI.showConfirmDialog(fileToSave + '\n'
@@ -123,13 +153,22 @@ public class SaveFile {
         }
         
         try {
-            tempFile = File.createTempFile(fileToSave.substring(0, fileToSave.lastIndexOf('.')) + "Temp", fileToSave.substring(fileToSave.lastIndexOf('.')));
+            tempFile = File.createTempFile(file.getName().substring(0, file.getName().lastIndexOf('.')) + "SaveTemp", file.getName().substring(file.getName().lastIndexOf('.')));
             copyFile(commonValues.getSelectedFile(), tempFile.getAbsolutePath(), currentGUI);
         } catch (IOException ex) {
             LogWriter.writeLog("Exception attempting to create temp file: " + ex);
         }
         
         if (tempFile != null) {
+            
+            if (currentGUI.getValues().isFormsChanged()) {
+                Object[] objArr = currentGUI.getPdfDecoder().getFormRenderer().getFormComponents(null, ReturnValues.FORMOBJECTS_FROM_REF, -1);
+
+                if (objArr != null) {
+                    currentGUI.getAnnotationPanel().saveForms(commonValues.getSelectedFile(), tempFile.getAbsolutePath(), objArr);
+                }
+            }
+            
             if (currentGUI.getAnnotationPanel().annotationAdded()) {
                 currentGUI.getAnnotationPanel().saveAnnotations(tempFile.getAbsolutePath(), fileToSave);
             } else {
@@ -149,7 +188,9 @@ public class SaveFile {
         }
     }
     
+    
     private static void copyFile(String input, String output, GUIFactory currentGUI){
+        
         /*
          * reset flag and graphical clue
          */

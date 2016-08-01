@@ -305,7 +305,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     private final VBox nav=new VBox();
     private VBox advancedPanel;
     private ComboBox<String> searchType;
-    private CheckBox wholeWordsOnlyBox, caseSensitiveBox, multiLineBox, highlightAll, searchAll, useRegEx, searchHighlightedOnly;
+    private CheckBox wholeWordsOnlyBox, caseSensitiveBox, multiLineBox, highlightAll, searchAll, useRegEx, searchHighlightedOnly, ignoreWhiteSpace;
     Button searchButton;
     ObservableList<String> listModel;
     
@@ -454,6 +454,9 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
             useRegEx = new CheckBox(Messages.getMessage("PdfViewerSearch.RegExCheckBox"));
             useRegEx.setId("useregex");
             
+            ignoreWhiteSpace = new CheckBox(Messages.getMessage("PdfViewerSearch.IgnoreWhiteSpace"));
+            ignoreWhiteSpace.setId("ignoreWhiteSpace");
+            
             searchHighlightedOnly = new CheckBox(Messages.getMessage("PdfViewerSearch.HighlightsOnly"));
             searchHighlightedOnly.setId("highlightsOnly");
             
@@ -476,6 +479,8 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
             advancedPanel.getChildren().add(useRegEx);
             
             advancedPanel.getChildren().add(searchHighlightedOnly);
+            
+//            advancedPanel.getChildren().add(ignoreWhiteSpace);
             
             advancedPanel.setVisible(false);
             
@@ -727,6 +732,10 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                                 searchTypeParameters |= SearchType.USE_REGULAR_EXPRESSIONS;
                             }
                             
+                            if (ignoreWhiteSpace.isSelected()) {
+                                searchTypeParameters |= SearchType.IGNORE_SPACE_CHARACTERS;
+                            }
+                            
                             if (searchHighlightedOnly.isSelected()) {
                                 searchTypeParameters |= SearchType.SEARCH_HIGHLIGHTS_ONLY;
                             }
@@ -798,6 +807,10 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                                     searchTypeParameters |= SearchType.USE_REGULAR_EXPRESSIONS;
                                 }
                                 
+                                if (ignoreWhiteSpace.isSelected()) {
+                                    searchTypeParameters |= SearchType.IGNORE_SPACE_CHARACTERS;
+                                }
+
                                 if (searchHighlightedOnly.isSelected()) {
                                     searchTypeParameters |= SearchType.SEARCH_HIGHLIGHTS_ONLY;
                                 }
@@ -1163,5 +1176,17 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     public void dispose(){
         //Added as needed for swing. No code yet
         
+    }
+    
+    @Override
+    public void selectSearchOptions(int options){
+        searchAll.setSelected(!((options & SearchType.FIND_FIRST_OCCURANCE_ONLY) == SearchType.FIND_FIRST_OCCURANCE_ONLY));
+        wholeWordsOnlyBox.setSelected((options & SearchType.WHOLE_WORDS_ONLY) == SearchType.WHOLE_WORDS_ONLY);
+        caseSensitiveBox.setSelected((options & SearchType.CASE_SENSITIVE) == SearchType.CASE_SENSITIVE);
+        multiLineBox.setSelected((options & SearchType.MUTLI_LINE_RESULTS) == SearchType.MUTLI_LINE_RESULTS);
+        highlightAll.setSelected((options & SearchType.HIGHLIGHT_ALL_RESULTS) == SearchType.HIGHLIGHT_ALL_RESULTS);
+        useRegEx.setSelected((options & SearchType.USE_REGULAR_EXPRESSIONS) == SearchType.USE_REGULAR_EXPRESSIONS);
+        searchHighlightedOnly.setSelected((options & SearchType.SEARCH_HIGHLIGHTS_ONLY) == SearchType.SEARCH_HIGHLIGHTS_ONLY);
+        ignoreWhiteSpace.setSelected((options & SearchType.IGNORE_SPACE_CHARACTERS) == SearchType.IGNORE_SPACE_CHARACTERS);
     }
 }

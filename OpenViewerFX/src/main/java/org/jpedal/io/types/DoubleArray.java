@@ -27,19 +27,40 @@
 
  *
  * ---------------
- * ArrayDecoder.java
+ * DoubleArray.java
  * ---------------
  */
 package org.jpedal.io.types;
 
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.utils.NumberUtils;
 
 /**
  *
  * @author markee
  */
-public interface ArrayDecoder {
-
-    int readArray(PdfObject Aobj, int Dest);
+public class DoubleArray extends Array {
+    
+    public DoubleArray(final PdfFileReader pdfFileReader, int i,final byte[] raw) {
+        super(pdfFileReader, i, PdfDictionary.VALUE_IS_DOUBLE_ARRAY, raw);
+    }
+    
+    @Override
+    void fillArray(final int elementCount, PdfObject pdfObject) {
+        
+        double[] finalByteValues = new double[elementCount];
+        byte[] data;
+        
+        for(int a=0;a<elementCount;a++){
+            data=valuesRead.get(a);
+            finalByteValues[a]=NumberUtils.parseFloat(0, data.length, data); 
+        }
+        
+        pdfObject.setDoubleArray(PDFkeyInt, finalByteValues);
+        
+               
+    }
     
 }

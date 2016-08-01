@@ -43,7 +43,7 @@ import org.jpedal.io.ColorSpaceConvertor;
  */
 public class SMask {
         
-    public static BufferedImage applyLuminosityMask(BufferedImage image, BufferedImage smask){
+    public static BufferedImage applyLuminosityMask(BufferedImage image, BufferedImage smask, int [] tr){
                 
         if(smask==null){
             return image;
@@ -83,9 +83,9 @@ public class SMask {
                 y = (r * 77) + (g * 152) + (b * 28);
                 ip = imagePixels[i];
                 a = (ip >> 24) & 0xff;
-                a = (a * y) >> 16;
-                imagePixels[i] = (a<<24)|(ip & 0xffffff);
-            }            
+                a = tr != null ? (a * tr[y >> 8]) >> 8 : (a * y) >> 16;
+                imagePixels[i] = (a << 24) | (ip & 0xffffff);
+            }
         }
         
         return image;

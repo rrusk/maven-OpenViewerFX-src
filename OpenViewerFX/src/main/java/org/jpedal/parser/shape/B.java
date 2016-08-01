@@ -83,7 +83,7 @@ public class B {
             
 
             //only curently implemented in Swing (fixes /PDFdata/test_data/baseline_screens/debug3/535B-X-test.pdf)
-            if(!useJavaFX && !isLowerCase && formLevel > 2 &&  hasShape && currentDrawShape.isClosed() && gs.getClippingShape()!=null && gs.nonstrokeColorSpace.getID()== ColorSpaces.DeviceCMYK && gs.nonstrokeColorSpace.getColor().getRGB()==-1){
+            if(!useJavaFX && !isLowerCase && formLevel > 2 &&  hasShape && currentDrawShape.isClosed() && gs.getClippingShape()!=null && gs.nonstrokeColorSpace.getID()== ColorSpaces.DeviceCMYK && gs.nonstrokeColorSpace.getColor().getRGB()==-1 && gs.getAlpha(GraphicsState.STROKE)==0){
 
                 final Area a=gs.getClippingShape();
                 a.subtract(new Area(currentShape));

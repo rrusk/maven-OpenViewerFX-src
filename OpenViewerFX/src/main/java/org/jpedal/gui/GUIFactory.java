@@ -381,8 +381,8 @@ public interface GUIFactory {
     
     String getPageLabel(int pageNumber);
     
-    public void addAnnotationPanel(GUIAnnotationPanel panel);
+    void addAnnotationPanel(GUIAnnotationPanel panel);
     
-    public GUIAnnotationPanel getAnnotationPanel();
+    GUIAnnotationPanel getAnnotationPanel();
     
 }

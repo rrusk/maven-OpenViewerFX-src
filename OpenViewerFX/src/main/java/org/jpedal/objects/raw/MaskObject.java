@@ -49,7 +49,7 @@ public class MaskObject extends XObject {
 
 	//int FormType=0, Height=1, Width=1;
 
-	private PdfObject G;
+	private PdfObject G, TRasDict;
 
     public MaskObject(final String ref) {
         super(ref);
@@ -101,8 +101,8 @@ public class MaskObject extends XObject {
                // System.out.println(G+" returned from "+this+" "+this.getObjectRefAsString());
 	        	return G;
 
-//            case PdfDictionary.XObject:
-//                return XObject;
+            case PdfDictionary.TR:
+                return TRasDict;
 
             default:
                 return super.getDictionary(id);
@@ -160,9 +160,9 @@ public class MaskObject extends XObject {
 	        	G=value;
 			break;
 
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
+            case PdfDictionary.TR:
+            	TRasDict=value;
+            break;
 
             default:
             	super.setDictionary(id, value);

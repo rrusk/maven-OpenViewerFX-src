@@ -36,7 +36,10 @@ package org.jpedal.color;
 
 import java.awt.color.ColorSpace;
 import java.util.Map;
+import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfObjectReader;
+import org.jpedal.objects.raw.ColorSpaceObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
@@ -47,7 +50,169 @@ import org.jpedal.objects.raw.PdfObject;
  * returns the correct colorspace, decoding the values
  */
 public final class ColorspaceFactory {
+
+    public static GenericColorSpace getColorSpaceInstance(final String key,PdfObjectReader currentPdfFile, PdfArrayIterator colorSpace, Map<String, GenericColorSpace> colorspacesObjects) {
+       
+        GenericColorSpace col=getColorSpaceInstance(currentPdfFile, colorSpace );
+            
+        if(col.getID()==ColorSpaces.ICC) {
+            colorspacesObjects.put(key,col);
+        }
+         
+        
+        return col;
+    }
     
+    
+    /**
+     * used by commands which implicitly set colorspace
+     * 
+     */
+    public static GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, final PdfArrayIterator colorSpace) {
+        
+        
+         System.out.println("colorspace="+colorSpace.getNextValueAsString(false));
+        int ID=colorSpace.getNextValueAsKey();
+        
+        //allow for CMYK in ID
+        if(ID==PdfDictionary.CMYK) {
+            ID=ColorSpaces.DeviceCMYK;
+        }
+        
+        boolean isIndexed=false;
+        int size=0;
+        byte[] lookup=null;
+        
+        int rawID=-1;
+        
+        //setup colorspaces which map onto others
+        if (ID==ColorSpaces.Indexed || ID==PdfDictionary.I){
+            
+            isIndexed=true;
+            
+            //actual colorspace
+            byte[] base=colorSpace.getNextValueAsByte(true);
+            
+            ColorSpaceObject col=getObject(currentPdfFile, base);
+            
+            PdfArrayIterator baseColValues=col.getMixedArray(PdfDictionary.ColorSpace);
+            
+            System.out.println("col="+col+" "+col.getObjectRefAsString()+" "+baseColValues.getTokenCount());
+           
+            ID=baseColValues.getNextValueAsKey();
+        
+             //hival
+             size=colorSpace.getNextValueAsInteger(true);
+             
+             //lookup
+             lookup=colorSpace.getNextValueAsByte(true);
+             
+            rawID=ID;
+            
+        }
+        
+        GenericColorSpace currentColorData = getColorspace(currentPdfFile, colorSpace, ID);
+        
+        //handle CMAP as object or direct
+        if(isIndexed){
+            
+            
+            //ICC code will wrongly create RGB in case of indexed ICC with DeviceGray alt - here we fit this
+            //(sample file is 11jun/early mockup.pdf)
+            if(rawID==ColorSpaces.ICC && lookup.length<3) {
+                currentColorData=new DeviceGrayColorSpace();
+            }
+            
+            
+            currentColorData.setIndex(lookup,size);
+        }
+        
+        System.out.println("We need to set PdfDictionary.Alternate");
+       // currentColorData.setAlternateColorSpace(colorSpace.getParameterConstant(PdfDictionary.Alternate));
+       
+        return currentColorData;
+    }
+    
+    private static ColorSpaceObject getObject(final PdfObjectReader currentPdfFile, final byte[] data) {
+        
+        final ColorSpaceObject colObj  = new ColorSpaceObject(new String(data));
+
+        if(data[0]=='<') {
+            colObj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            colObj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        colObj.setUnresolvedData(data,PdfDictionary.ColorSpace);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        objectDecoder.checkResolved(colObj);
+        
+        return colObj;
+    }
+
+    
+     
+    private static GenericColorSpace getColorspace(final PdfObjectReader currentPdfFile, final PdfArrayIterator colorSpace, final int ID) {
+        
+        //no DeviceRGB as set as default
+        GenericColorSpace currentColorData=new DeviceRGBColorSpace();
+        
+        switch(ID){
+            case ColorSpaces.Separation:
+                currentColorData=new SeparationColorSpace(currentPdfFile,colorSpace);
+                break;
+                
+            case ColorSpaces.DeviceN:
+               // currentColorData=new DeviceNColorSpace(currentPdfFile, colorSpace);
+                break;
+                
+            case ColorSpaces.DeviceGray:
+                currentColorData=new DeviceGrayColorSpace();
+                break;
+                
+            case ColorSpaces.DeviceCMYK:
+                currentColorData=new DeviceCMYKColorSpace();
+                currentColorData.setRawColorSpace(ColorSpaces.DeviceCMYK);
+
+                break;
+                
+            case ColorSpaces.CalGray:
+             //   currentColorData = getCalGrayColorspace(colorSpace);
+                break;
+                
+            case ColorSpaces.CalRGB:
+              //  currentColorData = getCalRGBColorspace(colorSpace);
+                break;
+                
+            case ColorSpaces.Lab:
+             //   currentColorData = getLabColorspace(colorSpace);
+                break;
+                
+            case ColorSpaces.ICC:
+             //   currentColorData = getICCColorspace(colorSpace);
+                break;
+                
+            case ColorSpaces.Pattern:
+               /* 
+                //patterns can have an additional colorspace and setting
+                final PdfObject col=colorSpace.getDictionary(PdfDictionary.AlternateSpace);
+                
+                GenericColorSpace patternColorSpace=null;
+                if(col!=null){
+                    patternColorSpace=ColorspaceFactory.getColorSpaceInstance(currentPdfFile, col);
+                }
+                
+                currentColorData=new PatternColorSpace(currentPdfFile,patternColorSpace);
+                */
+                break;
+                
+        }
+        
+        return currentColorData;
+    }
+   
+    
+   
     private ColorspaceFactory(){}
     
     /**

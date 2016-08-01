@@ -27,19 +27,39 @@
 
  *
  * ---------------
- * ArrayDecoder.java
+ * BooleanArray.java
  * ---------------
  */
 package org.jpedal.io.types;
 
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
 /**
  *
  * @author markee
  */
-public interface ArrayDecoder {
+public class BooleanArray extends Array {
+    
+    public BooleanArray(final PdfFileReader pdfFileReader, int i, final byte[] raw) {
+        super(pdfFileReader, i, PdfDictionary.VALUE_IS_BOOLEAN_ARRAY, raw);
+    }
 
-    int readArray(PdfObject Aobj, int Dest);
+    @Override
+    void fillArray(final int elementCount, PdfObject pdfObject) {
+        
+        boolean[] finalByteValues = new boolean[elementCount];
+        byte[] data;
+        
+        for(int a=0;a<elementCount;a++){
+            data=valuesRead.get(a);
+            finalByteValues[a]=(data.length>3 && data[0]=='t' && data[1]=='r' && data[2]=='u' && data[3]=='e'); 
+        }
+        
+        pdfObject.setBooleanArray(PDFkeyInt, finalByteValues);
+        
+               
+    }
     
 }

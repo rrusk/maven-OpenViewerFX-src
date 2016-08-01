@@ -32,7 +32,6 @@
  */
 package org.jpedal.objects.structuredtext;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
@@ -44,10 +43,7 @@ import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.PdfPageData;
 import org.jpedal.objects.PdfResources;
 import org.jpedal.objects.layers.PdfLayerList;
-import org.jpedal.objects.raw.MCObject;
-import org.jpedal.objects.raw.PageObject;
-import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.objects.raw.*;
 import org.jpedal.parser.PdfStreamDecoder;
 import org.jpedal.parser.ValueTypes;
 import org.jpedal.render.SwingDisplay;
@@ -180,7 +176,7 @@ public class MarkedContentGenerator {
          */
         final PdfObject K =structTreeRootObj.getDictionary(PdfDictionary.K);
         if(K ==null){
-            final byte[][] Karray=structTreeRootObj.getStringArray(PdfDictionary.K);
+            final PdfArrayIterator Karray=structTreeRootObj.getMixedArray(PdfDictionary.K);
             
             if(debug) {
                 System.out.println("Karray=");
@@ -211,7 +207,7 @@ public class MarkedContentGenerator {
         }
         
         final PdfObject Pg;
-        final byte[][] Karray = K.getStringArray(PdfDictionary.K);
+        final PdfArrayIterator Karray = K.getMixedArray(PdfDictionary.K);
         final int Kint = K.getInt(PdfDictionary.K);
         
         final PdfObject Kdict = K.getDictionary(PdfDictionary.K);
@@ -281,7 +277,7 @@ public class MarkedContentGenerator {
         
         
         if(debug) {
-            System.out.println(indent + "page decoded karray" + Arrays.toString(Karray) + " Kdict=" + Kdict + " kint=" + Kint);
+            System.out.println(indent + "page decoded karray" + Karray + " Kdict=" + Kdict + " kint=" + Kint);
         }
         
         
@@ -334,37 +330,36 @@ public class MarkedContentGenerator {
         return text;
     }
     
-    private void readKarray(final byte[][] Karray, final Element root, final Map pageStream, String fullS) {
+    private void readKarray(final PdfArrayIterator Karray, final Element root, final Map pageStream, String fullS) {
         
-        final int count=Karray.length;
+        final int count=Karray.getTokenCount();
         PdfObject kidObj;
         String KValue;
-        byte[] lastChar;
         
         for(int i=0;i<count;i++){
-            
-            KValue=new String(Karray[i]);
-            
+
+            KValue=new String(Karray.getNextValueAsByte(true));
+
             if(debug) {
-                System.out.println(indent + "aK value=" + KValue);
+            System.out.println(indent + "aK value=" + KValue);
             }
-            
-            if(count-i>=3){ //it is probably a ref
-                
-                lastChar=Karray[i+2];
-                
-                if(lastChar[0]=='R'){ //it is a ref
+
+            if(KValue.endsWith(" R")){ //it is probably a ref
+
+              //  lastChar=Karray[i+2];
                     
-                    kidObj = new MCObject(KValue+ ' ' +new String(Karray[i+1])+" R");
+               // if(lastChar[0]=='R'){ //it is a ref
                     
-                    currentPdfFile.readObject(kidObj);
+                    kidObj = new MCObject(KValue);
                     
+                currentPdfFile.readObject(kidObj);
+
                     readChildNode(kidObj, root, pageStream,fullS);
-                    i += 2; //allow for 3 values read in loop
-                    
-                }else{
-                    addContentToNode(pageStream, KValue, root);
-                }
+                   // i += 2; //allow for 3 values read in loop
+
+            //}else{
+            //        addContentToNode(pageStream, KValue, root);
+            //    }
             }else{
                
                 if(isHTML){
@@ -372,12 +367,12 @@ public class MarkedContentGenerator {
                         reverseLookup.put(KValue,fullS);
                     }
                 }
-                
+            
                 addContentToNode(pageStream, KValue, root);
             }
         }
     }
-    
+
     private static String cleanName(String s) {
         //make sure S is valid XML
         

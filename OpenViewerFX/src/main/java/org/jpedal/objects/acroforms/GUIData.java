@@ -479,7 +479,7 @@ public abstract class GUIData {
 	    form= rawFormData.get(i.next());
 	    isPageSelected=pageNumber==-1 || form.getPageNumber()==pageNumber;
 	    name=form.getTextStreamValue(PdfDictionary.T);
-	    
+        
             switch(value){
 		case GUI_FORMS_FROM_NAME:
 		    if(isPageSelected && (key==null || (name != null && name.equals(key)) )){

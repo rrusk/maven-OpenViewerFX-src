@@ -330,15 +330,13 @@ public class ObjectStore {
      * @param current_image is of type String
      * @param image is of type BufferedImage
      * @param file_name_is_path is of type boolean
-     * @param save_unclipped is of type boolean
      * @param type is of type String
      * @return boolean
      */
-    public final synchronized boolean saveStoredImage(
+    public final boolean saveStoredImage(
             String current_image,
             BufferedImage image,
             final boolean file_name_is_path,
-            final boolean save_unclipped,
             final String type) {
 
         boolean was_error = false;
@@ -365,33 +363,23 @@ public class ObjectStore {
                 image_type.put(current_image, "tif");
             }
 
-            was_error =saveStoredImage( "TIFF", ".tif", ".tiff", current_image, image, file_name_is_path, save_unclipped);
+            was_error =saveStoredImage( "TIF", ".tif", ".tiff", current_image, image, file_name_is_path);
         } else if (type.contains("jpg")) {
             if (!file_name_is_path) {
                 image_type.put(current_image, "jpg");
             }
 
-            was_error =saveStoredJPEGImage( current_image, image, file_name_is_path, save_unclipped);
+            was_error =saveStoredJPEGImage( current_image, image, file_name_is_path);
         } else if (type.contains("png")) {
 
             if (!file_name_is_path) {
                 image_type.put(current_image, "png");
             }
 
-            was_error = saveStoredImage( "PNG", ".png", ".png", current_image, image, file_name_is_path, save_unclipped);
+            was_error = saveStoredImage( "PNG", ".png", ".png", current_image, image, file_name_is_path);
 
         }
         return was_error;
-    }
-
-    /**
-     * get type of image used to store graphic.
-     *
-     * @param current_image is of type String
-     * @return String
-     */
-    public final String getImageType(final String current_image) {
-        return image_type.get(current_image);
     }
 
     /**
@@ -417,7 +405,7 @@ public class ObjectStore {
      * @param current_image is of type String
      * @return BufferedImage
      */
-    public final synchronized BufferedImage loadStoredImage(String current_image) {
+    public final BufferedImage loadStoredImage(String current_image) {
 
         if(current_image==null) {
             return null;
@@ -446,7 +434,7 @@ public class ObjectStore {
      * routine to remove all objects from temp store
      *
      */
-    public final synchronized void flush() {
+    public final void flush() {
 
         if(debugAdobe){
             System.out.println("Flush files on close");
@@ -624,27 +612,16 @@ public class ObjectStore {
     /**
      * save buffered image as JPEG
      */
-    private synchronized boolean saveStoredJPEGImage(final String current_image, final BufferedImage image, final boolean file_name_is_path, final boolean save_unclipped) {
+    private boolean saveStoredJPEGImage(String file_name, final BufferedImage image, final boolean file_name_is_path) {
 
-        final boolean was_error = false;
-
-        //generate path name or use
-        //value supplied by user
-        String file_name = current_image;
-        String unclipped_file_name = "";
         if (!file_name_is_path) {
-            file_name = temp_dir + key + current_image;
-            unclipped_file_name = temp_dir + key + 'R' + current_image;
-
-            //log the type in our table so we can lookup
-            image_type.put('R' + current_image, image_type.get(current_image));
+            file_name = temp_dir + key + file_name;           
         }
 
         //add ending if needed
-        if ((!file_name.toLowerCase().endsWith(".jpg"))
-                && (!file_name.toLowerCase().endsWith(".jpeg"))) {
+        final String s=file_name.toLowerCase();
+        if (!s.endsWith(".jpg") && !s.endsWith(".jpeg")) {
             file_name += ".jpg";
-            unclipped_file_name += ".jpg";
         }
 
         /*
@@ -660,14 +637,7 @@ public class ObjectStore {
             LogWriter.writeLog("Exception " + e + " writing image " + image + " as " + file_name);
         }
 
-        //save unclipped copy or make sure only original
-        if (save_unclipped){
-            saveCopy(file_name, unclipped_file_name);
-            tempFileNames.put(unclipped_file_name,"#");
-
-        }
-
-        return was_error;
+        return false;
     }
 
     public String getFileForCachedImage(final String current_image) {
@@ -679,9 +649,7 @@ public class ObjectStore {
     /**
      * load a image when required and remove from store
      */
-    private synchronized BufferedImage loadStoredImage(
-            String current_image,
-            final String ending) {
+    private BufferedImage loadStoredImage(String current_image,final String ending) {
 
         current_image = removeIllegalFileNameCharacters(current_image);
 
@@ -692,37 +660,7 @@ public class ObjectStore {
 
     }
 
-    /**
-     * save copy
-     */
-    private static void saveCopy(final String source, final String destination) {
-        BufferedInputStream from = null;
-        BufferedOutputStream to = null;
-        try {
-            //create streams
-            from = new BufferedInputStream(new FileInputStream(source));
-            to = new BufferedOutputStream(new FileOutputStream(destination));
-
-            //write
-            final byte[] buffer = new byte[65535];
-            int bytes_read;
-            while ((bytes_read = from.read(buffer)) != -1) {
-                to.write(buffer, 0, bytes_read);
-            }
-        } catch (final Exception e) {
-            LogWriter.writeLog("Exception " + e + " copying file");
-        }
-
-        //close streams
-        try {
-            to.close();
-            from.close();
-        } catch (final Exception e) {
-            LogWriter.writeLog("Exception " + e + " closing files");
-        }
-    }
-
-    /**
+     /**
      * Save a Copy.
      * 
      * @param current_image is of type String
@@ -809,7 +747,7 @@ public class ObjectStore {
     /**
      * load a image when required and remove from store
      */
-    private synchronized BufferedImage loadStoredJPEGImage(final String current_image) {
+    private BufferedImage loadStoredJPEGImage(final String current_image) {
         final String file_name = temp_dir + key + current_image + ".jpg";
 
         //load the image to process
@@ -834,61 +772,34 @@ public class ObjectStore {
     /**
      * save buffered image
      */
-    private synchronized boolean saveStoredImage(
+    private boolean saveStoredImage(
             final String format,
             final String ending1,
             final String ending2,
             String current_image,
             BufferedImage image,
-            final boolean file_name_is_path,
-            final boolean save_unclipped) {
+            final boolean file_name_is_path) {
         boolean was_error = false;
 
         //generate path name or use
         //value supplied by user
         current_image = removeIllegalFileNameCharacters(current_image);
         String file_name = current_image;
-        String unclipped_file_name = "";
-
+        
         if (!file_name_is_path) {
             file_name = temp_dir + key + current_image;
-            unclipped_file_name = temp_dir + key + 'R' + current_image;
-
-            //log the type in our table so we can lookup
-            image_type.put('R' + current_image, image_type.get(current_image));
         }
 
         //add ending if needed
-        if ((!file_name.toLowerCase().endsWith(ending1))
-                && (!file_name.toLowerCase().endsWith(ending2))) {
+        final String s=file_name.toLowerCase();
+        if (!s.endsWith(ending1) && !s.endsWith(ending2)) {
             file_name += ending1;
-            unclipped_file_name += ending1;
         }
 
         try { //write out data to create image in temp dir
 
-
-            if(format.equals("TIFF")) // imageIO has issue in tiffs
-            {
-                DefaultImageHelper.write(image, "png", file_name);
-            } else {
-                DefaultImageHelper.write(image, format, file_name);
-            }
-
-            //if it failed retry as RGB
-            final File f=new File(file_name);
-            if(f.length()==0){
-
-                image=ColorSpaceConvertor.convertToRGB(image);
-
-                if(format.equals("TIFF")) //imageIO has issue in tiffs
-                {
-                    DefaultImageHelper.write(image, "png", file_name);
-                } else {
-                    DefaultImageHelper.write(image, format, file_name);
-                }
-            }
-
+            DefaultImageHelper.write(image, format, file_name);
+            
             tempFileNames.put(file_name,"#");
 
         } catch (final Exception e) {
@@ -903,20 +814,13 @@ public class ObjectStore {
             was_error = true;
         }
 
-        //save unclipped copy
-        if (save_unclipped){
-            saveCopy(file_name, unclipped_file_name);
-            tempFileNames.put(unclipped_file_name,"#");
-
-        }
-
         return was_error;
     }
 
     /**
      * delete all cached pages
      */
-    public static synchronized void  flushPages(){
+    public static void  flushPages(){
 
         try{
 

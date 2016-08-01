@@ -306,7 +306,7 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     
         //check for 1 x 1 complex shape (after scaling) and replace with dot
-        if(type ==DISPLAY_SCREEN && currentShape.getBounds().getWidth()*scaling==1 &&
+        if(type ==DISPLAY_SCREEN && !isPrinting && currentShape.getBounds().getWidth()*scaling==1 &&
                 currentShape.getBounds().getHeight()*scaling==1 && ((BasicStroke)shapeStroke).getLineWidth()*scaling<1) {
             currentShape = new Rectangle(currentShape.getBounds().x, currentShape.getBounds().y, 1, 1);
         }
@@ -505,48 +505,7 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
                 }
             }
         }
-
-        AffineTransform aff = g2.getTransform();
-
-        double mx = aff.getScaleX();
-        double my = aff.getScaleX();
-        double sx = upside_down.getScaleX();
-        double sy = upside_down.getScaleY();
-
-        //Rotated images can cause issue when scaling up
-        //Only handle rotated page with rotation on image
-        if ((image.getType() != 0)
-                && //Catch issue with images with odd types
-                (mx == 0 && my == 0 && sx > 0 && sy < 0)) {
-            mx = aff.getShearX();
-            my = aff.getShearY();
-            sx = Math.abs(sx);
-            sy = Math.abs(sy);
-
-            //90 rotation on page
-            if (mx > 0 && my > 0) {
-                int newWidth = Math.abs((int) ((image.getWidth() * sx) * mx));
-                int newHeight = Math.abs((int) ((image.getHeight() * sy) * my));
-
-                //Only use if new image size is large than the original image
-                if (newWidth > 0 && newHeight > 0 && newWidth > image.getWidth() && newHeight > image.getHeight()) {
-                    BufferedImage bi = new BufferedImage(newWidth, newHeight, image.getType());
-                    Graphics2D g = bi.createGraphics();
-
-                    g.setRenderingHints(g2.getRenderingHints());
-
-                    g.drawImage(image, AffineTransform.getScaleInstance(mx * sx, my * sy), null);
-
-                    upside_down.scale(1 / sx, -(1 / sy));
-                    aff.scale(1 / mx, -(1 / my));
-
-                    g2.setTransform(aff);
-
-                    image = bi;
-                }
-            }
-        }
-
+        
         //Draw image as normal
         g2.drawImage(image, upside_down, null);
 

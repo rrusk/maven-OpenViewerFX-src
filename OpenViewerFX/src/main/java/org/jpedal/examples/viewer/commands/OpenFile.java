@@ -320,6 +320,8 @@ public class OpenFile {
                                     Thread.sleep(1000);
 
                                 }
+                                
+                                commonValues.setSelectedFile(decode_pdf.getFileName());
                             } catch (final InterruptedException e) {
                                 LogWriter.writeLog("Exception attempting to open file: " + e);
                             }
@@ -609,46 +611,48 @@ public class OpenFile {
                             }
 
                             final PdfObject linearObj = (PdfObject) decode_pdf.getJPedalObject(PdfDictionary.Linearized);
-                            int linearfileLength = linearObj.getInt(PdfDictionary.L);
+                            if (linearObj != null) {
+                                int linearfileLength = linearObj.getInt(PdfDictionary.L);
 
-                            StringBuilder message = new StringBuilder("Downloading ");
-                            linearfileLength /= 1024;
-                            if (linearfileLength < 1024) {
-                                message.append(linearfileLength).append(" kB");
-                            } else {
+                                StringBuilder message = new StringBuilder("Downloading ");
                                 linearfileLength /= 1024;
-                                message.append(linearfileLength).append(" M");
-                            }
+                                if (linearfileLength < 1024) {
+                                    message.append(linearfileLength).append(" kB");
+                                } else {
+                                    linearfileLength /= 1024;
+                                    message.append(linearfileLength).append(" M");
+                                }
 
-                            final String fMessage = message.toString();
+                                final String fMessage = message.toString();
 
-                            final Thread fullReaderer = new Thread() {
-                                @Override
-                                public void run() {
+                                final Thread fullReaderer = new Thread() {
+                                    @Override
+                                    public void run() {
 
-                                    final LinearThread linearizedBackgroundReaderer = (LinearThread) decode_pdf.getJPedalObject(PdfDictionary.LinearizedReader);
+                                        final LinearThread linearizedBackgroundReaderer = (LinearThread) decode_pdf.getJPedalObject(PdfDictionary.LinearizedReader);
 
-                                    while (linearizedBackgroundReaderer != null && linearizedBackgroundReaderer.isAlive()) {
+                                        while (linearizedBackgroundReaderer != null && linearizedBackgroundReaderer.isAlive()) {
 
-                                        try {
-                                            Thread.sleep(1000);
-                                        } catch (final InterruptedException e) {
-                                            e.printStackTrace();
+                                            try {
+                                                Thread.sleep(1000);
+                                            } catch (final InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                            currentGUI.setDownloadProgress(fMessage, linearizedBackgroundReaderer.getPercentageLoaded());
+
                                         }
-                                        currentGUI.setDownloadProgress(fMessage, linearizedBackgroundReaderer.getPercentageLoaded());
+
+                                        currentGUI.setDownloadProgress(fMessage, 100);
+
+                                        processPage(commonValues, decode_pdf, currentGUI, thumbnails);
 
                                     }
+                                };
 
-                                    currentGUI.setDownloadProgress(fMessage, 100);
+                                fullReaderer.setDaemon(true);
+                                fullReaderer.start();
 
-                                    processPage(commonValues, decode_pdf, currentGUI, thumbnails);
-
-                                }
-                            };
-
-                            fullReaderer.setDaemon(true);
-                            fullReaderer.start();
-
+                            }
                         }
                     } catch (final Exception e) {
                         currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.UrlError") + " file=" + selectedFile + '\n' + e.getMessage());
@@ -763,7 +767,20 @@ public class OpenFile {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
 
-                    } else {
+                    }else if(fName.endsWith(".dcm")){
+                        File f = new File(selectedFile);
+                        byte[] rawData = new byte[(int) f.length()];
+                        FileInputStream fis;
+                        try {
+                            fis = new FileInputStream(f);
+                            fis.read(rawData);
+                            java.awt.image.BufferedImage img = JDeliHelper.getDicomImage(rawData);
+                            commonValues.setBufferedImg(img);
+                        } catch (Exception ex) {
+                            LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
+                        }
+                    
+                    }else {
                         try {
                             // Load the source image from a file.
                             if (isURL) {

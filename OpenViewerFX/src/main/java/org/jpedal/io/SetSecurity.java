@@ -32,14 +32,13 @@
  */
 package org.jpedal.io;
 
-import java.security.Key;
 import java.security.Security;
-import java.security.cert.Certificate;
 import org.jpedal.utils.LogWriter;
 
 public class SetSecurity {
     
     private static String altSP;
+    public static boolean useBouncyCastle = false;
     
     public static void init(){
         
@@ -56,7 +55,7 @@ public class SetSecurity {
             final java.security.Provider provider = (java.security.Provider) c.newInstance();
             
             Security.addProvider(provider);
-            
+            useBouncyCastle = true;
         } catch (final Exception e) {
             
             LogWriter.writeLog("Unable to run custom security provider " + altSP+" Exception " + e);
@@ -64,24 +63,6 @@ public class SetSecurity {
             throw new RuntimeException("This PDF file is encrypted and JPedal needs an additional library to \n" +
                     "decode on the classpath (we recommend bouncycastle library).\n" +
                     "There is additional explanation at http://www.idrsolutions.com/additional-jars"+ '\n');
-            
-            
         }
-    }
-    
-    /**
-     * cycle through all possible values to find match (only tested with Bouncy castle)
-     * @param certificate
-     * @param key
-     */
-    public static byte[] extractCertificateData(final byte[][] recipients, final Certificate certificate, final Key key) {
-        
-        //break if not bc
-        if(altSP==null || !altSP.equals("org.bouncycastle.jce.provider.BouncyCastleProvider")) {
-            throw new RuntimeException("only Bouncy castle currently supported with certificates");
-        }
-        
-        return CertificateReader.readCertificate(recipients, certificate, key);
-       
     }
 }

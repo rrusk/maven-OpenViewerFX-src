@@ -63,17 +63,13 @@ public class ImageTransformer {
 	 * pass in image information and apply transformation matrix
 	 * to image
 	 */
-	public ImageTransformer(
-		final GraphicsState current_graphics_state,
-		final BufferedImage new_image) {
+	public ImageTransformer(final GraphicsState current_graphics_state, final BufferedImage new_image) {
 
 		//save global values
 		this.current_image = new_image;
-		final int w;
-        final int h;
-
-        w = current_image.getWidth(); //raw width
-		h = current_image.getHeight(); //raw height
+		
+        final int w = current_image.getWidth(); //raw width
+		final int h = current_image.getHeight(); //raw height
 
 		CTM = current_graphics_state.CTM; //local copy of CTM
 

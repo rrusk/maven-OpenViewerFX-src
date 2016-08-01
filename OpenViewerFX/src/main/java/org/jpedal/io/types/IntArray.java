@@ -27,19 +27,40 @@
 
  *
  * ---------------
- * ArrayDecoder.java
+ * IntArray.java
  * ---------------
  */
 package org.jpedal.io.types;
 
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.utils.NumberUtils;
 
 /**
  *
  * @author markee
  */
-public interface ArrayDecoder {
-
-    int readArray(PdfObject Aobj, int Dest);
+public class IntArray extends Array {
+    
+    public IntArray(final PdfFileReader pdfFileReader, int i, final byte[] raw) {
+        super(pdfFileReader, i, PdfDictionary.VALUE_IS_INT_ARRAY, raw);
+    }
+    
+    @Override
+    void fillArray(final int elementCount, final PdfObject pdfObject) {
+        
+        int[] finalByteValues = new int[elementCount];
+        byte[] data;
+        
+        for(int a=0;a<elementCount;a++){
+            data=valuesRead.get(a);
+            finalByteValues[a]=NumberUtils.parseInt(0, data.length, data); 
+        }
+        
+        pdfObject.setIntArray(PDFkeyInt, finalByteValues);
+        
+               
+    }
     
 }

@@ -1211,7 +1211,7 @@ public class StandardFonts {
     
     public static int getIDForGlyphName(final String fontName, String glyphName) {
         boolean base10=false;
-        final int uc = StandardFonts.getAdobeMap(glyphName);
+        final int uc = getAdobeMap(glyphName);
         if (uc >= 0) {
             return uc;
         } else if (glyphName.startsWith("uni")){
@@ -1221,22 +1221,24 @@ public class StandardFonts {
         } else {
             base10 = true;
         }
-        
-        try {
-            int num;
-            if (base10) {
-                num = Integer.parseInt(glyphName, 10);
-                num = mapCIDToValidUnicode(fontName, num);
-            } else {
-                num = Integer.parseInt(glyphName, 16);
-            }
-            return num;
-        } catch (final NumberFormatException e) {
 
-            LogWriter.writeLog("Exception in handling cid id "+e);
-            
-            return -1;
+        if (glyphName != null && glyphName.matches("[0-9]+")) {
+            try {
+                int num;
+                if (base10) {
+                    num = Integer.parseInt(glyphName, 10);
+                    num = mapCIDToValidUnicode(fontName, num);
+                } else {
+                    num = Integer.parseInt(glyphName, 16);
+                }
+                return num;
+            } catch (final NumberFormatException e) {
+
+                LogWriter.writeLog("Exception in handling cid id "+e);
+
+            }
         }
+        return -1;
     }
     
     /**

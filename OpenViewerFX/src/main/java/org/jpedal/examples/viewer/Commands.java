@@ -39,6 +39,7 @@ import java.net.URL;
 import java.util.Map;
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
+import org.jpedal.examples.viewer.commands.SaveFile;
 import org.jpedal.examples.viewer.commands.ViewStack;
 import org.jpedal.examples.viewer.gui.generic.GUISearchList;
 import org.jpedal.examples.viewer.gui.generic.GUISearchWindow;
@@ -296,6 +297,10 @@ public class Commands {
     }
 
     public void handleTransferedFile(final String file) throws PdfException {
+
+        
+        //Before anything handle any unsaved forms
+        SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
         while (Values.getOpeningTransferedFile() || Values.isProcessing()) {
             try {

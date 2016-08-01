@@ -1162,7 +1162,7 @@ public abstract class GUI implements GUIFactory {
                 }
             }
 
-            if(commonValues.isFormsChanged()) {
+            if(commonValues.isFormsChanged() && !isJavaFX) {
                 title = "* " + title;
             }
         }

@@ -49,7 +49,6 @@ import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.commands.Images;
 import org.jpedal.examples.viewer.commands.OpenFile;
-import org.jpedal.examples.viewer.commands.SaveFile;
 import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.examples.viewer.gui.generic.GUISearchWindow;
 import org.jpedal.examples.viewer.gui.popups.DownloadProgress;
@@ -92,7 +91,7 @@ public class JavaFXOpenFile {
             /*
              * warn user on forms
              */
-            SaveFile.handleUnsaveForms(currentGUI, commonValues);
+            //SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
             if (org.jpedal.examples.viewer.utils.Printer.isPrinting()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPrintWait.message"));
@@ -116,9 +115,7 @@ public class JavaFXOpenFile {
                 currentGUI.setViewerTitle(null);
 
                 if ((commonValues.getSelectedFile() != null) && !Values.isProcessing()) {
-                    // reset the viewableArea before opening a new file
-                    decode_pdf.resetViewableArea();
-
+                    
                     try {
                         commonValues.setMultiTiff(false);
 
@@ -226,9 +223,6 @@ public class JavaFXOpenFile {
                             thumbnails.terminateDrawing();
 
                             decode_pdf.flushObjectValues(true);
-
-                            // reset the viewableArea before opening a new file
-                            decode_pdf.resetViewableArea();
 
                             currentGUI.stopThumbnails();
 
@@ -340,7 +334,7 @@ public class JavaFXOpenFile {
             /*
              * warn user on forms
              */
-            SaveFile.handleUnsaveForms(currentGUI, commonValues);
+            //SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
 //            currentGUI.resetNavBar();
             
@@ -393,9 +387,6 @@ public class JavaFXOpenFile {
                         thumbnails.terminateDrawing();
 
                         decode_pdf.flushObjectValues(true);
-
-                        // reset the viewableArea before opening a new file
-                        decode_pdf.resetViewableArea();
 
                         currentGUI.stopThumbnails();
 

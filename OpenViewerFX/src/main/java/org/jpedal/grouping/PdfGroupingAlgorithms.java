@@ -3934,8 +3934,14 @@ public class PdfGroupingAlgorithms {
         boolean valuesSwapped = (mode == PdfData.VERTICAL_BOTTOM_TO_TOP || mode == PdfData.VERTICAL_TOP_TO_BOTTOM);
 
         //Portions of text to perform the search on and find teasers
-        final String searchText = buildSearchText(false, mode);
-        final String coordsText = buildSearchText(true, mode);
+        String searchText = buildSearchText(false, mode);
+        String coordsText = buildSearchText(true, mode);
+
+        //Allow the use of regular expressions symbols
+//        if ((searchType & SearchType.IGNORE_SPACE_CHARACTERS) == SearchType.IGNORE_SPACE_CHARACTERS) {
+//            searchText = searchText.replaceAll(" ", "");
+//            coordsText = coordsText.replaceAll(MARKER2+"[0,1,2,3,4,5,6,7,8,9,\\\\.]*?"+MARKER2+"[0,1,2,3,4,5,6,7,8,9,\\\\.]*?"+MARKER2+" ", "");
+//        }
         
         //Hold starting point data at page rotation
         int[] resultStart;
@@ -3948,17 +3954,25 @@ public class PdfGroupingAlgorithms {
             //Set the default separator between words in a search term
             String sep = " ";
 
-            //Multiline needs space or newline to be recognised as word separators
-            if ((searchType & SearchType.MUTLI_LINE_RESULTS) == SearchType.MUTLI_LINE_RESULTS) {
-                sep = "[ \\\\n]+";
-            }
+//            if ((searchType & SearchType.IGNORE_SPACE_CHARACTERS) == SearchType.IGNORE_SPACE_CHARACTERS) {
+//                if ((searchType & SearchType.MUTLI_LINE_RESULTS) == SearchType.MUTLI_LINE_RESULTS) {
+//                    sep = "[\\\\n]*+";
+//                } else {
+//                    sep = "";
+//                }
+//            } else {
+                //Multiline needs space or newline to be recognised as word separators
+                if ((searchType & SearchType.MUTLI_LINE_RESULTS) == SearchType.MUTLI_LINE_RESULTS) {
+                    sep = "[ \\\\n]+";
+                }
 
-            //if not using reg ex add reg ex literal flags around the text and word separators
-            if (!useRegEx) {
-                searchValue = "\\Q" + searchValue + "\\E";
-                sep = "\\\\E" + sep + "\\\\Q";
-            }
-
+                //if not using reg ex add reg ex literal flags around the text and word separators
+                if (!useRegEx) {
+                    searchValue = "\\Q" + searchValue + "\\E";
+                    sep = "\\\\E" + sep + "\\\\Q";
+                }
+//            }
+            
             //If word seperator has changed, replace all spaces with modified seperator
             if (!sep.equals(" ")) {
                 searchValue = searchValue.replaceAll(" ", sep);

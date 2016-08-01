@@ -37,9 +37,12 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import org.jpedal.exception.PdfException;
+import org.jpedal.function.FunctionFactory;
+import org.jpedal.function.PDFFunction;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
+import org.jpedal.objects.raw.FunctionObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.ParserOptions;
@@ -97,8 +100,23 @@ public class MaskUtils {
             
             final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(newSMask, fx, fw, fy, fh, currentPdfFile, parserOptions, formLevel, multiplyer,false,scaling);
 
+            int[] tr = null;
+            PdfObject objTR = gs.SMask.getDictionary(PdfDictionary.TR);
+            //smask may contain tr values refer to case 25259
+            if (objTR != null) {
+                final PdfObject funcObj = new FunctionObject(objTR.getObjectRefAsString());
+                currentPdfFile.readObject(funcObj);
+                PDFFunction function = FunctionFactory.getFunction(funcObj, currentPdfFile);
+                if (function != null) {
+                    tr = new int[256];
+                    for (int i = 0; i < 256; i++) {
+                        tr[i] = (int)(function.compute(new float[]{i/255f})[0]*255);
+                    }
+                }
+            }
+
             if(gs.SMask.getNameAsConstant(PdfDictionary.S) == PdfDictionary.Luminosity){
-                image= SMask.applyLuminosityMask(image, smaskImage);
+                image= SMask.applyLuminosityMask(image, smaskImage, tr);
             }else{
                 image= SMask.applyAlphaMask(image, smaskImage);
             }

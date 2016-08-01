@@ -81,6 +81,10 @@ public class JDeliHelper {
         return null;
     }
     
+     public static BufferedImage getDicomImage(byte[] data) throws Exception{
+        return null;
+    }
+    
     public static int[] convertCMYKtoRGB(int cc, int mm, int yy, int kk) {
        return null;
     }    

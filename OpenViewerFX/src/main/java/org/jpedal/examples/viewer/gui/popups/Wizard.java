@@ -46,8 +46,8 @@ import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
@@ -218,18 +218,8 @@ public class Wizard
 		}
 	}
 	
-	private class textboxPressState implements KeyListener
+	private class textboxPressState extends KeyAdapter
 	{	
-		@Override
-        public void keyReleased(final KeyEvent e) {
-			
-		}
-		
-		@Override
-        public void keyPressed(final KeyEvent e) {
-			
-		}
-		
 		@Override
         public void keyTyped(final KeyEvent e) {
 			setNextButtonEnabled(panelManager.canAdvance());

@@ -37,8 +37,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.io.types.ArrayDecoder;
-import org.jpedal.io.types.ArrayFactory;
+import org.jpedal.io.types.Array;
 import org.jpedal.objects.raw.OutlineObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -182,8 +181,8 @@ public class OutlineData {
                             if(ref!=null && ref.startsWith("[")){
 
                                 final byte[] raw=StringUtils.toBytes(ref);
-                                final ArrayDecoder objDecoder=ArrayFactory.getDecoder(currentPdfFile.getObjectReader(),0, raw.length, PdfDictionary.VALUE_IS_MIXED_ARRAY,null, PdfDictionary.Names,raw);
-                                objDecoder.readArray(false, Aobj, PdfDictionary.Dest);
+                                final Array objDecoder=new Array(currentPdfFile.getObjectReader(),0, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
+                                objDecoder.readArray(Aobj, PdfDictionary.Dest);
                                 DestObj=Aobj.getMixedArray(PdfDictionary.Dest);
                             }else if(ref!=null){
                             	Aobj=new OutlineObject(ref);
