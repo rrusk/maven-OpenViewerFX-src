@@ -35,14 +35,14 @@ package org.jpedal.color;
 
 
 import java.awt.color.ColorSpace;
-import java.util.Map;
 import org.jpedal.io.ObjectDecoder;
+import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.objects.raw.ColorSpaceObject;
-import org.jpedal.objects.raw.PdfArrayIterator;
-import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.objects.raw.PdfObject;
-
+import org.jpedal.io.types.Array;
+import org.jpedal.io.types.ArrayUtils;
+import org.jpedal.io.types.KeyArray;
+import org.jpedal.objects.raw.*;
+import org.jpedal.utils.NumberUtils;
 
 /**
  * @author markee
@@ -50,90 +50,89 @@ import org.jpedal.objects.raw.PdfObject;
  * returns the correct colorspace, decoding the values
  */
 public final class ColorspaceFactory {
-
-    public static GenericColorSpace getColorSpaceInstance(final String key,PdfObjectReader currentPdfFile, PdfArrayIterator colorSpace, Map<String, GenericColorSpace> colorspacesObjects) {
-       
-        GenericColorSpace col=getColorSpaceInstance(currentPdfFile, colorSpace );
-            
-        if(col.getID()==ColorSpaces.ICC) {
-            colorspacesObjects.put(key,col);
-        }
-         
-        
-        return col;
-    }
-    
     
     /**
      * used by commands which implicitly set colorspace
      * 
      */
     public static GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, final PdfArrayIterator colorSpace) {
-        
-        
-         System.out.println("colorspace="+colorSpace.getNextValueAsString(false));
-        int ID=colorSpace.getNextValueAsKey();
-        
+
+        //System.out.println("col="+colorSpace.getNextValueAsString(false));
+        int ID = colorSpace.getNextValueAsKey();
+
         //allow for CMYK in ID
-        if(ID==PdfDictionary.CMYK) {
-            ID=ColorSpaces.DeviceCMYK;
+        if (ID == PdfDictionary.CMYK) {
+            ID = ColorSpaces.DeviceCMYK;
         }
-        
-        boolean isIndexed=false;
-        int size=0;
-        byte[] lookup=null;
-        
-        int rawID=-1;
         
         //setup colorspaces which map onto others
-        if (ID==ColorSpaces.Indexed || ID==PdfDictionary.I){
-            
-            isIndexed=true;
-            
-            //actual colorspace
-            byte[] base=colorSpace.getNextValueAsByte(true);
-            
-            ColorSpaceObject col=getObject(currentPdfFile, base);
-            
-            PdfArrayIterator baseColValues=col.getMixedArray(PdfDictionary.ColorSpace);
-            
-            System.out.println("col="+col+" "+col.getObjectRefAsString()+" "+baseColValues.getTokenCount());
-           
-            ID=baseColValues.getNextValueAsKey();
-        
-             //hival
-             size=colorSpace.getNextValueAsInteger(true);
-             
-             //lookup
-             lookup=colorSpace.getNextValueAsByte(true);
-             
-            rawID=ID;
-            
-        }
-        
-        GenericColorSpace currentColorData = getColorspace(currentPdfFile, colorSpace, ID);
-        
-        //handle CMAP as object or direct
-        if(isIndexed){
-            
-            
+        if (ID == ColorSpaces.Indexed || ID == PdfDictionary.I) {
+
+            GenericColorSpace currentColorData = getColorSpace(colorSpace, currentPdfFile);
+
+            //hival
+            final int size = colorSpace.getNextValueAsInteger(true);
+
+            //lookup
+            final byte[] lookup = getTransformTable(currentPdfFile, colorSpace.getNextValueAsByte(true));
+
             //ICC code will wrongly create RGB in case of indexed ICC with DeviceGray alt - here we fit this
             //(sample file is 11jun/early mockup.pdf)
-            if(rawID==ColorSpaces.ICC && lookup.length<3) {
-                currentColorData=new DeviceGrayColorSpace();
+            if (currentColorData.getRawColorSpacePDFType() == ColorSpaces.ICC && lookup.length < 3) {
+                currentColorData = new DeviceGrayColorSpace();
             }
-            
-            
-            currentColorData.setIndex(lookup,size);
+
+            currentColorData.setIndex(lookup, size);
+
+            return currentColorData;
+        } else {
+            return getColorspace(ID, colorSpace, currentPdfFile);
+
         }
+    }
+
+    private static GenericColorSpace getColorSpace(final PdfArrayIterator colorSpace, final PdfObjectReader currentPdfFile) {
+    
+        final byte[] colValue=colorSpace.getNextValueAsByte(false);
         
-        System.out.println("We need to set PdfDictionary.Alternate");
-       // currentColorData.setAlternateColorSpace(colorSpace.getParameterConstant(PdfDictionary.Alternate));
-       
-        return currentColorData;
+        if (ArrayUtils.isRef(colValue, 0) || ArrayUtils.isArray(colValue, 0)) {
+            PdfArrayIterator it=convertColValueToMixedArray(currentPdfFile, colorSpace.getNextValueAsByte(true));
+            
+            return getColorspace(it.getNextValueAsKey(), it, currentPdfFile);          
+        } else {
+            return getColorspace(colorSpace.getNextValueAsKey(), colorSpace, currentPdfFile);
+        }     
+    }
+
+    public static FunctionObject getFunctionObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
+        
+        final FunctionObject colObj  = new FunctionObject(new String(data));
+
+        if(data[0]=='<') {
+            colObj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            colObj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        colObj.setUnresolvedData(data,PdfDictionary.Function);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        objectDecoder.checkResolved(colObj);
+        
+        return colObj;
     }
     
-    private static ColorSpaceObject getObject(final PdfObjectReader currentPdfFile, final byte[] data) {
+    static byte[] getTransformTable(final PdfObjectReader currentPdfFile, final byte[] data) {
+       
+        if(ArrayUtils.isRef(data, 0)){ //indirect so needs decoding
+           final ColorSpaceObject colObj2  = new ColorSpaceObject(new String(data));          
+           currentPdfFile.readObject(colObj2);
+            return colObj2.getDecodedStream();
+         }else{ //direct string so just use
+            return data;
+        }
+    }
+    
+    private static ColorSpaceObject getColObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
         
         final ColorSpaceObject colObj  = new ColorSpaceObject(new String(data));
 
@@ -149,21 +148,19 @@ public final class ColorspaceFactory {
         
         return colObj;
     }
-
     
-     
-    private static GenericColorSpace getColorspace(final PdfObjectReader currentPdfFile, final PdfArrayIterator colorSpace, final int ID) {
+    private static GenericColorSpace getColorspace(final int ID, final PdfArrayIterator colorSpace, final PdfObjectReader currentPdfFile) {
         
         //no DeviceRGB as set as default
-        GenericColorSpace currentColorData=new DeviceRGBColorSpace();
-        
+        GenericColorSpace currentColorData;
+         
         switch(ID){
             case ColorSpaces.Separation:
-                currentColorData=new SeparationColorSpace(currentPdfFile,colorSpace);
+                currentColorData= getDeviceNColorSpace(currentPdfFile, colorSpace, ID); 
                 break;
                 
             case ColorSpaces.DeviceN:
-               // currentColorData=new DeviceNColorSpace(currentPdfFile, colorSpace);
+               currentColorData= getDeviceNColorSpace(currentPdfFile, colorSpace, ID); 
                 break;
                 
             case ColorSpaces.DeviceGray:
@@ -173,235 +170,147 @@ public final class ColorspaceFactory {
             case ColorSpaces.DeviceCMYK:
                 currentColorData=new DeviceCMYKColorSpace();
                 currentColorData.setRawColorSpace(ColorSpaces.DeviceCMYK);
-
                 break;
                 
             case ColorSpaces.CalGray:
-             //   currentColorData = getCalGrayColorspace(colorSpace);
+                currentColorData = getCalGrayColorspace(getColObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true)));               
                 break;
                 
             case ColorSpaces.CalRGB:
-              //  currentColorData = getCalRGBColorspace(colorSpace);
+                currentColorData = getCalRGBColorspace(getColObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true)));
                 break;
                 
             case ColorSpaces.Lab:
-             //   currentColorData = getLabColorspace(colorSpace);
+                currentColorData = getLabColorspace(getColObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true)));
                 break;
                 
             case ColorSpaces.ICC:
-             //   currentColorData = getICCColorspace(colorSpace);
+                currentColorData = getICCColorspace(getColObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true)));
                 break;
                 
-            case ColorSpaces.Pattern:
-               /* 
-                //patterns can have an additional colorspace and setting
-                final PdfObject col=colorSpace.getDictionary(PdfDictionary.AlternateSpace);
-                
-                GenericColorSpace patternColorSpace=null;
-                if(col!=null){
-                    patternColorSpace=ColorspaceFactory.getColorSpaceInstance(currentPdfFile, col);
-                }
-                
-                currentColorData=new PatternColorSpace(currentPdfFile,patternColorSpace);
-                */
+            case ColorSpaces.Pattern:            
+                currentColorData = getPatternColorspace(colorSpace, currentPdfFile);              
                 break;
                 
+            default:
+                currentColorData=new DeviceRGBColorSpace();              
         }
         
         return currentColorData;
     }
-   
+
+    private static GenericColorSpace getPatternColorspace(final PdfArrayIterator colorSpace, final PdfObjectReader currentPdfFile) {
+        
+        GenericColorSpace currentColorData;
+        if(colorSpace.hasMoreTokens()){
+            final GenericColorSpace patternColorSpace = getColorSpace(colorSpace, currentPdfFile);
+            currentColorData=new PatternColorSpace(currentPdfFile,patternColorSpace);
+        }else{
+            currentColorData=new PatternColorSpace(currentPdfFile,new DeviceRGBColorSpace());
+        }
+        return currentColorData;
+    }
     
+    private static byte[][] convertColValueToKeyArray(final PdfObjectReader currentPdfFile, byte[] alt) {
+        
+        int ptr=0;
+        if(alt[0]=='['){
+            ptr=1;
+        }
+        
+        final KeyArray objDecoder=new KeyArray(currentPdfFile.getObjectReader(),ptr, alt);
+        final OCObject obj=new OCObject(new String(alt)); //OCObject used OCOBject as contaisn a KeyArray object
+        objDecoder.readArray(obj, PdfDictionary.Configs); //any value which is a key array
+        
+        return obj.getKeyArray(PdfDictionary.Configs);
+       
+    }
+   
+    public static PdfArrayIterator convertColValueToMixedArray(final PdfObjectReader currentPdfFile, byte[] raw) {
+        
+        ColorSpaceObject obj=new ColorSpaceObject(new String(raw));
+        
+        final PdfFileReader objectReader=currentPdfFile.getObjectReader();
+        
+        int startArray=0;
+        
+        if(ArrayUtils.isRef(raw, 0)){ //indirect so needs decoding
+            
+            int i=0;
+            final int startI = 0;
+
+            //move cursor to end of ref
+            i = ArrayUtils.skipToEndOfRef(i, raw);
+            //actual value or first part of ref
+            final int ref = NumberUtils.parseInt(startI, i, raw);
+            
+            i=ArrayUtils.skipSpaces(raw, i);
+
+            // get generation number
+            int keyStart = i;
+
+            //move cursor to end of reference
+            i = ArrayUtils.skipToEndOfRef(i, raw);
+        
+            final int generation = NumberUtils.parseInt(keyStart, i, raw);
+
+            i=ArrayUtils.skipSpaces(raw, i);
+        
+            //read the Dictionary data
+            raw = objectReader.readObjectAsByteArray(obj, objectReader.isCompressed(ref, generation), ref, generation);
+
+            obj=new ColorSpaceObject(new String(raw));
+            
+            while(raw[startArray]!='['){
+                startArray++;
+            }
+        
+        }
+        
+        final Array objDecoder=new Array(objectReader, startArray, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
+        
+        objDecoder.readArray(obj, PdfDictionary.ColorSpace);
+        
+        return obj.getMixedArray(PdfDictionary.ColorSpace);
+        
+    }
    
     private ColorspaceFactory(){}
-    
-    /**
-     * used by commands which implicitly set colorspace
-     */
-    public static GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, final PdfObject colorSpace, final Map<String, GenericColorSpace> colorspacesObjects) {
-        
-        //see if we already have it
-        final String key;
-        if(colorSpace.getStatus()==PdfObject.DECODED) {
-            key=colorSpace.getObjectRefAsString();
-        } else {
-            key=new String(colorSpace.getUnresolvedData());
-        }
-        
-        GenericColorSpace col=null;
-        
-        //cache some colorspaces for speed
-        final Object cachedValue=colorspacesObjects.get(key);
-        
-        if(cachedValue!=null){
-            col=(GenericColorSpace) cachedValue;
-            col.reset();
-        }
-        
-        
-        if(col==null){
-            
-            col=getColorSpaceInstance(currentPdfFile, colorSpace );
-            
-            if(col.getID()==ColorSpaces.ICC) {
-                colorspacesObjects.put(key,col);
-            }
-            
-        }
-        
-        return col;
-    }
-    
-    /**
-     * used by commands which implicitly set colorspace
-     * 
-     */
-    public static GenericColorSpace getColorSpaceInstance(final PdfObjectReader currentPdfFile, PdfObject colorSpace) {
-        
-        currentPdfFile.checkResolved(colorSpace);
-        
-        int ID=colorSpace.getParameterConstant(PdfDictionary.ColorSpace);
-        
-        //allow for CMYK in ID
-        if(ID==PdfDictionary.CMYK) {
-            ID=ColorSpaces.DeviceCMYK;
-        }
-        
-        boolean isIndexed=false;
-        int size=0;
-        byte[] lookup=null;
-        
-        int rawID=-1;
-        
-        /*setup colorspaces which map onto others*/
-        if (ID==ColorSpaces.Indexed || ID==PdfDictionary.I){
-            
-            isIndexed=true;
-            
-            //get raw values from Indexed
-            size=colorSpace.getInt(PdfDictionary.hival);
-            lookup=colorSpace.getDictionary(PdfDictionary.Lookup).getDecodedStream();
-            
-            //actual colorspace
-            colorSpace=colorSpace.getDictionary(PdfDictionary.Indexed);
-            ID=colorSpace.getParameterConstant(PdfDictionary.ColorSpace);
-            rawID=ID;
-            
-        }
-        
-        GenericColorSpace currentColorData = getColorspace(currentPdfFile, colorSpace, ID);
-        
-        /*handle CMAP as object or direct*/
-        if(isIndexed){
-            
-            
-            //ICC code will wrongly create RGB in case of indexed ICC with DeviceGray alt - here we fit this
-            //(sample file is 11jun/early mockup.pdf)
-            if(rawID==ColorSpaces.ICC && lookup.length<3) {
-                currentColorData=new DeviceGrayColorSpace();
-            }
-            
-            
-            currentColorData.setIndex(lookup,size);
-        }
-        
-        currentColorData.setAlternateColorSpace(colorSpace.getParameterConstant(PdfDictionary.Alternate));
-        
-        return currentColorData;
-    }
-    
-    private static GenericColorSpace getColorspace(final PdfObjectReader currentPdfFile, final PdfObject colorSpace, final int ID) {
-        
-        //no DeviceRGB as set as default
-        GenericColorSpace currentColorData=new DeviceRGBColorSpace();
-        
-        switch(ID){
-            case ColorSpaces.Separation:
-                currentColorData=new SeparationColorSpace(currentPdfFile,colorSpace);
-                break;
-                
-            case ColorSpaces.DeviceN:
-                currentColorData=new DeviceNColorSpace(currentPdfFile, colorSpace);
-                break;
-                
-            case ColorSpaces.DeviceGray:
-                currentColorData=new DeviceGrayColorSpace();
-                break;
-                
-            case ColorSpaces.DeviceCMYK:
-                currentColorData=new DeviceCMYKColorSpace();
-                currentColorData.setRawColorSpace(ColorSpaces.DeviceCMYK);
-
-                break;
-                
-            case ColorSpaces.CalGray:
-                currentColorData = getCalGrayColorspace(colorSpace);
-                break;
-                
-            case ColorSpaces.CalRGB:
-                currentColorData = getCalRGBColorspace(colorSpace);
-                break;
-                
-            case ColorSpaces.Lab:
-                currentColorData = getLabColorspace(colorSpace);
-                break;
-                
-            case ColorSpaces.ICC:
-                currentColorData = getICCColorspace(colorSpace);
-                break;
-                
-            case ColorSpaces.Pattern:
-                
-                //patterns can have an additional colorspace and setting
-                final PdfObject col=colorSpace.getDictionary(PdfDictionary.AlternateSpace);
-                
-                GenericColorSpace patternColorSpace=null;
-                if(col!=null){
-                    patternColorSpace=ColorspaceFactory.getColorSpaceInstance(currentPdfFile, col);
-                }
-                
-                currentColorData=new PatternColorSpace(currentPdfFile,patternColorSpace);
-                break;
-                
-        }
-        
-        return currentColorData;
-    }
-    
+  
     private static GenericColorSpace getICCColorspace(final PdfObject colorSpace) {
         
         GenericColorSpace currentColorData=new DeviceRGBColorSpace();
         
-        /*
-         * Switch ICC to alt Gray
-         */
         final int alt=colorSpace.getParameterConstant(PdfDictionary.Alternate);
-        if(alt== ColorSpaces.DeviceGray){// || alt== ColorSpaces.DeviceRGB){
-            
-            //use the RGB
-            
-            //}else if(alt==ColorSpaces.DeviceCMYK){
-            
-            //    currentColorData=new DeviceCMYKColorSpace();
-        }else{
+        if(alt!= ColorSpaces.DeviceGray){
             currentColorData=new ICCColorSpace(colorSpace);
         }
+        
+        currentColorData = getAlternateICCColorSpace(currentColorData, alt);
+        
+        currentColorData.setRawColorSpace(ColorSpaces.ICC);
+        
+        return currentColorData;
+    }
+
+    private static GenericColorSpace getAlternateICCColorSpace(GenericColorSpace currentColorData, final int alt) {
         
         final int type=currentColorData.getType();
         
         //use if alterative can be used as MUCH faster...
         if(alt==ColorSpaces.DeviceCMYK && currentColorData.isInvalid()){
             currentColorData=new DeviceCMYKColorSpace();
+            currentColorData.setAlternateColorSpace(alt);
         }else if(type==ColorSpace.TYPE_CMYK){
             currentColorData=new DeviceCMYKColorSpace();
+            currentColorData.setAlternateColorSpace(alt);
         }else if(type==ColorSpace.TYPE_RGB){
             currentColorData=new DeviceRGBColorSpace();
+            currentColorData.setAlternateColorSpace(alt);
         }else if(type==ColorSpace.TYPE_GRAY){
             currentColorData=new DeviceGrayColorSpace();
+            currentColorData.setAlternateColorSpace(alt);
         }
-        
-        currentColorData.setRawColorSpace(ColorSpaces.ICC);
-        
         return currentColorData;
     }
     
@@ -447,21 +356,19 @@ public final class ColorspaceFactory {
             Ma = matrixArray;
         }
         
-        return new CalRGBColorSpace(W, Ma,G);
-        
+        return new CalRGBColorSpace(W, Ma,G);        
     }
     
     private static GenericColorSpace getCalGrayColorspace(final PdfObject colorSpace) {
         
-        float[] W = { 0.0f, 1.0f, 0.0f };
-        float[] G = { 1.0f, 1.0f, 1.0f };
+        float[] W = { 0.0f};
+        float[] G = { 1.0f};
         
         float[] gammaArray=null;
         final float[] whitepointArray=colorSpace.getFloatArray(PdfDictionary.WhitePoint);
-        final float rawGamma=colorSpace.getFloatNumber(PdfDictionary.Gamma);
-        if(rawGamma!=-1){
-            gammaArray=new float[1];
-            gammaArray[0]=rawGamma;
+        final float[] rawGamma=colorSpace.getFloatArray(PdfDictionary.Gamma);
+        if(rawGamma!=null){
+            gammaArray=rawGamma;
         }
         
         if (whitepointArray != null) {
@@ -474,5 +381,104 @@ public final class ColorspaceFactory {
         
         return new CalGrayColorSpace(W, G);
     }
-    
+     
+    private static GenericColorSpace getDeviceNColorSpace(final PdfObjectReader currentPdfFile, final PdfArrayIterator colorSpace, final int ID) {
+     
+        int componentCount=1;
+        
+        final byte[] name=colorSpace.getNextValueAsByte(true);
+        
+        GenericColorSpace altCS = getColorSpace(colorSpace, currentPdfFile);
+       
+        PdfObject functionObj=getFunctionObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true));
+       
+        //name of color if separation or Components if device and component count
+        byte[][] components=null;
+        if(ID!=ColorSpaces.Separation){
+            components=convertColValueToKeyArray(currentPdfFile,name);
+            componentCount=components.length;
+        }
+        
+        int cmykMapping=getAlternateDeviceMappingColorSpace(componentCount, components);
+        
+        if(cmykMapping!=SeparationColorSpace.NOCMYK){          
+            altCS=new DeviceCMYKColorSpace();
+        }
+        
+        final ColorMapping colorMapper=new ColorMapping(currentPdfFile,functionObj);
+        float[] domain=functionObj.getFloatArray(PdfDictionary.Domain);
+        
+        if(ID==ColorSpaces.Separation){
+            return new SeparationColorSpace(colorMapper,domain, altCS);
+        }else{
+            return new DeviceNColorSpace(componentCount, colorMapper, domain, altCS);
+        }
+    }
+
+    private static int getAlternateDeviceMappingColorSpace(final int componentCount, final byte[][] components) {
+        
+        int cmykMapping=SeparationColorSpace.NOCMYK;
+        final int[] values=new int[componentCount];
+        if(components!=null){
+            for(int ii=0;ii<componentCount;ii++){
+                values[ii]=PdfDictionary.generateChecksum(1, components[ii].length-1, components[ii]);
+            }
+        }
+        switch(componentCount){
+            
+            case 1:
+                if(components!=null && (values[0]==SeparationColorSpace.Black || values[0]==SeparationColorSpace.PANTONE_BLACK)){
+                    cmykMapping=SeparationColorSpace.Black;
+                }
+                
+                break;
+                
+            case 2:
+                
+                if(values[0]==SeparationColorSpace.Cyan){
+                    if(values[1]==SeparationColorSpace.Yellow) {
+                        cmykMapping=SeparationColorSpace.CY;
+                    } else if(values[1]==SeparationColorSpace.Magenta) {
+                        cmykMapping=SeparationColorSpace.CM;
+                    }
+                }else if(values[0]==SeparationColorSpace.Magenta && values[1]==SeparationColorSpace.Yellow) {
+                    cmykMapping=SeparationColorSpace.MY;
+                }
+                
+                break;
+                
+            case 3:
+                
+                if(values[0]==SeparationColorSpace.Magenta && values[1]==SeparationColorSpace.Yellow && values[2]==SeparationColorSpace.Black) {
+                    cmykMapping=SeparationColorSpace.MYK;
+                } else if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow) {
+                    cmykMapping=SeparationColorSpace.CMY;
+                } else if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Black) {
+                    cmykMapping=SeparationColorSpace.CMK;
+                }
+                break;
+                
+           /* case 4:
+                
+                if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow && values[3]==SeparationColorSpace.Black) {
+                    //  cmykMapping=SeparationColorSpace.CMYB;
+                }
+                break; */
+                
+            case 5:
+                
+                if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow && values[3]==SeparationColorSpace.Black) {
+                    cmykMapping=SeparationColorSpace.CMYK;
+                }
+                break;
+                
+            case 6:
+                
+                if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow && values[3]==SeparationColorSpace.Black) {
+                    cmykMapping=SeparationColorSpace.CMYK;
+                }
+                break;
+        }
+        return cmykMapping;
+    }
 }

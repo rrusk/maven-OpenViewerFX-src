@@ -431,277 +431,271 @@ public class TextLines {
      * @param page       :: The page to add highlights to.
      */
     public void addHighlights(final int[][] highlights, final boolean areaSelect, final int page){
+        
+        
+        
+        if (highlights != null) { //If null do nothing to clear use the clear method
 
-        if(highlights!=null){ //If null do nothing to clear use the clear method
-
-        	//Flag that highlights have changed
+            //Flag that highlights have changed
             hasHighlightAreasUpdated = true;
-            
-            if(!areaSelect){
-                //Ensure highlighting takes place
-//				boolean nothingToHighlight = false;
-
-                for(int j=0; j!=highlights.length; j++){
-                    if(highlights[j]!=null){
-
-                        //Ensure that the points are adjusted so that they are within line area if that is sent as rectangle
-                        int[] startPoint = {highlights[j][0]+1, highlights[j][1]+1};
-                        int[] endPoint = {highlights[j][0]+highlights[j][2]-1, highlights[j][1]+highlights[j][3]-1};
-                        //both null flushes localAreas
-
-                        if(areas==null){
-                            areas = new HashMap<Integer, int[][]>();
-                        }
-
-                        final int[][] lines = getLineAreasAs2DArray(page);
-                        final int[] writingMode = this.getLineWritingMode(page);
-
-                        int start = -1;
-                        int finish = -1;
-                        boolean backward = false;
-                        //Find the first selected line and the last selected line.
-                        if(lines!=null){
-                            for(int i=0; i!= lines.length; i++){
-                                if(contains(startPoint[0], startPoint[1], lines[i])) {
-                                    start = i;
-                                }
-
-                                if(contains(endPoint[0], endPoint[1], lines[i])) {
-                                    finish = i;
-                                }
-
-                                if(start!=-1 && finish!=-1){
-                                    break;
-                                }
-                            }
-
-                            if(start>finish){
-                                final int temp = start;
-                                start = finish;
-                                finish = temp;
-                                backward = true;
-                            }
-
-                            if(start==finish){
-                                if(startPoint[0]>endPoint[0]){
-                                    final int[] temp = startPoint;
-                                    startPoint = endPoint;
-                                    endPoint = temp;
-                                }
-                            }
-
-                            if(start!=-1 && finish!=-1){
-                                //Fill in all the lines between
-                                final Integer p = page;
-                                final int[][] localAreas = new int[finish-start+1][4];
-
-                                System.arraycopy(lines, start + 0, localAreas, 0, finish - start + 1);
-
-                                if(localAreas.length>0){
-                                    final int top = 0;
-                                    final int bottom = localAreas.length-1;
-
-                                    if(localAreas[top]!=null && localAreas[bottom]!=null){
-
-                                        switch(writingMode[start]){
-                                            case PdfData.HORIZONTAL_LEFT_TO_RIGHT :
-                                                // if going backwards
-                                                if(backward){
-                                                    if((endPoint[0]-15)<=localAreas[top][0]){
-                                                        //Do nothing to localAreas as we want to pick up the start of a line
-                                                    }else{
-                                                        localAreas[top][2] -= (endPoint[0]-localAreas[top][0]);
-                                                        localAreas[top][0] = endPoint[0];
-                                                    }
-
-                                                }else{
-                                                    if((startPoint[0]-15)<=localAreas[top][0]){
-                                                        //Do nothing to localAreas as we want to pick up the start of a line
-                                                    }else{
-                                                        localAreas[top][2] -= (startPoint[0]-localAreas[top][0]);
-                                                        localAreas[top][0] = startPoint[0];
-                                                    }
-
-                                                }
-                                                break;
-                                            case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
-                                                LogWriter.writeLog("THIS TEXT DIRECTION HAS NOT BEEN IMPLEMENTED YET (Right to Left)");
-                                                break;
-                                            case PdfData.VERTICAL_TOP_TO_BOTTOM:
-                                                if(backward){
-                                                    if((endPoint[1]-15)<=localAreas[top][1]){
-                                                        //Do nothing to localAreas as we want to pick up the start of a line
-                                                    }else{
-                                                        localAreas[top][3] -= (endPoint[1]-localAreas[top][1]);
-                                                        localAreas[top][1] = endPoint[1];
-                                                    }
-
-                                                }else{
-                                                    if((startPoint[1]-15)<=localAreas[top][1]){
-                                                        //Do nothing to localAreas as we want to pick up the start of a line
-                                                    }else{
-                                                        localAreas[top][3] -= (startPoint[1]-localAreas[top][1]);
-                                                        localAreas[top][1] = startPoint[1];
-                                                    }
-
-                                                }
-                                                break;
-                                            case PdfData.VERTICAL_BOTTOM_TO_TOP :
-                                                if(backward){
-                                                    if((endPoint[1]-15)<=localAreas[top][1]){
-                                                        //Do nothing to localAreas as we want to pick up the start of a line
-                                                    }else{
-                                                        localAreas[top][3] -= (endPoint[1]-localAreas[top][1]);
-                                                        localAreas[top][1] = endPoint[1];
-                                                    }
-
-                                                }else{
-                                                    if((startPoint[1]-15)<=localAreas[top][1]){
-                                                        //Do nothing to localAreas as we want to pick up the start of a line
-                                                    }else{
-                                                        localAreas[top][3] -= (startPoint[1]-localAreas[top][1]);
-                                                        localAreas[top][1] = startPoint[1];
-                                                    }
-
-                                                }
-                                                break;
-                                        }
-
-
-                                        switch(writingMode[finish]){
-                                            case PdfData.HORIZONTAL_LEFT_TO_RIGHT :
-                                                // if going backwards
-                                                if(backward){
-                                                    if((startPoint[0]+15)>=localAreas[bottom][0]+localAreas[bottom][2]){
-                                                        //Do nothing to localAreas as we want to pick up the end of a line
-                                                    }else{
-                                                        localAreas[bottom][2] = startPoint[0] - localAreas[bottom][0];
-                                                    }
-
-                                                }else{
-                                                    if((endPoint[0]+15)>=localAreas[bottom][0]+localAreas[bottom][2]){
-                                                        //Do nothing to localAreas as we want to pick up the end of a line
-                                                    }else {
-                                                        localAreas[bottom][2] = endPoint[0] - localAreas[bottom][0];
-                                                    }
-                                                }
-                                                break;
-                                            case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
-                                                LogWriter.writeLog("THIS TEXT DIRECTION HAS NOT BEEN IMPLEMENTED YET (Right to Left)");
-                                                break;
-                                            case PdfData.VERTICAL_TOP_TO_BOTTOM:
-                                                // if going backwards
-                                                if(backward){
-                                                    if((startPoint[1]+15)>=localAreas[bottom][1]+localAreas[bottom][3]){
-                                                        //Do nothing to localAreas as we want to pick up the end of a line
-                                                    }else{
-                                                        localAreas[bottom][3] = startPoint[1] - localAreas[bottom][1];
-                                                    }
-
-                                                }else{
-                                                    if((endPoint[1]+15)>=localAreas[bottom][1]+localAreas[bottom][3]){
-                                                        //Do nothing to localAreas as we want to pick up the end of a line
-                                                    }else {
-                                                        localAreas[bottom][3] = endPoint[1] - localAreas[bottom][1];
-                                                    }
-                                                }
-                                                break;
-                                            case PdfData.VERTICAL_BOTTOM_TO_TOP :
-                                                // if going backwards
-                                                if(backward){
-                                                    if((startPoint[1]+15)>=localAreas[bottom][1]+localAreas[bottom][3]){
-                                                        //Do nothing to localAreas as we want to pick up the end of a line
-                                                    }else{
-                                                        localAreas[bottom][3] = startPoint[1] - localAreas[bottom][1];
-                                                    }
-
-                                                }else{
-                                                    if((endPoint[1]+15)>=localAreas[bottom][1]+localAreas[bottom][3]){
-                                                        //Do nothing to localAreas as we want to pick up the end of a line
-                                                    }else {
-                                                        localAreas[bottom][3] = endPoint[1] - localAreas[bottom][1];
-                                                    }
-                                                }
-                                                break;
-                                        }
-                                    }
-                                }
-                                this.areas.put(p, localAreas);
-                            }
-//							else {
-//								//This is the first highlight and nothing was selected
-//								if(nothingToHighlight){
-//									System.out.println("Area == null");
-//									//Prevent text extraction on nothing
-//									this.localAreas = null;
-//								}
-//							}
-                        }
-                    }
-                }
-            }else{
-                //if inset add in difference transparently
-                for(int v=0; v!=highlights.length; v++){
-                    if(highlights[v]!=null){
-                        if(highlights[v][2]<0){
-                            highlights[v][2] = -highlights[v][2];
-                            highlights[v][0] -=highlights[v][2];
-                        }
-
-                        if(highlights[v][3]<0){
-                            highlights[v][3] = -highlights[v][3];
-                            highlights[v][1] -=highlights[v][3];
-                        }
-
-                        if(areas!=null){
-                            final Integer p = page;
-                            int[][] localAreas = this.areas.get(p);
-                            if(localAreas!=null){
-                                boolean matchFound=false;
-
-                                //see if already added
-                                final int size=localAreas.length;
-                                for(int i=0;i<size;i++){
-                                    if(localAreas[i]!=null){
-                                        //If area has been added before please ignore
-                                        if(localAreas[i]!=null && (localAreas[i][0] ==highlights[v][0] && localAreas[i][1] ==highlights[v][1] && localAreas[i][2] ==highlights[v][2] &&
-                                                localAreas[i][3] ==highlights[v][3])){
-                                            matchFound=true;
-                                            i=size;
-                                        }
-                                    }
-                                }
-
-                                if(!matchFound){
-                                    final int newSize=localAreas.length+1;
-                                    final int[][] newAreas=new int[newSize][4];
-                                    for(int i=0;i<localAreas.length;i++){
-                                        if(localAreas[i]!=null) {
-                                            newAreas[i] = new int[]{localAreas[i][0], localAreas[i][1], localAreas[i][2], localAreas[i][3]};
-                                        }
-                                    }
-                                    localAreas = newAreas;
-
-                                    localAreas[localAreas.length-1] = highlights[v];
-                                }
-                                this.areas.put(p, localAreas);
-                            }else{
-                                this.areas.put(p, highlights);
-                            }
-                        }else{
-                            areas = new HashMap<Integer, int[][]>();
-                            final Integer p = page;
-                            final int[][] localAreas = new int[1][4];
-                            localAreas[0] = highlights[v];
-                            this.areas.put(p, localAreas);
-                        }
-                    }
+            for (int j = 0; j != highlights.length; j++) {
+                int[][] values = getHighlightableInArea(highlights[j], areaSelect, page);
+                if (values != null) {
+                    this.areas.put(page, values);
                 }
             }
         }
     }
 
+    public int[][] getHighlightableInArea(int[] highlights, final boolean areaSelect, final int page) {
 
+        if (!areaSelect) {
+            
+            if (highlights != null) {
+
+                //Ensure that the points are adjusted so that they are within line area if that is sent as rectangle
+                int[] startPoint = {highlights[0] + 1, highlights[1] + 1};
+                int[] endPoint = {highlights[0] + highlights[2] - 1, highlights[1] + highlights[3] - 1};
+                //both null flushes localAreas
+                if (areas == null) {
+                    areas = new HashMap<Integer, int[][]>();
+                }
+
+                final int[][] lines = getLineAreasAs2DArray(page);
+                final int[] writingMode = this.getLineWritingMode(page);
+
+                int start = -1;
+                int finish = -1;
+                boolean backward = false;
+                //Find the first selected line and the last selected line.
+                if (lines != null) {
+                    for (int i = 0; i != lines.length; i++) {
+                        if (contains(startPoint[0], startPoint[1], lines[i])) {
+                            start = i;
+                        }
+
+                        if (contains(endPoint[0], endPoint[1], lines[i])) {
+                            finish = i;
+                        }
+
+                        if (start != -1 && finish != -1) {
+                            break;
+                        }
+                    }
+
+                    if (start > finish) {
+                        final int temp = start;
+                        start = finish;
+                        finish = temp;
+                        backward = true;
+                    }
+
+                    if (start == finish) {
+                        if (startPoint[0] > endPoint[0]) {
+                            final int[] temp = startPoint;
+                            startPoint = endPoint;
+                            endPoint = temp;
+                        }
+                    }
+
+                    if (start != -1 && finish != -1) {
+                        //Fill in all the lines between
+                        final Integer p = page;
+                        final int[][] localAreas = new int[finish - start + 1][4];
+
+                        System.arraycopy(lines, start + 0, localAreas, 0, finish - start + 1);
+
+                        if (localAreas.length > 0) {
+                            final int top = 0;
+                            final int bottom = localAreas.length - 1;
+
+                            if (localAreas[top] != null && localAreas[bottom] != null) {
+
+                                switch (writingMode[start]) {
+                                    case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
+                                        // if going backwards
+                                        if (backward) {
+                                            if ((endPoint[0] - 15) <= localAreas[top][0]) {
+                                                //Do nothing to localAreas as we want to pick up the start of a line
+                                            } else {
+                                                localAreas[top][2] -= (endPoint[0] - localAreas[top][0]);
+                                                localAreas[top][0] = endPoint[0];
+                                            }
+
+                                        } else {
+                                            if ((startPoint[0] - 15) <= localAreas[top][0]) {
+                                                //Do nothing to localAreas as we want to pick up the start of a line
+                                            } else {
+                                                localAreas[top][2] -= (startPoint[0] - localAreas[top][0]);
+                                                localAreas[top][0] = startPoint[0];
+                                            }
+
+                                        }
+                                        break;
+                                    case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
+                                        LogWriter.writeLog("THIS TEXT DIRECTION HAS NOT BEEN IMPLEMENTED YET (Right to Left)");
+                                        break;
+                                    case PdfData.VERTICAL_TOP_TO_BOTTOM:
+                                        if (backward) {
+                                            if ((endPoint[1] - 15) <= localAreas[top][1]) {
+                                                //Do nothing to localAreas as we want to pick up the start of a line
+                                            } else {
+                                                localAreas[top][3] -= (endPoint[1] - localAreas[top][1]);
+                                                localAreas[top][1] = endPoint[1];
+                                            }
+
+                                        } else {
+                                            if ((startPoint[1] - 15) <= localAreas[top][1]) {
+                                                //Do nothing to localAreas as we want to pick up the start of a line
+                                            } else {
+                                                localAreas[top][3] -= (startPoint[1] - localAreas[top][1]);
+                                                localAreas[top][1] = startPoint[1];
+                                            }
+
+                                        }
+                                        break;
+                                    case PdfData.VERTICAL_BOTTOM_TO_TOP:
+                                        if (backward) {
+                                            if ((endPoint[1] - 15) <= localAreas[top][1]) {
+                                                //Do nothing to localAreas as we want to pick up the start of a line
+                                            } else {
+                                                localAreas[top][3] -= (endPoint[1] - localAreas[top][1]);
+                                                localAreas[top][1] = endPoint[1];
+                                            }
+
+                                        } else {
+                                            if ((startPoint[1] - 15) <= localAreas[top][1]) {
+                                                //Do nothing to localAreas as we want to pick up the start of a line
+                                            } else {
+                                                localAreas[top][3] -= (startPoint[1] - localAreas[top][1]);
+                                                localAreas[top][1] = startPoint[1];
+                                            }
+
+                                        }
+                                        break;
+                                }
+
+                                switch (writingMode[finish]) {
+                                    case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
+                                        // if going backwards
+                                        if (backward) {
+                                            if ((startPoint[0] + 15) >= localAreas[bottom][0] + localAreas[bottom][2]) {
+                                                //Do nothing to localAreas as we want to pick up the end of a line
+                                            } else {
+                                                localAreas[bottom][2] = startPoint[0] - localAreas[bottom][0];
+                                            }
+
+                                        } else {
+                                            if ((endPoint[0] + 15) >= localAreas[bottom][0] + localAreas[bottom][2]) {
+                                                //Do nothing to localAreas as we want to pick up the end of a line
+                                            } else {
+                                                localAreas[bottom][2] = endPoint[0] - localAreas[bottom][0];
+                                            }
+                                        }
+                                        break;
+                                    case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
+                                        LogWriter.writeLog("THIS TEXT DIRECTION HAS NOT BEEN IMPLEMENTED YET (Right to Left)");
+                                        break;
+                                    case PdfData.VERTICAL_TOP_TO_BOTTOM:
+                                        // if going backwards
+                                        if (backward) {
+                                            if ((startPoint[1] + 15) >= localAreas[bottom][1] + localAreas[bottom][3]) {
+                                                //Do nothing to localAreas as we want to pick up the end of a line
+                                            } else {
+                                                localAreas[bottom][3] = startPoint[1] - localAreas[bottom][1];
+                                            }
+
+                                        } else {
+                                            if ((endPoint[1] + 15) >= localAreas[bottom][1] + localAreas[bottom][3]) {
+                                                //Do nothing to localAreas as we want to pick up the end of a line
+                                            } else {
+                                                localAreas[bottom][3] = endPoint[1] - localAreas[bottom][1];
+                                            }
+                                        }
+                                        break;
+                                    case PdfData.VERTICAL_BOTTOM_TO_TOP:
+                                        // if going backwards
+                                        if (backward) {
+                                            if ((startPoint[1] + 15) >= localAreas[bottom][1] + localAreas[bottom][3]) {
+                                                //Do nothing to localAreas as we want to pick up the end of a line
+                                            } else {
+                                                localAreas[bottom][3] = startPoint[1] - localAreas[bottom][1];
+                                            }
+
+                                        } else {
+                                            if ((endPoint[1] + 15) >= localAreas[bottom][1] + localAreas[bottom][3]) {
+                                                //Do nothing to localAreas as we want to pick up the end of a line
+                                            } else {
+                                                localAreas[bottom][3] = endPoint[1] - localAreas[bottom][1];
+                                            }
+                                        }
+                                        break;
+                                }
+                            }
+                        }
+                        return localAreas;
+                    }
+                }
+            }
+        } else {
+            //if inset add in difference transparently
+            if (highlights != null) {
+                if (highlights[2] < 0) {
+                    highlights[2] = -highlights[2];
+                    highlights[0] -= highlights[2];
+                }
+
+                if (highlights[3] < 0) {
+                    highlights[3] = -highlights[3];
+                    highlights[1] -= highlights[3];
+                }
+
+                if (areas != null) {
+                    final Integer p = page;
+                    int[][] localAreas = this.areas.get(p);
+                    if (localAreas != null) {
+                        boolean matchFound = false;
+
+                        //see if already added
+                        final int size = localAreas.length;
+                        for (int i = 0; i < size; i++) {
+                            if (localAreas[i] != null) {
+                                //If area has been added before please ignore
+                                if (localAreas[i] != null && (localAreas[i][0] == highlights[0] && localAreas[i][1] == highlights[1] && localAreas[i][2] == highlights[2]
+                                        && localAreas[i][3] == highlights[3])) {
+                                    matchFound = true;
+                                    i = size;
+                                }
+                            }
+                        }
+
+                        if (!matchFound) {
+                            final int newSize = localAreas.length + 1;
+                            final int[][] newAreas = new int[newSize][4];
+                            for (int i = 0; i < localAreas.length; i++) {
+                                if (localAreas[i] != null) {
+                                    newAreas[i] = new int[]{localAreas[i][0], localAreas[i][1], localAreas[i][2], localAreas[i][3]};
+                                }
+                            }
+                            localAreas = newAreas;
+
+                            localAreas[localAreas.length - 1] = highlights;
+                        }
+                        return localAreas;
+                    } else {
+                        return new int[][]{highlights};
+                    }
+                } else {
+                    areas = new HashMap<Integer, int[][]>();
+                    final int[][] localAreas = new int[1][4];
+                    localAreas[0] = highlights;
+                    return localAreas;
+                }
+            }
+        }
+        return null;
+    }
+    
     public boolean hasHighlightAreasUpdated() {
 		return hasHighlightAreasUpdated;
 	}

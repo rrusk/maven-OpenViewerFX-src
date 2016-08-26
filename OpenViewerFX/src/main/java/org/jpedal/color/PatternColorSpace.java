@@ -40,12 +40,16 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import org.jpedal.exception.PdfException;
+import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.ObjectStore;
+import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.PatternObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.objects.raw.ShadingObject;
 import org.jpedal.parser.PdfStreamDecoderForPattern;
 import org.jpedal.parser.ValueTypes;
 import org.jpedal.render.DynamicVectorRenderer;
@@ -109,18 +113,10 @@ public class PatternColorSpace extends GenericColorSpace{
             strokCol=patternColorSpace.getColor();
         }
         
-        PatternObj=(PatternObject) patterns.get(value_loc[0]);
-        
-//        if(PatternObj.getObjectRefAsString().equals("614 0 R")){
-//            currentColor=new PdfColor(0,255,0);
-//            return ;
-//        }
-
-        //ensure read
-        currentPdfFile.checkResolved(PatternObj);
+        PatternObj=getPatternObjectFromRefOrDirect(currentPdfFile, (byte[]) patterns.get(value_loc[0]));
         
         //lookup table
-        final byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
+        final byte[] streamData=PatternObj.getDecodedStream();
         
         //type of Pattern (shading or tiling)
         final int shadingType= PatternObj.getInt(PdfDictionary.PatternType);
@@ -158,13 +154,28 @@ public class PatternColorSpace extends GenericColorSpace{
         }
     }
     
+    static PatternObject getPatternObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
+    
+        final PatternObject colObj  = new PatternObject(new String(data));
+
+        if(data[0]=='<') {
+            colObj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            colObj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        colObj.setUnresolvedData(data,PdfDictionary.Pattern);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        objectDecoder.checkResolved(colObj);
+        
+        return colObj;
+    }
     
     public BufferedImage getImageForPatternedShape(GraphicsState gs){
         
         float mm[][] = gs.CTM;
         AffineTransform gsAffine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
         
-        currentPdfFile.checkResolved(PatternObj);
         final byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
         final int patternType= PatternObj.getInt(PdfDictionary.PatternType);
         
@@ -513,17 +524,13 @@ public class PatternColorSpace extends GenericColorSpace{
      */
     private PdfPaint setupShading(final PdfObject PatternObj, final float[][] matrix) {
 
-        final PdfObject Shading=PatternObj.getDictionary(PdfDictionary.Shading);
-
-        final PdfObject ColorSpace=Shading.getDictionary(PdfDictionary.ColorSpace);
+        final PdfArrayIterator shadingArray=PatternObj.getMixedArray(PdfDictionary.Shading);
+    
+        final PdfObject Shading=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject(PatternObj.getObjectRefAsString()), currentPdfFile.getObjectReader(),shadingArray.getNextValueAsByte(true), PdfDictionary.Shading);
         
-        //convert colorspace and get details
-        GenericColorSpace newColorSpace=ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
-        
-        //use alternate as preference if CMYK
-        if(newColorSpace.getID()==ColorSpaces.ICC && ColorSpace.getParameterConstant(PdfDictionary.Alternate)==ColorSpaces.DeviceCMYK) {
-            newColorSpace=new DeviceCMYKColorSpace();
-        }
+        final PdfArrayIterator ColorSpace=Shading.getMixedArray(PdfDictionary.ColorSpace);
+         
+        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
         
         return new ShadedPaint(Shading, isPrinting,newColorSpace, currentPdfFile,matrix,colorsReversed);
         

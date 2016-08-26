@@ -38,8 +38,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.util.HashMap;
 import java.util.Map;
-import org.jpedal.io.PdfObjectReader;
-import org.jpedal.objects.raw.PdfObject;
 
 /**
  * handle Device ColorSpace
@@ -49,12 +47,15 @@ public class DeviceNColorSpace extends SeparationColorSpace {
     private static final long serialVersionUID = -1372268945371555187L;
     
     private final Map<Integer, Integer> cache=new HashMap<Integer, Integer>();
-    
-    public DeviceNColorSpace(final PdfObjectReader currentPdfFile, final PdfObject colorSpace) {
+     
+    public DeviceNColorSpace(final int componentCount, final ColorMapping colorMapper,final float[] domain, final GenericColorSpace altCS){
         
         setType(ColorSpaces.DeviceN);
         
-        processColorToken(currentPdfFile, colorSpace);
+        this.componentCount=componentCount;
+        this.colorMapper=colorMapper;
+        this.domain=domain;
+        this.altCS=altCS;
         
     }
     

@@ -165,39 +165,7 @@ public class ExtGStateObject extends PdfObject {
         }
     }
 
-    @Override
-    public void setIntNumber(final int id, final int value){
 
-        switch(id){
-
-//	        case PdfDictionary.Height:
-//	            Height=value;
-//	        break;
-//
-//	        case PdfDictionary.Width:
-//	            Width=value;
-//	        break;
-
-            default:
-            	super.setIntNumber(id, value);
-        }
-    }
-
-    @Override
-    public int getInt(final int id){
-
-        switch(id){
-
-//        	case PdfDictionary.Height:
-//            return Height;
-//
-//	        case PdfDictionary.Width:
-//	            return Width;
-
-            default:
-            	return super.getInt(id);
-        }
-    }
 
     @Override
     public void setDictionary(final int id, final PdfObject value){
@@ -313,26 +281,6 @@ public class ExtGStateObject extends PdfObject {
         return PDFvalue;
     }
 
-    @Override
-    public int getParameterConstant(final int key) {
-
-        switch(key){
-
-
-//            case PdfDictionary.BaseEncoding:
-//
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
-        default:
-        	return super.getParameterConstant(key);
-
-        }
-    }
 
 //    public void setStream(){
 //
@@ -355,28 +303,7 @@ public class ExtGStateObject extends PdfObject {
         }
 	}
 
-    @Override
-    public double[] getDoubleArray(final int id) {
 
-        switch(id){
-           default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
 
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
@@ -422,77 +349,7 @@ public class ExtGStateObject extends PdfObject {
         }
     }
 
-    @Override
-    public void setName(final int id, final byte[] value) {
 
-        switch(id){
-
-
-//            case PdfDictionary.CMapName:
-//                rawCMapName=value;
-//            break;
-
-            default:
-                super.setName(id,value);
-
-        }
-
-    }
-
-    @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//
-
-            default:
-                super.setTextStreamValue(id,value);
-
-        }
-
-    }
-
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-//            case PdfDictionary.BaseFont:
-//
-//            //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-
-            default:
-                return super.getName(id);
-
-        }
-    }
-
-    @Override
-    public String getTextStreamValue(final int id) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//
-//	            //setup first time
-//	            if(CharSet==null && rawCharSet!=null)
-//	            	CharSet=new String(rawCharSet);
-//
-//	            return CharSet;
-
-            default:
-                return super.getTextStreamValue(id);
-
-        }
-    }
 
     /**
      * unless you need special fucntions,

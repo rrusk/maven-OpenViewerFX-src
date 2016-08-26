@@ -58,113 +58,8 @@ public class InfoObject extends PdfObject {
     public InfoObject(final int ref, final int gen) {
         super(ref,gen);
     }
-
-
-    @Override
-    public boolean getBoolean(final int id){
-
-        switch(id){
-
-            // case PdfDictionary.ImageMask:
-            // 	return ImageMask;
-
-
-            default:
-                return super.getBoolean(id);
-        }
-
-    }
-
-    @Override
-    public void setBoolean(final int id, final boolean value){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
-
-            default:
-                super.setBoolean(id, value);
-        }
-    }
     
-    @Override
-    public PdfObject getDictionary(final int id){
 
-        switch(id){
-
-//	        case PdfDictionary.OPI:
-//	        	return OPI;
-//
-//            case PdfDictionary.XObject:
-//                return XObject;
-
-            default:
-                return super.getDictionary(id);
-        }
-    }
-
-    @Override
-    public void setIntNumber(final int id, final int value){
-
-        switch(id){
-
-//	        case PdfDictionary.FormType:
-//	        	FormType=value;
-//	        break;
-//
-//	        case PdfDictionary.Height:
-//	            Height=value;
-//	        break;
-//
-//	        case PdfDictionary.Width:
-//	            Width=value;
-//	        break;
-
-            default:
-                super.setIntNumber(id, value);
-        }
-    }
-
-    @Override
-    public int getInt(final int id){
-
-        switch(id){
-
-//        	case PdfDictionary.FormType:
-//            return FormType;
-//
-//        	case PdfDictionary.Height:
-//            return Height;
-//
-//	        case PdfDictionary.Width:
-//	            return Width;
-
-            default:
-                return super.getInt(id);
-        }
-    }
-
-    @Override
-    public void setDictionary(final int id, final PdfObject value){
-
-    	value.setID(id);
-    	
-        switch(id){
-
-//	        case PdfDictionary.OPI:
-//	        	OPI=value;
-//			break;
-//
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
-
-            default:
-                super.setDictionary(id, value);
-        }
-    }
 
 
     @Override
@@ -225,127 +120,13 @@ public class InfoObject extends PdfObject {
         return PDFvalue;
     }
 
-    @Override
-    public int getParameterConstant(final int key) {
 
-        //System.out.println("Get constant for "+key +" "+this);
-        switch(key){
-
-
-//            case PdfDictionary.BaseEncoding:
-//
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
-            default:
-                return super.getParameterConstant(key);
-
-        }
-    }
 
 //    public void setStream(){
 //
 //        hasStream=true;
 //    }
 
-
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
-
-        switch(id){
-
-            //case PdfDictionary.Differences:
-            //    return new PdfArrayIterator(Differences);
-
-            default:
-                return super.getMixedArray(id);
-        }
-    }
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-                return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-                super.setDoubleArray(id, value);
-        }
-    }
-
-    @Override
-    public int[] getIntArray(final int id) {
-
-        switch(id){
-
-            default:
-                return super.getIntArray(id);
-        }
-    }
-
-    @Override
-    public void setIntArray(final int id, final int[] value) {
-
-        switch(id){
-
-            default:
-                super.setIntArray(id, value);
-        }
-    }
-
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-//            case PdfDictionary.Differences:
-//                Differences=value;
-//            break;
-
-            default:
-                super.setMixedArray(id, value);
-        }
-    }
-
-    @Override
-    public float[] getFloatArray(final int id) {
-
-        switch(id){
-            default:
-                return super.getFloatArray(id);
-
-        }
-    }
-
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.Matrix:
-//	            Matrix=value;
-//	        break;
-
-            default:
-                super.setFloatArray(id, value);
-        }
-    }
 
     @Override
     public void setName(final int id, final byte[] value) {
@@ -612,26 +393,6 @@ public class InfoObject extends PdfObject {
         }
     }
 
-    @Override
-    public byte[][] getKeyArray(final int id) {
-
-        switch(id){
-
-            default:
-                return super.getKeyArray(id);
-        }
-    }
-
-    @Override
-    public void setKeyArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            default:
-                super.setKeyArray(id, value);
-        }
-
-    }
 
     @Override
     public int getObjectType(){

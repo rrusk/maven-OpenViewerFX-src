@@ -1222,22 +1222,19 @@ public class StandardFonts {
             base10 = true;
         }
 
-        if (glyphName != null && glyphName.matches("[0-9]+")) {
+        if (glyphName != null) {
             try {
-                int num;
-                if (base10) {
-                    num = Integer.parseInt(glyphName, 10);
-                    num = mapCIDToValidUnicode(fontName, num);
-                } else {
-                    num = Integer.parseInt(glyphName, 16);
+                if (base10 && glyphName.matches("[0-9]+")) {
+                    int num = Integer.parseInt(glyphName, 10);
+                    return mapCIDToValidUnicode(fontName, num);
+                } else if (glyphName.matches("[0-9A-F]+")) {
+                    return Integer.parseInt(glyphName, 16);
                 }
-                return num;
             } catch (final NumberFormatException e) {
-
                 LogWriter.writeLog("Exception in handling cid id "+e);
-
             }
         }
+
         return -1;
     }
     

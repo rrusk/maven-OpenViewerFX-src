@@ -36,6 +36,8 @@ import org.jpedal.exception.PdfException;
 import org.jpedal.fonts.FontMappings;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.StandardFonts;
+import org.jpedal.io.ObjectDecoder;
+import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.FontObject;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -64,11 +66,14 @@ public class FontResolver {
         //check it was decoded
         if(restoredFont==null){
 
-            PdfObject newFont= cache.unresolvedFonts.get(fontID);
-            if(newFont==null){ //once decoded remove from this list of stub font objects 
+            PdfObject newFont=null;
+            byte[] newFontData= cache.unresolvedFonts.get(fontID);
+            if(newFontData==null){ //once decoded remove from this list of stub font objects 
                 cache.directFonts.remove(fontID);
+            }else{
+                newFont=getFontObjectFromRefOrDirect(pdfStreamDecoder.currentPdfFile, newFontData);
             }
-
+            
             /*
              * in Flatten forms, if font not in our resources, we need to create one based on name
              * Otherwise we will not switch from whatever is last being used on page (and might have custom value)
@@ -139,5 +144,22 @@ public class FontResolver {
         newFont.setConstant(PdfDictionary.Subtype, StandardFonts.TRUETYPE);
         fontID=StandardFonts.expandName(name); //turns common shortened versions used in AP (ie Helv to Helvetica)
         return fontID;
+    }
+    
+    public static FontObject getFontObjectFromRefOrDirect(final  PdfObjectReader currentPdfFile, final byte[] data) {
+        
+        final FontObject obj  = new FontObject(new String(data));
+
+        if(data[0]=='<') {
+            obj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            obj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        obj.setUnresolvedData(data,PdfDictionary.Font);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        objectDecoder.checkResolved(obj);
+        
+        return obj;
     }
 }

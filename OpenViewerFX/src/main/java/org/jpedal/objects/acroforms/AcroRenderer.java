@@ -63,6 +63,8 @@ import org.jpedal.utils.StringUtils;
  */
 public class AcroRenderer{
     
+    public static boolean FROM_JPDF2FORMS = false;
+    
     FormObject[] Fforms, Aforms;
     
     private PdfObject AcroRes;
@@ -571,7 +573,7 @@ public class AcroRenderer{
                         		final float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
                         		
                         		if(pageData.getRotation(page)%180!=0) {
-                                    po.setFloatArray(PdfDictionary.Rect, new float[]{rect[2] - 160, -100, rect[2], 0});
+                                    po.setFloatArray(PdfDictionary.Rect, new float[]{rect[2], pageData.getCropBoxHeight(page)-100, rect[2]+160, pageData.getCropBoxHeight(page)});
                                 } else {
                                     po.setFloatArray(PdfDictionary.Rect, new float[]{pageData.getCropBoxWidth(page), rect[3] - 100, pageData.getCropBoxWidth(page) + 160, rect[3]});
                                 }
@@ -836,7 +838,7 @@ public class AcroRenderer{
      * Utility method to ensure formObject is actually an annotation before we continue
      * @return True if annotation
      */
-    static boolean isAnnotation(FormObject formObject){
+    public static boolean isAnnotation(FormObject formObject){
         
         if(formObject.getParameterConstant(PdfDictionary.Type)==PdfDictionary.Annot){
             return true;

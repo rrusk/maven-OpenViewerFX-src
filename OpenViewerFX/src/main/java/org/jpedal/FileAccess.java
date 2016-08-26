@@ -45,10 +45,10 @@ import org.jpedal.display.Display;
 import org.jpedal.display.PageOffsets;
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ExternalHandlers;
-import org.jpedal.io.DecryptionFactory;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.linear.LinearParser;
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.PdfPageData;
@@ -852,7 +852,7 @@ public class FileAccess {
                 linearPageCount=linearParser.getPageCount();
 
             }else {
-                pdfObject= currentPdfFile.getObjectReader().readReferenceTable(null);
+                pdfObject= currentPdfFile.getObjectReader().readReferenceTable(null, currentPdfFile.getObjectReader());
             }
 
             //new load code - be more judicious in how far down tree we scan

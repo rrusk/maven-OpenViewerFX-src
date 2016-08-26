@@ -93,7 +93,7 @@ public class StringValue {
         while(raw[i]!='R' && !isNull){
             
             //allow for null for Parent
-            if(PDFkeyInt== PdfDictionary.Parent && raw[i]=='n' && raw[i+1]=='u' && raw[i+2]=='l' && raw[i+3]=='l') {
+            if(PDFkeyInt== PdfDictionary.Parent && ArrayUtils.isNull(raw,i)) {
                 isNull = true;
             }
             

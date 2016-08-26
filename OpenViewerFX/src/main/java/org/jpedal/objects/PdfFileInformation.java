@@ -33,10 +33,10 @@
 package org.jpedal.objects;
 
 import org.jpedal.constants.PDFflags;
-import org.jpedal.io.DecryptionFactory;
 import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.raw.MetadataObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;

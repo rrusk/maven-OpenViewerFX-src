@@ -1010,14 +1010,12 @@ public class JavaFXPreferences {
         final GridPane contentGridPane = new GridPane();
         contentGridPane.getColumnConstraints().setAll(new ColumnConstraints(100), new ColumnConstraints(200)); //set width of grid columns
         final Text nameTitle = new Text(Messages.getMessage("PdfPreferences.ExtensionName"));
-        final Text bcmailName = new Text("BCMail");
         final Text cidName = new Text("CID");
         final Text jceName = new Text("JCE");
         final Text rhinoName = new Text("Rhino");
         nameTitle.setFont(titleFont);
 
         final Text descriptionTitle = new Text(Messages.getMessage("PdfPreferences.ExtensionDescription"));
-        final Text bcmailDescr = new Text(Messages.getMessage("PdfExtensions.BCMail.text"));
         final Text cidDescr = new Text(Messages.getMessage("PdfExtensions.CID.text"));
         final Text jceDescr = new Text(Messages.getMessage("PdfExtensions.JCE.text"));
         final Text rhinoDescr = new Text(Messages.getMessage("PdfExtensions.Rhino.text"));
@@ -1026,11 +1024,8 @@ public class JavaFXPreferences {
         final Text versionTitle = new Text(Messages.getMessage("PdfPreferences.ExtensionVersion"));
         versionTitle.setFont(titleFont);
         
-        final Hyperlink bcmailVersion = new Hyperlink();
-        String details = getBCMailVersion(bcmailVersion);
-
         final Hyperlink cidVersion = new Hyperlink();
-        details += getCidVersion(cidVersion);
+        String details = getCidVersion(cidVersion);
         
         final Hyperlink jceVersion = new Hyperlink();
         details += getJCEVersion(jceVersion);
@@ -1051,8 +1046,6 @@ public class JavaFXPreferences {
         
         int y = 0;
         addLineToExtensionGrid(contentGridPane, nameTitle, descriptionTitle, versionTitle, y);
-        y++;
-        addLineToExtensionGrid(contentGridPane, bcmailName, bcmailDescr, bcmailVersion, y);
         y++;
         addLineToExtensionGrid(contentGridPane, cidName, cidDescr, cidVersion, y);
         y++;
@@ -1174,37 +1167,6 @@ public class JavaFXPreferences {
         return details;
     }
 
-    private static String getBCMailVersion(final Hyperlink versionNode){
-        String details = "";
-        String version = "Unknown Version";
-        try {
-            final Class bcmailc = Class.forName("org.bouncycastle.jcajce.JcaJceHelper");
-            final String className = bcmailc.getName().replace('.', '/');
-            final String[] paths = bcmailc.getResource('/' + className + ".class").getPath().split("!");
-            final URL file = new URL(paths[0]);
-            final JarFile jar = new JarFile(file.getFile());
-            if (!jar.getManifest().getMainAttributes().getValue("Implementation-Version").isEmpty()) {
-                version = jar.getManifest().getMainAttributes().getValue("Implementation-Version");
-            }
-            versionNode.setText(version);
-            details += "bcmail: " + version + '\n';
-        } catch (final Exception e) {
-            versionNode.setText(Messages.getMessage("PdfExtensions.getText")+' '+e);
-            versionNode.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(final ActionEvent e) {
-                    try {
-                        BrowserLauncher.openURL(Messages.getMessage("PdfExtensions.BCMail.link"));
-                    } catch (final Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
-        }
-        
-        return details;
-    }
-    
     private static void addLineToExtensionGrid(GridPane contentGridPane, Node name, Node desc, Node value, int y){
         contentGridPane.add(name, 0, y);
         contentGridPane.add(desc, 1, y);

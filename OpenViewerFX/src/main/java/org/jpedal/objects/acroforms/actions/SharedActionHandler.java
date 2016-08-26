@@ -1747,11 +1747,11 @@ public abstract class SharedActionHandler implements ActionHandler {
         if (((MouseEvent)raw).getClickCount() == 2) {
             
             //find the popup dictionary so we can get the ref (we do this to get the ref so we can lookup)
-            final FormObject popupObj= (FormObject) formObj.getDictionary(PdfDictionary.Popup);
-            currentPdfFile.checkResolved(popupObj);
+            final FormObject decodedObj= (FormObject) formObj.getDictionary(PdfDictionary.Popup);
+            currentPdfFile.checkResolved(decodedObj);
             
             //use the ref to lookup the actual instance where the gui comp will be stored in
-            final FormObject decodedObj= this.acrorend.getFormObject(popupObj.getObjectRefAsString());
+//            final FormObject decodedObj= this.acrorend.getFormObject(popupObj.getObjectRefAsString());
             
             //if it exists toggle on/off
             final Object comp=decodedObj.getGUIComponent();

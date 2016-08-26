@@ -35,10 +35,7 @@ package org.jpedal.parser;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.util.HashMap;
-import java.util.Map;
 import org.jpedal.PdfDecoderInt;
-import org.jpedal.color.GenericColorSpace;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.constants.PageInfo;
 import org.jpedal.exception.PdfException;
@@ -49,14 +46,18 @@ import org.jpedal.fonts.glyph.JavaFXSupport;
 import org.jpedal.fonts.glyph.T3Size;
 import org.jpedal.images.SamplingFactory;
 import org.jpedal.io.DefaultErrorTracker;
+import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.ObjectStore;
+import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.io.StatusBar;
 import org.jpedal.objects.*;
 import org.jpedal.objects.layers.PdfLayerList;
+import org.jpedal.objects.raw.ExtGStateObject;
 import org.jpedal.objects.raw.MCObject;
 import org.jpedal.objects.raw.PdfDictionary ;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.objects.raw.XObject;
 import org.jpedal.parser.color.*;
 import org.jpedal.parser.gs.CM;
 import org.jpedal.parser.gs.Q;
@@ -100,8 +101,6 @@ public class PdfStreamDecoder extends BaseDecoder{
     PdfLayerList layers;
     
     protected boolean getSamplingOnly;
-    
-    private final Map<String, GenericColorSpace> shadingColorspacesObjects=new HashMap<String, GenericColorSpace>(50);
     
     private boolean isTTHintingRequired;
     
@@ -559,9 +558,6 @@ public class PdfStreamDecoder extends BaseDecoder{
         int startCommand=0;
         int shapeCommandCount=0;
 
-        //used in CS to avoid miscaching
-        String csInUse="",CSInUse="";
-        
         PdfShape currentDrawShape = null;
         
         if(parserOptions.useJavaFX()) {
@@ -667,7 +663,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                                     }
                                 }else{
                                 SH.execute(parser.generateOpAsString(0, true), cache, gs,
-                                        isPrinting, shadingColorspacesObjects, parserOptions.getPageNumber(), currentPdfFile,
+                                        isPrinting, parserOptions.getPageNumber(), currentPdfFile,
                                         pageData, current);
                                 }
                             }
@@ -683,36 +679,12 @@ public class PdfStreamDecoder extends BaseDecoder{
                                 
                                 switch(commandID){
                                     
-                                    case Cmd.cs :
-                                    {
-                                        final String colorspaceObject=parser.generateOpAsString(0, true);
-                                        final boolean isLowerCase=true;
-                                        //ensure if used for both Cs and cs simultaneously we only cache one version and do not overwrite
-                                        final boolean alreadyUsed=(!isLowerCase && colorspaceObject.equals(csInUse))||(isLowerCase && colorspaceObject.equals(CSInUse));
-                                        
-                                        if(isLowerCase) {
-                                            csInUse = colorspaceObject;
-                                        } else {
-                                            CSInUse = colorspaceObject;
-                                        }
-                                        
-                                        CS.execute(isLowerCase, colorspaceObject, gs, cache, currentPdfFile, isPrinting, alreadyUsed);
+                                    case Cmd.cs :                                   
+                                        CS.execute(true, parser.generateOpAsString(0, true), gs, cache, currentPdfFile, isPrinting);
                                         break;
-                                    }
-                                    case Cmd.CS :
-                                        
-                                        final String colorspaceObject=parser.generateOpAsString(0, true);
-                                        final boolean isLowerCase=false;
-                                        //ensure if used for both Cs and cs simultaneously we only cache one version and do not overwrite
-                                        final boolean alreadyUsed=(!isLowerCase && colorspaceObject.equals(csInUse))||(isLowerCase && colorspaceObject.equals(CSInUse));
-                                        
-                                        if(isLowerCase) {
-                                            csInUse = colorspaceObject;
-                                        } else {
-                                            CSInUse = colorspaceObject;
-                                        }
-                                        
-                                        CS.execute(isLowerCase, colorspaceObject, gs, cache, currentPdfFile, isPrinting, alreadyUsed);
+                                    
+                                    case Cmd.CS :                                       
+                                        CS.execute(false, parser.generateOpAsString(0, true), gs, cache, currentPdfFile, isPrinting);
                                         break;
                                         
                                     case Cmd.rg :
@@ -786,12 +758,10 @@ public class PdfStreamDecoder extends BaseDecoder{
                                     final String name=parser.generateOpAsString(0, true);
                                     //byte[] rawData;
                                     
-                                    XObject = cache.getXObjects(name);
-                                    if (XObject != null){
+                                    final byte[] XObjectData = cache.getXObjects(name);
+                                    if (XObjectData != null){
                                         
-                                        //rawData=XObject.getUnresolvedData();
-                                        
-                                        currentPdfFile.checkResolved(XObject);
+                                        XObject=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new XObject("1 0 R"), currentPdfFile.getObjectReader(), XObjectData, PdfDictionary.XObject);
                                         
                                         subtype = XObject.getParameterConstant(PdfDictionary.Subtype);
                                     }
@@ -887,7 +857,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                             break;
                     }
                 } catch (final Exception e) {
-                    
+
                     LogWriter.writeLog("[PDF] " + e + " Processing token >" + Cmd.getCommandAsString(commandID) + "<>" + parserOptions.getFileName() + " <" + parserOptions.getPageNumber());
                     
                     //only exit if no issue with stream
@@ -952,10 +922,12 @@ public class PdfStreamDecoder extends BaseDecoder{
                 
             case Cmd.gs :
                 if(!getSamplingOnly){
-                    final PdfObject GS= cache.GraphicsStates.get(parser.generateOpAsString(0, true));
                     
-                    currentPdfFile.checkResolved(GS);
+                    final String key=parser.generateOpAsString(0, true);
+                    final byte[] data= cache.GraphicsStates.get(key);
                     
+                    final PdfObject GS=getExtStateObjectFromRefOrDirect(currentPdfFile,data);
+
                     gs.setMode(GS);
                     
                     final int blendMode=gs.getBMValue();
@@ -1497,5 +1469,22 @@ public class PdfStreamDecoder extends BaseDecoder{
     public void incrementTokenNumber() {
         tokenNumber++;
         current.setValue(DynamicVectorRenderer.TOKEN_NUMBER,tokenNumber);
+    }
+    
+    private static ExtGStateObject getExtStateObjectFromRefOrDirect(final  PdfObjectReader currentPdfFile, final byte[] data) {
+        
+        final ExtGStateObject obj  = new ExtGStateObject(new String(data));
+
+        if(data[0]=='<') {
+            obj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            obj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        obj.setUnresolvedData(data,PdfDictionary.ExtGState);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        objectDecoder.checkResolved(obj);
+        
+        return obj;
     }
 }

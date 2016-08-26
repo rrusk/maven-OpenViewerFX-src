@@ -53,33 +53,10 @@ public class PatternObject extends XObject {
 
 
     @Override
-    public boolean getBoolean(final int id){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	return ImageMask;
-//        	
-       
-            default:
-            	return super.getBoolean(id);
-        }
-
+    public boolean decompressStreamWhenRead() {
+        return true;
     }
-    
-    @Override
-    public void setBoolean(final int id, final boolean value){
 
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
-        
-            default:
-                super.setBoolean(id, value);
-        }
-    }
 
     @Override
     public void setIntNumber(final int id, final int value){
@@ -254,168 +231,14 @@ public class PatternObject extends XObject {
         return PDFvalue;
     }
 
-    @Override
-    public int getParameterConstant(final int key) {
 
-        switch(key){
-        
-                   
-//            case PdfDictionary.BaseEncoding:
-//            	
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
-        default:
-        	return super.getParameterConstant(key);
-
-        }
-    }
 
 //    public void setStream(){
 //
 //        hasStream=true;
 //    }
     
-    
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
-		
-    	switch(id){
 
-            //case PdfDictionary.Differences:
-            //    return new PdfArrayIterator(Differences);
-
-            default:
-			return super.getMixedArray(id);
-        }
-	}
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
-    
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
-
-        switch(id){
-            default:
-            	super.setMixedArray(id, value);
-        }
-    }
-
-    @Override
-    public float[] getFloatArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getFloatArray(id);
-
-        }
-    }
-
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.Matrix:
-//	            Matrix=value;
-//	        break;
-        
-            default:
-            	super.setFloatArray(id, value);
-        }
-    }
-
-    @Override
-    public void setName(final int id, final byte[] value) {
-
-        switch(id){
-
-            
-//            case PdfDictionary.CMapName:
-//                rawCMapName=value;
-//            break;
-            
-            default:
-                super.setName(id,value);
-
-        }
-
-    }
-    
-    @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//	        
-            
-            default:
-                super.setTextStreamValue(id,value);
-
-        }
-
-    }
-
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-//            case PdfDictionary.BaseFont:
-//
-//            //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-               
-            default:
-                return super.getName(id);
-
-        }
-    }
-    
-    @Override
-    public String getTextStreamValue(final int id) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//	
-//	            //setup first time
-//	            if(CharSet==null && rawCharSet!=null)
-//	            	CharSet=new String(rawCharSet);
-//	
-//	            return CharSet;
-        
-            default:
-                return super.getTextStreamValue(id);
-
-        }
-    }
 
     /**
      * unless you need special fucntions,

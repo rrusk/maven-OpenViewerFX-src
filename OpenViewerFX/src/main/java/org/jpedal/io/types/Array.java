@@ -60,6 +60,9 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
     int PDFkeyInt;
 
     int rawLength;
+    
+    private String indirectRef=null;
+    private boolean isSingle;
    
     public Array(final PdfFileReader pdfFileReader, final int i, final int type, final byte[] raw) {
         super(pdfFileReader);
@@ -101,6 +104,8 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
 
     private boolean readIndirect(final PdfObject pdfObject) throws RuntimeException {
 
+        isSingle=false;
+        
         //allow for indirect to 1 item
         final int startI = i;
 
@@ -142,6 +147,10 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         //read the Dictionary data
         arrayData = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(ref, generation), ref, generation);
 
+        if(decryption!=null){
+            indirectRef=ref+" "+generation+" R";
+        }
+        
         //allow for data in Linear object not yet loaded
         if (arrayData == null) {
             pdfObject.setFullyResolved(false);
@@ -176,7 +185,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
             }
 
             if (arrayData[j2] == 47) { //allow for value of type  32 0 obj /FlateDecode endob
-                j2--;
+              //  j2--;
                 break;
             }
             
@@ -188,6 +197,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
                 if (debugFastCode) {
                     System.out.println(padding + "Single value, not indirect "+pdfObject.getObjectRefAsString());
                 }
+                isSingle=true;
 
                 break;
             }
@@ -203,7 +213,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
     public int readArray(final PdfObject pdfObject, final int PDFkeyInt) {
 
         
-        if(findStart()){ //will also exit if empty array [] 
+        if(raw[i]!='/' && findStart()){ //will also exit if empty array [] 
             return i + 1;
         }
         
@@ -217,7 +227,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         //may need to add method to PdfObject is others as well as Mask (last test to  allow for /Contents null
         //0 never occurs but we set as flag if called from gotoDest/DefaultActionHandler
-        boolean isIndirect=raw[i]!=91 && raw[i]!='(' && raw[0]!=0 && !ArrayUtils.isNull(raw,i) && ArrayUtils.handleIndirect(raw, i); 
+        boolean isIndirect=raw[i]!=91  && raw[i]!='(' && raw[0]!=0 && !ArrayUtils.isNull(raw,i) && ArrayUtils.handleIndirect(raw, i); 
         boolean singleKey=isFirstKeySingle();
          
         //single value ie /Filter /FlateDecode or (text)
@@ -261,7 +271,11 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
                 break;
             }else if(arrayData[j2]=='>' && arrayData[j2+1]=='>'){
                 break;
-            }else if(arrayData[j2-1]=='/'){  //isKey               
+            }else if(arrayData[j2-1]=='/'){  //isKey   
+                if(type==PdfDictionary.VALUE_IS_FLOAT_ARRAY ||type==PdfDictionary.VALUE_IS_INT_ARRAY){ //must be end of values in this case
+                    j2--;
+                    break;
+                }
                 newValues=writeKey();
             }else if(ArrayUtils.isRef(arrayData, j2) || (arrayData[j2]=='<' && arrayData[j2+1]=='<')){
                 newValues = writeObject(keyStart);
@@ -271,7 +285,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
                 newValues=writeNull();
             }else if(arrayData[j2]=='('){                                 
                 newValues=writeString(pdfObject);
-            }else if(arrayData[j2]=='['){                                
+            }else if(ArrayUtils.isArray(arrayData, j2)){                                
                 newValues=writeArray();
             }else if(arrayData[j2+1]=='<' && arrayData[j2+2]=='<'){                                
                 newValues = writeDirectDictionary(keyStart);
@@ -282,14 +296,14 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
             }
            
             if (debugFastCode) {
-                System.out.println(padding + "<Element -----" + currentElement + "( j2=" + j2 + " ) value=" + new String(newValues) + '<');
+                System.out.println(padding + "<Element -----" + currentElement + "( j2=" + j2 + " ) value=" + new String(newValues) + '<'+" "+singleKey);                      
             }
             
             valuesRead.add(newValues);           
             
             currentElement++;
             
-            if(singleKey){
+            if(singleKey || isSingle){
                 break;
             }
             
@@ -368,15 +382,26 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
     }
 
-    private byte[] writeArray(){ // [59 0 R /XYZ null 711 null ]
+    private byte[] writeArray(){ // [59 0 R /XYZ null 711 null ] or [/DeviceN [/Black]   /DeviceCMYK 16 0 R]
+        
+        int depth=0;
         
         if(debugFastCode){
             System.out.println(padding + "----array");
         }
         
         int keyStart=j2;
-        while(arrayData[j2]!=']') {           
-            j2++;    
+        while(arrayData[j2]!=']' || depth>0) {   
+            
+            if(arrayData[j2]=='['){
+                depth++;
+            }
+            
+            j2++; 
+            
+            if(arrayData[j2]==']'){
+                depth--;
+            }
         }
         
         //exclude end bracket
@@ -407,7 +432,14 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         try {
             if (!pdfObject.isInCompressedStream() && decryption!=null) {
-                newValues = decryption.decrypt(newValues, pdfObject.getObjectRefAsString(), false, null, false, false);
+                
+                String ref=pdfObject.getObjectRefAsString();
+                
+                if(indirectRef!=null){
+                    ref=indirectRef;
+                }
+                
+                newValues = decryption.decrypt(newValues,ref, false, null, false, false);
             }
         }catch (final PdfSecurityException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
@@ -506,7 +538,11 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         }
         
         if (debugFastCode) {
-            System.out.println(padding + "----scanElements j2="+j2+" chars="+ + arrayData[j2-1]+" "+ arrayData[j2]+" "+ arrayData[j2+1]);
+            if(j2>0){
+                System.out.println(padding + "----scanElements j2="+j2+" chars="+ arrayData[j2-1]+" "+ arrayData[j2]+" "+ arrayData[j2+1]);
+            }else{
+                System.out.println(padding + "----scanElements j2="+j2+" chars="+ arrayData[j2]+" "+ arrayData[j2+1]);
+            }
         }
     }
 
@@ -546,9 +582,13 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         }
         
         byte[] newValues = ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-        
+       
         if(hexString){
-            newValues =ArrayUtils.handleHexString(newValues, decryption, pdfObject.getObjectRefAsString());
+            if(indirectRef==null){
+                newValues =ArrayUtils.handleHexString(newValues, decryption, pdfObject.getObjectRefAsString());
+            }else{
+                newValues =ArrayUtils.handleHexString(newValues, decryption, indirectRef);
+            }
         }
         
         j2++;
@@ -590,10 +630,10 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
     }
 
     boolean isSingleKey() {
-         return (raw[i]==47 || raw[i]=='(' || raw[i]=='<');
+         return (raw[i]=='/' || raw[i]=='(' || raw[i]=='<');
     }
     
     boolean isFirstKeySingle() {
-         return (raw[i]==47 || raw[i]=='(' || raw[i]=='<');
+         return (raw[i]=='/' || raw[i]=='(' || raw[i]=='<');
     }
 }

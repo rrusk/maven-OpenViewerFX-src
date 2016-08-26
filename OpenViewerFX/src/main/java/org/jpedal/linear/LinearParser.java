@@ -305,7 +305,7 @@ public class LinearParser {
         final PdfObject pdfObject;
         if(O!=-1){
             linearObj.setIntNumber(PdfDictionary.O, -1);
-            currentPdfFile.getObjectReader().readReferenceTable(linearObj);
+            currentPdfFile.getObjectReader().readReferenceTable(linearObj, currentPdfFile.getObjectReader());
             pdfObject =new PageObject(O,0);
             currentPdfFile.readObject(pdfObject);
             
@@ -315,7 +315,7 @@ public class LinearParser {
             Ooffset = currentPdfFile.getObjectReader().getOffset(O);
             
         }else{ //use O as flag and reset
-            pdfObject =currentPdfFile.getObjectReader().readReferenceTable(null);
+            pdfObject =currentPdfFile.getObjectReader().readReferenceTable(null, currentPdfFile.getObjectReader());
         }
         
         /*

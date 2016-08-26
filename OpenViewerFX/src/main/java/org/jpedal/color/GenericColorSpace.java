@@ -173,17 +173,6 @@ public class GenericColorSpace {
        
     }
     
-    
-    
-    /**
-     * reset any defaults if reused
-     */
-    public void reset(){
-        
-        currentColor = new PdfColor(0,0,0);
-        
-    }
-    
     //show if problem and we should default to Alt
     public boolean isInvalid(){
         return failed;
@@ -254,9 +243,6 @@ public class GenericColorSpace {
     
     /**any indexed colormap*/
     byte[] IndexedColorMap;
-    
-    /**pantone name if present*/
-    String pantoneName;
     
     /**number of colors*/
     int componentCount=3;
@@ -1235,20 +1221,13 @@ public class GenericColorSpace {
                     k=y;
                 }
                 
-                if(pantoneName==null) {
-                    colorToken=GenericColorSpace.cb+"C='"+c+"' M='"+m+"' Y='"+y+"' K='"+k+"' >";
-                } else {
-                    colorToken=GenericColorSpace.cb+"C='"+c+"' M='"+m+"' Y='"+y+"' K='"+k+"' pantoneName='"+pantoneName+"' >";
-                }
+                colorToken=GenericColorSpace.cb+"C='"+c+"' M='"+m+"' Y='"+y+"' K='"+k+"' >";
+                
             }else{
                 colorToken=GenericColorSpace.cb+"type='shading'>";
             }
         }else{
-            if(pantoneName==null) {
-                colorToken=GenericColorSpace.cb+"C='"+c+"' M='"+m+"' Y='"+y+"' K='"+k+"' >";
-            } else {
-                colorToken=GenericColorSpace.cb+"C='"+c+"' M='"+m+"' Y='"+y+"' K='"+k+"' pantoneName='"+pantoneName+"' >";
-        }
+            colorToken=GenericColorSpace.cb+"C='"+c+"' M='"+m+"' Y='"+y+"' K='"+k+"' >";
         }
         
         return colorToken;

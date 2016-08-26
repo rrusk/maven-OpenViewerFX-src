@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.jpedal.external.ExternalHandlers;
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.javascript.DefaultParser;
@@ -57,6 +58,8 @@ public class Javascript {
 
     /**default to handle commands*/
     private ExpressionEngine jsParser;
+    
+    private boolean actionsExecuted=false;
 
 	private static boolean useNewJSParser;
 	private static boolean disableJavascript;
@@ -114,6 +117,9 @@ public class Javascript {
      * triggered by events not easily tracked with listeners
      */
     public  void executeAction(final String jsCode){
+        
+        actionsExecuted=true;
+        
 		if(disableJavascript) {
             return;
         }
@@ -208,6 +214,8 @@ public class Javascript {
             message = jsParser.execute(ref, type, js, eventType, keyPressed);
         }
 
+        actionsExecuted=true;
+        
         return message;
     }
 
@@ -261,7 +269,9 @@ public class Javascript {
 		if(disableJavascript) {
             return;
         }
-        jsParser.closeFile();
+        if(actionsExecuted && !ExternalHandlers.isULCPresent()){
+            jsParser.closeFile();
+        }
 
     }
 

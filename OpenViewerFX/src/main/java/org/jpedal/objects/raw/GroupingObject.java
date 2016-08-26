@@ -44,9 +44,7 @@ public class GroupingObject extends PdfObject {
 
 	private byte[] rawName;
 
-	private int colorType=PdfDictionary.Unknown;
-        
-        private boolean K,I;
+    private boolean K,I;
 
     private PdfObject colorSpace;
 
@@ -61,26 +59,6 @@ public class GroupingObject extends PdfObject {
     }
 
 
-    @Override
-    public byte[][] getStringArray(final int id) {
-
-        switch(id){
-
-            default:
-            	return super.getStringArray(id);
-        }
-    }
-
-    @Override
-    public void setStringArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            default:
-            	super.setStringArray(id, value);
-        }
-
-    }
 
     @Override
     public boolean getBoolean(final int id){
@@ -134,26 +112,6 @@ public class GroupingObject extends PdfObject {
         }
     }
 
-    @Override
-    public void setIntNumber(final int id, final int value){
-
-        switch(id){
-
-            default:
-            	super.setIntNumber(id, value);
-        }
-    }
-
-    @Override
-    public int getInt(final int id){
-
-        switch(id){
-
-
-            default:
-            	return super.getInt(id);
-        }
-    }
 
     @Override
     public void setDictionary(final int id, final PdfObject value){
@@ -259,132 +217,12 @@ public class GroupingObject extends PdfObject {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-        switch(pdfKeyType){
-        	
-        	case PdfDictionary.ColorSpace:
-        		colorType=PDFvalue;
-        		break;
-        	
-        }
-
         return PDFvalue;
     }
-    
-    @Override
-    public int getParameterConstant(final int key) {
-        final int def= PdfDictionary.Unknown;
-
-        switch(key){
-
-            case PdfDictionary.ColorSpace:
-            	
-                return colorType;
 
 
-                default:
-                	super.getParameterConstant(key);
-        }
-
-        return def;
-    }
-
-    
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
 
 
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
-
-    	switch(id){
-
-            //case PdfDictionary.Differences:
-            //    return new PdfArrayIterator(Differences);
-
-            default:
-			return super.getMixedArray(id);
-        }
-	}
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
-
-    /**
-     * set values (access with getArrayIterator(int id))
-     */
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-//            case PdfDictionary.Differences:
-//                Differences=value;
-//            break;
-
-            default:
-            	super.setMixedArray(id, value);
-        }
-    }
-
-    @Override
-    public float[] getFloatArray(final int id) {
-
-        switch(id){
-
-            default:
-            	return super.getFloatArray(id);
-
-        }
-    }
-    
-    @Override
-    public void setFloatNumber(final int id, final float value){
-
-        switch(id){
-    	
-            default:
-            	super.setFloatNumber(id, value);
-        }
-    }
-    
-    @Override
-    public float getFloatNumber(final int id){
-
-        switch(id){
-	        
-            default:
-            	return super.getFloatNumber(id);
-        }
-    }
-
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-	        
-            default:
-            	super.setFloatArray(id, value);
-        }
-    }
 
     @Override
     public void setName(final int id, final byte[] value) {
@@ -418,22 +256,7 @@ public class GroupingObject extends PdfObject {
 
     }
 
-    @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//
-
-            default:
-                super.setTextStreamValue(id,value);
-
-        }
-
-    }
 
     @Override
     public String getName(final int id) {
@@ -455,24 +278,7 @@ public class GroupingObject extends PdfObject {
         }
     }
 
-    @Override
-    public String getTextStreamValue(final int id) {
 
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//
-//	            //setup first time
-//	            if(CharSet==null && rawCharSet!=null)
-//	            	CharSet=new String(rawCharSet);
-//
-//	            return CharSet;
-
-            default:
-                return super.getTextStreamValue(id);
-
-        }
-    }
 
     /**
      * unless you need special fucntions,

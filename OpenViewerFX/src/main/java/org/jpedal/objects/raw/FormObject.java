@@ -1074,28 +1074,7 @@ public class FormObject extends PdfObject{
         }
     }
 
-    @Override
-    public double[] getDoubleArray(final int id) {
 
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
 
     @Override
     public int[] getIntArray(final int id) {
@@ -1336,32 +1315,7 @@ public class FormObject extends PdfObject{
         }
     }
 
-    @Override
-    public byte[][] getStringArray(final int id) {
 
-        switch(id){
-
-            //case PdfDictionary.XFA:
-              //              return deepCopy(rawXFAasArray);
-
-            default:
-            	return super.getStringArray(id);
-        }
-    }
-
-    @Override
-    public void setStringArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            //case PdfDictionary.XFA:
-              //  rawXFAasArray=value;
-
-            default:
-            	super.setStringArray(id, value);
-        }
-
-    }
 
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {

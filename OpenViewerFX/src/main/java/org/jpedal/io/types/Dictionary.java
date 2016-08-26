@@ -32,15 +32,18 @@
  */
 package org.jpedal.io.types;
 
+import java.util.ArrayList;
 import org.jpedal.io.ObjectDecoder;
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
 import static org.jpedal.io.ObjectDecoder.resolveFully;
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
-import org.jpedal.objects.raw.*;
+import org.jpedal.objects.raw.NamesObject;
+import org.jpedal.objects.raw.ObjectFactory;
+import org.jpedal.objects.raw.PdfDictionary;
+import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.NumberUtils;
-import org.jpedal.utils.StringUtils;
 
 /**
  *
@@ -59,10 +62,7 @@ public class Dictionary {
             i++;
         }
         
-        //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32) {
-            i++;
-        }
+        i=ArrayUtils.skipSpaces(raw, i);
         
         //some objects can have a common value (ie /ToUnicode /Identity-H
         if(raw[i]==47){
@@ -97,8 +97,7 @@ public class Dictionary {
                 
                 if(constant==PdfDictionary.Unknown || isInlineImage){
                     
-                    final byte[] newStr=new byte[keyLength];
-                    System.arraycopy(raw, keyStart, newStr, 0, keyLength);
+                    byte[] newStr=getByteKeyFromStream(keyLength, raw, keyStart);
                     
                     final String s=new String(newStr);
                     valueObj.setGeneralStringValue(s);
@@ -165,7 +164,6 @@ public class Dictionary {
                         i++;
                     }
                     
-                    
                     //roll on and ignore
                     if(raw[i]=='<' && raw[i+1]=='<'){
                         
@@ -186,11 +184,7 @@ public class Dictionary {
                         i--;
                         
                     }else{ //must be a ref
-                        //                					while(raw[i]!='R')
-                        //                						i++;
-                        //                					i++;
-                        //System.out.println("read ref");
-                        i = Dictionary.readDictionaryFromRefOrDirect(PDFkeyInt,pdfObject,objectRef, i, raw, PDFkeyInt,objectReader);
+                       i = Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, i, raw, PDFkeyInt,objectReader);
                     }
                     
                     if(i<raw.length && raw[i]=='/') //move back so loop works
@@ -199,7 +193,7 @@ public class Dictionary {
                     }
                     
                 }else{
-                    i = Dictionary.readDictionaryFromRefOrDirect(PDFkeyInt,pdfObject,objectRef, i, raw, PDFkeyInt,objectReader);
+                    i = Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, i, raw, PDFkeyInt,objectReader);
                 }
             }
         return i;
@@ -213,10 +207,7 @@ public class Dictionary {
         
         while(jj<length){
             
-            //ignore any spaces
-            while(jj<length && (raw[jj]==32 || raw[jj]==13 || raw[jj]==10)) {
-                jj++;
-            }
+            jj=ArrayUtils.skipSpaces(raw, jj);
             
             //number (possibly reference)
             if(jj<length && raw[jj]>='0' && raw[jj]<='9'){
@@ -226,11 +217,8 @@ public class Dictionary {
                     jj++;
                 }
                 
-                //ignore any spaces
-                while(jj<length && (raw[jj]==32 || raw[jj]==10 || raw[jj]==13)) {
-                    jj++;
-                }
-                
+                jj=ArrayUtils.skipSpaces(raw, jj);
+        
                 //generation and spaces
                 while(jj<length && ((raw[jj]>='0' && raw[jj]<='9')||(raw[jj]==32 || raw[jj]==10 || raw[jj]==13))) {
                     jj++;
@@ -245,10 +233,8 @@ public class Dictionary {
                 jj++;
             }
             
-            //ignore any spaces
-            while(jj<length && (raw[jj]==32 || raw[jj]==13 || raw[jj]==10)) {
-                jj++;
-            }
+            jj=ArrayUtils.skipSpaces(raw, jj);
+                        
             
             //must be next key or end
             if(raw[jj]=='>' && raw[jj+1]=='>'){
@@ -340,11 +326,8 @@ public class Dictionary {
             
             final int number= NumberUtils.parseInt(keyStart2, i, raw);
             
-            //generation
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
+            i=ArrayUtils.skipSpaces(raw, i);
+        
             keyStart2=i;
             //move cursor to end of reference
             while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
@@ -352,15 +335,7 @@ public class Dictionary {
             }
             final int generation= NumberUtils.parseInt(keyStart2, i, raw);
             
-            //move cursor to start of R
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
-            if(raw[i]!=82) //we are expecting R to end ref
-            {
-                throw new RuntimeException("3. Unexpected value in file " + raw[i] + " - please send to IDRsolutions for analysis");
-            }
+            i=ArrayUtils.skipSpaces(raw, i);
             
             if(!ignoreRecursion){
                 
@@ -422,28 +397,17 @@ public class Dictionary {
             
             final PdfObject valueObj= ObjectFactory.createObject(PDFkeyInt, pdfObject.getObjectRefAsString(), pdfObject.getObjectType(), pdfObject.getID());
             valueObj.setID(PDFkeyInt);
-            
-            /*
-             * read pairs (stream in data starting at j)
-             */
-            if(ignoreRecursion) //just skip to end
-            {
-                j = readKeyPairs(PDFkeyInt, data, j, -2, null, objectReader);
-            } else{
-                //count values first
-                final int count=readKeyPairs(PDFkeyInt,data, j,-1, null,objectReader);
-                
-                //now set values
-                j=readKeyPairs(PDFkeyInt,data, j,count,valueObj,objectReader);
-                
-                
-                //store value
-                pdfObject.setDictionary(PDFkeyInt,valueObj);
-                
-                if(debugFastCode) {
-                    System.out.println(padding + "Set Dictionary " + count + " pairs type in " + pdfObject + " to " + valueObj);
-                }
+               
+            //read pairs (stream in data starting at j)
+            j=readKeyPairs(data, j,valueObj);
+
+            //store value
+            pdfObject.setDictionary(PDFkeyInt,valueObj);
+
+            if(debugFastCode) {
+                System.out.println(padding + "Set Dictionary pairs type in " + pdfObject + " to " + valueObj);
             }
+            
         }
         
         //update pointer if direct so at end (if ref already in right place)
@@ -456,375 +420,84 @@ public class Dictionary {
         }
         return i;
     }
-    
-     
+
     /**
-     * if pairs is -1 returns number of pairs
-     * otherwise sets pairs and returns point reached in stream
+     * sets pairs and returns point reached in stream
      */
-    static int readKeyPairs(final int id, final byte[] data, final int j,int pairs, final PdfObject pdfObject, final PdfFileReader objectReader) {
-        
-        final boolean debug=false;
-        
-        int start=j,level;
-        
-        final int numberOfPairs=pairs;
-        
-        //same routine used to count first and then fill with values
-        boolean isCountOnly=false,skipToEnd=false;
-        byte[][] keys=null,values=null;
-        PdfObject[] objs=null;
-        
-        if(pairs==-1){
-            isCountOnly=true;
-        }else if(pairs==-2){
-            isCountOnly=true;
-            skipToEnd=true;
-        }else{
-            keys=new byte[numberOfPairs][];
-            values=new byte[numberOfPairs][];
-            objs=new PdfObject[numberOfPairs];
-            
-            if(debug) {
-                System.out.println("Loading " + numberOfPairs + " pairs");
-            }
-        }
-        pairs=0;
-        
+    private static int readKeyPairs(final byte[] data,  int start, final PdfObject pdfObject) {
+
+        final ArrayList<byte[]> keys=new ArrayList<byte[]>(100);
+        final ArrayList<byte[]> values=new ArrayList<byte[]>(100);
+
         while(true){
-            
+
             //move cursor to start of text
             start = getStart(data, start);
 
-            //allow for comment
-            if(data[start]==37){
+            if(data[start]==37){ //allow for comment
                 start = ArrayUtils.skipComment(data, start);
             }
-            
-            //exit at end
-            if(data[start]==62) {
+
+            if(data[start]==62) { //exit at end
                 break;
             }
-            
-            //count token or tell user problem
-            if(data[start]==47){
-                pairs++;
-                start++;
-            }else {
-                throw new RuntimeException("Unexpected value " + data[start] + " - not key pair");
-            }
-            
-            //read token key and save if on second run
-            final int tokenStart=start;
-            while(data[start]!=32 && data[start]!=10 && data[start]!=13 && data[start]!='[' && data[start]!='<' && data[start]!='/') {
-                start++;
-            }
-            
-            final int tokenLength=start-tokenStart;
-            
-            final byte[] tokenKey=new byte[tokenLength];
-            System.arraycopy(data, tokenStart, tokenKey, 0, tokenLength);
-            
-            if(!isCountOnly) //pairs already rolled on so needs to be 1 less
-            {
-                keys[pairs - 1] = tokenKey;
-            }
 
+            //read key (starts with /)           
+            final int tokenStart=start+1;
+            start=ArrayUtils.skipToEndOfKey(data, tokenStart);
+            keys.add(getByteKeyFromStream(start-tokenStart, data, tokenStart));
+
+            //read value
             start=ArrayUtils.skipSpaces(data,start);
 
-            final boolean isDirect=data[start]==60 || data[start]=='[' || data[start]=='/';
-            
-            final byte[] dictData;
-            
-            if(debug) {
-                System.out.println("token=" + new String(tokenKey) + " isDirect " + isDirect);
-            }
-            
-            if(isDirect){
-                //get to start at <<
-                while(data[start-1]!='<' && data[start]!='<' && data[start]!='[' && data[start]!='/') {
-                    start++;
-                }
-                
-                final int streamStart=start;
-                
-                //find end
-                boolean isObject=true;
-                
-                if(data[start]=='<'){
-                    start += 2;
-                    level=1;
-                    
-                    while(level>0){
-                        //   System.out.print((char)data[start]);
-                        if(data[start]=='<' && data[start+1]=='<'){
-                            start += 2;
-                            level++;
-                        }else if(data[start]=='>' && data[start+1]=='>'){
-                            start += 2;
-                            level--;
-                        }else {
-                            start++;
-                        }
-                    }
-                    
-                    //System.out.println("\n<---------------"+start);
-                    
-                    //if(data[start]=='>' && data[start+1]=='>')
-                    //start=start+2;
-                }else if(data[start]=='['){
-                    
-                    level=1;
-                    start++;
-                    
-                    boolean inStream=false;
-                    
-                    while(level>0){
-                        
-                        //allow for streams
-                        if(!inStream && data[start]=='(') {
-                            inStream = true;
-                        } else if(inStream && data[start]==')' && (data[start-1]!='\\' || data[start-2]=='\\' )) {
-                            inStream = false;
-                        }
-                        
-                        //System.out.println((char)data[start]);
-                        
-                        if(!inStream){
-                            if(data[start]=='[') {
-                                level++;
-                            } else if(data[start]==']') {
-                                level--;
-                            }
-                        }
-                        
-                        start++;
-                    }
-                    
-                    isObject=false;
-                }else if(data[start]=='/'){
-                    start++;
-                    while(data[start]!='/' && data[start]!=10 && data[start]!=13 && data[start]!=32){
-                        start++;
-                        
-                        if(start<data.length-1 && data[start]=='>' && data[start+1]=='>') {
-                            break;
-                        }
-                    }
-                }
-                
-                if(!isCountOnly){
-                    final int len=start-streamStart;
-                    dictData=new byte[len];
-                    System.arraycopy(data, streamStart, dictData, 0, len);
-                    //pairs already rolled on so needs to be 1 less
-                    values[pairs-1]=dictData;
-                    
-                    final String ref=pdfObject.getObjectRefAsString();
-                    
-                    //@speed - will probably need to change as we add more items
-                    
-                    if(pdfObject.getObjectType()==PdfDictionary.ColorSpace){
-                        
-                        //isDirect avoids storing multiple direct objects as will overwrite each other
-                        if(isObject && !isDirect){
-                            ColorObjectDecoder.handleColorSpaces(pdfObject, 0,  dictData,objectReader);
-                            objs[pairs-1]=pdfObject;
-                        }else{
-                            final ColorSpaceObject colObject=new ColorSpaceObject(ref);
-                            
-                            if(isDirect) {
-                                colObject.setRef(-1, 0);
-                            }
-                            
-                            ColorObjectDecoder.handleColorSpaces(colObject, 0,  dictData,objectReader);
-                            objs[pairs-1]=colObject;
-                        }
-                        
-                        //handleColorSpaces(-1, valueObj,ref, 0, dictData,debug, -1,null, paddingString);
-                    }else if(isObject) {
+            int refStart=start;
 
-                        final PdfObject valueObj = ObjectFactory.createObject(id, ref, pdfObject.getObjectType(), pdfObject.getID());
-                        valueObj.setID(id);
-                        readDictionaryFromRefOrDirect(id, valueObj, ref, 0, dictData, -1, objectReader);
-                        objs[pairs - 1] = valueObj;
-                    }
-                }
-                
-            }else{ //its 50 0 R
-                
-                final int number;
-                final int generation;
-                final int refStart=start;
-                int keyStart2=start;
+            if(ArrayUtils.isNull(data,start)){
+                start += 4;
+            }else {
 
-                if(data[start]=='n' && data[start+1]=='u' && data[start+2]=='l' && data[start+3]=='l'){
-                    start += 4;
-                }else{
+                if (data[start]==60 || data[start]=='[' || data[start]=='/') {
                     
-                    //number
-                    while(data[start]!=10 && data[start]!=13 && data[start]!=32 && data[start]!=47 &&
-                            data[start]!=60 && data[start]!=62){
+                    refStart = start;
+
+                    if (data[start] == '<') {
+                        start = ObjectUtils.skipToEndOfObject(start, data);
+                    } else if (data[start] == '[') {
+                        start=ArrayUtils.skipToEndOfArray(data, start);                        
+                    } else if (data[start] == '/') {
+                        start=ArrayUtils.skipToEndOfKey(data, start+1);
+                    }
+                } else { //its 50 0 R
+                    while (data[start] != 'R') {
                         start++;
                     }
-                    number= NumberUtils.parseInt(keyStart2, start, data);
-                    
-                    //generation
-                    while(data[start]==10 || data[start]==13 || data[start]==32 || data[start]==47 || data[start]==60) {
-                        start++;
-                    }
-                    
-                    keyStart2=start;
-                    //move cursor to end of reference
-                    while(data[start]!=10 && data[start]!=13 && data[start]!=32 &&
-                            data[start]!=47 && data[start]!=60 && data[start]!=62) {
-                        start++;
-                    }
-                    
-                    generation= NumberUtils.parseInt(keyStart2, start, data);
-                    
-                    //move cursor to start of R
-                    while(data[start]==10 || data[start]==13 || data[start]==32 || data[start]==47 || data[start]==60) {
-                        start++;
-                    }
-               
-                    if(data[start]!=82){ //we are expecting R to end ref
-                        throw new RuntimeException((char)data[start-1]+" "+(char)data[start]+ ' ' +(char)data[start+1]+" 3. Unexpected value in file - please send to IDRsolutions for analysis");
-                    }
-                    start++; //roll past
-                    
-                    if(debug) {
-                        System.out.println("Data in object=" + number + ' ' + generation + " R");
-                    }
-                    
-                    //read the Dictionary data
-                    if(!isCountOnly){
-                        
-                        if(PdfDictionary.getKeyType(id, pdfObject.getObjectType())==PdfDictionary.VALUE_IS_UNREAD_DICTIONARY){
-                            
-                            
-                            final String ref=new String(data, refStart,start-refStart);
-                            
-                            final PdfObject valueObj=ObjectFactory.createObject(id, ref, pdfObject.getObjectType(), pdfObject.getID());
-                            
-                            valueObj.setStatus(PdfObject.UNDECODED_REF);
-                            valueObj.setUnresolvedData(StringUtils.toBytes(ref),id);
-                            
-                            objs[pairs-1]=valueObj;
-                            
-                        }else{
-                            
-                            final byte[] rawDictData=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
-                            
-                            //allow for data in Linear object not yet loaded
-                            if(rawDictData==null){
-                                pdfObject.setFullyResolved(false);
-                                
-                                return data.length;
-                            }
-                            
-                            if(debug){
-                                System.out.println("============================================\n");
-                                for(int aa=0;aa<rawDictData.length;aa++){
-                                    System.out.print((char)rawDictData[aa]);
-                                    
-                                    if(aa>5 && rawDictData[aa-5]=='s' && rawDictData[aa-4]=='t' && rawDictData[aa-3]=='r'&& rawDictData[aa-2]=='e' && rawDictData[aa-1]=='a' && rawDictData[aa]=='m') {
-                                        aa = rawDictData.length;
-                                    }
-                                }
-                                System.out.println("\n============================================");
-                            }
-                            //cleanup
-                            //lose obj at start
-                            int jj=0;
-                            
-                            while(jj<3 ||(rawDictData[jj-1]!=106 && rawDictData[jj-2]!=98 && rawDictData[jj-3]!=111)){
-                                
-                                if(rawDictData[jj]=='/' || rawDictData[jj]=='[' || rawDictData[jj]=='<') {
-                                    break;
-                                }
-                                
-                                jj++;
-                                
-                                if(jj==rawDictData.length){
-                                    jj=0;
-                                    break;
-                                }
-                            }
-                            
-                            //skip any spaces after
-                            while(rawDictData[jj]==10 || rawDictData[jj]==13 || rawDictData[jj]==32)// || data[j]==47 || data[j]==60)
-                            {
-                                jj++;
-                            }
-                            
-                            final int len=rawDictData.length-jj;
-                            dictData=new byte[len];
-                            System.arraycopy(rawDictData, jj, dictData, 0, len);
-                            //pairs already rolled on so needs to be 1 less
-                            values[pairs-1]=dictData;
-                            
-                            final String ref=number+" "+generation+" R";//pdfObject.getObjectRefAsString();
-                            
-                            if(pdfObject.getObjectType()==PdfDictionary.Font && id==PdfDictionary.Font){//last condition for CharProcs
-                                objs[pairs-1]=null;
-                                values[pairs-1]=StringUtils.toBytes(ref);
-                            }else if(pdfObject.getObjectType()==PdfDictionary.XObject){
-                                //intel Unimplemented pattern type 0 in file
-                                final PdfObject valueObj=ObjectFactory.createObject(id, ref, PdfDictionary.XObject, PdfDictionary.XObject);
-                                valueObj.setStatus(PdfObject.UNDECODED_REF);
-                                valueObj.setUnresolvedData(StringUtils.toBytes(ref),id);
-                                
-                                objs[pairs-1]=valueObj;
-                            }else{
-                                
-                                //@speed - will probably need to change as we add more items
-                                final PdfObject valueObj=ObjectFactory.createObject(id, ref, pdfObject.getObjectType(), pdfObject.getID());
-                                valueObj.setID(id);
-                                if(debug){
-                                    System.out.println(ref+" ABOUT TO READ OBJ for "+valueObj+ ' ' +pdfObject);
-                                    
-                                    System.out.println("-------------------\n");
-                                    for(int aa=0;aa<dictData.length;aa++){
-                                        System.out.print((char)dictData[aa]);
-                                        
-                                        if(aa>5 && dictData[aa-5]=='s' && dictData[aa-4]=='t' && dictData[aa-3]=='r'&& dictData[aa-2]=='e' && dictData[aa-1]=='a' && dictData[aa]=='m') {
-                                            aa = dictData.length;
-                                        }
-                                    }
-                                    System.out.println("\n-------------------");
-                                }
-                                
-                                if(valueObj.getObjectType()==PdfDictionary.ColorSpace){
-                                    ColorObjectDecoder.handleColorSpaces(valueObj, 0,  dictData,objectReader);
-                                }else {
-                                    readDictionaryFromRefOrDirect(id, valueObj, ref, 0, dictData, -1, objectReader);
-                                }
-                                
-                                objs[pairs-1]=valueObj;
-                                
-                            }
-                        }
-                    }
+
+                    start++; //roll past R
                 }
+                
+                values.add(getByteKeyFromStream(start - refStart, data, refStart));
             }
         }
-        
-        
-        if(!isCountOnly) {
-            pdfObject.setDictionaryPairs(keys, values, objs);
+
+        final int size=keys.size();
+        byte[][] returnKeys=new byte[size][];
+        byte[][] returnValues=new byte[size][];
+
+        for(int a=0;a<size;a++){
+            returnKeys[a]=keys.get(a);
+            returnValues[a]=values.get(a);
         }
-        
-        if(debug) {
-            System.out.println("done=============================================");
-        }
-        
-        if(skipToEnd || !isCountOnly) {
-            return start;
-        } else {
-            return pairs;
-        }
-        
+
+        pdfObject.setDictionaryPairs(returnKeys, returnValues);
+
+        return start;
+
+    }
+
+    private static byte[] getByteKeyFromStream(final int tokenLength, final byte[] data, final int tokenStart) {
+        final byte[] tokenKey=new byte[tokenLength];
+        System.arraycopy(data, tokenStart, tokenKey, 0, tokenLength);
+        return tokenKey;
     }
 
     private static int getStart(byte[] data, int start) {
@@ -838,7 +511,6 @@ public class Dictionary {
     }
 
     /**
-     * @param id
      * @param pdfObject
      * @param objectRef
      * @param i
@@ -846,7 +518,7 @@ public class Dictionary {
      * @param PDFkeyInt - -1 will store in pdfObject directly, not as separate object
      * @return
      */
-    public static int readDictionaryFromRefOrDirect(final int id, final PdfObject pdfObject, final String objectRef, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int readDictionaryFromRefOrDirect(final PdfObject pdfObject, final String objectRef, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         readDictionaryFromRefOrDirect:
         while (true) {
@@ -870,9 +542,7 @@ public class Dictionary {
             
             //some items like MAsk can be [19 19] or stream
             //and colorspace is law unto itself
-            if ((PDFkeyInt == PdfDictionary.ColorSpace || id == PdfDictionary.ColorSpace || pdfObject.getPDFkeyInt() == PdfDictionary.ColorSpace) && PdfDictionary.getKeyType(id,0)!=PdfDictionary.VALUE_IS_MIXED_ARRAY){
-                return ColorObjectDecoder.processColorSpace(pdfObject, pdfObject.getObjectRefAsString(), i, raw,objectReader);
-            }else if (possibleArrayStart != -1 && (PDFkeyInt == PdfDictionary.Mask || PDFkeyInt == PdfDictionary.TR || PDFkeyInt == PdfDictionary.OpenAction)) {
+            if (possibleArrayStart != -1 && (PDFkeyInt == PdfDictionary.Mask || PDFkeyInt == PdfDictionary.TR || PDFkeyInt == PdfDictionary.OpenAction)) {
                 return ArrayFactory.processArray(pdfObject, raw, PDFkeyInt, possibleArrayStart, objectReader);
             }
             
@@ -906,8 +576,7 @@ public class Dictionary {
                     while (data[j] == 91 || data[j] == 32 || data[j] == 13 || data[j] == 10) {
                         j++;
                     }
-                    
-                    
+
                     //trap empty arrays ie [ ]
                     //ie 13jun/Factuur 2106010.PDF
                     if (data[j] == ']') {
@@ -931,7 +600,7 @@ public class Dictionary {
                         //move cursor to end of reference
                         while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
                             
-                            //trap null arrays ie [null null] or [null]
+                            //trap null arrays ie [null null] or [null]                            
                             
                             if (data[j] == 'l' && data[j - 1] == 'l' && data[j - 2] == 'u' && data[j - 3] == 'n') {
                                 hasNull = true;
@@ -946,11 +615,7 @@ public class Dictionary {
                         
                         ref = NumberUtils.parseInt(keyStart, j, data);
                         
-                        //move cursor to start of generation or next value
-                        while (data[j] == 10 || data[j] == 13 || data[j] == 32)// || data[j]==47 || data[j]==60)
-                        {
-                            j++;
-                        }
+                        j=ArrayUtils.skipSpaces(data, j);
                         
                         //handle nulls
                         if (ref != 69560 || data[keyStart] != 'n') {
@@ -973,17 +638,8 @@ public class Dictionary {
                     
                     generation = NumberUtils.parseInt(keyStart, j, data);
 
-                    //move cursor to start of R
-                    while (data[j] == 10 || data[j] == 13 || data[j] == 32 || data[j] == 47 || data[j] == 60) {
-                        j++;
-                    }
-                    
-                    if (data[j] != 82)  //we are expecting R to end ref
-                    {
-                        throw new RuntimeException("ref=" + ref + " gen=" + ref + " 1. Unexpected value " + data[j] + " in file - please send to IDRsolutions for analysis char=" + (char) data[j]);
-                    }
-                    
-                    //read the Dictionary data
+                    j=ArrayUtils.skipSpaces(data, j);
+                     
                     data = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(ref, generation), ref, generation);
                     
                     //allow for data in Linear object not yet loaded
@@ -996,7 +652,7 @@ public class Dictionary {
                     //disregard corrputed data from start of file
                     if (data != null && data.length > 4 && data[0] == '%' && data[1] == 'P' && data[2] == 'D' && data[3] == 'F') {
                         data = null;
-                    }else if(data[0]=='n' && data[1]=='u' && data[2]=='l' && data[3]=='l'){
+                    }else if(ArrayUtils.isNull(data,0)){
                         data=null;
                     }
                     
@@ -1047,12 +703,8 @@ public class Dictionary {
                     /*
                      * get id from stream
                      */
-                    //skip any spaces
-                    while (data[j] == 10 || data[j] == 13 || data[j] == 32)// || data[j]==47 || data[j]==60)
-                    {
-                        j++;
-                    }
-                    
+                    j=ArrayUtils.skipSpaces(data, j);
+                     
                     boolean isMissingValue = j < raw.length && raw[j] == '<';
                     
                     if (isMissingValue) { //check not <</Last
@@ -1077,10 +729,7 @@ public class Dictionary {
                         
                         ref = NumberUtils.parseInt(keyStart, j, data);
                         
-                        //move cursor to start of generation
-                        while (data[j] == 10 || data[j] == 13 || data[j] == 32 || data[j] == 47 || data[j] == 60) {
-                            j++;
-                        }
+                        j=ArrayUtils.skipSpaces(data, j);
                         
                         keyStart = j;
                         //move cursor to end of reference
@@ -1101,34 +750,11 @@ public class Dictionary {
                         }
                     }
                     
-                    //skip any spaces
-                    while (data[j] == 10 || data[j] == 13 || data[j] == 32 || data[j] == 9)// || data[j]==47 || data[j]==60)
-                    {
-                        j++;
-                    }
+                    j=ArrayUtils.skipSpaces(data, j);
                     
                     //move to start of Dict values
-                    if (data[0] != 60) {
-                        while (data[j] != 60 && data[j + 1] != 60) {
-
-                            //allow for null object
-                            if (data[j] == 'n' && data[j + 1] == 'u' && data[j + 2] == 'l' && data[j + 3] == 'l') {
-                                return i;
-                            }
-
-                            //allow for Direct value ie 2 0 obj /WinAnsiEncoding
-                            if (data[j] == 47) {
-                                break;
-                            }
-
-                            //allow for textStream (text)
-                            if (data[j] == '(') {
-                                j = TextStream.readTextStream(pdfObject, j, data, PDFkeyInt, true, objectReader);
-                                break;
-                            }
-
-                            j++;
-                        }
+                    while (data[j] != 60 && data[j + 1] != 60 && data[j] != 47) {
+                        j++;
                     }
                     
                     i = ObjectDecoder.handleValue(pdfObject, i, PDFkeyInt, j, ref, generation, data,objectReader);
@@ -1137,11 +763,7 @@ public class Dictionary {
             
             return i;
         }
-    }
-    
-   
-   
-    
+    }   
 }
 
 

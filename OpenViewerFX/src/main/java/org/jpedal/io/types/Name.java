@@ -33,11 +33,11 @@
 package org.jpedal.io.types;
 
 import org.jpedal.exception.PdfSecurityException;
-import org.jpedal.io.DecryptionFactory;
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -201,10 +201,7 @@ public class Name {
             i++;
         }
         
-        //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32) {
-            i++;
-        }
+        i=ArrayUtils.skipSpaces(raw, i);
         
         //work out if direct (ie /String or read ref 27 0 R
         int j2=i;
@@ -223,9 +220,7 @@ public class Name {
         boolean isInsideArray=false;
         if(isIndirect){
             int aa=i+1;
-            while(aa<raw.length && (raw[aa]==10 || raw[aa]==13 || raw[aa]==32 )) {
-                aa++;
-            }
+            aa=ArrayUtils.skipSpaces(raw, aa);
             
             if(raw[aa]==47 || raw[aa]==']'){
                 isIndirect=false;
@@ -260,10 +255,7 @@ public class Name {
             
             final int generation= NumberUtils.parseInt(keyStart, i, raw);
             
-            //move cursor to start of R
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
+            i=ArrayUtils.skipSpaces(raw, i);
             
             if(raw[i]!=82){ //we are expecting R to end ref
                 throw new RuntimeException(padding+"2. Unexpected value in file - please send to IDRsolutions for analysis");

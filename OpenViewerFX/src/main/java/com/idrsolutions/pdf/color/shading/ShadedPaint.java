@@ -41,13 +41,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.io.Serializable;
 import java.util.ArrayList;
+import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.function.FunctionFactory;
 import org.jpedal.function.PDFFunction;
-import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.objects.raw.FunctionObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.DecoderOptions;
@@ -136,55 +136,25 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
 
         background = Shading.getFloatArray(PdfDictionary.Background);
 
-        /*
-         * these values appear in several types of shading but not all
-         */
-        final PdfObject functionObj = Shading.getDictionary(PdfDictionary.Function);
-        final byte[][] keys = Shading.getKeyArray(PdfDictionary.Function);
+        PdfArrayIterator keys = Shading.getMixedArray(PdfDictionary.Function);
 
-        /*
-         * setup the translation function
-         */
-        if (functionObj != null) {
-            function = new PDFFunction[1];
-            function[0] = FunctionFactory.getFunction(functionObj, currentPdfFile);
-        } else if (keys != null) {
+        final int functionCount = keys.getTokenCount();
+            
+        if (functionCount>0) {
 
-            int functionCount = 0;
-            if (keys != null) {
-                functionCount = keys.length;
+            final PdfObject[] subFunction = new PdfObject[functionCount];
+
+            for (int i = 0; i < functionCount; i++) {
+                byte[] nextValue=keys.getNextValueAsByte(true);
+                subFunction[i] =ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, nextValue);
             }
 
-            PdfObject functionsObj;
-            if (keys != null) {
+            function = new PDFFunction[subFunction.length];
 
-                final PdfObject[] subFunction = new PdfObject[functionCount];
-
-                String id;
-                for (int i = 0; i < functionCount; i++) {
-
-                    id = new String(keys[i]);
-
-                    if (id.startsWith("<<")) {
-                        functionsObj = new FunctionObject(1);
-                        final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
-                        objectDecoder.readDictionaryAsObject(functionsObj, 0, keys[i]);
-                    } else {
-                        functionsObj = new FunctionObject(id);
-                        currentPdfFile.readObject(functionsObj);
-                    }
-                    subFunction[i] = functionsObj;
-                }
-
-                function = new PDFFunction[subFunction.length];
-
-                /*
-                 * get values for sub stream Function
-                 */
-                for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {
-                    function[i1] = FunctionFactory.getFunction(subFunction[i1], currentPdfFile);
-                }
-            }
+            // get values for sub stream Function
+            for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {
+                function[i1] = FunctionFactory.getFunction(subFunction[i1], currentPdfFile);
+            }           
         }
 
         final float[] newDomain = Shading.getFloatArray(PdfDictionary.Domain);

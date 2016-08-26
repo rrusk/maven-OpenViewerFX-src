@@ -36,9 +36,12 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import org.jpedal.color.ColorSpaces;
+import org.jpedal.color.ColorspaceFactory;
+import org.jpedal.color.GenericColorSpace;
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.ParserOptions;
@@ -125,15 +128,20 @@ public class PDFObjectToImage {
                     currentPdfFile.checkResolved(group);
                     final String Tname=group.getName(PdfDictionary.S);
                     
-                    PdfObject cs = group.getDictionary(PdfDictionary.ColorSpace);
+                    final PdfArrayIterator ColorSpace=group.getMixedArray(PdfDictionary.ColorSpace);
 
-                    //System.out.println(group.getDictionary(PdfDictionary.ColorSpace) +" "+group.getObjectRefAsString()+" "+group.getBoolean(PdfDictionary.I)+" "+group.getBoolean(PdfDictionary.K)+" ");
-                    if(group.getBoolean(PdfDictionary.I)==false && group.getBoolean(PdfDictionary.K)==false && cs!=null && cs.getParameterConstant(PdfDictionary.ColorSpace)==ColorSpaces.DeviceCMYK){
-                      //  System.out.println("Ignore");
-                    }else if(Tname.equals("Transparency")){
+                    if(ColorSpace!=null && ColorSpace.getTokenCount()>0){
+
+                        GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
                         
-                        formG2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
-                    }
+                        //System.out.println(group.getDictionary(PdfDictionary.ColorSpace) +" "+group.getObjectRefAsString()+" "+group.getBoolean(PdfDictionary.I)+" "+group.getBoolean(PdfDictionary.K)+" ");
+                        if(group.getBoolean(PdfDictionary.I)==false && group.getBoolean(PdfDictionary.K)==false && newColorSpace!=null && newColorSpace.getID()==ColorSpaces.DeviceCMYK){
+                          //  System.out.println("Ignore");
+                        }else if(Tname.equals("Transparency")){
+
+                            formG2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+                        }
+                    }                  
                 }
             }
             

@@ -32,74 +32,42 @@
  */
 package org.jpedal.parser.color;
 
-import org.jpedal.color.*;
+import org.jpedal.color.ColorSpaces;
+import org.jpedal.color.ColorspaceFactory;
+import org.jpedal.color.GenericColorSpace;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
-import org.jpedal.objects.raw.ColorSpaceObject;
-import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.parser.PdfObjectCache;
-import org.jpedal.utils.StringUtils;
 
 /**
  *
  */
 public class CS {
    
-    public static void execute(final boolean isLowerCase, final String colorspaceObject, final GraphicsState gs, final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final boolean isPrinting, final boolean alreadyUsed) {
+    public static void execute(final boolean isLowerCase, final String colorspaceObject, final GraphicsState gs, final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final boolean isPrinting) {
 
         //set flag for stroke
         final boolean isStroke = !isLowerCase;
 
-        PdfObject ColorSpace=(PdfObject)cache.get(PdfObjectCache.Colorspaces,colorspaceObject);
-
-        if(ColorSpace==null) {
-            ColorSpace = new ColorSpaceObject(StringUtils.toBytes(colorspaceObject));
+        Object rawDict=cache.get(PdfObjectCache.Colorspaces,colorspaceObject);
+          
+        //we will reimplement as values in cache directly  (ie DeviceRGB returns /DeviceRGB)
+        if(rawDict==null){ //it can be direct value
+            rawDict=('/'+colorspaceObject).getBytes();
         }
 
-        final String ref=ColorSpace.getObjectRefAsString();
-        final String ref2=ref+ '-'+isLowerCase;
+        PdfArrayIterator array=ColorspaceFactory.convertColValueToMixedArray(currentPdfFile,(byte[])rawDict);
 
-        final GenericColorSpace newColorSpace;
-        if(ColorSpace.getParameterConstant(PdfDictionary.ColorSpace)==PdfDictionary.Pattern && colorspaceObject.equals("Pattern")){
-            
-            newColorSpace= new PatternColorSpace(currentPdfFile, new DeviceRGBColorSpace());
+        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, array);
 
-        }else if(!alreadyUsed && cache.containsKey(PdfObjectCache.ColorspacesObjects)){
-
-            newColorSpace=(GenericColorSpace) cache.get(PdfObjectCache.ColorspacesObjects, ref);
-
-            //reinitialise
-            newColorSpace.reset();
-        }else if(alreadyUsed && cache.containsKey(PdfObjectCache.ColorspacesObjects)){
-
-            newColorSpace=(GenericColorSpace) cache.get(PdfObjectCache.ColorspacesObjects, ref2);
-
-            //reinitialise
-            newColorSpace.reset();
-        }else{
-
-            newColorSpace=ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
-
-            newColorSpace.setPrinting(isPrinting);
-
-            if((newColorSpace.getID()==ColorSpaces.ICC || newColorSpace.getID()==ColorSpaces.Separation)){
-
-                if(ref.contains("-1")){ //ignore
-                }else if(!alreadyUsed){
-                    cache.put(PdfObjectCache.ColorspacesObjects, ref, newColorSpace);
-                }else {
-                    cache.put(PdfObjectCache.ColorspacesObjects, ref2, newColorSpace);                  
-                }
-
-            }
-        }
+        newColorSpace.setPrinting(isPrinting);
 
         //pass in pattern arrays containing all values
         if(newColorSpace.getID()==ColorSpaces.Pattern){
 
             //at this point we only know it is Pattern so need to pass in WHOLE array
-            newColorSpace.setPattern(cache.patterns);
+            newColorSpace.setPattern(cache.getPatterns());
             newColorSpace.setGS(gs);
         }
 
@@ -112,7 +80,6 @@ public class CS {
             gs.nonstrokeColorSpace = newColorSpace;
         }
     }
-
 }
 
 

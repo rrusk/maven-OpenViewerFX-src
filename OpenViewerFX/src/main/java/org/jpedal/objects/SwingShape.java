@@ -228,8 +228,8 @@ public class SwingShape implements Serializable, PdfShape
         final int end = shape_primitives.size() - 1;
         
         //code to fix rounding issue in clipping if rect and boundary just over 0.5
-        //tweaked for abacus/Zebra_als_PDF_OK.pdf 
-        if(end==6 && cmd== Cmd.B && thickness>=0.9f){
+        //tweaked for abacus/Zebra_als_PDF_OK.pdf
+        if(end==6 && cmd== Cmd.B && thickness>=0.9f && is_clip){
             for(int aa=0;aa<8;aa++){
                 final float diff=x[aa]-(int)x[aa];
                 

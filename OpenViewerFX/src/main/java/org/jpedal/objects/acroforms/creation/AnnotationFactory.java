@@ -355,9 +355,8 @@ public class AnnotationFactory {
                 
                 for(int i=0; i<values.length; i+=8){
                     
-                    
-                    final CubicCurve2D curve = new CubicCurve2D.Double(values[i]+xOffset, values[i+1]+yOffset, values[i+2]+xOffset, values[i+3]+yOffset
-                            , values[i+4]+xOffset, values[i+5]+yOffset, values[i+6]+xOffset, values[i+7]+yOffset);
+                    final CubicCurve2D curve = new CubicCurve2D.Double(values[i], values[i+1], values[i+2], values[i+3]
+                            , values[i+4], values[i+5], values[i+6], values[i+7]);
                     g2.draw(curve);
                 }
             }
@@ -604,7 +603,7 @@ public class AnnotationFactory {
     
     private static BufferedImage getPolyIcon(final PdfObject form, final boolean line){
         Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
-//        Color ic = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.IC));
+        Color ic = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.IC));
         
         float[] quad = form.getFloatArray(PdfDictionary.Rect);
         float[] vertices = form.getFloatArray(PdfDictionary.Vertices);
@@ -618,13 +617,22 @@ public class AnnotationFactory {
             g.setColor(c);
             float lastX = vertices[0];
             float lastY = vertices[1];
+            Polygon poly = new Polygon();
+            if (!line) {
+                poly.addPoint((int) lastX - bounds.x, (int) (bounds.height - (lastY - bounds.y)));
+            }
             for(int i=2; i!=vertices.length; i+=2){
+                if(!line){
+                    poly.addPoint((int)vertices[i]-bounds.x, (int)(bounds.height-(vertices[i+1]-bounds.y)));
+                }
                 g.drawLine((int)lastX-bounds.x, (int)(bounds.height-(lastY-bounds.y)), (int)vertices[i]-bounds.x, (int)(bounds.height-(vertices[i+1]-bounds.y)));
                 lastX = vertices[i];
                 lastY = vertices[i+1];
             }
             if(!line){
                 g.drawLine((int)lastX-bounds.x, (int)(bounds.height-(lastY-bounds.y)), (int)vertices[0]-bounds.x, (int)(bounds.height-(vertices[1]-bounds.y)));
+                g.setColor(ic);
+                g.fillPolygon(poly);
             }
             return icon;
         }
@@ -734,7 +742,7 @@ public class AnnotationFactory {
     
     private static BufferedImage getTextIcon(final PdfObject form){
         
-        String name = form.getTextStreamValue(PdfDictionary.Name);
+        String name = form.getName(PdfDictionary.Name);
         final String iconFile;
         
         if(name==null) {
@@ -746,7 +754,7 @@ public class AnnotationFactory {
          * Comment, Key, Note, Help, NewParagraph, Paragraph, Insert
          */
         if(name.equals("Comment")){
-            iconFile = "/org/jpedal/objects/acroforms/res/comment.png";
+          iconFile = "/org/jpedal/objects/acroforms/res/comment.png";
         }else if(name.equals("Check")){
             iconFile = "/org/jpedal/objects/acroforms/res/Check.png";
         }else if(name.equals("Checkmark")){

@@ -30,7 +30,7 @@
  * DecryptionFactory.java
  * ---------------
  */
-package org.jpedal.io;
+package org.jpedal.io.security;
 
 import java.io.*;
 import java.security.Key;
@@ -47,6 +47,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.jpedal.constants.PDFflags;
 import org.jpedal.exception.PdfSecurityException;
+import org.jpedal.io.ObjectStore;
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.io.PdfObjectFactory;
+import org.jpedal.objects.raw.EncryptionObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfKeyPairsIterator;
@@ -534,7 +538,7 @@ public class DecryptionFactory {
 
     /**extract  metadata for  encryption object
      */
-    public void readEncryptionObject(final PdfObject encyptionObj) throws PdfSecurityException {
+    public void readEncryptionObject(final PdfObject encyptionObj, final PdfFileReader pdfFileReader) throws PdfSecurityException {
 
         //reset flags
         stringsEncoded=false;
@@ -621,7 +625,7 @@ public class DecryptionFactory {
                     CFkey=keyPairs.getNextKeyAsString();
 
                     if(CFkey.equals(key)) {
-                        StrFObj = keyPairs.getNextValueAsDictionary();
+                        StrFObj = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new EncryptionObject(encyptionObj.getObjectRefAsString()), pdfFileReader, keyPairs.getNextValueAsBytes(), PdfDictionary.CF);        
                     }
 
                     //roll on
@@ -642,7 +646,7 @@ public class DecryptionFactory {
                     CFkey=keyPairs.getNextKeyAsString();
 
                     if(CFkey.equals(key)) {
-                        StmFObj = keyPairs.getNextValueAsDictionary();
+                        StmFObj =  PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new EncryptionObject(encyptionObj.getObjectRefAsString()), pdfFileReader, keyPairs.getNextValueAsBytes(), PdfDictionary.CF);        
                     }
 
                     //roll on
@@ -1098,5 +1102,9 @@ public class DecryptionFactory {
     private byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData) throws Exception {
         return decryptionMethods.decodeAES(encKey, encData, ivData);
     }   
+
+    public void setCipherNull() {
+        cipher = null;
+    }
     
 }

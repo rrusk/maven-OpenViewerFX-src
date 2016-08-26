@@ -955,6 +955,21 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                                 }
 
                             }
+                            
+                            //Potential fix for ignoring transform
+//                            AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
+//                            double scaleFactorX = 1d/affine.getScaleX();
+//                            double scaleFactorY = 1d/affine.getScaleY();
+//                            
+//                            if(affine.getScaleX()==0 && affine.getScaleY()==0){
+//                                scaleFactorX = 1d/affine.getShearX();
+//                                scaleFactorY = 1d/affine.getShearY();
+//                            }
+//                            
+//                            g2.transform(affine);
+//                            g2.scale(-scaleFactorX, scaleFactorY);
+//                            
+//                            g2.drawString(displayValue,0,0);
 
                             g2.drawString(displayValue,x,y);
 
@@ -2017,7 +2032,10 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         drawUserContent(type, obj, colors);
     }
   
-    private void flushAdditionalObjOnPage(){
+    /**
+     * Do not make private
+     */
+    public void flushAdditionalObjOnPage(){
         
         //reset pointer
         if(endItem!=-1) {

@@ -62,34 +62,7 @@ extends GenericColorSpace {
     
     private final Map<Integer, Integer> cache=new HashMap<Integer, Integer>();
     private float[] prevFloat;
-    
-    /**
-     * reset any defaults if reused
-     */
-    @Override
-    public void reset(){
-        
-        super.reset();
-        
-        isConverted=false;
-        
-        //set cache to -1 as flag
-//		a1=new int[256];
-//		b1=new int[256];
-//		c1=new int[256];
-//
-//		for(int i=0;i<256;i++){
-//			a1[i]=-1;
-//			b1[i]=-1;
-//			c1[i]=-1;
-//
-//		}
-//
-//		cache.clear();
-        
-        //  isCached=true;
-    }
-    
+  
     public ICCColorSpace(final PdfObject colorSpace) {
         
         //set cache to -1 as flag

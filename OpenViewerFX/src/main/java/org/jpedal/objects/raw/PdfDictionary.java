@@ -74,8 +74,6 @@ public class PdfDictionary {
 
     public static final int Alternate=2054519176;
 
-    public static final int AlternateSpace=-1247101998;
-
     public static final int Annot=1044266837;
 
     public static final int Annots=1044338049;
@@ -450,8 +448,6 @@ public class PdfDictionary {
     
     public static final int Hue=1590581;
 
-    public static final int hival=960901492;
-
     public static final int I=25;
     
     public static final int IC=6419;
@@ -561,8 +557,6 @@ public class PdfDictionary {
 
     public static final int Locked=859525491;
 
-    public static final int Lookup=1060856191;
-    
     public static final int Luminosity=-2139971891;
 
     public static final int LW=7207;
@@ -897,8 +891,6 @@ public class PdfDictionary {
     public static final int TI=9241;
 
     public static final int TilingType=1619174053;
-
-    public static final int tintTransform=-1313946392;
 
     public static final int Title=960773209;
 
@@ -1457,10 +1449,11 @@ public class PdfDictionary {
                 return VALUE_IS_INT;
 
             case ColorSpace:
-                if(1==2) {
+                
+                if(type==PdfDictionary.Resources){
+                    return PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
+                }else{
                     return VALUE_IS_MIXED_ARRAY;
-                } else {
-                    return VALUE_IS_UNREAD_DICTIONARY;
                 }
 
             case Columns:
@@ -1632,8 +1625,11 @@ public class PdfDictionary {
                 return VALUE_IS_DICTIONARY;
 
             case ExtGState:
-                return VALUE_IS_UNREAD_DICTIONARY;
-
+                if(type==PdfDictionary.Resources){
+                    return PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
+                }else{
+                    return VALUE_IS_MIXED_ARRAY;
+                }
             case F:
 
             	if (type==PdfDictionary.Form || type==PdfDictionary.Outlines ||type==PdfDictionary.FS || type==PdfDictionary.Names) {
@@ -1676,8 +1672,11 @@ public class PdfDictionary {
             	return PdfDictionary.VALUE_IS_DICTIONARY;
 
             case Font:
-                return VALUE_IS_UNREAD_DICTIONARY;
-
+                if(type==PdfDictionary.Resources){
+                    return PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
+                }else{
+                    return VALUE_IS_MIXED_ARRAY;
+                }
             case FontBBox:
                 return VALUE_IS_FLOAT_ARRAY;
 
@@ -1713,10 +1712,14 @@ public class PdfDictionary {
             	return VALUE_IS_NAME;
 
             case Function:
-                return VALUE_IS_DICTIONARY;
-
+                if (type == PdfDictionary.Shading) {
+                    return PdfDictionary.VALUE_IS_MIXED_ARRAY;
+                } else {
+                    return VALUE_IS_DICTIONARY;
+                }
+                 
             case Functions:
-                return VALUE_IS_KEY_ARRAY;
+                return VALUE_IS_MIXED_ARRAY;
 
             case FunctionType:
                 return VALUE_IS_INT;
@@ -1955,6 +1958,10 @@ public class PdfDictionary {
 
             case N:
                 switch (type) {
+                    case ColorSpace:
+                        return VALUE_IS_FLOAT;
+                    case Function:
+                        return VALUE_IS_FLOAT;
                     case Linearized:
                         return VALUE_IS_INT;
                     case PdfDictionary.CompressedObject:
@@ -1964,17 +1971,21 @@ public class PdfDictionary {
                         return VALUE_IS_VARIOUS;
                     case Shading:
                         return VALUE_IS_FLOAT;
+                    case XObject:
+                        return VALUE_IS_FLOAT;    
                     default:
                         return VALUE_IS_NAME;
                 }
 
             case Name:
-                if(type==PdfDictionary.Form){
+                if(type==PdfDictionary.OCProperties){
                     return VALUE_IS_TEXTSTREAM;
+                }else if(type==PdfDictionary.Form){
+                    return VALUE_IS_VARIOUS;
                 }else{
                     return VALUE_IS_NAME;
                 }
-            
+                
             case Names:
                 if(type==PdfDictionary.Names || type==PdfDictionary.FS) {
                     return VALUE_IS_MIXED_ARRAY;
@@ -2106,8 +2117,11 @@ public class PdfDictionary {
             	return VALUE_IS_DICTIONARY;
 
             case Pattern:
-                return VALUE_IS_DICTIONARY;
-
+                if(type==PdfDictionary.Resources){
+                    return PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
+                }else{
+                    return VALUE_IS_DICTIONARY;
+                }
             case PatternType:
                 return VALUE_IS_INT;
 
@@ -2242,8 +2256,13 @@ public class PdfDictionary {
                 return VALUE_IS_TEXTSTREAM;
 
             case Shading:
-                return VALUE_IS_DICTIONARY;
-
+                
+                if(type==PdfDictionary.Resources){
+                    return PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
+                }else{
+                    return VALUE_IS_MIXED_ARRAY;
+                }
+                
             case S:
                 if(type==PdfDictionary.Linearized) {
                     return VALUE_IS_INT;
@@ -2469,7 +2488,12 @@ public class PdfDictionary {
                 return VALUE_IS_DICTIONARY;
                 
             case XObject:
-                return VALUE_IS_UNREAD_DICTIONARY;
+                
+                if(type==PdfDictionary.Resources){
+                    return PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
+                }else{
+                    return VALUE_IS_MIXED_ARRAY;
+                }
                 
             case XRefStm:
                 return VALUE_IS_INT;

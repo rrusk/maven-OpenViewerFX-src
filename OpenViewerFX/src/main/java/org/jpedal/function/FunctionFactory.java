@@ -32,9 +32,9 @@
  */
 package org.jpedal.function;
 
-import org.jpedal.io.ObjectDecoder;
+import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.objects.raw.FunctionObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
@@ -73,32 +73,20 @@ public class FunctionFactory {
             N = newN;
         }
 
-		final byte[][] keys=functionObj.getKeyArray(PdfDictionary.Functions);
+		final PdfArrayIterator keys=functionObj.getMixedArray(PdfDictionary.Functions);
 		int functionCount=0;
 		if(keys!=null) {
-            functionCount = keys.length;
+            functionCount = keys.getTokenCount();
         }
 
 		PDFFunction[] functions=null;
-		PdfObject function;
+		
 		if(keys!=null){
 			
 			final PdfObject[] subFunction=new PdfObject[functionCount];
 			
-			String id;
 			for(int i=0;i<functionCount;i++){
-				
-				id=new String(keys[i]);
-
-                if(id.startsWith("<<")){
-                    function=new FunctionObject(1);
-                    final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
-                    objectDecoder.readDictionaryAsObject(function,0,keys[i]);
-                }else{
-                    function=new FunctionObject(id);
-				    currentPdfFile.readObject(function);
-                }
-                subFunction[i]=function;
+				    subFunction[i]=ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, keys.getNextValueAsByte(true));
 			}
 
 			functions = new PDFFunction[subFunction.length];

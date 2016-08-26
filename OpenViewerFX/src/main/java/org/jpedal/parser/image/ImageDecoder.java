@@ -131,34 +131,18 @@ public class ImageDecoder extends BaseDecoder{
         final int height=imageData.getHeight();
         final int depth=imageData.getDepth();
         
-        final PdfObject ColorSpaceAsDict=XObject.getDictionary(PdfDictionary.ColorSpace);
-        
         //handle colour information
         GenericColorSpace decodeColorData=new DeviceRGBColorSpace();
-        
-        if(ColorSpaceAsDict!=null){
-            decodeColorData= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpaceAsDict, cache.XObjectColorspaces);
             
-            decodeColorData.setPrinting(parserOptions.isPrinting());
-            
-            //track colorspace use
-            cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(),"x");
-         
-        }else if(PdfDictionary.getKeyType(PdfDictionary.ColorSpace, -1)==PdfDictionary.VALUE_IS_MIXED_ARRAY){
-            
-            final PdfArrayIterator ColorSpace=XObject.getMixedArray(PdfDictionary.ColorSpace);
-        
-            System.out.println(">>"+XObject.getObjectRefAsString());
-            
-            decodeColorData= ColorspaceFactory.getColorSpaceInstance(XObject.getObjectRefAsString(), currentPdfFile, ColorSpace, cache.XObjectColorspaces);
-            
-            decodeColorData.setPrinting(parserOptions.isPrinting());
-            
-            System.out.println(" ColorSpace="+decodeColorData);
-            //track colorspace use
-            cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(),"x");
-            
+        final PdfArrayIterator ColorSpace=XObject.getMixedArray(PdfDictionary.ColorSpace);
+        if(ColorSpace.getTokenCount()>0){ //if not set will be zero
+            decodeColorData= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
         }
+
+        decodeColorData.setPrinting(parserOptions.isPrinting());
+
+        //track colorspace use
+        cache.put(PdfObjectCache.ColorspacesUsed, decodeColorData.getID(),"x");
         
         //fix for odd itext file (/PDFdata/baseline_screens/debug3/Leistung.pdf)
         final byte[] indexData=decodeColorData.getIndexedMap();

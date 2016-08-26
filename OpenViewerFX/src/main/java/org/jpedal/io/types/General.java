@@ -317,7 +317,7 @@ public class General {
             }
 
             try{
-                jj = Dictionary.readDictionaryFromRefOrDirect(-1,pdfObject, objRef,jj , data, PDFkeyInt,objectReader);
+                jj = Dictionary.readDictionaryFromRefOrDirect(pdfObject, objRef,jj , data, PDFkeyInt,objectReader);
 
             }catch(final Exception e){
                 LogWriter.writeLog("Exception: " + e.getMessage());
@@ -408,7 +408,7 @@ public class General {
 
             final PdfObject obj= ObjectFactory.createObject(key,value, PdfDictionary.Form, pdfObject.getID());
 
-            Dictionary.readDictionaryFromRefOrDirect(key, obj, (String) currentKey, 0, value.getBytes(), -1,objectReader);
+            Dictionary.readDictionaryFromRefOrDirect(obj, (String) currentKey, 0, value.getBytes(), -1,objectReader);
 
             if(key!=PdfDictionary.On && key!=PdfDictionary.Off) {
                 APobj.setCurrentKey(currentKey);

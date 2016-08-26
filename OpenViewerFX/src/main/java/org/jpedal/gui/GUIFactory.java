@@ -385,4 +385,5 @@ public interface GUIFactory {
     
     GUIAnnotationPanel getAnnotationPanel();
     
+    Object getGlassPane();
 }

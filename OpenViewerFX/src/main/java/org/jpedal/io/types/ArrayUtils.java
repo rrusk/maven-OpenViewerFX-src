@@ -33,7 +33,7 @@
 package org.jpedal.io.types;
 
 import org.jpedal.exception.PdfSecurityException;
-import org.jpedal.io.DecryptionFactory;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.utils.LogWriter;
 
 /**
@@ -71,7 +71,7 @@ public class ArrayUtils {
     }
 
 
-    static int skipToEndOfRef(int i, final byte[] raw) {
+    public static int skipToEndOfRef(int i, final byte[] raw) {
 
         byte b=raw[i];
         while(b!=10 && b!=13 && b!=32 && b!=47 && b!=60 && b!=62){
@@ -113,8 +113,15 @@ public class ArrayUtils {
         
         //convert to byte values
         String nextValue;
-        final String str=new String(newValues);
-        final byte[] IDbytes=new byte[newValues.length/2];
+        String str=new String(newValues);
+     //   System.out.println("---------------\n"+str+"\n---------------");
+   //     str=str.replace(" ", "");
+    //    str=str.replace("\n", "");
+     //   str=str.replace(" ", "");
+        
+        final byte[] IDbytes=new byte[str.length()/2];
+        
+        int ptr=0;
         for(int ii=0;ii<newValues.length;ii += 2){
             
             if(ii+2>newValues.length) {
@@ -125,15 +132,18 @@ public class ArrayUtils {
             * If the byte values has a \n in the middle we should ignore it.
             * (customer-June2011/payam.pdf)
             */
-            if(str.charAt(ii)=='\n'){
+            while(str.charAt(ii)=='\n' || str.charAt(ii)==' '){
                 ii++;
             }
             
             nextValue=str.substring(ii,ii+2);
-            IDbytes[ii/2]=(byte)Integer.parseInt(nextValue,16);
+            IDbytes[ptr]=(byte)Integer.parseInt(nextValue,16);
             
+            ptr++;
         }
-        newValues=IDbytes;
+        
+        newValues=new byte[ptr];
+        System.arraycopy(IDbytes, 0, newValues, 0, ptr);
         
         if(decryptor!=null){
             byte[] decryptedValue=null;
@@ -163,14 +173,14 @@ public class ArrayUtils {
     }
     
     public static int skipToEndOfKey(final byte[] data, int start) {
-        
         int len=data.length;
         
-        //now skip any spaces to key or text
-        while(start<len && (Character.isLetterOrDigit((char)data[start])||data[start]=='_'|| data[start]=='.' || data[start]=='#' || data[start]=='-')) {
-            start++;
+        while (start < len && !(data[start] == '/' || data[start] == '[' || 
+                data[start] == ' ' || data[start] == 10 || data[start] == ']' 
+                || data[start] == '>' || data[start] == 13 || data[start] == '<')) {
+                start++;
         }
-
+        
         return start;
     }
 
@@ -184,14 +194,19 @@ public class ArrayUtils {
         boolean isNumber=true;
         
         int count=arrayData.length;
+        int chars=0;
         
         j2=skipSpaces(arrayData,j2);
         
         while(isNumber && j2<count){
             
+            if(chars>0 && (arrayData[j2]=='(' || arrayData[j2]=='<' ||  arrayData[j2]==' ' ||  arrayData[j2]=='/')){
+                break;
+            }
             if((arrayData[j2]>='0' && arrayData[j2]<='9')) {
                 //part of number char
                 j2++;
+                chars++;
             }else{
                 isNumber=false;
             }     
@@ -200,7 +215,7 @@ public class ArrayUtils {
         return isNumber;      
     }
 
-    static boolean isRef(byte[] arrayData, int j2) {
+    public static boolean isRef(byte[] arrayData, int j2) {
         
         boolean isRef=true;
         
@@ -226,9 +241,43 @@ public class ArrayUtils {
         return isRef && elementCount==2;
                
     }
+    
+    public static boolean isArray(final byte[] arrayData, final int j2) {
+        
+        return arrayData[j2]=='[';           
+    }
 
     static boolean isEndObj(final byte[] arrayData, final int j2) {
        return arrayData[j2]=='e' && arrayData[j2+1]=='n' && arrayData[j2+2]=='d' && arrayData[j2+3]=='o' && arrayData[j2+4]=='b' && arrayData[j2+5]=='j';
+    }
+
+    static int skipToEndOfArray(final byte[] data, int start) {
+    
+        int level = 1;
+        start++;
+
+        boolean inStream = false;
+
+        while (level > 0) {
+
+            //allow for streams
+            if (!inStream && data[start] == '(') {
+                inStream = true;
+            } else if (inStream && data[start] == ')' && (data[start - 1] != '\\' || data[start - 2] == '\\')) {
+                inStream = false;
+            }
+
+            if (!inStream) {
+                if (data[start] == '[') {
+                    level++;
+                } else if (data[start] == ']') {
+                    level--;
+                }
+            }
+
+            start++;
+        }
+        return start;
     }
 }
 

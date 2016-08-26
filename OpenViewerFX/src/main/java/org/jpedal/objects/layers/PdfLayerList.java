@@ -33,6 +33,8 @@
 package org.jpedal.objects.layers;
 
 import java.util.*;
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.raw.OCObject;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -291,14 +293,17 @@ public class PdfLayerList {
 
         String glyphKey,ref;
         PdfObject glyphObj;
+        
+        final PdfFileReader pdfFileReader=currentPdfFile.getObjectReader();
 
         while(keyPairs.hasMorePairs()){
 
             glyphKey=keyPairs.getNextKeyAsString();
 
-            glyphObj=keyPairs.getNextValueAsDictionary();
+            glyphObj=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new OCObject(propertiesObj.getObjectRefAsString()), pdfFileReader, keyPairs.getNextValueAsBytes(), PdfDictionary.OCProperties);
+        
             ref=glyphObj.getObjectRefAsString();
-
+            
             currentPdfFile.checkResolved(glyphObj);
 
             final byte[][] childPairs=glyphObj.getKeyArray(PdfDictionary.OCGs);

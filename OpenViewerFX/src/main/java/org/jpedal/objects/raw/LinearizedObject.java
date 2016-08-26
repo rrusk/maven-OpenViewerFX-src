@@ -63,50 +63,7 @@ public class LinearizedObject extends PdfObject {
        super(ref,gen);
     }
 
-    @Override
-    public boolean getBoolean(final int id){
 
-        switch(id){
-
-       // case PdfDictionary.ImageMask:
-       // 	return ImageMask;
-
-
-            default:
-            	return super.getBoolean(id);
-        }
-
-    }
-
-    @Override
-    public void setBoolean(final int id, final boolean value){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
-
-            default:
-                super.setBoolean(id, value);
-        }
-    }
-
-    @Override
-    public PdfObject getDictionary(final int id){
-
-        switch(id){
-
-	        //case PdfDictionary.EF:
-	        //	return EF;
-
-//            case PdfDictionary.XObject:
-//                return XObject;
-
-            default:
-                return super.getDictionary(id);
-        }
-    }
 
     @Override
     public void setIntNumber(final int id, final int value){
@@ -318,41 +275,6 @@ public class LinearizedObject extends PdfObject {
 //    }
 
 
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
-
-    	switch(id){
-
-            //case PdfDictionary.Differences:
-            //    return new PdfArrayIterator(Differences);
-
-            default:
-			return super.getMixedArray(id);
-        }
-	}
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
 
     @Override
     public int[] getIntArray(final int id) {
@@ -381,86 +303,7 @@ public class LinearizedObject extends PdfObject {
         }
     }
 
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
 
-        switch(id){
-
-//            case PdfDictionary.Differences:
-//                Differences=value;
-//            break;
-
-            default:
-            	super.setMixedArray(id, value);
-        }
-    }
-
-    @Override
-    public float[] getFloatArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getFloatArray(id);
-
-        }
-    }
-
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.Matrix:
-//	            Matrix=value;
-//	        break;
-
-            default:
-            	super.setFloatArray(id, value);
-        }
-    }
-
-    @Override
-    public void setName(final int id, final byte[] value) {
-
-        switch(id){
-
-//        case PdfDictionary.E:
-//            rawE=value;
-//    	break;
-
-
-
-//            case PdfDictionary.CMapName:
-//                rawCMapName=value;
-//            break;
-
-            default:
-                super.setName(id,value);
-
-        }
-
-    }
-
-    @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
-
-        switch(id){
-
-        //case PdfDictionary.UF:
-          //  rawUF=value;
-    	//break;
-
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//
-
-            default:
-                super.setTextStreamValue(id,value);
-
-        }
-
-    }
 
     @Override
     public String getName(final int id) {
@@ -489,24 +332,6 @@ public class LinearizedObject extends PdfObject {
         }
     }
 
-    @Override
-    public String getTextStreamValue(final int id) {
-
-        switch(id){
-
-//	        case PdfDictionary.UF:
-//
-//	            //setup first time
-//	            if(UF==null && rawUF!=null)
-//	            	UF=new String(rawUF);
-//
-//	            return UF;
-
-            default:
-                return super.getTextStreamValue(id);
-
-        }
-    }
 
     /**
      * unless you need special fucntions,
@@ -569,48 +394,13 @@ public class LinearizedObject extends PdfObject {
         }
     }
 
-    @Override
-    public byte[][] getKeyArray(final int id) {
-
-        switch(id){
-
-            default:
-            	return super.getKeyArray(id);
-        }
-    }
-
-    @Override
-    public void setKeyArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            default:
-            	super.setKeyArray(id, value);
-        }
-
-    }
 
     @Override
     public boolean decompressStreamWhenRead() {
 		return true;
 	}
 
-    @Override
-    public int getNameAsConstant(final int id) {
 
-        //byte[] raw=null;
-
-        switch(id){
-
-//            case PdfDictionary.E:
-//            raw=rawE;
-//            break;
-
-            default:
-                return super.getNameAsConstant(id);
-
-        }
-    }
 
 
 

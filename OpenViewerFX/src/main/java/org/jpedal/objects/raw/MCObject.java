@@ -71,34 +71,6 @@ public class MCObject extends PdfObject {
     }
 
 
-    @Override
-    public boolean getBoolean(final int id){
-
-        switch(id){
-
-       // case PdfDictionary.ImageMask:
-       // 	return ImageMask;
-
-
-            default:
-            	return super.getBoolean(id);
-        }
-
-    }
-
-    @Override
-    public void setBoolean(final int id, final boolean value){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
-
-            default:
-                super.setBoolean(id, value);
-        }
-    }
 
     @Override
     public PdfObject getDictionary(final int id){
@@ -317,27 +289,6 @@ public class MCObject extends PdfObject {
         return PDFvalue;
     }
 
-    @Override
-    public int getParameterConstant(final int key) {
-
-    	//System.out.println("Get constant for "+key +" "+this);
-        switch(key){
-
-
-//            case PdfDictionary.BaseEncoding:
-//
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
-        default:
-        	return super.getParameterConstant(key);
-
-        }
-    }
 
 
     @Override

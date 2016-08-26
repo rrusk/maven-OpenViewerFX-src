@@ -226,28 +226,7 @@ public class ResourcesObject extends PdfObject {
         return PDFvalue;
     }
 
-    @Override
-    public int getParameterConstant(final int key) {
 
-        switch(key){
-        
-                   
-//            case PdfDictionary.BaseEncoding:
-//            	
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
-        
-      //check general values
-        default:
-        return super.getParameterConstant(key);
-
-        }
-    }
 
 //    public void setStream(){
 //
@@ -268,31 +247,7 @@ public class ResourcesObject extends PdfObject {
         }
 	}
 
-    @Override
-    public double[] getDoubleArray(final int id) {
 
-       
-        switch(id){
-            default:
-                return super.getDoubleArray(id);
-
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-
-    }
     
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
@@ -309,77 +264,7 @@ public class ResourcesObject extends PdfObject {
 
     }
 
-    @Override
-    public float[] getFloatArray(final int id) {
 
-        switch(id){
-            default:
-            	return super.getFloatArray(id);
-        }
-    }
-
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.FontBBox:
-//	            FontBBox=value;
-//	        break;
-        
-            default:
-            	super.setFloatArray(id, value);
-        }
-    }
-
-    @Override
-    public void setName(final int id, final byte[] value) {
-
-        switch(id){
-
-            
-//            case PdfDictionary.CMapName:
-//                rawCMapName=value;
-//            break;
-            
-            default:
-                super.setName(id,value);
-        }
-    }
-    
-    @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//	        
-            
-            default:
-                super.setTextStreamValue(id,value);
-
-        }
-    }
-
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-//            case PdfDictionary.BaseFont:
-//
-//            //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-               
-            default:
-                return super.getName(id);
-        }
-    }
 
     /**
      * unless you need special fucntions,

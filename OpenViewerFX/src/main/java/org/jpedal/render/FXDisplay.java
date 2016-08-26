@@ -66,6 +66,7 @@ import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.FunctionObject;
 import org.jpedal.objects.raw.PatternObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -335,20 +336,16 @@ public class FXDisplay extends GUIDisplay {
     }
     
     private static Paint getShadingPaint(PatternObject patternObj, PatternColorSpace patternCS, Bounds bounds) {
-        final PdfObject shading = patternObj.getDictionary(PdfDictionary.Shading);
-        final PdfObject shadeCS = shading.getDictionary(PdfDictionary.ColorSpace);
+       
         final PdfObjectReader currentPdfFile = patternCS.getObjectReader();
+        final PdfObject shading=patternObj.getDictionary(PdfDictionary.Shading);
+        final PdfArrayIterator ColorSpace=shading.getMixedArray(PdfDictionary.ColorSpace);
+        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+ 
         float[][] matrix = {{1,0,0},{0,1,0},{0,0,1}};
         final float[] inputs=patternObj.getFloatArray(PdfDictionary.Matrix);
         if(inputs!=null){
             matrix = new float[][]{{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
-        }
-        //convert colorspace and get details
-        GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, shadeCS);
-
-        //use alternate as preference if CMYK
-        if (newColorSpace.getID() == ColorSpaces.ICC && shadeCS.getParameterConstant(PdfDictionary.Alternate) == ColorSpaces.DeviceCMYK) {
-            newColorSpace = new DeviceCMYKColorSpace();
         }
 
         final int shadingType = shading.getInt(PdfDictionary.ShadingType);
@@ -466,7 +463,7 @@ public class FXDisplay extends GUIDisplay {
         return new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
     }    
 
-    protected static void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, boolean allowColorChange){
+    protected void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, boolean allowColorChange){
 
         // Removes the default black stroke on shapes
         currentShape.setStroke(null);

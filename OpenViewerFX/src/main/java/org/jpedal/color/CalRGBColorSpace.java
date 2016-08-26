@@ -135,23 +135,6 @@ public class CalRGBColorSpace extends  GenericColorSpace{
     }
     
     /**
-     * reset any defaults if reused
-     */
-    @Override
-    public final void reset(){
-        
-        lastC=-255;
-        lastI=-255;
-        lastE=-255;
-        
-        r=0;
-        g=0;
-        b=0;
-        
-        currentColor = new PdfColor(0,0,0);
-    }
-    
-    /**
      * set CalRGB color (in terms of rgb)
      */
     @Override

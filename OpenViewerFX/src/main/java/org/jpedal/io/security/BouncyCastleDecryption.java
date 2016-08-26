@@ -30,7 +30,7 @@
  * BouncyCastleDecryption.java
  * ---------------
  */
-package org.jpedal.io;
+package org.jpedal.io.security;
 
 import java.security.Key;
 import java.security.cert.Certificate;
@@ -54,7 +54,6 @@ public class BouncyCastleDecryption implements BaseDecryption{
     
     @Override
     public byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException {
-
         final int ELength= rawValue.length;
         final byte[] returnKey = new byte[ELength];
         

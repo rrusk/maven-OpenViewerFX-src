@@ -2026,40 +2026,6 @@ public class SwingProperties extends JPanel {
             details += "os: "+System.getProperty("os.name")+ ' ' +System.getProperty("os.version")+ ' ' +System.getProperty("os.arch")+ '\n';
             details += "jpedal: "+PdfDecoderInt.version+ '\n';
             
-            //BCMail
-            c.gridy++;
-            c.gridx=0;
-            pane.add(new JLabel("BCMail"), c);
-            c.gridx=1;
-            pane.add(new JLabel("<html>"+Messages.getMessage("PdfExtensions.BCMail.text")), c);
-            c.gridx=2;
-            JLabel bcmail;
-            String version="Unknown version";
-            try {
-                final Class bcmailc = Class.forName("org.bouncycastle.jcajce.JcaJceHelper");
-                final String className = bcmailc.getName().replace('.', '/');
-                final String[] paths = bcmailc.getResource('/' + className + ".class").getPath().split("!");
-                final URL file = new URL(paths[0]);
-                final JarFile jar = new JarFile(file.getFile());
-                if (!jar.getManifest().getMainAttributes().getValue("Implementation-Version").isEmpty()) {
-                    version = jar.getManifest().getMainAttributes().getValue("Implementation-Version");
-                }
-                
-                bcmail = new JLabel("<html>"+version);
-                details+="bcmail: "+version+ '\n';
-            }catch(final Exception e) {
-                bcmail = new JLabel("<html><u>"+Messages.getMessage("PdfExtensions.getText")+' '+e+"</u></html>");
-                bcmail.setForeground(Color.BLUE);
-                bcmail.addMouseListener(new Link(Messages.getMessage("PdfExtensions.BCMail.link")));
-            } catch (final Error e) {
-                // Added catch for java.lang.UnsupportedClassVersionError as I get this error when I open the
-                // preferences window when using jdk1.5 - Leon
-                bcmail = new JLabel("<html><u>"+Messages.getMessage("PdfExtensions.getText")+' '+e+"</u></html>");
-                bcmail.setForeground(Color.BLUE);
-                bcmail.addMouseListener(new Link(Messages.getMessage("PdfExtensions.BCMail.link")));
-            }
-            pane.add(bcmail, c);
-            
             //CID
             c.gridy++;
             c.gridx=0;
@@ -2106,6 +2072,7 @@ public class SwingProperties extends JPanel {
             }
             
             //Java FX
+            String version="Unknown version";
             c.gridy++;
             c.gridx=0;
             pane.add(new JLabel("JavaFX"), c);

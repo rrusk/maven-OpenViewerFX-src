@@ -34,6 +34,7 @@ package org.jpedal.objects.raw;
 
 import java.util.Arrays;
 import org.jpedal.fonts.StandardFonts;
+import org.jpedal.io.types.ArrayUtils;
 import org.jpedal.utils.NumberUtils;
 
 /**
@@ -171,7 +172,7 @@ public class PdfArrayIterator {
 			currentToken++;
 			
 			//return null as 0
-			if(raw[0]=='n' && raw[1]=='u' && raw[2]=='l'  && raw[3]=='l' ) {
+			if(ArrayUtils.isNull(raw,0)) {
                 return 0;
             } else {
                 return NumberUtils.parseFloat(0, raw.length, raw);
@@ -231,7 +232,7 @@ public class PdfArrayIterator {
 			currentToken++;
 
 			//return null as 0
-			if(raw[0]=='n' && raw[1]=='u' && raw[2]=='l'  && raw[3]=='l' ) {
+			if(ArrayUtils.isNull(raw,0)) {
                 return new float[1];
             } else{
 

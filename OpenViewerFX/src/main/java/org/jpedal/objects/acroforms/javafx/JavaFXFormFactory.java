@@ -142,7 +142,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
                     
     private Button createAnnotationText(final FormObject form){
         Button but = setupAnnotationButton(form);
-        String name = form.getTextStreamValue(PdfDictionary.Name);
+        String name = form.getName(PdfDictionary.Name);
         BufferedImage commentIcon = getAnnotationTextIcon(form, name);
         
         //Ensure sized correctly

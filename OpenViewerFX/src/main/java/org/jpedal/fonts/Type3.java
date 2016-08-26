@@ -38,8 +38,10 @@ import org.jpedal.fonts.glyph.T3Glyph;
 import org.jpedal.fonts.glyph.T3Glyphs;
 import org.jpedal.fonts.glyph.T3Size;
 import org.jpedal.io.ObjectStore;
+import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
+import org.jpedal.objects.raw.FontObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfKeyPairsIterator;
 import org.jpedal.objects.raw.PdfObject;
@@ -108,8 +110,6 @@ public class Type3 extends PdfFont {
     
     private void readEmbeddedFont(final PdfObject pdfObject, final ObjectStore objectStore) {
         
-        int key,otherKey;
-        
         final PdfObject CharProcs=pdfObject.getDictionary(PdfDictionary.CharProcs);
         
         //handle type 3 charProcs and store for later lookup
@@ -129,74 +129,77 @@ public class Type3 extends PdfFont {
                 }
             }
             
-            /*
-             * read all the key pairs for Glyphs
-             */
-            final PdfKeyPairsIterator keyPairs=CharProcs.getKeyPairsIterator();
-            
+            // read all the key pairs for Glyphs
             String glyphKey;
-            PdfObject glyphObj;
+            byte[] data;
+            
+            PdfKeyPairsIterator keyPairs=CharProcs.getKeyPairsIterator();
             
             while(keyPairs.hasMorePairs()){
                 
                 glyphKey=keyPairs.getNextKeyAsString();
-                glyphObj=keyPairs.getNextValueAsDictionary();
-               
+                data=keyPairs.getNextValueAsBytes();
+                        
                 //decode and store in array
-                if(glyphObj!=null && renderPage && !glyphKey.equals(".notdef") && !glyphKey.equals(".")){
-                    
-                    //decode and create graphic of glyph
-                    final T3Renderer glyphDisplay=new T3Display(0,false,20,objectStore);
-                    
-                    glyphDisplay.setType3Glyph(glyphKey);
-                    
-                    try{
-                        glyphDecoder.setRenderer(glyphDisplay);
-                        glyphDecoder.setDefaultColors(currentGraphicsState.getNonstrokeColor(),currentGraphicsState.getNonstrokeColor());
-                        int  renderX,renderY;
-                        
-                        //if size is 1 we need to scale up so we can see
-                        int factor=1;
-                        final double[] fontMatrix=pdfObject.getDoubleArray(PdfDictionary.FontMatrix);
-                        if(fontMatrix!=null && fontMatrix[0]==1 && (fontMatrix[3]==1 || fontMatrix[3]==-1)) {
-                            factor=10;
-                        }
-                        
-                        final GraphicsState gs=new GraphicsState(0,0);
-                        gs.CTM = new float[][]{{factor,0,0},
-                            {0,factor,0},{0,0,1}
-                        };
-                        
-                        final T3Size t3 = glyphDecoder.decodePageContent(glyphObj, gs);
-                        
-                        renderX=t3.x;
-                        renderY=t3.y;
-                        
-                        //allow for rotated on page in case swapped
-                        if(renderX==0 && renderY!=0){
-                            renderX=t3.y;
-                            renderY=t3.x;
-                        }
-                        
-                        final T3Glyph glyph=new T3Glyph(glyphDisplay, renderX,renderY,glyphDecoder.ignoreColors);
-                        glyph.setScaling(1f/factor);
-                        
-                        otherKey=-1;
-                        
-                       // System.out.println("str="+" "+rawDiffKeys.keySet());
-                        key=(rawDiffKeys.get(keyPairs.getNextKeyAsString()));
-                        
-                        glyphs.setT3Glyph(key,otherKey, glyph);
-                        
-                    }catch(final Exception e){
-                        LogWriter.writeLog("Exception "+e+" is Type3 font code");
-                    }
+                if(data!=null && renderPage && !glyphKey.equals(".notdef") && !glyphKey.equals(".")){                   
+                    decodeT3GlyphData(data, objectStore, glyphKey, glyphDecoder, pdfObject);
                 }
                 
-                //roll on
                 keyPairs.nextPair();
             }
             isFontEmbedded = true;
+        }
+    }
+
+    private void decodeT3GlyphData(byte[] data, final ObjectStore objectStore, String glyphKey, final T3StreamDecoder glyphDecoder, final PdfObject pdfObject) {
+        
+        int otherKey;
+        int key;
+        
+        PdfObject glyphObj=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FontObject("1 0 R"), currentPdfFile.getObjectReader(),data, PdfDictionary.CharProcs);
+        //decode and create graphic of glyph
+        final T3Renderer glyphDisplay=new T3Display(0,false,20,objectStore);
+        glyphDisplay.setType3Glyph(glyphKey);
+        try{
+            glyphDecoder.setRenderer(glyphDisplay);
+            glyphDecoder.setDefaultColors(currentGraphicsState.getNonstrokeColor(),currentGraphicsState.getNonstrokeColor());
+            int  renderX,renderY;
+            
+            //if size is 1 we need to scale up so we can see
+            int factor=1;
+            final double[] fontMatrix=pdfObject.getDoubleArray(PdfDictionary.FontMatrix);
+            if(fontMatrix!=null && fontMatrix[0]==1 && (fontMatrix[3]==1 || fontMatrix[3]==-1)) {
+                factor=10;
+            }
+            
+            final GraphicsState gs=new GraphicsState(0,0);
+            gs.CTM = new float[][]{{factor,0,0},
+                {0,factor,0},{0,0,1}
+            };
+            
+            final T3Size t3 = glyphDecoder.decodePageContent(glyphObj, gs);
+            
+            renderX=t3.x;
+            renderY=t3.y;
+            
+            //allow for rotated on page in case swapped
+            if(renderX==0 && renderY!=0){
+                renderX=t3.y;
+                renderY=t3.x;
+            }
+            
+            final T3Glyph glyph=new T3Glyph(glyphDisplay, renderX,renderY,glyphDecoder.ignoreColors);
+            glyph.setScaling(1f/factor);
+            
+            otherKey=-1;
+            
+            // System.out.println("str="+" "+rawDiffKeys.keySet());
+            key=(rawDiffKeys.get(glyphKey));
+            
+            glyphs.setT3Glyph(key,otherKey, glyph);
+            
+        }catch(final Exception e){
+            LogWriter.writeLog("Exception "+e+" is Type3 font code");
         }
     }
 }

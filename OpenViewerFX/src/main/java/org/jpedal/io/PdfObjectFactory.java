@@ -34,6 +34,7 @@ package org.jpedal.io;
 
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.objects.raw.PdfDictionary;
+import org.jpedal.objects.raw.PdfObject;
 
 public class PdfObjectFactory {
 
@@ -66,5 +67,20 @@ public class PdfObjectFactory {
             default:
                 return PDFkeyInt;
         }
+    }
+
+    public static PdfObject getPDFObjectObjectFromRefOrDirect(final PdfObject obj, final  PdfFileReader pdfFileReader, final byte[] data, final int key) {
+        
+        if(data[0]=='<') {
+            obj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            obj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        obj.setUnresolvedData(data,key);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(pdfFileReader);
+        objectDecoder.checkResolved(obj);
+        
+        return obj;
     }
 }

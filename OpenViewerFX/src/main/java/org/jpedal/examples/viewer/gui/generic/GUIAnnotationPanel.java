@@ -37,8 +37,11 @@ import org.jpedal.PdfDecoderInt;
 
 public interface GUIAnnotationPanel {
     
-    boolean addPanel();
+    public enum FORMMODE{
+        CREATION, EDIT
+    }
     
+    boolean addPanel();
     
     Object getAnnotationType();
     
@@ -62,4 +65,8 @@ public interface GUIAnnotationPanel {
     void dispose();
     
     Object getDisplayPanel();
+    
+    public void setFormMode(FORMMODE mode);
+    
+    public FORMMODE getFormMode();
 }

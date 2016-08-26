@@ -126,12 +126,20 @@ public class DocInfo {
         /*
          * add form details if applicable
          */
-        if (getFormList(decode_pdf) != null) {
-            tabbedPane.add(getFormList(decode_pdf));
-            tabbedPane.setTitleAt(nextTab, "Forms");
-            nextTab++;
-        }
+        final org.jpedal.objects.acroforms.AcroRenderer formRenderer = decode_pdf.getFormRenderer();
+        if (formRenderer != null) {
+            //get list of forms on page
+            final Object[] formsOnPage = formRenderer.getFormComponents(null, ReturnValues.FORM_NAMES, decode_pdf.getPageNumber());
 
+            //Do not add if no forms on page
+            if (formsOnPage != null && formsOnPage.length>0) {
+                //Form list is guaranteed to not be null by this point
+                tabbedPane.add(getFormList(decode_pdf));
+                tabbedPane.setTitleAt(nextTab, "Forms");
+                nextTab++;
+            }
+        }
+        
         /*
          * optional tab for new XML style info
          */

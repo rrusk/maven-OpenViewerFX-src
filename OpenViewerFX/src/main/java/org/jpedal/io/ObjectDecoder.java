@@ -33,7 +33,7 @@
 package org.jpedal.io;
 
 import java.io.Serializable;
-import org.jpedal.color.ColorSpaces;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.io.types.*;
 import org.jpedal.objects.raw.ObjectFactory;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -291,13 +291,7 @@ public class ObjectDecoder implements Serializable {
         
         final int id=pdfObject.getID();
         
-        if(type==PdfDictionary.Resources && (PDFkeyInt==PdfDictionary.ColorSpace
-                || PDFkeyInt==PdfDictionary.ExtGState || PDFkeyInt==PdfDictionary.Shading
-                || PDFkeyInt==PdfDictionary.XObject || PDFkeyInt==PdfDictionary.Font|| PDFkeyInt==PdfDictionary.Pattern)){
-            pdfKeyType=PdfDictionary.VALUE_IS_DICTIONARY_PAIRS;
-            //}else if (type==PdfDictionary.Form && id== PdfDictionary.AA && PDFkeyInt== PdfDictionary.K){
-            //     pdfKeyType= PdfDictionary.VALUE_IS_UNREAD_DICTIONARY;
-        }else if (type==PdfDictionary.Outlines && PDFkeyInt== PdfDictionary.D){
+        if (type==PdfDictionary.Outlines && PDFkeyInt== PdfDictionary.D){
             PDFkeyInt= PdfDictionary.Dest;
             pdfKeyType= PdfDictionary.VALUE_IS_MIXED_ARRAY;
         }else if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && PDFkeyInt== PdfDictionary.D){
@@ -311,37 +305,11 @@ public class ObjectDecoder implements Serializable {
             }
         }else if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && (id==PdfDictionary.AP || id==PdfDictionary.AA) && PDFkeyInt== PdfDictionary.A){
             pdfKeyType= PdfDictionary.VALUE_IS_VARIOUS;
-        }else if (PDFkeyInt== PdfDictionary.Order && type==PdfDictionary.OCProperties){
-            pdfKeyType= PdfDictionary. VALUE_IS_OBJECT_ARRAY;
-        }else if (PDFkeyInt== PdfDictionary.Name && type==PdfDictionary.OCProperties){
-            pdfKeyType= PdfDictionary.VALUE_IS_TEXTSTREAM;
-        }else if ((type==PdfDictionary.ColorSpace || type==PdfDictionary.Function) && PDFkeyInt== PdfDictionary.N){
-            pdfKeyType= PdfDictionary.VALUE_IS_FLOAT;
-        }else if(PDFkeyInt==PdfDictionary.Gamma && type==PdfDictionary.ColorSpace &&
-                pdfObject.getParameterConstant(PdfDictionary.ColorSpace)== ColorSpaces.CalGray){ //its a number not an array
-            pdfKeyType= PdfDictionary.VALUE_IS_FLOAT;
         }else if(id==PdfDictionary.Win && pdfObject.getObjectType()==PdfDictionary.Form &&
                 (PDFkeyInt==PdfDictionary.P || PDFkeyInt==PdfDictionary.O)){
             pdfKeyType= PdfDictionary.VALUE_IS_TEXTSTREAM;
-        }else if (isInlineImage && PDFkeyInt==PdfDictionary.ColorSpace){
-            pdfKeyType= PdfDictionary.VALUE_IS_DICTIONARY;
         }else {
             pdfKeyType = PdfDictionary.getKeyType(PDFkeyInt, type);
-        }
-        
-        
-        //handle array of Function in Shading by using keyArray
-        if(id==PdfDictionary.Shading && PDFkeyInt==PdfDictionary.Function){
-            
-            //get next non number/char value
-            int ptr=i;
-            while((raw[ptr]>=48 && raw[ptr]<58) || raw[ptr]==32){
-                ptr++;
-            }
-            
-            if(raw[ptr]=='['){
-                pdfKeyType=PdfDictionary.VALUE_IS_KEY_ARRAY;
-            }
         }
         
         //allow for other values in D,N,R definitions
@@ -511,7 +479,7 @@ public class ObjectDecoder implements Serializable {
                 break;
                 
             }case PdfDictionary.VALUE_IS_VARIOUS:{
-                if(raw.length-5>0 && raw[i+1]=='n' && raw[i+2]=='u' && raw[i+3]=='l' && raw[i+4]=='l'){ //ignore null value and skip (ie /N null)
+                if(raw.length-5>0 && ArrayUtils.isNull(raw,i+1)){ //ignore null value and skip (ie /N null)
                     i += 5;
                 }else{
                     i = setVariousValue(pdfObject, i, raw, length, PDFkeyInt, map, ignoreRecursion,objectReader);
@@ -644,7 +612,7 @@ public class ObjectDecoder implements Serializable {
         }
         
         //allow for null object
-        if(raw[nextC]=='n' && raw[nextC+1]=='u' && raw[nextC+2]=='l' && raw[nextC+3]=='l'){
+        if(ArrayUtils.isNull(raw,nextC)){
             i=nextC+4;
             return i;
         }else if(raw[nextC]=='[' && raw[nextC+1]==']'){ //allow for empty object []
@@ -729,8 +697,7 @@ public class ObjectDecoder implements Serializable {
         final PdfObject valueObj= ObjectFactory.createObject(PDFkeyInt,pdfObject.getObjectRefAsString(), pdfObject.getObjectType(), pdfObject.getID());
         valueObj.setID(PDFkeyInt);
         
-        if(raw[i]=='n' && raw[i+1]=='u' && raw[i+2]=='l' && raw[i+3]=='l'){ //allow for null
-        }else {
+        if(!ArrayUtils.isNull(raw,i)){ //allow for null
             pdfObject.setDictionary(PDFkeyInt, valueObj);
         }
         
@@ -775,7 +742,7 @@ public class ObjectDecoder implements Serializable {
             }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
                 
                 //roll onto first valid char
-                while((raw[i]==91 && PDFkeyInt!=PdfDictionary.ColorSpace)  || raw[i]==32 || raw[i]==13 || raw[i]==10){
+                while(raw[i]==91  || raw[i]==32 || raw[i]==13 || raw[i]==10){
                     i++;
                 }
                 
@@ -828,7 +795,7 @@ public class ObjectDecoder implements Serializable {
                         i++;
                     }
                     i--;
-                }else if(raw[i]=='n' && raw[i+1]=='u' && raw[i+2]=='l' && raw[i+3]=='l'){ //allow for null
+                }else if(ArrayUtils.isNull(raw,i)){ //allow for null
                     i += 4;
                 }else{ //must be a ref
                     
@@ -1073,7 +1040,7 @@ public class ObjectDecoder implements Serializable {
             //allow for empty object
             if(raw[0]=='e' && raw[1]=='n' && raw[2]=='d' && raw[3]=='o' && raw[4]=='b' ){
                 //empty object
-            }else if(raw[0]=='n' && raw[1]=='u' && raw[2]=='l' && raw[3]=='l'){
+            }else if(ArrayUtils.isNull(raw,0)){
                 //null object
             }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
                 
@@ -1112,7 +1079,7 @@ public class ObjectDecoder implements Serializable {
                     return;
                 }
                 
-                Dictionary.readDictionaryFromRefOrDirect(-1,pdfObject,objectRef, 0, raw , -1,objectReader);
+                Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, 0, raw , -1,objectReader);
                 
             }
         }
@@ -1149,7 +1116,7 @@ public class ObjectDecoder implements Serializable {
             raw=newArray;
             pdfObject.setRef(objectRef);
 
-            Dictionary.readDictionaryFromRefOrDirect(-1,pdfObject,objectRef, 0, raw , -1,objectReader);
+            Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, 0, raw , -1,objectReader);
         }
     }
     

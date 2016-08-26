@@ -42,6 +42,7 @@ import java.util.Map;
 import org.jpedal.constants.PDFflags;
 import org.jpedal.exception.PdfException;
 import org.jpedal.exception.PdfSecurityException;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.io.types.CompressedObjects;
 import org.jpedal.io.types.ObjectReader;
 import org.jpedal.io.types.Offsets;
@@ -332,7 +333,6 @@ public class PdfFileReader
                 //decrypt the stream
                 try{
                     if(decryption!=null && !isCompressedStream && (decryption.getBooleanValue(PDFflags.IS_METADATA_ENCRYPTED) || !isMetaData)){
-
                         decryption.decrypt(null,pdfObject.getObjectRefAsString(), false,cacheName, false,false);
                     }
                 }catch(final Exception e){                  
@@ -346,14 +346,7 @@ public class PdfFileReader
                 //decrypt the stream
                 try{
                     if(decryption!=null && !isCompressedStream  && (decryption.getBooleanValue(PDFflags.IS_METADATA_ENCRYPTED) || !isMetaData)){// && pdfObject.getObjectType()!=PdfDictionary.ColorSpace){
-
-                        // System.out.println(objectRef+">>>"+pdfObject.getObjectRefAsString());
-                        if(pdfObject.getObjectType()==PdfDictionary.ColorSpace && pdfObject.getObjectRefAsString().startsWith("[")){
-
-                        }else {
-                            stream = decryption.decrypt(stream, pdfObject.getObjectRefAsString(), false, null, false, false);
-                        }
-
+                        stream = decryption.decrypt(stream, pdfObject.getObjectRefAsString(), false, null, false, false);                    
                     }
                 }catch(final PdfSecurityException e){
 
@@ -876,7 +869,7 @@ public class PdfFileReader
         }
 
         if(decryption!=null) {
-            decryption.cipher = null;
+            decryption.setCipherNull();
         }
 
         decryption=null;
@@ -1393,14 +1386,14 @@ public class PdfFileReader
      * read reference table start to see if new 1.5 type or traditional xref
      * @throws PdfException
      */
-    public final PdfObject readReferenceTable(final PdfObject linearObj) throws PdfException {
+    public final PdfObject readReferenceTable(final PdfObject linearObj, final PdfFileReader pdfFileReader) throws PdfException {
 
         final PdfObject rootObj= refTable.readReferenceTable(linearObj,this,objectReader);
 
         final PdfObject encryptObj=refTable.getEncryptionObject();
 
         if(encryptObj!=null) {
-            setupDecryption(encryptObj);
+            setupDecryption(encryptObj, pdfFileReader);
         }
 
         //will be null if offset table invalid
@@ -1409,7 +1402,7 @@ public class PdfFileReader
         return rootObj;
     }
 
-    public void setupDecryption(final PdfObject encryptObj) throws PdfSecurityException {
+    public void setupDecryption(final PdfObject encryptObj, final PdfFileReader pdfFileReader) throws PdfSecurityException {
 
         try{
             final byte[] ID=refTable.getID();
@@ -1425,7 +1418,7 @@ public class PdfFileReader
                 readObject(encyptionObj);
             }
 
-            decryption.readEncryptionObject(encyptionObj);
+            decryption.readEncryptionObject(encyptionObj, pdfFileReader);
 
         }catch(final Error err){
 

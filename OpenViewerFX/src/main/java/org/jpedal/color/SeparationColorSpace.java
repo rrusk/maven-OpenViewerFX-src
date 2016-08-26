@@ -46,10 +46,6 @@ import javax.imageio.stream.ImageInputStream;
 import org.jpedal.JDeliHelper;
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.ColorSpaceConvertor;
-import org.jpedal.io.PdfObjectReader;
-import org.jpedal.objects.raw.PdfArrayIterator;
-import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
 /**
@@ -61,8 +57,8 @@ public class SeparationColorSpace extends GenericColorSpace {
     
     static final int Black=1009857357;
     static final int PANTONE_BLACK=573970506;
-    private static final int Cyan=323563838;
-    private static final int Magenta=895186280;
+    static final int Cyan=323563838;
+    static final int Magenta=895186280;
     public static final int Yellow=1010591868;
     
     protected ColorMapping colorMapper;
@@ -70,7 +66,7 @@ public class SeparationColorSpace extends GenericColorSpace {
     //avoid rereading colorspaces
     //protected Map cachedValues=new HashMap();
     
-    private float[] domain;
+    float[] domain;
     
     /*if we use CMYK*/
     protected int cmykMapping=NOCMYK;
@@ -89,201 +85,15 @@ public class SeparationColorSpace extends GenericColorSpace {
     
     public SeparationColorSpace() {}
     
-    public SeparationColorSpace(final PdfObjectReader currentPdfFile, final PdfObject colorSpace) {
+    public SeparationColorSpace(ColorMapping colorMapper,float[] domain, final GenericColorSpace altCS){
+        
+        this.colorMapper=colorMapper;
+        this.domain=domain;
+        this.altCS=altCS;
+       
+        componentCount=1;
         
         setType(ColorSpaces.Separation);
-        
-        processColorToken(currentPdfFile, colorSpace);
-    }
-
-    SeparationColorSpace(PdfObjectReader currentPdfFile, PdfArrayIterator colorSpace) {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
-    
-    protected void processColorToken(final PdfObjectReader currentPdfFile, PdfObject colorSpace) {
-        
-        final PdfObject indexed=colorSpace.getDictionary(PdfDictionary.Indexed);
-        PdfObject functionObj=colorSpace.getDictionary(PdfDictionary.tintTransform);
-        
-        domain = null;
-        
-        //if(colorSpace.getDictionary(PdfDictionary.Process)!=null)
-        //  isProcess=true;
-        
-        //name of color if separation or Components if device and component count
-        byte[] name=null;
-        byte[][] components=null;
-        if(getID()==ColorSpaces.Separation){
-            name=colorSpace.getStringValueAsByte(PdfDictionary.Name);
-            
-            if(name!=null) {
-                components=new byte[][]{name};
-            }
-            componentCount=1;
-        }else{
-            components=colorSpace.getStringArray(PdfDictionary.Components);
-            componentCount=components.length;
-        }
-        
-        //test values
-        
-        cmykMapping=NOCMYK;
-        
-        final int[] values=new int[componentCount];
-        if(components!=null){
-            for(int ii=0;ii<componentCount;ii++){
-                values[ii]=PdfDictionary.generateChecksum(1, components[ii].length-1, components[ii]);
-            }
-        }
-        
-        switch(componentCount){
-            
-            case 1:
-                if(components!=null && (values[0]==Black || values[0]==PANTONE_BLACK)){
-                    cmykMapping=Black;
-                }
-                
-                break;
-                
-            case 2:
-                
-                if(values[0]==Cyan){
-                    if(values[1]==Yellow) {
-                        cmykMapping=CY;
-                    } else if(values[1]==Magenta) {
-                        cmykMapping=CM;
-                    }
-                }else if(values[0]==Magenta && values[1]==Yellow) {
-                    cmykMapping=MY;
-                }
-                
-                break;
-                
-            case 3:
-                
-                if(values[0]==Magenta && values[1]==Yellow && values[2]==Black) {
-                    cmykMapping=MYK;
-                } else if(values[0]==Cyan && values[1]==Magenta && values[2]==Yellow) {
-                    cmykMapping=CMY;
-                } else if(values[0]==Cyan && values[1]==Magenta && values[2]==Black) {
-                    cmykMapping=CMK;
-                }
-                break;
-                
-            case 4:
-                
-                if(values[0]==Cyan && values[1]==Magenta && values[2]==Yellow && values[3]==Black) {
-                    cmykMapping=CMYB;
-                }
-                break;
-                
-            case 5:
-                
-                if(values[0]==Cyan && values[1]==Magenta && values[2]==Yellow && values[3]==Black) {
-                    cmykMapping=CMYK;
-                }
-                break;
-                
-            case 6:
-                
-                if(values[0]==Cyan && values[1]==Magenta && values[2]==Yellow && values[3]==Black) {
-                    cmykMapping=CMYK;
-                }
-                break;
-        }
-        
-        //hard-code myk and cmy
-        if(cmykMapping!=NOCMYK){
-            
-            altCS=new DeviceCMYKColorSpace();
-            
-        }else{
-            
-            /*
-             * work out colorspace (can also be direct ie /Pattern)
-             */
-            colorSpace=colorSpace.getDictionary(PdfDictionary.AlternateSpace);
-            
-            //System.out.println("Set uncached AlCS "+colorSpace.getObjectRefAsString()+" "+this);
-            altCS =ColorspaceFactory.getColorSpaceInstance(currentPdfFile, colorSpace);
-            
-            //use alternate as preference if CMYK
-            if(altCS.getID()==ColorSpaces.ICC && colorSpace.getParameterConstant(PdfDictionary.Alternate)==ColorSpaces.DeviceCMYK) {
-                altCS=new DeviceCMYKColorSpace();
-            }
-            
-            
-        }
-        
-        if(name!=null){
-            final int len=name.length;
-            int jj=0;
-            int topHex;
-            int bottomHex;
-            final byte[] tempName=new byte[len];
-            for(int i=0;i<len;i++){
-                if(name[i]=='#'){
-                    //roll on past #
-                    i++;
-                    
-                    topHex=name[i];
-                    
-                    //convert to number
-                    if(topHex>='A' && topHex<='F') {
-                        topHex -= 55;
-                    } else if(topHex>='a' && topHex<='f') {
-                        topHex -= 87;
-                    } else if(topHex>='0' && topHex<='9') {
-                        topHex -= 48;
-                    }
-                    
-                    i++;
-                    
-                    while(name[i]==32 || name[i]==10 || name[i]==13) {
-                        i++;
-                    }
-                    
-                    bottomHex=name[i];
-                    
-                    if(bottomHex>='A' && bottomHex<='F') {
-                        bottomHex -= 55;
-                    } else if(bottomHex>='a' && bottomHex<='f') {
-                        bottomHex -= 87;
-                    } else if(bottomHex>='0' && bottomHex<='9') {
-                        bottomHex -= 48;
-                    }
-                    
-                    tempName[jj]=(byte) (bottomHex+(topHex<<4));
-                }else{
-                    tempName[jj]=name[i];
-                }
-                
-                jj++;
-            }
-            
-            //resize
-            if(jj!=len){
-                name=new byte[jj];
-                System.arraycopy(tempName, 0, name, 0, jj);
-                
-            }
-            
-            pantoneName=new String(name);
-        }
-        
-        /*
-         * setup transformation
-         **/
-        if(functionObj==null) {
-            colorSpace.getDictionary(PdfDictionary.tintTransform);
-        }
-        
-        if(functionObj==null && indexed!=null) {
-            functionObj=indexed.getDictionary(PdfDictionary.tintTransform);
-        }
-        
-        colorMapper=new ColorMapping(currentPdfFile,functionObj);
-        domain=functionObj.getFloatArray(PdfDictionary.Domain);
         
     }
     

@@ -35,16 +35,18 @@ package org.jpedal.parser.shape;
 import com.idrsolutions.pdf.color.shading.ShadedPaint;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.util.Map;
 import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.color.PdfPaint;
+import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfPageData;
 import org.jpedal.objects.SwingShape;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
+import org.jpedal.objects.raw.ShadingObject;
 import org.jpedal.parser.Cmd;
 import org.jpedal.parser.PdfObjectCache;
 import org.jpedal.render.DynamicVectorRenderer;
@@ -53,14 +55,15 @@ import org.jpedal.utils.LogWriter;
 public class SH {
 
     public static void execute(final String shadingObject, final PdfObjectCache cache, final GraphicsState gs,
-                               final boolean isPrinting, final Map<String, GenericColorSpace> shadingColorspacesObjects, final int pageNum,
+                               final boolean isPrinting, final int pageNum,
                                final PdfObjectReader currentPdfFile,
                                final PdfPageData pageData, final DynamicVectorRenderer current) {
-        
-        PdfObject Shading= (PdfObject) cache.get(PdfObjectCache.LocalShadings, shadingObject);
-        if(Shading==null){
-            Shading= (PdfObject) cache.get(PdfObjectCache.GlobalShadings, shadingObject);
+        byte[] shadingData= (byte[]) cache.get(PdfObjectCache.LocalShadings, shadingObject);
+        if(shadingData==null){
+            shadingData= (byte[]) cache.get(PdfObjectCache.GlobalShadings, shadingObject);
         }
+        
+        PdfObject Shading=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject("1 0 R"), currentPdfFile.getObjectReader(),shadingData, PdfDictionary.Shading);
         
         //workout shape
         Shape shadeShape=null;
@@ -87,11 +90,11 @@ public class SH {
          * generate the appropriate shading and then colour in the current clip with it
          */
         try{
+            
+            final PdfArrayIterator ColorSpace=Shading.getMixedArray(PdfDictionary.ColorSpace);
 
-            final PdfObject ColorSpace=Shading.getDictionary(PdfDictionary.ColorSpace);
-
-            final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace, shadingColorspacesObjects);
-
+            final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+            
             newColorSpace.setPrinting(isPrinting);
             
             final PdfPaint shading=new ShadedPaint(Shading, isPrinting,newColorSpace, currentPdfFile,gs.CTM,false);

@@ -210,7 +210,9 @@ public class XFormDecoder {
                 pdfStreamDecoder.cache.reset(mainCache);   //copy in data
 
                 final PdfObject Resources= XObject.getDictionary(PdfDictionary.Resources);
-                pdfStreamDecoder.readResources(Resources, false);
+                if(Resources!=null) {
+                    pdfStreamDecoder.readResources(Resources, false);
+                }
 
                 pdfStreamDecoder.cache.groupObj= XObject.getDictionary(PdfDictionary.Group);
                 pdfStreamDecoder.currentPdfFile.checkResolved(pdfStreamDecoder.cache.groupObj);

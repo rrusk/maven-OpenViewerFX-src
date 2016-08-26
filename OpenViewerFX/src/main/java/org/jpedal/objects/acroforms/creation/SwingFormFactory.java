@@ -86,7 +86,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     
     private JButton createAnnotationFreeText(final FormObject form){
         JButton but = setupAnnotationButton(form);
-        
+                
         but.setText("<html>" + form.getTextStreamValue(PdfDictionary.Contents) + "</html>");
         
         but.setVerticalAlignment(SwingConstants.TOP);

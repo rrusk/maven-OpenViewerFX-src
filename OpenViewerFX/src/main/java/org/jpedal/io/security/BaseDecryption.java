@@ -30,7 +30,7 @@
  * BaseDecryption.java
  * ---------------
  */
-package org.jpedal.io;
+package org.jpedal.io.security;
 
 import java.security.Key;
 import java.security.cert.Certificate;

@@ -227,7 +227,10 @@ public class FormFlattener {
         //might be needed to pick up fonts
         if(imgObj!=null){
             final PdfObject resources = imgObj.getDictionary(PdfDictionary.Resources);
-            pdfStreamDecoder.readResources(resources, false);
+
+            if(resources!=null) {
+                pdfStreamDecoder.readResources(resources, false);
+            }
         }
 
         /*

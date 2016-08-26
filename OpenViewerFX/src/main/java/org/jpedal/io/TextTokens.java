@@ -64,18 +64,31 @@ public class TextTokens {
 
     /**
      * read the next double char
+     * @param keepReturns
+     * @return 
      */
-    public char nextUnicodeToken(boolean keepReturns) {
+    public char nextUnicodeToken(final boolean keepReturns) {
 
         int first,second=0;
 
         first=nextToken();
+        
+        //allow for 2 byte return char first and then check both as single
+        //Added for file sample_pdfs_html/12jul/1997.pdf (popup characters incorrect)
+        if(this.hasMoreTokens()){
+            second=nextToken();
+            int combined=((first<<8)+second);
+        
+            if(combined==13 && keepReturns ) {
+                return (char) combined;
+            }
+        }
+        
         if(first==13 && keepReturns && this.hasMoreTokens()) {
             first = nextToken();
         }
 
         if(this.hasMoreTokens()){
-            second=nextToken();
             if(second==13 && keepReturns && this.hasMoreTokens()) {
                 second = nextToken();
             }

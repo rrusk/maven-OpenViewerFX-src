@@ -44,18 +44,16 @@ public class ColorSpaceObject extends PdfObject {
 	
 	byte[] rawName;
 	
-	PdfObject alternateSpace, IndexedColorSpace, Lookup, Process, tintTransform;
+	PdfObject Process;
 	
-	int Alternate=PdfDictionary.Unknown, colorType=PdfDictionary.Unknown;
+	int Alternate=PdfDictionary.Unknown;
 
 	private byte[][] rawComponents;
 	
 	private float[] BlackPoint, Gamma, WhitePoint;
 	
-	float GammaInCalGrey=-1, N=-1;
+	float N=-1;
 	
-	private int hival=-1;
-
     public ColorSpaceObject(final String ref) {
         super(ref);
     }
@@ -63,13 +61,6 @@ public class ColorSpaceObject extends PdfObject {
     public ColorSpaceObject(final int ref, final int gen) {
        super(ref,gen);
     }
-
-    public ColorSpaceObject(final byte[] bytes) {
-
-        //set ID
-    	colorType=PdfDictionary.getIntKey(0, bytes.length, bytes);
-    	
-	}
 
 	@Override
     public byte[][] getStringArray(final int id) {
@@ -99,91 +90,17 @@ public class ColorSpaceObject extends PdfObject {
 
     }
 
-    @Override
-    public boolean getBoolean(final int id){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	return ImageMask;
-//
-
-            default:
-            	return super.getBoolean(id);
-        }
-
-    }
-
-    @Override
-    public void setBoolean(final int id, final boolean value){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
-
-            default:
-                super.setBoolean(id, value);
-        }
-    }
 
     @Override
     public PdfObject getDictionary(final int id){
 
         switch(id){
-
-        case PdfDictionary.AlternateSpace:
-        	return alternateSpace;
-        	
-        case PdfDictionary.Indexed:
-        	return IndexedColorSpace;
-
-        case PdfDictionary.Lookup:
-        	return Lookup;
-
+	
         case PdfDictionary.Process:
         	return Process;
-        	
-        case PdfDictionary.tintTransform:
-            return tintTransform;
-
+        
             default:
                 return super.getDictionary(id);
-        }
-    }
-
-    @Override
-    public void setIntNumber(final int id, final int value){
-
-        switch(id){
-
-	        case PdfDictionary.hival:
-	        	hival=value;
-	        break;
-//
-//	        case PdfDictionary.Width:
-//	            Width=value;
-//	        break;
-
-            default:
-            	super.setIntNumber(id, value);
-        }
-    }
-
-    @Override
-    public int getInt(final int id){
-
-        switch(id){
-
-        	case PdfDictionary.hival:
-            return hival;
-//
-//	        case PdfDictionary.Width:
-//	            return Width;
-
-            default:
-            	return super.getInt(id);
         }
     }
 
@@ -193,22 +110,6 @@ public class ColorSpaceObject extends PdfObject {
     	value.setID(id);
     	
         switch(id){
-
-	        case PdfDictionary.AlternateSpace:
-	        	alternateSpace=value;
-	        	break;
-        	
-	        case PdfDictionary.Indexed:
-	        	IndexedColorSpace=value;
-	        	break;
-
-            case PdfDictionary.Lookup:
-	        	Lookup=value;
-	        	break;
-	        	
-            case PdfDictionary.tintTransform:
-            	tintTransform=value;
-    		break;
 
             case PdfDictionary.Process:
             	Process=value;
@@ -280,12 +181,7 @@ public class ColorSpaceObject extends PdfObject {
 
         case PdfDictionary.Alternate:
         	Alternate=PDFvalue;
-    		break;
-        	
-        	case PdfDictionary.ColorSpace:
-        		colorType=PDFvalue;
-        		break;
-        	
+    		break;       	
         }
 
         return PDFvalue;
@@ -293,69 +189,21 @@ public class ColorSpaceObject extends PdfObject {
     
     @Override
     public int getParameterConstant(final int key) {
-        final int def= PdfDictionary.Unknown;
+        final int def = PdfDictionary.Unknown;
 
-        switch(key){
+        switch (key) {
 
-        case PdfDictionary.Alternate:
-        	return Alternate;
-        	
-            case PdfDictionary.ColorSpace:
-            	
-                return colorType;
+            case PdfDictionary.Alternate:
+                return Alternate;
 
-
-                default:
-                	super.getParameterConstant(key);
+            default:
+                super.getParameterConstant(key);
         }
 
         return def;
     }
 
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
 
-    	switch(id){
-
-            default:
-			return super.getMixedArray(id);
-        }
-	}
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
-
-    /**
-     * set values (access with getArrayIterator(int id))
-     */
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-//            case PdfDictionary.Differences:
-//                Differences=value;
-//            break;
-
-            default:
-            	super.setMixedArray(id, value);
-        }
-    }
 
     @Override
     public float[] getFloatArray(final int id) {
@@ -382,12 +230,8 @@ public class ColorSpaceObject extends PdfObject {
 
         switch(id){
 
-        case PdfDictionary.Gamma:
-        	GammaInCalGrey=value;
-        	break;
-        	
-        	case PdfDictionary.N:
-		        	N=value;
+        case PdfDictionary.N:
+		    N=value;
 	    	break;
     	
             default:
@@ -400,11 +244,8 @@ public class ColorSpaceObject extends PdfObject {
 
         switch(id){
 
-        case PdfDictionary.Gamma:
-        	return GammaInCalGrey;
-        	
-	        case PdfDictionary.N:
-	        	return N;
+        case PdfDictionary.N:
+	        return N;
 	        
             default:
             	return super.getFloatNumber(id);
@@ -465,21 +306,20 @@ public class ColorSpaceObject extends PdfObject {
 
     }
 
+
+    
     @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
+    public byte[] getRawName(final int id) {
 
         switch(id){
 
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//
+            case PdfDictionary.Name:
+            return rawName;
 
             default:
-                super.setTextStreamValue(id,value);
+                return super.getRawName(id);
 
         }
-
     }
 
     @Override
@@ -502,24 +342,6 @@ public class ColorSpaceObject extends PdfObject {
         }
     }
 
-    @Override
-    public String getTextStreamValue(final int id) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//
-//	            //setup first time
-//	            if(CharSet==null && rawCharSet!=null)
-//	            	CharSet=new String(rawCharSet);
-//
-//	            return CharSet;
-
-            default:
-                return super.getTextStreamValue(id);
-
-        }
-    }
 
     /**
      * unless you need special fucntions,

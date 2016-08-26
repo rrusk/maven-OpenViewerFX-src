@@ -125,15 +125,13 @@ public class PdfObject {
     private PdfFileReader objReader;
     private String cacheName;
     
-    private byte[][] ColorSpaceArray, Filter, Nums,TR;
+    private byte[][] ColorSpaceArray, ExtGStateArray, Filter, FontArray, FunctionArray, Nums,PatternArray, ShadingArray, TR, XObjectArray;
     
     private byte[][] keys;
     
     private byte[][] values;
     
     private Object[] DecodeParmsAsArray;
-    
-    private PdfObject[] objs;
     
     //used by /Other
     protected Object currentKey;
@@ -966,26 +964,53 @@ public class PdfObject {
     
     
     public void setMixedArray(final int id, final byte[][] value) {
-        
-        switch(id){
-            
+
+        switch (id) {
+
             case PdfDictionary.ColorSpace:
-                
-                ColorSpaceArray=value;
+
+                ColorSpaceArray = value;
                 break;
-                
+
+            case PdfDictionary.ExtGState:
+
+                ExtGStateArray = value;
+                break;
+
             case PdfDictionary.Filter:
-                
-                Filter=value;
+
+                Filter = value;
                 break;
-             
+
+            case PdfDictionary.Font:
+
+                FontArray = value;
+                break;
+
+            case PdfDictionary.Function:
+                FunctionArray = value;
+                break;
+
             case PdfDictionary.Nums:
-                Nums=value;
-            break;
-            
-            default:
+                Nums = value;
+                break;
+
+            case PdfDictionary.Pattern:
+
+                PatternArray = value;
+                break;
+
+            case PdfDictionary.Shading:
+                ShadingArray = value;
+                break;
+
+            case PdfDictionary.XObject:
+                XObjectArray = value;
+                break; 
                 
-                if(debug) {
+            default:
+
+                if (debug) {
                     throw new RuntimeException("unknown value " + id + " passed into setMixedArray in " + this);
                 }
         }
@@ -1115,6 +1140,27 @@ public class PdfObject {
         }
         
         return str;
+    }
+    
+    
+    public byte[] getRawName(final int id) {
+        
+        switch(id){
+            
+            case PdfDictionary.Name:               
+                return rawName;
+               
+            case PdfDictionary.S:
+                return rawS;
+                
+            default:
+                
+                if(debug) {
+                    throw new RuntimeException("unknown value " + id + " passed into getRawName in " + this);
+                }
+        }
+        
+        return null;
     }
     
     public String getStringKey(final int id) {
@@ -1392,37 +1438,53 @@ public class PdfObject {
     }
     
     public PdfArrayIterator getMixedArray(final int id) {
-        
-        switch(id){
-            
+
+        switch (id) {
+
             case PdfDictionary.ColorSpace:
                 return new PdfArrayIterator(ColorSpaceArray);
-                
+
+            case PdfDictionary.ExtGState:
+                return new PdfArrayIterator(ExtGStateArray);
+
+            case PdfDictionary.Font:
+                return new PdfArrayIterator(FontArray);
+
             case PdfDictionary.Filter:
                 return new PdfArrayIterator(Filter);
-                
+
+            case PdfDictionary.Function:
+                return new PdfArrayIterator(FunctionArray);
+
             case PdfDictionary.Nums:
                 return new PdfArrayIterator(Nums);
 
+            case PdfDictionary.Pattern:
+                return new PdfArrayIterator(PatternArray);
+
+            case PdfDictionary.Shading:
+                return new PdfArrayIterator(ShadingArray);
+
+            case PdfDictionary.XObject:
+                return new PdfArrayIterator(XObjectArray);
+
             default:
-                if(debug) {
+                if (debug) {
                     throw new RuntimeException("unknown value " + id + " passed into getMixedArray in " + this);
                 }
                 return null;
         }
     }
-    
-    public void setDictionaryPairs(final byte[][] keys, final byte[][] values, final PdfObject[] objs) {
+
+    public void setDictionaryPairs(final byte[][] keys, final byte[][] values) {
         
         this.keys=keys;
         this.values=values;
-        this.objs=objs;
-        
         
     }
     
     public PdfKeyPairsIterator getKeyPairsIterator() {
-        return new PdfKeyPairsIterator(keys,values,objs);
+        return new PdfKeyPairsIterator(keys,values);
     }
     
     public void setKeyArray(final int id, final byte[][] keyValues) {

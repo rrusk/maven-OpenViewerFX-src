@@ -33,11 +33,11 @@
 package org.jpedal.io.types;
 
 import org.jpedal.exception.PdfSecurityException;
-import org.jpedal.io.DecryptionFactory;
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -60,13 +60,6 @@ public class TextStream {
 
             i=ArrayUtils.skipSpaces(raw,i);
 
-            //allow for no actual value but another key
-            if(raw[i]==47){
-                pdfObject.setTextStreamValue(PDFkeyInt, new byte[1]);
-                i--;
-                return i;
-            }
-
             //get next key to see if indirect
             final boolean isRef=raw[i]!='<' && raw[i]!='(';
 
@@ -77,7 +70,6 @@ public class TextStream {
                 //number
                 int keyStart2=i;
                 while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
-
                     i++;
                 }
 

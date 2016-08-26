@@ -123,9 +123,17 @@ public class NameLookup extends HashMap<String, Object> {
                         final String nextValue = new String(aKidList);
 
                         final PdfObject nextObject = new NamesObject(nextValue);
+
+                        if(aKidList[0]=='<') {
+                            nextObject.setStatus(PdfObject.UNDECODED_DIRECT);
+                        } else {
+                            nextObject.setStatus(PdfObject.UNDECODED_REF);
+                        }
+                        nextObject.setUnresolvedData(aKidList,nameLists[ii]);
+
                         nextObject.ignoreRecursion(false);
 
-                        objectReader.readObject(nextObject);
+                        objectDecoder.checkResolved(nextObject);
 
                         readNames(nextObject, javascript, true);
                     }

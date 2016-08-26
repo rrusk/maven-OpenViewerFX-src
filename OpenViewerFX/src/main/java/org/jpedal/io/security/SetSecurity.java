@@ -30,7 +30,7 @@
  * SetSecurity.java
  * ---------------
  */
-package org.jpedal.io;
+package org.jpedal.io.security;
 
 import java.security.Security;
 import org.jpedal.utils.LogWriter;
@@ -38,7 +38,7 @@ import org.jpedal.utils.LogWriter;
 public class SetSecurity {
     
     private static String altSP;
-    public static boolean useBouncyCastle = false;
+    public static boolean useBouncyCastle;
     
     public static void init(){
         
@@ -57,12 +57,8 @@ public class SetSecurity {
             Security.addProvider(provider);
             useBouncyCastle = true;
         } catch (final Exception e) {
-            
-            LogWriter.writeLog("Unable to run custom security provider " + altSP+" Exception " + e);
-            
-            throw new RuntimeException("This PDF file is encrypted and JPedal needs an additional library to \n" +
-                    "decode on the classpath (we recommend bouncycastle library).\n" +
-                    "There is additional explanation at http://www.idrsolutions.com/additional-jars"+ '\n');
+            LogWriter.writeLog("Running default JCA security provider because no other provider found or supplied.");
+            e.getMessage();
         }
     }
 }

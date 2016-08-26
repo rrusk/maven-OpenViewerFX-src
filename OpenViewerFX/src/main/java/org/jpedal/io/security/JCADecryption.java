@@ -30,7 +30,7 @@
  * JCADecryption.java
  * ---------------
  */
-package org.jpedal.io;
+package org.jpedal.io.security;
 
 import java.lang.reflect.Field;
 import java.security.Key;
@@ -39,6 +39,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.jpedal.exception.PdfSecurityException;
+import org.jpedal.gui.ShowGUIMessage;
 
 public class JCADecryption implements BaseDecryption {
 
@@ -48,12 +49,11 @@ public class JCADecryption implements BaseDecryption {
     
     @Override
     public byte[] v5Decrypt(final byte[] rawValue, final byte[] encKey) throws PdfSecurityException {
-
-        byte[] returnKey = new byte[rawValue.length];
+        byte[] returnKey = null;
 
         try {
-            SecretKeySpec key = new SecretKeySpec(encKey, "AES");
-            Cipher c = Cipher.getInstance("AES/CBC/NOPADDING");
+            final SecretKeySpec key = new SecretKeySpec(encKey, "AES");
+            final Cipher c = Cipher.getInstance("AES/CBC/NOPADDING");
             c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(new byte[16]));
             returnKey = c.doFinal(rawValue);
 
@@ -67,21 +67,20 @@ public class JCADecryption implements BaseDecryption {
     public byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData) throws Exception {
         byte[] out = null;
         try {
-            SecretKeySpec key = new SecretKeySpec(encKey, "AES");
-            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            final SecretKeySpec key = new SecretKeySpec(encKey, "AES");
+            final Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
             c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(ivData));
             out = c.doFinal(encData);
-
+        
         } catch (Exception e) {
             e.printStackTrace();
-        }
+    }
         return out;
     }
 
     private void allowBiggerKeySize() {
-        //See case 26048 for notes on this method
         try {
-            Field field = Class.forName("javax.crypto.JceSecurity").getDeclaredField("isRestricted");
+            final Field field = Class.forName("javax.crypto.JceSecurity").getDeclaredField("isRestricted");
             field.setAccessible(true);
             field.set(null, java.lang.Boolean.FALSE);
         } catch (Exception ex) {
@@ -91,6 +90,11 @@ public class JCADecryption implements BaseDecryption {
 
     @Override
     public byte[] readCertificate(final byte[][] recipients, final Certificate certificate, final Key key) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String message = "This method is not supported without the BouncyCastle mail jar added "
+                + "to the classpath. " + System.getProperty("line.separator") + 
+                "See https://www.idrsolutions.com/jpedal/support/additional-jars/ for more details.";
+        
+        ShowGUIMessage.showGUIMessage(message, "Unsupported Certificate operation");
+        throw new UnsupportedOperationException(message);
     }
 }

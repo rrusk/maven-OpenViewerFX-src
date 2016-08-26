@@ -53,33 +53,7 @@ public class PageObject extends PdfObject {
 		return PdfDictionary.Page;
 	}
     
-    @Override
-    public boolean getBoolean(final int id){
 
-        switch(id){
-	
-//        case PdfDictionary.EncodedByteAlign:
-//        	return EncodedByteAlign; 
-
-            default:
-            	return super.getBoolean(id);
-        }
-
-    }
-    
-    @Override
-    public void setBoolean(final int id, final boolean value){
-
-        switch(id){
-        	
-//        case PdfDictionary.EncodedByteAlign:
-//        	EncodedByteAlign=value;
-//        	break;
-
-            default:
-                super.setBoolean(id, value);
-        }
-    }
 
     @Override
     public PdfObject getDictionary(final int id){
@@ -354,30 +328,6 @@ public class PageObject extends PdfObject {
 
 	}
 
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-               return super.getDoubleArray(id);
-
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-
-    }
 
     @Override
     public byte[][] getKeyArray(final int id) {
@@ -440,64 +390,7 @@ public class PageObject extends PdfObject {
 
     }
 
-    @Override
-    public float[] getFloatArray(final int id) {
 
-        switch(id){
-            default:
-            	return super.getFloatArray(id);
-
-        }
-    }
-
-    @Override
-    public void setFloatArray(final int id, final float[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.FontBBox:
-//	            FontBBox=value;
-//	        break;
-
-            default:
-            	super.setFloatArray(id, value);
-        }
-
-    }
-
-    @Override
-    public void setName(final int id, final byte[] value) {
-
-        switch(id){
-
-
-//            case PdfDictionary.CMapName:
-//                rawCMapName=value;
-//            break;
-
-
-            default:
-                super.setName(id,value);
-
-        }
-
-    }
-
-    @Override
-    public void setTextStreamValue(final int id, final byte[] value) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-
-            default:
-                super.setTextStreamValue(id,value);
-
-        }
-
-    }
 
     @Override
     public String getName(final int id) {
@@ -519,23 +412,4 @@ public class PageObject extends PdfObject {
         }
     }
 
-    @Override
-    public String getTextStreamValue(final int id) {
-
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//
-//	            //setup first time
-//	            if(CharSet==null && rawCharSet!=null)
-//	            	CharSet=new String(rawCharSet);
-//
-//	            return CharSet;
-
-            default:
-
-                return super.getTextStreamValue(id);
-
-        }
-    }
 }

@@ -42,15 +42,12 @@ public class PdfKeyPairsIterator {
     
 	private final byte[][] keys,values;
 	
-	private final PdfObject[] objs;
-
     int maxCount,current;
 
-    public PdfKeyPairsIterator(final byte[][] keys, final byte[][] values, final PdfObject[] objs) {
+    public PdfKeyPairsIterator(final byte[][] keys, final byte[][] values) {
 
         this.keys=keys;
         this.values=values;
-        this.objs=objs;
         
         if(keys!=null) {
             maxCount = keys.length;
@@ -139,6 +136,14 @@ public class PdfKeyPairsIterator {
     public boolean hasMorePairs() {
         return current<maxCount;
     }
+    
+    public byte[] getNextValueAsBytes() {
+        if(values[current]==null) {
+            return null;
+        } else {
+            return values[current];
+        }
+    }
 
     public String getNextValueAsString() {
         if(values[current]==null) {
@@ -147,13 +152,4 @@ public class PdfKeyPairsIterator {
             return new String(values[current]);
         }
     }
-
-    /**
-     * return value as PdfObject or null
-     * @return
-     */
-	public PdfObject getNextValueAsDictionary() {
-		
-		return objs[current];
-	}
 }

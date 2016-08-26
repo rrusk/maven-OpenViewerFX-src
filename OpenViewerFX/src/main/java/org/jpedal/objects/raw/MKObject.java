@@ -120,35 +120,7 @@ public class MKObject extends FormObject {
     public MKObject() {
 		// TODO Auto-generated constructor stub
 	}
-    
-	@Override
-    public boolean getBoolean(final int id){
 
-        switch(id){
-
-       // case PdfDictionary.ImageMask:
-       // 	return ImageMask;
-
-
-            default:
-            	return super.getBoolean(id);
-        }
-
-    }
-
-    @Override
-    public void setBoolean(final int id, final boolean value){
-
-        switch(id){
-
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
-
-            default:
-                super.setBoolean(id, value);
-        }
-    }
 
     @Override
     public PdfObject getDictionary(final int id){
@@ -228,75 +200,6 @@ public class MKObject extends FormObject {
 //    }
 
 
-    @Override
-    public PdfArrayIterator getMixedArray(final int id) {
-
-    	switch(id){
-
-            //case PdfDictionary.Differences:
-            //    return new PdfArrayIterator(Differences);
-
-            default:
-			return super.getMixedArray(id);
-        }
-	}
-
-    @Override
-    public double[] getDoubleArray(final int id) {
-
-        switch(id){
-            default:
-            	return super.getDoubleArray(id);
-        }
-    }
-
-    @Override
-    public void setDoubleArray(final int id, final double[] value) {
-
-        switch(id){
-
-//            case PdfDictionary.FontMatrix:
-//                FontMatrix=value;
-//            break;
-
-            default:
-            	super.setDoubleArray(id, value);
-        }
-    }
-
-    @Override
-    public int[] getIntArray(final int id) {
-
-        switch(id){
-
-            default:
-            	return super.getIntArray(id);
-        }
-    }
-
-    @Override
-    public void setIntArray(final int id, final int[] value) {
-
-        switch(id){
-
-            default:
-            	super.setIntArray(id, value);
-        }
-    }
-
-    @Override
-    public void setMixedArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-//            case PdfDictionary.Differences:
-//                Differences=value;
-//            break;
-
-            default:
-            	super.setMixedArray(id, value);
-        }
-    }
 
     @Override
     public float[] getFloatArray(final int id) {
@@ -335,22 +238,6 @@ public class MKObject extends FormObject {
         }
     }
 
-    @Override
-    public void setName(final int id, final byte[] value) {
-
-        switch(id){
-
-
-//            case PdfDictionary.CMapName:
-//                rawCMapName=value;
-//            break;
-
-            default:
-                super.setName(id,value);
-
-        }
-
-    }
 
     @Override
     public byte[] getTextStreamValueAsByte(final int id) {
@@ -372,24 +259,6 @@ public class MKObject extends FormObject {
         }
     }
 
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-//            case PdfDictionary.BaseFont:
-//
-//            //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-
-            default:
-                return super.getName(id);
-
-        }
-    }
     
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
@@ -513,26 +382,7 @@ public class MKObject extends FormObject {
         }
     }
 
-    @Override
-    public byte[][] getKeyArray(final int id) {
 
-        switch(id){
-
-            default:
-            	return super.getKeyArray(id);
-        }
-    }
-
-    @Override
-    public void setKeyArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            default:
-            	super.setKeyArray(id, value);
-        }
-
-    }
 
     @Override
     public int getObjectType(){

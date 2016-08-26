@@ -39,12 +39,12 @@ import java.awt.Point;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import javax.swing.BorderFactory;
 import javax.swing.JInternalFrame;
 import javax.swing.JTextArea;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.MouseInputAdapter;
 import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -67,7 +67,8 @@ public class PdfSwingPopup extends JInternalFrame{
     public PdfSwingPopup(final FormObject popupObj, final int cropBoxWidth) {
 
         formObject = popupObj;
-
+        float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
+        
         /*
          * all the popup data is in the Parent not the popup object
          */
@@ -158,6 +159,7 @@ public class PdfSwingPopup extends JInternalFrame{
 
         //add title bar
         titleBar = new JTextArea(title);
+        titleBar.setHighlighter(null);
         titleBar.setEditable(false);
         if (bgColor != null) {
             titleBar.setBackground(bgColor);
@@ -217,19 +219,30 @@ public class PdfSwingPopup extends JInternalFrame{
     }
     
     final Point currPos = new Point(0, 0);
-    private class MyMouseMotionAdapter extends MouseMotionAdapter{
-	@Override
-    public void mouseDragged(final MouseEvent e) {
-	    //move the popup as the user drags the mouse
-	    final Point pt = e.getPoint();
-	    final Point curLoc = getLocation();
-	    currPos.x += pt.x;
-	    currPos.y += pt.y;
-	    curLoc.translate(pt.x, pt.y);
-	    setLocation(curLoc);
-	    formObject.setUserSetOffset(currPos);
-	    super.mouseDragged(e);
-	}
+    private class MyMouseMotionAdapter extends MouseInputAdapter {
+        Point clickStart = null;
+        
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if(clickStart==null){
+                clickStart = e.getPoint();
+            }
+            //move the popup as the user drags the mouse
+            final Point pt = e.getPoint();
+            final Point curLoc = getLocation();
+            int x = pt.x-clickStart.x;
+            int y = pt.y-clickStart.y;
+            currPos.x += x;
+            currPos.y += y;
+            curLoc.translate(x, y);
+            setLocation(curLoc);
+            formObject.setUserSetOffset(currPos);
+        }
+        
+        @Override
+        public void mousePressed(MouseEvent e) {
+            clickStart = e.getPoint();
+        }
     }
     
     @Override

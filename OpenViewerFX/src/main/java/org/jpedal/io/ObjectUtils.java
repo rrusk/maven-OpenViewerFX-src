@@ -423,4 +423,24 @@ public class ObjectUtils {
         }
         return values;
     }
+
+    public static int skipToEndOfObject(int start, final byte[] data) {
+        
+        start += 2;
+        int level = 1;
+
+        while (level > 0) {
+            //   System.out.print((char)data[start]);
+            if (data[start] == '<' && data[start + 1] == '<') {
+                start += 2;
+                level++;
+            } else if (data[start] == '>' && data[start + 1] == '>') {
+                start += 2;
+                level--;
+            } else {
+                start++;
+            }
+        }
+        return start;
+    }
 }

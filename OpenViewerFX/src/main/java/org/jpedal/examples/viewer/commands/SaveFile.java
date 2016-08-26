@@ -87,49 +87,63 @@ public class SaveFile {
     private static final FileFilterer jpg = new FileFilterer(new String[] {"jpg"}, "Jpg (*.jpg)");
         
     
-     private static void saveFile(final GUIFactory currentGUI, final Values commonValues) {
-        final JFileChooser chooser = new JFileChooser(commonValues.getInputDir());
-        chooser.setSelectedFile(new File(commonValues.getInputDir() + '/' + commonValues.getSelectedFile()));
-        chooser.addChoosableFileFilter(pdf);
-        chooser.addChoosableFileFilter(fdf);
-        chooser.addChoosableFileFilter(png);
-        chooser.addChoosableFileFilter(tif);
-        chooser.addChoosableFileFilter(jpg);
-        chooser.setFileFilter(pdf);
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    private static void saveFile(final GUIFactory currentGUI, final Values commonValues) {
 
-        //set default name to current file name
-        final int approved = chooser.showSaveDialog(null);
-        if (approved == JFileChooser.APPROVE_OPTION) {
-            String filter = chooser.getFileFilter().getDescription().toLowerCase();
-            if (filter.startsWith("all") || filter.startsWith("pdf") || filter.startsWith("fdf")) {
-                saveAsPdf(chooser.getSelectedFile(), currentGUI, commonValues);
-            } else if (filter.startsWith("png") || filter.startsWith("tif") || filter.startsWith("jpg")) {
-                saveAsImage(chooser.getSelectedFile(), currentGUI, filter.substring(0, 3));
+        //Prevent save is linearised file is still loading
+        if (currentGUI.getPdfDecoder().isLoadingLinearizedPDF()) {
+            currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.LineariseSaveWait"));
+        } else {
+
+            final JFileChooser chooser = new JFileChooser(commonValues.getInputDir());
+            chooser.setSelectedFile(new File(commonValues.getInputDir() + '/' + commonValues.getSelectedFile()));
+            chooser.addChoosableFileFilter(pdf);
+            chooser.addChoosableFileFilter(fdf);
+            chooser.addChoosableFileFilter(png);
+            chooser.addChoosableFileFilter(tif);
+            chooser.addChoosableFileFilter(jpg);
+            chooser.setFileFilter(pdf);
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            //set default name to current file name
+            final int approved = chooser.showSaveDialog(null);
+            if (approved == JFileChooser.APPROVE_OPTION) {
+
+                final String filter = chooser.getFileFilter().getDescription().toLowerCase();
+
+                if (filter.startsWith("all") || filter.startsWith("pdf") || filter.startsWith("fdf")) {
+                    saveAsPdf(chooser.getSelectedFile(), currentGUI, commonValues);
+                } else if (filter.startsWith("png") || filter.startsWith("tif") || filter.startsWith("jpg")) {
+                    saveAsImage(chooser.getSelectedFile(), currentGUI, filter.substring(0, 3));
+                }
             }
         }
     }
    
-    private static void saveAsImage(File file, final GUIFactory currentGUI, String ext) throws IllegalArgumentException {
-        PdfDecoderInt decoder = currentGUI.getPdfDecoder();
-        for (int i = 1; i <= decoder.getPageCount(); i++) {
-            try {
-                final String separator = System.getProperty("file.separator");
+    private static void saveAsImage(File file, final GUIFactory currentGUI, final String ext) {
+        
+        if (ext.equals("png") || ext.equals("jpg") || ext.equals("tif")) {
+            
+            final PdfDecoderInt decoder = currentGUI.getPdfDecoder();
+            
+            final File f = new File(file.getPath().replace("." + ext, "").replace(".pdf", ""));
+            f.mkdir();
 
-                BufferedImage imageToSave = decoder.getPageAsImage(i, 1);
+            for (int i = 1; i <= decoder.getPageCount(); i++) {
+                try {
+                    
+                    final BufferedImage imageToSave = decoder.getPageAsImage(i, 1);
 
-                File f = new File(file.getPath().replace("." + ext, "").replace(".pdf", ""));
-                f.mkdir();
-                String filename = f.getAbsolutePath() + separator + file.getName().replace(".pdf", "") + "_" + i + "." + ext;
-                if (ext.equals("png") || ext.equals("jpg") || ext.equals("tif")) {
+                    final String filename = f.getAbsolutePath() + System.getProperty("file.separator") + file.getName().replace(".pdf", "") + "_" + i + '.' + ext;
+
                     decoder.getObjectStore().saveStoredImage(filename, imageToSave, true, ext);
-                } else {
-                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.ImagesSaveUnsupported")+" "+ext);
-                    LogWriter.writeLog("Saving as "+ext +" is currenty unsupported.");
+
+                } catch (Exception ex) {
+                    LogWriter.writeLog("Exception attempting to Save as image: " + ex);
                 }
-            } catch (Exception ex) {
-                LogWriter.writeLog("Exception attempting to Save as image: " + ex);
             }
+        } else {
+            currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.ImagesSaveUnsupported")+" "+ext);
+            LogWriter.writeLog("Saving as "+ext +" is currenty unsupported.");
         }
     }
     
@@ -168,7 +182,7 @@ public class SaveFile {
                     currentGUI.getAnnotationPanel().saveForms(commonValues.getSelectedFile(), tempFile.getAbsolutePath(), objArr);
                 }
             }
-            
+
             if (currentGUI.getAnnotationPanel().annotationAdded()) {
                 currentGUI.getAnnotationPanel().saveAnnotations(tempFile.getAbsolutePath(), fileToSave);
             } else {

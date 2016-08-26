@@ -376,7 +376,8 @@ public class SwingData extends GUIData {
 
         if (formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Text) {
 
-            final String name = formObject.getTextStreamValue(PdfDictionary.Name);
+            final String name = formObject.getName(PdfDictionary.Name);
+            
             if (name != null && name.equals("Comment")) {
                 /* Name of the icon image to use for the icon of this annotation
                  * - predefined icons are needed for names:-

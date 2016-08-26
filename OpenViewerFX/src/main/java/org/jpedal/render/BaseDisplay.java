@@ -80,10 +80,12 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     protected int currentItem = -1;
 
     //Used purely to keep track of rendering for colour change functionality
-    protected static int itemToRender = -1;
+    //must NEVER be made static
+    protected int itemToRender = -1;
 
     //used to track end of PDF page in display
-    protected static int endItem=-1;
+    //must NEVER be made static
+    protected int endItem=-1;
 
     Area lastClip;
 
@@ -367,7 +369,7 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
             //Adjust line width to 1 if less than 1
             //ignore if using T3Display (such as ap image generation in html / svg conversion
             if(enhanceFractionalLines && ((((BasicStroke)shapeStroke).getLineWidth()*scaling<1) &&
-                    !(this instanceof T3Display))){
+                    !isPrinting && !(this instanceof T3Display))){
                 g2.setStroke(new BasicStroke(1/scaling,((BasicStroke)shapeStroke).getEndCap(), ((BasicStroke)shapeStroke).getLineJoin(), ((BasicStroke)shapeStroke).getMiterLimit(), ((BasicStroke)shapeStroke).getDashArray(), ((BasicStroke)shapeStroke).getDashPhase()));
             }else{
                 g2.setStroke(shapeStroke);

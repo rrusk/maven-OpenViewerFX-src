@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.stream.ImageInputStream;
 import org.jpedal.exception.PdfException;
+import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.PageLookup;
 import org.jpedal.objects.raw.FormObject;

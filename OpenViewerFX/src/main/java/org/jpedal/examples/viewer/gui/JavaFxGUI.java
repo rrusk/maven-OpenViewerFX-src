@@ -49,8 +49,8 @@ import javafx.geometry.*;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -78,9 +78,9 @@ import org.jpedal.examples.viewer.*;
 import org.jpedal.examples.viewer.commands.OpenFile;
 import org.jpedal.examples.viewer.commands.javafx.JavaFXOpenFile;
 import org.jpedal.examples.viewer.gui.generic.*;
+import org.jpedal.examples.viewer.gui.javafx.*;
 import org.jpedal.examples.viewer.gui.javafx.FXViewerTransitions.TransitionDirection;
 import org.jpedal.examples.viewer.gui.javafx.FXViewerTransitions.TransitionType;
-import org.jpedal.examples.viewer.gui.javafx.*;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXInputDialog;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXMessageDialog;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXOptionDialog;
@@ -4036,6 +4036,12 @@ public class JavaFxGUI extends GUI implements GUIFactory {
     @Override
     public GUIAnnotationPanel getAnnotationPanel() {
         LogWriter.writeLog("JavaFxGUI.getAnnotationPanel is not available in FX Viewer.");
+        return null;
+    }
+
+    @Override
+    public Object getGlassPane() {
+        LogWriter.writeLog("JavaFxGUI.getGlassPane is not available in FX Viewer.");
         return null;
     }
 
