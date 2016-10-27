@@ -50,7 +50,7 @@ public class OutlineObject extends PdfObject {
     byte[] rawFstring,rawTitle;
 
     private PdfObject A, Fdict,First, Next, Last;
-    private byte[][] Dest;
+    private byte[][] Dest,D;
 
 
     public OutlineObject(final String ref) {
@@ -219,6 +219,9 @@ public class OutlineObject extends PdfObject {
 
     	switch(id){
 
+            case PdfDictionary.D:
+                return new PdfArrayIterator(D);
+
             case PdfDictionary.Dest:
                 return new PdfArrayIterator(Dest);
 
@@ -234,6 +237,10 @@ public class OutlineObject extends PdfObject {
 
         switch(id){
 
+            case PdfDictionary.D:
+                D=value;
+            break;
+            
             case PdfDictionary.Dest:
                 Dest=value;
             break;

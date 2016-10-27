@@ -73,63 +73,6 @@ import org.w3c.dom.NodeList;
 public class SwingProperties extends JPanel {
     
     private final int TRUE_HASH = "true".hashCode();
-
-    /**
-     * Gets the boolean value of a property and loads it into a JCheckBox
-     *
-     * @param comp JCheckbox to show the data.
-     * @param elementName Property name to be loaded.
-     */
-    private void loadBooleanValue(final JCheckBox comp, final String elementName) {
-        final String value = properties.getValue(elementName).toLowerCase();
-        comp.setSelected(!value.isEmpty() && value.hashCode() == TRUE_HASH);
-    }
-
-    /**
-     * Gets the boolean value of a property and loads it into a JCheckBox
-     *
-     * @param comp CheckNode to show the data.
-     * @param elementName Property name to be loaded.
-     */
-    private void loadBooleanValue(final CheckNode comp, final String elementName) {
-        final String value = properties.getValue(elementName).toLowerCase();
-        comp.setSelected(!value.isEmpty() && value.hashCode() == TRUE_HASH);
-    }
-
-    /**
-     * Gets the String value of a property and loads it into a JTextField
-     *
-     * @param comp JTextfield to show the data.
-     * @param elementName Property name to be loaded.
-     */
-    private void loadStringValue(JTextField comp, final String elementName) {
-        String propValue = properties.getValue(elementName);
-        if (propValue != null && !propValue.isEmpty()) {
-            comp.setText(propValue);
-        }
-    }
-
-    /**
-     * Gets the String value of a property and loads it into a JTextField
-     *
-     * @param comp JTextfield to show the data.
-     * @param elementName Property name to be loaded.
-     * @param defaultText Default text to be used if property value not found or
-     * empty.
-     */
-    private void loadStringValue(JTextField comp, final String elementName, final String defaultText) {
-        String propValue = properties.getValue(elementName);
-        if (propValue != null && !propValue.isEmpty()) {
-            comp.setText(propValue);
-        } else {
-            comp.setText(defaultText);
-        }
-    }
-
-    public SwingProperties(final GUIFactory currentGUI){
-        speech = (Speech)currentGUI.getPdfDecoder().getExternalHandler(Options.SpeechEngine);
-        showPreferenceWindow(currentGUI);
-    }
     
     //Text to Speech external handler
     final Speech speech;
@@ -266,6 +209,67 @@ public class SwingProperties extends JPanel {
     private JButton clearHistory;
     
     private JLabel historyClearedLabel;
+    
+    /**
+     * Gets the boolean value of a property and loads it into a JCheckBox
+     *
+     * @param comp JCheckbox to show the data.
+     * @param elementName Property name to be loaded.
+     */
+    private void loadBooleanValue(final JCheckBox comp, final String elementName) {
+        final String value = properties.getValue(elementName).toLowerCase();
+        comp.setSelected(!value.isEmpty() && value.hashCode() == TRUE_HASH);
+    }
+
+    /**
+     * Gets the boolean value of a property and loads it into a JCheckBox
+     *
+     * @param comp CheckNode to show the data.
+     * @param elementName Property name to be loaded.
+     */
+    private void loadBooleanValue(final CheckNode comp, final String elementName) {
+        final String value = properties.getValue(elementName).toLowerCase();
+        comp.setSelected(!value.isEmpty() && value.hashCode() == TRUE_HASH);
+    }
+
+    /**
+     * Gets the String value of a property and loads it into a JTextField
+     *
+     * @param comp JTextfield to show the data.
+     * @param elementName Property name to be loaded.
+     */
+    private void loadStringValue(JTextField comp, final String elementName) {
+        String propValue = properties.getValue(elementName);
+        if (propValue != null && !propValue.isEmpty()) {
+            comp.setText(propValue);
+        }
+    }
+
+    /**
+     * Gets the String value of a property and loads it into a JTextField
+     *
+     * @param comp JTextfield to show the data.
+     * @param elementName Property name to be loaded.
+     * @param defaultText Default text to be used if property value not found or
+     * empty.
+     */
+    private void loadStringValue(JTextField comp, final String elementName, final String defaultText) {
+        String propValue = properties.getValue(elementName);
+        if (propValue != null && !propValue.isEmpty()) {
+            comp.setText(propValue);
+        } else {
+            comp.setText(defaultText);
+        }
+    }
+
+    /**
+     * Dialog window to show properties options for the user interface
+     * @param currentGUI GUIFactory object the properties dialog will be associated with
+     */
+    public SwingProperties(final GUIFactory currentGUI){
+        speech = (Speech)currentGUI.getPdfDecoder().getExternalHandler(Options.SpeechEngine);
+        showPreferenceWindow(currentGUI);
+    }
     
     //Only allow numerical input to the field
     final KeyListener numericalKeyListener = new KeyListener(){
@@ -1392,7 +1396,6 @@ public class SwingProperties extends JPanel {
             return panel;
         }
         
-        
         /*
          * Creates a pane holding all Printing settings
          */
@@ -1959,7 +1962,6 @@ public class SwingProperties extends JPanel {
             }
         }
         
-        
         /**
          * Creates a contentPane showing which extensions are enabled
          * @return contentPane
@@ -2072,7 +2074,7 @@ public class SwingProperties extends JPanel {
             }
             
             //Java FX
-            String version="Unknown version";
+            String version;
             c.gridy++;
             c.gridx=0;
             pane.add(new JLabel("JavaFX"), c);

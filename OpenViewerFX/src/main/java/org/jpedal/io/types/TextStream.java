@@ -41,7 +41,6 @@ import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
-import org.jpedal.utils.NumberUtils;
 
 /**
  *
@@ -58,7 +57,7 @@ public class TextStream {
                 i++;
             }
 
-            i=ArrayUtils.skipSpaces(raw,i);
+            i=StreamReaderUtils.skipSpaces(raw,i);
 
             //get next key to see if indirect
             final boolean isRef=raw[i]!='<' && raw[i]!='(';
@@ -67,26 +66,10 @@ public class TextStream {
             data=raw;
             if(isRef){
 
-                //number
-                int keyStart2=i;
-                while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
-                    i++;
-                }
-
-                final int number= NumberUtils.parseInt(keyStart2, i, raw);
-
-                //generation
-                while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                    i++;
-                }
-
-                keyStart2=i;
-                //move cursor to end of reference
-                while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                    i++;
-                }
-                final int generation= NumberUtils.parseInt(keyStart2, i, raw);
-
+                final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
+                final int number = values[0];
+                final int generation = values[1];
+                i = values[2];
                 //move cursor to start of R
                 while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
                     i++;
@@ -131,7 +114,7 @@ public class TextStream {
                             j++;
                         }
 
-                        j=ArrayUtils.skipSpaces(data,j);
+                        j=StreamReaderUtils.skipSpaces(data,j);
 
                     }
                 }
@@ -192,7 +175,7 @@ public class TextStream {
                             break;
                         }
 
-                        start=ArrayUtils.skipSpaces(data,start);
+                        start=StreamReaderUtils.skipSpaces(data,start);
 
                         topHex=data[start];
 
@@ -207,7 +190,7 @@ public class TextStream {
 
                         start++;
 
-                        start=ArrayUtils.skipSpaces(data,start);
+                        start=StreamReaderUtils.skipSpaces(data,start);
 
                         bottomHex=data[start];
 

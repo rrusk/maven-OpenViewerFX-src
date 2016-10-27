@@ -39,7 +39,6 @@ import static org.jpedal.io.ObjectDecoder.padding;
 import static org.jpedal.io.ObjectDecoder.resolveFully;
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
-import org.jpedal.objects.raw.NamesObject;
 import org.jpedal.objects.raw.ObjectFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -50,152 +49,77 @@ import org.jpedal.utils.NumberUtils;
  */
 public class Dictionary {
 
-    public static int readDictionary(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final boolean ignoreRecursion, final PdfFileReader objectReader, final boolean isInlineImage) {
-        
-        int keyLength;
-        final int keyStart;
-
-        final String objectRef=pdfObject.getObjectRefAsString();
+    public static int readDictionary(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final boolean ignoreRecursion, final PdfFileReader objectReader) {
         
         //roll on
         if(raw[i]!='<') {
             i++;
         }
         
-        i=ArrayUtils.skipSpaces(raw, i);
+        i=StreamReaderUtils.skipSpaces(raw, i);
         
         //some objects can have a common value (ie /ToUnicode /Identity-H
         if(raw[i]==47){
             
-            if(debugFastCode) {
-                System.out.println(padding + "Indirect");
-            }
-            
-            //move cursor to start of text
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
-            keyStart=i;
-            keyLength=0;
-            
-            //move cursor to end of text
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
-                i++;
-                keyLength++;
-            }
-            
-            i--;// move back so loop works
-            
-            if(!ignoreRecursion){
-                
-                final PdfObject valueObj=ObjectFactory.createObject(PDFkeyInt,objectRef, pdfObject.getObjectType(), pdfObject.getID());
-                valueObj.setID(PDFkeyInt);
-                
-                //store value
-                final int constant=valueObj.setConstant(PDFkeyInt,keyStart,keyLength,raw);
-                
-                if(constant==PdfDictionary.Unknown || isInlineImage){
-                    
-                    byte[] newStr=getByteKeyFromStream(keyLength, raw, keyStart);
-                    
-                    final String s=new String(newStr);
-                    valueObj.setGeneralStringValue(s);
-                    
-                    if(debugFastCode) {
-                        System.out.println(padding + "Set Dictionary as String=" + s + "  in " + pdfObject + " to " + valueObj);
-                    }
-                    
-                }else if(debugFastCode) {
-                    System.out.println(padding + "Set Dictionary as constant=" + constant + "  in " + pdfObject + " to " + valueObj);
-                }
-                
-                
-                //store value
-                pdfObject.setDictionary(PDFkeyInt,valueObj);
-                
-                if(pdfObject.isDataExternal()){
-                    valueObj.isDataExternal(true);
-                    if(!resolveFully(valueObj,objectReader)) {
-                        pdfObject.setFullyResolved(false);
-                    }
-                }
-            }
-            
-        }else //allow for empty object
-            if(raw[i]=='e' && raw[i+1]=='n' && raw[i+2]=='d' && raw[i+3]=='o' && raw[i+4]=='b' ){
-                //        return i;
+            i = readKey(pdfObject, i+1, raw, PDFkeyInt, objectReader);
+
+        }else if(raw[i]=='e' && raw[i+1]=='n' && raw[i+2]=='d' && raw[i+3]=='o' && raw[i+4]=='b' ){ //allow for empty object
                 
                 if(debugFastCode) {
                     System.out.println(padding + "Empty object" + new String(raw) + "<<");
                 }
+        
+        }else if(!ignoreRecursion){
+            i = Dictionary.readDictionaryFromRefOrDirect(pdfObject,pdfObject.getObjectRefAsString(), i, raw, PDFkeyInt,objectReader);
+        }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
                 
-            }else if(raw[i]=='(' && PDFkeyInt== PdfDictionary.JS){ //ie <</S/JavaScript/JS( for JS
-                i++;
-                final int start=i;
-                //find end
-                while(i<raw.length){
-                    i++;
-                    if(raw[i]==')' && !ObjectUtils.isEscaped(raw, i)) {
-                        break;
-                    }
-                }
-                final byte[] data=ObjectUtils.readEscapedValue(i,raw,start, false);
-                
-                final NamesObject JS=new NamesObject(objectRef);
-                JS.setDecodedStream(data);
-                pdfObject.setDictionary(PdfDictionary.JS, JS);
-                
-            }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
-                
-                if(debugFastCode) {
-                    System.out.println(padding + "1.About to read ref orDirect i=" + i + " char=" + (char) raw[i] + " ignoreRecursion=" + ignoreRecursion);
-                }
-                
-                
-                if(ignoreRecursion){
-                    
-                    //roll onto first valid char
-                    while(raw[i]==91 || raw[i]==32 || raw[i]==13 || raw[i]==10){
-                        
-                        //if(raw[i]==91) //track incase /Mask [19 19]
-                        //	possibleArrayStart=i;
-                        
-                        i++;
-                    }
-                    
-                    //roll on and ignore
-                    if(raw[i]=='<' && raw[i+1]=='<'){
-                        
-                        i += 2;
-                        int reflevel=1;
-                        
-                        while(reflevel>0){
-                            if(raw[i]=='<' && raw[i+1]=='<'){
-                                i += 2;
-                                reflevel++;
-                            }else if(raw[i]=='>' && raw[i+1]=='>'){
-                                i += 2;
-                                reflevel--;
-                            }else {
-                                i++;
-                            }
-                        }
-                        i--;
-                        
-                    }else{ //must be a ref
-                       i = Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, i, raw, PDFkeyInt,objectReader);
-                    }
-                    
-                    if(i<raw.length && raw[i]=='/') //move back so loop works
-                    {
-                        i--;
-                    }
-                    
-                }else{
-                    i = Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, i, raw, PDFkeyInt,objectReader);
-                }
+            i = readRef(pdfObject, i, raw, PDFkeyInt, objectReader);
+        }
+        return i;
+    }
+
+    static int readRef(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
+
+            if(debugFastCode) {
+                System.out.println(padding + "1.About to read ref orDirect i=" + i + " char=" + (char) raw[i]);
             }
+
+            i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 91);
+            
+            i = Dictionary.readDictionaryFromRefOrDirect(pdfObject,pdfObject.getObjectRefAsString(), i, raw, PDFkeyInt,objectReader);
+ 
+
+        return i;
+    }
+
+    static int readKey(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
+
+        final int keyStart=i;
+
+        i= StreamReaderUtils.skipToEndOfRef(raw, i);
+
+        final PdfObject valueObj= ObjectFactory.createObject(PDFkeyInt,pdfObject.getObjectRefAsString(), pdfObject.getObjectType(), pdfObject.getID());
+        valueObj.setID(PDFkeyInt);
+
+        //store value
+        valueObj.setConstant(PDFkeyInt,keyStart,i-keyStart,raw);
+
+        valueObj.setGeneralStringValue(new String(getByteKeyFromStream(i-keyStart, raw, keyStart)));
+
+        if(debugFastCode) {
+            System.out.println(padding + "Set Dictionary as String=" + valueObj.getGeneralStringValue() + "  in " + pdfObject + " to " + valueObj);
+        }
+
+        //store value
+        pdfObject.setDictionary(PDFkeyInt,valueObj);
+
+        if(pdfObject.isDataExternal()){
+            valueObj.isDataExternal(true);
+            if(!resolveFully(valueObj,objectReader)) {
+                pdfObject.setFullyResolved(false);
+            }
+        }
+
         return i;
     }
     
@@ -207,7 +131,7 @@ public class Dictionary {
         
         while(jj<length){
             
-            jj=ArrayUtils.skipSpaces(raw, jj);
+            jj=StreamReaderUtils.skipSpaces(raw, jj);
             
             //number (possibly reference)
             if(jj<length && raw[jj]>='0' && raw[jj]<='9'){
@@ -217,7 +141,7 @@ public class Dictionary {
                     jj++;
                 }
                 
-                jj=ArrayUtils.skipSpaces(raw, jj);
+                jj=StreamReaderUtils.skipSpaces(raw, jj);
         
                 //generation and spaces
                 while(jj<length && ((raw[jj]>='0' && raw[jj]<='9')||(raw[jj]==32 || raw[jj]==10 || raw[jj]==13))) {
@@ -233,7 +157,7 @@ public class Dictionary {
                 jj++;
             }
             
-            jj=ArrayUtils.skipSpaces(raw, jj);
+            jj=StreamReaderUtils.skipSpaces(raw, jj);
                         
             
             //must be next key or end
@@ -260,54 +184,14 @@ public class Dictionary {
             return pdfKeyType;
         }
     }
-    
-    public static boolean isStringPair(final int i, final byte[] raw, boolean stringPair) {
-        
-        final int len=raw.length;
-        for(int aa=i;aa<len;aa++){
-            if(raw[aa]=='('){
-                aa=len;
-                stringPair =true;
-            }else if(raw[aa]=='/' || raw[aa]=='>' || raw[aa]=='<' || raw[aa]=='[' || raw[aa]=='R'){
-                aa=len;
-            }else if(raw[aa]=='M' && raw[aa+1]=='C' && raw[aa+2]=='I' && raw[aa+3]=='D'){
-                aa=len;
-            }
-        }
-        return stringPair;
-    }
-    
-    public static int findDictionaryEnd(int jj, final byte[] raw, final int length) {
-        
-        int keyLength=0;
-        while (true) { //get key up to space or [ or / or ( or < or carriage return
-            
-            if (raw[jj] == 32 || raw[jj] == 13 || raw[jj] == 9 || raw[jj] == 10 || raw[jj] == 91 ||
-                    raw[jj]==47 || raw[jj]==40 || raw[jj]==60 || raw[jj]==62) {
-                break;
-            }
-            
-            jj++;
-            keyLength++;
-            
-            if(jj==length) {
-                break;
-            }
-        }
-        return keyLength;
-    }
-    
-     
+
     public static int setDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw, final int length, final boolean ignoreRecursion, final PdfFileReader objectReader, final int PDFkeyInt) {
         
         if(debugFastCode) {
             System.out.println(padding + ">>>Reading Dictionary Pairs i=" + i + ' ' + (char) raw[i] + (char) raw[i + 1] + (char) raw[i + 2] + (char) raw[i + 3] + (char) raw[i + 4] + (char) raw[i + 5] + (char) raw[i + 6]);
         }
         
-        //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47) {
-            i++;
-        }
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
         
         //set data which will be switched below if ref
         byte[] data=raw;
@@ -319,23 +203,10 @@ public class Dictionary {
         if(isRef){
             
             //number
-            int keyStart2=i;
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
-            
-            final int number= NumberUtils.parseInt(keyStart2, i, raw);
-            
-            i=ArrayUtils.skipSpaces(raw, i);
-        
-            keyStart2=i;
-            //move cursor to end of reference
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
-            final int generation= NumberUtils.parseInt(keyStart2, i, raw);
-            
-            i=ArrayUtils.skipSpaces(raw, i);
+            final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
+            final int number = values[0];
+            final int generation = values[1];
+            i = values[2];
             
             if(!ignoreRecursion){
                 
@@ -375,10 +246,10 @@ public class Dictionary {
                         }
                     }
                     
-                    //skip any spaces after
-                    while(data[j]==10 || data[j]==13 || data[j]==32)// || data[j]==47 || data[j]==60)
-                    {
-                        j++;
+                    j=StreamReaderUtils.skipSpaces(data, j);
+                    
+                    if(data[j]=='%'){
+                        j=StreamReaderUtils.skipComment(data, j);
                     }
                 }
                 
@@ -386,18 +257,15 @@ public class Dictionary {
         }
         
         //allow for empty object (ie /Pattern <<>> )
-        int endJ=j;
-        while(data[endJ]=='<' || data[endJ]==' ' || data[endJ]==13 ||  data[endJ]==10) {
-            endJ++;
-        }
-        
+        final int endJ=StreamReaderUtils.skipSpacesOrOtherCharacter(data, j,'<');
+
         if(data[endJ]=='>'){ //empty object
             j=endJ+1;
         }else{
             
             final PdfObject valueObj= ObjectFactory.createObject(PDFkeyInt, pdfObject.getObjectRefAsString(), pdfObject.getObjectType(), pdfObject.getID());
             valueObj.setID(PDFkeyInt);
-               
+
             //read pairs (stream in data starting at j)
             j=readKeyPairs(data, j,valueObj);
 
@@ -432,28 +300,29 @@ public class Dictionary {
         while(true){
 
             //move cursor to start of text
-            start = getStart(data, start);
+            start = StreamReaderUtils.skipSpacesOrOtherCharacter(data, start, 60);
 
             if(data[start]==37){ //allow for comment
-                start = ArrayUtils.skipComment(data, start);
+                start = StreamReaderUtils.skipComment(data, start);
             }
 
-            if(data[start]==62) { //exit at end
+            if(data[start]==62 || StreamReaderUtils.isEndObj(data,start)) { //exit at end
                 break;
             }
 
             //read key (starts with /)           
             final int tokenStart=start+1;
-            start=ArrayUtils.skipToEndOfKey(data, tokenStart);
+            start=StreamReaderUtils.skipToEndOfKey(data, tokenStart);
             keys.add(getByteKeyFromStream(start-tokenStart, data, tokenStart));
 
             //read value
-            start=ArrayUtils.skipSpaces(data,start);
+            start=StreamReaderUtils.skipSpaces(data,start);
 
             int refStart=start;
 
-            if(ArrayUtils.isNull(data,start)){
+            if(StreamReaderUtils.isNull(data,start)){
                 start += 4;
+                values.add(null);
             }else {
 
                 if (data[start]==60 || data[start]=='[' || data[start]=='/') {
@@ -463,14 +332,14 @@ public class Dictionary {
                     if (data[start] == '<') {
                         start = ObjectUtils.skipToEndOfObject(start, data);
                     } else if (data[start] == '[') {
-                        start=ArrayUtils.skipToEndOfArray(data, start);                        
+                        start=StreamReaderUtils.skipToEndOfArray(data, start);                        
                     } else if (data[start] == '/') {
-                        start=ArrayUtils.skipToEndOfKey(data, start+1);
+                        start=StreamReaderUtils.skipToEndOfKey(data, start+1);
                     }
                 } else { //its 50 0 R
-                    while (data[start] != 'R') {
-                        start++;
-                    }
+                        while (data[start] != 'R') {
+                            start++;
+                        }
 
                     start++; //roll past R
                 }
@@ -500,16 +369,6 @@ public class Dictionary {
         return tokenKey;
     }
 
-    private static int getStart(byte[] data, int start) {
-
-        byte b=data[start];
-        while(b ==9 || b ==10 || b ==13 || b ==32 || b ==60) {
-            start++;
-            b=data[start];
-        }
-        return start;
-    }
-
     /**
      * @param pdfObject
      * @param objectRef
@@ -523,38 +382,11 @@ public class Dictionary {
         readDictionaryFromRefOrDirect:
         while (true) {
             
-            int keyStart;
-            int possibleArrayStart = -1;
+            i=StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 91);
             
-            //@speed - find end so we can ignore once no longer reading into map as well
-            //and skip to end of object
-            //allow for [ref] or [<< >>] at top level (may be followed by gap)
-            //good example is /PDFdata/baseline_screens/docusign/test3 _ Residential Purchase and Sale Agreement - 6-03.pdf
-            while (raw[i] == 91 || raw[i] == 32 || raw[i] == 13 || raw[i] == 10) {
-                
-                if (raw[i] == 91) //track incase /Mask [19 19]
-                {
-                    possibleArrayStart = i;
-                }
-                
-                i++;
-            }
-            
-            //some items like MAsk can be [19 19] or stream
-            //and colorspace is law unto itself
-            if (possibleArrayStart != -1 && (PDFkeyInt == PdfDictionary.Mask || PDFkeyInt == PdfDictionary.TR || PDFkeyInt == PdfDictionary.OpenAction)) {
-                return ArrayFactory.processArray(pdfObject, raw, PDFkeyInt, possibleArrayStart, objectReader);
-            }
-            
-            if (raw[i] == '%') { // if %comment roll onto next line
-                while (raw[i] != 13 && raw[i] != 10) {
-                    i++;
-                }
-                
-                //and lose space after
-                while (raw[i] == 91 || raw[i] == 32 || raw[i] == 13 || raw[i] == 10) {
-                    i++;
-                }
+            if(raw[i]=='%'){
+                i=StreamReaderUtils.skipComment(raw, i);
+                i=StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 91);
             }
             
             if (raw[i] == 60) { //[<<data inside brackets>>]
@@ -573,50 +405,32 @@ public class Dictionary {
                 while (true) {
                     
                     //allow for [ref] at top level (may be followed by gap
-                    while (data[j] == 91 || data[j] == 32 || data[j] == 13 || data[j] == 10) {
-                        j++;
-                    }
-
+                    j=StreamReaderUtils.skipSpacesOrOtherCharacter(data, j, 91);
+            
                     //trap empty arrays ie [ ]
                     //ie 13jun/Factuur 2106010.PDF
                     if (data[j] == ']') {
                         return j;
                     }
-                    
+
                     // trap nulls  as well
                     boolean hasNull = false;
-                    
+                    int keyStart;
+                    int[] values;
+
                     while (true) {
-                        
+
                         //trap null arrays ie [null null]
                         if (hasNull && data[j] == ']') {
                             return j;
                         }
-                        
-                        /*
-                         * get object ref
-                         */
+                        values = StreamReaderUtils.readRefFromStream(data, j);
+                        ref = values[0];
+
                         keyStart = j;
-                        //move cursor to end of reference
-                        while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
-                            
-                            //trap null arrays ie [null null] or [null]                            
-                            
-                            if (data[j] == 'l' && data[j - 1] == 'l' && data[j - 2] == 'u' && data[j - 3] == 'n') {
-                                hasNull = true;
-                            }
-                            
-                            if (hasNull && data[j] == ']') {
-                                return j;
-                            }
-                            
-                            j++;
-                        }
-                        
-                        ref = NumberUtils.parseInt(keyStart, j, data);
-                        
-                        j=ArrayUtils.skipSpaces(data, j);
-                        
+                        j=StreamReaderUtils.skipToEndOfRef(data, j);
+                        j=StreamReaderUtils.skipSpaces(data, j);
+
                         //handle nulls
                         if (ref != 69560 || data[keyStart] != 'n') {
                             break; //not null
@@ -625,20 +439,13 @@ public class Dictionary {
                             if (data[j] == '<') { // /DecodeParms [ null << /K -1 /Columns 1778 >>  ] ignore null and jump down to enclosed Dictionary
                                 i = j;
                                 continue readDictionaryFromRefOrDirect;
-                                
+
                             }
                         }
                     }
 
-                    keyStart = j;
-                    //move cursor to end of reference
-                    while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
-                        j++;
-                    }
-                    
-                    generation = NumberUtils.parseInt(keyStart, j, data);
-
-                    j=ArrayUtils.skipSpaces(data, j);
+                       generation = values[1];
+                       j = values[2];
                      
                     data = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(ref, generation), ref, generation);
                     
@@ -652,7 +459,7 @@ public class Dictionary {
                     //disregard corrputed data from start of file
                     if (data != null && data.length > 4 && data[0] == '%' && data[1] == 'P' && data[2] == 'D' && data[3] == 'F') {
                         data = null;
-                    }else if(ArrayUtils.isNull(data,0)){
+                    }else if(StreamReaderUtils.isNull(data,0)){
                         data=null;
                     }
                     
@@ -676,12 +483,8 @@ public class Dictionary {
                             }
                             j2++;
                         }
-                        
-                        //skip any spaces
-                        while (data[j2] != 91 && (data[j2] == 10 || data[j2] == 13 || data[j2] == 32))// || data[j]==47 || data[j]==60)
-                        {
-                            j2++;
-                        }
+
+                        j2=StreamReaderUtils.skipSpaces(data,j2);
                     }
                     
                     //if indirect, round we go again
@@ -698,72 +501,59 @@ public class Dictionary {
                 }
                 
                 //allow for no data found (ie /PDFdata/baseline_screens/debug/hp_broken_file.pdf)
-                if (data != null) {
-                    
-                    /*
-                     * get id from stream
-                     */
-                    j=ArrayUtils.skipSpaces(data, j);
-                     
-                    boolean isMissingValue = j < raw.length && raw[j] == '<';
-                    
-                    if (isMissingValue) { //check not <</Last
-                        //find first valid char
-                        int xx = j;
-                        while (xx < data.length && (raw[xx] == '<' || raw[xx] == 10 || raw[xx] == 13 || raw[xx] == 32)) {
-                            xx++;
-                        }
-                        
-                        if (raw[xx] == '/') {
-                            isMissingValue = false;
-                        }
-                    }
-                    
-                    if (isMissingValue) { //missing value at start for some reason
-                        
-                        keyStart = j;
-                        //move cursor to end of reference
-                        while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
-                            j++;
-                        }
-                        
-                        ref = NumberUtils.parseInt(keyStart, j, data);
-                        
-                        j=ArrayUtils.skipSpaces(data, j);
-                        
-                        keyStart = j;
-                        //move cursor to end of reference
-                        while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
-                            j++;
-                        }
-                        
-                        generation = NumberUtils.parseInt(keyStart, j, data);
-                        
-                        //lose obj at start
-                        while (data[j - 1] != 106 && data[j - 2] != 98 && data[j - 3] != 111) {
-                            
-                            if (data[j] == '<') {
-                                break;
-                            }
-                            
-                            j++;
-                        }
-                    }
-                    
-                    j=ArrayUtils.skipSpaces(data, j);
-                    
-                    //move to start of Dict values
-                    while (data[j] != 60 && data[j + 1] != 60 && data[j] != 47) {
-                        j++;
-                    }
-                    
-                    i = ObjectDecoder.handleValue(pdfObject, i, PDFkeyInt, j, ref, generation, data,objectReader);
+                if (data != null) {               
+                    i=readObj(j, data, raw, ref, generation, i, pdfObject, PDFkeyInt, objectReader);
                 }
             }
             
             return i;
         }
     }   
+
+    private static int readObj(int j, byte[] data, final byte[] raw, int ref, int generation, int i, final PdfObject pdfObject, final int PDFkeyInt, final PdfFileReader objectReader) {
+
+        /*
+        * get id from stream
+        */
+        j=StreamReaderUtils.skipSpaces(data, j);
+
+        //check not <</Last
+        final boolean isMissingValue = j < raw.length && raw[j] == '<' &&
+                raw[StreamReaderUtils.skipSpacesOrOtherCharacter(raw, j,'<')]!='/';
+
+        if (isMissingValue) { //missing value at start for some reason
+            
+            int keyStart = j;
+
+            j=StreamReaderUtils.skipToEndOfRef(data, j);
+            
+            ref = NumberUtils.parseInt(keyStart, j, data);
+            
+            j=StreamReaderUtils.skipSpaces(data, j);
+            
+            keyStart = j;
+            j=StreamReaderUtils.skipToEndOfRef(data, j);
+
+            generation = NumberUtils.parseInt(keyStart, j, data);
+            
+            //lose obj at start
+            while (data[j - 1] != 106 && data[j - 2] != 98 && data[j - 3] != 111) {
+                
+                if (data[j] == '<') {
+                    break;
+                }
+                
+                j++;
+            }
+        }
+        j=StreamReaderUtils.skipSpaces(data, j);
+        //move to start of Dict values
+        while (data[j] != 60 && data[j + 1] != 60 && data[j] != 47) {
+            j++;
+        }
+        i = ObjectDecoder.handleValue(pdfObject, i, PDFkeyInt, j, ref, generation, data,objectReader);
+        return i;
+    }
 }
 
 

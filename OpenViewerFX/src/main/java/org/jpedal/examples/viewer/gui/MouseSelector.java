@@ -43,8 +43,10 @@ import org.jpedal.objects.PdfPageData;
 public class MouseSelector {
 
     /**
-     * adjusty x co-ordinate shown in display for user to include any page
-     * centering
+     * Adjust x coordinate from mouse to take into account any centring offset
+     * @param cx int value for the current x value
+     * @param decode_pdf PdfDecoderInt for the current PDF
+     * @return int value for the x coordinate after adjustments
      */
     protected static int adjustForAlignment(int cx, final PdfDecoderInt decode_pdf) {
 
@@ -117,4 +119,4 @@ public class MouseSelector {
         }
         return ret;
     }
-        }
+}

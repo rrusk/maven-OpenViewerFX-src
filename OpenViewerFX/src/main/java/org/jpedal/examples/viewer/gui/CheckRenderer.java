@@ -30,7 +30,6 @@
  * CheckRenderer.java
  * ---------------
  */
-
 package org.jpedal.examples.viewer.gui;
 
 import java.awt.Color;
@@ -42,136 +41,135 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.tree.TreeCellRenderer;
 
 public class CheckRenderer extends JPanel implements TreeCellRenderer {
-	  protected final JCheckBox check;
-	  protected final TreeLabel label;
 
-	  public CheckRenderer() {
-	    setLayout(null);
-	    add(check = new JCheckBox());
-	    add(label = new TreeLabel());
-	    check.setBackground(UIManager.getColor("Tree.textBackground"));
-	  }
+    protected final JCheckBox check;
+    protected final TreeLabel label;
 
-	  @Override
-      public Component getTreeCellRendererComponent(final JTree tree, final Object value,
-	               final boolean isSelected, final boolean expanded,
-	               final boolean leaf, final int row, final boolean hasFocus) {
+    public CheckRenderer() {
+        setLayout(null);
+        add(check = new JCheckBox());
+        add(label = new TreeLabel());
+        check.setBackground(UIManager.getColor("Tree.textBackground"));
+    }
 
-	      final String  stringValue = tree.convertValueToText(value, isSelected,
-	              expanded, leaf, row, hasFocus);
+    @Override
+    public Component getTreeCellRendererComponent(final JTree tree, final Object value,
+            final boolean isSelected, final boolean expanded,
+            final boolean leaf, final int row, final boolean hasFocus) {
 
+        final String stringValue = tree.convertValueToText(value, isSelected,
+                expanded, leaf, row, hasFocus);
 
-	      setEnabled(tree.isEnabled());
+        setEnabled(tree.isEnabled());
 
-	      if(value instanceof CheckNode){
+        if (value instanceof CheckNode) {
 
-	          check.setSelected(((CheckNode)value).isSelected());
-	          setEnabled(((CheckNode)value).isEnabled());
-	          check.setEnabled(((CheckNode)value).isEnabled());
+            check.setSelected(((CheckNode) value).isSelected());
+            setEnabled(((CheckNode) value).isEnabled());
+            check.setEnabled(((CheckNode) value).isEnabled());
 
-	          label.setFont(tree.getFont());
-	          label.setText(stringValue);
-	          label.setSelected(isSelected);
-	          label.setFocus(hasFocus);
+            label.setFont(tree.getFont());
+            label.setText(stringValue);
+            label.setSelected(isSelected);
+            label.setFocus(hasFocus);
 
-	          return this;
-	      }else {
-              return new JLabel(stringValue);
-          }
+            return this;
+        } else {
+            return new JLabel(stringValue);
+        }
 
-	  }
+    }
 
-	  @Override
-      public Dimension getPreferredSize() {
-	    final Dimension d_check = check.getPreferredSize();
-	    final Dimension d_label = label.getPreferredSize();
-	    return new Dimension(d_check.width  + d_label.width,
-	      (d_check.height < d_label.height ?
-	       d_label.height : d_check.height));
-	  }
+    @Override
+    public Dimension getPreferredSize() {
+        final Dimension d_check = check.getPreferredSize();
+        final Dimension d_label = label.getPreferredSize();
+        return new Dimension(d_check.width + d_label.width,
+                (d_check.height < d_label.height
+                        ? d_label.height : d_check.height));
+    }
 
-	  @Override
-      public void doLayout() {
-	    final Dimension d_check = check.getPreferredSize();
-	    final Dimension d_label = label.getPreferredSize();
-	    int y_check = 0;
-	    int y_label = 0;
-	    if (d_check.height < d_label.height) {
-	      y_check = (d_label.height - d_check.height)/2;
-	    } else {
-	      y_label = (d_check.height - d_label.height)/2;
-	    }
-	    check.setLocation(0,y_check);
-	    check.setBounds(0,y_check,d_check.width,d_check.height);
-	    label.setLocation(d_check.width,y_label);
-	    label.setBounds(d_check.width,y_label,d_label.width,d_label.height);
-	  }
+    @Override
+    public void doLayout() {
+        final Dimension d_check = check.getPreferredSize();
+        final Dimension d_label = label.getPreferredSize();
+        int y_check = 0;
+        int y_label = 0;
+        if (d_check.height < d_label.height) {
+            y_check = (d_label.height - d_check.height) / 2;
+        } else {
+            y_label = (d_check.height - d_label.height) / 2;
+        }
+        check.setLocation(0, y_check);
+        check.setBounds(0, y_check, d_check.width, d_check.height);
+        label.setLocation(d_check.width, y_label);
+        label.setBounds(d_check.width, y_label, d_label.width, d_label.height);
+    }
 
-
-	  @Override
-      public void setBackground(Color color) {
-	    if (color instanceof ColorUIResource) {
+    @Override
+    public void setBackground(Color color) {
+        if (color instanceof ColorUIResource) {
             color = null;
         }
-	    super.setBackground(color);
-	  }
+        super.setBackground(color);
+    }
 
+    public static class TreeLabel extends JLabel {
 
-	  public static class TreeLabel extends JLabel {
-	    boolean isSelected;
-	    boolean hasFocus;
+        boolean isSelected;
+        boolean hasFocus;
 
-	    TreeLabel() {
-	    }
+        TreeLabel() {
+        }
 
-	    @Override
+        @Override
         public void setBackground(Color color) {
-		if(color instanceof ColorUIResource) {
-            color = null;
+            if (color instanceof ColorUIResource) {
+                color = null;
+            }
+            super.setBackground(color);
         }
-		super.setBackground(color);
-	    }
 
-	    @Override
+        @Override
         public void paint(final Graphics g) {
-	      final String str;
-	      if ((str = getText()) != null && !str.isEmpty()){
-	          if (isSelected) {
-	            g.setColor(UIManager.getColor("Tree.selectionBackground"));
-	          } else {
-	            g.setColor(UIManager.getColor("Tree.textBackground"));
-	          }
-	          final Dimension d = getPreferredSize();
-	          int imageOffset = 0;
-	          final Icon currentI = getIcon();
-	          if (currentI != null) {
-	            imageOffset = currentI.getIconWidth() + Math.max(0, getIconTextGap() - 1);
-	          }
-	          g.fillRect(imageOffset, 0, d.width -1 - imageOffset, d.height);
-	          if (hasFocus) {
-	            g.setColor(UIManager.getColor("Tree.selectionBorderColor"));
-	            g.drawRect(imageOffset, 0, d.width -1 - imageOffset, d.height -1);
-	         }
-	        }
-	      super.paint(g);
-	    }
+            final String str;
+            if ((str = getText()) != null && !str.isEmpty()) {
+                if (isSelected) {
+                    g.setColor(UIManager.getColor("Tree.selectionBackground"));
+                } else {
+                    g.setColor(UIManager.getColor("Tree.textBackground"));
+                }
+                final Dimension d = getPreferredSize();
+                int imageOffset = 0;
+                final Icon currentI = getIcon();
+                if (currentI != null) {
+                    imageOffset = currentI.getIconWidth() + Math.max(0, getIconTextGap() - 1);
+                }
+                g.fillRect(imageOffset, 0, d.width - 1 - imageOffset, d.height);
+                if (hasFocus) {
+                    g.setColor(UIManager.getColor("Tree.selectionBorderColor"));
+                    g.drawRect(imageOffset, 0, d.width - 1 - imageOffset, d.height - 1);
+                }
+            }
+            super.paint(g);
+        }
 
-	    @Override
+        @Override
         public Dimension getPreferredSize() {
-	      Dimension retDimension = super.getPreferredSize();
-	      if (retDimension != null) {
-	        retDimension = new Dimension(retDimension.width + 3,
-					 retDimension.height);
-	      }
-	      return retDimension;
-	    }
+            Dimension retDimension = super.getPreferredSize();
+            if (retDimension != null) {
+                retDimension = new Dimension(retDimension.width + 3,
+                        retDimension.height);
+            }
+            return retDimension;
+        }
 
-	    void setSelected(final boolean isSelected) {
-	    	this.isSelected = isSelected;
-	    }
+        void setSelected(final boolean isSelected) {
+            this.isSelected = isSelected;
+        }
 
-	    void setFocus(final boolean hasFocus) {
-	      this.hasFocus = hasFocus;
-	    }
-	  }
-	}
+        void setFocus(final boolean hasFocus) {
+            this.hasFocus = hasFocus;
+        }
+    }
+}

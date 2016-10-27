@@ -43,7 +43,7 @@ public class CalGrayColorSpace extends GenericColorSpace {
 
 		componentCount=1;
 
-		setCIEValues(whitepoint, null,null,gamma);
+		setCIEValues(whitepoint,null,null,null,gamma);
 		setType(ColorSpaces.CalGray);
 
 	}
@@ -71,11 +71,12 @@ public class CalGrayColorSpace extends GenericColorSpace {
 		//standard calculate (see pdf spec 1.3 page 170)
 		float[] values = new float[3];
 		final float AG = (float) Math.pow(A, G[0]);
-
+                
+        //        values[0] = (B[0]);
 		values[0] = ((W[0]) * AG);
 		values[1] = ((W[1]) * AG);
 		values[2] = (W[2] * AG);
-
+                
 		//convert to rgb
 		values = cs.toRGB(values);
 

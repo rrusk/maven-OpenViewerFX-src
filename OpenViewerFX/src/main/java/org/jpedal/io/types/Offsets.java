@@ -129,26 +129,32 @@ public class Offsets extends Vector_Int{
 
         final int[] ObjLengthTable=new int[objectCount];
 
-        while(i<objectCount-1){
+        while(i<objectCount-1) {
 
-            end=offsets[id[i+1]];
-            int objLength=end-start-1;
+            end = offsets[id[i + 1]];
+
+            if(end>eof){ //allow for invalid ref outside file see 27419
+                break;
+            }
+
+            int objLength = end - start - 1;
 
             //adjust for any xref
-            if(xrefs[xrefID[j]]<end){
-                objLength=xrefs[xrefID[j]]-start-1;
-                while(xrefs[xrefID[j]]<end+1) {
+            if (xrefs[xrefID[j]] < end) {
+                objLength = xrefs[xrefID[j]] - start - 1;
+                while (xrefs[xrefID[j]] < end + 1) {
                     j++;
                 }
             }
-            ObjLengthTable[id[i]]=objLength;
-            //System.out.println(id[i]+" "+objLength+" "+start+" "+end);
-            start=end;
-            while(xrefs[xrefID[j]]<start+1) {
+            ObjLengthTable[id[i]] = objLength;
+
+            start = end;
+            while (xrefs[xrefID[j]] < start + 1) {
                 j++;
             }
             i++;
         }
+
 
         //special case - last object
 

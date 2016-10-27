@@ -57,8 +57,6 @@ public class TextSelect {
             if (url != null) {
                 currentGUI.getButtons().getButton(Commands.MOUSEMODE).setIcon(url);
             }
-        } else {
-
         }
     }
 }

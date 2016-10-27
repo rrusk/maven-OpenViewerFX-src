@@ -58,7 +58,7 @@ public class FontObject extends PdfObject {
 
 	int CIDToGIDMapAsConstant=PdfDictionary.Unknown;
 
-    int FirstChar=1,LastChar=255,Flags,MissingWidth,DW=-1,StemV, Supplement;
+    int FirstChar,LastChar=255,Flags,MissingWidth,DW=-1,StemV, Supplement;
 
     float Ascent,Descent;
 

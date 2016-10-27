@@ -52,8 +52,6 @@ public class RSSyndication {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             getRSSBox(currentGUI);
-        } else {
-
         }
     }
     

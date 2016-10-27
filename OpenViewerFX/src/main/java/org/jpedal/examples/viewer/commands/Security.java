@@ -70,7 +70,7 @@ public class Security {
                     final PdfPageData currentPageData = decode_pdf.getPdfPageData();
 
                     decode_pdf.closePdfFile();
-                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
+//                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
                     ItextFunctions.encrypt(commonValues.getPageCount(), currentPageData, encryptPage);
                     OpenFile.open(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
                 }

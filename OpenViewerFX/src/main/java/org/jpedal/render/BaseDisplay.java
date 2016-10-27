@@ -68,6 +68,8 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     protected int type;
 
     boolean isType3Font;
+    
+    public int currentTokenNumber=-1;
 
     /**set flag to show if we add a background*/
     protected boolean addBackground = true;
@@ -628,14 +630,27 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
         case ENHANCE_FRACTIONAL_LINES:
             enhanceFractionalLines = i != 0;
         	break;
+            
+        case TOKEN_NUMBER:
+           this.currentTokenNumber = i;
+           break;
+           
         }
     }
 
     @Override
     public int getValue(final int key) {
+        
+        switch(key){
+
+            case TOKEN_NUMBER:
+                return currentTokenNumber;
+            
         //used by HTML to get font handing mode, etc
         //this is the unused 'dummy' default implementation required for other modes as in Interface
+            default:
         return -1;
+        }
     }
 
     /**

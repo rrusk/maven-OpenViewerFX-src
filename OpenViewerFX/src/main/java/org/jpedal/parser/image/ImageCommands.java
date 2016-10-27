@@ -44,7 +44,6 @@ import org.jpedal.io.PdfObjectReader;
 import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.FunctionObject;
-import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.data.ImageData;
 
@@ -129,7 +128,7 @@ public class ImageCommands {
     /**
      * apply TR
      */
-    static void applyTR(final ImageData imageData, final PdfObject TR, final PdfObjectReader currentPdfFile) {
+    static void applyTR(final ImageData imageData, final Object[] TR, final PdfObjectReader currentPdfFile) {
 
         try {
             final PDFFunction[] functions = getFunctions(TR, currentPdfFile);
@@ -171,12 +170,12 @@ public class ImageCommands {
     }
     
     
-    private static PDFFunction[] getFunctions(final PdfObject TR, final PdfObjectReader currentPdfFile) {
+    private static PDFFunction[] getFunctions(final Object[] TRvalues, final PdfObjectReader currentPdfFile) {
         
         PDFFunction[] functions =null;
 
         int total=0;
-        final byte[][] kidList = TR.getKeyArray(PdfDictionary.TR);
+        final byte[][] kidList = (byte[][]) TRvalues[1];
         if(kidList!=null) {
             total = kidList.length;
             functions =new PDFFunction[total];

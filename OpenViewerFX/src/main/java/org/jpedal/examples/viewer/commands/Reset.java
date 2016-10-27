@@ -48,8 +48,6 @@ public class Reset {
             commonValues.dx = 0;
             commonValues.dy = 0;
             commonValues.maxViewY = 0;
-        } else {
-
         }
     }
 }

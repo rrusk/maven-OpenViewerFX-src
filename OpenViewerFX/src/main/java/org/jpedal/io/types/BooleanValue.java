@@ -46,11 +46,7 @@ public class BooleanValue {
         
         i++;
         
-        //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47){
-            //System.out.println("skip="+raw[i]);
-            i++;
-        }
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
         
         keyStart=i;
         

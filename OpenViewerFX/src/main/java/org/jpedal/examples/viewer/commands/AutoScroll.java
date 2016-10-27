@@ -42,8 +42,6 @@ public class AutoScroll {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             currentGUI.toogleAutoScrolling();
-        } else {
-
         }
     }
 }

@@ -500,7 +500,6 @@ public class TextLines {
 
                     if (start != -1 && finish != -1) {
                         //Fill in all the lines between
-                        final Integer p = page;
                         final int[][] localAreas = new int[finish - start + 1][4];
 
                         System.arraycopy(lines, start + 0, localAreas, 0, finish - start + 1);

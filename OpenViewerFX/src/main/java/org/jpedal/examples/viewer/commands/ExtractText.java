@@ -60,8 +60,6 @@ public class ExtractText extends GUIExtractText {
     public static void execute(final Object[] args, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final Values commonValues) {
         if (args == null) {
             extractSelectedText(currentGUI, decode_pdf, commonValues);
-        } else {
-
         }
     }
 

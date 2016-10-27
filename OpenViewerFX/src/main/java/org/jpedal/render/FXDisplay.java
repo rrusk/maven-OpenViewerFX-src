@@ -60,11 +60,9 @@ import org.jpedal.fonts.glyph.PdfGlyph;
 import org.jpedal.fonts.tt.TTGlyph;
 import org.jpedal.function.FunctionFactory;
 import org.jpedal.function.PDFFunction;
-import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
-import org.jpedal.objects.raw.FunctionObject;
 import org.jpedal.objects.raw.PatternObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -242,10 +240,10 @@ public class FXDisplay extends GUIDisplay {
         }
 
         if(rawKey==null){
-            objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem,image,false,"tif");
+            objectStoreRef.saveStoredImageAsBytes(pageNumber+"_HIRES_"+currentItem,image,false);
             imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem);
         }else{
-            objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false,"tif");
+            objectStoreRef.saveStoredImageAsBytes(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false);
             imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem+ '_' +rawKey);
         }
         
@@ -352,7 +350,7 @@ public class FXDisplay extends GUIDisplay {
         final float[] background = shading.getFloatArray(PdfDictionary.Background);
 
         final PdfObject functionObj = shading.getDictionary(PdfDictionary.Function);
-        final byte[][] keys = shading.getKeyArray(PdfDictionary.Function);
+        final PdfArrayIterator keys = shading.getMixedArray(PdfDictionary.Function);
         PDFFunction [] function = null;
         if (functionObj != null) {
             function = new PDFFunction[1];
@@ -360,23 +358,16 @@ public class FXDisplay extends GUIDisplay {
         } else if (keys != null) {
             int functionCount = 0;
             if (keys != null) {
-                functionCount = keys.length;
+                functionCount = keys.getTokenCount();
             }
-            PdfObject functionsObj;
+
             if (keys != null) {
                 final PdfObject[] subFunction = new PdfObject[functionCount];
-                String id;
+ 
                 for (int i = 0; i < functionCount; i++) {
-                    id = new String(keys[i]);
-                    if (id.startsWith("<<")) {
-                        functionsObj = new FunctionObject(1);
-                        final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
-                        objectDecoder.readDictionaryAsObject(functionsObj, 0, keys[i]);
-                    } else {
-                        functionsObj = new FunctionObject(id);
-                        currentPdfFile.readObject(functionsObj);
-                    }
-                    subFunction[i] = functionsObj;
+                    
+                    subFunction[i]=ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, keys.getNextValueAsByte(true));
+                    
                 }
                 function = new PDFFunction[subFunction.length];
                 for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {

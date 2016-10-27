@@ -32,6 +32,7 @@
  */
 package org.jpedal.examples.viewer.commands;
 
+import java.awt.Component;
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.examples.viewer.Commands;
@@ -39,7 +40,7 @@ import org.jpedal.examples.viewer.SharedViewer;
 import org.jpedal.gui.GUIFactory;
 
 /**
- *
+ * Change page display mode to single
  */
 public class Single {
 
@@ -52,6 +53,13 @@ public class Single {
 
             currentGUI.getCombo(Commands.SCALING).setEnabled(true);
             currentGUI.getCombo(Commands.ROTATION).setEnabled(true);
+            
+            currentGUI.getButtons().getButton(Commands.ROTATELEFT).setEnabled(true);
+            currentGUI.getButtons().getButton(Commands.ROTATERIGHT).setEnabled(true);
+            
+            if (currentGUI.getGlassPane() != null){
+                ((Component)currentGUI.getGlassPane()).setVisible(true);
+            }            
 
             currentGUI.getButtons().getButton(Commands.MOUSEMODE).setEnabled(true);
             currentGUI.getButtons().getButton(Commands.SNAPSHOT).setEnabled(true);

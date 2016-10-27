@@ -59,7 +59,7 @@ public class PdfObjectCache {
     private final Map<java.io.Serializable, Object> colorspacesUsed=new HashMap<java.io.Serializable, Object>(initSize);
 
     /**colors*/
-    private Map<Object, byte[]> colorspaces= new HashMap<Object, byte[]>(initSize);
+    private Map<Object, byte[]> colorspaces= getColorSpaceWithDefaultValues();
 
     private Map<Object, byte[]> globalXObjects = new HashMap<Object, byte[]>(initSize);
     private Map<Object, byte[]> localXObjects=new HashMap<Object, byte[]>(initSize);
@@ -249,7 +249,7 @@ public class PdfObjectCache {
         resolvedFonts=new HashMap<String, PdfFont>(initSize);
         unresolvedFonts=new HashMap<Object, byte[]>(initSize);
         directFonts=new HashMap<String, PdfObject>(initSize);
-        colorspaces= new HashMap<Object, byte[]>(initSize);
+        colorspaces= getColorSpaceWithDefaultValues();
         GraphicsStates=new HashMap<Object, byte[]>(initSize);
         localXObjects=new HashMap<Object, byte[]>(initSize);
 
@@ -313,20 +313,20 @@ public class PdfObjectCache {
     public Map getPatterns() {
         return patterns;
     }
-/**
-    private static Map<Object, Object> getColorSpaceWithDefaultValues() {
+/**/
+    private static Map<Object, byte[]> getColorSpaceWithDefaultValues() {
 
-       final Map colorValues= new HashMap<Object, Object>(initSize);
+       final Map colorValues= new HashMap<Object, byte[]>(initSize);
        
        final String[] keys={"DeviceRGB","Pattern","Separation","CalRGB","CalGray","ICC",
-           "DeviceGray","DeviceN", "Lab", "DeviceCMYK", "Indexed"};
+           "DeviceGray","DeviceN", "Lab", "DeviceCMYK"};
        final String[] values={"/DeviceRGB", "/Pattern", "/Separation", "/CalRGB", "/CalGray", "/ICC",
-           "/DeviceGray", "/DeviceN", "/Lab", "/DeviceCMYK", "/Indexed"};
+           "/DeviceGray", "/DeviceN", "/Lab", "/DeviceCMYK"};
        
        final int keyCount=keys.length;
        for(int i=0;i<keyCount;i++){
            colorValues.put(keys[i], values[i].getBytes());
-}
+        }
        return colorValues;
     }/**/
 }

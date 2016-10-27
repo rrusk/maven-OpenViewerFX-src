@@ -36,7 +36,7 @@ import org.jpedal.PdfDecoderInt;
 import org.jpedal.gui.GUIFactory;
 
 /**
- *
+ * Returns the current page
  */
 public class CurrentPage {
 

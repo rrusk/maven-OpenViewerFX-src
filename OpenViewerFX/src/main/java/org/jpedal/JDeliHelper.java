@@ -166,6 +166,10 @@ public class JDeliHelper {
         return null;
     }
     
+    public static BufferedImage getPsdImage(final String fileName){
+        return null;
+    }
+    
     public static int getTiffPageCount(final String file) {
         
         return 0;

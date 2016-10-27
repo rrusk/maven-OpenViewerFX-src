@@ -46,7 +46,7 @@ import static org.jpedal.examples.viewer.gui.GUI.*;
 import org.jpedal.utils.LogWriter;
 
 /**
- * This class controls everything todo with Swing Cursor objects
+ * This class controls everything to do with Swing Cursor objects
  */
 public class SwingCursor {
     
@@ -65,6 +65,11 @@ public class SwingCursor {
     private Cursor panCursorB;
     private Cursor panCursorBL;
     
+    /**
+     * Get a stored Cursor
+     * @param type in value specifying the cursor type
+     * @return Cursor object for the specified type
+     */
     public Cursor getCursor(final int type) {
         switch (type) {
             case GRAB_CURSOR:
@@ -161,11 +166,14 @@ public class SwingCursor {
         }
     }
     
+    /**
+     * Specify the location to be used for cursor images
+     * @param location String value presenting the directory that holds the cursor images
+     */
     public void setIconLocation(final String location){
         iconLocation = location;
     }
-
-
+    
     /**
      * Retrieve the URL of the actual image to use f
      * @param path Preferred name and location
@@ -217,6 +225,11 @@ public class SwingCursor {
         }
     }
     
+    /**
+     * Get the cursor image as a buffered image for use in FX code
+     * @param type int value representing the cursor type
+     * @return BufferedImage of the image to use for the cursor
+     */
     public BufferedImage getCursorImageForFX(final int type) {
         switch (type) {
             case GRAB_CURSOR:

@@ -141,7 +141,7 @@ public class PdfStreamDecoder extends BaseDecoder{
     
     private int tokenNumber;
     
-    /**list of images used for display*/
+    /**lisßt of images used for display*/
     String imagesInFile;
     
     //set threshold - value indicates several possible values

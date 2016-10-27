@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.StringTokenizer;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.FastByteArrayOutputStream;
 
@@ -1416,10 +1417,8 @@ public class Type1 extends PdfFont {
         
         final int count ;
         
-        //move to start of first value
-        while(cont[start] == 32 || cont[start]==10 || cont[start]==13) {
-            start++;
-        }
+//        //move to start of first value
+        start = StreamReaderUtils.skipSpaces(cont, start);
         
         //read the  count
         StringBuilder tmp=new StringBuilder();

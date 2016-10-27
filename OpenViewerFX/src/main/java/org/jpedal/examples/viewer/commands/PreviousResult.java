@@ -45,7 +45,8 @@ import org.jpedal.utils.Messages;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
 /**
- *
+ * Shows the previous search result in the Viewer.
+ * Jumps to final result if already at first result.
  */
 public class PreviousResult {
 

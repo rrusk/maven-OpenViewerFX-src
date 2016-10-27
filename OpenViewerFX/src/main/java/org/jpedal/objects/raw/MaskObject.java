@@ -39,10 +39,6 @@ public class MaskObject extends XObject {
 	//unknown CMAP as String
 	//String unknownValue=null;
 
-	private int[] Mask;
-	
-	byte[][] TR;
-
 	private float[] BC;
 
 	//boolean ImageMask=false;
@@ -175,36 +171,6 @@ public class MaskObject extends XObject {
 //        hasStream=true;
 //    }
 
-
-
-    @Override
-    public int[] getIntArray(final int id) {
-
-        switch(id){
-
-            case PdfDictionary.Mask:
-                return deepCopy(Mask);
-
-            default:
-            	return super.getIntArray(id);
-        }
-    }
-
-    @Override
-    public void setIntArray(final int id, final int[] value) {
-
-        switch(id){
-
-            case PdfDictionary.Mask:
-            	Mask=value;
-            break;
-
-            default:
-            	super.setIntArray(id, value);
-        }
-    }
-
-
     @Override
     public float[] getFloatArray(final int id) {
 
@@ -297,33 +263,5 @@ public class MaskObject extends XObject {
             default:
                 throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
         }
-    }
-    
-    @Override
-    public byte[][] getKeyArray(final int id) {
-
-        switch(id){
-
-            case PdfDictionary.TR:
-       		    return deepCopy(TR);
-
-            default:
-            	return super.getKeyArray(id);
-        }
-    }
-
-    @Override
-    public void setKeyArray(final int id, final byte[][] value) {
-
-        switch(id){
-
-            case PdfDictionary.TR:
-                TR=value;
-            break;
-
-            default:
-            	super.setKeyArray(id, value);
-        }
-
     }
 }

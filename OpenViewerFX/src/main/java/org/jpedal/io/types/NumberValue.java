@@ -59,12 +59,8 @@ public class NumberValue {
         //actual value or first part of ref
         int number= NumberUtils.parseInt(keyStart, i, raw);
         
-        
-        //roll onto next nonspace char and see if number
         int jj=i;
-        while(jj<rawLength &&(raw[jj]==32 || raw[jj]==13 || raw[jj]==10)) {
-            jj++;
-        }
+        jj = StreamReaderUtils.skipSpaces(raw, jj);
         
         boolean  isRef=false;
         
@@ -74,14 +70,10 @@ public class NumberValue {
             int aa=jj;
             
             //move cursor to end of number
-            while((raw[aa]!=10 && raw[aa]!=13 && raw[aa]!=32 && raw[aa]!=47 && raw[aa]!=60 && raw[aa]!=62)) {
-                aa++;
-            }
+            aa = StreamReaderUtils.skipToEndOfRef(raw, aa);
             
             //move cursor to start of text
-            while(aa<rawLength && (raw[aa]==10 || raw[aa]==13 || raw[aa]==32 || raw[aa]==47)) {
-                aa++;
-            }
+            aa = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, aa, 47);
             
             isRef=aa<rawLength && raw[aa]=='R';
             
@@ -95,9 +87,7 @@ public class NumberValue {
             
             keyStart=i;
             //move cursor to end of reference
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
+            i = StreamReaderUtils.skipToEndOfRef(raw, i);
             
             final int generation= NumberUtils.parseInt(keyStart, i, raw);
             
@@ -149,10 +139,7 @@ public class NumberValue {
             
             //skip any spaces after
             if(len>1){//allow for small values (ie Rotate object pointing to value 0)
-                while( j<data.length &&(data[j]==9 || data[j]==10 || data[j]==13 || data[j]==32))// || data[j]==47 || data[j]==60)
-                {
-                    j++;
-                }
+               j = StreamReaderUtils.skipSpaces(data, j);
             }
             
             int count=j;

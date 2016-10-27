@@ -43,13 +43,14 @@ public class XObject extends PdfObject {
 	
 	String Intent,OC;
 	
+	private int[] Mask;
 	
 	
 	boolean ImageMask,K;
 	
 	int Height=1, Width=1;
 	
-	private PdfObject Group,Mask, OCObject, OPI, XObject;
+	private PdfObject Group,MaskObj, OCObject, OPI, XObject;
 	
     public XObject(final String ref) {
         super(ref);
@@ -99,6 +100,34 @@ public class XObject extends PdfObject {
                 super.setBoolean(id, value);
         }
     }
+    
+    @Override
+    public int[] getIntArray(final int id) {
+
+        switch(id){
+
+            case PdfDictionary.Mask:
+                return deepCopy(Mask);
+
+            default:
+            	return super.getIntArray(id);
+        }
+    }
+
+    @Override
+    public void setIntArray(final int id, final int[] value) {
+
+        switch(id){
+
+            case PdfDictionary.Mask:
+            	Mask=value;
+            break;
+
+            default:
+            	super.setIntArray(id, value);
+        }
+    }
+
 
     @Override
     public PdfObject getDictionary(final int id){
@@ -109,7 +138,7 @@ public class XObject extends PdfObject {
         		return Group;
 
 	        case PdfDictionary.Mask:
-	        	return Mask;
+	        	return MaskObj;
 
             case PdfDictionary.OC:
                 return OCObject;
@@ -173,7 +202,7 @@ public class XObject extends PdfObject {
 	        break;
 
 	        case PdfDictionary.Mask:
-	        	Mask=value;
+	        	MaskObj=value;
 	        break;
 
             case PdfDictionary.OC:

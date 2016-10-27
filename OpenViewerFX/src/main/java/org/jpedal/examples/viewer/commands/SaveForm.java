@@ -53,8 +53,6 @@ public class SaveForm {
     public static void execute(final Object[] args, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final Values commonValues) {
         if (args == null) {
             saveChangedForm(currentGUI, decode_pdf, commonValues);
-        } else {
-
         }
     }
 
@@ -122,7 +120,7 @@ public class SaveForm {
             }
             
             if(ExternalHandlers.isITextPresent()){
-                final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
+//                final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
                 ItextFunctions.saveFormsData(fileToSave);
             }
             

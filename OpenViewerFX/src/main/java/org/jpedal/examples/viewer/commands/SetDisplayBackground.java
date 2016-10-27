@@ -39,10 +39,14 @@ import org.jpedal.constants.JPedalSettings;
 import org.jpedal.exception.PdfException;
 
 /**
- *
+ * Set the background for the display area
  */
 public class SetDisplayBackground {
 
+    /**
+     * @param args object array containing arguments, args[0] should be an integer
+     * @param decode_pdf PdfDecoderInt object representing the PdfObject currently open
+     */
     public static void execute(final Object[] args, final PdfDecoderInt decode_pdf) {
 
         try {

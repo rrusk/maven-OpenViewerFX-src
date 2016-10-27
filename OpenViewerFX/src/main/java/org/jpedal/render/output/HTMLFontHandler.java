@@ -88,7 +88,6 @@ public class HTMLFontHandler {
 
             final byte[] stream;
             final PdfObject FontFile2 = pdfFontDescriptor.getDictionary(PdfDictionary.FontFile2);
-
             if (FontFile2 != null) { //truetype fonts
                 stream = currentPdfFile.readStream(FontFile2, true, true, false, false, false, FontFile2.getCacheName(currentPdfFile.getObjectReader()));
                 current.writeCustom(DynamicVectorRenderer.SAVE_EMBEDDED_FONT, new Object[]{restoredFont, stream, "ttf"});

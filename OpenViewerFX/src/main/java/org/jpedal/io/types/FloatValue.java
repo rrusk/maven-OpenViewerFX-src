@@ -49,25 +49,17 @@ public class FloatValue {
         //roll on
         i++;
         
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47) {
-            i++;
-        }
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
         
         int keyStart=i;
-        
-        //move cursor to end of text
-        while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
-            i++;
-        }
+        i = StreamReaderUtils.skipToEndOfRef(raw, i);
         
         //actual value or first part of ref
         float number= NumberUtils.parseFloat(keyStart, i, raw);
         
         //roll onto next nonspace char and see if number
         int jj=i;
-        while(jj<length &&(raw[jj]==32 || raw[jj]==13 || raw[jj]==10)) {
-            jj++;
-        }
+        jj = StreamReaderUtils.skipSpaces(raw, jj);
         
         //check its not a ref (assumes it XX 0 R)
         if(raw[jj]>= 48 && raw[jj]<=57){ //if next char is number 0-9 its a ref
@@ -76,15 +68,14 @@ public class FloatValue {
             while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
                 i++;
             }
+
             
             /*
              * get generation number
              */
             keyStart=i;
             //move cursor to end of reference
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
+            i = StreamReaderUtils.skipToEndOfRef(raw, i);
             
             final int generation= NumberUtils.parseInt(keyStart, i, raw);
             
@@ -118,11 +109,7 @@ public class FloatValue {
                 j++;
             }
             
-            //skip any spaces after
-            while(data[j]==10 || data[j]==13 || data[j]==32)// || data[j]==47 || data[j]==60)
-            {
-                j++;
-            }
+            j = StreamReaderUtils.skipSpaces(data, j);
             
             int count=j;
             

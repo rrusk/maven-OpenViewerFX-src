@@ -34,6 +34,7 @@
 package org.jpedal.parser.text;
 
 import java.util.StringTokenizer;
+import org.jpedal.io.types.StreamReaderUtils;
 import static org.jpedal.parser.text.TD.getString;
 import org.jpedal.utils.NumberUtils;
 
@@ -50,9 +51,7 @@ class Leading {
 
         //get string
         int strt=leadingStart;
-        while(stream[strt]==10 || stream[strt]==9 || stream[strt]==32 || stream[strt]==13) {
-            strt++;
-        }
+        strt = StreamReaderUtils.skipSpaces(stream, strt);
 
         //more than one value separated by space
         float value;
@@ -81,10 +80,8 @@ class Leading {
         float value = 0;
         i++;
         //allow for spaces
-        while(stream[i]==32 || stream[i]==13 || stream[i]==10) //' '=32
-        {
-            i++;
-        }
+        i = StreamReaderUtils.skipSpaces(stream, i);
+        
         char nc = (char) stream[i], rc=' ';
         
         //allow for )( or >< (ie no value)

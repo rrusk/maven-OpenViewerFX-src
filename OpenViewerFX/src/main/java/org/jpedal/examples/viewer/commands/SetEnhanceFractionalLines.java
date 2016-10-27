@@ -39,10 +39,14 @@ import org.jpedal.constants.JPedalSettings;
 import org.jpedal.exception.PdfException;
 
 /**
- *
+ * Allow thin lines (width less than 1) to be made wider and clearly visible
  */
 public class SetEnhanceFractionalLines {
 
+    /**
+     * @param args object array containing arguments, args[0] should be boolean (true to enable, false to disable)
+     * @param decode_pdf PdfDecoderInt object representing the PdfObject currently open
+     */
     public static void execute(final Object[] args, final PdfDecoderInt decode_pdf) {
         try {
             final Map<Integer, Object> map = new HashMap<Integer, Object>();

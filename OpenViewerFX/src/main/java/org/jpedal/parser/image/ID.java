@@ -250,9 +250,15 @@ public class ID extends ImageDecoder {
             //look for end EI
             
             //handle Pdflib and xenos variety
-            if ( streamLength-i>3 &&  stream[i + 1] == 69 && stream[i + 2] == 73 && ((stream[i+3] == 10 && (streamLength==i+4 || stream[i+4]==81))  || (stream[i+3]==32 && stream[i+4] == 10))){
+            if ( streamLength-i>3 &&  stream[i + 1] == 69 && stream[i + 2] == 73 && ((stream[i+3] == 10 && (streamLength==i+4 || stream[i+4]==81))  || (stream[i+3]==32 && stream[i+4] == 10))){              
                 break;
             }
+            
+            //handle RADPDF  variety (see 26654)
+            if (streamLength-i>3 &&  stream[i + 1] == 69 && stream[i + 2] == 73 && ((stream[i+3] == 32 && stream[i+4] == 32))){   
+                break;
+            }
+            
             //general case
             if ((streamLength-i>3)&&(stream[i] == 32 || stream[i] == 10 || stream[i] == 13 ||  (stream[i+3] == 32 && stream[i+4] == 'Q'))
                     && (stream[i + 1] == 69)

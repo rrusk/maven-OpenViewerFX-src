@@ -51,11 +51,6 @@ public class CS {
         final boolean isStroke = !isLowerCase;
 
         Object rawDict=cache.get(PdfObjectCache.Colorspaces,colorspaceObject);
-          
-        //we will reimplement as values in cache directly  (ie DeviceRGB returns /DeviceRGB)
-        if(rawDict==null){ //it can be direct value
-            rawDict=('/'+colorspaceObject).getBytes();
-        }
 
         PdfArrayIterator array=ColorspaceFactory.convertColValueToMixedArray(currentPdfFile,(byte[])rawDict);
 

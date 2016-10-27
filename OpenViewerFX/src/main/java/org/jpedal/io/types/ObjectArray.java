@@ -51,7 +51,7 @@ public class ObjectArray extends Array {
     
     @Override
     boolean isFirstKeySingle() {
-         return arrayData[j2]=='/' ||arrayData[j2]=='(' || arrayData[j2]=='<' || ArrayUtils.isRef(arrayData, j2);
+         return arrayData[j2]=='/' ||arrayData[j2]=='(' || arrayData[j2]=='<' || StreamReaderUtils.isRef(arrayData, j2);
     }
     
     @Override
@@ -75,19 +75,19 @@ public class ObjectArray extends Array {
         
             keyStart=moveToStartOfNextValue();
 
-            if(ArrayUtils.isEndObj(arrayData,j2)){
+            if(StreamReaderUtils.isEndObj(arrayData,j2)){
                 break;
             }else if(arrayData[j2]=='>' && arrayData[j2+1]=='>'){
                 break;
             }else if(arrayData[j2-1]=='/'){  // /key               
                 newValues=writeKey();
-            }else if(ArrayUtils.isRef(arrayData, j2)){
+            }else if(StreamReaderUtils.isRef(arrayData, j2)){
                 newValues = getIndirectRef(pdfObject, keyStart);
             }else if((arrayData[j2]=='<' && arrayData[j2+1]=='<')){
                 newValues = writeObject(keyStart);
-            }else if(ArrayUtils.isNumber(arrayData, j2)){               
+            }else if(StreamReaderUtils.isNumber(arrayData, j2)){               
                 newValues=writeNumber();
-            }else if(ArrayUtils.isNull(arrayData,j2)){               
+            }else if(StreamReaderUtils.isNull(arrayData,j2)){               
                 newValues=writeNull();
             }else if(arrayData[j2]=='('){                                 
                 newValues=writeString(pdfObject);
@@ -124,6 +124,11 @@ public class ObjectArray extends Array {
         final byte[] bytes = objectReader.readObjectData(obj);
 
         final int len=bytes.length;
+
+        //return null if object does not exist
+        if(len==0){
+            return null;
+        }
         
         //find first key char to show if indirect
         int a=0;

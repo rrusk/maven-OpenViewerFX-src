@@ -42,6 +42,7 @@ import java.util.Map;
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfFileReader;
+import org.jpedal.io.security.CryptoAES;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.NumberUtils;
 import org.jpedal.utils.StringUtils;
@@ -1337,6 +1338,10 @@ public class PdfObject {
                 //System.out.println(cached.length+" "+DecodedStream.length);
                 bis.read(cached);
                 bis.close();
+                if(objReader.getEncHash() != null){
+                    CryptoAES aes = new CryptoAES();
+                    cached = aes.decrypt(objReader.getEncHash(), cached);
+                }
                 
                 //System.out.println(new String(cached));
             }catch(final Exception e){
@@ -1671,10 +1676,10 @@ public class PdfObject {
         pageNumber = number;
     }
 
-    public void setCache(final long offset, final PdfFileReader objReader) {
-        this.startStreamOnDisk=offset;
+
+    public void setCache(final PdfFileReader objReader) {
+        this.startStreamOnDisk=objReader.getOffset(getObjectRefID());
         this.objReader=objReader;
-        
     }
     
     public boolean isCached() {

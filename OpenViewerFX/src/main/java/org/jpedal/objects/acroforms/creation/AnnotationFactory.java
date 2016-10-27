@@ -34,15 +34,18 @@ package org.jpedal.objects.acroforms.creation;
 
 import java.awt.*;
 import java.awt.geom.CubicCurve2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Calendar;
 import javax.imageio.ImageIO;
 import org.jpedal.color.DeviceCMYKColorSpace;
 import org.jpedal.objects.GraphicsState;
-import org.jpedal.objects.acroforms.FormRenderUtilsG2;
 import static org.jpedal.objects.acroforms.creation.SwingFormFactory.curveInk;
 import org.jpedal.objects.raw.FormObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.render.DynamicVectorRenderer;
@@ -116,37 +119,40 @@ public class AnnotationFactory {
             Rectangle bounds = getFormBounds((FormObject) form, quad);
             final Object[] InkListArray = form.getObjectArray(PdfDictionary.InkList);
             final BufferedImage icon1 = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
-            scanInkListTree(InkListArray, form, icon1.getGraphics());
+            Graphics2D g2 = (Graphics2D)icon1.getGraphics();
+            setStroke(form, g2);
+            scanInkListTree(InkListArray, form, g2);
             return icon1;
         }
         return null;
     }
     
     public static float[] scanInkListTree(final Object[] InkListArray, final PdfObject form, final Graphics g) {
-        
+
         float[] quad = form.getFloatArray(PdfDictionary.Rect);
         if (quad == null) {
             return null;
         }
-         
+
         Rectangle bounds = getFormBounds((FormObject) form, quad);
-        
-        float minX = 0;
-        float minY = 0;
-        float maxX = 0;
-        float maxY = 0;
-        
+
+        float minX = bounds.x;
+        float minY = bounds.y;
+        float maxX = bounds.x+bounds.width;
+        float maxY = bounds.y+bounds.height;
+
         float[] vals = null;
         final Graphics2D g2 = (Graphics2D) g;
+
+        setStroke(form, g2);
+        
         //if specific DecodeParms for each filter, set othereise use global
         if(InkListArray !=null){
-            
+
             final int count= InkListArray.length;
-            
+
             float x;
             float y;
-            
-            boolean isFirstPoint = true;
             
             //If Graphics not set, don't draw anything.
             if(g!=null){
@@ -170,199 +176,100 @@ public class AnnotationFactory {
                             final DeviceCMYKColorSpace cmyk = new DeviceCMYKColorSpace();
                             cmyk.setColor(underlineColor, 4);
                             c1 = new Color(cmyk.getColor().getRGB());
-                            
+
                             break;
                         default:
                             break;
                     }
                 }
-                
+
                 g2.setColor(new Color(0.0f,0.0f,0.0f,0.0f));
                 g2.fillRect(0, 0, bounds.width, bounds.height);
                 g2.setColor(c1);
                 g2.setPaint(c1);
             }
-            
+
             for(int i=0;i<count;i++){
-                
+
                 if(InkListArray[i] instanceof byte[]){
                     final byte[] decodeByteData= (byte[]) InkListArray[i];
-                    
+
                     if(vals==null){
                         vals = new float[count];
                     }
-                    
-                    if(decodeByteData!=null){
-                        final String val= new String(decodeByteData);
+
+                    if (decodeByteData != null) {
+                        final String val = new String(decodeByteData);
                         final float v = Float.parseFloat(val);
-                        
-                        switch(i%2){
-                            case 0 :
-                                if(isFirstPoint){
+
+                        switch (i % 2) {
+                            case 0:
+                                if (v < minX) {
                                     minX = v;
+                                }
+                                if (v > maxX) {
                                     maxX = v;
-                                }else{
-                                    if(v<minX) {
-                                        minX = v;
-                                    }
-                                    if(v>maxX) {
-                                        maxX = v;
-                                    }
                                 }
                                 x = (v - bounds.x);
                                 vals[i] = x;
                                 break;
-                            case 1 :
-                                if(isFirstPoint){
+                            case 1:
+                                if (v < minY) {
                                     minY = v;
+                                }
+                                if (v > maxY) {
                                     maxY = v;
-                                    isFirstPoint = false;
-                                }else{
-                                    if(v<minY) {
-                                        minY = v;
-                                    }
-                                    if(v>maxY) {
-                                        maxY = v;
-                                    }
                                 }
                                 y = bounds.height - (v - bounds.y);
                                 vals[i] = y;
-                                
-                                //x = 0;
-                                //y = 0;
-                                
+
                                 break;
                         }
-                        //                        System.out.println("val="+val);
-                        
                     }
-                }else{
-                    // System.out.println(">>");
+                } else {
                     final float[] r = scanInkListTree((Object[]) InkListArray[i], form, g);
-                    if(isFirstPoint){
+                    if (r[0] < minX) {
                         minX = r[0];
-                        maxX = r[2];
-                        minY = r[1];
-                        maxY = r[3];
-                        isFirstPoint = false;
-                    }else{
-                        if(r[0]<minX) {
-                            minX = r[0];
-                        }
-                        if(r[2]>maxX) {
-                            maxX = r[2];
-                        }
-                        if(r[1]<minY) {
-                            minY = r[1];
-                        }
-                        if(r[3]>maxY) {
-                            maxY = r[3];
-                        }
                     }
-                    // System.out.println("<<");
+                    if (r[2] > maxX) {
+                        maxX = r[2];
+                    }
+                    if (r[1] < minY) {
+                        minY = r[1];
+                    }
+                    if (r[3] > maxY) {
+                        maxY = r[3];
+                    }
                 }
             }
         }
-        
-        if(vals!=null){
-            if(vals.length<6){ //Only use lines on ink
-            for(int i=0; i<vals.length; i++){
-                if(i%2==0){ //X coord
-                    if(vals[i]<minX) {
-                        minX = vals[i];
-                    }
-                    
-                    if(vals[i]>maxX) {
-                        maxX = vals[i];
-                    }
-                }else{ //Y coord
-                    if(vals[i]<minY) {
-                        minY = vals[i];
-                    }
-                    
-                    if(vals[i]>maxY) {
-                        maxY = vals[i];
-                    }
-                }
-            }
-            
-            float xOffset = 0;
-            float yOffset = 0;
-            
-            if(minX < 0) {
-                xOffset = Math.abs(minX);
-            }
-            if(minY < 0) {
-                yOffset = Math.abs(minY);
-            }
-            
-            minX += xOffset;
-            maxX += xOffset;
-            minY += yOffset;
-            maxY += yOffset;
-            
-            if(g2!=null){
-                
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setStroke(new BasicStroke(1.52f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                
+
+        if (vals != null) {
+            if (vals.length < 6) { //Only use lines on ink
+                if (g2 != null) {
+
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
                 for(int i=0; i<vals.length; i+=4){
-                    final Line2D.Float line = new Line2D.Float(vals[0], vals[1], vals[2], vals[3]);
-                    g2.draw(line);
+                        final Line2D.Float line = new Line2D.Float(vals[0], vals[1], vals[2], vals[3]);
+                        g2.draw(line);
+                    }
                 }
-            }
             }else{ //Enough armguments so curve ink
                 final float[] values = curveInk(vals);
-            for(int i=0; i<values.length; i++){
-                if(i%2==0){ //X coord
-                    if(values[i]<minX) {
-                        minX = values[i];
-                    }
-                    
-                    if(values[i]>maxX) {
-                        maxX = values[i];
-                    }
-                }else{ //Y coord
-                    if(values[i]<minY) {
-                        minY = values[i];
-                    }
-                    
-                    if(values[i]>maxY) {
-                        maxY = values[i];
+                if(g2 != null){
+
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    for(int i=0; i<values.length; i+=8){
+
+                        final CubicCurve2D curve = new CubicCurve2D.Double(values[i], values[i + 1], values[i + 2], values[i + 3], values[i + 4], values[i + 5], values[i + 6], values[i + 7]);
+                        g2.draw(curve);
                     }
                 }
-            }
-            
-            float xOffset = 0;
-            float yOffset = 0;
-            
-            if(minX < 0) {
-                xOffset = Math.abs(minX);
-            }
-            if(minY < 0) {
-                yOffset = Math.abs(minY);
-            }
-            
-            minX += xOffset;
-            maxX += xOffset;
-            minY += yOffset;
-            maxY += yOffset;
-            
-            if(g2!=null){
-                
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setStroke(new BasicStroke(1.52f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                
-                for(int i=0; i<values.length; i+=8){
-                    
-                    final CubicCurve2D curve = new CubicCurve2D.Double(values[i], values[i+1], values[i+2], values[i+3]
-                            , values[i+4], values[i+5], values[i+6], values[i+7]);
-                    g2.draw(curve);
-                }
-            }
             }
         }
-        
+
         return new float[]{minX, minY, maxX, maxY};
     }
     
@@ -548,15 +455,46 @@ public class AnnotationFactory {
             
             final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
             final Graphics2D g = (Graphics2D)icon.getGraphics();
+            int width = setStroke(form, g);
             g.setColor(ic);
             g.fillRect(0, 0, bounds.width, bounds.height);
             g.setColor(c);
-            FormRenderUtilsG2.renderBorder(g, (FormObject)form, 0,0,icon.getWidth(), icon.getHeight());
+            g.drawRect(width/2, width/2, bounds.width-width, bounds.height-width);
+//            FormRenderUtilsG2.renderBorder(g, (FormObject)form, 0,0,icon.getWidth(), icon.getHeight());
             
             return icon;
         }
         //Return a small empty image as no highlight to make.
         return null;
+    }
+    
+    private static int setStroke(PdfObject form, Graphics2D g) {
+        int borderWidth = 1;
+        PdfObject BS = form.getDictionary(PdfDictionary.BS);
+        if (BS != null && g!=null) {
+            final String s = BS.getName(PdfDictionary.S);
+            borderWidth = BS.getInt(PdfDictionary.W);
+            if (borderWidth == -1) {
+                borderWidth = 1;
+            }
+            final PdfArrayIterator d = BS.getMixedArray(PdfDictionary.D);
+
+            if (s == null || s.equals("S")) {
+                g.setStroke(new BasicStroke(borderWidth));
+            } else {
+                if (s.equals("D")) {
+                    float[] dash = {3};
+                    if (d != null && d.hasMoreTokens()) {
+                        final int count = d.getTokenCount();
+                        if (count > 0) {
+                            dash = d.getNextValueAsFloatArray();
+                        }
+                    }
+                    g.setStroke(new BasicStroke(borderWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, dash, 0));
+                }
+            }
+        }
+        return borderWidth;
     }
     
     private static BufferedImage getCircleIcon(final PdfObject form){
@@ -570,10 +508,13 @@ public class AnnotationFactory {
             
             final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
             final Graphics2D g = (Graphics2D)icon.getGraphics();
+            
+            int width = setStroke(form, g);
+            
             g.setColor(ic);
-            g.fillOval(1, 1, bounds.width-2, bounds.height-2);
+            g.fillOval((width/2), (width/2), bounds.width-width, bounds.height-width);
             g.setColor(c);
-            g.drawOval(1, 1, bounds.width-2, bounds.height-2);
+            g.drawOval((width/2),(width/2), bounds.width-width, bounds.height-width);
             
             return icon;
         }
@@ -590,8 +531,10 @@ public class AnnotationFactory {
             
             Rectangle bounds = getFormBounds((FormObject)form, quad);
             
+            
             final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
             final Graphics2D g = (Graphics2D)icon.getGraphics();
+            setStroke(form, g);
             g.setColor(c);
             g.drawLine((int)line[0]-bounds.x, (int)(bounds.height-(line[1]-bounds.y)), (int)line[2]-bounds.x, (int)(bounds.height-(line[3]-bounds.y)));
             
@@ -614,28 +557,30 @@ public class AnnotationFactory {
             
             final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
             final Graphics2D g = (Graphics2D)icon.getGraphics();
-            g.setColor(c);
+            setStroke(form, g);
+
             float lastX = vertices[0];
             float lastY = vertices[1];
-            Polygon poly = new Polygon();
-            if (!line) {
-                poly.addPoint((int) lastX - bounds.x, (int) (bounds.height - (lastY - bounds.y)));
-            }
+
+            GeneralPath gPath = new GeneralPath(Path2D.WIND_NON_ZERO);
+            gPath.moveTo((int)lastX - bounds.x, (int)(bounds.height - (lastY - bounds.y)));
+
             for(int i=2; i!=vertices.length; i+=2){
-                if(!line){
-                    poly.addPoint((int)vertices[i]-bounds.x, (int)(bounds.height-(vertices[i+1]-bounds.y)));
-                }
-                g.drawLine((int)lastX-bounds.x, (int)(bounds.height-(lastY-bounds.y)), (int)vertices[i]-bounds.x, (int)(bounds.height-(vertices[i+1]-bounds.y)));
-                lastX = vertices[i];
-                lastY = vertices[i+1];
+                gPath.lineTo((int)vertices[i] - bounds.x, (int)(bounds.height - (vertices[i+1] - bounds.y)));
             }
-            if(!line){
-                g.drawLine((int)lastX-bounds.x, (int)(bounds.height-(lastY-bounds.y)), (int)vertices[0]-bounds.x, (int)(bounds.height-(vertices[1]-bounds.y)));
+
+            if (!line) {
+                gPath.lineTo((int)vertices[0] - bounds.x, (int)(bounds.height - (vertices[1]-bounds.y)));
                 g.setColor(ic);
-                g.fillPolygon(poly);
+                g.fill(gPath);
             }
+
+            g.setColor(c);
+            g.draw(gPath);
+
             return icon;
         }
+
         //Return a small empty image as no highlight to make.
         return null;
     }
@@ -740,21 +685,60 @@ public class AnnotationFactory {
         return null;
     }
     
-    private static BufferedImage getTextIcon(final PdfObject form){
+    public  static BufferedImage getTextIcon(final PdfObject form){
+        
+        final String iconFile = getPngImageForAnnotation(form);
+        
+        BufferedImage commentIcon = null;
+        try {
+            commentIcon = ImageIO.read(AnnotationFactory.class.getResource(iconFile));
+        } catch (final IOException e){
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
+        
+        setColorForAnnotation(form, commentIcon);
+
+        return commentIcon;
+    }
+
+    private static void setColorForAnnotation(final PdfObject form, BufferedImage commentIcon) {
+        
+//Set color of annotation
+        float[] col = form.getFloatArray(PdfDictionary.C);
+        
+        if(col==null){//If not color set we should use white
+            col = new float[]{1.0f,1.0f,1.0f};
+        }
+        
+        final Color c = new Color(col[0], col[1], col[2]);
+        final int rgb = c.getRGB();
+
+        //Replace default color with specified color
+        for(int x=0; x!=commentIcon.getWidth(); x++){
+            for(int y=0; y!=commentIcon.getHeight(); y++){
+                
+                //Checks for yellow (R255,G255,B000) and replaces with color
+                if(commentIcon.getRGB(x, y)==-256){
+                    commentIcon.setRGB(x, y, rgb);
+                }
+            }
+        }
+    }
+
+    public static String getPngImageForAnnotation(final PdfObject form) {
         
         String name = form.getName(PdfDictionary.Name);
-        final String iconFile;
         
+        final String iconFile;
         if(name==null) {
             name = "Note";
         }
-        
         /* Name of the icon image to use for the icon of this annotation
-         * - predefined icons are needed for names:-
-         * Comment, Key, Note, Help, NewParagraph, Paragraph, Insert
-         */
+        * - predefined icons are needed for names:-
+        * Comment, Key, Note, Help, NewParagraph, Paragraph, Insert
+        */
         if(name.equals("Comment")){
-          iconFile = "/org/jpedal/objects/acroforms/res/comment.png";
+            iconFile = "/org/jpedal/objects/acroforms/res/comment.png";
         }else if(name.equals("Check")){
             iconFile = "/org/jpedal/objects/acroforms/res/Check.png";
         }else if(name.equals("Checkmark")){
@@ -788,36 +772,7 @@ public class AnnotationFactory {
         }else{ //Default option. Name = Note
             iconFile = "/org/jpedal/objects/acroforms/res/TextNote.png";
         }
-        
-        BufferedImage commentIcon = null;
-        try {
-            commentIcon = ImageIO.read(AnnotationFactory.class.getResource(iconFile));
-        } catch (final IOException e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-        
-        //Set color of annotation
-        float[] col = form.getFloatArray(PdfDictionary.C);
-        
-        if(col==null){//If not color set we should use white
-            col = new float[]{1.0f,1.0f,1.0f};
-        }
-        
-        final Color c = new Color(col[0], col[1], col[2]);
-        final int rgb = c.getRGB();
-
-        //Replace default color with specified color
-        for(int x=0; x!=commentIcon.getWidth(); x++){
-            for(int y=0; y!=commentIcon.getHeight(); y++){
-                
-               //Checks for yellow (R255,G255,B000) and replaces with color
-                if(commentIcon.getRGB(x, y)==-256){
-                    commentIcon.setRGB(x, y, rgb);
-                }
-            }
-        }
-
-        return commentIcon;
+        return iconFile;
     }
     
     private static BufferedImage getFileAttachmentIcon(){
@@ -940,4 +895,23 @@ public class AnnotationFactory {
             }
         }
     }
+    
+    
+    public static String getCurrentDateAsString(){
+        
+        Calendar cal = Calendar.getInstance();
+        String date = "D:" + cal.get(Calendar.YEAR) + String.format("%02d", cal.get(Calendar.MONTH)) + String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)) + String.format("%02d", cal.get(Calendar.HOUR_OF_DAY)) + String.format("%02d", cal.get(Calendar.MINUTE)) + String.format("%02d", cal.get(Calendar.SECOND));
+        int offset = cal.getTimeZone().getOffset(System.currentTimeMillis());
+        if(offset>0){
+            date += '+';
+        }
+        if(offset!=0){
+            date+=String.format("%02d", ((offset/1000)/3600));
+            date+='\'';
+            date+=String.format("%02d", ((offset/1000)%3600)/60);
+            date+='\'';
+        }
+        return date;
+    }
+    
 }

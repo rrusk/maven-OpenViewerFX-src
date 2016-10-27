@@ -383,7 +383,7 @@ public class DecryptionFactory {
         }
 
 
-        if(!isOwnerPassword){
+        if(!isOwnerPassword || (isOwnerPassword && isUserPassword)){
 
             /*test if user first*/
             if(isUserPassword){
@@ -395,7 +395,6 @@ public class DecryptionFactory {
 
                 isFileViewable=true;
                 isPasswordSupplied=true;
-
                 if((P & 16)==16) {
                     extractionIsAllowed = true;
                 }
@@ -1105,6 +1104,10 @@ public class DecryptionFactory {
 
     public void setCipherNull() {
         cipher = null;
+    }
+    
+    public byte[] getEncHash(){
+        return encryptionPassword;
     }
     
 }

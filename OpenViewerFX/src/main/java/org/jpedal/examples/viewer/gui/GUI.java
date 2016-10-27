@@ -164,56 +164,7 @@ public abstract class GUI implements GUIFactory {
     protected boolean bookmarksGenerated;
     protected GUISearchWindow searchFrame;
     protected String pageTitle,bookmarksTitle, signaturesTitle,layersTitle, annotationTitle;
-
-    public static final boolean debugFX=false;
-
-    public GUI(final PdfDecoderInt decode_pdf, final Values commonValues, final GUIThumbnailPanel thumbnails, final PropertiesFile properties) {
-        this.decode_pdf = decode_pdf;
-        this.commonValues = commonValues;
-        this.thumbnails = thumbnails;
-        this.properties = properties;
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
-    public void setPreferences(final int dpi, final int search, final int border, final boolean scroll, int pageMode, final boolean updateDefaultValue, final int maxNoOfMultiViewers){
-
-        //Set border config value and repaint
-        decode_pdf.setBorderPresent(border==1);
-        properties.setValue("borderType", String.valueOf(border));
-
-        //Set autoScroll default and add to properties file
-        allowScrolling = scroll;
-        properties.setValue("autoScroll", String.valueOf(scroll));
-
-        //Dpi is taken into effect when zoom is called
-        decode_pdf.getDPIFactory().setDpi(dpi);
-        properties.setValue("resolution", String.valueOf(dpi));
-
-        //Ensure valid value if not recognised
-        if(pageMode<Display.SINGLE_PAGE || pageMode>Display.PAGEFLOW) {
-            pageMode = Display.SINGLE_PAGE;
-        }
-
-        //Default Page Layout
-        decode_pdf.setPageMode(pageMode);
-        properties.setValue("startView", String.valueOf(pageMode));
-
-        decode_pdf.repaint();
-
-        //Set the search window
-        final String propValue = properties.getValue("searchWindowType");
-        if((!propValue.isEmpty() && !propValue.equals(String.valueOf(search))) && (showMessages) ){
-                ShowGUIMessage.showGUIMessage(Messages.getMessage("PageLayoutViewMenu.ResetSearch"), null);
-            }
-        properties.setValue("searchWindowType", String.valueOf(search));
-
-        properties.setValue("automaticupdate", String.valueOf(updateDefaultValue));
-
-        commonValues.setMaxMiltiViewers(maxNoOfMultiViewers);
-        properties.setValue("maxmultiviewers", String.valueOf(maxNoOfMultiViewers));
-
-    }
-
+    
     /**handle for internal use*/
     protected PdfDecoderInt decode_pdf;
 
@@ -261,7 +212,66 @@ public abstract class GUI implements GUIFactory {
     protected String propValue;
 
     protected String propValue2;
+    
+    public static final boolean debugFX=false;
+    
+    public GUI(final PdfDecoderInt decode_pdf, final Values commonValues, final GUIThumbnailPanel thumbnails, final PropertiesFile properties) {
+        this.decode_pdf = decode_pdf;
+        this.commonValues = commonValues;
+        this.thumbnails = thumbnails;
+        this.properties = properties;
+    }
 
+    /**
+     * Method to allow setting of common properties values
+     * @param dpi int value to set the dpi property
+     * @param search int value to set the search style property
+     * @param border int value to set the border property
+     * @param scroll true to enable autoscrolling, false to disable
+     * @param pageMode int value to set the starting display view mode
+     * @param updateDefaultValue true to enable automaticupdate property, false to disable
+     * @param maxNoOfMultiViewers int value to set the maximum amount of files openable by the Multiviewer
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public void setPreferences(final int dpi, final int search, final int border, final boolean scroll, int pageMode, final boolean updateDefaultValue, final int maxNoOfMultiViewers){
+
+        //Set border config value and repaint
+        decode_pdf.setBorderPresent(border==1);
+        properties.setValue("borderType", String.valueOf(border));
+
+        //Set autoScroll default and add to properties file
+        allowScrolling = scroll;
+        properties.setValue("autoScroll", String.valueOf(scroll));
+
+        //Dpi is taken into effect when zoom is called
+        decode_pdf.getDPIFactory().setDpi(dpi);
+        properties.setValue("resolution", String.valueOf(dpi));
+
+        //Ensure valid value if not recognised
+        if(pageMode<Display.SINGLE_PAGE || pageMode>Display.PAGEFLOW) {
+            pageMode = Display.SINGLE_PAGE;
+        }
+
+        //Default Page Layout
+        decode_pdf.setPageMode(pageMode);
+        properties.setValue("startView", String.valueOf(pageMode));
+
+        decode_pdf.repaint();
+
+        //Set the search window
+        final String propValue = properties.getValue("searchWindowType");
+        if((!propValue.isEmpty() && !propValue.equals(String.valueOf(search))) && (showMessages) ){
+                ShowGUIMessage.showGUIMessage(Messages.getMessage("PageLayoutViewMenu.ResetSearch"), null);
+            }
+        properties.setValue("searchWindowType", String.valueOf(search));
+
+        properties.setValue("automaticupdate", String.valueOf(updateDefaultValue));
+
+        commonValues.setMaxMiltiViewers(maxNoOfMultiViewers);
+        properties.setValue("maxmultiviewers", String.valueOf(maxNoOfMultiViewers));
+
+    }
+    
     /* (non-Javadoc)
      * @see org.jpedal.examples.viewer.gui.swing.GUIFactory#allowScrolling()
      */
@@ -315,10 +325,15 @@ public abstract class GUI implements GUIFactory {
         return scaling;
     }
 
+    /**
+     * Get the values used by the GUI
+     * @return Values object to hold various details for the viewer
+     */
     @Override
     public Values getValues(){
         return commonValues;
     }
+    
     /* (non-Javadoc)
 	 * @see org.jpedal.examples.viewer.gui.swing.GUIFactory#addCombo(java.lang.String, java.lang.String, int)
 	 */
@@ -364,6 +379,10 @@ public abstract class GUI implements GUIFactory {
         return Collections.unmodifiableMap(objs);
     }
 
+    /**
+     * Set the scaling for the user interface and update the scaling combo box
+     * @param s float value representing the scaling where 1 is 100%
+     */
     @SuppressWarnings("UnusedDeclaration")
     public void setScaling(final float s){
         scaling = s;
@@ -398,13 +417,18 @@ public abstract class GUI implements GUIFactory {
 
     }
 
+    /**
+     * Set the dpi value used to adjust scaling
+     * @param dpi int value to represent the dpi
+     */
     @SuppressWarnings("UnusedDeclaration")
     public void setDpi(final int dpi) {
         decode_pdf.getDPIFactory().setDpi(dpi);
     }
 
-
-
+    /**
+     * Dispose of the elements that require disposal
+     */
     @Override
     public void dispose(){
         tree=null;
@@ -412,10 +436,10 @@ public abstract class GUI implements GUIFactory {
         rotationBox=null;
         scalingBox=null;
     }
-
-
+    
     /**
      * main method to initialise Swing specific code and create GUI display
+     * @param currentCommands Commands object to be used by the user interface
      */
     @Override
     public void init(final Commands currentCommands) {
@@ -587,25 +611,41 @@ public abstract class GUI implements GUIFactory {
     protected String getTitle(){
         return Messages.getMessage("PdfViewer.titlebar") + ' ' + PdfDecoderInt.version;
     }
-
+    
+    /**
+     * Get if command is in a thread
+     * @return true if command is in thread, false otherwise.
+     */
     @Override
     @SuppressWarnings("UnusedDeclaration")
     public boolean isCommandInThread(){
         return commandInThread;
     }
 
+    /**
+     * Used to flag if command is in a thread
+     * @param b true to flag command is in thread, false otherwise.
+     */
     @Override
     @SuppressWarnings("UnusedDeclaration")
     public void setCommandInThread(final boolean b){
         commandInThread = b;
     }
 
+    /**
+     * Get if their is currently a command executing
+     * @return true if command is executing, false otherwise
+     */
     @Override
     @SuppressWarnings("UnusedDeclaration")
     public boolean isExecutingCommand(){
         return executingCommand;
     }
 
+    /**
+     * Used to flag if command is executing
+     * @param b true to flag command is executing, false otherwise.
+     */
     @Override
     @SuppressWarnings("UnusedDeclaration")
     public void setExecutingCommand(final boolean b){
@@ -622,25 +662,38 @@ public abstract class GUI implements GUIFactory {
         }
     }
 
+    /**
+     * Get the thickness of the glow border
+     * @return int value of the glow border thickness
+     */
     @SuppressWarnings("MethodMayBeStatic")
     public int getGlowThickness(){
         return glowThickness;
     }
 
+    /**
+     * Get the outer colour of the glow border
+     * @return Color used for the outer section of the glow border
+     */
     public Color getGlowOuterColor(){
         return glowOuterColor;
     }
 
+    /**
+     * Get the inner colour of the glow border
+     * @return Color used for the inner section of the glow border
+     */
     public Color getGlowInnerColor(){
         return glowInnerColor;
     }
 
-    // Adding the search frame on to the GUI
+    /**
+     * Set the search frame to be used as part of the user interface
+     * @param searchFrame GUISearchWindow object to be used as the search window
+     */
     @Override
     public void setSearchFrame(final GUISearchWindow searchFrame) {
-
         this.searchFrame = searchFrame;
-
     }
 
     protected void setRotation(){
@@ -661,9 +714,11 @@ public abstract class GUI implements GUIFactory {
 //            decode_pdf.repaint();
         }
     }
-
+    
     /**
-     * get current value for a combobox (options SCALING,ROTATION)
+     * Get selected index for the specified combo-box
+     * @param ID int value specifying a combo-box
+     * @return int value of the selected index in the given combo-box or -1 if ID is not valid
      */
     public int getSelectedComboIndex(final int ID) {
 
@@ -676,9 +731,11 @@ public abstract class GUI implements GUIFactory {
                 return -1;
         }
     }
-
+    
     /**
-     * set current index for a combobox (options SCALING,ROTATION)
+     * Set selected index for the specified combo-box
+     * @param ID int value specifying a combo-box
+     * @param index int value of the index to select
      */
     public void setSelectedComboIndex(final int ID, final int index) {
         switch (ID){
@@ -692,9 +749,11 @@ public abstract class GUI implements GUIFactory {
         }
 
     }
-
+    
     /**
-     * get current Item for a combobox (options SCALING,ROTATION)
+     * Get selected item for the specified combo-box
+     * @param ID int value specifying a combo-box
+     * @return Object representing the selected item or null if ID is not recognised
      */
     public Object getSelectedComboItem(final int ID) {
 
@@ -708,9 +767,11 @@ public abstract class GUI implements GUIFactory {
 
         }
     }
-
+    
     /**
-     * get current Item for a combobox (options SCALING,ROTATION)
+     * Set selected item for the specified combo-box
+     * @param ID int value specifying a combo-box
+     * @param index String value of the item to select
      */
     public void setSelectedComboItem(final int ID,String index) {
         switch (ID){
@@ -729,6 +790,12 @@ public abstract class GUI implements GUIFactory {
         }
     }
 
+    /**
+     * Not part of API - used internally
+     * 
+     * Set the PdfDecoderInt object used by the user interface
+     * @param decode_pdf PdfDecoderInt used for the PDF opened in the viewer
+     */
     public void setPdfDecoder(final PdfDecoderInt decode_pdf){
         this.decode_pdf = decode_pdf;
     }
@@ -1280,16 +1347,31 @@ public abstract class GUI implements GUIFactory {
         annotationTitle = Messages.getMessage("PdfViewerJPanel.annotations");
     }
 
+    /**
+     * Get the label of the given page. PDFs can specify a label for a page
+     * (such as using Roman numerals), the method will return the page label if 
+     * one exists, otherwise it will return the default of the page number.
+     * 
+     * @param pageNumber int value to present the page number
+     * @return String value representing the page label for the page.
+     */
     @Override
     public String getPageLabel(int pageNumber) {
-        String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
-        if (value != null) {
-            return value;
-        } else {
-            return String.valueOf(pageNumber);
+        if(commonValues.isPDF()){ //Only check labels if pdf
+            String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
+            if (value != null) {
+                return value;
+            }
         }
+        return String.valueOf(pageNumber);
     }
     
+    /**
+     * Get if the page label for a given page differs from the default page numbers
+     * 
+     * @param pageNumber int value representing the page number
+     * @return true if the page label differs, false otherwise
+     */
     public boolean pageLabelDiffers(int pageNumber){
         String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
         if (value != null) {

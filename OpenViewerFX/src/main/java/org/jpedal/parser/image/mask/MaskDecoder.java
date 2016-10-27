@@ -58,7 +58,7 @@ public class MaskDecoder {
     public static byte[] applyMask(final ImageData imageData,final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, byte[] maskDataSream) {
         
         
-        int[] maskArray=newMask.getIntArray(PdfDictionary.Mask);
+        int[] maskArray=XObject.getIntArray(PdfDictionary.Mask);
         if(maskArray!=null){
            maskArray=convertToRGB(maskArray,decodeColorData);
         }

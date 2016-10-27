@@ -57,8 +57,6 @@ public class SaveFile {
     public static void execute(final Object[] args, final GUIFactory currentGUI, final Values commonValues) {
         if (args == null) {
             saveFile(currentGUI, commonValues);
-        } else {
-
         }
     }
 
@@ -143,13 +141,22 @@ public class SaveFile {
             }
         } else {
             currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.ImagesSaveUnsupported")+" "+ext);
-            LogWriter.writeLog("Saving as "+ext +" is currenty unsupported.");
+            LogWriter.writeLog("Saving as "+ext +" is currently unsupported.");
         }
     }
     
     private static void saveAsPdf(File file, final GUIFactory currentGUI, final Values commonValues){
         String fileToSave = file.getAbsolutePath();
         File tempFile = null;
+
+        //check if pdf is encrypted/password protected
+        //if new annots have been added we prevent saving
+        if (currentGUI.getPdfDecoder().isEncrypted()){// && !decode_pdf.isPasswordSupplied()){
+            if (currentGUI.getAnnotationPanel().annotationAdded()){
+                currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NewAnnotInEncryptedFile"));
+                return;
+            }
+        }
         
         if (!fileToSave.endsWith(".pdf")) {
             fileToSave += ".pdf";

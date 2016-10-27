@@ -41,7 +41,6 @@ import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
-import org.jpedal.utils.NumberUtils;
 import org.jpedal.utils.StringUtils;
 
 /**
@@ -80,29 +79,11 @@ public class Name {
         //read ref data and slot in
         if(isRef){
             //number
-            int keyStart2=i;
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
+            final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
             
-            final int number= NumberUtils.parseInt(keyStart2, i, raw);
-            
-            //generation
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
-            keyStart2=i;
-            //move cursor to end of reference
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
-            final int generation= NumberUtils.parseInt(keyStart2, i, raw);
-            
-            //move cursor to start of R
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
+            i = values[2];
+            final int generation = values[1];
+            final int number= values[0];
             
             if(raw[i]!=82) //we are expecting R to end ref
             {
@@ -132,11 +113,7 @@ public class Name {
                     j++;
                 }
                 
-                //skip any spaces after
-                while(data[j]==10 || data[j]==13 || data[j]==32)// || data[j]==47 || data[j]==60)
-                {
-                    j++;
-                }
+                j = StreamReaderUtils.skipSpaces(data, j);
                 
                 //reset pointer
                 start=j;
@@ -193,15 +170,13 @@ public class Name {
     public static int setNameStringValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean isMap, final Object PDFkey, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         byte[] stringBytes;
-      
-        int keyStart;
-        
+
         //move cursor to end of last command if needed
         while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!='(' && raw[i]!='<') {
             i++;
         }
         
-        i=ArrayUtils.skipSpaces(raw, i);
+        i=StreamReaderUtils.skipSpaces(raw, i);
         
         //work out if direct (ie /String or read ref 27 0 R
         int j2=i;
@@ -220,7 +195,7 @@ public class Name {
         boolean isInsideArray=false;
         if(isIndirect){
             int aa=i+1;
-            aa=ArrayUtils.skipSpaces(raw, aa);
+            aa=StreamReaderUtils.skipSpaces(raw, aa);
             
             if(raw[aa]==47 || raw[aa]==']'){
                 isIndirect=false;
@@ -231,31 +206,10 @@ public class Name {
         
         if(isIndirect){ //its in another object so we need to fetch
             
-            keyStart=i;
-            
-            //move cursor to end of ref
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
-                i++;
-            }
-            
-            //actual value or first part of ref
-            final int ref= NumberUtils.parseInt(keyStart, i, raw);
-            
-            //move cursor to start of generation
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
-            // get generation number
-            keyStart=i;
-            //move cursor to end of reference
-            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62) {
-                i++;
-            }
-            
-            final int generation= NumberUtils.parseInt(keyStart, i, raw);
-            
-            i=ArrayUtils.skipSpaces(raw, i);
+            final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
+            final int ref = values[0];
+            final int generation = values[1];
+            i = values[2];
             
             if(raw[i]!=82){ //we are expecting R to end ref
                 throw new RuntimeException(padding+"2. Unexpected value in file - please send to IDRsolutions for analysis");
@@ -301,9 +255,7 @@ public class Name {
         if(isInsideArray){ //values inside []
             
             //move cursor to start of text
-            while(arrayData[j2]==10 || arrayData[j2]==13 || arrayData[j2]==32 || arrayData[j2]==47) {
-                j2++;
-            }
+            j2 = StreamReaderUtils.skipSpacesOrOtherCharacter(arrayData, j2, 47);
             
             int slashes=0;
             

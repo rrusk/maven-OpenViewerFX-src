@@ -47,7 +47,7 @@ public class KeyArray extends Array {
 
     @Override
     boolean isSingleKey() {
-         return ArrayUtils.isRef(arrayData, j2);
+         return StreamReaderUtils.isRef(arrayData, j2);
     }
 
     @Override

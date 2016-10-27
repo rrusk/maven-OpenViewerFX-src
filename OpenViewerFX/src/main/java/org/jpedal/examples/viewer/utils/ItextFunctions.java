@@ -33,10 +33,10 @@
 package org.jpedal.examples.viewer.utils;
 
 
-import org.jpedal.PdfDecoderInt;
+//import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.gui.popups.*;
 import org.jpedal.examples.viewer.objects.SignData;
-import org.jpedal.gui.GUIFactory;
+//import org.jpedal.gui.GUIFactory;
 import org.jpedal.objects.PdfPageData;
 
 
@@ -74,10 +74,10 @@ public class ItextFunctions {
 	public static final int ALLOW_DEGRADED_PRINTING = -1;//PdfWriter.ALLOW_DEGRADED_PRINTING;
 	
 
-    public ItextFunctions(final GUIFactory currentGUI, final String selectedFile,
-			final PdfDecoderInt decode_pdf) {
-	
-	}
+//    public ItextFunctions(final GUIFactory currentGUI, final String selectedFile,
+//			final PdfDecoderInt decode_pdf) {
+//
+//	}
 
     //<link><a name="saveform" />
     /** uses itext to save out form data with any changes user has made

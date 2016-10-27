@@ -61,7 +61,7 @@ public class MaskDataDecoder {
      */
     static byte[] applyMask(final ImageData imageData,final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, byte[] maskDataSream) {
         
-        final int[] maskArray=newMask.getIntArray(PdfDictionary.Mask);
+        final int[] maskArray=XObject.getIntArray(PdfDictionary.Mask);
     
         byte[] objectData=imageData.getObjectData();
         

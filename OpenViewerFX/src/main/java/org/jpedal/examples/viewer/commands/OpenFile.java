@@ -410,6 +410,12 @@ public class OpenFile {
 
         currentGUI.removePageListener();
         
+        //Only reset display mode if pdf / fdf
+        final String ending = file.toLowerCase().trim();
+        if(ending.endsWith(".pdf") || ending.endsWith(".fdf")){
+            currentGUI.setDisplayView(Display.SINGLE_PAGE, decode_pdf.getPageAlignment());
+        }
+        
         //Clear previous annotations
         currentGUI.getAnnotationPanel().clearAnnotations();
         
@@ -767,6 +773,13 @@ public class OpenFile {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
 
+                    }else if(fName.endsWith(".psd")){
+                        try{
+                            java.awt.image.BufferedImage img = JDeliHelper.getPsdImage(fName);
+                            commonValues.setBufferedImg(img);                            
+                        }catch(Exception ex){
+                            LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
+                        }
                     }else if(fName.endsWith(".dcm")){
                         File f = new File(selectedFile);
                         byte[] rawData = new byte[(int) f.length()];
@@ -884,7 +897,7 @@ public class OpenFile {
 
         final String[] pdf = {"pdf"};
         final String[] fdf = {"fdf"};
-        final String[] png = {"png", "tif", "tiff", "jpg", "jpeg"};
+        final String[] png = {"png", "tif", "tiff", "jpg", "jpeg", "jp2", "psd"};
         chooser.addChoosableFileFilter(new FileFilterer(png, "Images (Tiff, Jpeg,Png)"));
         chooser.addChoosableFileFilter(new FileFilterer(fdf, "fdf (*.fdf)"));
         chooser.addChoosableFileFilter(new FileFilterer(pdf, "Pdf (*.pdf)"));
@@ -900,7 +913,8 @@ public class OpenFile {
             final boolean isValid = ((ext.endsWith(".pdf")) || (ext.endsWith(".fdf"))
                     || (ext.endsWith(".tif")) || (ext.endsWith(".tiff"))
                     || (ext.endsWith(".png"))
-                    || (ext.endsWith(".jpg")) || (ext.endsWith(".jpeg")));
+                    || (ext.endsWith(".jpg")) || (ext.endsWith(".jpeg"))
+                    || (ext.endsWith(".jp2")));
 
             if (isValid) {
                 //save path so we reopen her for later selections
@@ -991,9 +1005,6 @@ public class OpenFile {
             decode_pdf.setPDFBorder(BorderFactory.createLineBorder(Color.black, 1));
 
             Images.decodeImage(decode_pdf, currentGUI, thumbnails, commonValues);
-
-            Values.setProcessing(false);
-
         }
     }
     

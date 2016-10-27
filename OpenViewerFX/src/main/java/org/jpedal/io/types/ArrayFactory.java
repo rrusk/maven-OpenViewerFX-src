@@ -32,11 +32,8 @@
  */
 package org.jpedal.io.types;
 
-import static org.jpedal.io.ObjectDecoder.resolveFully;
 import org.jpedal.io.PdfFileReader;
-import org.jpedal.objects.raw.ObjectFactory;
 import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.objects.raw.PdfObject;
 
 /**
  *
@@ -72,30 +69,5 @@ public class ArrayFactory {
             default:
                 return new StringArray(objectReader, i, raw);
         }
-    }
- 
-    public static int processArray(final PdfObject pdfObject, final byte[] raw, final int PDFkeyInt, final int possibleArrayStart, final PdfFileReader objectReader) {
-        
-        //convert data to new Dictionary object and store
-        final PdfObject valueObj = ObjectFactory.createObject(PDFkeyInt, null, pdfObject.getObjectType(), pdfObject.getID());
-        valueObj.setID(PDFkeyInt);
-        pdfObject.setDictionary(PDFkeyInt, valueObj);
-        valueObj.ignoreRecursion(pdfObject.ignoreRecursion());
-        
-        if(valueObj.isDataExternal()){
-            valueObj.isDataExternal(true);
-            if(!resolveFully(valueObj,objectReader)) {
-                pdfObject.setFullyResolved(false);
-            }
-        }
-        
-        int type = PdfDictionary.VALUE_IS_INT_ARRAY;
-        if (PDFkeyInt == PdfDictionary.TR) {
-            type = PdfDictionary.VALUE_IS_KEY_ARRAY;
-        }
-        
-        final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, possibleArrayStart, type, raw);
-        return objDecoder.readArray(valueObj, PDFkeyInt);
-        
     }
 }

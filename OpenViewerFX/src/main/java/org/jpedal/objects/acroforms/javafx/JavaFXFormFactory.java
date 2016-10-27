@@ -64,6 +64,7 @@ import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.acroforms.creation.GenericFormFactory;
 import org.jpedal.objects.acroforms.utils.FormsCSSHelper;
 import org.jpedal.objects.raw.FormObject;
+import org.jpedal.objects.raw.FormStream;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -1319,45 +1320,17 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
         final int subtype = form.getParameterConstant(PdfDictionary.Subtype);
         
         if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
-            
-            //if we have a root stream then it is the off value
-            //check in order of N Off, MK I, then N
-            //as N Off overrides others and MK I is in preference to N
-            if(APobjN.getDictionary(PdfDictionary.Off) !=null){
-                normalOffDic = APobjN.getDictionary(PdfDictionary.Off);
-            }else if(form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null
-                    && form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.IF)==null){
-                //look here for MK IF
-                //if we have an IF inside the MK then use the MK I as some files shown that this value is there
-                //only when the MK I value is not as important as the AP N.
-                normalOffDic = form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I);
-            }else if(APobjN.getDecodedStream()!=null){
-                normalOffDic = APobjN;
-            }
-            
+
+            final Object[] values= FormStream.getNormalKeyValues(form);
+            form.setNormalOnState((String) values[0]);
+            normalOnDic =(PdfObject) values[1];
+            normalOffDic =(PdfObject) values[2];
+
             if(normalOffDic!=null){
                 comp.setText(null);
                 normal = new JavaFXImageIcon(comp, form,normalOffDic, currentPdfFile,subtype,0);
             }
-            
-            if(APobjN.getDictionary(PdfDictionary.On) !=null){
-                normalOnDic = APobjN.getDictionary(PdfDictionary.On);
-                form.setNormalOnState("On");
-            }else {
-                final Map otherValues=APobjN.getOtherDictionaries();
-                if(otherValues!=null && !otherValues.isEmpty()){
-                    final Iterator keys=otherValues.keySet().iterator();
-                    PdfObject val;
-                    String key;
-                    while(keys.hasNext()){
-                        key=(String)keys.next();
-                        val=(PdfObject)otherValues.get(key);
-                        normalOnDic = val;
-                        form.setNormalOnState(key);
-                    }
-                }
-            }
-            
+
             if(normalOnDic!=null){
                 comp.setText(null);
                 selected = new JavaFXImageIcon(comp, form,normalOnDic, currentPdfFile,subtype,0);
@@ -1387,31 +1360,44 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
                 }
             }
             
-            
+
             if(APobjD!=null){
-                //down off
-                //if we have a root stream then it is the off value
-                if(APobjD.getDecodedStream()!=null){
-                    downOffDic = APobjD;
-                }else if(APobjD.getDictionary(PdfDictionary.Off) !=null){
-                    downOffDic = APobjD.getDictionary(PdfDictionary.Off);
-                }
                 
-                //down on
-                if(APobjD.getDictionary(PdfDictionary.On) !=null){
-                    downOnDic = APobjD.getDictionary(PdfDictionary.On);
-                }else {
-                    final Map otherValues=APobjD.getOtherDictionaries();
-                    if(otherValues!=null && !otherValues.isEmpty()){
-                        final Iterator keys=otherValues.keySet().iterator();
-                        PdfObject val;
-                        String key;
-                        while(keys.hasNext()){
-                            key=(String)keys.next();
-                            val=(PdfObject)otherValues.get(key);
-                            downOnDic = val;
+                if(1==2) {
+                    
+                    final Object[] values = FormStream.getDownKeyValues(form);
+                    downOnDic =(PdfObject) values[1];
+                    downOffDic =(PdfObject) values[2];
+                    
+                } 
+                
+                else {
+                
+                    //down off
+                    //if we have a root stream then it is the off value
+                    if(APobjD.getDecodedStream()!=null){
+                        downOffDic = APobjD;
+                    }else if(APobjD.getDictionary(PdfDictionary.Off) !=null){
+                        downOffDic = APobjD.getDictionary(PdfDictionary.Off);
+                    }
+
+                    //down on
+                    if(APobjD.getDictionary(PdfDictionary.On) !=null){
+                        downOnDic = APobjD.getDictionary(PdfDictionary.On);
+                    }else {
+                        final Map otherValues=APobjD.getOtherDictionaries();
+                        if(otherValues!=null && !otherValues.isEmpty()){
+                            final Iterator keys=otherValues.keySet().iterator();
+                            PdfObject val;
+                            String key;
+                            while(keys.hasNext()){
+                                key=(String)keys.next();
+                                val=(PdfObject)otherValues.get(key);
+                                downOnDic = val;
+                            }
                         }
                     }
+                
                 }
             }
             
@@ -1427,32 +1413,37 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
         }
         
         if (APobjR!=null) {
-            //if we have a root stream then it is the off value
-            if(APobjR.getDecodedStream()!=null){
-                rollOffDic = APobjR;
-            }else if(APobjR.getDictionary(PdfDictionary.Off) !=null){
-                rollOffDic = APobjR.getDictionary(PdfDictionary.Off);
-            }
-            
-            if(rollOffDic!=null){
-                rollover = new JavaFXImageIcon(comp,form,rollOffDic, currentPdfFile,subtype,0);
-            }
-            
-            //if we have a root stream then it is the off value
-            if(APobjR.getDictionary(PdfDictionary.On) !=null){
-                rollOnDic = APobjR.getDictionary(PdfDictionary.On);
-            }else {
-                final Map otherValues=APobjR.getOtherDictionaries();
-                if(otherValues!=null && !otherValues.isEmpty()){
-                    final Iterator keys=otherValues.keySet().iterator();
-                    PdfObject val;
-                    String key;
-                    while(keys.hasNext()){
-                        key=(String)keys.next();
-                        val=(PdfObject)otherValues.get(key);
-                        rollOnDic = val;
+            if (1 == 2) {
+                final Object[] values = FormStream.getRolloverKeyValues(APobjR);
+                rollOnDic = (PdfObject) values[1];
+                rollOffDic = (PdfObject) values[2];  
+            } else {
+                //if we have a root stream then it is the off value
+                if(APobjR.getDecodedStream()!=null){
+                    rollOffDic = APobjR;
+                }else if(APobjR.getDictionary(PdfDictionary.Off) !=null){
+                    rollOffDic = APobjR.getDictionary(PdfDictionary.Off);
+                }
+
+                //if we have a root stream then it is the off value
+                if(APobjR.getDictionary(PdfDictionary.On) !=null){
+                    rollOnDic = APobjR.getDictionary(PdfDictionary.On);
+                }else {
+                    final Map otherValues=APobjR.getOtherDictionaries();
+                    if(otherValues!=null && !otherValues.isEmpty()){
+                        final Iterator keys=otherValues.keySet().iterator();
+                        PdfObject val;
+                        String key;
+                        while(keys.hasNext()){
+                            key=(String)keys.next();
+                            val=(PdfObject)otherValues.get(key);
+                            rollOnDic = val;
+                        }
                     }
                 }
+            }
+            if(rollOffDic!=null){
+                rollover = new JavaFXImageIcon(comp,form,rollOffDic, currentPdfFile,subtype,0);
             }
             
             if(rollOnDic!=null){                

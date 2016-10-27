@@ -52,6 +52,7 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.SnapshotParameters;
@@ -441,6 +442,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
 //            setPreferredSize(new Dimension(100, 100));
         }
         setId("PdfDecoderFX");
+        this.setCacheHint(CacheHint.QUALITY);
     }
     
     protected int specialMode= SpecialOptions.NONE;
@@ -476,6 +478,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         //@swing
 //        setPreferredSize(new Dimension(100, 100));
         setId("PdfDecoderFX");
+        this.setCacheHint(CacheHint.QUALITY);
     }
 
     
@@ -1980,7 +1983,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
      */
     @Override
     public boolean isForm() {
-        return res.isForm();
+        return res.isForm() || getFormRenderer().isXFA();
     }
     
     

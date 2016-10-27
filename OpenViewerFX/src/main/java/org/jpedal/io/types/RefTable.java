@@ -386,7 +386,7 @@ public class RefTable {
             
             i++;
             final PdfObject pdfObject=new CompressedObject("0 0 R");
-            Dictionary.readDictionary(pdfObject, i, Bytes, -1, true,currentPdfFile, false);
+            Dictionary.readDictionary(pdfObject, i, Bytes, -1, true,currentPdfFile);
             
             //move to beyond >>
             int level=0;
@@ -424,10 +424,7 @@ public class RefTable {
                 
                 boolean hasRef=true;
                 
-               while (Bytes[i] ==10 || Bytes[i] ==13) {
-                    i++;
-                }
-                
+                i = StreamReaderUtils.skipSpaces(Bytes, i);
                 while (Bytes[i] =='%'){
                     while(Bytes[i]!=10){
                         
@@ -472,12 +469,7 @@ public class RefTable {
                 }
             }
             
-            i=0;
-            
-            //allow for bum data at start
-            while(Bytes[i]==13 || Bytes[i] == 32  || Bytes[i]==10 || Bytes[i]==9) {
-                i++;
-            }
+            i = StreamReaderUtils.skipSpaces(Bytes, 0);
             
             if (pointer == -1){
                 LogWriter.writeLog("No startRef");
@@ -485,12 +477,7 @@ public class RefTable {
                 /*now read the objects for the trailers*/
             } else if (Bytes[i] == 120 && Bytes[i+1] == 114 && Bytes[i+2] == 101 && Bytes[i+3] == 102) { //make sure starts xref
                 
-                i = 5;
-                
-                //move to start of value ignoring spaces or returns
-                while (Bytes[i] == 10 ||Bytes[i] == 32 || Bytes[i] == 13) {
-                    i++;
-                }
+               i = StreamReaderUtils.skipSpaces(Bytes, 5);
                 
                 current = offset.readXRefs(current, Bytes, endTable, i,eof,pdf_datafile);
                 

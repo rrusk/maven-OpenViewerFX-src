@@ -69,13 +69,11 @@ public class SetCrop {
                     final PdfPageData currentPageData = decode_pdf.getPdfPageData();
 
                     decode_pdf.closePdfFile();
-                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
+//                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
                     ItextFunctions.setCrop(commonValues.getPageCount(), currentPageData, cropPage);
                     OpenFile.open(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
                 }
             }
-        } else {
-
         }
     }
 }

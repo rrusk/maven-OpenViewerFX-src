@@ -375,7 +375,7 @@ public class CMAP extends Table {
         //exception found in Itext
         if (rawIndex == 128 && endCode != null && "Euro".equals(glyph)) {
             value = getFormat4Value(8364, value);
-        } else if (format == 0) { //if no cmap use identity
+        } else if (format == 0) { //if no cmap use also identity
 
             //hack
             if(index>255) {
@@ -386,9 +386,15 @@ public class CMAP extends Table {
             if(value==0 && index2!=-1) {
                 value = glyphIndexToChar[formatToUse][index2];
             }
-
             
-
+            //if no Format 0 check format 4 (see case 26831)
+            if(value==0) {
+                final int format4Value=getFormat4Value(index,0);
+                if(format4Value>0){
+                    value=format4Value;
+                }
+            }
+            
         }else if(format==4){
 
             value = getFormat4Value(index, value);

@@ -32,8 +32,10 @@
  */
 package org.jpedal.objects.acroforms.actions;
 
+import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.io.types.Array;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.objects.raw.OutlineObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -46,68 +48,171 @@ import org.jpedal.utils.StringUtils;
 public class DestHandler {
 
     
-    public static PdfArrayIterator getDestFromObject(PdfObject aData) {
+    public static PdfArrayIterator getDestFromObject(PdfObject formObj, PdfObjectReader currentPdfFile) {
         
-        //aData can either be in top level of Form (as in Annots) and in A or AA
-        //or second level (as in A/ /D - this allows for both
-        //which this routine handles
-        PdfObject a2=aData.getDictionary(PdfDictionary.A);
-        if(a2==null) {
-            a2 = aData.getDictionary(PdfDictionary.AA);
-        }
-        if(a2!=null) {
-            aData = a2;
-        }
-        //allow for D as indirect
-        final PdfObject Dobj=aData.getDictionary(PdfDictionary.D);
-        if(Dobj!=null) {
-            aData = Dobj;
-        }
+        PdfArrayIterator Dest=formObj.getMixedArray(PdfDictionary.Dest);
         
-        return aData.getMixedArray(PdfDictionary.Dest);
-        
-    }
-    
-    /**
-     * Update corresponding Dest object with: Dest = aData.getMixedArray(PdfDictionary.Dest); 
-     * @param Dest
-     * @param aData
-     * @return 
-     */
-    public static PdfObject getIndirectDest(final PdfObjectReader currentPdfFile, final PdfArrayIterator Dest, final PdfObject aData){
-        final boolean debugDest = false;
-        final PdfObject newObj;
-        final String ref=currentPdfFile.convertNameToRef( Dest.getNextValueAsString(false));
-        if(ref!=null){
-
-            //can be indirect object stored between []
-            if(ref.charAt(0)=='['){
-                if(debugDest) {
-                    System.out.println("data for named obj " + ref);
-                }
-
-                final byte[] raw=StringUtils.toBytes(ref);
-                //replace char so subroutine works -ignored but used as flag in routine
-                raw[0]= 0;
-
-                final Array objDecoder=new Array(currentPdfFile.getObjectReader(), 0, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
-                objDecoder.readArray(aData, PdfDictionary.Dest);
-                newObj = aData;
-            }else{
-                if(debugDest) {
-                    System.out.println("convert named obj " + ref);
-                }
-
-                newObj=new OutlineObject(ref);
-                currentPdfFile.readObject(newObj);
+        if(Dest==null || Dest.getTokenCount()==0){
+            
+            //aData can either be in top level of Form (as in Annots) and in A or AA
+            //or second level (as in A/ /D - this allows for both
+            //which this routine handles
+            PdfObject Aobj=formObj.getDictionary(PdfDictionary.A);
+            if(Aobj==null) {
+                Aobj = formObj.getDictionary(PdfDictionary.AA);
             }
-        }else{
-            newObj = aData;
+            if(Aobj!=null) {
+                formObj = Aobj;
+            }
+            
+            //allow for D as indirect
+            final PdfObject Dobj=formObj.getDictionary(PdfDictionary.D);
+            if(Dobj!=null) {
+                formObj = Dobj;
+            }
+            
+            Dest=formObj.getMixedArray(PdfDictionary.D);
         }
         
-        return newObj;
+        //its nameString name (name) linking to obj so read that
+        if (Dest != null && Dest.getTokenCount()>0 && !Dest.isNextValueRef()){            
+            Dest=decodeDest(Dest.getNextValueAsString(false), currentPdfFile, Dest);           
+        }
+        
+        return Dest;
+        
+    }
+   
+    /**
+     * Gets the page number from an A entry and Dest or D entry
+     * @param dest Dest or D entry
+     * @return page number
+     */
+    public static int getPageNumberFromLink(PdfArrayIterator dest, final PdfObjectReader currentPdfFile){
+        
+        if(dest.getTokenCount()==1){ //indirect value to remap (Name or ref)
+                
+            final String ref=currentPdfFile.convertNameToRef( dest.getNextValueAsString(false));
+            if(ref!=null){
+                dest = convertRef(ref, currentPdfFile);
+            }else{         
+                dest=decodeDest(dest.getNextValueAsString(false), currentPdfFile, dest);          
+            }
+        }
+       
+        int page=-1;
+        
+        if(dest.hasMoreTokens()){
+            final String pageRef = dest.getNextValueAsString(false);
+            
+            //convert to target page if ref or ignore
+            page =currentPdfFile.convertObjectToPageNumber(pageRef);
+
+            if(page==-1 && dest.getTokenCount()>2 && !pageRef.contains(" R") && !pageRef.isEmpty()){
+
+                //get pageRef as number of ref
+                if(dest.hasMoreTokens()){
+                    int possiblePage=dest.getNextValueAsInteger(false)+1;
+                
+                    if(possiblePage>0){ //can also be a number (cant check range as not yet open)
+                        page=possiblePage;
+                    }
+                }
+            }
+            
+            //allow for number
+            if (page == -1 && dest.isNextValueNumber()) {
+                
+                int possiblePage = dest.getNextValueAsInteger(false) + 1;
+
+                if (possiblePage > 0) { //can also be a number (cant check range as not yet open)
+                    page = possiblePage;
+                }
+            }
+        }
+    
+        return page;
+    }
+
+    private static PdfArrayIterator convertRef(final String ref, final PdfObjectReader currentPdfFile) {
+        
+        PdfArrayIterator dest=null;
+        final PdfObject aData=new OutlineObject(ref);
+        //can be indirect object stored between []
+        if(ref.charAt(0)=='['){           
+            dest= converDestStringToMixedArray(ref, currentPdfFile, aData);            
+        }else{
+            dest =decodeDest(ref, currentPdfFile, dest);
+        }
+        return dest;
+    }
+
+    private static PdfArrayIterator converDestStringToMixedArray(final String ref, final PdfObjectReader currentPdfFile, final PdfObject aData) {
+        
+        final byte[] raw= StringUtils.toBytes(ref);
+       
+        final Array objDecoder=new Array(currentPdfFile.getObjectReader(), 0,  PdfDictionary.VALUE_IS_MIXED_ARRAY, raw);
+        objDecoder.readArray(aData, PdfDictionary.Dest);
+        return aData.getMixedArray(PdfDictionary.Dest);
     }
     
+    private static PdfArrayIterator decodeDest(String nameString, final PdfObjectReader currentPdfFile, PdfArrayIterator DestObj) {
+        
+        if(nameString.startsWith("/")){
+            nameString=nameString.substring(1);
+        }
+        
+        byte[] rawRef=nameString.getBytes();
+         
+        if(!StreamReaderUtils.isRef(rawRef, 0)){
+            nameString=currentPdfFile.convertNameToRef(nameString);
+        }
+        
+        if(nameString!=null){
+            
+            rawRef=nameString.getBytes();
+            
+            if(StreamReaderUtils.isRef(rawRef, 0)){ //indirect so needs resolving if []
+                
+                final int[] values=StreamReaderUtils.readRefFromStream(rawRef,0);
+                
+                final int ref2=values[0];
+                final int generation=values[1];
+                
+                OutlineObject obj=new OutlineObject(new String(rawRef));
+                
+                PdfFileReader objectReader=currentPdfFile.getObjectReader();
+                
+                //read the Dictionary data
+                rawRef = objectReader.readObjectAsByteArray(obj, objectReader.isCompressed(ref2, generation), ref2, generation);
+                
+                int startArray=0;
+                while(rawRef[startArray]!='[' && rawRef[startArray]!='<'){
+                    startArray++;
+                }
+                
+                if(rawRef[startArray]=='['){
+                    int length=rawRef.length;
+                    int newLength=length-startArray;
+                    
+                    byte[] strippedData=new byte[length];
+                    
+                    System.arraycopy(rawRef, startArray, strippedData, 0, newLength);
+                    nameString=new String(strippedData);
+                }else{
+                    OutlineObject Aobj=new OutlineObject(nameString);
+                    currentPdfFile.readObject(Aobj);
+                    DestObj=Aobj.getMixedArray(PdfDictionary.D);
+                }
+            }
+        }
+        //allow for direct value
+        if(nameString!=null && nameString.startsWith("[")){            
+            DestObj= converDestStringToMixedArray(nameString, currentPdfFile, new OutlineObject(nameString));
+        }
+        
+        return DestObj;
+    }  
 }
 
 

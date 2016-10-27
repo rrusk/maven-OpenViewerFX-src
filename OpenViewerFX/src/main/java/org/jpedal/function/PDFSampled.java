@@ -43,6 +43,9 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
     private final float outputs[];
     private final double[] sampleArray;
     private float[] prevInputs;
+    private final double[] cubeN ;
+    private final int[] cubeVertex;
+    private final int cubeVertices;
 
     public PDFSampled(final byte[] stream, final int bits, final float[] domain, final float[] range,
             final float[] encode, final float[] decode, final int[] size) {
@@ -99,6 +102,9 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
         for (int i = 0; i < m; i++) {
             prevInputs[i] = Float.MAX_VALUE;
         }
+        cubeVertices = 1 << m;
+        cubeN = new double[cubeVertices];
+        cubeVertex = new int[cubeVertices];
     }
 
     /**
@@ -130,12 +136,9 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
         
         prevInputs = input.clone();
 
-        int cubeVertices = 1 << m;
-        double[] cubeN = new double[cubeVertices];
-        int[] cubeVertex = new int[cubeVertices];
-
         for (int i = 0; i < cubeVertices; i++) {
             cubeN[i] = 1;
+            cubeVertex[i] = 0;
         }
 
         int k = n, pos = 1;
@@ -162,21 +165,26 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
                     cubeN[j] *= n0;
                     cubeVertex[j] += offset0;
                 }
-            }           
+            }
 
             k *= cur;
             pos <<= 1;
         }
         
-        for (int i = 0; i < n; i++) {            
-            int first = 2 * i;
-            int next = first + 1;            
-            double pp = 0;
+        int kk,ff,nn;
+        double pp;
+        for (int i = 0; i < n; i++) {
+            ff = i << 1;
+            nn = ff + 1;
+            pp = 0;
             for (int j = 0; j < cubeVertices; j++) {
-                pp += sampleArray[cubeVertex[j] + i] * cubeN[j];
-            }            
-            pp = interpolateDouble(pp, 0, 1, decode[first], decode[next]);
-            outputs[i] = (float) Math.min(Math.max(pp, range[first]), range[next]);
+                kk = cubeVertex[j] + 1;
+                if (kk > -1) {
+                    pp += sampleArray[cubeVertex[j] + i] * cubeN[j];
+                }
+            }
+            pp = interpolateDouble(pp, 0, 1, decode[ff], decode[nn]);
+            outputs[i] = (float) Math.min(Math.max(pp, range[ff]), range[nn]);
         }
         return outputs;
 

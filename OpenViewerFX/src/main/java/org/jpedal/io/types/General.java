@@ -40,7 +40,7 @@ import org.jpedal.objects.raw.ObjectFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
-import org.jpedal.utils.NumberUtils;
+
 
 /**
  *
@@ -50,9 +50,7 @@ public class General {
 
     
     public static int readGeneral(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final boolean map, final boolean ignoreRecursion, final PdfFileReader objectReader,Object PDFkey){
-
-        int keyStart;
-
+       
         if(debugFastCode) {
             System.out.println(padding + "general case " + i);
         }
@@ -82,35 +80,13 @@ public class General {
                 while (data[j] == 91 || data[j] == 32 || data[j] == 13 || data[j] == 10) {
                     j++;
                 }
-
+                final int[] values = StreamReaderUtils.readRefFromStream(data, j);
                 // get object ref
-                keyStart = j;
+
                 final int refStart=j;
-                //move cursor to end of reference
-                while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
-                    j++;
-                }
-
-                ref = NumberUtils.parseInt(keyStart, j, data);
-
-                //move cursor to start of generation or next value
-                while (data[j] == 10 || data[j] == 13 || data[j] == 32)// || data[j]==47 || data[j]==60)
-                {
-                    j++;
-                }
-
-                keyStart = j;
-                //move cursor to end of reference
-                while (data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
-                    j++;
-                }
-
-                generation = NumberUtils.parseInt(keyStart, j, data);
-
-                //move cursor to start of R
-                while (data[j] == 10 || data[j] == 13 || data[j] == 32 || data[j] == 47 || data[j] == 60) {
-                    j++;
-                }
+                ref = values[0];
+                generation = values[1];
+                j = values[2];
 
                 if (data[j] != 82)  //we are expecting R to end ref
                 {
@@ -135,10 +111,8 @@ public class General {
                     for(int aa=3;aa<newLength;aa++){   //skip past 13 0 obj bit at start if present
                         if(newData[aa-2]=='o' && newData[aa-1]=='b' && newData[aa]=='j'){
                             firstChar=aa+1;
-                            //roll on past and spaces
-                            while(firstChar<newLength && (newData[firstChar]==10 || newData[firstChar]==13 || newData[firstChar]==32 || newData[firstChar]==9)) {
-                                firstChar++;
-                            }
+                            
+                            firstChar = StreamReaderUtils.skipSpaces(newData, firstChar);
 
                             aa=newLength; //exit loop
                         }else if(newData[aa]>47 && newData[aa]<58){//number

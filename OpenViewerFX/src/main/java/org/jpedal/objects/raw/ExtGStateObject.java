@@ -43,11 +43,11 @@ public class ExtGStateObject extends PdfObject {
 
     float CA=-1,ca=-1, LW=-1,OPM=-1;
 
-    
+    byte[][] TR;
     
     boolean AIS,op, OP;
 
-    PdfObject TR;
+    PdfObject TRobj;
     private byte[][] BM;
 
     public ExtGStateObject(final String ref) {
@@ -158,7 +158,7 @@ public class ExtGStateObject extends PdfObject {
         switch(id){
 
             case PdfDictionary.TR:
-                return TR;
+                return TRobj;
 
             default:
                 return super.getDictionary(id);
@@ -175,7 +175,7 @@ public class ExtGStateObject extends PdfObject {
         switch(id){
 
             case PdfDictionary.TR:
-            	TR=value;
+            	TRobj=value;
     		break;
 
             default:
@@ -410,5 +410,34 @@ public class ExtGStateObject extends PdfObject {
             default:
                 throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
         }
+    }
+    
+    
+    @Override
+    public byte[][] getKeyArray(final int id) {
+
+        switch(id){
+
+            case PdfDictionary.TR:
+       		    return deepCopy(TR);
+
+            default:
+            	return super.getKeyArray(id);
+        }
+    }
+
+    @Override
+    public void setKeyArray(final int id, final byte[][] value) {
+
+        switch(id){
+
+            case PdfDictionary.TR:
+                TR=value;
+            break;
+
+            default:
+            	super.setKeyArray(id, value);
+        }
+
     }
 }

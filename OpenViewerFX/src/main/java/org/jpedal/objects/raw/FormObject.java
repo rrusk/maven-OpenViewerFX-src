@@ -52,6 +52,22 @@ import org.jpedal.utils.ObjectCloneFactory;
 import org.jpedal.utils.StringUtils;
 
 public class FormObject extends PdfObject{
+    
+    private static Color FieldsHightlightColor = null;    
+//    private static Color RequiredFieldsHighlightColor = null;
+    static{
+        String cs = System.getProperty("org.jpedal.FieldsHighlightColor");
+        if(cs != null){
+            float[] ff = generateFloatFromString(cs);                    
+            FieldsHightlightColor = new Color((int)ff[0],(int)ff[1],(int)ff[2]);
+        }
+//        cs = System.getProperty("org.jpedal.RequiredFieldsHighlightColor");
+//        if(cs != null){
+//            float[] ff = generateFloatFromString(cs);                    
+//            RequiredFieldsHighlightColor = new Color((int)ff[0],(int)ff[1],(int)ff[2]);
+//        }
+        
+    }
 
     private static final JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
                  
@@ -292,14 +308,14 @@ public class FormObject extends PdfObject{
 
     protected String AS, Cert, ContactInfo, Contents, Dstring, DA, DV, Fstring, JSString, H, N, NM, Pstring, RC, S, Subj, T, TM, TU, URI, Vstring;
 
-    private byte[][] Border, DmixedArray, Fields, State, rawXFAasArray;
+    private byte[][] Border, DestMixedArray, DmixedArray, Fields, State, rawXFAasArray;
     protected PdfObject Bl, OC, Off, On, P;
 
 	private PdfObject XFAasStream;
 
     protected Object[] CO, InkList, Opt,Reference;
 
-	protected byte[][] Kids;
+	protected byte[][] Kids, rawKids;
 	
 	private String htmlElementId;
 
@@ -1032,10 +1048,10 @@ public class FormObject extends PdfObject{
                 return new PdfArrayIterator(Border);
 
             case PdfDictionary.D:
-                           return new PdfArrayIterator(DmixedArray);
+                return new PdfArrayIterator(DmixedArray);
 
             case PdfDictionary.Dest:
-            	return new PdfArrayIterator(DmixedArray);
+            	return new PdfArrayIterator(DestMixedArray);
 
             case PdfDictionary.Fields:
                 return new PdfArrayIterator(Fields);
@@ -1119,8 +1135,12 @@ public class FormObject extends PdfObject{
                 Border=value;
             break;
 
-            case PdfDictionary.Dest:
+            case PdfDictionary.D:
             	DmixedArray=value;
+            break;
+            
+            case PdfDictionary.Dest:
+            	DestMixedArray=value;
             break;
 
             case PdfDictionary.Fields:
@@ -1332,6 +1352,7 @@ public class FormObject extends PdfObject{
 
             case PdfDictionary.Contents:
                 rawContents=value;
+                Contents = null;
             break;
 
             case PdfDictionary.D:
@@ -1365,6 +1386,7 @@ public class FormObject extends PdfObject{
 
 	        case PdfDictionary.M:
 	            rawM=value;
+                M=null;
 	        break;
 
             case PdfDictionary.P:
@@ -1799,6 +1821,10 @@ public class FormObject extends PdfObject{
         switch(id){
 
         case PdfDictionary.Kids:
+            
+            if(value!=null){
+                rawKids=deepCopy(value);
+            }
             Kids=value;
         break;
 
@@ -1935,6 +1961,9 @@ public class FormObject extends PdfObject{
                 break;
         }
 		
+            if(newColor == null && FieldsHightlightColor != null){
+                return FieldsHightlightColor;
+            }
 		return newColor;
 	}
 
@@ -2122,10 +2151,15 @@ public class FormObject extends PdfObject{
         
         //byte[][]
         newObject.Border = (Border==null ? null : ObjectCloneFactory.cloneDoubleArray(Border));
+        newObject.DestMixedArray = (DestMixedArray==null ? null : ObjectCloneFactory.cloneDoubleArray(DestMixedArray));
         newObject.DmixedArray = (DmixedArray==null ? null : ObjectCloneFactory.cloneDoubleArray(DmixedArray));
         newObject.Fields = (Fields==null ? null : ObjectCloneFactory.cloneDoubleArray(Fields));
         newObject.rawXFAasArray=rawXFAasArray==null ? null : ObjectCloneFactory.cloneDoubleArray(rawXFAasArray);
         newObject.State=State==null ? null : ObjectCloneFactory.cloneDoubleArray(State);
+        
+        if(rawKids!=null){
+            newObject.rawKids = deepCopy(rawKids);
+        }
         
         //BUfferedImage
         newObject.normalOffImage = ObjectCloneFactory.deepCopy(normalOffImage);
@@ -2603,56 +2637,6 @@ public class FormObject extends PdfObject{
     }
 
     /**
-     * sets the image
-     * <br>images are one of R rollover, N normal, D down and Off unselected, On selected
-     * <br>for Normal selected the normal on state should also be set
-     */
-    public void setAppearanceImage(BufferedImage image, final int imageType, final int status) {
-    	if(image==null)
-    		//if null use opaque image
-        {
-            image = getOpaqueImage();
-        }
-
-        switch(imageType){
-            case PdfDictionary.D:
-                if(status==PdfDictionary.On){
-                    downOnImage = image;
-                }else if(status==PdfDictionary.Off){
-                    downOffImage = image;
-                }else {
-                    throw new RuntimeException("Unknown status use PdfDictionary.On or PdfDictionary.Off");
-                }
-            break;
-
-            case PdfDictionary.N:
-                if(status==PdfDictionary.On){
-                	normalOnImage = image;
-                }else if(status==PdfDictionary.Off){
-                    normalOffImage=image;
-                }else {
-                    throw new RuntimeException("Unknown status use PdfDictionary.On or PdfDictionary.Off");
-                }
-            break;
-
-            case PdfDictionary.R:
-                if(status==PdfDictionary.On){
-                	rolloverOnImage = image;
-                }else if(status==PdfDictionary.Off){
-                    rolloverOffImage=image;
-                }else {
-                    throw new RuntimeException("Unknown status use PdfDictionary.On or PdfDictionary.Off");
-                }
-            break;
-
-            default:
-                throw new RuntimeException("Unknown type use PdfDictionary.D, PdfDictionary.N or PdfDictionary.R");
-        }
-        
-        appearancesUsed=true;
-    }
-
-    /**
      * sets the border color
      */
     public void setBorderColor(final String nextField) {
@@ -2941,22 +2925,24 @@ public class FormObject extends PdfObject{
 	public int getTextSize() {
 		return textSize;
 	}
-
+    
 	/**
 	 * @return the values map for this field,
 	 * map that references the display value from the export values
 	 */
 	public Map<String, String> getValuesMap(final boolean keyFirst) {
 		
-		
+        
 		if(Opt!=null && OptValues==null){
 							
 			final Object[] rawOpt=getObjectArray(PdfDictionary.Opt);
 			
-			if(rawOpt!=null){
+            if(rawOpt!=null){
 				
 				String key,value;
 				Object[] obj;
+                
+                int ptr=0;
 
                 for (final Object aRawOpt : rawOpt) {
 
@@ -2977,10 +2963,29 @@ public class FormObject extends PdfObject{
 
                         OptValues.put(key, value);
 
+                    }else if(rawKids!=null && rawKids.length== rawOpt.length && aRawOpt instanceof byte[]) { //fixes case 25844
+                        
+                        if (keyFirst) {
+                            key = StringUtils.getTextString((byte[]) aRawOpt, false);
+                            value = StringUtils.getTextString(rawKids[ptr], false);
+                        } else {
+                            //key = StringUtils.getTextString((byte[]) obj[1], false);
+                            value = StringUtils.getTextString((byte[]) aRawOpt, false);
+                            key = StringUtils.getTextString(rawKids[ptr], false);
+                        }
+                        
+                        if (OptValues == null) {
+                            OptValues = new HashMap<String, String>();
+                        }
+
+                        OptValues.put(key, value);
                     }
+                    
+                    ptr++;
                 }
 			}		
 		}
+        
 		if(OptValues==null){
             return null;
         }else{
@@ -3063,8 +3068,8 @@ public class FormObject extends PdfObject{
         if(textString==null) {
             textString = getTextStreamValue(PdfDictionary.V);
         }
-		
-		if(textString==null && getTextStreamValue(PdfDictionary.DV)!=null) {
+
+        if(textString==null && getTextStreamValue(PdfDictionary.DV)!=null) {
             return getTextStreamValue(PdfDictionary.DV);
         } else{
 			if(textString!=null) {
@@ -3888,5 +3893,13 @@ public class FormObject extends PdfObject{
 	public int[] getMatteBorderDetails(){
 		return matteDetails;
 	}
+
+    public void setRawKids(final byte[][] kidsInParent) {
+        rawKids=kidsInParent;
+    }
+
+    public byte[][] getRawKids() {
+        return rawKids;
+    }
 }
 

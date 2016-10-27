@@ -27,19 +27,15 @@
 
  *
  * ---------------
- * ShapeFactory.java
+ * Crypt.java
  * ---------------
  */
-package org.jpedal.render;
+package org.jpedal.io.security;
 
-public interface ShapeFactory {
+public interface Crypto {
 
-    Object getContent();
+    byte[] encrypt(byte[] password, byte[] data) throws Exception;
 
-    boolean isEmpty();
-
-    String getPathCommands();
-
-	//void setShapeNumber(int shapeCount);
+    byte[] decrypt(byte[] password, byte[] data) throws Exception;
 
 }

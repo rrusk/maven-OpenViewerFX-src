@@ -33,7 +33,6 @@
 
 package org.jpedal.color;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -54,35 +53,11 @@ import org.jpedal.utils.LogWriter;
 public class SeparationColorSpace extends GenericColorSpace {
     
     protected GenericColorSpace altCS;
-    
-    static final int Black=1009857357;
-    static final int PANTONE_BLACK=573970506;
-    static final int Cyan=323563838;
-    static final int Magenta=895186280;
-    public static final int Yellow=1010591868;
-    
+
     protected ColorMapping colorMapper;
-    
-    //avoid rereading colorspaces
-    //protected Map cachedValues=new HashMap();
-    
+
     float[] domain;
-    
-    /*if we use CMYK*/
-    protected int cmykMapping=NOCMYK;
-    
-    protected static final int NOCMYK=-1;
-    protected static final int MYK=1;
-    protected static final int CMY=2;
-    protected static final int CMK=4;
-    protected static final int CY=5;
-    protected static final int MY=6;
-    protected static final int CM=8;
-    
-    protected static final int CMYK=7; //use don 6 values where CMYK is first 4
-    
-    protected static final int CMYB=9;
-    
+
     public SeparationColorSpace() {}
     
     public SeparationColorSpace(ColorMapping colorMapper,float[] domain, final GenericColorSpace altCS){
@@ -99,18 +74,7 @@ public class SeparationColorSpace extends GenericColorSpace {
     
     /**private method to do the calculation*/
     private void setColor(final float value){
-           
-        if(this.cmykMapping==Black){ //special case coded in
-            
-            final float[] newOp={0f,0f,0f, value};
-            altCS.setColor(newOp,1);
-            
-        }else{
-            //optimisation for white
-            //if(altCS.getID()==ColorSpaces.DeviceCMYK && value==1.0){
-            //    altCS.setColor(new float[]{0,0,0,0},4);
-            //}else
-            
+
             //adjust size if needed
             int elements=1;
             
@@ -126,8 +90,7 @@ public class SeparationColorSpace extends GenericColorSpace {
             final float[] operand =colorMapper.getOperandFloat(values);
             
             altCS.setColor(operand,operand.length);
-        
-        }
+
     }
     
     /** set color (translate and set in alt colorspace */
@@ -175,9 +138,7 @@ public class SeparationColorSpace extends GenericColorSpace {
             
             //read the image data
             in = new ByteArrayInputStream(data);
-            
-//iir = (ImageReader)ImageIO.getImageReadersByFormatName("JPEG").next();
-            
+
             //suggestion from Carol
             final Iterator<ImageReader> iterator = ImageIO.getImageReadersByFormatName("JPEG");
             
@@ -371,45 +332,88 @@ public class SeparationColorSpace extends GenericColorSpace {
         
     }
     
-    /**
-     * convert separation stream to RGB and return as an image
-     */
     @Override
     public byte[]  dataToRGBByteArray(final byte[] rgb, final int w, final int h) {
-        
         final int pixelCount=3*w*h;
-        final byte[] imageData=new byte[pixelCount];
+        final byte[] imageData=new byte[pixelCount];      
+        float[] operand;
+        int inpLen = domain.length / 2;
         
-        //convert data to RGB format
-        int pixelReached=0;
-        
-        //cache table for speed
-        final float[][] lookuptable=new float[3][256];
-        for(int i=0;i<256;i++) {
-            lookuptable[0][i]=-1;
-        }
-        
-        for (final byte aRgb : rgb) {
-            
-            final int value = (aRgb & 255);
-            
-            if (lookuptable[0][value] == -1) {               
-                setColor(value / 255f);
-                
-                lookuptable[0][value] = ((Color) this.getColor()).getRed();
-                lookuptable[1][value] = ((Color) this.getColor()).getGreen();
-                lookuptable[2][value] = ((Color) this.getColor()).getBlue();
-                
+        if (inpLen == 1) {
+            float last = -1, cur;
+            int p = 0, pp = 0, tt;
+            for (int i = 0, ii = w * h; i < ii; i++) {
+                cur = (rgb[p++] & 0xff) / 255f;
+                if (last == cur) {
+                    tt = altCS.getColor().getRGB();
+                } else {
+                    operand = colorMapper.getOperandFloat(new float[]{cur});
+                    altCS.setColor(operand, operand.length);
+                    tt = altCS.getColor().getRGB();
+                }
+                imageData[pp++] = (byte) ((tt >> 16) & 0xff);
+                imageData[pp++] = (byte) ((tt >> 8) & 0xff);
+                imageData[pp++] = (byte) (tt & 0xff);
+                last = cur;
             }
-            
-            for (int comp = 0; comp < 3; comp++) {
-                imageData[pixelReached] = (byte) lookuptable[comp][value];
-                pixelReached++;
+        } else {
+            float[] inputs = new float[inpLen];
+            int p = 0, pp = 0, tt;
+            for (int i = 0, ii = w * h; i < ii; i++) {
+                for (int j = 0; j < inpLen; j++) {
+                    inputs[j] = (rgb[p++] & 0xff) / 255f;
+                }
+                operand = colorMapper.getOperandFloat(inputs);
+                altCS.setColor(operand, operand.length);
+                tt = altCS.getColor().getRGB();
+                imageData[pp++] = (byte) ((tt >> 16) & 0xff);
+                imageData[pp++] = (byte) ((tt >> 8) & 0xff);
+                imageData[pp++] = (byte) (tt & 0xff);
             }
         }
-        
         return imageData;
     }
+    
+//    /**
+//     * keeping this old case incase it is needed
+//     * convert separation stream to RGB and return as an image
+//     */
+//    @Override
+//    public byte[]  dataToRGBByteArray2(final byte[] rgb, final int w, final int h) {
+//
+//        final int pixelCount=3*w*h;
+//        final byte[] imageData=new byte[pixelCount];
+//        
+//        //convert data to RGB format
+//        int pixelReached=0;
+//        
+//        //cache table for speed
+//        final float[][] lookuptable=new float[3][256];
+//        for(int i=0;i<256;i++) {
+//            lookuptable[0][i]=-1;
+//        }
+//        
+//        for (final byte aRgb : rgb) {
+//            
+//            final int value = (aRgb & 255);
+//            
+//            if (lookuptable[0][value] == -1) {               
+//                setColor(value / 255f);
+//                
+//                lookuptable[0][value] = ((Color) this.getColor()).getRed();
+//                lookuptable[1][value] = ((Color) this.getColor()).getGreen();
+//                lookuptable[2][value] = ((Color) this.getColor()).getBlue();
+//                
+//            }
+//            
+//            for (int comp = 0; comp < 3; comp++) {
+//                imageData[pixelReached] = (byte) lookuptable[comp][value];
+//                pixelReached++;
+//            }
+//        }
+//        
+//        return imageData;
+//    }
     
     /**
      * turn raw data into an image
@@ -432,58 +436,28 @@ public class SeparationColorSpace extends GenericColorSpace {
      * create rgb index for color conversion
      */
     @Override
-    public byte[] convertIndexToRGB(final byte[] data){
+    public byte[] convertIndexToRGB(final byte[] data) {
+
+        final byte[] newdata = new byte[3 * 256]; //converting to RGB so size known
+
+        int inpLen = domain.length / 2;
+
+        int palLen = data.length / inpLen;
+        float[] inputs = new float[inpLen];
+        float[] operand;
+        int p = 0, pp = 0, tt;
         
-        isConverted=true;
-        
-        final byte[] newdata=new byte[3*256]; //converting to RGB so size known
-        
-        try {
-            
-            int outputReached=0;
-            float[] opValues;
-            Color currentCol;
-            float[] operand;
-            final int byteCount=data.length;
-            final float[] values = new float[componentCount];
-            
-            //scan each byte and convert
-            for(int i=0;i<byteCount;i += componentCount){
-                
-                //turn into rgb and store
-                if(this.componentCount==1 && getID()==ColorSpaces.Separation && colorMapper==null){ //separation (fix bug with 1 component DeviceN with second check)
-                    opValues=new float[1];
-                    opValues[1]= (data[i] & 255);
-                    setColor(opValues,1);
-                    currentCol=(Color)this.getColor();
-                }else{ //convert deviceN
-                    
-                    for(int j=0;j<componentCount;j++) {
-                        values[j] = (data[i+j] & 255)/255f;
-                    }
-                    
-                    operand = colorMapper.getOperandFloat(values);
-                    
-                    altCS.setColor(operand,operand.length);
-                    currentCol=(Color)altCS.getColor();
-                    
-                }
-                
-                newdata[outputReached]=(byte) currentCol.getRed();
-                outputReached++;
-                newdata[outputReached]=(byte)currentCol.getGreen();
-                outputReached++;
-                newdata[outputReached]=(byte)currentCol.getBlue();
-                outputReached++;
-                
+        for (int i = 0, ii = Math.min(256, palLen); i < ii; i++) {
+            for (int j = 0; j < inpLen; j++) {
+                inputs[j] = (data[p++] & 0xff) / 255f;
             }
-            
-        } catch (final Exception ee) {
-            
-            LogWriter.writeLog("Exception  " + ee + " converting colorspace");
-            
+            operand = colorMapper.getOperandFloat(inputs);
+            altCS.setColor(operand, operand.length);
+            tt = altCS.getColor().getRGB();
+            newdata[pp++] = (byte) ((tt >> 16) & 0xff);
+            newdata[pp++] = (byte) ((tt >> 8) & 0xff);
+            newdata[pp++] = (byte) (tt & 0xff);
         }
-        
         return newdata;
     }
     

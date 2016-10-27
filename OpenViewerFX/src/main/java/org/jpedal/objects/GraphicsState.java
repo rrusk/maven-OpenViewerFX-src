@@ -67,7 +67,9 @@ public class GraphicsState
     public final float[][] lastCTM = new float[3][3];
 
     //TR value
-    private PdfObject TR;
+    private PdfObject TRobj;
+    
+    private byte[][] TR;
 
     public PdfObject SMask;
 
@@ -275,8 +277,12 @@ public class GraphicsState
         return this.OPM;
     }
 
-    public PdfObject getTR() {
-        return TR;
+    public Object[] getTR() {
+        if(TRobj==null && TR==null){
+            return null;
+        }else{
+            return new Object[]{TRobj,TR};
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -587,26 +593,26 @@ public class GraphicsState
      */
     public final Area getClippingShape()
     {
-        if(TRmask!=null && current_clipping_shape==null){
+        if(TRmask!=null){
             return new Area(TRmask);
-        }else if(TRmask!=null){
-
-            //    if(TRmask.intersects(current_clipping_shape.getBounds()))
-
-            final Area clipAsArea=new Area(TRmask);
-
-            clipAsArea.intersect(current_clipping_shape);
-
-            if(debugClip){
-                System.out.println("[getClippingShape1]");
-                if(current_clipping_shape==null){
-                    System.out.println("Null shape");
-                }else{
-                    System.out.println("Shape bounds= "+current_clipping_shape.getBounds());
-                }
-            }
-
-            return clipAsArea;
+//        }else if(TRmask!=null){
+//
+//            //    if(TRmask.intersects(current_clipping_shape.getBounds()))
+//
+//            final Area clipAsArea=new Area(TRmask);
+//
+//            clipAsArea.intersect(current_clipping_shape);
+//
+//            if(debugClip){
+//                System.out.println("[getClippingShape1]");
+//                if(current_clipping_shape==null){
+//                    System.out.println("Null shape");
+//                }else{
+//                    System.out.println("Shape bounds= "+current_clipping_shape.getBounds());
+//                }
+//            }
+//
+//            return clipAsArea;
         }else{
 
             if(debugClip){
@@ -670,42 +676,40 @@ public class GraphicsState
             OPM = 0;
         }
 
-        TR=GS.getDictionary(PdfDictionary.TR);
+        TRobj=GS.getDictionary(PdfDictionary.TR);
+
+        TR=GS.getKeyArray(PdfDictionary.TR);
 
         //transferFunction
-        if(TR!=null){
+        if(TRobj!=null || TR!=null){
 
             boolean isIdentity=false;
 
-            if(TR.getGeneralType(PdfDictionary.TR)==PdfDictionary.Identity){
+            if(TRobj!=null && TRobj.getGeneralType(PdfDictionary.TR)==PdfDictionary.Identity){
                 isIdentity=true;
-            }else{
-                final byte[][] maskArray=TR.getKeyArray(PdfDictionary.TR);
+            }else if(TR!=null){ //see if object or colors
 
-                //see if object or colors
-                if(maskArray!=null){
+                final int count=TR.length;
+                if(count>0){
 
-                    final int count=maskArray.length;
-                    if(count>0){
+                    isIdentity=true;
 
-                        isIdentity=true;
+                    for (final byte[] aMaskArray : TR) {
+                        final int nextID = PdfDictionary.getIntKey(1, aMaskArray.length - 1, aMaskArray);
 
-                        for (final byte[] aMaskArray : maskArray) {
-                            final int nextID = PdfDictionary.getIntKey(1, aMaskArray.length - 1, aMaskArray);
+                        //System.out.println("ii="+ii+" "+nextID+" "+PdfDictionary.Identity+" "+new String(maskArray[ii]));
 
-                            //System.out.println("ii="+ii+" "+nextID+" "+PdfDictionary.Identity+" "+new String(maskArray[ii]));
-
-                            if (nextID != PdfDictionary.Identity) {
-                                isIdentity = false;
-                                break;
-                            }
+                        if (nextID != PdfDictionary.Identity) {
+                            isIdentity = false;
+                            break;
                         }
                     }
                 }
             }
-
+            
             if(isIdentity) {
-                TR = null;
+                TRobj = null;
+                TR=null;
             }
 
         }
@@ -791,6 +795,10 @@ public class GraphicsState
 
         if (TR != null) {
             newGS.TR = TR;
+        }
+        
+        if (TRobj != null) {
+            newGS.TRobj = TRobj;
         }
 
         newGS.maxNonstrokeAlpha=maxNonstrokeAlpha;

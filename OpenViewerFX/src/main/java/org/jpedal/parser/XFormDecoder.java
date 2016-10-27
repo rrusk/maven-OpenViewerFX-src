@@ -414,7 +414,9 @@ public class XFormDecoder {
         //store  final image on disk & in memory
         pdfStreamDecoder.pdfImages.setImageInfo(imgName, pdfStreamDecoder.parserOptions.getPageNumber(), pdfStreamDecoder.gs.CTM[2][0], pdfStreamDecoder.gs.CTM[2][1], fw, fh);
         //save the image (R and normal so works with existing code)
-        pdfStreamDecoder.objectStoreStreamRef.saveStoredImage('R' + imgName, currentImage, false, "jpg");
-        pdfStreamDecoder.objectStoreStreamRef.saveStoredImage(imgName, currentImage, false, "jpg");
+        pdfStreamDecoder.objectStoreStreamRef.saveStoredImageAsBytes('R' + imgName, currentImage, false);
+        pdfStreamDecoder.objectStoreStreamRef.saveStoredImageAsBytes(imgName, currentImage, false);
+//        pdfStreamDecoder.objectStoreStreamRef.saveStoredImage('R' + imgName, currentImage, false, "jpg");
+//        pdfStreamDecoder.objectStoreStreamRef.saveStoredImage(imgName, currentImage, false, "jpg");
     }
 }

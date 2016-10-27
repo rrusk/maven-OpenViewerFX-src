@@ -33,6 +33,8 @@
 
 package org.jpedal.function;
 
+import java.util.Arrays;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.NumberUtils;
 
@@ -56,9 +58,9 @@ public class PostscriptFactory {
 
 	protected boolean testingFunction;
 
-	protected double[] stack;
+	protected double[] stack = new double[100];
 	private double[] safeStack;
-	protected int[] stackType;
+	protected int[] stackType = new int[100];
 	private int[] safeStackType;
 
 	protected int stkPtr;
@@ -332,156 +334,154 @@ public class PostscriptFactory {
 	//unique id for roll
     protected static final int PS_roll = 5229553;
 
-	//identify command
-	protected static int getCommandID(final byte[] cmds) {
+    //identify command
+    protected static int getCommandID(final byte[] cmds) {
 
-		//default no key value
-		int id = -1;
+        //default no key value
+        int id = -1;
 
-		//build key with same formula we used to create Constants (we've checked they are unique)
-
-		int key=0;
-		int keyLength=cmds.length;
-		if(keyLength>4) {
+        //build key with same formula we used to create Constants (we've checked they are unique)
+        int key = 0;
+        int keyLength = cmds.length;
+        if (keyLength > 4) {
             keyLength = 4;
         }
 
-		for(int j=0;j<keyLength;j++) {
+        for (int j = 0; j < keyLength; j++) {
             key += (cmds[j] - 'a') * scale[j];
         }
 
+        switch (key) {
+            case PS_abs:
+                id = PS_abs;
+                break;
+            case PS_add:
+                id = PS_add;
+                break;
+            case PS_atan:
+                id = PS_atan;
+                break;
+            case PS_ceil:
+                id = PS_ceil;
+                break;
+            case PS_cos:
+                id = PS_cos;
+                break;
+            case PS_cvi:
+                id = PS_cvi;
+                break;
+            case PS_cvr:
+                id = PS_cvr;
+                break;
+            case PS_div:
+                id = PS_div;
+                break;
+            case PS_exp:
+                id = PS_exp;
+                break;
+            case PS_floo:
+                id = PS_floo;
+                break;
+            case PS_idiv:
+                id = PS_idiv;
+                break;
+            case PS_ln:
+                id = PS_ln;
+                break;
+            case PS_log:
+                id = PS_log;
+                break;
+            case PS_mod:
+                id = PS_mod;
+                break;
+            case PS_mul:
+                id = PS_mul;
+                break;
+            case PS_neg:
+                id = PS_neg;
+                break;
+            case PS_sin:
+                id = PS_sin;
+                break;
+            case PS_sqrt:
+                id = PS_sqrt;
+                break;
+            case PS_sub:
+                id = PS_sub;
+                break;
+            case PS_roun:
+                id = PS_roun;
+                break;
+            case PS_trun:
+                id = PS_trun;
+                break;
+            case PS_and:
+                id = PS_and;
+                break;
+            case PS_bits:
+                id = PS_bits;
+                break;
+            case PS_eq:
+                id = PS_eq;
+                break;
+            case PS_fals:
+                id = PS_fals;
+                break;
+            case PS_ge:
+                id = PS_ge;
+                break;
+            case PS_gt:
+                id = PS_gt;
+                break;
+            case PS_le:
+                id = PS_le;
+                break;
+            case PS_lt:
+                id = PS_lt;
+                break;
+            case PS_ne:
+                id = PS_ne;
+                break;
+            case PS_not:
+                id = PS_not;
+                break;
+            case PS_or:
+                id = PS_or;
+                break;
+            case PS_true:
+                id = PS_true;
+                break;
+            case PS_xor:
+                id = PS_xor;
+                break;
+            case PS_if:
+                id = PS_if;
+                break;
+            case PS_ifel:
+                id = PS_ifel;
+                break;
+            case PS_copy:
+                id = PS_copy;
+                break;
+            case PS_exch:
+                id = PS_exch;
+                break;
+            case PS_pop:
+                id = PS_pop;
+                break;
+            case PS_dup:
+                id = PS_dup;
+                break;
+            case PS_inde:
+                id = PS_inde;
+                break;
+            case PS_roll:
+                id = PS_roll;
+                break;
 
-		switch (key) {
-		case PS_abs:
-			id=PS_abs;
-			break;
-		case PS_add:
-			id=PS_add;
-			break;
-		case PS_atan:
-			id=PS_atan;
-			break;
-		case PS_ceil:
-			id=PS_ceil;
-			break;
-		case PS_cos:
-			id=PS_cos;
-			break;
-		case PS_cvi:
-			id=PS_cvi;
-			break;
-		case PS_cvr:
-			id=PS_cvr;
-			break;
-		case PS_div:
-			id=PS_div;
-			break;
-		case PS_exp:
-			id=PS_exp;
-			break;
-		case PS_floo:
-			id=PS_floo;
-			break;
-		case PS_idiv:
-			id=PS_idiv;
-			break;
-		case PS_ln:
-			id=PS_ln;
-			break;
-		case PS_log:
-			id=PS_log;
-			break;
-		case PS_mod:
-			id=PS_mod;
-			break;
-		case PS_mul:
-			id=PS_mul;
-			break;
-		case PS_neg:
-			id=PS_neg;
-			break;
-		case PS_sin:
-			id=PS_sin;
-			break;
-		case PS_sqrt:
-			id=PS_sqrt;
-			break;
-		case PS_sub:
-			id=PS_sub;
-			break;
-		case PS_roun:
-			id=PS_roun;
-			break;
-		case PS_trun:
-			id=PS_trun;
-			break;
-		case PS_and:
-			id=PS_and;
-			break;
-		case PS_bits:
-			id=PS_bits;
-			break;
-		case PS_eq:
-			id=PS_eq;
-			break;
-		case PS_fals:
-			id=PS_fals;
-			break;
-		case PS_ge:
-			id=PS_ge;
-			break;
-		case PS_gt:
-			id=PS_gt;
-			break;
-		case PS_le:
-			id=PS_le;
-			break;
-		case PS_lt:
-			id=PS_lt;
-			break;
-		case PS_ne:
-			id=PS_ne;
-			break;
-		case PS_not:
-			id=PS_not;
-			break;
-		case PS_or:
-			id=PS_or;
-			break;
-		case PS_true:
-			id=PS_true;
-			break;
-		case PS_xor:
-			id=PS_xor;
-			break;
-		case PS_if:
-			id=PS_if;
-			break;
-		case PS_ifel:
-			id=PS_ifel;
-			break;
-		case PS_copy:
-			id=PS_copy;
-			break;
-		case PS_exch:
-			id=PS_exch;
-			break;
-		case PS_pop:
-			id=PS_pop;
-			break;
-		case PS_dup:
-			id=PS_dup;
-			break;
-		case PS_inde:
-			id=PS_inde;
-			break;
-		case PS_roll:
-			id=PS_roll;
-			break;
-
-		}
-		return id;
-	}
+        }
+        return id;
+    }
 
 	/**
 	 *
@@ -633,24 +633,24 @@ public class PostscriptFactory {
 			fType = currentType;
 
 			if(fType==PS_INTEGER && firstInt>0){
-				final double[] items = new double[firstInt];
-				final int[] types = new int[firstInt];
+                            final double[] items = new double[firstInt];
+                            final int[] types = new int[firstInt];
 
-				// take elements off
-				for(int i=0; i< items.length;i++){
-					items[i] = pop();
-					types[i] = currentType;
-				}
+                            // take elements off
+                            for(int i=0; i< items.length;i++){
+                                    items[i] = pop();
+                                    types[i] = currentType;
+                            }
 
-				// put them back on (remember about the order)
-				for(int ii=items.length;ii>0 ;ii--){
-					push(items[ii-1], types[ii-1]);
-				}
+                            // put them back on (remember about the order)
+                            for(int ii=items.length;ii>0 ;ii--){
+                                    push(items[ii-1], types[ii-1]);
+                            }
 
-				// and now put the copied ones on top
-				for(int ii=items.length;ii>0 ;ii--){
-					push(items[ii-1], types[ii-1]);
-				}
+                            // and now put the copied ones on top
+                            for(int ii=items.length;ii>0 ;ii--){
+                                    push(items[ii-1], types[ii-1]);
+                            }
 
 
 			}else if(fType==PS_INTEGER && firstInt==0){
@@ -740,8 +740,8 @@ public class PostscriptFactory {
 
 			// check if enough elements on the stack
 			if(stack.length<2) {
-                throw new RuntimeException("EXCH - not enough elements on the stack");
-            }
+                          throw new RuntimeException("EXCH - not enough elements on the stack");
+                        }
 			
 			first = pop();
 			fType = currentType;
@@ -1037,10 +1037,10 @@ public class PostscriptFactory {
 			//fType = currentType;
 
 			if(fType == PS_BOOLEAN && sType == PS_BOOLEAN) {
-                push((int) first | (int) second, PS_BOOLEAN);
-            } else if (fType == PS_INTEGER && sType == PS_INTEGER) {
-                push((int) first | (int) second, PS_INTEGER);
-            } else if(LogWriter.isRunningFromIDE){
+                             push((int) first | (int) second, PS_BOOLEAN);
+                        } else if (fType == PS_INTEGER && sType == PS_INTEGER) {
+                            push((int) first | (int) second, PS_INTEGER);
+                        } else if(LogWriter.isRunningFromIDE){
 				// should never happend, will exit
 				throw new RuntimeException("Critical error in PS_or");
 			}
@@ -1115,8 +1115,8 @@ public class PostscriptFactory {
 
 			// check if enough elements on the stack
 			if(stack.length<2) {
-                throw new RuntimeException("SUB - not enough elements on the stack");
-            }
+                            throw new RuntimeException("SUB - not enough elements on the stack");
+                        }
 				
 
 			first = pop();
@@ -1125,10 +1125,10 @@ public class PostscriptFactory {
 			sType = currentType;
 
 			if(fType == PS_REAL || sType == PS_REAL) {
-                push(second - first, PS_REAL);
-            } else {
-                push(second - first, PS_INTEGER);
-            }
+                            push(second - first, PS_REAL);
+                        } else {
+                            push(second - first, PS_INTEGER);
+                        }
 
 			/*
 			 *  If the result would happend to be outside of integer range
@@ -1212,8 +1212,8 @@ public class PostscriptFactory {
 			double tmp = Math.toDegrees(Math.atan(tangent));
 
 			if(tmp<0) {
-                tmp = -tmp;
-            }
+                            tmp = -tmp;
+                        }
 
 			push(tmp+90, PS_REAL);
 		} else if (first<=0 && second<=0){
@@ -1221,8 +1221,8 @@ public class PostscriptFactory {
 			double tmp = Math.toDegrees(Math.atan(tangent));
 
 			if(tmp<0) {
-                tmp = -tmp;
-            }
+                            tmp = -tmp;
+                        }
 
 			push(tmp+180, PS_REAL);
 		} else if (first<=0 && second>=0){
@@ -1230,8 +1230,8 @@ public class PostscriptFactory {
 			double tmp = Math.toDegrees(Math.atan(tangent));
 
 			if(tmp<0) {
-                tmp = -tmp;
-            }
+                           tmp = -tmp;
+                        }
 
 			push(tmp+270, PS_REAL);
 		}
@@ -1299,7 +1299,7 @@ public class PostscriptFactory {
 			numberOfElements=stkPtr;
 		}
 
-        if(amount>0){
+                if(amount>0){
 			// top elements
         	
 			final double[] topTemp = new double[amount];
@@ -1339,7 +1339,7 @@ public class PostscriptFactory {
 
 		} else if(amount<0){
         	
-            amount=-amount;
+                    amount=-amount;
 
             // top elements
 			final double[] topTemp = new double[numberOfElements-amount];
@@ -1609,26 +1609,23 @@ public class PostscriptFactory {
 		}
 
 		if(isMinus) {
-            return -d;
-        } else {
-            return d;
-        }
+                    return -d;
+                } else {
+                     return d;
+                }
 	}
 
 	private byte[] getNextValue() {
 
-		final int start;
-        int end;
-        int next;
-        byte[] returnValue=null;
+            final int start;
+            int end;
+            int next;
+            byte[] returnValue=null;
 
-		//skip to start of next value
-		while(ptr<streamLength && (stream[ptr]==10 || stream[ptr]==13 || stream[ptr]==32)) {
-            ptr++;
-        }
+            ptr = StreamReaderUtils.skipSpaces(stream, ptr);
 
 		//log start
-		start=ptr;
+            start=ptr;
 
 		//find end
 		while(ptr<streamLength){
@@ -1636,20 +1633,20 @@ public class PostscriptFactory {
 			next=stream[ptr];
 
 			if(next==START_BRACE) {
-                break;
-            }
+                            break;
+                        }
 
 			ptr++;
 
 			if(ptr>=streamLength) {
-                break;
-            }
+                            break;
+                        }
 
 			next=stream[ptr];
 
 			if(next==32 || next ==13 || next==10 || next==START_BRACE || next==END_BRACE) {
-                break;
-            }
+                            break;
+                        }
 
 		}
 
@@ -1673,15 +1670,15 @@ public class PostscriptFactory {
 
 			final int len=end-start;
 			returnValue=new byte[len];
-            System.arraycopy(stream, start, returnValue, start - start, end - start);
+                        System.arraycopy(stream, start, returnValue, start - start, end - start);
 
 		}
 
 		if(debug){
 			System.out.print(">>>>>>>> ");
 			for(int aa=start;aa<end;aa++) {
-                System.out.print((char) stream[aa]);
-            }
+                            System.out.print((char) stream[aa]);
+                        }
 
 			System.out.println(" <<<");
 		}
@@ -1698,18 +1695,17 @@ public class PostscriptFactory {
 
 		//rest stack
 		//may need to change structure- try for double
-		stack=new double[100];
-		stackType = new int[100];
+		Arrays.fill(stack, 0);
+                Arrays.fill(stackType,0);
 		stkPtr=0;
 		stkTypePtr=0;
-		for(int ii=0;ii<100;ii++) {
-            stack[ii] = 0d;
-        }
-		
-		for(int iii=0;iii<100;iii++) {
-            stackType[iii] = 0;
-        }
-
+//		for(int ii=0;ii<100;ii++) {
+//                    stack[ii] = 0d;
+//                }
+//
+//		for(int iii=0;iii<100;iii++) {
+//                    stackType[iii] = 0;
+//                }
 		for (final float value : values) {
 
             if (debug) {

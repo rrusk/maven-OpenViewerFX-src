@@ -63,7 +63,7 @@ public class LinearThread extends Thread {
     int startObjPtr,endObjPtr;
 
     //use top line to slow down load speed
-    private static final int bufSize=8192;
+    public static int bufSize=8192;
 
     int ref;
     final int firstObjLength;

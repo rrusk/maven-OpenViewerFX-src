@@ -36,15 +36,13 @@ import java.awt.GraphicsEnvironment;
 import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.exception.PdfFontException;
+import org.jpedal.io.ObjectStore;
 import org.jpedal.parser.DecoderOptions;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Strip;
@@ -176,7 +174,48 @@ public final class FontMappings {
             LogWriter.writeLog("Unable to read FontDirs " + e.getMessage());
         }
     }
+
+    /**
+     * used to ensure we load once
+     */
+    private static Map<String, String> isLiberationLoaded=new HashMap<String, String>();
     
+    public static void addLiberationAsFallBackFont(final String family, final String path) throws IOException{
+        
+        if(isLiberationLoaded.containsKey(family)){
+            return;
+        }
+        
+        isLiberationLoaded.put(family,path);
+        
+        checkFontTablesInitialised();
+        
+        final String[] fontNames={"-Regular","-Bold","-Italic","-BoldItalic"};
+        final int fontCount=fontNames.length;
+
+        for (int i = 0; i < fontCount; i++) {
+
+            final String type= "/TrueType";
+            final String fontName=family+fontNames[i];
+        
+            String rawPath="org/jpedal/res/"+path+"/"+fontName+".ttf";
+            String outPath= ObjectStore.temp_dir+fontName+".ttf";
+
+            InputStream url = FontMappings.class.getClassLoader().getResourceAsStream(rawPath);
+            BufferedOutputStream to=new BufferedOutputStream(new FileOutputStream(outPath));
+            
+            ObjectStore.copy(url, to);
+            to.close();
+            
+            fontSubstitutionTable.put(fontName, type);
+            fontSubstitutionLocation.put(fontName, outPath);
+            
+            //store details under file
+            fontPropertiesTableType.put(fontName, StandardFonts.TRUETYPE);
+            fontPropertiesTablePath.put(fontName,outPath);
+                     
+        }/**/
+    }
     
     /**
      * set mode to use when substituting fonts (default is to use Filename (ie arial.ttf)
@@ -265,14 +304,7 @@ public final class FontMappings {
      */
     public static String addTTDir(final String fontPath, String failed) {
         
-        if ( fontSubstitutionTable == null) {
-            fontSubstitutionTable = new ConcurrentHashMap<String, String>();
-            fontSubstitutionFontID = new ConcurrentHashMap<String, Integer>();
-            fontPossDuplicates = new ConcurrentHashMap<String, String>();
-            fontPropertiesTable = new ConcurrentHashMap<String, String>();
-            fontPropertiesTableType = new ConcurrentHashMap<String, Integer>();
-            fontPropertiesTablePath = new ConcurrentHashMap<String, String>();
-        }
+        checkFontTablesInitialised();
         
         final File currentDir = new File(fontPath);
         
@@ -429,14 +461,7 @@ public final class FontMappings {
         
         String failed = null;
         
-        if (FontMappings.fontSubstitutionTable == null) {
-            fontSubstitutionTable = new ConcurrentHashMap<String, String>();
-            fontSubstitutionFontID = new ConcurrentHashMap<String, Integer>();
-            fontPossDuplicates = new ConcurrentHashMap<String, String>();
-            fontPropertiesTable = new ConcurrentHashMap<String, String>();
-            fontPropertiesTableType = new ConcurrentHashMap<String, Integer>();
-            fontPropertiesTablePath = new ConcurrentHashMap<String, String>();
-        }
+        checkFontTablesInitialised();
         
         try {
             if (fontDirs == null) { // idiot safety test
@@ -471,6 +496,17 @@ public final class FontMappings {
         }
         
         return failed;
+    }
+
+    private static void checkFontTablesInitialised() {
+        if (FontMappings.fontSubstitutionTable == null) {
+            fontSubstitutionTable = new ConcurrentHashMap<String, String>();
+            fontSubstitutionFontID = new ConcurrentHashMap<String, Integer>();
+            fontPossDuplicates = new ConcurrentHashMap<String, String>();
+            fontPropertiesTable = new ConcurrentHashMap<String, String>();
+            fontPropertiesTableType = new ConcurrentHashMap<String, Integer>();
+            fontPropertiesTablePath = new ConcurrentHashMap<String, String>();
+        }
     }
     
     /**
@@ -650,14 +686,7 @@ public final class FontMappings {
      */
     public static void addFontFile(final String currentFont, String fontPath) {
         
-        if ( fontSubstitutionTable == null) {
-            fontSubstitutionTable = new ConcurrentHashMap<String, String>();
-            fontSubstitutionFontID = new ConcurrentHashMap<String, Integer>();
-            fontPossDuplicates = new ConcurrentHashMap<String, String>();
-            fontPropertiesTable = new ConcurrentHashMap<String, String>();
-            fontPropertiesTableType = new ConcurrentHashMap<String, Integer>();
-            fontPropertiesTablePath = new ConcurrentHashMap<String, String>();
-        }
+        checkFontTablesInitialised();
 
         //add separator if needed
         if (fontPath != null && !fontPath.endsWith("/") && !fontPath.endsWith("\\")) {
@@ -871,7 +900,7 @@ public final class FontMappings {
                 LogWriter.writeLog("No fonts found at " + fontPath);
             }
         }
-        
+          
         //finally close
         if(in!=null){
             try {

@@ -370,6 +370,10 @@ public class Parser {
 
                 //Check for exceptions in TrueType hinting and re decode if neccessary
                 if (TTGlyph.redecodePage) {
+                    
+                    //the software may well have flagged forms on page as decoded and will ignore this second attempt. So set back to not decoded.
+                    this.externalHandlers.getFormRenderer().getCompData().setListForPage(pageIndex,null,true);
+                    
                     TTGlyph.redecodePage = false;
                     return getPageAsImage(pageIndex, imageIsTransparent);
                 }

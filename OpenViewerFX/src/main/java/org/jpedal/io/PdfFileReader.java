@@ -42,6 +42,7 @@ import java.util.Map;
 import org.jpedal.constants.PDFflags;
 import org.jpedal.exception.PdfException;
 import org.jpedal.exception.PdfSecurityException;
+import org.jpedal.io.security.CryptoAES;
 import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.io.types.CompressedObjects;
 import org.jpedal.io.types.ObjectReader;
@@ -410,6 +411,18 @@ public class PdfFileReader
                         final PdfFilteredReader filter=new PdfFilteredReader();
                         stream =filter.decodeFilters(ObjectUtils.setupDecodeParms(pdfObject,this), stream, filters ,width,height, cacheName);
 
+                        if(cacheName != null && encryptionPassword != null){
+                            File f = new File(cacheName);
+                            FileInputStream fis = new FileInputStream(f);                            
+                            byte[] temp = new byte[(int)f.length()];
+                            fis.read(temp);
+                            CryptoAES aes = new CryptoAES();
+                            temp = aes.encrypt(encryptionPassword, temp);
+                            FileOutputStream fos = new FileOutputStream(f);
+                            fos.write(temp);
+                            fos.close();
+                        }
+                        
                         //flag if any error
                         pdfObject.setStreamMayBeCorrupt(filter.hasError());
 
@@ -450,6 +463,12 @@ public class PdfFileReader
 
                 try {
                     new BufferedInputStream(new FileInputStream(cacheName)).read(bytes);
+                    
+                    if (encryptionPassword != null) {
+                        CryptoAES aes = new CryptoAES();
+                        bytes = aes.decrypt(encryptionPassword, bytes);
+                    }
+                    
                 } catch (final Exception e) {
                     LogWriter.writeLog("Exception: " + e.getMessage());
                 }
@@ -1429,6 +1448,10 @@ public class PdfFileReader
                     "There is additional explanation at http://www.idrsolutions.com/additional-jars"+ '\n');
 
         }
+    }
+    
+    public byte[] getEncHash(){
+        return encryptionPassword;
     }
 }
 

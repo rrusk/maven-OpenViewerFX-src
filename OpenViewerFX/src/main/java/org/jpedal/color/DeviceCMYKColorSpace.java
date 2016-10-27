@@ -108,33 +108,58 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
         m = 1;
         k = 1;
 
-        if (length > 3) {
-            //get values
-            c = operand[0];
-            // the cyan
-            m = operand[1];
-            // the magenta
-            y = operand[2];
-            // the yellow
-            k = operand[3];
-        } else {
-            //get values
-            if (length > 0) {
+//        if (length > 3) {
+//            //get values
+//            c = operand[0];
+//            // the cyan
+//            m = operand[1];
+//            // the magenta
+//            y = operand[2];
+//            // the yellow
+//            k = operand[3];
+//        } else {
+//            //get values
+//            if (length > 0) {
+//                c = operand[0];
+//            }
+//            // the cyan
+//            if (length > 1) {
+//                m = operand[1];
+//            }
+//            // the magenta
+//            if (length > 2) {
+//                y = operand[2];
+//            }
+//            // the yellow
+//            if (length > 3) {
+//                k = operand[3];
+//            }
+//
+//        }
+        
+        //new code refer to case 26589
+        switch (length) {
+            case 1:
                 c = operand[0];
-            }
-            // the cyan
-            if (length > 1) {
+                m = operand[0];
+                y = operand[0];
+                k = operand[0];
+                break;
+            case 2:
+                c = operand[0];
                 m = operand[1];
-            }
-            // the magenta
-            if (length > 2) {
+                break;
+            case 3:
+                c = operand[0];
+                m = operand[1];
                 y = operand[2];
-            }
-            // the yellow
-            if (length > 3) {
+                break;
+            default:
+                c = operand[0];
+                m = operand[1];
+                y = operand[2];
                 k = operand[3];
-            }
-
+                break;
         }
 
         if ((lastC == c) && (lastM == m) && (lastY == y) && (lastK == k)) {

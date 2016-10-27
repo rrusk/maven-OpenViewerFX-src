@@ -35,7 +35,7 @@ package org.jpedal.examples.viewer.commands;
 import org.jpedal.examples.viewer.gui.GUI;
 
 /**
- *
+ * Toggle if the mouse is always shown or not
  */
 public class AlwaysShowMouse {
 

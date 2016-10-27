@@ -39,10 +39,9 @@ import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.io.types.Array;
-import org.jpedal.io.types.ArrayUtils;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.io.types.KeyArray;
 import org.jpedal.objects.raw.*;
-import org.jpedal.utils.NumberUtils;
 
 /**
  * @author markee
@@ -95,7 +94,7 @@ public final class ColorspaceFactory {
     
         final byte[] colValue=colorSpace.getNextValueAsByte(false);
         
-        if (ArrayUtils.isRef(colValue, 0) || ArrayUtils.isArray(colValue, 0)) {
+        if (StreamReaderUtils.isRef(colValue, 0) || StreamReaderUtils.isArray(colValue, 0)) {
             PdfArrayIterator it=convertColValueToMixedArray(currentPdfFile, colorSpace.getNextValueAsByte(true));
             
             return getColorspace(it.getNextValueAsKey(), it, currentPdfFile);          
@@ -123,7 +122,7 @@ public final class ColorspaceFactory {
     
     static byte[] getTransformTable(final PdfObjectReader currentPdfFile, final byte[] data) {
        
-        if(ArrayUtils.isRef(data, 0)){ //indirect so needs decoding
+        if(StreamReaderUtils.isRef(data, 0)){ //indirect so needs decoding
            final ColorSpaceObject colObj2  = new ColorSpaceObject(new String(data));          
            currentPdfFile.readObject(colObj2);
             return colObj2.getDecodedStream();
@@ -234,28 +233,14 @@ public final class ColorspaceFactory {
         
         int startArray=0;
         
-        if(ArrayUtils.isRef(raw, 0)){ //indirect so needs decoding
+        if(StreamReaderUtils.isRef(raw, 0)){ //indirect so needs decoding
             
-            int i=0;
-            final int startI = 0;
-
-            //move cursor to end of ref
-            i = ArrayUtils.skipToEndOfRef(i, raw);
-            //actual value or first part of ref
-            final int ref = NumberUtils.parseInt(startI, i, raw);
+            final int[] values=StreamReaderUtils.readRefFromStream(raw,0);
             
-            i=ArrayUtils.skipSpaces(raw, i);
-
-            // get generation number
-            int keyStart = i;
-
-            //move cursor to end of reference
-            i = ArrayUtils.skipToEndOfRef(i, raw);
-        
-            final int generation = NumberUtils.parseInt(keyStart, i, raw);
-
-            i=ArrayUtils.skipSpaces(raw, i);
-        
+            final int ref=values[0];
+            final int generation=values[1];
+            //final int i=values[2]; //added for completeness but not needed in this case
+            
             //read the Dictionary data
             raw = objectReader.readObjectAsByteArray(obj, objectReader.isCompressed(ref, generation), ref, generation);
 
@@ -336,16 +321,22 @@ public final class ColorspaceFactory {
     
     private static GenericColorSpace getCalRGBColorspace(final PdfObject colorSpace) {
         
-        float[] W = { 0.0f, 1.0f, 0.0f };
+        float[] W = { 1.0f, 1.0f, 1.0f };
+        float[] B = { 0.0f, 0.0f, 0.0f };
         float[] G = { 1.0f, 1.0f, 1.0f };
         float[] Ma = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
         
         final float[] gammaArray=colorSpace.getFloatArray(PdfDictionary.Gamma);
         final float[] whitepointArray=colorSpace.getFloatArray(PdfDictionary.WhitePoint);
+        final float[] blackpointArray=colorSpace.getFloatArray(PdfDictionary.BlackPoint);
         final float[] matrixArray=colorSpace.getFloatArray(PdfDictionary.Matrix);
         
         if (whitepointArray != null) {
             W=whitepointArray;
+        }
+        
+        if (blackpointArray != null) {
+            B=blackpointArray;
         }
         
         if (gammaArray != null) {
@@ -356,7 +347,7 @@ public final class ColorspaceFactory {
             Ma = matrixArray;
         }
         
-        return new CalRGBColorSpace(W, Ma,G);        
+        return new CalRGBColorSpace(W,B,Ma,G);        
     }
     
     private static GenericColorSpace getCalGrayColorspace(final PdfObject colorSpace) {
@@ -393,18 +384,11 @@ public final class ColorspaceFactory {
         PdfObject functionObj=getFunctionObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true));
        
         //name of color if separation or Components if device and component count
-        byte[][] components=null;
         if(ID!=ColorSpaces.Separation){
-            components=convertColValueToKeyArray(currentPdfFile,name);
+            final byte[][] components=convertColValueToKeyArray(currentPdfFile,name);
             componentCount=components.length;
         }
-        
-        int cmykMapping=getAlternateDeviceMappingColorSpace(componentCount, components);
-        
-        if(cmykMapping!=SeparationColorSpace.NOCMYK){          
-            altCS=new DeviceCMYKColorSpace();
-        }
-        
+
         final ColorMapping colorMapper=new ColorMapping(currentPdfFile,functionObj);
         float[] domain=functionObj.getFloatArray(PdfDictionary.Domain);
         
@@ -413,72 +397,5 @@ public final class ColorspaceFactory {
         }else{
             return new DeviceNColorSpace(componentCount, colorMapper, domain, altCS);
         }
-    }
-
-    private static int getAlternateDeviceMappingColorSpace(final int componentCount, final byte[][] components) {
-        
-        int cmykMapping=SeparationColorSpace.NOCMYK;
-        final int[] values=new int[componentCount];
-        if(components!=null){
-            for(int ii=0;ii<componentCount;ii++){
-                values[ii]=PdfDictionary.generateChecksum(1, components[ii].length-1, components[ii]);
-            }
-        }
-        switch(componentCount){
-            
-            case 1:
-                if(components!=null && (values[0]==SeparationColorSpace.Black || values[0]==SeparationColorSpace.PANTONE_BLACK)){
-                    cmykMapping=SeparationColorSpace.Black;
-                }
-                
-                break;
-                
-            case 2:
-                
-                if(values[0]==SeparationColorSpace.Cyan){
-                    if(values[1]==SeparationColorSpace.Yellow) {
-                        cmykMapping=SeparationColorSpace.CY;
-                    } else if(values[1]==SeparationColorSpace.Magenta) {
-                        cmykMapping=SeparationColorSpace.CM;
-                    }
-                }else if(values[0]==SeparationColorSpace.Magenta && values[1]==SeparationColorSpace.Yellow) {
-                    cmykMapping=SeparationColorSpace.MY;
-                }
-                
-                break;
-                
-            case 3:
-                
-                if(values[0]==SeparationColorSpace.Magenta && values[1]==SeparationColorSpace.Yellow && values[2]==SeparationColorSpace.Black) {
-                    cmykMapping=SeparationColorSpace.MYK;
-                } else if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow) {
-                    cmykMapping=SeparationColorSpace.CMY;
-                } else if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Black) {
-                    cmykMapping=SeparationColorSpace.CMK;
-                }
-                break;
-                
-           /* case 4:
-                
-                if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow && values[3]==SeparationColorSpace.Black) {
-                    //  cmykMapping=SeparationColorSpace.CMYB;
-                }
-                break; */
-                
-            case 5:
-                
-                if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow && values[3]==SeparationColorSpace.Black) {
-                    cmykMapping=SeparationColorSpace.CMYK;
-                }
-                break;
-                
-            case 6:
-                
-                if(values[0]==SeparationColorSpace.Cyan && values[1]==SeparationColorSpace.Magenta && values[2]==SeparationColorSpace.Yellow && values[3]==SeparationColorSpace.Black) {
-                    cmykMapping=SeparationColorSpace.CMYK;
-                }
-                break;
-        }
-        return cmykMapping;
     }
 }

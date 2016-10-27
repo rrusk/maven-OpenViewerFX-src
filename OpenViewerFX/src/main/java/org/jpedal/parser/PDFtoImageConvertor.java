@@ -32,6 +32,7 @@
  */
 package org.jpedal.parser;
 
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import org.jpedal.PdfDecoderInt;
@@ -244,7 +245,9 @@ public abstract class PDFtoImageConvertor {
                     }
                     
                 } else {
-                    formRenderer.getCompData().renderFormsOntoG2(image.getGraphics(), pageIndex, 0, displayRotation, null, null, pageData.getMediaBoxHeight(pageIndex));
+                    Graphics2D g2 = (Graphics2D)image.getGraphics();
+                    g2.scale(imageScaling.getScaleX(), -imageScaling.getScaleY());
+                    formRenderer.getCompData().renderFormsOntoG2(g2, pageIndex, 0, displayRotation, null, null, pageData.getMediaBoxHeight(pageIndex));
                 }
             } else {
                 

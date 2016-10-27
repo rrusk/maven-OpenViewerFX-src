@@ -116,7 +116,7 @@ public abstract class GUIData {
         rasterizeForms = inlineForms;
     } 
     
-    protected void setListForPage(final int page, final List<FormObject> comps, final boolean isSorted){
+    public void setListForPage(final int page, final List<FormObject> comps, final boolean isSorted){
         if(isSorted){
 	    formsOrdered[page] = comps;
 	}else{

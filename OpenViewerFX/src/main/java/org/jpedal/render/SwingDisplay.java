@@ -616,13 +616,9 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                 ignoreItem=false;
                 
                 //see if we need to draw
-                if((currentArea!=null) &&
-                    
-                    //was glyphArea, changed back to currentArea to fix highlighting issue in Sams files.
-                    //last width test for odd print issue in phonobingo
-                     (type < 7 && (userAnnot != null) && ((!userAnnot.intersects(currentArea)))&& currentArea.width>0)) {
-                        ignoreItem = true;
-                    }
+                if (currentArea != null && userAnnot != null && type < 7) {
+                    ignoreItem = testIfAnnotVisible(currentArea, userAnnot, ignoreItem);
+                }
                 
                 if(ignoreItem || (lastItemPainted!=-1 && i<lastItemPainted)){
                     //keep local counts in sync
@@ -910,7 +906,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             final double[] af=new double[6];
 
                             g2.getTransform().getMatrix(af);
-
+                            
                             if(af[2]!=0) {
                                 af[2] = -af[2];
                             }
@@ -957,21 +953,29 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             }
                             
                             //Potential fix for ignoring transform
-//                            AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
-//                            double scaleFactorX = 1d/affine.getScaleX();
-//                            double scaleFactorY = 1d/affine.getScaleY();
-//                            
-//                            if(affine.getScaleX()==0 && affine.getScaleY()==0){
-//                                scaleFactorX = 1d/affine.getShearX();
-//                                scaleFactorY = 1d/affine.getShearY();
-//                            }
-//                            
-//                            g2.transform(affine);
-//                            g2.scale(-scaleFactorX, scaleFactorY);
-//                            
-//                            g2.drawString(displayValue,0,0);
+                            AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
+                            double scaleFactorX = 1d/affine.getScaleX();
+                            double scaleFactorY = 1d/affine.getScaleY();
+                            
+                            if(affine.getScaleX()==0 && affine.getScaleY()==0){
+                                scaleFactorX = 1d/affine.getShearX();
+                                scaleFactorY = 1d/affine.getShearY();
+                            }
+                            
+                            if(afValues2[afCount]>0){
+                                scaleFactorY = -scaleFactorY;
+                            }
+                            
+                            if(afValues3[afCount]>0){
+                                scaleFactorX = -scaleFactorX;
+                            }
+                            
+                            g2.transform(affine);
+                            g2.scale(scaleFactorX, scaleFactorY);
+                            
+                            g2.drawString(displayValue,0,0);
 
-                            g2.drawString(displayValue,x,y);
+//                            g2.drawString(displayValue,x,y);
 
                             //restore defaults
                             g2.setTransform(defaultAf);
@@ -1081,6 +1085,25 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         //track
         lastScaling=scaling;
 
+    }
+
+    static boolean testIfAnnotVisible(Rectangle currentArea, final Rectangle userAnnot, boolean ignoreItem) {
+        
+        //Allow for testing components with 0 width or 0 height
+        final Rectangle testRect = currentArea.getBounds();
+        
+        if(testRect.width==0){
+            testRect.width++;
+        }
+        if(testRect.height==0){
+            testRect.height++;
+        }
+        //was glyphArea, changed back to currentArea to fix highlighting issue in Sams files.
+        //last width test for odd print issue in phonobingo
+        if (!userAnnot.intersects(testRect)) {
+            ignoreItem = true;
+        }
+        return ignoreItem;
     }
 
 
@@ -1567,10 +1590,10 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                 }
             }
             if(rawKey==null){
-                objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem,image,false,"png");
+                objectStoreRef.saveStoredImageAsBytes(pageNumber+"_HIRES_"+currentItem,image,false);
                 imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem);
             }else{
-                objectStoreRef.saveStoredImage(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false,"png");
+                objectStoreRef.saveStoredImageAsBytes(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false);
                 imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem+ '_' +rawKey);
             }
 

@@ -32,12 +32,11 @@
  */
 package org.jpedal.examples.viewer.gui.generic;
 
-import java.awt.Color;
 import org.jpedal.PdfDecoderInt;
 
 public interface GUIAnnotationPanel {
     
-    public enum FORMMODE{
+    enum FORMMODE{
         CREATION, EDIT
     }
     
@@ -47,12 +46,9 @@ public interface GUIAnnotationPanel {
     
     void clearAnnotationType();
     
+    Object getAnnotationListener();
     
     void addAnnotationForWriting(Object annot);
-    
-    void addUnsavedAnnotationsToPage(PdfDecoderInt decode_pdf);
-
-    void addAnnotationToDisplay(PdfDecoderInt decode_pdf, int[] types, Color[] cols, Object[] objs);
     
     boolean annotationAdded();
 
@@ -66,7 +62,5 @@ public interface GUIAnnotationPanel {
     
     Object getDisplayPanel();
     
-    public void setFormMode(FORMMODE mode);
-    
-    public FORMMODE getFormMode();
+    void populateList(PdfDecoderInt decode_pdf);
 }

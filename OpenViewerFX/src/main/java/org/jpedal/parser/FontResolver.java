@@ -102,7 +102,9 @@ public class FontResolver {
                         fallbackToArial=true;
                     }
                     
-                    restoredFont = pdfFontFactory.createFont(fallbackToArial, newFont, fontID, pdfStreamDecoder.objectStoreStreamRef, pdfStreamDecoder.parserOptions.isRenderPage(), pdfStreamDecoder.errorTracker, pdfStreamDecoder.isPrinting);
+                    restoredFont = pdfFontFactory.createFont(fallbackToArial, newFont, fontID, pdfStreamDecoder.objectStoreStreamRef,
+                            pdfStreamDecoder.parserOptions.isRenderPage(),
+                            pdfStreamDecoder.errorTracker, pdfStreamDecoder.isPrinting, isHTML);
 
                     if (isHTML) {
                         HTMLFontHandler.processFont(restoredFont, current, newFont, pdfStreamDecoder.currentPdfFile);
@@ -146,7 +148,7 @@ public class FontResolver {
         return fontID;
     }
     
-    public static FontObject getFontObjectFromRefOrDirect(final  PdfObjectReader currentPdfFile, final byte[] data) {
+    private static FontObject getFontObjectFromRefOrDirect(final  PdfObjectReader currentPdfFile, final byte[] data) {
         
         final FontObject obj  = new FontObject(new String(data));
 

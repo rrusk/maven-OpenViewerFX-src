@@ -85,7 +85,7 @@ public class SingleViewTransferHandler extends BaseTransferHandler{
 		final String testFile = file.toLowerCase();
 		
 		final boolean isValid = ((testFile.endsWith(".pdf"))
-                                || (testFile.endsWith(".dcm"))
+                                || (testFile.endsWith(".dcm")) || (testFile.endsWith(".psd"))
 				|| (testFile.endsWith(".fdf")) || (testFile.endsWith(".tif"))
 				|| (testFile.endsWith(".tiff")) || (testFile.endsWith(".png"))
 				|| (testFile.endsWith(".jpg")) || (testFile.endsWith(".jpeg"))

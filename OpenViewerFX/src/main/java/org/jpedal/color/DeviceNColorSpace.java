@@ -47,6 +47,8 @@ public class DeviceNColorSpace extends SeparationColorSpace {
     private static final long serialVersionUID = -1372268945371555187L;
     
     private final Map<Integer, Integer> cache=new HashMap<Integer, Integer>();
+            
+    private float [] oldValues;
      
     public DeviceNColorSpace(final int componentCount, final ColorMapping colorMapper,final float[] domain, final GenericColorSpace altCS){
         
@@ -71,90 +73,16 @@ public class DeviceNColorSpace extends SeparationColorSpace {
         setColor(values,opCount);
     }
     
-    
     /** set color (translate and set in alt colorspace */
     @Override
-    public void setColor(final float[] raw, final int opCount) {
-        
-        final int[] lookup=new int[3];
-        
-        int opNumbers=raw.length;
-        if(opNumbers>3) {
-            opNumbers=3;
-        }
-        
-        for(int i=0;i<opNumbers;i++){
-            lookup[i]=(int)(raw[i]*255);
-        }
-        
-        boolean isCached=false;
-        
-        if(this.cmykMapping==Black && opCount==1){ //special case coded in
-            
-            final float[] newOp={0f,0f,0f, raw[0]};
-            altCS.setColor(newOp,newOp.length);
-            
-        }else if(opCount<4 && cache.get((lookup[0] << 16) + (lookup[1] << 8) + lookup[2])!=null){
-            
-            isCached=true;
-            
-            final Integer val=cache.get((lookup[0] << 16) + (lookup[1] << 8) + lookup[2]);
-            final int rawValue = val;
-            final int r = ((rawValue >> 16) & 255);
-            final int g = ((rawValue >> 8) & 255);
-            final int b = ((rawValue) & 255);
-            
-            altCS.currentColor=new PdfColor(r,g,b);
-            
-        }else if(this.cmykMapping==CMYB && opCount==4){ //special case coded in
-            
-            final float[] newOp={raw[0],raw[1],raw[2],raw[3]};
-            altCS.setColor(newOp,newOp.length);
-        }else if(this.cmykMapping==MYK && opCount==3){ //special case coded in
-            
-            final float[] newOp={0.0f,raw[0],raw[1],raw[2]};
-            altCS.setColor(newOp,newOp.length);
-            
-        }else if(this.cmykMapping==CMY && opCount==3){ //special case coded in
-            
-            final float[] newOp={raw[0],raw[1],raw[2],0.0f};
-            altCS.setColor(newOp,newOp.length);
-            
-        }else if(this.cmykMapping==CMK && opCount==3){ //special case coded in
-            
-            final float[] newOp={raw[0],raw[1],0f, raw[2]};
-            altCS.setColor(newOp,newOp.length);
-            
-        }else if(this.cmykMapping==CY && opCount==2){ //special case coded in
-            
-            final float[] newOp={raw[0],0,raw[1], 0};
-            altCS.setColor(newOp,newOp.length);
-            
-        }else if(this.cmykMapping==CM && opCount==2){ //special case coded in
-            
-            final float[] newOp={raw[0],raw[1],0, 0};
-            altCS.setColor(newOp,newOp.length);
-        }else if(this.cmykMapping==MY && opCount==2){ //special case coded in
-            
-            final float[] newOp={0,raw[0],raw[1], 0};
-            altCS.setColor(newOp,newOp.length);
-            
-        }else{
-            
-            final float[] operand =colorMapper.getOperandFloat(raw);
-            altCS.setColor(operand,operand.length);
-            
-        }
-        
-        if(!isCached){ //not used except as flag
-            
-            altCS.getColor().getRGB();
-            final int rawValue = altCS.getColor().getRGB();
-            
-            //store values in cache
-            cache.put((lookup[0] << 16) + (lookup[1] << 8) + lookup[2], rawValue);
-            
-        }
+    public void setColor(final float[] raw, final int opCount) {        
+        if (oldValues != null && isSame(raw, oldValues)) {
+
+        } else {
+            final float[] operand = colorMapper.getOperandFloat(raw);
+            altCS.setColor(operand, operand.length);
+            oldValues = raw.clone();
+        }        
     }
     
     /**
@@ -163,23 +91,8 @@ public class DeviceNColorSpace extends SeparationColorSpace {
     @Override
     public BufferedImage  dataToRGB(final byte[] data, final int w, final int h) {
         
-        BufferedImage image;
-        
-      //  try {
-            
-            //convert data
-            image=createImage(w, h, data);
-            
-//        } catch (final  ee) {
-//            image = null;
-//            
-//            if(LogWriter.isOutput()) {
-//                LogWriter.writeLog("Couldn't convert DeviceN colorspace data: " + ee);
-//            }
-//        }
-        
-        return image;
-        
+        return createImage(w, h, data);
+
     }
     
     /**
@@ -189,30 +102,20 @@ public class DeviceNColorSpace extends SeparationColorSpace {
     public BufferedImage JPEGToRGBImage(final byte[] data, final int ww, final int hh, final int pX, final int pY) {
         
         BufferedImage image=null;
-        
-    //    try{
-            
-            Raster ras= JPEGDecoder.getRasterFromJPEG(data, "JPEG");
-            
-            if(ras!=null){
-                ras=cleanupRaster(ras,pX,pY, componentCount);
-                final int w=ras.getWidth();
-                final int h=ras.getHeight();
-                
-                final DataBufferByte rgb = (DataBufferByte) ras.getDataBuffer();
-                
-                //convert the image
-                image=createImage(w, h, rgb.getData());
-            }
-//        } catch (final Exception ee) {
-//            
-//            if(LogWriter.isOutput()) {
-//                LogWriter.writeLog("Couldn't read JPEG, not even raster: " + ee);
-//            }
-//            
-//            ee.printStackTrace();
-//        }
-        
+
+        Raster ras= JPEGDecoder.getRasterFromJPEG(data, "JPEG");
+
+        if(ras!=null){
+            ras=cleanupRaster(ras,pX,pY, componentCount);
+            final int w=ras.getWidth();
+            final int h=ras.getHeight();
+
+            final DataBufferByte rgb = (DataBufferByte) ras.getDataBuffer();
+
+            //convert the image
+            image=createImage(w, h, rgb.getData());
+        }
+
         return image;
     }
     
@@ -232,7 +135,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
         final int byteCount= rawData.length/componentCount;
         
         final float[] values=new float[componentCount];
-        
+                
         int j=0,j2=0;
         
         for(int i=0;i<byteCount;i++){
@@ -245,7 +148,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
                 values[comp]=((rawData[j] & 255)/255f);
                 j++;
             }
-            
+
             setColor(values,componentCount);
             
             //set values
@@ -267,6 +170,15 @@ public class DeviceNColorSpace extends SeparationColorSpace {
         image.setData(raster);
         
         return image;
+    }
+    
+    private static boolean isSame(float[]a , float []b){
+        for (int i = 0; i < a.length; i++) {
+            if(a[i]!= b[i]){
+                return false;
+            }
+        }
+        return true;
     }
     
     public byte[] getRGBBytes(final byte[] rawData,final int w, final int h) {             

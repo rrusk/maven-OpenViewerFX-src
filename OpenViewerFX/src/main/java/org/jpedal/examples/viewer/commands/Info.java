@@ -54,8 +54,6 @@ public class Info {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             getInfoBox(currentGUI);
-        } else {
-
         }
     }
 

@@ -43,8 +43,6 @@ public class Preferences {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             new SwingProperties(currentGUI);
-        } else {
-
         }
     }
 }

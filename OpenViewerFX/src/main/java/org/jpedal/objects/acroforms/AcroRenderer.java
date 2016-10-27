@@ -63,7 +63,7 @@ import org.jpedal.utils.StringUtils;
  */
 public class AcroRenderer{
     
-    public static boolean FROM_JPDF2FORMS = false;
+    public static boolean FROM_JPDF2FORMS;
     
     FormObject[] Fforms, Aforms;
     
@@ -720,17 +720,15 @@ public class AcroRenderer{
                     }
 
                     if (formObject != null && (formsCreated.get(formObject.getObjectRefAsString())==null) && page==formObject.getPageNumber()){// && !formObject.getObjectRefAsString().equals("216 0 R")){
-                        //String OEPROPval=formObject.getTextStreamValue(PdfDictionary.EOPROPtype);
                         final int type=formFactory.getType();
-                                
-                        //NOTE: if this custom form needs redrawing more change ReadOnlyTextIcon.MAXSCALEFACTOR to 1;
-                        if((formsRasterizedForDisplay() && current!=null) || (type == FormFactory.SVG)){// || OEPROPval!=null){
-                            
+                       
+                        //NOTE: if this custom form needs redrawing more changediff ReadOnlyTextIcon.MAXSCALEFACTOR to 1;
+                        if((formsRasterizedForDisplay() && current!=null)  || type == FormFactory.SVG || 
+                                (formFactory.flattenForms() && !AcroRenderer.isAnnotation(formObject))){
+
                             //rasterize any flattened PDF forms here
                             try {
-                               // current.drawFlattenedForm(formObject,false);
-                                getFormFlattener().drawFlattenedForm(current, formObject, type == FormFactory.HTML || type == FormFactory.SVG, (PdfObject) this.getFormResources()[0]);
-                            
+                               getFormFlattener().drawFlattenedForm(current, formObject, type == FormFactory.HTML || type == FormFactory.SVG, (PdfObject) this.getFormResources()[0]);                            
                             }catch( final PdfException e ){
                                 LogWriter.writeLog("Exception: " + e.getMessage());
                             }
@@ -743,7 +741,7 @@ public class AcroRenderer{
                             formsCreated.put(formObject.getObjectRefAsString(), "x");
                             
                             //original method we still use for HTML/SVG
-                            if(this.formFactory.getType()==FormFactory.HTML || this.formFactory.getType()==FormFactory.SVG || this.formFactory.getType()==FormFactory.JAVAFX){
+                            if(type==FormFactory.HTML || type==FormFactory.SVG || type==FormFactory.JAVAFX){
                                 sortedForms.add(formObject);
                             
                                 //neede in display to fix position issues
@@ -966,7 +964,7 @@ public class AcroRenderer{
                 final String parent=formObject.getStringKey(PdfDictionary.Parent);
                 
                 if(parent!=null){
-                    final PdfObject parentObj = getParent(parent);
+                    final PdfObject parentObj = getParent(parent, null);
                     
                     pageObj=parentObj.getDictionary(PdfDictionary.P);
                     if(pageObj!=null) {
@@ -1030,8 +1028,19 @@ public class AcroRenderer{
             
             //clone parent to allow inheritance of values or create new
             if(parent!=null){
-                final FormObject parentObj = getParent(parent);
+                final FormObject parentObj = getParent(parent, formObject);
                 
+                /*
+                 * Getting the parent will also make any associated popup objects.
+                 * If this is a popup the parent will instead make a copy so that
+                 * we have a copy in annot list and one in form object. This is causing
+                 * issue in annotation saving and deletion.
+                 */
+                //Overwrite created popup here with the one we already have.
+                if (formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Popup) {
+                    parentObj.setDictionary(PdfDictionary.Popup, formObject);
+                }
+
                 //inherited values
                 if(parentObj!=null){
                     //all values are copied from the parent inside this call
@@ -1068,7 +1077,7 @@ public class AcroRenderer{
         return i;
     }
     
-    private FormObject getParent(final String parent) {
+    private FormObject getParent(final String parent, FormObject formObj) {
         
         FormObject parentObj= compData.getRawFormData().get(parent);
         
@@ -1082,6 +1091,12 @@ public class AcroRenderer{
             compData.storeRawData(parentObj);
             
         }
+        
+        if(parentObj!=null && formObj!=null){
+            final byte[][] kidsInParent=parentObj.getRawKids();
+            formObj.setRawKids(kidsInParent);
+        }
+            
         return parentObj;
     }
     
@@ -1328,7 +1343,7 @@ public class AcroRenderer{
             case EMBEDDED_FILES:
                 
                 if(currentPdfFile.getNamesLookup()==null){
-                    return null;
+                    return new Object[]{};
                 }
                 return currentPdfFile.getNamesLookup().getEmbeddedFiles();
 

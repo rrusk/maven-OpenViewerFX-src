@@ -85,7 +85,7 @@ public class GenericColorSpace {
     float[] W;
     float[] G;
     float[] Ma;
-    //private float[] B;
+    float[] B;
     float[] R;
     
     /**defines rgb colorspace*/
@@ -1106,7 +1106,7 @@ public class GenericColorSpace {
     /**
      * create a CIE values for conversion to RGB colorspace
      */
-    public final void setCIEValues(final float[] W, final float[] R, final float[] Ma, final float[] G){
+    public final void setCIEValues(final float[] W, final float[] B, final float[] R, final float[] Ma, final float[] G){
         
         cs = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
         
@@ -1114,7 +1114,7 @@ public class GenericColorSpace {
         this.G = G;
         this.Ma = Ma;
         this.W = W;
-        //this.B = B;
+        this.B = B;
         this.R = R;
         
     }

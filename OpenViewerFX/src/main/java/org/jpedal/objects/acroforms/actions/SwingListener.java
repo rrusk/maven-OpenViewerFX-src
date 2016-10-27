@@ -96,7 +96,7 @@ public class SwingListener extends PDFListener implements MouseListener, KeyList
         handler.A(e, formObject, ActionHandler.MOUSEENTERED);
         handler.E(e, formObject);
         
-        if (formObject.getCharacteristics()[8]) {//togglenoView
+        if (formObject.getCharacteristics()[8] && formObject.getGUIComponent()!=null) {//togglenoView
             ((Component)formObject.getGUIComponent()).setVisible(true);
         }
         
@@ -111,7 +111,7 @@ public class SwingListener extends PDFListener implements MouseListener, KeyList
         handler.A(e, formObject, ActionHandler.MOUSEEXITED);
         handler.X(e, formObject);
         
-        if (formObject.getCharacteristics()[8]) {//togglenoView
+        if (formObject.getCharacteristics()[8] && formObject.getGUIComponent()!=null) {//togglenoView
             ((Component)formObject.getGUIComponent()).setVisible(false);
         }
         

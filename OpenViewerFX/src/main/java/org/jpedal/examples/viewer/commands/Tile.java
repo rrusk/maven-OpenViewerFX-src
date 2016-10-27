@@ -46,8 +46,6 @@ public class Tile {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             tile(currentGUI);
-        } else {
-
         }
 
     }

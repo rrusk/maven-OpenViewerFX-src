@@ -35,14 +35,13 @@ package org.jpedal.parser;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 import org.jpedal.exception.PdfException;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.TextState;
 import org.jpedal.objects.acroforms.creation.AnnotationFactory;
 import org.jpedal.objects.acroforms.overridingImplementations.ReadOnlyTextIcon;
 import org.jpedal.objects.raw.FormObject;
+import org.jpedal.objects.raw.FormStream;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.mask.MaskUtils;
@@ -95,59 +94,19 @@ public class FormFlattener {
         PdfObject imgObj = null;
 
         final PdfObject APobjN = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
-        Map otherValues=new HashMap();
-        if(APobjN!=null){
-            otherValues=APobjN.getOtherDictionaries();
+        
+        if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
+
+            final String defaultState = form.getName(PdfDictionary.AS);
+            final Object[] values= FormStream.getNormalKeyValues(form);
+            if (defaultState != null && defaultState.equals(((FormObject)form).getNormalOnState())) {
+                ((FormObject)form).setNormalOnState((String) values[0]);
+                imgObj =(PdfObject) values[1];
+            }else{
+                imgObj =(PdfObject) values[2];
+            } 
         }
-
-        final String defaultState = form.getName(PdfDictionary.AS);
-        if (defaultState != null && defaultState.equals(((FormObject)form).getNormalOnState())) {
-            //use the selected appearance stream
-            if(APobjN.getDictionary(PdfDictionary.On) !=null){
-                imgObj = APobjN.getDictionary(PdfDictionary.On);
-            }else if(APobjN.getDictionary(PdfDictionary.Off) !=null && defaultState != null && defaultState.equals("Off")){
-                imgObj = APobjN.getDictionary(PdfDictionary.Off);
-            }else if(otherValues!=null && defaultState != null){
-
-                imgObj=(PdfObject)otherValues.get(defaultState);
-            }else {
-                if(otherValues!=null && !otherValues.isEmpty()){
-                    /*final Iterator keys=otherValues.keySet().iterator();
-                    final PdfObject val;
-                    final String key;
-                    //while(keys.hasNext()){
-                    key=(String)keys.next();
-                    val=(PdfObject)otherValues.get(key);
-                    //System.out.println("key="+key+" "+val.getName(PdfDictionary.AS));
-                    imgObj = val;
-                    /**/
-                    imgObj=(PdfObject) otherValues.entrySet().iterator().next();
-                    //}
-                }
-            }
-        }else {
-            //use the normal appearance Stream
-            if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
-
-                //if we have a root stream then it is the off value
-                //check in order of N Off, MK I, then N
-                //as N Off overrides others and MK I is in preference to N
-                if(APobjN!=null && APobjN.getDictionary(PdfDictionary.Off) !=null){
-                    imgObj = APobjN.getDictionary(PdfDictionary.Off);
-
-                }else if(form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null
-                        && form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.IF)==null){
-                    //look here for MK IF
-                    //if we have an IF inside the MK then use the MK I as some files shown that this value is there
-                    //only when the MK I value is not as important as the AP N.
-                    imgObj = form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I);
-
-                }else if(APobjN!=null && APobjN.getDecodedStream()!=null){
-                    imgObj = APobjN;
-                }
-            }
-        }
-
+       
         /*
          * we have some examples where no text inside AP datastream so we ignore in this case
          * and use the text
@@ -159,7 +118,8 @@ public class FormFlattener {
             if(formData!=null){
                 final String str=new String(formData);
 
-                if(str.contains("BMC")&& !str.contains("BT")) {
+                //if((str.contains("BMC")&& !str.contains("BT"))) {
+                if(str.isEmpty() || (str.contains("BMC")&& !str.contains("BT"))) {
                     imgObj = null;
                 }
             }
@@ -413,13 +373,13 @@ public class FormFlattener {
             if (imgObj != null &&
                     form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Widget &&
                     form.getNameAsConstant(PdfDictionary.FT) != PdfDictionary.Sig) {
-                float[] values = imgObj.getFloatArray(PdfDictionary.BBox);
-                if (values != null) {
-                    float xScale = (BBox[2] - BBox[0]) / (values[2] - values[0]);
+                float[] values2 = imgObj.getFloatArray(PdfDictionary.BBox);
+                if (values2 != null) {
+                    float xScale = (BBox[2] - BBox[0]) / (values2[2] - values2[0]);
                     if (xScale < 0) {
                         xScale = -xScale;
                     }
-                    float yScale = (BBox[3] - BBox[1]) / (values[3] - values[1]);
+                    float yScale = (BBox[3] - BBox[1]) / (values2[3] - values2[1]);
                     if (yScale < 0) {
                         yScale = -yScale;
                     }

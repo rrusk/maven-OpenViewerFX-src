@@ -151,4 +151,12 @@ public abstract class GenericFormFactory {
     public static boolean isButtonForm(final int formType){
         return formType==FormFactory.RADIOBUTTON || formType==FormFactory.CHECKBOXBUTTON;
     }
+    
+    /**
+     * used in HTML modes to signal if forms rasterized
+     * @return 
+     */
+    public boolean flattenForms(){
+        return false;
+    }
 }

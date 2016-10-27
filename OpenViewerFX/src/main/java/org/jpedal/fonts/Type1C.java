@@ -2430,7 +2430,7 @@ public class Type1C extends Type1{
         
         /**/
 		//handle CIDS first
-        if(hasCIDToGIDMap){ //see 22986
+        if(hasCIDToGIDMap || (isCIDFont && charset>3000)){ //see 22986 and 27074
 			glyphNames = new int[nGlyphs];
 			glyphNames[0] = 0;
 
@@ -2522,7 +2522,7 @@ public class Type1C extends Type1{
                          glyphNames[i++] =c++;
                      }
                  }
-             }
+			}
          }
          
          return glyphNames;

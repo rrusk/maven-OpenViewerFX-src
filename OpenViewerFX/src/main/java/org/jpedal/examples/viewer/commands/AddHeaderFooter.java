@@ -73,13 +73,11 @@ public class AddHeaderFooter {
                     final PdfPageData currentPageData = decode_pdf.getPdfPageData();
 
                     decode_pdf.closePdfFile();
-                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
+//                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
                     ItextFunctions.addHeaderFooter(commonValues.getPageCount(), currentPageData, addHeaderFooter);
                     OpenFile.open(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
                 }
             }
-        } else {
-
         }
     }
 }

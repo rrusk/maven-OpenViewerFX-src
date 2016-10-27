@@ -46,8 +46,6 @@ public class Cascade {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             cascade(currentGUI);
-        } else {
-
         }
 
     }

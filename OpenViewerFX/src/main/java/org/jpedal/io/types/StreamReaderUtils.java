@@ -27,7 +27,7 @@
 
  *
  * ---------------
- * ArrayUtils.java
+ * StreamReaderUtils.java
  * ---------------
  */
 package org.jpedal.io.types;
@@ -35,11 +35,12 @@ package org.jpedal.io.types;
 import org.jpedal.exception.PdfSecurityException;
 import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.utils.LogWriter;
+import org.jpedal.utils.NumberUtils;
 
 /**
  *
  */
-public class ArrayUtils {
+public class StreamReaderUtils {
     
     
     static boolean handleIndirect(final byte[] raw, int aa){
@@ -70,8 +71,29 @@ public class ArrayUtils {
         return indirect;
     }
 
+    public static int findDictionaryEnd(int jj, final byte[] raw, final int length) {
 
-    public static int skipToEndOfRef(int i, final byte[] raw) {
+        int keyLength=0;
+        while (true) { //get key up to space or [ or / or ( or < or carriage return
+
+            if (raw[jj] == 32 || raw[jj] == 13 || raw[jj] == 9 || raw[jj] == 10 || raw[jj] == 91 ||
+                    raw[jj]==47 || raw[jj]==40 || raw[jj]==60 || raw[jj]==62) {
+                break;
+            }
+
+            jj++;
+            keyLength++;
+
+            if(jj==length) {
+                break;
+            }
+        }
+        return keyLength;
+    }
+
+
+
+    public static int skipToEndOfRef(final byte[] raw, int i) {
 
         byte b=raw[i];
         while(b!=10 && b!=13 && b!=32 && b!=47 && b!=60 && b!=62){
@@ -165,10 +187,19 @@ public class ArrayUtils {
         final int len=data.length;
         
         //now skip any spaces to key or text
-        while(start<len && (data[start]==10 || data[start]==13 || data[start]==32)) {
+        while(start<len && (data[start]==10 || data[start]==13 || data[start]==32 || data[start]==9)) {
             start++;
         }
 
+        return start;
+    }
+    
+    public static int skipSpacesOrOtherCharacter(final byte[] data, int start, int character) {
+        final int length = data.length;
+        
+        while (start < length && (data[start]==10 || data[start]==13 || data[start]==32 || data[start]==9 || data[start]==character)) {
+            start++;
+        }
         return start;
     }
     
@@ -278,6 +309,31 @@ public class ArrayUtils {
             start++;
         }
         return start;
+    }
+
+    public static int[] readRefFromStream(final byte[] raw, int ptr) {
+        
+        final int startI = ptr;
+
+        //move cursor to end of ref
+        ptr = StreamReaderUtils.skipToEndOfRef(raw,ptr);
+        
+        //actual value or first part of ref
+        final int ref = NumberUtils.parseInt(startI, ptr, raw);
+
+        ptr=StreamReaderUtils.skipSpaces(raw, ptr);
+
+        // get generation number
+        int keyStart = ptr;
+
+        //move cursor to end of reference
+        ptr = StreamReaderUtils.skipToEndOfRef(raw,ptr);
+
+        final int generation = NumberUtils.parseInt(keyStart, ptr, raw);
+
+        ptr=StreamReaderUtils.skipSpaces(raw, ptr);
+        
+        return new int[]{ref,generation,ptr};
     }
 }
 

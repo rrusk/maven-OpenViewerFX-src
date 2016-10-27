@@ -59,7 +59,7 @@ public class Javascript {
     /**default to handle commands*/
     private ExpressionEngine jsParser;
     
-    private boolean actionsExecuted=false;
+    private boolean actionsExecuted;
 
 	private static boolean useNewJSParser;
 	private static boolean disableJavascript;

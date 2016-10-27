@@ -32,7 +32,6 @@
  */
 package org.jpedal.io.security;
 
-import java.lang.reflect.Field;
 import java.security.Key;
 import java.security.cert.Certificate;
 import javax.crypto.Cipher;
@@ -49,7 +48,7 @@ public class JCADecryption implements BaseDecryption {
     
     @Override
     public byte[] v5Decrypt(final byte[] rawValue, final byte[] encKey) throws PdfSecurityException {
-        byte[] returnKey = null;
+        byte[] returnKey;
 
         try {
             final SecretKeySpec key = new SecretKeySpec(encKey, "AES");
@@ -79,13 +78,13 @@ public class JCADecryption implements BaseDecryption {
     }
 
     private void allowBiggerKeySize() {
-        try {
-            final Field field = Class.forName("javax.crypto.JceSecurity").getDeclaredField("isRestricted");
-            field.setAccessible(true);
-            field.set(null, java.lang.Boolean.FALSE);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+//        try {
+//            final Field field = Class.forName("javax.crypto.JceSecurity").getDeclaredField("isRestricted");
+//            field.setAccessible(true);
+//            field.set(null, java.lang.Boolean.FALSE);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
     }
 
     @Override

@@ -444,6 +444,10 @@ public class DocInfo {
 
                 String current = FontMappings.fontSubstitutionLocation.get(nextFont);
 
+                if(!FontMappings.fontPropertiesTablePath.containsKey(current)){
+                    continue;
+                }
+                
                 if (sortFontsByDir) {
                     int ptr = current.lastIndexOf(System.getProperty("file.separator"));
                     if (ptr == -1 && current.indexOf('/') != -1) {
@@ -777,18 +781,18 @@ public class DocInfo {
     }
 
     private static void addDetailsToCurrentNode(DefaultMutableTreeNode currentFontNode, String nextFont) {
-           final String loc = FontMappings.fontPropertiesTablePath.get(nextFont);
-                    final Integer type = FontMappings.fontPropertiesTableType.get(nextFont);
+        final String loc = FontMappings.fontPropertiesTablePath.get(nextFont);
+        final Integer type = FontMappings.fontPropertiesTableType.get(nextFont);
 
-                    final Map<String, String> properties = StandardFonts.getFontDetails(type, loc);
-                    if (properties != null) {
+        final Map<String, String> properties = StandardFonts.getFontDetails(type, loc);
+        if (properties != null) {
 
-                        for (final String key : properties.keySet()) {
-                            final String value = properties.get(key);
-                            final DefaultMutableTreeNode FontDetails = new DefaultMutableTreeNode(key + " = " + value);
-                            currentFontNode.add(FontDetails);
-                        }
-                    }
+            for (final String key : properties.keySet()) {
+                final String value = properties.get(key);
+                final DefaultMutableTreeNode FontDetails = new DefaultMutableTreeNode(key + " = " + value);
+                currentFontNode.add(FontDetails);
+            }
+        }
     }
 
 }

@@ -63,13 +63,11 @@ public class Nup {
                     final PdfPageData currentPageData = decode_pdf.getPdfPageData();
 
                     //decode_pdf.closePdfFile();
-                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
+//                    final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
                     ItextFunctions.nup(commonValues.getPageCount(), currentPageData, nup);
                     //open(commonValues.getSelectedFile());
                 }
             }
-        } else {
-
         }
     }
 }

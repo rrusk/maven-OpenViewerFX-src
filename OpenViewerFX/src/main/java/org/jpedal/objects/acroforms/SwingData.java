@@ -46,6 +46,7 @@ import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import org.jpedal.display.Display;
 import org.jpedal.external.CustomFormPrint;
+import org.jpedal.objects.acroforms.creation.AnnotationFactory;
 import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.acroforms.creation.JPedalBorderFactory;
 import org.jpedal.objects.acroforms.overridingImplementations.CustomImageIcon;
@@ -377,21 +378,21 @@ public class SwingData extends GUIData {
         if (formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Text) {
 
             final String name = formObject.getName(PdfDictionary.Name);
-            
+
             if (name != null && name.equals("Comment")) {
                 /* Name of the icon image to use for the icon of this annotation
                  * - predefined icons are needed for names:-
                  * Comment, Key, Note, Help, NewParagraph, Paragraph, Insert
                  */
-                    try {
-                        final BufferedImage commentIcon = ImageIO.read(getClass().getResource("/org/jpedal/objects/acroforms/res/comment.png"));
-                        g2.drawImage(commentIcon, formObject.getBoundingRectangle().x, pageData.getCropBoxHeight(page) - formObject.getBoundingRectangle().y, formObject.getBoundingRectangle().width, formObject.getBoundingRectangle().height, null);
-                    } catch (final Exception e) {
-                        LogWriter.writeLog("Exception: " + e.getMessage());
-                    }
+                try {
+                    final BufferedImage commentIcon = ImageIO.read(getClass().getResource("/org/jpedal/objects/acroforms/res/comment.png"));
+                    g2.drawImage(commentIcon, formObject.getBoundingRectangle().x, pageData.getCropBoxHeight(page) - formObject.getBoundingRectangle().y, formObject.getBoundingRectangle().width, formObject.getBoundingRectangle().height, null);
+                } catch (final Exception e) {
+                    LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
-        
+        }
+
         if (formObject.getFloatArray(PdfDictionary.C) == null) {
             formObject.setFloatArray(PdfDictionary.C, new float[]{255, 255, 0});
         }
@@ -405,66 +406,73 @@ public class SwingData extends GUIData {
                 bgColor = new Color(col[0], col[1], col[2]);
             }
         }
-        
-        if (formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Popup &&
-             formObject.getBoolean(PdfDictionary.Open)){
-                FormRenderUtilsG2.renderPopupWindow(g2, formObject, bgColor, isPrinting, pageData.getCropBoxHeight(page));
-            }
-        
+
+        if (formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Popup
+                && formObject.getBoolean(PdfDictionary.Open)) {
+            FormRenderUtilsG2.renderPopupWindow(g2, formObject, bgColor, isPrinting, pageData.getCropBoxHeight(page));
+        }
+
         
         //Revert back font before continuing
         g2.setFont(backup);
+
         
-        /*
-         * Type must be Border W width in points (if 0 no border, default =1) S
-         * style - (default =S) S=solid, D=dashed (pattern specified by D entry
-         * below), B=beveled(embossed appears to above page), I=inset(engraved
-         * appeared to be below page), U=underline ( single line at bottom of
-         * boundingbox) D array phase - e.g. [a b] c means:- a=on blocks,b=off
-         * blocks(if not present default to a), c=start of off block preseded
-         * index is on block. i.e. [4] 6 :- 4blocks on 4blocks off, block[6] if
-         * off - 1=off 2=on 3=on 4=on 5=on 6=off 7=off 8=off 9=off etc...
-         *
-         */
-        int borderWidth = FormRenderUtilsG2.renderBorder(g2, formObject, pageData.getCropBoxHeight(page));
-        
-        //Revert back stroke before continuing
-        g2.setStroke(st);
-        
-        final String textValue = formObject.getValue();
-        if (textValue != null) {
-            
-            FontMetrics metrics = FormRenderUtilsG2.renderFont(g2, formObject, textValue, borderWidth);
-            
+        if (AcroRenderer.isAnnotation(formObject) && formObject.getParameterConstant(PdfDictionary.Subtype) != PdfDictionary.Widget) {
+            BufferedImage bi = AnnotationFactory.getIcon(formObject);
+            g2.drawImage(bi, formObject.getBoundingRectangle().x, pageData.getCropBoxHeight(page)-(formObject.getBoundingRectangle().y+formObject.getBoundingRectangle().height), null);
+        } else {
+
+            /*
+             * Type must be Border W width in points (if 0 no border, default =1) S
+             * style - (default =S) S=solid, D=dashed (pattern specified by D entry
+             * below), B=beveled(embossed appears to above page), I=inset(engraved
+             * appeared to be below page), U=underline ( single line at bottom of
+             * boundingbox) D array phase - e.g. [a b] c means:- a=on blocks,b=off
+             * blocks(if not present default to a), c=start of off block preseded
+             * index is on block. i.e. [4] 6 :- 4blocks on 4blocks off, block[6] if
+             * off - 1=off 2=on 3=on 4=on 5=on 6=off 7=off 8=off 9=off etc...
+             *
+             */
+            int borderWidth = FormRenderUtilsG2.renderBorder(g2, formObject, pageData.getCropBoxHeight(page));
+
+            //Revert back stroke before continuing
+            g2.setStroke(st);
+
+            final String textValue = formObject.getValue();
+            if (textValue != null) {
+
+                FontMetrics metrics = FormRenderUtilsG2.renderFont(g2, formObject, textValue, borderWidth);
+
             //Text is drawn from the baseline so inorder to draw the highlights 
-            //correctly we need to add te fonts decent
-            int justification = formObject.getAlignment();
-            Rectangle2D r = metrics.getStringBounds(textValue, g2);
-            
-            //Always center button output
-            if (formObject.getFieldFlags()[FormObject.PUSHBUTTON_ID]) {
-                justification = 0;
-            }
+                //correctly we need to add te fonts decent
+                int justification = formObject.getAlignment();
+                Rectangle2D r = metrics.getStringBounds(textValue, g2);
 
-            if (formObject.getObjectArray(PdfDictionary.Opt) != null && !formObject.getFieldFlags()[FormObject.COMBO_ID]) {
-                FormRenderUtilsG2.renderComboForms(g2, formObject, metrics, r, borderWidth, justification, pageData.getCropBoxHeight(page));
-            } else {
-                if (!textValue.isEmpty()) {
-                    g2.setClip(new Rectangle(formObject.getBoundingRectangle().x + borderWidth - 1,
-                            pageData.getCropBoxHeight(page) - (formObject.getBoundingRectangle().y + formObject.getBoundingRectangle().height) + borderWidth - 1,
-                            formObject.getBoundingRectangle().width - (borderWidth * 2) + 2,
-                            formObject.getBoundingRectangle().height - (borderWidth * 2) + 2));
+                //Always center button output
+                if (formObject.getFieldFlags()[FormObject.PUSHBUTTON_ID]) {
+                    justification = 0;
+                }
 
-                    if (formObject.getFieldFlags()[FormObject.MULTILINE_ID]) {
-                        FormRenderUtilsG2.renderMultilineTextField(g2, formObject, metrics, r, textValue, borderWidth, justification, pageData.getCropBoxHeight(page));
-                    } else { //Single Line Field
-                        FormRenderUtilsG2.renderSingleLineTextField(g2, formObject, metrics, r, textValue, borderWidth, justification, pageData.getCropBoxHeight(page));
+                if (formObject.getObjectArray(PdfDictionary.Opt) != null && !formObject.getFieldFlags()[FormObject.COMBO_ID]) {
+                    FormRenderUtilsG2.renderComboForms(g2, formObject, metrics, r, borderWidth, justification, pageData.getCropBoxHeight(page));
+                } else {
+                    if (!textValue.isEmpty()) {
+                        g2.setClip(new Rectangle(formObject.getBoundingRectangle().x + borderWidth - 1,
+                                pageData.getCropBoxHeight(page) - (formObject.getBoundingRectangle().y + formObject.getBoundingRectangle().height) + borderWidth - 1,
+                                formObject.getBoundingRectangle().width - (borderWidth * 2) + 2,
+                                formObject.getBoundingRectangle().height - (borderWidth * 2) + 2));
+
+                        if (formObject.getFieldFlags()[FormObject.MULTILINE_ID]) {
+                            FormRenderUtilsG2.renderMultilineTextField(g2, formObject, metrics, r, textValue, borderWidth, justification, pageData.getCropBoxHeight(page));
+                        } else { //Single Line Field
+                            FormRenderUtilsG2.renderSingleLineTextField(g2, formObject, metrics, r, textValue, borderWidth, justification, pageData.getCropBoxHeight(page));
+                        }
                     }
                 }
             }
-        }
 
-        FormRenderUtilsG2.renderQuadPoint(g2, formObject, bgColor, pageData.getCropBoxHeight(page));
+            FormRenderUtilsG2.renderQuadPoint(g2, formObject, bgColor, pageData.getCropBoxHeight(page));
+        }
 
         g2.setTransform(ax);
         g2.setFont(backup);
@@ -1143,6 +1151,9 @@ public class SwingData extends GUIData {
                     }
                 }
             }
+            //Validate after adding components to ensure they appear.
+            //Popups will sometimes vanish otherwise.
+            panel.validate();
         }
     }
     

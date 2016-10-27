@@ -153,9 +153,9 @@ public class ImageDecoder extends BaseDecoder{
             if(indexData!=null && decodeColorData.getID()==ColorSpaces.DeviceRGB && width*height==objectData.length) {
                 
                 final PdfObject newMask = XObject.getDictionary(PdfDictionary.Mask);
-                if (newMask != null) {
+                final int[] maskArray = XObject.getIntArray(PdfDictionary.Mask);
                     
-                    final int[] maskArray = newMask.getIntArray(PdfDictionary.Mask);
+                if (newMask != null || maskArray!=null) {
                     
                     //this specific case has all zeros
                     if (maskArray != null && maskArray.length == 2 && maskArray[0] == 255 && maskArray[0] == maskArray[1] && decodeColorData.getIndexedMap() != null && decodeColorData.getIndexedMap().length == 768) {
@@ -195,7 +195,10 @@ public class ImageDecoder extends BaseDecoder{
         
 //          System.out.println("XObject="+XObject+" "+XObject.getObjectRefAsString());
         PdfObject newSMask=XObject.getDictionary(PdfDictionary.SMask);
+        
         final PdfObject newMask=XObject.getDictionary(PdfDictionary.Mask);
+        final int[] maskArray=XObject.getIntArray(PdfDictionary.Mask);
+       
         ImageData imageData=new ImageData(XObject, objectData);
         imageData.getFilter(XObject);
         GenericColorSpace decodeColorData = setupXObjectColorspace(XObject, imageData);
@@ -212,7 +215,7 @@ public class ImageDecoder extends BaseDecoder{
             decodeColorData=new DeviceRGBColorSpace();
             //imageData.setObjectData(objectData); 
             imageData=null;
-        }else if(newSMask!=null || newMask!=null){
+        }else if(newSMask!=null || newMask!=null || maskArray!=null){
             
             if(newSMask!=null && XObject.getInt(PdfDictionary.Width)==1 && XObject.getInt(PdfDictionary.Height)==1 && XObject.getInt(PdfDictionary.BitsPerComponent)==8){ //swap out the image with inverted SMask if empty
                
@@ -257,8 +260,7 @@ public class ImageDecoder extends BaseDecoder{
                 }else{ //mask
                     
                    byte[] index=decodeColorData.getIndexedMap();
-                   int[] maskArray=newMask.getIntArray(PdfDictionary.Mask);
-       
+                   
                     if(index!=null){
                         index=decodeColorData.convertIndexToRGB(index);
                         
@@ -274,7 +276,13 @@ public class ImageDecoder extends BaseDecoder{
                       //  imageData.setDepth(8);
                     }
                     ///WE NEED TO CONVERT JPG to raw DATA in mask as well
-                    ImageData maskImageData=new ImageData(newMask, objectData);
+                    ImageData maskImageData;
+                    if(newMask==null){
+                        maskImageData=new ImageData(XObject, objectData);
+                    }else{
+                        maskImageData=new ImageData(newMask, objectData);
+                    }
+                    
                     if(maskArray!=null){
                         return MaskDataDecoder.applyMaskArray(imageData, maskArray);
                     }                        
@@ -289,6 +297,7 @@ public class ImageDecoder extends BaseDecoder{
                     decodeColorData=new DeviceRGBColorSpace();
                         
                     XObject.setDictionary(PdfDictionary.Mask, null);
+                    XObject.setIntArray(PdfDictionary.Mask, null);
                     
                 }
                 //  String dest="/Users/markee/Desktop/deviceRGB/"+org.jpedal.DevFlags.currentFile.substring(org.jpedal.DevFlags.currentFile.lastIndexOf("/"));
@@ -491,7 +500,7 @@ public class ImageDecoder extends BaseDecoder{
         
         //@suda - image saved here is being saved out as garbage. Do we need to alter colorspace or issue in our image decoder.      
         //releate comment in JDeliHelper
-        if(objectStoreStreamRef.saveStoredImage("CLIP_"+currentImage, image, false, "png")) {
+        if(objectStoreStreamRef.saveStoredImageAsBytes("CLIP_"+currentImage, image, false)) {
             errorTracker.addPageFailureMessage("Problem saving " + image);
         }
         
@@ -564,7 +573,7 @@ public class ImageDecoder extends BaseDecoder{
         
         //
         if(parserOptions.isRawImagesExtracted()){
-            objectStoreStreamRef.saveStoredImage('R'+currentImage,image,false, "png");
+            objectStoreStreamRef.saveStoredImageAsBytes('R'+currentImage,image,false);
         }
          
         // get clipped image and co-ords
@@ -605,11 +614,7 @@ public class ImageDecoder extends BaseDecoder{
             
             //save the scaled/clipped version of image if allowed
             if(parserOptions.isFinalImagesExtracted()){
-
-                objectStoreStreamRef.saveStoredImage(
-                        currentImage,
-                        ImageCommands.addBackgroundToMask(image, isMask),
-                        false, "png");
+                objectStoreStreamRef.saveStoredImageAsBytes(currentImage,ImageCommands.addBackgroundToMask(image, isMask), false);
             }
         }     
     }
@@ -745,9 +750,9 @@ public class ImageDecoder extends BaseDecoder{
         }
         
         //apply any transfer function directly to data (does not work on DCT data)
-        final PdfObject TR=gs.getTR();
-        if(TR!=null){ //array of values
-            ImageCommands.applyTR(imageData, TR, currentPdfFile);
+        final Object[] TRvalues=gs.getTR();      
+        if(TRvalues!=null){ //array of values
+            ImageCommands.applyTR(imageData, TRvalues, currentPdfFile);
         }     
         
 
@@ -921,6 +926,7 @@ public class ImageDecoder extends BaseDecoder{
             imageData.setpY(pageData.getCropBoxHeight(parserOptions.getPageNumber()));
         }
         
+        final boolean hasMask=XObject.getRawObjectType()==PdfDictionary.Mask || XObject.getIntArray(PdfDictionary.Mask)!=null;
         /*
          * turn off all scaling and allow user to control if switched off or HTML/svg/JavaFX
          * (we still trap very large images in these cases as they blow away the
@@ -929,7 +935,7 @@ public class ImageDecoder extends BaseDecoder{
         final int maxHTMLImageSize=4000;
         if((w<maxHTMLImageSize && h<maxHTMLImageSize &&
                 current.isHTMLorSVG() &&
-                (imageData.getDepth()!=1 || XObject.getRawObjectType()!=PdfDictionary.Mask))){
+                (imageData.getDepth()!=1 || !hasMask))){
             imageData.setpX(-1);
             imageData.setpY(1);
         }
@@ -941,7 +947,7 @@ public class ImageDecoder extends BaseDecoder{
         }
         
         //avoid for scanned text
-        if(imageData.getDepth()==1 && (XObject.getObjectType()!=PdfDictionary.Mask) &&
+        if(imageData.getDepth()==1 && !hasMask &&
                 decodeColorData.getID()== ColorSpaces.DeviceGray && imageData.getHeight()<300){
             
             imageData.setpX(0);

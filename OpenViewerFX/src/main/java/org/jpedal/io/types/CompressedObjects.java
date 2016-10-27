@@ -63,11 +63,7 @@ public class CompressedObjects {
             }
 
             //ignore any gaps between entries
-            //(for loop assumes single char and not always correct)
-            while(compressedStream[ii]==10 || compressedStream[ii]==13 || compressedStream[ii]==32) {
-                ii++;
-            }
-
+            ii = StreamReaderUtils.skipSpaces(compressedStream, ii);
             /*work out key size*/
             startKey=ii;
             
@@ -94,10 +90,7 @@ public class CompressedObjects {
             id= NumberUtils.parseInt(startKey, startKey + length, compressedStream);
                 
             /*move to offset*/
-            while(compressedStream[ii]==32 || compressedStream[ii]==13 || compressedStream[ii]==10) {
-                ii++;
-            }
-
+            ii = StreamReaderUtils.skipSpaces(compressedStream, ii);
             /*get size*/
             startOff=ii;
             while((compressedStream[ii]!=32 && compressedStream[ii]!=13 && compressedStream[ii]!=10)&&(ii<First)){

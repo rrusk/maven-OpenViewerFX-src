@@ -34,7 +34,7 @@ package org.jpedal.objects.raw;
 
 import java.util.Arrays;
 import org.jpedal.fonts.StandardFonts;
-import org.jpedal.io.types.ArrayUtils;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.utils.NumberUtils;
 
 /**
@@ -172,7 +172,7 @@ public class PdfArrayIterator {
 			currentToken++;
 			
 			//return null as 0
-			if(ArrayUtils.isNull(raw,0)) {
+			if(StreamReaderUtils.isNull(raw,0)) {
                 return 0;
             } else {
                 return NumberUtils.parseFloat(0, raw.length, raw);
@@ -232,7 +232,7 @@ public class PdfArrayIterator {
 			currentToken++;
 
 			//return null as 0
-			if(ArrayUtils.isNull(raw,0)) {
+			if(StreamReaderUtils.isNull(raw,0)) {
                 return new float[1];
             } else{
 
@@ -449,5 +449,35 @@ public class PdfArrayIterator {
         }
 
         currentToken=0;
+    }
+
+    public boolean isNextValueNumber() {
+        boolean isNumber;
+		
+		if(currentToken<tokenCount){
+			
+			//allow for non-valid
+			if(rawData==null || rawData[currentToken]==null || rawData[currentToken].length==0) {
+                return false;
+            }
+			
+            isNumber=true;
+			final byte[] raw=rawData[currentToken];
+            int ptr=0;
+			for(byte r:raw){
+                if((r>='0' && r<='9') || (r=='/' && ptr==0)){ 
+                    //note we can get /1
+                }else{
+                    isNumber=false;
+                    break;
+                }
+                ptr++;
+            }
+
+		}else {
+            throw new RuntimeException("Out of range exception with PdfArrayIterator");
+        }
+		
+		return isNumber;
     }
 }

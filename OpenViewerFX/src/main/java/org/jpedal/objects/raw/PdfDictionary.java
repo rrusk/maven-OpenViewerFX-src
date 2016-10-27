@@ -1502,10 +1502,10 @@ public class PdfDictionary {
             case D:
                 if(type==PdfDictionary.MCID) {
                     return VALUE_IS_INT;
-                } else
-            	//if(type==PdfDictionary.OCProperties || type==PdfDictionary.Form)
-                {
-                    return PdfDictionary.VALUE_IS_DICTIONARY;
+                } else if(type==PdfDictionary.Form || type==PdfDictionary.Outlines) {
+                    return VALUE_IS_MIXED_ARRAY;
+                } else{
+                    return PdfDictionary.VALUE_IS_VARIOUS;
                 }
 
             case DA:
@@ -1924,7 +1924,8 @@ public class PdfDictionary {
                 return VALUE_IS_UNREAD_DICTIONARY;
 
             case Mask:
-                return VALUE_IS_DICTIONARY;
+                return VALUE_IS_VARIOUS;
+             //   return VALUE_IS_DICTIONARY;
 
             case Matrix:
                 return VALUE_IS_FLOAT_ARRAY;
@@ -1968,7 +1969,11 @@ public class PdfDictionary {
                         return VALUE_IS_INT;
                     case PdfDictionary.Form:
                     case PdfDictionary.MK:
-                        return VALUE_IS_VARIOUS;
+                        if(1==2){
+                            return VALUE_IS_DICTIONARY_PAIRS;
+                        }else{
+                            return VALUE_IS_VARIOUS;
+                        }
                     case Shading:
                         return VALUE_IS_FLOAT;
                     case XObject:
@@ -2199,7 +2204,11 @@ public class PdfDictionary {
 
             case R:
             	if(type==Form || type==PdfDictionary.MK) {
-                    return VALUE_IS_VARIOUS;
+                    if (1==2) {
+                        return VALUE_IS_DICTIONARY_PAIRS;
+                    } else {
+                        return VALUE_IS_VARIOUS;
+                    }
                 } else {
                     return VALUE_IS_INT;
                 }
@@ -2374,7 +2383,7 @@ public class PdfDictionary {
                 return VALUE_IS_DICTIONARY;
 
             case TR:
-                return VALUE_IS_DICTIONARY;
+                return VALUE_IS_VARIOUS;
 
             case Trapped:
                 return VALUE_IS_NAME;

@@ -1191,7 +1191,11 @@ public class JavaFXPreferences {
          */
         properties.setValue("enhancedViewerMode", String.valueOf(enhancedViewerCB.isSelected()));
         properties.setValue("enhanceFractionalLines", String.valueOf(enhancedFractionalLinesCB.isSelected()));
-        // properties.setValue("borderType", String.valueOf(showBorderCB.isSelected()));
+        int borderTypeValue = 1;
+        if (!showBorderCB.isSelected()){
+            borderTypeValue = 0;
+        }        
+         properties.setValue("borderType", String.valueOf(borderTypeValue));
         properties.setValue("pageInsets", String.valueOf(pageInsetsTF.getText()));
         // properties.setValue("startView", String.valueOf(displayCombo.getValue()));
         properties.setValue("enhancedFacingMode", String.valueOf(enablePageFlipCB.isSelected()));

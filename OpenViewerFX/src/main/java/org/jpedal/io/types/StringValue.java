@@ -46,11 +46,8 @@ public class StringValue {
     public static int setStringConstantValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
         
         i++;
-        
-        //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47) {
-            i++;
-        }
+
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
         
         final int keyStart=i;
         int keyLength=0;
@@ -78,11 +75,8 @@ public class StringValue {
     public static int setStringKeyValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
         
         i++;
-        
-        //move cursor to start of text
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47) {
-            i++;
-        }
+
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
         
         final int keyStart=i;
         int keyLength=1;
@@ -93,7 +87,7 @@ public class StringValue {
         while(raw[i]!='R' && !isNull){
             
             //allow for null for Parent
-            if(PDFkeyInt== PdfDictionary.Parent && ArrayUtils.isNull(raw,i)) {
+            if(PDFkeyInt== PdfDictionary.Parent && StreamReaderUtils.isNull(raw,i)) {
                 isNull = true;
             }
             

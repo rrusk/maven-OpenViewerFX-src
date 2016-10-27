@@ -322,6 +322,9 @@ public class FileAccess {
             final PdfFileReader objectReader=currentPdfFile.getObjectReader();
 
             final DecryptionFactory decryption=objectReader.getDecryptionObject();
+            if(decryption != null && decryption.getEncHash()!= null){
+                objectStoreRef.setEncHash(decryption.getEncHash().clone());
+            }            
             return decryption!=null && (decryption.getBooleanValue(PDFflags.IS_PASSWORD_SUPPLIED) || certificate!=null);
         }else {
             return false;

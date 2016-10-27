@@ -37,7 +37,11 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jpedal.examples.handlers.DefaultImageHelper;
+import org.jpedal.io.security.CryptoAES;
+import org.jpedal.io.security.TempStoreImage;
 import org.jpedal.render.SwingDisplay;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Strip;
@@ -139,6 +143,8 @@ public class ObjectStore {
     private final Map<Integer,Integer> imagesOnDiskAsBytespY=new HashMap<Integer,Integer>();
     private final Map<Integer, byte[]> imagesOnDiskMask= new HashMap<Integer, byte[]>();
     private final Map<Integer,Integer> imagesOnDiskColSpaceID=new HashMap<Integer,Integer>();
+    
+    private byte[] encHash;
 
     /**
      * ObjectStore -
@@ -324,6 +330,43 @@ public class ObjectStore {
         return isSuccessful;
     }/*/
 
+    public final boolean saveStoredImageAsBytes(String currentImage, BufferedImage image, final boolean file_name_is_path) {
+        FileOutputStream fos = null;
+        try {
+            String current_image = removeIllegalFileNameCharacters(currentImage);
+            final File checkDir = new File(temp_dir);
+            if (!checkDir.exists()) {
+                checkDir.mkdirs();
+            }
+            String fileName = currentImage+".jpl";
+            if (!file_name_is_path) {
+                image_type.put(current_image, "jpl");
+                fileName = temp_dir + key + current_image+".jpl";
+            }
+            
+            byte[] data = TempStoreImage.getBytes(image);
+//        encryption goes here
+            if(encHash != null){
+                CryptoAES aes = new CryptoAES();
+                data = aes.encrypt(encHash, data);
+            }           
+            fos = new FileOutputStream(fileName);
+            fos.write(data);
+            fos.close();
+            tempFileNames.put(fileName,"#");
+            return false;
+        } catch (Exception ex) {
+            Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return true;
+    }
+    
     /**
      * save buffered image as JPEG or tif
      *
@@ -424,6 +467,8 @@ public class ObjectStore {
             image = loadStoredJPEGImage(current_image);
         } else if (flag.equals("png")) {
             image = loadStoredImage(current_image, ".png");
+        } else if(flag.equals("jpl")){
+            image = loadStoredImage(current_image, ".jpl");
         }
 
         return image;
@@ -654,6 +699,31 @@ public class ObjectStore {
         current_image = removeIllegalFileNameCharacters(current_image);
 
         final String file_name = temp_dir + key + current_image + ending;
+                
+        if(ending.equals(".jpl")){
+            FileInputStream fis = null;
+            try {
+                File file = new File(file_name);
+                byte[] data= new byte[(int)file.length()];
+                fis = new FileInputStream(file_name);
+                fis.read(data);                
+                if(encHash != null){
+                    CryptoAES aes = new CryptoAES();
+                    data = aes.decrypt(encHash, data);
+                }
+                BufferedImage img = TempStoreImage.getImage(data);
+                return img;
+            } catch (Exception ex) {
+                Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    fis.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return null;
+        }
 
         //load the image to process
         return DefaultImageHelper.read(file_name);
@@ -723,7 +793,7 @@ public class ObjectStore {
         copy(from, to);
     }
 
-    public static void copy(final BufferedInputStream from, final BufferedOutputStream to) {
+    public static void copy(final InputStream from, final OutputStream to) {
         try{
             //write
             final byte[] buffer = new byte[65535];
@@ -903,10 +973,13 @@ public class ObjectStore {
                 final File fis=new File(cachedFile);
                 from = new BufferedInputStream(new FileInputStream(fis));
 
-                data=new byte[(int)fis.length()];
+                data=new byte[(int)fis.length()];                
                 from.read(data);
                 from.close();
-
+                
+                CryptoAES aes = new CryptoAES();
+                data = aes.decrypt(key.getBytes(), data);
+                
                 //
             } catch (final Exception e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
@@ -915,7 +988,7 @@ public class ObjectStore {
         return data;
     }
 
-    public static void cachePageAsBytes(final String key, final byte[] bytes) {
+    public static void cachePageAsBytes(final String key, byte[] bytes) {
 
         try {
 
@@ -932,6 +1005,10 @@ public class ObjectStore {
             final File ff=File.createTempFile("bytes",".bin", new File(ObjectStore.temp_dir));
 
             final BufferedOutputStream to = new BufferedOutputStream(new FileOutputStream(ff));
+            
+            CryptoAES aes = new CryptoAES();
+            bytes = aes.encrypt(key.getBytes(), bytes);
+            
             to.write(bytes);
             to.flush();
             to.close();
@@ -954,11 +1031,16 @@ public class ObjectStore {
 
         try {
             //System.out.println("ObjectStore.temp_dir="+ObjectStore.temp_dir);
-
+            
             final File ff=File.createTempFile("image",".bin", new File(ObjectStore.temp_dir));
 
             final BufferedOutputStream to = new BufferedOutputStream(new FileOutputStream(ff));
-            to.write(bytes);
+            if (encHash != null) {
+                CryptoAES aes = new CryptoAES();
+                to.write(aes.encrypt(encHash, bytes));
+            } else {
+                to.write(bytes);
+            }
             to.flush();
             to.close();
 
@@ -1022,6 +1104,10 @@ public class ObjectStore {
 
                 data=new byte[(int)fis.length()];
                 from.read(data);
+                if(encHash != null){
+                    CryptoAES aes = new CryptoAES();
+                    data = aes.decrypt(encHash, data);
+                }
                 from.close();
 
                 //
@@ -1123,5 +1209,9 @@ public class ObjectStore {
 
     public String getKey() {
         return key;
+    }
+
+    public void setEncHash(byte[] pass) {
+        this.encHash = pass;
     }
 }

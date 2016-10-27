@@ -152,7 +152,7 @@ public class Stream {
                 
                 boolean	isValid=false;
                 
-                if(setStreamLength!=-1){
+                if(setStreamLength>0){ //we also manually check if set to zero in PDF (case 27390)
                     
                     streamLength=setStreamLength;
                     

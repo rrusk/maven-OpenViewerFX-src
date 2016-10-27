@@ -86,7 +86,7 @@ public class ObjectDecoder implements Serializable {
         if(endPt==-1) {
             endPt = raw.length;
         }
-        
+         
         //used to debug issues by printing out details for obj
         //(set to non-final above)
         //debugFastCode =pdfObject.getObjectRefAsString().equals("5 0 R");
@@ -189,7 +189,7 @@ public class ObjectDecoder implements Serializable {
                 i++; //skip /
                 
                 final int keyStart=i;
-                final int keyLength= Dictionary.findDictionaryEnd(i, raw, length);
+                final int keyLength= StreamReaderUtils.findDictionaryEnd(i, raw, length);
                 i += keyLength;
                 
                 if(i==length) {
@@ -199,7 +199,7 @@ public class ObjectDecoder implements Serializable {
                 //if BDC see if string
                 boolean isStringPair=false;
                 if(pdfObject.getID()== PdfDictionary.BDC) {
-                    isStringPair = Dictionary.isStringPair(i, raw, isStringPair);
+                    isStringPair = isStringPair(i, raw, isStringPair);
                 }
                 
                 final int type=pdfObject.getObjectType();
@@ -231,13 +231,6 @@ public class ObjectDecoder implements Serializable {
                 }else{
                     i = setValue(pdfObject, i, raw, length, isMap);
                 }
-                
-                //special case if Dest defined as names object and indirect
-            }else if(raw[i]=='[' && level==0 && pdfObject.getObjectType()==PdfDictionary.Outlines){
-                
-                final Array objDecoder=new Array(objectReader,i, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
-                objDecoder.readArray(pdfObject, PdfDictionary.Dest);
-                
             }
             
             i++;
@@ -291,17 +284,13 @@ public class ObjectDecoder implements Serializable {
         
         final int id=pdfObject.getID();
         
-        if (type==PdfDictionary.Outlines && PDFkeyInt== PdfDictionary.D){
-            PDFkeyInt= PdfDictionary.Dest;
-            pdfKeyType= PdfDictionary.VALUE_IS_MIXED_ARRAY;
-        }else if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && PDFkeyInt== PdfDictionary.D){
+        if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && PDFkeyInt== PdfDictionary.D){
             if(id==PdfDictionary.AP || id==PdfDictionary.AA){
                 pdfKeyType= PdfDictionary.VALUE_IS_VARIOUS;
             }else if(id==PdfDictionary.Win){
                 pdfKeyType= PdfDictionary.VALUE_IS_TEXTSTREAM;
             }else{
-                PDFkeyInt= PdfDictionary.Dest;
-                pdfKeyType= PdfDictionary.VALUE_IS_MIXED_ARRAY;
+                pdfKeyType = PdfDictionary.getKeyType(PDFkeyInt, type);
             }
         }else if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && (id==PdfDictionary.AP || id==PdfDictionary.AA) && PDFkeyInt== PdfDictionary.A){
             pdfKeyType= PdfDictionary.VALUE_IS_VARIOUS;
@@ -317,7 +306,9 @@ public class ObjectDecoder implements Serializable {
             pdfKeyType = Dictionary.getPairedValues(pdfObject, i, raw, pdfKeyType, length, keyLength, keyStart);
         }else
             //allow for other values in D,N,R definitions as key pairs
-            if(((((id==PdfDictionary.N || id==PdfDictionary.D || id==PdfDictionary.R))) &&
+            if((((((id==PdfDictionary.N && PdfDictionary.getKeyType(PdfDictionary.N, PdfDictionary.Form)!=PdfDictionary.VALUE_IS_DICTIONARY_PAIRS ) || 
+                    (id==PdfDictionary.D && PdfDictionary.getKeyType(PdfDictionary.D, PdfDictionary.Form)!=PdfDictionary.VALUE_IS_DICTIONARY_PAIRS) || 
+                    (id==PdfDictionary.R && PdfDictionary.getKeyType(PdfDictionary.R, PdfDictionary.Form)!=PdfDictionary.VALUE_IS_DICTIONARY_PAIRS)))) &&
                     pdfObject.getParentID()==PdfDictionary.AP &&
                     pdfObject.getObjectType()==PdfDictionary.Form
                     && raw[i]!='['  )){
@@ -346,7 +337,7 @@ public class ObjectDecoder implements Serializable {
         
         //DecodeParms can be an array as well as a dictionary so check next char and alter if so
         if(PDFkeyInt==PdfDictionary.DecodeParms) {
-            pdfKeyType = setTypeForDecodeParams(i, raw, length, pdfKeyType);
+            pdfKeyType = setTypeForDecodeParams(i, raw, pdfKeyType);
         }
         
         if(debugFastCode && pdfKeyType==-1 &&  pdfObject.getObjectType()!=PdfDictionary.Page){
@@ -460,10 +451,7 @@ public class ObjectDecoder implements Serializable {
                 //roll on
                 i++;
                 
-                //move cursor to start of text
-                while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47) {
-                    i++;
-                }
+                i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
                 
                 i = NumberValue.setNumberValue(pdfObject, i, raw, PDFkeyInt,objectReader);
                 break;
@@ -479,7 +467,7 @@ public class ObjectDecoder implements Serializable {
                 break;
                 
             }case PdfDictionary.VALUE_IS_VARIOUS:{
-                if(raw.length-5>0 && ArrayUtils.isNull(raw,i+1)){ //ignore null value and skip (ie /N null)
+                if(raw.length-5>0 && StreamReaderUtils.isNull(raw,i+1)){ //ignore null value and skip (ie /N null)
                     i += 5;
                 }else{
                     i = setVariousValue(pdfObject, i, raw, length, PDFkeyInt, map, ignoreRecursion,objectReader);
@@ -500,10 +488,7 @@ public class ObjectDecoder implements Serializable {
             i++;
         }
         
-        //move cursor to start of text
-        while(i<length &&(raw[i]==9 || raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==60)) {
-            i++;
-        }
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 60);
         
         return i;
     }
@@ -531,7 +516,7 @@ public class ObjectDecoder implements Serializable {
         }else if(raw[i]=='['){
             i = setArray(pdfObject, i, raw, PDFkeyInt, objectReader);
         }else if((raw[i]=='<' && raw[i+1]=='<')){
-            i = Dictionary.readDictionary(pdfObject, i, raw, PDFkeyInt, ignoreRecursion,objectReader, isInlineImage);
+            i = Dictionary.readDictionary(pdfObject, i, raw, PDFkeyInt, ignoreRecursion,objectReader);
         }else{
             i=General.readGeneral(pdfObject, i, raw, length, PDFkeyInt, map, ignoreRecursion, objectReader,PDFkey);
         }
@@ -542,6 +527,7 @@ public class ObjectDecoder implements Serializable {
     static int setArray(PdfObject pdfObject, int i, byte[] raw, int PDFkeyInt, PdfFileReader objectReader) {
         switch (PDFkeyInt) {
             
+            case PdfDictionary.D:
             case PdfDictionary.OpenAction:
                  case PdfDictionary.K:
             case PdfDictionary.XFA:
@@ -551,6 +537,13 @@ public class ObjectDecoder implements Serializable {
                     break;
                 }
             
+            case PdfDictionary.Mask:           
+                {
+                    final ArrayDecoder objDecoder=new IntArray(objectReader, i, raw);
+                    i=objDecoder.readArray(pdfObject, PDFkeyInt);
+                    
+                    break;
+                }
             case PdfDictionary.C:
             case PdfDictionary.IC:
                 {
@@ -558,6 +551,8 @@ public class ObjectDecoder implements Serializable {
                     i=objDecoder.readArray(pdfObject, PDFkeyInt);
                     break;
                 }
+                
+            case PdfDictionary.TR:    
             case PdfDictionary.OCGs:
                 {
                     final ArrayDecoder objDecoder=new KeyArray(objectReader, i, raw);
@@ -575,21 +570,15 @@ public class ObjectDecoder implements Serializable {
         return i;
     }
 
-    static int setTypeForDecodeParams(final int i, final byte[] raw, final int length, int pdfKeyType) {
+    static int setTypeForDecodeParams(final int i, final byte[] raw, int pdfKeyType) {
         int ii=i;
         
-        //roll onto first valid char
-        while(ii<length && (raw[ii]==32 || raw[ii]==9 || raw[ii]==13 || raw[ii]==10)) {
-            ii++;
-        }
+        ii = StreamReaderUtils.skipSpaces(raw, ii);
         
         //see if might be object arrays
         if(raw[ii]!='<'){
             
-            //roll onto first valid char
-            while(ii<length && (raw[ii]==32 || raw[ii]==9 || raw[ii]==13 || raw[ii]==10 || raw[ii]==91)) {
-                ii++;
-            }
+            ii = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, ii, 91);
             
             if(raw[ii]=='<' || (raw[ii]>='0' && raw[ii]<='9')) {
                 pdfKeyType = PdfDictionary.VALUE_IS_OBJECT_ARRAY;
@@ -605,14 +594,10 @@ public class ObjectDecoder implements Serializable {
          */
         int end=i;
         int nextC=i;
-        
-        //ignore any gaps
-        while(raw[nextC]==10 || raw[nextC]==32 || raw[nextC]==9) {
-            nextC++;
-        }
+        nextC = StreamReaderUtils.skipSpaces(raw, nextC);
         
         //allow for null object
-        if(ArrayUtils.isNull(raw,nextC)){
+        if(StreamReaderUtils.isNull(raw,nextC)){
             i=nextC+4;
             return i;
         }else if(raw[nextC]=='[' && raw[nextC+1]==']'){ //allow for empty object []
@@ -627,7 +612,9 @@ public class ObjectDecoder implements Serializable {
         boolean inDictionary=true;
         final boolean isKey=raw[end-1]=='/';
         
-        while(inDictionary){
+        final int strLen=raw.length;
+        
+        while(inDictionary && end<strLen){
             
             if(raw[end]=='<'&& raw[end+1]=='<'){
                 int level2=1;
@@ -671,7 +658,7 @@ public class ObjectDecoder implements Serializable {
         }
         
         //boolean save=debugFastCode;
-        Dictionary.readDictionary(pdfObject,i, raw, PDFkeyInt, ignoreRecursion, objectReader, isInlineImage);
+        Dictionary.readDictionary(pdfObject,i, raw, PDFkeyInt, ignoreRecursion, objectReader);
         
         //use correct value
         return end;
@@ -684,10 +671,7 @@ public class ObjectDecoder implements Serializable {
             i++;
         }
         
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==9) //move cursor to start of text
-        {
-            i++;
-        }
+        i = StreamReaderUtils.skipSpaces(raw,i);
         
         final int start=i;
         final int keyStart;
@@ -697,7 +681,7 @@ public class ObjectDecoder implements Serializable {
         final PdfObject valueObj= ObjectFactory.createObject(PDFkeyInt,pdfObject.getObjectRefAsString(), pdfObject.getObjectType(), pdfObject.getID());
         valueObj.setID(PDFkeyInt);
         
-        if(!ArrayUtils.isNull(raw,i)){ //allow for null
+        if(!StreamReaderUtils.isNull(raw,i)){ //allow for null
             pdfObject.setDictionary(PDFkeyInt, valueObj);
         }
         
@@ -741,10 +725,7 @@ public class ObjectDecoder implements Serializable {
             if(raw[i]=='e' && raw[i+1]=='n' && raw[i+2]=='d' && raw[i+3]=='o' && raw[i+4]=='b' ){
             }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
                 
-                //roll onto first valid char
-                while(raw[i]==91  || raw[i]==32 || raw[i]==13 || raw[i]==10){
-                    i++;
-                }
+                i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 91);
                 
                 //roll on and ignore
                 if(raw[i]=='<' && raw[i+1]=='<'){
@@ -795,7 +776,7 @@ public class ObjectDecoder implements Serializable {
                         i++;
                     }
                     i--;
-                }else if(ArrayUtils.isNull(raw,i)){ //allow for null
+                }else if(StreamReaderUtils.isNull(raw,i)){ //allow for null
                     i += 4;
                 }else{ //must be a ref
                     
@@ -947,38 +928,26 @@ public class ObjectDecoder implements Serializable {
             
             //allow for empty object
             if(raw[0]!='e' && raw[1]!='n' && raw[2]!='d' && raw[3]!='o' && raw[4]!='b' ){
-                
-                int j=0;
-                
+
                 //allow for [ref] at top level (may be followed by gap
-                while (raw[j] == 91 || raw[j] == 32 || raw[j] == 13 || raw[j] == 10) {
-                    j++;
-                }
-                
+                int j=StreamReaderUtils.skipSpacesOrOtherCharacter(raw, 0, 91);
+
                 // get object ref
                 int keyStart = j;
                 
                 //move cursor to end of reference
-                while (raw[j] != 10 && raw[j] != 13 && raw[j] != 32 && raw[j] != 47 && raw[j] != 60 && raw[j] != 62) {
-                    j++;
-                }
-                
+                j = StreamReaderUtils.skipToEndOfRef(raw, j);
+
                 final int ref = NumberUtils.parseInt(keyStart, j, raw);
-                
-                //move cursor to start of generation or next value
-                while (raw[j] == 10 || raw[j] == 13 || raw[j] == 32)// || data[j]==47 || data[j]==60)
-                {
-                    j++;
-                }
-                
+
+                j=StreamReaderUtils.skipSpaces(raw, j);
+
                 // get generation number
                 keyStart = j;
                 
                 //move cursor to end of reference
-                while (raw[j] != 10 && raw[j] != 13 && raw[j] != 32 && raw[j] != 47 && raw[j] != 60 && raw[j] != 62) {
-                    j++;
-                }
-                
+                j = StreamReaderUtils.skipToEndOfRef(raw, j);
+
                 final int generation = NumberUtils.parseInt(keyStart, j, raw);
                 
                 if(raw[raw.length-1]=='R') //recursively validate all child objects
@@ -990,9 +959,6 @@ public class ObjectDecoder implements Serializable {
                     pdfObject.ignoreRecursion(false);
                     final ObjectDecoder objDecoder=new ObjectDecoder(objectReader);
                     objDecoder.readDictionaryAsObject(pdfObject, j, raw);
-                    
-                    //if(!pdfObject.isFullyResolved())
-                    //    fullyResolved=false;
                 }
             }
         }
@@ -1040,7 +1006,7 @@ public class ObjectDecoder implements Serializable {
             //allow for empty object
             if(raw[0]=='e' && raw[1]=='n' && raw[2]=='d' && raw[3]=='o' && raw[4]=='b' ){
                 //empty object
-            }else if(ArrayUtils.isNull(raw,0)){
+            }else if(StreamReaderUtils.isNull(raw,0)){
                 //null object
             }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
                 
@@ -1118,6 +1084,22 @@ public class ObjectDecoder implements Serializable {
 
             Dictionary.readDictionaryFromRefOrDirect(pdfObject,objectRef, 0, raw , -1,objectReader);
         }
+    }
+
+    static boolean isStringPair(final int i, final byte[] raw, boolean stringPair) {
+
+        final int len=raw.length;
+        for(int aa=i;aa<len;aa++){
+            if(raw[aa]=='('){
+                aa=len;
+                stringPair =true;
+            }else if(raw[aa]=='/' || raw[aa]=='>' || raw[aa]=='<' || raw[aa]=='[' || raw[aa]=='R'){
+                aa=len;
+            }else if(raw[aa]=='M' && raw[aa+1]=='C' && raw[aa+2]=='I' && raw[aa+3]=='D'){
+                aa=len;
+            }
+        }
+        return stringPair;
     }
     
     /**

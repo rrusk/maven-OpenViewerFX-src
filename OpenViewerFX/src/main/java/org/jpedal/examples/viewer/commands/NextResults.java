@@ -44,7 +44,8 @@ import org.jpedal.utils.Messages;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
 /**
- * Shows the next lot of search results in the Viewer
+ * Shows the next search result in the Viewer.
+ * Loops back to first result if already at final result.
  */
 public class NextResults {
 
@@ -201,9 +202,8 @@ public class NextResults {
                 }
             
             currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-        } else {
-
         }
+
         if (commonValues.getCurrentPage() == searchFrame.getFirstPageWithResults()
                 && results.getSelectedIndex() == 0) {
             status = FIRST_DOCUMENT_SEARCH_RESULT_NOW_SHOWN;

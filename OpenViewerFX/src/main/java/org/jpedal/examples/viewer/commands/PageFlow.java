@@ -54,7 +54,7 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
 /**
- *
+ * Change page display mode to pageflow
  */
 public class PageFlow {
 
@@ -139,6 +139,13 @@ public class PageFlow {
                 currentGUI.getCombo(Commands.SCALING).setEnabled(false);
                 currentGUI.getButtons().getButton(Commands.MOUSEMODE).setEnabled(false);
                 currentGUI.getButtons().getButton(Commands.SNAPSHOT).setEnabled(false);
+                            
+                currentGUI.getButtons().getButton(Commands.ROTATELEFT).setEnabled(false);
+                currentGUI.getButtons().getButton(Commands.ROTATERIGHT).setEnabled(false);
+                
+                if (currentGUI.getGlassPane() != null){
+                    ((Component)currentGUI.getGlassPane()).setVisible(false);
+                }  
                 
                 currentGUI.getButtons().alignLayoutMenuOption(Display.PAGEFLOW);
                 
@@ -185,8 +192,6 @@ public class PageFlow {
             currentGUI.getCombo(Commands.ROTATION).setEnabled(false);
             
             currentGUI.updateTextBoxSize();
-        } else {
-
         }
     }
 }

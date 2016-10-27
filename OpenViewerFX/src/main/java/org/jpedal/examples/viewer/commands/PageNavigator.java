@@ -129,8 +129,6 @@ public class PageNavigator {
             {
                 navigatePages(commonValues.getPageCount() - commonValues.getCurrentPage(), commonValues, decode_pdf, currentGUI);
             }
-        } else {
-
         }
     }
 
@@ -140,8 +138,6 @@ public class PageNavigator {
             {
                 navigatePages(-(commonValues.getCurrentPage() - 1), commonValues, decode_pdf, currentGUI);
             }
-        } else {
-
         }
     }
 
@@ -211,8 +207,6 @@ public class PageNavigator {
                     navigatePages(-10, commonValues, decode_pdf, currentGUI);
                 }
             }
-        } else {
-
         }
     }
 

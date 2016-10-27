@@ -146,7 +146,6 @@ public class PropertiesFile {
       "Shows the Pdf menu on the Export menu","PdfMenu", "true",
       "Shows the One per page menuitem on the Pdf menu","Oneperpage", "true",
       "Shows the Nup menuitem on the Pdf menu","Nup", "true",
-      "Shows the Handouts menuitem on the Pdf menu","Handouts", "true",
         "ENDCHILDREN",
       "Shows the Content menu on the Export menu","ContentMenu", "true",
       "Shows the Images menuitem on the Content menu","Images", "true",
@@ -249,7 +248,7 @@ public class PropertiesFile {
       "Voice name to be used for text to speech functionality","voice","kevin16(general domain)",
       "Flag to turn on previews in single page mode when scrolling","previewOnSingleScroll","true",
       "Flag to show the bounding box of the mouse selection","showMouseSelectionBox","false",
-      "Flag if we should spearate the cover of document when in facing mode","separateCoverOn","true",
+      "Flag if we should separate the cover of document when in facing mode","separateCoverOn","true",
       "Flag to set the JavaFX transition type","transitionType","None",  
         //These variables are used to track some settings between sessions
       "Flag to track the users scaling between sessions","trackScaling","false", //Viewer scaling
@@ -798,7 +797,7 @@ public class PropertiesFile {
                     }else{
                         
                         //Is it running in the IDE
-                        if(properties[position+1].equals("7.4.26")){
+                        if(properties[position+1].equals("7.6.27")){
                             //Do nothing as we are in the IDE
                             //Refactor for testing purposes
                             //refactorProperties  = true;

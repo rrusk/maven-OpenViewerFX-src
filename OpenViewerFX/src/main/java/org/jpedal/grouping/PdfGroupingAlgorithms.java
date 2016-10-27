@@ -3941,6 +3941,7 @@ public class PdfGroupingAlgorithms {
 //        if ((searchType & SearchType.IGNORE_SPACE_CHARACTERS) == SearchType.IGNORE_SPACE_CHARACTERS) {
 //            searchText = searchText.replaceAll(" ", "");
 //            coordsText = coordsText.replaceAll(MARKER2+"[0,1,2,3,4,5,6,7,8,9,\\\\.]*?"+MARKER2+"[0,1,2,3,4,5,6,7,8,9,\\\\.]*?"+MARKER2+" ", "");
+//            coordsText = coordsText.replaceAll(" ", "");
 //        }
         
         //Hold starting point data at page rotation

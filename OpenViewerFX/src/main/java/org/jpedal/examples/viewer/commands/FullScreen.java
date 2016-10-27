@@ -43,7 +43,7 @@ import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
 
 /**
- *
+ * Toggle fullscreen mode if supported
  */
 public class FullScreen {
 
@@ -114,8 +114,6 @@ public class FullScreen {
             // Exit full-screen mode
             //	gs.setFullScreenWindow(null);
             //}
-        } else {
-
         }
     }
 

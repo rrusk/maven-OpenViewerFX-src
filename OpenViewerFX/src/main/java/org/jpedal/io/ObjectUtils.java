@@ -32,7 +32,7 @@
  */
 package org.jpedal.io;
 
-import org.jpedal.io.types.ArrayUtils;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.objects.raw.DecodeParmsObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -382,7 +382,7 @@ public class ObjectUtils {
             //allow for comment
             if(raw[jj]==37){
 
-                jj = ArrayUtils.skipComment(raw, jj);
+                jj = StreamReaderUtils.skipComment(raw, jj);
             }
 
             if(jj>5 && raw[jj-5]=='s' && raw[jj-4]=='t' && raw[jj-3]=='r' && raw[jj-2]=='e' && raw[jj-1]=='a' &&raw[jj]=='m') {

@@ -39,10 +39,17 @@ import org.jpedal.constants.JPedalSettings;
 import org.jpedal.exception.PdfException;
 
 /**
- *
+ * Set the threshold to determine which text has its colour changed when using SetTextColor.
  */
 public class SetReplacementThreshold {
 
+    /**
+     * Accepts a single value to use as a threshold to use for color changing.
+     * All color values (R,G and B), must be under this value in order to change text color.
+     *
+     * @param args object array containing arguments, args[0] should be an integer between 0 and 255.
+     * @param decode_pdf PdfDecoderInt object representing the PdfObject currently open.
+     */
     public static void execute(final Object[] args, final PdfDecoderInt decode_pdf) {
         try {
             final Map<Integer, Object> map = new HashMap<Integer, Object>();

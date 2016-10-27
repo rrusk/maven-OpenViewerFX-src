@@ -44,10 +44,8 @@ public class Tip {
 
     public static void execute(final Object[] args, final GUIFactory currentGUI, final PropertiesFile properties) {
         if(args==null){
-                    final TipOfTheDay tipOfTheDay = new TipOfTheDay((Container)currentGUI.getFrame(), "/org/jpedal/examples/viewer/res/tips", properties);
-                    tipOfTheDay.setVisible(true);
-                }else{
-                    
-                }
+            final TipOfTheDay tipOfTheDay = new TipOfTheDay((Container)currentGUI.getFrame(), "/org/jpedal/examples/viewer/res/tips", properties);
+            tipOfTheDay.setVisible(true);
+        }
     }
 }

@@ -51,7 +51,7 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
 /**
- * Clean up and exit programo
+ * Clean up and exit program
  */
 public class Exit {
 

@@ -724,18 +724,11 @@ public abstract class SharedActionHandler implements ActionHandler {
         }
         
         //Can be a direct Dest on Annot -  we collapse together for our viewer
-        PdfArrayIterator Dest = DestHandler.getDestFromObject(aData);
+        PdfArrayIterator Dest = DestHandler.getDestFromObject(aData,currentPdfFile);
         
         if (Dest!=null && Dest.hasMoreTokens()) {
             
             if (eventType == MOUSECLICKED) {
-                
-                //allow for it being an indirect named object and convert if so
-                if(Dest.getTokenCount()==1){
-                    //					System.out.println("val="+ Dest.getNextValueAsString(false));
-                    aData = DestHandler.getIndirectDest(currentPdfFile, Dest, aData);
-                    Dest = aData.getMixedArray(PdfDictionary.Dest);
-                }
                 
                 String filename = aData.getTextStreamValue(PdfDictionary.F);
                 
@@ -1277,8 +1270,8 @@ public abstract class SharedActionHandler implements ActionHandler {
         }
         
         //Check its not an annotation or is a widget (used for interactive forms)
-        if(formObj.getParameterConstant(PdfDictionary.Type)!=PdfDictionary.Annot ||
-                formObj.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Widget){
+        if(formObj.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Widget ||
+                formObj.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Popup){
             gui.getValues().setFormsChanged(true);
             gui.setViewerTitle(null);
         }

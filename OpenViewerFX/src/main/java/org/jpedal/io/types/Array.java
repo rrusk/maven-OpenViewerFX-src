@@ -42,7 +42,6 @@ import org.jpedal.io.PdfFileReader;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
-import org.jpedal.utils.NumberUtils;
 
 /**
  * parse PDF array data from PDF for mixed and object values
@@ -61,7 +60,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
 
     int rawLength;
     
-    private String indirectRef=null;
+    private String indirectRef;
     private boolean isSingle;
    
     public Array(final PdfFileReader pdfFileReader, final int i, final int type, final byte[] raw) {
@@ -96,7 +95,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         }
         //allow for comment
         if (raw[i] == 37) {
-            i = ArrayUtils.skipComment(raw, i);
+            i = StreamReaderUtils.skipComment(raw, i);
         }
 
         return false;
@@ -108,41 +107,12 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         //allow for indirect to 1 item
         final int startI = i;
-
-        if (debugFastCode) {
-            System.out.print(padding + "Indirect object ref=");
-        }
-
-        //move cursor to end of ref
-        i = ArrayUtils.skipToEndOfRef(i, raw);
-        //actual value or first part of ref
-        final int ref = NumberUtils.parseInt(startI, i, raw);
-        //move cursor to start of generation
-        while (raw[i] == 10 || raw[i] == 13 || raw[i] == 32 || raw[i] == 47 || raw[i] == 60) {
-            i++;
-        }
         
-        // get generation number
-        int keyStart = i;
-        
-        //move cursor to end of reference
-        i = ArrayUtils.skipToEndOfRef(i, raw);
-        
-        final int generation = NumberUtils.parseInt(keyStart, i, raw);
-        
-        if (debugFastCode) {
-            System.out.print(padding + " ref=" + ref + " generation=" + generation + '\n');
-        }
-        
-        // check R at end of reference and abort if wrong
-        //move cursor to start of R
-        while (raw[i] == 10 || raw[i] == 13 || raw[i] == 32 || raw[i] == 47 || raw[i] == 60) {
-            i++;
-        }
-        
-        if (raw[i] != 82){ //we are expecting R to end ref
-            throw new RuntimeException(padding + "4. Unexpected value " + (char) raw[i] + " in file - please send to IDRsolutions for analysis");
-        }
+        final int[] values=StreamReaderUtils.readRefFromStream(raw,i);
+            
+        final int ref=values[0];
+        final int generation=values[1];
+        i=values[2];
         
         //read the Dictionary data
         arrayData = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(ref, generation), ref, generation);
@@ -168,14 +138,14 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
 
             //allow for % comment
             if (arrayData[j2] == '%') {
-                j2 = ArrayUtils.skipComment(arrayData, j2);
+                j2 = StreamReaderUtils.skipComment(arrayData, j2);
 
                 //roll back as [ may be next char
                 j2--;
             }
 
             //allow for null
-            if (ArrayUtils.isNull(arrayData, j2)) {
+            if (StreamReaderUtils.isNull(arrayData, j2)) {
                 break;
             }
 
@@ -227,7 +197,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         //may need to add method to PdfObject is others as well as Mask (last test to  allow for /Contents null
         //0 never occurs but we set as flag if called from gotoDest/DefaultActionHandler
-        boolean isIndirect=raw[i]!=91  && raw[i]!='(' && raw[0]!=0 && !ArrayUtils.isNull(raw,i) && ArrayUtils.handleIndirect(raw, i); 
+        boolean isIndirect=raw[i]!=91  && raw[i]!='(' && raw[0]!=0 && !StreamReaderUtils.isNull(raw,i) && StreamReaderUtils.handleIndirect(raw, i); 
         boolean singleKey=isFirstKeySingle();
          
         //single value ie /Filter /FlateDecode or (text)
@@ -267,7 +237,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         while (j2 < arrayEnd && arrayData[j2] != 93) {
         
-            if(ArrayUtils.isEndObj(arrayData,j2)){
+            if(StreamReaderUtils.isEndObj(arrayData,j2)){
                 break;
             }else if(arrayData[j2]=='>' && arrayData[j2+1]=='>'){
                 break;
@@ -277,15 +247,15 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
                     break;
                 }
                 newValues=writeKey();
-            }else if(ArrayUtils.isRef(arrayData, j2) || (arrayData[j2]=='<' && arrayData[j2+1]=='<')){
+            }else if(StreamReaderUtils.isRef(arrayData, j2) || (arrayData[j2]=='<' && arrayData[j2+1]=='<')){
                 newValues = writeObject(keyStart);
-            }else if(ArrayUtils.isNumber(arrayData, j2)){               
+            }else if(StreamReaderUtils.isNumber(arrayData, j2)){               
                 newValues=writeNumber();
-            }else if(ArrayUtils.isNull(arrayData,j2)){               
+            }else if(StreamReaderUtils.isNull(arrayData,j2)){               
                 newValues=writeNull();
             }else if(arrayData[j2]=='('){                                 
                 newValues=writeString(pdfObject);
-            }else if(ArrayUtils.isArray(arrayData, j2)){                                
+            }else if(StreamReaderUtils.isArray(arrayData, j2)){                                
                 newValues=writeArray();
             }else if(arrayData[j2+1]=='<' && arrayData[j2+2]=='<'){                                
                 newValues = writeDirectDictionary(keyStart);
@@ -319,24 +289,18 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         final int size=arrayData.length;
         
-        //move cursor to start of text
-        while(j2<size &&(arrayData[j2]==10 || arrayData[j2]==13 || arrayData[j2]==32 || arrayData[j2]==47 || arrayData[j2]==9)) {
-            j2++;
-        }
-        
+        j2 = StreamReaderUtils.skipSpacesOrOtherCharacter(arrayData, j2, 47);
+
         while(j2<size && arrayData[j2]=='%'){ //ignore % comments in middle of value
             while(j2<size && arrayData[j2]!=10){
                 j2++;
             }
             
-            j2=ArrayUtils.skipSpaces(arrayData, j2);
+            j2=StreamReaderUtils.skipSpaces(arrayData, j2);
             
         } 
-        
-        //move cursor to start of text
-        while(j2<size &&(arrayData[j2]==10 || arrayData[j2]==13 || arrayData[j2]==32 || arrayData[j2]==47 || arrayData[j2]==9)) {
-            j2++;
-        }
+
+        j2 = StreamReaderUtils.skipSpacesOrOtherCharacter(arrayData, j2, 47);
         
         return j2;
     }
@@ -483,7 +447,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         j2++;
         
-        return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
+        return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, true);
     }
 
     byte[] writeNumber() {
@@ -492,7 +456,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
             System.out.println(padding + "----number");
         }
         
-        j2=ArrayUtils.skipSpaces(arrayData,j2);
+        j2=StreamReaderUtils.skipSpaces(arrayData,j2);
         int keyStart=j2;
         
         while(arrayData[j2]>='0' && arrayData[j2]<='9'){          
@@ -509,7 +473,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         }
         
         int keyStart=j2;
-        j2=ArrayUtils.skipToEndOfKey(arrayData, j2+1);
+        j2=StreamReaderUtils.skipToEndOfKey(arrayData, j2+1);
         
         //include / so we can differentiate /9 and 9
         if(keyStart>0 && arrayData[keyStart-1]==47) {
@@ -585,9 +549,9 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
        
         if(hexString){
             if(indirectRef==null){
-                newValues =ArrayUtils.handleHexString(newValues, decryption, pdfObject.getObjectRefAsString());
+                newValues =StreamReaderUtils.handleHexString(newValues, decryption, pdfObject.getObjectRefAsString());
             }else{
-                newValues =ArrayUtils.handleHexString(newValues, decryption, indirectRef);
+                newValues =StreamReaderUtils.handleHexString(newValues, decryption, indirectRef);
             }
         }
         

@@ -39,10 +39,15 @@ import org.jpedal.constants.JPedalSettings;
 import org.jpedal.exception.PdfException;
 
 /**
- *
+ * Allow text color change to also change color of shapes and line art
  */
 public class ChangeLineArt {
 
+    /**
+     *
+     * @param args object array containing arguments, args[0] should be a boolean
+     * @param decode_pdf PdfDecoderInt object representing the PdfObject currently open
+     */
     public static void execute(final Object[] args, final PdfDecoderInt decode_pdf) {
 
         try {

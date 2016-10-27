@@ -1652,12 +1652,12 @@ public class PdfFont implements Serializable {
     }
     
     /**
-     * name of font used to display
+     * name of font and Path used to display
      */
     public String getSubstituteFont() {
         return this.substituteFontFile;
     }
-    
+
     /**used in generic renderer*/
     public float getGlyphWidth(final String charGlyph, final int rawInt, final String displayValue) {
         

@@ -37,9 +37,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jpedal.io.PdfObjectReader;
-import org.jpedal.io.types.Array;
-import org.jpedal.objects.raw.OutlineObject;
-import org.jpedal.objects.raw.PdfArrayIterator;
+import org.jpedal.objects.acroforms.actions.DestHandler;
+import static org.jpedal.objects.acroforms.actions.DestHandler.getDestFromObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.StringUtils;
@@ -64,10 +63,6 @@ public class OutlineData {
 		} catch (final ParserConfigurationException e) {
 			System.err.println("Exception "+e+" generating XML document");
 		}
-
-		//increment so arrays correct size
-		//pageCount++;
-
 	}
 
 	/**return the list*/
@@ -105,27 +100,14 @@ public class OutlineData {
 	private void readOutlineLevel(final Element root, final PdfObjectReader currentPdfFile, PdfObject outlineObj, final int level, boolean isClosed) {
 
 		String ID;
-		//float coord=0;
 		int page;
-
 		Element child=OutlineDataXML.createElement("title");
-
-        PdfObject FirstObj=null, NextObj;
-
-		PdfArrayIterator DestObj;
+        PdfObject FirstObj, NextObj;
 
 		while(true){
 
-			if(FirstObj!=null) {
-                outlineObj = FirstObj;
-            }
-
 			ID=outlineObj.getObjectRefAsString();
-
-			//set to -1 as default
-			//coord=-1;
-			page=-1;
-
+			
 			/*
 			 * process and move onto next value
 			 */
@@ -140,76 +122,7 @@ public class OutlineData {
                 isClosed = numberOfItems < 0;
             }
 
-            //get Dest from Dest or A object
-			DestObj=outlineObj.getMixedArray(PdfDictionary.Dest);
-
-            PdfObject Aobj=outlineObj;
-
-            if(DestObj==null || DestObj.getTokenCount()==0){
-				Aobj=outlineObj.getDictionary(PdfDictionary.A);
-
-                //A can also have DEST as a D value (we convert it to DEST to simplify all our usage
-                //so should not be set to null
-				if(Aobj!=null){ //If there is an A object we will not encounter a Dest
-						//DestObj=null; (will break files)
-						DestObj=Aobj.getMixedArray(PdfDictionary.Dest);
-				}
-			}
-
-			String ref=null;
-
-        if (DestObj != null && DestObj.getTokenCount()>0){// && type==PdfDictionary.Goto) {
-
-				int count=DestObj.getTokenCount();
-
-                if(count>0){
-					if(DestObj.isNextValueRef()) {
-                        ref = DestObj.getNextValueAsString(true);
-                    } else{ //its nameString name (name) linking to obj so read that
-                        String nameString =DestObj.getNextValueAsString(true);
-
-                        //check if object and read if so (can also be an indirect name which we lookup
-                        if(nameString!=null ){
-
-                            if(nameString.startsWith("/")){
-                                nameString=nameString.substring(1);
-                            }
-                            
-                            ref=currentPdfFile.convertNameToRef(nameString);
-
-                            //allow for direct value
-                            if(ref!=null && ref.startsWith("[")){
-
-                                final byte[] raw=StringUtils.toBytes(ref);
-                                final Array objDecoder=new Array(currentPdfFile.getObjectReader(),0, PdfDictionary.VALUE_IS_MIXED_ARRAY,raw);
-                                objDecoder.readArray(Aobj, PdfDictionary.Dest);
-                                DestObj=Aobj.getMixedArray(PdfDictionary.Dest);
-                            }else if(ref!=null){
-                            	Aobj=new OutlineObject(ref);
-                                currentPdfFile.readObject(Aobj);
-                                DestObj=Aobj.getMixedArray(PdfDictionary.Dest);
-                            }
-
-                            if(DestObj!=null){
-                                count=DestObj.getTokenCount();
-
-                                if(count>0 && DestObj.hasMoreTokens()) { //can be object or raw number
-                                    if(DestObj.isNextValueRef()){
-                                        ref = DestObj.getNextValueAsString(true);
-                                    }else {
-                                        ref=null;
-                                        page=1+DestObj.getNextValueAsInteger(); //note it treats 0 as first page
-                                    }
-                                }
-                            }
-                        }
-                    }
-				}    				
-			}
-
-			if(ref!=null) {
-                page = currentPdfFile.convertObjectToPageNumber(ref);
-            }
+			page=DestHandler.getPageNumberFromLink(getDestFromObject(outlineObj, currentPdfFile),currentPdfFile); //set to -1 as default
 
 			//add title to tree
 			final byte[] titleData=outlineObj.getTextStreamValueAsByte(PdfDictionary.Title);
@@ -226,9 +139,9 @@ public class OutlineData {
 
             child.setAttribute("isClosed", String.valueOf(isClosed));
 
-            //store Dest so we can access
-            if(Aobj!=null) {
-                DestObjs.put(ID, Aobj);
+            //store Object containing Dest so we can access
+            if(outlineObj!=null) {
+                DestObjs.put(ID, outlineObj);
             }
 
             if(page==PdfDictionary.Null){
@@ -248,11 +161,10 @@ public class OutlineData {
                 break;
             }
 
-			FirstObj=NextObj;
-
+			outlineObj = NextObj;            
 		}
 	}
-
+    
     /**
      * not recommended for general usage
      * @param ref

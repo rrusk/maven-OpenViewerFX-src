@@ -46,6 +46,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.*;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -3409,6 +3410,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             
             //Sets up the ScrollPane
             pageContainer = new ScrollPane();
+            pageContainer.setCacheHint(CacheHint.QUALITY);
             pageContainer.setPannable(true);
             pageContainer.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
             pageContainer.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
@@ -3636,12 +3638,19 @@ public class JavaFxGUI extends GUI implements GUIFactory {
                 final DropShadow pdfBorder = new DropShadow();
                 pdfBorder.setOffsetY(0f);
                 pdfBorder.setOffsetX(0f);
-                pdfBorder.setColor(color);
+                
                 pdfBorder.setWidth(dropshadowDepth);
                 pdfBorder.setHeight(dropshadowDepth);
 
-                ((javafx.scene.Node) decode_pdf).setEffect(pdfBorder);
-
+                //if decoder.borderpresent set effect else transparent
+                if (decode_pdf.isBorderPresent()){
+                    pdfBorder.setColor(color);
+                }
+                else{
+                    pdfBorder.setColor(Color.TRANSPARENT);
+                }
+                
+                ((javafx.scene.Node) decode_pdf).setEffect(pdfBorder);   
             }
         });
     }
@@ -4027,12 +4036,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             customFXHandle.hvalueProperty().addListener(viewListener);
         }
     }
-
-    @Override
-    public void addAnnotationPanel(GUIAnnotationPanel panel) {
-        LogWriter.writeLog("JavaFxGUI.addAnnotationPanel is not available in FX Viewer. "+panel);
-    }
-
+    
     @Override
     public GUIAnnotationPanel getAnnotationPanel() {
         LogWriter.writeLog("JavaFxGUI.getAnnotationPanel is not available in FX Viewer.");

@@ -98,7 +98,6 @@ public class ObjectReader {
         boolean reachedCacheLimit=false;
         final boolean inStream=false;
         boolean inLoop=true;
-        final long start=getPointer();
 
         if(pdfObject!=null) //only use if values found
         {
@@ -210,8 +209,11 @@ public class ObjectReader {
             }
 
             //switch on caching
-            if(startStreamFound && dataRead!=null &&dataRead.length>newCacheSize){ //stop if over max size
-                pdfObject.setCache(start,currentPdfFile);
+            if(!reachedCacheLimit && startStreamFound && dataRead!=null &&dataRead.length>newCacheSize){ //stop if over max size
+
+                if(!reachedCacheLimit) { //only set on first time
+                    pdfObject.setCache(currentPdfFile);
+                }
                 reachedCacheLimit=true;
             }
 
