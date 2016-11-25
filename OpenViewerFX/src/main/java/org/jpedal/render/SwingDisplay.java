@@ -953,30 +953,29 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             }
                             
                             //Potential fix for ignoring transform
-                            AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
+                            AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],0,0);
+                            
                             double scaleFactorX = 1d/affine.getScaleX();
                             double scaleFactorY = 1d/affine.getScaleY();
                             
-                            if(affine.getScaleX()==0 && affine.getScaleY()==0){
+                            g2.translate(x, y);
+                            
+                            if(affine.getScaleX()==0){
                                 scaleFactorX = 1d/affine.getShearX();
+                            }
+
+                            if(affine.getScaleY()==0){
                                 scaleFactorY = 1d/affine.getShearY();
                             }
                             
-                            if(afValues2[afCount]>0){
-                                scaleFactorY = -scaleFactorY;
-                            }
+                            affine.scale(Math.abs(scaleFactorX), Math.abs(scaleFactorY));
                             
-                            if(afValues3[afCount]>0){
-                                scaleFactorX = -scaleFactorX;
-                            }
+                            g2.scale(1, -1);
+                            g2.transform(affine);                            
+                            g2.scale(1, -1);
                             
-                            g2.transform(affine);
-                            g2.scale(scaleFactorX, scaleFactorY);
+                            g2.drawString(displayValue, 0, 0);
                             
-                            g2.drawString(displayValue,0,0);
-
-//                            g2.drawString(displayValue,x,y);
-
                             //restore defaults
                             g2.setTransform(defaultAf);
                             g2.setClip(s1);
@@ -1223,9 +1222,19 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         }
 
         if(img!=null) {
-            final AffineTransform imageAf=new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
-
-            renderImage(imageAf, img, fillOpacity, null, x, y);
+            
+            //When we allow transparency in printing there are cases that the JDK can not support, add a work around here to prevent issue.
+            //Added for Case 27484
+            if(isPrinting && img.getTransparency()==Transparency.TRANSLUCENT && 
+                    ((img.getHeight()==1 && afValues4[afCount]<1) 
+//                    || (img.getWidth()==1 && afValues1[afCount]<1) //Fix for similar issue with width. Commented out until example is found to confirm
+                    )){
+                final AffineTransform imageAf=new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],1,x,y);
+                renderImage(imageAf, img, fillOpacity, null, x, y);
+            }else{
+                final AffineTransform imageAf=new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
+                renderImage(imageAf, img, fillOpacity, null, x, y);
+            }
         }
     }
     

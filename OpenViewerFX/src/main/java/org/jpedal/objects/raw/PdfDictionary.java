@@ -1470,7 +1470,7 @@ public class PdfDictionary {
 
             case Contents:
             	if(type==Form) {
-                    return VALUE_IS_VARIOUS;
+                    return VALUE_IS_TEXTSTREAM;
                 } else {
                     return VALUE_IS_KEY_ARRAY;
                 }
@@ -1763,9 +1763,6 @@ public class PdfDictionary {
                     return VALUE_IS_BOOLEAN;
                 } else if(type==PdfDictionary.Linearized) {
                     return VALUE_IS_INT;
-                } else if(1==2) //need to find type
-                {
-                    return VALUE_IS_DICTIONARY;
                 } else {
                     return VALUE_IS_BOOLEAN;
                 }
@@ -1967,13 +1964,13 @@ public class PdfDictionary {
                         return VALUE_IS_INT;
                     case PdfDictionary.CompressedObject:
                         return VALUE_IS_INT;
+                        
+                        //Do this second
+                        //@zain @bethan - you will need to change (note drop-through
                     case PdfDictionary.Form:
                     case PdfDictionary.MK:
-                        if(1==2){
-                            return VALUE_IS_DICTIONARY_PAIRS;
-                        }else{
-                            return VALUE_IS_VARIOUS;
-                        }
+                        return VALUE_IS_VARIOUS; 
+                        
                     case Shading:
                         return VALUE_IS_FLOAT;
                     case XObject:
@@ -2070,7 +2067,7 @@ public class PdfDictionary {
             	return VALUE_IS_BOOLEAN;
 
             case OpenAction:
-                return VALUE_IS_VARIOUS;
+                return VALUE_IS_MIXED_ARRAY;
 
             case OPI:
             	return VALUE_IS_DICTIONARY;
@@ -2203,16 +2200,11 @@ public class PdfDictionary {
             	return VALUE_IS_FLOAT_ARRAY;
 
             case R:
+                
             	if(type==Form || type==PdfDictionary.MK) {
-                    if (1==2) {
-                        return VALUE_IS_DICTIONARY_PAIRS;
-                    } else {
-                        return VALUE_IS_VARIOUS;
-                    }
-                } else {
-                    return VALUE_IS_INT;
+                    return VALUE_IS_VARIOUS;
                 }
-
+                return VALUE_IS_INT;
             case Range:
                 return VALUE_IS_FLOAT_ARRAY;
 

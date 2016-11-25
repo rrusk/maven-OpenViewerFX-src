@@ -38,7 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.acroforms.actions.DestHandler;
-import static org.jpedal.objects.acroforms.actions.DestHandler.getDestFromObject;
+import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.StringUtils;
@@ -122,7 +122,9 @@ public class OutlineData {
                 isClosed = numberOfItems < 0;
             }
 
-			page=DestHandler.getPageNumberFromLink(getDestFromObject(outlineObj, currentPdfFile),currentPdfFile); //set to -1 as default
+            final PdfArrayIterator dest = DestHandler.getDestFromObject(outlineObj, currentPdfFile);
+			page = DestHandler.getPageNumberFromLink(dest, currentPdfFile); //set to -1 as default
+			final Object[] zoomArray = DestHandler.getZoomFromDest(dest, currentPdfFile);
 
 			//add title to tree
 			final byte[] titleData=outlineObj.getTextStreamValueAsByte(PdfDictionary.Title);
@@ -146,9 +148,13 @@ public class OutlineData {
 
             if(page==PdfDictionary.Null){
                 child.setAttribute("page", "-1");
-            }else if(page!=-1) {
+            }else{
                 child.setAttribute("page", String.valueOf(page));
             }
+
+			if (zoomArray != null) {
+				child.setAttribute("zoom", DestHandler.convertZoomArrayToString(zoomArray));
+			}
 
             child.setAttribute("level", String.valueOf(level));
             child.setAttribute("objectRef",ID);

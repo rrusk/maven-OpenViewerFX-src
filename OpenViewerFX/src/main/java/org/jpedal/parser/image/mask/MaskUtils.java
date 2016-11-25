@@ -196,8 +196,7 @@ public class MaskUtils {
             //we always use high res for these in html to give best quality results
             //final boolean currentHiResSetting = current.getHiResImageForDisplayMode();
             //current.setHiResImageForDisplayMode(true);
-            
-            current.drawImage(parserOptions.getPageNumber(),image,gs1,false,name, -3);
+
             current.drawImage(parserOptions.getPageNumber(),image, gs1,false, name, -2);
             
             //restore default

@@ -46,7 +46,6 @@ import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.mask.MaskUtils;
 import org.jpedal.render.ClipUtils;
-import org.jpedal.render.DynamicVectorRenderer;
 
 public class FormFlattener {
     /**
@@ -98,7 +97,7 @@ public class FormFlattener {
         if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
 
             final String defaultState = form.getName(PdfDictionary.AS);
-            final Object[] values= FormStream.getNormalKeyValues(form);
+            final Object[] values= FormStream.getNormalKeyValues(form, pdfStreamDecoder.currentPdfFile.getObjectReader());
             if (defaultState != null && defaultState.equals(((FormObject)form).getNormalOnState())) {
                 ((FormObject)form).setNormalOnState((String) values[0]);
                 imgObj =(PdfObject) values[1];
@@ -437,14 +436,7 @@ public class FormFlattener {
                 pdfStreamDecoder.gs.CTM[2][0]= x;
                 pdfStreamDecoder.gs.CTM[2][1]= y;
 
-                //-3 tells it to render to background image and thumbnail if present
-                pdfStreamDecoder.current.drawImage(pdfStreamDecoder.parserOptions.getPageNumber(), image, pdfStreamDecoder.gs, false, form.getObjectRefAsString(), -3);
-            
-                //add to SVG as external image if needed
-                if(pdfStreamDecoder.current.getBooleanValue(DynamicVectorRenderer.IsSVGMode)){
-                    pdfStreamDecoder.current.drawImage(pdfStreamDecoder.parserOptions.getPageNumber(), image, pdfStreamDecoder.gs, false, form.getObjectRefAsString(), -2);            
-                }
-            
+                pdfStreamDecoder.current.drawImage(pdfStreamDecoder.parserOptions.getPageNumber(), image, pdfStreamDecoder.gs, false, form.getObjectRefAsString(), -2);
             }
 
         }else{

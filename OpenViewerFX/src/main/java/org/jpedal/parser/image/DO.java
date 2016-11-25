@@ -129,8 +129,7 @@ public class DO extends ImageDecoder {
                 //save transformed image
                 if (image != null) {
 
-                    if(isForHTML){                     
-                        current.drawImage(parserOptions.getPageNumber(), image, gs, false, name, -3);
+                    if(isForHTML){
                         current.drawImage(parserOptions.getPageNumber(),image,gs,false,name, -2);
                     }else{
 

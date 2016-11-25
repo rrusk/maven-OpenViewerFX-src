@@ -897,8 +897,8 @@ public class OpenFile {
 
         final String[] pdf = {"pdf"};
         final String[] fdf = {"fdf"};
-        final String[] png = {"png", "tif", "tiff", "jpg", "jpeg", "jp2", "psd"};
-        chooser.addChoosableFileFilter(new FileFilterer(png, "Images (Tiff, Jpeg,Png)"));
+        final String[] png = {"png", "tif", "tiff", "jpg", "jpeg", "jp2", "psd", "bmp"};
+        chooser.addChoosableFileFilter(new FileFilterer(png, "Images (Tiff, Jpeg, Png, Bmp)"));
         chooser.addChoosableFileFilter(new FileFilterer(fdf, "fdf (*.fdf)"));
         chooser.addChoosableFileFilter(new FileFilterer(pdf, "Pdf (*.pdf)"));
 
@@ -914,7 +914,7 @@ public class OpenFile {
                     || (ext.endsWith(".tif")) || (ext.endsWith(".tiff"))
                     || (ext.endsWith(".png"))
                     || (ext.endsWith(".jpg")) || (ext.endsWith(".jpeg"))
-                    || (ext.endsWith(".jp2")));
+                    || (ext.endsWith(".jp2")) || ext.endsWith(".bmp"));
 
             if (isValid) {
                 //save path so we reopen her for later selections

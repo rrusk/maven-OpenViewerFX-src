@@ -46,6 +46,8 @@ import org.jpedal.fonts.FontMappings;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.io.ObjectStore;
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.parser.PdfStreamDecoder;
 import org.jpedal.parser.ValueTypes;
@@ -70,7 +72,7 @@ public class FormStream {
      */
     public static final boolean exitOnError=false;
 
-    public static Object[] getRolloverKeyValues(PdfObject form) {
+    public static Object[] getRolloverKeyValues(PdfObject form, PdfFileReader pdfFileReader) {
         
         final PdfObject APobjR = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.R);
 
@@ -78,22 +80,27 @@ public class FormStream {
         PdfObject val=null;
         PdfObject rollOffDic = null;
         
-        if(PdfDictionary.getKeyType(PdfDictionary.R, PdfDictionary.Form) == PdfDictionary.VALUE_IS_DICTIONARY_PAIRS) {
-            if(APobjR.getDictionary(PdfDictionary.On) !=null){
-                key = "On";
-                val = APobjR.getDictionary(PdfDictionary.On);
-            }
-            final Map otherValues=APobjR.getOtherDictionaries();
-            if(otherValues!=null && !otherValues.isEmpty()){
-                final Iterator keys=otherValues.keySet().iterator();
-                while(keys.hasNext()){
-                    key=(String)keys.next();
-                    val=(PdfObject)otherValues.get(key);
+        final PdfKeyPairsIterator APkeys = APobjR.getKeyPairsIterator();
+        
+        if (APkeys != null && APkeys.getTokenCount() > 0) {
+            
+            while (APkeys.hasMorePairs()) {
+                String glyphKey = APkeys.getNextKeyAsString();
+                byte[] data = APkeys.getNextValueAsBytes();
+                
+                if (data != null) {
+                    if (glyphKey.equals("Off")) {
+                        rollOffDic = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FormObject(glyphKey), pdfFileReader, data, PdfDictionary.AP);
+                    } else {
+                        key = glyphKey;
+                        val = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FormObject(glyphKey), pdfFileReader, data, PdfDictionary.AP);
+                    }
                 }
+                APkeys.nextPair();
             }
         } else {
             if (APobjR.getDictionary(PdfDictionary.Off) != null) {
-                rollOffDic = APobjR.getDictionary(PdfDictionary.R);
+                rollOffDic = APobjR.getDictionary(PdfDictionary.Off);
             } else if (APobjR.getDecodedStream() != null) {
                 rollOffDic = APobjR;
             }
@@ -116,7 +123,7 @@ public class FormStream {
         return new Object[] {key, val, rollOffDic};
     }
     
-    public static Object[] getNormalKeyValues(PdfObject form) {
+    public static Object[] getNormalKeyValues(PdfObject form, PdfFileReader pdfFileReader) {
 
         final PdfObject APobjN = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
 
@@ -124,38 +131,46 @@ public class FormStream {
         PdfObject val=null;
         PdfObject normalOffDic = null;
 
-
-        //if we have a root stream then it is the off value
-        //check in order of N Off, MK I, then N
-        //as N Off overrides others and MK I is in preference to N
-        if(APobjN.getDictionary(PdfDictionary.Off) !=null){
-            normalOffDic = APobjN.getDictionary(PdfDictionary.Off);
-        }else if(form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null
-                && form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.IF)==null){
-            //look here for MK IF
-            //if we have an IF inside the MK then use the MK I as some files shown that this value is there
-            //only when the MK I value is not as important as the AP N.
-            normalOffDic = form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I);
-        }else if(APobjN.getDecodedStream()!=null){
-            normalOffDic = APobjN;
-        }
+        //@zain @bethan - you will need to copy my changes into your version of this routine
+        //DO THIS FIRST
         
-        if(PdfDictionary.getKeyType(PdfDictionary.N, PdfDictionary.Form)==PdfDictionary.VALUE_IS_DICTIONARY_PAIRS) {
+        final PdfKeyPairsIterator APkeys=APobjN.getKeyPairsIterator();
+        
+        if(APkeys!=null && APkeys.getTokenCount()>0) {
 
-            if (APobjN.getDictionary(PdfDictionary.On) != null) {
-                key = "On";
-                val = APobjN.getDictionary(PdfDictionary.On);
-            }
+            while(APkeys.hasMorePairs()){
 
-            final Map otherValues = APobjN.getOtherDictionaries();
-            if (otherValues != null && !otherValues.isEmpty()) {
-                final Iterator keys = otherValues.keySet().iterator();
-                while (keys.hasNext()) {
-                    key = (String) keys.next();
-                    val = (PdfObject) otherValues.get(key);
+                String glyphKey=APkeys.getNextKeyAsString();
+                byte[] data=APkeys.getNextValueAsBytes();
+
+                if(data!=null){
+                    if(glyphKey.equals("Off")){
+                        normalOffDic=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FormObject(glyphKey), pdfFileReader, data, PdfDictionary.AP);
+                    }else{  
+                        key=glyphKey;                   
+                        val=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FormObject(glyphKey), pdfFileReader, data, PdfDictionary.AP);
+                    }
                 }
-            }
+              
+                APkeys.nextPair();
+            }            
         }else{
+            
+            //if we have a root stream then it is the off value
+            //check in order of N Off, MK I, then N
+            //as N Off overrides others and MK I is in preference to N
+            if(APobjN.getDictionary(PdfDictionary.Off) !=null){
+                normalOffDic = APobjN.getDictionary(PdfDictionary.Off);
+            }else if(form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null
+                    && form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.IF)==null){
+                //look here for MK IF
+                //if we have an IF inside the MK then use the MK I as some files shown that this value is there
+                //only when the MK I value is not as important as the AP N.
+                normalOffDic = form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I);
+            }else if(APobjN.getDecodedStream()!=null){
+                normalOffDic = APobjN;
+            }
+        
             if(APobjN.getDictionary(PdfDictionary.On) !=null){
                 val = APobjN.getDictionary(PdfDictionary.On);
                 key = "On";
@@ -175,42 +190,69 @@ public class FormStream {
         return new Object[]{key,val,normalOffDic};
     }
 
-        public static Object[] getDownKeyValues(PdfObject form){
+        public static Object[] getDownKeyValues(PdfObject form, PdfFileReader pdfFileReader){
         
             final PdfObject APobjD = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.D);
 
             String key=null;
             PdfObject val=null;
             PdfObject downOffDic = null;
-
-            if(PdfDictionary.getKeyType(PdfDictionary.D, PdfDictionary.Form)==PdfDictionary.VALUE_IS_DICTIONARY_PAIRS) {
-
-                    //down on
-                    if(APobjD.getDictionary(PdfDictionary.On) !=null){
-                        key = "On";
-                        val = APobjD.getDictionary(PdfDictionary.On);
-                    }else {
-                        final Map otherValues=APobjD.getOtherDictionaries();
-                        if(otherValues!=null && !otherValues.isEmpty()){
-                            final Iterator keys=otherValues.keySet().iterator();
-                            while(keys.hasNext()){
-                                key=(String)keys.next();
-                                val=(PdfObject)otherValues.get(key);
-                            }
+            
+            final PdfKeyPairsIterator APkeys=APobjD.getKeyPairsIterator();
+            
+            if(APkeys!=null && APkeys.getTokenCount()>0) {
+                
+                while(APkeys.hasMorePairs()) {
+                    
+                    String glyphKey=APkeys.getNextKeyAsString();
+                    byte[] data=APkeys.getNextValueAsBytes();
+                    
+                    if (data != null) {
+                        if (glyphKey.equals("Off")) {
+                            downOffDic = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FormObject(glyphKey), pdfFileReader, data, PdfDictionary.AP);
+                        } else {
+                            key=glyphKey;
+                            val=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FormObject(glyphKey), pdfFileReader, data, PdfDictionary.AP);
                         }
                     }
-
-            } else {
-                
-                //down off
-                //if we have a root stream then it is the off value
-                if(APobjD.getDecodedStream()!=null){
-                    downOffDic = APobjD;
-                }else if(APobjD.getDictionary(PdfDictionary.Off) !=null){
-                    downOffDic = APobjD.getDictionary(PdfDictionary.Off);
+                    
+                    APkeys.nextPair();
+                    
                 }
-                
-                
+            } 
+            
+            else {
+
+                if(PdfDictionary.getKeyType(PdfDictionary.D, PdfDictionary.Form)==PdfDictionary.VALUE_IS_DICTIONARY_PAIRS) {
+
+                        //down on
+                        if(APobjD.getDictionary(PdfDictionary.On) !=null){
+                            key = "On";
+                            val = APobjD.getDictionary(PdfDictionary.On);
+                        }else {
+                            final Map otherValues=APobjD.getOtherDictionaries();
+                            if(otherValues!=null && !otherValues.isEmpty()){
+                                final Iterator keys=otherValues.keySet().iterator();
+                                while(keys.hasNext()){
+                                    key=(String)keys.next();
+                                    val=(PdfObject)otherValues.get(key);
+                                }
+                            }
+                        }
+
+                } else {
+
+                    //down off
+                    //if we have a root stream then it is the off value
+                    if(APobjD.getDecodedStream()!=null){
+                        downOffDic = APobjD;
+                    }else if(APobjD.getDictionary(PdfDictionary.Off) !=null){
+                        downOffDic = APobjD.getDictionary(PdfDictionary.Off);
+                    }
+
+
+
+                  }
                 
             }
 
@@ -275,7 +317,7 @@ public class FormStream {
         //at the moment only handles static
         // (and not dynamic which are created at Runtime if
         // formObject.getBoolean(PdfDictionary.NeedAppearances) is true
-        setupAPimages(formObject);
+        setupAPimages(formObject,currentPdfFile.getObjectReader());
 
 
         //set H
@@ -319,7 +361,7 @@ public class FormStream {
     }
 
     /** set correct flags for AP images */
-    private static void setupAPimages(final FormObject formObject) {
+    private static void setupAPimages(final FormObject formObject, PdfFileReader pdfFileReader) {
 
         final PdfObject APobjN = formObject.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
         //if valid AP, setup flags to show we use images
@@ -330,7 +372,7 @@ public class FormStream {
             formObject.setAppreancesUsed(true);
             formObject.setNormalOnState(ASvalue);
 
-            final String key=(String) getNormalKeyValues(formObject)[0];
+            final String key=(String) getNormalKeyValues(formObject, pdfFileReader)[0];
             
             if(key!=null){
                 formObject.setNormalOnState(key);

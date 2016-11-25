@@ -90,11 +90,14 @@ public class TTGlyphs extends PdfJavaGlyphs {
     public PdfGlyph getEmbeddedGlyph(final GlyphFactory factory, final String glyph, final float[][]Trm, int rawInt,
                                      final String displayValue, final float currentWidth, final String key) {
 
-        final int id=rawInt;
-        if(hasGIDtoCID && isIdentity()){
+        final int id=rawInt; 
+        if(hasGIDtoCID && (isIdentity()|| currentCMAP==null) &&  CIDToGIDMap.length>rawInt){  
             
-            rawInt=CIDToGIDMap[rawInt];
-           
+            int mappedValue=CIDToGIDMap[rawInt];
+            
+            if(mappedValue>0){
+                rawInt=mappedValue;
+            }           
         }
         /* flush cache if needed*/
         if(Trm!=null && (lastTrm[0][0]!=Trm[0][0])|(lastTrm[1][0]!=Trm[1][0])|

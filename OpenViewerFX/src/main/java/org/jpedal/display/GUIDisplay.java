@@ -257,11 +257,11 @@ public class GUIDisplay implements Display{
             case CONTINUOUS:
                 if((displayRotation==90)|(displayRotation==270)){
                     pageSize[0] = ((int)(currentOffset.getBiggestHeight()*scaling)+insetW+insetW);
-                    pageSize[1] = ((int)(currentOffset.getTotalSingleWidth()*scaling)+gaps+insetH+insetH);
+                    pageSize[1] = pageData.getScaledTotalSingleWidth()+gaps+insetH+insetH;
                 }
                 else{
                     pageSize[0] = ((int)(currentOffset.getBiggestWidth()*scaling)+insetW+insetW);
-                    pageSize[1] = ((int)(currentOffset.getTotalSingleHeight()*scaling)+gaps+insetH+insetH);
+                    pageSize[1] = pageData.getScaledTotalSingleHeight()+gaps+insetH+insetH;
                 }
                 break;
 
@@ -275,7 +275,7 @@ public class GUIDisplay implements Display{
                     }
                     else{
                         pageSize[0] = ((int)(currentOffset.getDoublePageHeight()*scaling)+insetW+insetW);
-                        pageSize[1] = ((int)(currentOffset.getTotalDoubleWidth()*scaling)+doubleGaps+insetH+insetH);
+                        pageSize[1] = pageData.getScaledTotalDoubleWidth()+doubleGaps+insetH+insetH;
                     }
                 }else{
                     if(pageCount == 2){
@@ -284,7 +284,7 @@ public class GUIDisplay implements Display{
                     }
                     else{
                         pageSize[0] = ((int)(currentOffset.getDoublePageWidth()*scaling)+insetW+insetW);
-                        pageSize[1] = ((int)(currentOffset.getTotalDoubleHeight()*scaling)+doubleGaps+insetH+insetH);
+                        pageSize[1] = pageData.getScaledTotalDoubleHeight()+doubleGaps+insetH+insetH;
                     }
                 }
                 break;

@@ -53,7 +53,7 @@ import org.jpedal.utils.StringUtils;
 
 public class FormObject extends PdfObject{
     
-    private static Color FieldsHightlightColor = null;    
+    private static Color FieldsHightlightColor;
 //    private static Color RequiredFieldsHighlightColor = null;
     static{
         String cs = System.getProperty("org.jpedal.FieldsHighlightColor");

@@ -36,7 +36,7 @@ public class PageObject extends PdfObject {
 	
     private byte[][] Annots, Contents, Kids, OpenAction;
     
-    PdfObject AA, AcroForm, Dests, Group, OCProperties, O, OpenActionDict, PO, PageLabels, Properties, PV, Metadata, Outlines, Pages, MarkInfo, Names,StructTreeRoot;
+    PdfObject AA, AcroForm, Dests, Group, OCProperties, O, PO, PageLabels, Properties, PV, Metadata, Outlines, Pages, MarkInfo, Names,StructTreeRoot;
     
     private int StructParents=-1, pageMode=-1;
 
@@ -80,9 +80,6 @@ public class PageObject extends PdfObject {
 
             case PdfDictionary.O:
 	        	return O;
-
-            case PdfDictionary.OpenAction:
-	        	return OpenActionDict;
 
             case PdfDictionary.OCProperties:
                 return OCProperties;
@@ -181,10 +178,6 @@ public class PageObject extends PdfObject {
 
             case PdfDictionary.OCProperties:
                 OCProperties=value;
-            break;
-
-            case PdfDictionary.OpenAction:
-                OpenActionDict=value;
             break;
 
             case PdfDictionary.Outlines:

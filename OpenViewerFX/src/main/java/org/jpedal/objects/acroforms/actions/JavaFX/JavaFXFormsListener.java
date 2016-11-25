@@ -107,14 +107,14 @@ public class JavaFXFormsListener extends PDFListener{
             handler.A(event, formObject, ActionHandler.MOUSEENTERED);
             handler.E(event, formObject);
 
-            if (formObject.getCharacteristics()[8] && (Node)formObject.getGUIComponent()!=null) {//togglenoView
+            if (formObject.getCharacteristics()[8] && formObject.getGUIComponent() !=null) {//togglenoView
                 ((Node)formObject.getGUIComponent()).setVisible(true);
             }
         }else if (event.getEventType() == MouseEvent.MOUSE_EXITED){
             handler.A(event, formObject, ActionHandler.MOUSEEXITED);
             handler.X(event, formObject);
 
-            if (formObject.getCharacteristics()[8] && (Node)formObject.getGUIComponent()!=null) {//togglenoView
+            if (formObject.getCharacteristics()[8] && formObject.getGUIComponent() !=null) {//togglenoView
                 ((Node)formObject.getGUIComponent()).setVisible(false);
             }
         }

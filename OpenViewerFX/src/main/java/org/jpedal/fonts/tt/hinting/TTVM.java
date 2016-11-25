@@ -101,10 +101,10 @@ public class TTVM implements Serializable {
     private JComponent stateDisplay,debugGlyphDisplay;
     private JCheckBox showInterpolatedShadow;
     private boolean stepInto, debuggerRunningInBackground;
-    private static JList<String> currentInstructionList;
-    private static JList<String> stackList;
-    private static JList<String> cvtList;
-    private static JList<String> storageList;
+    private static JList currentInstructionList;
+    private static JList stackList;
+    private static JList cvtList;
+    private static JList storageList;
     private JLabel currentCode, debugXLabel, debugYLabel;
     private final java.util.Stack<int[]> codeStack = new java.util.Stack<int[]>();
     private final java.util.Stack<Integer> numberStack = new java.util.Stack<Integer>();
@@ -2891,7 +2891,7 @@ public class TTVM implements Serializable {
         instructionPanel.setBorder(new javax.swing.border.LineBorder(Color.BLACK));
 
         //Code list
-        currentInstructionList = new JList<String>();
+        currentInstructionList = new JList();
         final JScrollPane codePane = new JScrollPane(currentInstructionList) {
             @Override
             public Dimension getPreferredSize() {
@@ -3188,21 +3188,21 @@ public class TTVM implements Serializable {
 
         //Stack
         final JPanel stackPanel = new JPanel(new BorderLayout());
-        stackList = new JList<String>();
+        stackList = new JList();
         final JScrollPane stackScroll = new JScrollPane(stackList);
         stackPanel.add(BorderLayout.NORTH, new JLabel("Stack:"));
         stackPanel.add(BorderLayout.CENTER, stackScroll);
 
         //CVT
         final JPanel cvtPanel = new JPanel(new BorderLayout());
-        cvtList = new JList<String>(cvt.getCVTForDebug());
+        cvtList = new JList(cvt.getCVTForDebug());
         final JScrollPane cvtScroll = new JScrollPane(cvtList);
         cvtPanel.add(BorderLayout.NORTH, new JLabel("CVT:"));
         cvtPanel.add(BorderLayout.CENTER, cvtScroll);
 
         //Storage
         final JPanel storagePanel = new JPanel(new BorderLayout());
-        storageList = new JList<String>(getStorageAsArray());
+        storageList = new JList(getStorageAsArray());
         final JScrollPane storageScroll = new JScrollPane(storageList);
         storagePanel.add(BorderLayout.NORTH, new JLabel("Storage:"));
         storagePanel.add(BorderLayout.CENTER, storageScroll);

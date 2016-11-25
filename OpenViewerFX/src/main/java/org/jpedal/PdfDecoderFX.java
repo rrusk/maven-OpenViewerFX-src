@@ -1983,7 +1983,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
      */
     @Override
     public boolean isForm() {
-        return res.isForm() || getFormRenderer().isXFA();
+        return res.isForm() || (getFormRenderer()!=null && getFormRenderer().isXFA());
     }
     
     

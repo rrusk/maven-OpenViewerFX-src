@@ -241,7 +241,7 @@ public class TextStream {
                     newString = ObjectUtils.readEscapedValue(j,data, start,lbKeepReturns);
                 }
 
-                if(pdfObject.getObjectType()!= PdfDictionary.Encrypt){// && pdfObject.getObjectType()!=PdfDictionary.Outlines){
+                if(pdfObject.getObjectType()!= PdfDictionary.Encrypt && pdfObject.getObjectType()!= PdfDictionary.MCID){
 
                     try {
                         if(!pdfObject.isInCompressedStream() || PDFkeyInt==PdfDictionary.Name || PDFkeyInt==PdfDictionary.Reason || PDFkeyInt==PdfDictionary.Location || PDFkeyInt==PdfDictionary.M){

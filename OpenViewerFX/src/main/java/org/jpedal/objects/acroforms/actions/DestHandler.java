@@ -89,17 +89,9 @@ public class DestHandler {
      * @return page number
      */
     public static int getPageNumberFromLink(PdfArrayIterator dest, final PdfObjectReader currentPdfFile){
-        
-        if(dest.getTokenCount()==1){ //indirect value to remap (Name or ref)
-                
-            final String ref=currentPdfFile.convertNameToRef( dest.getNextValueAsString(false));
-            if(ref!=null){
-                dest = convertRef(ref, currentPdfFile);
-            }else{         
-                dest=decodeDest(dest.getNextValueAsString(false), currentPdfFile, dest);          
-            }
-        }
-       
+
+        dest = resolveIfIndirect(dest, currentPdfFile);
+
         int page=-1;
         
         if(dest.hasMoreTokens()){
@@ -212,7 +204,112 @@ public class DestHandler {
         }
         
         return DestObj;
-    }  
+    }
+
+    private static PdfArrayIterator resolveIfIndirect(PdfArrayIterator dest, final PdfObjectReader currentPdfFile) {
+        if (dest.getTokenCount() == 1) { //indirect value to remap (Name or ref)
+            final String ref = currentPdfFile.convertNameToRef(dest.getNextValueAsString(false));
+            if (ref != null) {
+                dest = convertRef(ref, currentPdfFile);
+            } else {
+                dest = decodeDest(dest.getNextValueAsString(false), currentPdfFile, dest);
+            }
+        }
+        return dest;
+    }
+
+    private static Float getFloatOrNull(final PdfArrayIterator dest) {
+        if (dest.getNextValueAsString(false).equals("null")) {
+            dest.getNextValueAsString(true); // Roll on
+            return null;
+        } else {
+            return dest.getNextValueAsFloat();
+        }
+    }
+
+    public static Object[] getZoomFromDest(PdfArrayIterator dest, final PdfObjectReader currentPdfFile) {
+        dest.resetToStart();
+        dest = resolveIfIndirect(dest, currentPdfFile);
+
+        while (dest.hasMoreTokens()) {
+            final Object[] action;
+            final int key = dest.getNextValueAsKey();
+            switch (key) {
+
+                case PdfDictionary.XYZ:
+                    action = new Object[5];
+                    action[0] = key;
+                    action[1] = "XYZ";
+                    action[2] = getFloatOrNull(dest);
+                    action[3] = getFloatOrNull(dest);
+                    action[4] = getFloatOrNull(dest);
+                    return action;
+
+                case PdfDictionary.Fit:
+                    action = new Object[2];
+                    action[0] = key;
+                    action[1] = "Fit";
+                    return action;
+
+                case PdfDictionary.FitH:
+                    action = new Object[3];
+                    action[0] = key;
+                    action[1] = "FitH";
+                    action[2] = getFloatOrNull(dest);
+                    return action;
+
+                case PdfDictionary.FitV:
+                    action = new Object[3];
+                    action[0] = key;
+                    action[1] = "FitV";
+                    action[2] = getFloatOrNull(dest);
+                    return action;
+
+                case PdfDictionary.FitR:
+                    action = new Object[6];
+                    action[0] = key;
+                    action[1] = "FitR";
+                    // Specification does not mention null values for FitR (behavior unspecified)
+                    action[2] = getFloatOrNull(dest);
+                    action[3] = getFloatOrNull(dest);
+                    action[4] = getFloatOrNull(dest);
+                    action[5] = getFloatOrNull(dest);
+                    return action;
+
+                case PdfDictionary.FitB:
+                    action = new Object[2];
+                    action[0] = key;
+                    action[1] = "FitB";
+                    return action;
+
+                case PdfDictionary.FitBH:
+                    action = new Object[3];
+                    action[0] = key;
+                    action[1] = "FitBH";
+                    action[2] = getFloatOrNull(dest);
+                    return action;
+
+                case PdfDictionary.FitBV:
+                    action = new Object[3];
+                    action[0] = key;
+                    action[1] = "FitBV";
+                    action[2] = getFloatOrNull(dest);
+                    return action;
+            }
+        }
+        return null;
+    }
+
+    public static String convertZoomArrayToString(final Object[] zoomArray) {
+        final StringBuilder zoom = new StringBuilder();
+        zoom.append(zoomArray[1]);
+
+        for (int i = 2; i < zoomArray.length; i++) {
+            zoom.append(' ').append(zoomArray[i]);
+        }
+
+        return zoom.toString();
+    }
 }
 
 

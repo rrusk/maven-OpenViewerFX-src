@@ -164,7 +164,7 @@ public class DecryptionFactory {
     }
 
     /**see if valid for password*/
-    private boolean testPassword() throws PdfSecurityException {
+    private boolean testPassword(final byte[] valueToMatch) throws PdfSecurityException {
 
         int count=32;
 
@@ -236,7 +236,7 @@ public class DecryptionFactory {
 
         }
 
-        return compareKeys(U, encrypted,count);
+        return compareKeys(valueToMatch, encrypted,count);
 
     }
 
@@ -328,7 +328,7 @@ public class DecryptionFactory {
 
         computeEncryptionKey();
 
-        final boolean isMatch=testPassword();
+        final boolean isMatch=testPassword(O);
 
         //put back to original if not in fact correct
         if(!isMatch){
@@ -352,7 +352,7 @@ public class DecryptionFactory {
         boolean isOwnerPassword=false,isUserPassword=false;
         if(rev<5){
             isOwnerPassword =testOwnerPassword();
-            isUserPassword=testPassword();
+            isUserPassword=testPassword(U);
         }else{ //v5 method very different so own routines to handle
             try {
 
@@ -855,7 +855,11 @@ public class DecryptionFactory {
                     if(AESData!=null) {
                         System.arraycopy(AESData, 0, iv, 0, 16);
                     } else {
+                        if (data.length>=16) {
                         System.arraycopy(data, 0, iv, 0, 16);
+                        }else {
+                            return data;
+                        }
                     }
 
                     //SecOP java ME - removed to remove additional package secop1_0.jar in java ME

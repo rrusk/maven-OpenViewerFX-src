@@ -37,8 +37,8 @@ import org.jpedal.utils.LogWriter;
 class UnicodeReader {
     
     private static final int[] powers={1,16,256,256*16};
-    
-    int ptr;
+
+    int dataLen;
     
     final byte[] data;
     
@@ -47,6 +47,10 @@ class UnicodeReader {
     UnicodeReader(final byte[] data){
         
         this.data=data;
+
+        if(data!=null){
+            dataLen=data.length;
+        }
     }
     
     /**
@@ -59,12 +63,11 @@ class UnicodeReader {
         }
         
         int defType = 0;
-        
+        int ptr=0;
+    
         //initialise unicode holder
         final String[] unicodeMappings = new String[65536];
-        
-        final int length=data.length;
-        
+
         boolean inDef=false;
         
         //get stream of data
@@ -73,39 +76,37 @@ class UnicodeReader {
             //read values into lookup table
             while (true) {
                 
-                while(ptr<length && data[ptr]==9) {
+                while(ptr<dataLen && data[ptr]==9) {
                     ptr++;
                 }
                 
-                if (ptr>=length) {
+                if (ptr>=dataLen) {
                     break;
-                } else if(ptr+4<length && data[ptr]=='e' && data[ptr+1]=='n' && data[ptr+2]=='d' && data[ptr+3]=='b' && data[ptr+4]=='f'){
+                } else if(ptr+4<dataLen && data[ptr]=='e' && data[ptr+1]=='n' && data[ptr+2]=='d' && data[ptr+3]=='b' && data[ptr+4]=='f'){
                     defType = 0;
                     inDef=false;
-                }else if (inDef) {
-                    
-                    readLineValue(unicodeMappings,defType);
+                }else if (inDef) {                    
+                    ptr=readLineValue(unicodeMappings,defType,ptr);
                 }
                 
-                if(ptr>=length){
+                if(ptr>=dataLen){
                     break;
                 }else if(data[ptr]=='b' && data[ptr+1]=='e' && data[ptr+2]=='g' && data[ptr+3]=='i' && data[ptr+4]=='n' &&
-                        data[ptr+5]=='b' && data[ptr+6]=='f' && data[ptr+7]=='c' && data[ptr+8]=='h' && data[ptr+9]=='a' && data[ptr+10]=='r'){
+                        data[ptr+5]=='b' && data[ptr+6]=='f'){
                     
-                    defType = 1;
-                    ptr += 10;
-                    
-                    inDef=true;
-                    
-                }else if(data[ptr]=='b' && data[ptr+1]=='e' && data[ptr+2]=='g' && data[ptr+3]=='i' && data[ptr+4]=='n' &&
-                        data[ptr+5]=='b' && data[ptr+6]=='f' && data[ptr+7]=='r' && data[ptr+8]=='a' && data[ptr+9]=='n' && data[ptr+10]=='g' && data[ptr+11]=='e'){
-                    
-                    defType = 2;
-                    ptr += 11;
-                    
-                    inDef=true;
+                    if(data[ptr+7]=='c' && data[ptr+8]=='h' && data[ptr+9]=='a' && data[ptr+10]=='r'){
+                        defType = 1;
+                        ptr += 10;
+
+                        inDef=true;
+                    }else if(data[ptr+7]=='r' && data[ptr+8]=='a' && data[ptr+9]=='n' && data[ptr+10]=='g' && data[ptr+11]=='e'){                   
+                        defType = 2;
+                        ptr += 11;
+
+                        inDef=true;
+                    }
                 }
-                
+            
                 ptr++;
             }
             
@@ -116,25 +117,21 @@ class UnicodeReader {
         return unicodeMappings;
     }
     
-    private void readLineValue(final String[] unicodeMappings,int type) {
+    private int readLineValue(final String[] unicodeMappings,int type, int ptr) {
         
         int entryCount= type +1;
-        
-        final int dataLen=data.length;
-        
-        int raw;
-        
+
         //read 2 values
-        final int[] value=new int[2000];
+        final int[][] value=new int[2000][4];
         boolean isMultipleValues=false;
         
         for(int vals=0;vals<entryCount;vals++){
             
             if(!isMultipleValues){
-                while(ptr<data.length && data[ptr]!='<'){ //read up to
+                while(ptr<dataLen && data[ptr]!='<'){ //read up to
                     
                     if(vals==2 && entryCount==3 && data[ptr]=='['){ //mutiple values inside []
-                        
+
                         type =4;
                         
                         int ii=ptr;
@@ -148,9 +145,7 @@ class UnicodeReader {
                         
                         //needs to be 1 less to make it work
                         entryCount--;
-                        
-                        //vals=entryCount;
-                        //break;
+                       
                     }
                     
                     ptr++;
@@ -172,7 +167,7 @@ class UnicodeReader {
                 count++;
                 
                 //allow for multiple values
-                if(charsFound==5){
+                if(charsFound==5 && type!=4){
                     
                     count=4;
                     ptr--;
@@ -182,34 +177,17 @@ class UnicodeReader {
                     break;
                 }
             }
-            
-            int pos=0;
-            
-            for(int jj=0;jj<count;jj++){
-                //convert to number
-                while(true){
-                    raw=data[ptr-1-jj];
-                    
-                    if(raw!=10 && raw!=13 && raw!=32 ) {
-                        break;
-                    }
-                    
-                    jj++;
-                }
-                
-                if(raw>='A' && raw<='F'){
-                    raw -= 55;
-                }else if(raw>='a' && raw<='f'){
-                    raw -= 87;
-                }else if(raw>='0' && raw<='9'){
-                    raw -= 48;
-                }else {
-                    throw new RuntimeException("Unexpected number "+(char)raw);
-                }
-                
-                value[vals] += (raw*powers[pos]);
-                
-                pos++;
+
+            int byteAccessed=0;
+            while(count>0){
+
+                int nextVal = getNextVal(ptr, count);
+
+                value[vals][byteAccessed] = nextVal;
+
+                byteAccessed++;
+
+                count -= 4;
             }
         }
         
@@ -222,96 +200,128 @@ class UnicodeReader {
         
         //put into array
         fillValues(unicodeMappings, entryCount, value,type);
-    }
-    
-    private void fillValues(final String[] unicodeMappings, final int entryCount, final int[] value, final int type) {
         
-        int intValue;
+        return ptr;
+    }
+
+    private int getNextVal(int ptr, int count) {
+
+        int disp=0;
+        if(count>4){
+            count=4;
+            disp=4;
+        }
+
+        int raw;
+        int pos=0;
+        int nextVal=0;
+        for(int jj=0;jj<count;jj++){
+            //convert to number
+            while(true){
+                raw=data[ptr-1-jj-disp];
+
+                if(raw!=10 && raw!=13 && raw!=32 ) {
+                    break;
+                }
+
+                jj++;
+            }
+
+            if(raw>='A' && raw<='F'){
+                raw -= 55;
+            }else if(raw>='a' && raw<='f'){
+                raw -= 87;
+            }else if(raw>='0' && raw<='9'){
+                raw -= 48;
+            }else {
+                throw new RuntimeException("Unexpected number "+(char)raw);
+            }
+
+            nextVal += (raw*powers[pos]);
+
+            pos++;
+        }
+        return nextVal;
+    }
+
+    private void fillValues(final String[] unicodeMappings, final int entryCount, final int[][] value, final int type) {
+        
+        int val;
         
         switch(type){
             
-            case 1:
+            case 1: //single value mapping onto 1 or more values
+
+                if(value[0][0]>255) {
+                    hasDoubleBytes=true;
+                }
+
+                final char[] str=new char[entryCount-1];
+
+                for(int aa=0;aa<entryCount-1;aa++) {
+                    str[aa]=(char)value[1+aa][0];
+                }
+
+                unicodeMappings[value[0][0]]= new String(str);
+
+                break;
                 
-                if(entryCount==2){
-                    if(value[type]>0){
-                        unicodeMappings[value[0]]= String.valueOf((char) value[type]);
-                        if(value[0]>255) {
-                            hasDoubleBytes=true;
-                        }
-                    }
-                    
-                }else{
-                    
-                    final char[] str=new char[entryCount-1];
-                    
-                    for(int aa=0;aa<entryCount-1;aa++) {
-                        str[aa]=(char)value[type +aa];
-                    }
-                    
-                    unicodeMappings[value[0]]= new String(str);
-                    if(value[0]>255) {
+            case 2: //range of values mapping onto 1 or more values
+                
+                for (int i = value[0][0]; i < value[1][0] + 1; i++){
+                    if(i>255) {
                         hasDoubleBytes=true;
                     }
-                    
+
+                    int disp=i-value[0][0];
+                    val=value[2][0] + disp;
+                    if(val>0){ //ignore  0 to fix issue in Dalim files
+                        if(unicodeMappings[i]==null) {
+                            unicodeMappings[i]= String.valueOf((char) val);
+                        }else{
+                            unicodeMappings[i] += String.valueOf((char) val);
+                        }
+                    }
                 }
                 
                 break;
-                
-            case 4:
-                
-                //ptr++;
-                
+
+            case 4: //corner case
+
                 int j=2;
-                for (int i = value[0]; i < value[1] + 1; i++){
-                    
-                    
-                    if(entryCount>1 && value[0]==value[1]){ //allow for <02> <02> [<0066006C>]
-                        
-                        unicodeMappings[i]= String.valueOf((char) (value[2]));
-                        if(i>255) {
-                            hasDoubleBytes=true;
-                        }
-                        
-                        for(int jj=1;jj<entryCount;jj++){
-                            unicodeMappings[i] += String.valueOf((char) (value[2+jj]));
-                            if(i>255) {
-                                hasDoubleBytes=true;
-                            }
-                        }
-                        // System.out.println("val="+value[0]+" "+unicodeMappings[i]+" value[0]="+value[0]+" value[1]="+value[1]+" value[2]="+value[2]+" value[3]="+value[3]);
-                        
-                    }else{
-                        //read next value
-                        
-                        intValue=value[j];
-                        j++;
-                        if(intValue>0){ //ignore  0 to fix issue in Dalim files
-                            unicodeMappings[i]= String.valueOf((char) (intValue));
-                            if(i>255) {
-                                hasDoubleBytes=true;
-                            }
-                        }
+                for (int i = value[0][0]; i < value[1][0] + 1; i++){
+                    if(i>255) {
+                        hasDoubleBytes=true;
                     }
-                }
-                
-                break;
-                
-            default:
-                
-                for (int i = value[0]; i < value[1] + 1; i++){
-                    intValue=value[type] + i - value[0];
-                    if(intValue>0){ //ignore  0 to fix issue in Dalim files
-                        unicodeMappings[i]= String.valueOf((char) (intValue));
-                        if(i>255) {
-                            hasDoubleBytes=true;
-                        }
+
+                    if(value[0][0]==value[1][0]){ //allow for <02> <02> [<0066006C>]
+                        setValue( i, 2, value, unicodeMappings,0);
+                    }else{ //read next value
+                        setValue(i, j,value, unicodeMappings,0);
                     }
+                    j++;
                 }
-                
+
                 break;
         }
     }
-    
+
+    static void setValue(int i, int j, final int[][] value, final String[] unicodeMappings, int offset) {
+
+        int val;
+
+        for(int jj=0;jj<4;jj++) {
+            val=value[j][jj]+offset;
+            if (val > 0) {
+                if(unicodeMappings[i]==null) {
+                    unicodeMappings[i]= String.valueOf((char) val);
+                }else{
+                    unicodeMappings[i] += String.valueOf((char) val);
+                }
+            }
+        }
+    }
+
     public boolean hasDoubleByteValues(){
         return hasDoubleBytes;
     }

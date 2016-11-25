@@ -39,7 +39,8 @@ import org.jpedal.utils.LogWriter;
  */
 public class PDFCalculator extends PDFGenericFunction implements PDFFunction {
 
-    private final PostscriptFactory post;
+    private final PostScriptCompiler comp;
+//    private final PostscriptFactory post;
 
     private final int n;
 
@@ -47,7 +48,8 @@ public class PDFCalculator extends PDFGenericFunction implements PDFFunction {
 
         super(domain, range);
 
-        post = new PostscriptFactory(stream);
+//        post = new PostscriptFactory(stream);
+        comp = new PostScriptCompiler(stream);
 
         n = range.length / 2;
 
@@ -71,8 +73,9 @@ public class PDFCalculator extends PDFGenericFunction implements PDFFunction {
         final float[] result = new float[n];
 
         try {
-            post.resetStacks(values);
-            final double[] stack = post.executePostscript();
+//            post.resetStacks(values);
+//            final double[] stack = post.executePostscript();
+            final double[] stack = comp.executeScript(values);
 
             for (int i = 0; i < n; i++) {
                 result[i] = min(max((float) (stack[i]), range[i * 2]), range[i * 2 + 1]);

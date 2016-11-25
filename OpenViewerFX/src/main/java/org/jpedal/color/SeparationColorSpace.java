@@ -206,35 +206,26 @@ public class SeparationColorSpace extends GenericColorSpace {
     public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h, final int pX, final int pY, final int d) throws PdfException{
         
         
-        BufferedImage image;
+        byte[] rawData = null;
         
         try {
-            image = JDeliHelper.JPEG2000ToRGBImage(data);
+            rawData = JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
         } catch (Exception ex) {//rethrow as Pdfexception
             throw new PdfException(ex.getMessage());
         }
+        
+        BufferedImage image = null;
 
-        if(image!=null){
+        if(rawData!=null){
             try{
 
                 IndexedColorMap = null;//make index null as we already processed
 
-
-                if(IndexedColorMap==null){ //avoid on index colorspaces
-                    image=cleanupImage(image,pX,pY);
-                }
-
-                final int iw = image.getWidth();
-                final int ih = image.getHeight();
-
-                final DataBufferByte rgb = (DataBufferByte) image.getRaster().getDataBuffer();
-                final byte[] rawData=rgb.getData();
-
                 //convert the image
                 if(getID()==ColorSpaces.DeviceN){
-                    image=createImageN(iw, ih, rawData);
+                    image=createImageN(w, h, rawData);
                 }else{
-                    image=createImage(iw, ih, rawData);
+                    image=createImage(w, h, rawData);
                 }
             } catch (final Exception ee) {
                 image = null;

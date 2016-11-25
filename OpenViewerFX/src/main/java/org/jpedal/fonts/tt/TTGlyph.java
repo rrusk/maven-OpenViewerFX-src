@@ -54,6 +54,8 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
 
     Area glyphShape;
+    
+    private boolean hasEndCurve;
 
     /**
      * method to set the paths after the object has be deserialized.
@@ -217,7 +219,12 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             if((type & GraphicsState.FILL)==GraphicsState.FILL){
                 g2.fill(paths.elementAt(jj));
             }else if((type & GraphicsState.STROKE)==GraphicsState.STROKE){
-                g2.draw(paths.elementAt(jj));
+                
+                if (!hasEndCurve || !((((BasicStroke) g2.getStroke()).getDashPhase() == 0.0f) && ((BasicStroke) g2.getStroke()).getDashArray() != null)) {
+
+                    g2.draw(paths.elementAt(jj));
+
+                }
             }
         }
 
@@ -504,7 +511,8 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
                     }
 
-                    if (!(endOfContour[p] && p > 0 && endOfContour[p-1])) {
+                    if (!(endOfContour[p] && p > 0 && endOfContour[p-1])) {    
+                        hasEndCurve=true;
                         current_path.curveTo(x1, y1, x2, y2, x3, y3);
                     }
 

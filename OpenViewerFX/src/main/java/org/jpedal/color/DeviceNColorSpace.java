@@ -36,8 +36,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * handle Device ColorSpace
@@ -45,11 +43,8 @@ import java.util.Map;
 public class DeviceNColorSpace extends SeparationColorSpace {
     
     private static final long serialVersionUID = -1372268945371555187L;
-    
-    private final Map<Integer, Integer> cache=new HashMap<Integer, Integer>();
-            
-    private float [] oldValues;
-     
+    private final int[] lookup = new int[256]; 
+                
     public DeviceNColorSpace(final int componentCount, final ColorMapping colorMapper,final float[] domain, final GenericColorSpace altCS){
         
         setType(ColorSpaces.DeviceN);
@@ -73,16 +68,42 @@ public class DeviceNColorSpace extends SeparationColorSpace {
         setColor(values,opCount);
     }
     
+    LimitedArray lim = new LimitedArray();
+    
     /** set color (translate and set in alt colorspace */
     @Override
-    public void setColor(final float[] raw, final int opCount) {        
-        if (oldValues != null && isSame(raw, oldValues)) {
-
+    public void setColor(final float[] raw, final int opCount) {
+        if (opCount == 1) {
+            int key = (int) (raw[0] * 255);
+            if (lookup[key] != 0) {
+                final int rawValue = lookup[key];
+                final int r = ((rawValue >> 16) & 255);
+                final int g = ((rawValue >> 8) & 255);
+                final int b = ((rawValue) & 255);
+                altCS.currentColor = new PdfColor(r, g, b);
+            } else {
+                final float[] operand = colorMapper.getOperandFloat(raw);
+                altCS.setColor(operand, operand.length);
+                lookup[key] = altCS.getColor().getRGB();
+            }
         } else {
-            final float[] operand = colorMapper.getOperandFloat(raw);
-            altCS.setColor(operand, operand.length);
-            oldValues = raw.clone();
-        }        
+            long key = 0;
+            for (float n : raw) {
+                key = key << 8 | (int) (n * 255);
+            }
+            Long lv = lim.get(key);
+            if (lv != null) {
+                final int rawValue = (int) (long) lv;
+                final int r = ((rawValue >> 16) & 255);
+                final int g = ((rawValue >> 8) & 255);
+                final int b = ((rawValue) & 255);
+                altCS.currentColor = new PdfColor(r, g, b);
+            } else {
+                final float[] operand = colorMapper.getOperandFloat(raw);
+                altCS.setColor(operand, operand.length);
+                lim.put(key, altCS.getColor().getRGB());
+            }
+        }
     }
     
     /**
@@ -148,7 +169,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
                 values[comp]=((rawData[j] & 255)/255f);
                 j++;
             }
-
+            
             setColor(values,componentCount);
             
             //set values
@@ -172,15 +193,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
         return image;
     }
     
-    private static boolean isSame(float[]a , float []b){
-        for (int i = 0; i < a.length; i++) {
-            if(a[i]!= b[i]){
-                return false;
-            }
-        }
-        return true;
-    }
-    
+       
     public byte[] getRGBBytes(final byte[] rawData,final int w, final int h) {             
         final byte[] rgb=new byte[w*h*3];        
         final int bytesCount=rawData.length;

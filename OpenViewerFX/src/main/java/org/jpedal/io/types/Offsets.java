@@ -66,10 +66,12 @@ public class Offsets extends Vector_Int{
     
     
     /**
-     * precalculate sizes for each object
+     * pre-calculate sizes for each object
+     * @param eof
+     * @return int[] containing length for each object using Object Ref as key 
      */
     public int[] calculateObjectLength(final int eof) {
-
+        
         if(refTableInvalid) {
             return null;
         }
@@ -105,6 +107,10 @@ public class Offsets extends Vector_Int{
 
         id=Sorts.quicksort( offsets, id );
 
+        return calcLengths(offsets, id, xrefs, xrefID, objectCount, eof);
+    }
+
+    static int skipEmptyValues(final int[] offsets, int[] id) {
         int i=0;
         //ignore empty values
         while(true){
@@ -115,20 +121,22 @@ public class Offsets extends Vector_Int{
             i++;
 
         }
+        return i;
+    }
 
-        /*
-         * loop to calc all object lengths
-         */
+    static int[] calcLengths(final int[] offsets, final int[] id, final int[] xrefs, final int[] xrefID, final int objectCount, final int eof) {
+        
+        int i=skipEmptyValues(offsets, id);
+
         int  start=offsets[id[i]],end;
-
+        
         //find next xref
         int j=0;
         while(xrefs[xrefID[j]]<start+1) {
             j++;
         }
-
+        
         final int[] ObjLengthTable=new int[objectCount];
-
         while(i<objectCount-1) {
 
             end = offsets[id[i + 1]];
@@ -154,13 +162,10 @@ public class Offsets extends Vector_Int{
             }
             i++;
         }
-
-
+        
         //special case - last object
-
         ObjLengthTable[id[i]]=xrefs[xrefID[j]]-start-1;
-        //System.out.println("*"+id[i]+" "+start+" "+xref+" "+eof);
-
+        
         return ObjLengthTable;
     }
 

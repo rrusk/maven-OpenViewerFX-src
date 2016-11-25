@@ -27,38 +27,42 @@
 
  *
  * ---------------
- * ListListener.java
+ * LimitedArray.java
  * ---------------
  */
-package org.jpedal.objects.acroforms.creation;
+package org.jpedal.color;
 
-import javax.swing.JList;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import org.jpedal.objects.raw.FormObject;
+public class LimitedArray {
 
-/**
- *
- * sync values back into FormObject
- */
-public class ListListener implements ListSelectionListener {
+    private final long[] list = new long[512];
+    private int iter;
+    private long lk = Long.MAX_VALUE;
+    private long lv = Long.MAX_VALUE;
 
-    final JList comp;
-    final FormObject form;
-
-    ListListener(final JList list, final FormObject form) {
-	this.comp = list;
-	this.form = form;
+    public LimitedArray() {
+        for (int i = 0; i < 256; i++) {
+            list[i << 1] = Long.MAX_VALUE;
+        }
     }
 
-    /**
-     * Called whenever the value of the selection changes.
-     *
-     * @param e the event that characterizes the change.
-     */
-    @Override
-    public void valueChanged(final ListSelectionEvent e) {
-	//System.out.println("Set to "+comp.getSelectedIndex());
-	form.setSelection(comp.getSelectedValues(), (String) comp.getSelectedValue(), comp.getSelectedIndices(),comp.getSelectedIndex());
+    public Long get(long k) {
+        if (lk == k) {
+            return lv;
+        }
+        for (int i = 0; i < 256; i++) {
+            if (list[i << 1] == k) {
+                return list[(i << 1) + 1];
+            }
+        }
+        return null;
+    }
+
+    public void put(long k, long v) {
+        iter &= 0xff;
+        list[iter << 1] = k;
+        list[(iter << 1) + 1] = v;
+        iter++;
+        lk = k;
+        lv = v;
     }
 }

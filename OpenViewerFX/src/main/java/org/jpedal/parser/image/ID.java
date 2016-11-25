@@ -111,7 +111,6 @@ public class ID extends ImageDecoder {
     private void renderImage(BufferedImage image, final String image_name) {
         
         if(current.isHTMLorSVG()){
-            current.drawImage(parserOptions.getPageNumber(), image, gs, false, image_name, -3);
             current.drawImage(parserOptions.getPageNumber(),image,gs,false,image_name, -2);
             
         }else{

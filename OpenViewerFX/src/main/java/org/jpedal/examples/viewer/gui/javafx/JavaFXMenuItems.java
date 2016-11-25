@@ -836,9 +836,6 @@ public class JavaFXMenuItems extends GUIMenuItems {
 			final Menu debugViewport = new Menu("Debug");
 			addToMainMenu(debugViewport);
 
-			// toggle viewport border
-			addMenuItem(debugViewport,"Toggle viewport border", Commands.TOGGLE);
-
 			//reset vieport option button
 			addMenuItem(debugViewport,"Reset viewport", Commands.RESET);
 

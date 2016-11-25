@@ -165,7 +165,9 @@ public class LinearThread extends Thread {
 
             try{
                 is.close();
-
+                synchronized (fos){
+                    fos.close();
+                }
                 //possible that page still being decoded on slower machine so wait
                 fileAccess.waitForDecodingToFinish();
 

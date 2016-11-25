@@ -428,12 +428,11 @@ public class RhinoParser extends DefaultParser implements ExpressionEngine{
     private static String checkAndReplaceCode(final String searchFor, final String replaceWith,String script) {
         final int index = script.indexOf(searchFor);
         if(index!=-1){
-            final StringBuilder buf = new StringBuilder(script.length());
-            buf.append(script.substring(0, index));
-            buf.append(replaceWith);
-            buf.append(checkAndReplaceCode(searchFor, replaceWith, script.substring(index+searchFor.length(),script.length())));
+            String buf = script.substring(0, index) +
+                    replaceWith +
+                    checkAndReplaceCode(searchFor, replaceWith, script.substring(index + searchFor.length(), script.length()));
 
-            script = buf.toString();
+            script = buf;
         }
         return script;
     }

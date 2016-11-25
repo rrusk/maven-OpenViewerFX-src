@@ -39,6 +39,7 @@ import static org.jpedal.io.ObjectDecoder.padding;
 import static org.jpedal.io.ObjectDecoder.resolveFully;
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
+import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.ObjectFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -61,7 +62,7 @@ public class Dictionary {
         //some objects can have a common value (ie /ToUnicode /Identity-H
         if(raw[i]==47){
             
-            i = readKey(pdfObject, i+1, raw, PDFkeyInt, objectReader);
+            i = readKey(pdfObject, i+1, raw, PDFkeyInt);
 
         }else if(raw[i]=='e' && raw[i+1]=='n' && raw[i+2]=='d' && raw[i+3]=='o' && raw[i+4]=='b' ){ //allow for empty object
                 
@@ -92,7 +93,7 @@ public class Dictionary {
         return i;
     }
 
-    static int readKey(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
+    static int readKey(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
 
         final int keyStart=i;
 
@@ -112,13 +113,6 @@ public class Dictionary {
 
         //store value
         pdfObject.setDictionary(PDFkeyInt,valueObj);
-
-        if(pdfObject.isDataExternal()){
-            valueObj.isDataExternal(true);
-            if(!resolveFully(valueObj,objectReader)) {
-                pdfObject.setFullyResolved(false);
-            }
-        }
 
         return i;
     }
@@ -369,6 +363,171 @@ public class Dictionary {
         return tokenKey;
     }
 
+
+    public static int setUnreadDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final boolean isInlineImage){
+
+        if(raw[i]!='<')  //roll on
+        {
+            i++;
+        }
+
+        i = StreamReaderUtils.skipSpaces(raw,i);
+
+        final int start=i;
+        final int keyStart;
+        int keyLength;
+
+        //create and store stub
+        final PdfObject valueObj= ObjectFactory.createObject(PDFkeyInt,pdfObject.getObjectRefAsString(), pdfObject.getObjectType(), pdfObject.getID());
+        valueObj.setID(PDFkeyInt);
+
+        if(!StreamReaderUtils.isNull(raw,i)){ //allow for null
+            pdfObject.setDictionary(PDFkeyInt, valueObj);
+        }
+
+        int status=PdfObject.UNDECODED_DIRECT; //assume not object and reset below if wrong
+
+        //some objects can have a common value (ie /ToUnicode /Identity-H
+        if(raw[i]==47){ //not worth caching
+
+            //move cursor to start of text
+            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
+                i++;
+            }
+
+            keyStart=i;
+            keyLength=0;
+
+            //move cursor to end of text
+            while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
+                i++;
+                keyLength++;
+            }
+
+            i--;// move back so loop works
+
+            //store value
+            final int constant=valueObj.setConstant(PDFkeyInt,keyStart,keyLength,raw);
+
+            if(constant== PdfDictionary.Unknown || isInlineImage){
+
+                final byte[] newStr=new byte[keyLength];
+                System.arraycopy(raw, keyStart, newStr, 0, keyLength);
+
+                final String s=new String(newStr);
+                valueObj.setGeneralStringValue(s);
+
+            }
+
+            status=PdfObject.DECODED;
+
+        }else //allow for empty object
+            if(raw[i]=='e' && raw[i+1]=='n' && raw[i+2]=='d' && raw[i+3]=='o' && raw[i+4]=='b' ){
+            }else{ //we need to ref from ref elsewhere which may be indirect [ref], hence loop
+
+                i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 91);
+
+                //roll on and ignore
+                if(raw[i]=='<' && raw[i+1]=='<'){
+
+                    i += 2;
+                    int reflevel=1;
+
+                    while(reflevel>0){
+                        if(raw[i]=='<' && raw[i+1]=='<'){
+                            i += 2;
+                            reflevel++;
+                        }else if(raw[i]=='(' ){ //allow for << (>>) >>
+
+                            i++;
+                            while(raw[i]!=')' || ObjectUtils.isEscaped(raw, i)) {
+                                i++;
+                            }
+
+                        }else if(raw[i]=='>' && i+1==raw.length){
+                            reflevel=0;
+                        }else if(raw[i]=='>' && raw[i+1]=='>'){
+                            i += 2;
+                            reflevel--;
+                        }else {
+                            i++;
+                        }
+                    }
+                }else if(raw[i]=='['){
+
+                    i++;
+                    int reflevel=1;
+
+                    while(reflevel>0){
+
+                        if(raw[i]=='(' ){ //allow for [[ in stream ie [/Indexed /DeviceRGB 255 (abc[[z
+
+                            i++;
+                            while(raw[i]!=')' || ObjectUtils.isEscaped(raw, i)) {
+                                i++;
+                            }
+
+                        }else if(raw[i]=='[' ){
+                            reflevel++;
+                        }else if(raw[i]==']'){
+                            reflevel--;
+                        }
+
+                        i++;
+                    }
+                    i--;
+                }else if(StreamReaderUtils.isNull(raw,i)){ //allow for null
+                    i += 4;
+                }else{ //must be a ref
+
+                    //assume not object and reset below if wrong
+                    status=PdfObject.UNDECODED_REF;
+
+                    while(raw[i]!='R' || raw[i-1]=='e') { //second condition to stop spurious match on DeviceRGB
+                        i++;
+
+                        if(i==raw.length) {
+                            break;
+                        }
+                    }
+                    i++;
+
+                    if(i>=raw.length) {
+                        i = raw.length - 1;
+                    }
+                }
+            }
+
+        valueObj.setStatus(status);
+        if(status!=PdfObject.DECODED){
+
+            final int StrLength=i-start;
+            final byte[] unresolvedData=new byte[StrLength];
+            System.arraycopy(raw, start, unresolvedData, 0, StrLength);
+
+            //check for returns in data if ends with R and correct to space
+            if(unresolvedData[StrLength-1]==82){
+
+                for(int jj=0;jj<StrLength;jj++){
+
+                    if(unresolvedData[jj]==10 || unresolvedData[jj]==13) {
+                        unresolvedData[jj] = 32;
+                    }
+
+                }
+            }
+            valueObj.setUnresolvedData(unresolvedData,PDFkeyInt);
+
+        }
+
+        if(raw[i]=='/' || raw[i]=='>') //move back so loop works
+        {
+            i--;
+        }
+        return i;
+    }
+
+
     /**
      * @param pdfObject
      * @param objectRef
@@ -391,8 +550,23 @@ public class Dictionary {
             
             if (raw[i] == 60) { //[<<data inside brackets>>]
                 
-                i =  DirectDictionaryToObject.convert(pdfObject, objectRef, i, raw, PDFkeyInt,objectReader);
+                boolean isPairs=false;
                 
+                //@zain @bethan - you will need to enable here
+                //do this third
+                if(PDFkeyInt==PdfDictionary.N || PDFkeyInt==PdfDictionary.R) {// || PDFkeyInt==PdfDictionary.D){
+                    isPairs=isDictionaryPairs(i, raw);    
+                }
+                
+                if(isPairs){
+                    FormObject APobj=new FormObject(objectRef);
+                    pdfObject.setDictionary(PDFkeyInt, APobj);
+                    
+                    i=readKeyPairs(raw,  i,  APobj);
+                  
+                }else{
+                    i =  DirectDictionaryToObject.convert(pdfObject, objectRef, i, raw, PDFkeyInt,objectReader);
+                }
             } else if (raw[i] == 47) { //direct value such as /DeviceGray
                 
                 i = ObjectUtils.setDirectValue(pdfObject, i, raw, PDFkeyInt);
@@ -551,9 +725,206 @@ public class Dictionary {
         while (data[j] != 60 && data[j + 1] != 60 && data[j] != 47) {
             j++;
         }
-        i = ObjectDecoder.handleValue(pdfObject, i, PDFkeyInt, j, ref, generation, data,objectReader);
+        i = handleValue(pdfObject, i, PDFkeyInt, j, ref, generation, data,objectReader);
         return i;
     }
-}
 
+
+    public static int setDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean ignoreRecursion, final int PDFkeyInt, final PdfFileReader objectReader) {
+
+        /*
+         * workout actual end as not always returned right
+         */
+        int end=i;
+        int nextC=i;
+        nextC = StreamReaderUtils.skipSpaces(raw, nextC);
+
+        //allow for null object
+        if(StreamReaderUtils.isNull(raw,nextC)){
+            i=nextC+4;
+            return i;
+        }else if(raw[nextC]=='[' && raw[nextC+1]==']'){ //allow for empty object []
+            i=nextC;
+            return i;
+        }
+
+        if(raw[i]!='<' && raw[i+1]!='<') {
+            end += 2;
+        }
+
+        boolean inDictionary=true;
+        final boolean isKey=raw[end-1]=='/';
+
+        final int strLen=raw.length;
+
+        while(inDictionary && end<strLen){
+
+            if(raw[end]=='<'&& raw[end+1]=='<'){
+                int level2=1;
+                end++;
+                while(level2>0){
+
+                    if(raw[end]=='<'&& raw[end+1]=='<'){
+                        level2++;
+                        end += 2;
+                    }else if(raw[end-1]=='>'&& raw[end]=='>'){
+                        level2--;
+                        if(level2>0) {
+                            end += 2;
+                        }
+                    }else if(raw[end]=='('){ //scan (strings) as can contain >>
+
+                        end++;
+                        while(raw[end]!=')' || ObjectUtils.isEscaped(raw, end)) {
+                            end++;
+                        }
+                    }else {
+                        end++;
+                    }
+                }
+
+                inDictionary=false;
+
+            }else if(raw[end]=='R' ){
+                inDictionary=false;
+            }else if(isKey && (raw[end]==' ' || raw[end]==13 || raw[end]==10 || raw[end]==9)){
+                inDictionary=false;
+            }else if(raw[end]=='/'){
+                inDictionary=false;
+                end--;
+            }else if(raw[end]=='>' && raw[end+1]=='>'){
+                inDictionary=false;
+                end--;
+            }else {
+                end++;
+            }
+        }
+
+        //boolean save=debugFastCode;
+        Dictionary.readDictionary(pdfObject,i, raw, PDFkeyInt, ignoreRecursion, objectReader);
+
+        //use correct value
+        return end;
+    }
+
+
+
+
+    static int handleValue(final PdfObject pdfObject, int i, final int PDFkeyInt, int j, final int ref, final int generation, final byte[] data, final PdfFileReader objectReader) {
+
+        final int keyStart;
+        int keyLength;
+        final int dataLen=data.length;
+
+        if (data[j] == 47) {
+            j++; //roll on past /
+
+            keyStart = j;
+            keyLength = 0;
+
+            //move cursor to end of text
+            while (j<dataLen && data[j] != 10 && data[j] != 13 && data[j] != 32 && data[j] != 47 && data[j] != 60 && data[j] != 62) {
+                j++;
+                keyLength++;
+
+            }
+
+            i--;// move back so loop works
+
+            if (PDFkeyInt == -1) {
+                //store value directly
+                pdfObject.setConstant(PDFkeyInt, keyStart, keyLength, data);
+
+                if (debugFastCode) {
+                    System.out.println(padding + "Set object Constant directly to " + pdfObject.setConstant(PDFkeyInt, keyStart, keyLength, data));
+                }
+            } else {
+                //convert data to new Dictionary object
+                final PdfObject valueObj = ObjectFactory.createObject(PDFkeyInt, null,pdfObject.getObjectType(), pdfObject.getID());
+                valueObj.setID(PDFkeyInt);
+                //store value
+                valueObj.setConstant(PDFkeyInt, keyStart, keyLength, data);
+                pdfObject.setDictionary(PDFkeyInt, valueObj);
+
+                if(pdfObject.isDataExternal()){
+                    valueObj.isDataExternal(true);
+                    if(!resolveFully(valueObj,objectReader)) {
+                        pdfObject.setFullyResolved(false);
+                    }
+                }
+            }
+        } else {
+
+            //convert data to new Dictionary object
+            final PdfObject valueObj  ;
+            if (PDFkeyInt == -1) {
+                valueObj = pdfObject;
+            } else {
+                valueObj = ObjectFactory.createObject(PDFkeyInt, ref, generation, pdfObject.getObjectType());
+                valueObj.setID(PDFkeyInt);
+                valueObj.setInCompressedStream(pdfObject.isInCompressedStream());
+
+                if(pdfObject.isDataExternal()){
+                    valueObj.isDataExternal(true);
+
+                    if(!resolveFully(valueObj,objectReader)) {
+                        pdfObject.setFullyResolved(false);
+                    }
+                }
+
+                if (PDFkeyInt != PdfDictionary.Resources) {
+                    valueObj.ignoreRecursion(pdfObject.ignoreRecursion());
+                }
+            }
+
+            final ObjectDecoder objDecoder=new ObjectDecoder(objectReader);
+            objDecoder.readDictionaryAsObject(valueObj, j, data);
+
+            //store value
+            if (PDFkeyInt != -1) {
+                pdfObject.setDictionary(PDFkeyInt, valueObj);
+            }
+        }
+
+        return i;
+    }
+
+    /**
+     * work out if single dictionary object or pairs of values by scanning 
+     * and looking for a /Type which will be missing in pairs
+      * @param i
+     * @param raw
+     * @return 
+     */
+    private static boolean isDictionaryPairs(int i, final byte[] raw) {
+        
+        final int length=raw.length;
+        int level=-1;
+        
+        //assume true and disprove
+        boolean isPair=true;
+        
+        for(int j=i;j<length-1;j++){
+            
+            //skip nested content which might contain spurious match
+            if(raw[j]=='<' && raw[j+1]=='<'){
+                level++;
+            }else if(raw[j]=='>' && raw[j+1]=='>'){
+                level--;
+                
+                if(level<0){                    
+                    break;
+                }
+            }else if(level==0 && (raw[j]=='[' || (raw[j]=='/' && raw[j+1]=='T' && raw[j+2]=='y' && raw[j+3]=='e')
+                    || (raw[j]=='/' && raw[j+1]=='R' && raw[j+2]=='e' && raw[j+3]=='s' && raw[j+4]=='o' && raw[j+5]=='u')
+                    || (raw[j]=='s' && raw[j+1]=='t' && raw[j+2]=='r' && raw[j+3]=='e' && raw[j+4]=='a' && raw[j+5]=='m'))){
+                    //System.out.println("Straight Dictionary");
+                    j=length;
+                    isPair=false;
+            }
+        }
+       
+        return isPair;
+    }
+}
 

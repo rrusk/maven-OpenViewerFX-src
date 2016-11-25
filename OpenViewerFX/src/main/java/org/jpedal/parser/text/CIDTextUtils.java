@@ -35,6 +35,7 @@ package org.jpedal.parser.text;
 
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.StandardFonts;
+import org.jpedal.fonts.tt.FontFile2;
 import org.jpedal.parser.ParserOptions;
 
 /**
@@ -189,7 +190,22 @@ public class CIDTextUtils {
             //lookup in 2 byte version
             newValue = StandardFonts.CMAP[combinedVal];
             
-            final int isDouble=currentFontData.isDoubleBytes(firstVal,secondByte,secondByteIsEscaped);
+            int isDouble=-1;
+            
+            //if CIDtoGID use that first to see if double byte
+            if(currentFontData.isCIDFont() && currentFontData.getGlyphData().getTable(FontFile2.CMAP)==null){
+                int first=currentFontData.getEncodedCMAPValue(firstVal);
+                int second=currentFontData.getEncodedCMAPValue(secondVal);
+                int combined=currentFontData.getEncodedCMAPValue(combinedVal);
+                if(combined<=0 && (first>0 || second>0)){
+                    newValue=null;
+                    isDouble=0;
+                }
+            }
+            
+            if(isDouble==-1){
+                isDouble=currentFontData.isDoubleBytes(firstVal,secondByte, secondByteIsEscaped);
+            }
             
             if(debug) {
                 System.out.println("2 byte values=" + newValue + ' ' + " isDouble=" + isDouble + ' ' + combinedVal + ' ' + firstValue);

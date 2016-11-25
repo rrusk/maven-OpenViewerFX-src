@@ -149,6 +149,8 @@ public class GraphicsState
     public static final int CLIPTEXT=7;
 
     private int BMvalue=PdfDictionary.Normal;
+    
+    private Area area;
 
     public GraphicsState(final GraphicsState gs){
 
@@ -295,6 +297,7 @@ public class GraphicsState
         this.text_render_type = text_render_type;
 
         TRmask=null;
+        area=null;
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -380,6 +383,7 @@ public class GraphicsState
 
         if(TRmask==null) {
             TRmask = new GeneralPath();
+            area = null;
         }
 
         TRmask.append(current_area,false);
@@ -594,7 +598,10 @@ public class GraphicsState
     public final Area getClippingShape()
     {
         if(TRmask!=null){
-            return new Area(TRmask);
+            if (area == null) {
+                area = new Area(TRmask);
+            }
+            return area;
 //        }else if(TRmask!=null){
 //
 //            //    if(TRmask.intersects(current_clipping_shape.getBounds()))

@@ -797,8 +797,8 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     public void setRenderer(final DynamicVectorRenderer current) {
     }
 
-    public Table getTable(final int LOCA) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public Table getTable(final int id) {
+       return null;
     }
     
     public boolean hasGIDtoCID() {

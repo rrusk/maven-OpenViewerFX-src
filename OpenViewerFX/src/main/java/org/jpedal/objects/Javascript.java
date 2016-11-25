@@ -276,7 +276,7 @@ public class Javascript {
     }
 
     public void storeJavascript(final String name, final String script, final int type) {
-
+        
 		//adobe spec says explicitly:-This method will overwrite any action already defined for the chosen trigger.
         javascriptCommands.put(name+ '-' +type,script);
 
@@ -286,63 +286,63 @@ public class Javascript {
         //(will include commands and spurious links as well)
         if(type==PdfDictionary.C2){
 
-            int ptr=0,start;
-
-            while(true){
-
-                //get start " but ignore \"
-                int escapedptr=script.indexOf("\\\"",ptr);
-                while(true){
-                    ptr=script.indexOf('\"',ptr);
-                    if(ptr==-1 || escapedptr==-1 || ptr-1>escapedptr) {
-                        break;
-                    }
-
-                }
-
-                if(ptr==-1) {
-                    break;
-                }
-
-                ptr++; //roll on
-                start=ptr;
-
-                //get end " but ignore \"
-                escapedptr=script.indexOf("\\\"",ptr);
-                while(true){
-                    ptr=script.indexOf('\"',ptr);
-
-                    if(ptr==-1 || escapedptr==-1 || ptr-1>escapedptr) {
-                        break;
-                    }
-
-                }
-
-                if(ptr==-1) {
-                    break;
-                }
-
-                final String obj=script.substring(start,ptr);
-
-                if(obj!=null){
-                	Vector_String existingList= linkedjavascriptCommands.get(obj);
-
-                    if(existingList==null){
-                        existingList=new Vector_String();
-                        existingList.addElement(name);
-                    }else{
-                    	//add if not already in
-                    	if(!existingList.contains(name)) {
-                            existingList.addElement(name);
-                        }
-                    }
-
-                    linkedjavascriptCommands.put(obj,existingList);
-                }
-
-                ptr++; //roll on
-
-            }
+//            int ptr=0,start;
+//
+//            while(true){
+//
+//                //get start " but ignore \"
+//                int escapedptr=script.indexOf("\\\"",ptr);
+//                while(true){
+//                    ptr=script.indexOf('\"',ptr);
+//                    if(ptr==-1 || escapedptr==-1 || ptr-1>escapedptr) {
+//                        break;
+//                    }
+//
+//                }
+//
+//                if(ptr==-1) {
+//                    break;
+//                }
+//
+//                ptr++; //roll on
+//                start=ptr;
+//
+//                //get end " but ignore \"
+//                escapedptr=script.indexOf("\\\"",ptr);
+//                while(true){
+//                    ptr=script.indexOf('\"',ptr);
+//
+//                    if(ptr==-1 || escapedptr==-1 || ptr-1>escapedptr) {
+//                        break;
+//                    }
+//
+//                }
+//
+//                if(ptr==-1) {
+//                    break;
+//                }
+//
+//                final String obj=script.substring(start,ptr);
+//
+//                if(obj!=null){
+//                	Vector_String existingList= linkedjavascriptCommands.get(obj);
+//
+//                    if(existingList==null){
+//                        existingList=new Vector_String();
+//                        existingList.addElement(name);
+//                    }else{
+//                    	//add if not already in
+//                    	if(!existingList.contains(name)) {
+//                            existingList.addElement(name);
+//                        }
+//                    }
+//
+//                    linkedjavascriptCommands.put(obj,existingList);
+//                }
+//
+//                ptr++; //roll on
+//
+//            }
         }
     }
 

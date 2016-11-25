@@ -762,6 +762,75 @@ public class PdfPageData implements Serializable{
 		return roundFloat(mediaBoxY*scalingValue);
 	}
 
+    public int getScaledTotalDoubleWidth() {
+        int total = 0;
+        if(getPageCount()==2){
+            total = getScaledCropBoxWidth(1);
+            if(total<getScaledCropBoxWidth(2)){
+                total = getScaledCropBoxWidth(2);
+            }
+        }else{
+            for (int i = 1; i <= getPageCount(); i++) {
+                if(i==1){
+                    total += getScaledCropBoxWidth(i);
+                }else{
+                    if ((i & 1) == 0) {//left page
+                        int page = getScaledCropBoxWidth(i);
+                        if(i<getPageCount() && page<getScaledCropBoxWidth(i+1)){
+                            page = getScaledCropBoxWidth(i+1);
+                        }
+                        total += page;
+                        
+                    }
+                }
+            }
+        }
+        return total;
+    }
+    
+    public int getScaledTotalDoubleHeight() {
+        int total = 0;
+        if(getPageCount()==2){
+            total = getScaledCropBoxHeight(1);
+            if(total<getScaledCropBoxHeight(2)){
+                total = getScaledCropBoxHeight(2);
+            }
+        }else{
+            for (int i = 1; i <= getPageCount(); i++) {
+                if(i==1){
+                    total += getScaledCropBoxHeight(i);
+                }else{
+                    if ((i & 1) == 0) {//left page
+                        int page = getScaledCropBoxHeight(i);
+                        if(i<getPageCount() && page<getScaledCropBoxHeight(i+1)){
+                            page = getScaledCropBoxHeight(i+1);
+                        }
+                        total += page;
+                        
+                    }
+                }
+            }
+        }
+        return total;
+    }
+    
+    public int getScaledTotalSingleHeight() {
+        int total = 0;
+        for(int i=1; i<=getPageCount(); i++){
+            total += getScaledCropBoxHeight(i);
+        }
+        return total;
+    }
+
+    
+    public int getScaledTotalSingleWidth() {
+        int total = 0;
+        for(int i=1; i<=getPageCount(); i++){
+            total += getScaledCropBoxWidth(i);
+        }
+        return total;
+    }
+    
 	public boolean hasMultipleSizes() {
 		//return if already calculated
 		if (hasMultipleSizesSet) {

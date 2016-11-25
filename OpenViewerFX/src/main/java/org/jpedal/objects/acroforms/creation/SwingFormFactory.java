@@ -87,8 +87,17 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     
     private JButton createAnnotationFreeText(final FormObject form){
         JButton but = setupAnnotationButton(form);
-                
-        but.setText("<html>" + form.getTextStreamValue(PdfDictionary.Contents) + "</html>");
+        
+        final String rc = form.getTextStreamValue(PdfDictionary.RC);
+        if(rc!=null){
+            but.setText(rc);
+        }else{
+            final String contents = form.getTextStreamValue(PdfDictionary.Contents);
+            if(contents!=null){
+                but.setText("<html>" + contents + "</html>");
+            }
+        }
+        //but.setText("<html>" + form.getTextStreamValue(PdfDictionary.Contents) + "</html>");
         
         but.setVerticalAlignment(SwingConstants.TOP);
         but.setHorizontalAlignment(SwingConstants.LEFT);
@@ -444,19 +453,19 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         
         //populate items array with list from Opt
         final String[] items = form.getItemsList();
-        final JComboBox<String> comboBox;
+        final JComboBox comboBox;
         if (items == null) {
-            comboBox = new JComboBox<String>();
+            comboBox = new JComboBox();
         } else{
             
-            comboBox = new JComboBox<String>(items);
+            comboBox = new JComboBox(items);
             
             /*
              * allow background colour in cells
              */
             final Color backgroundColor = FormObject.generateColor(form.getDictionary(PdfDictionary.MK).getFloatArray(PdfDictionary.BG));
             if(backgroundColor!=null){
-                final ListCellRenderer<String> renderer = new ComboColorRenderer(backgroundColor);
+                final ListCellRenderer renderer = new ComboColorRenderer(backgroundColor);
                 comboBox.setRenderer(renderer);
             }
         }
@@ -537,11 +546,11 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         final String[] items = form.getItemsList();
         
         //create list (note we catch null value)
-        final JList<String> list;
+        final JList list;
         if (items != null) {
-            list = new JList<String>(items);
+            list = new JList(items);
         } else {
-            list = new JList<String>();
+            list = new JList();
         }
         
         if (!form.getFieldFlags()[FormObject.MULTISELECT_ID])//mulitselect
@@ -560,7 +569,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         
         
         //sync to FormObject
-        form.setSelection(list.getSelectedValues(), list.getSelectedValue(), list.getSelectedIndices(),list.getSelectedIndex());
+        form.setSelection(list.getSelectedValues(), (String) list.getSelectedValue(), list.getSelectedIndices(),list.getSelectedIndex());
         
         setupUniversalFeatures(list, form);
         
@@ -1045,7 +1054,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         
         if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
 
-            final Object[] values=FormStream.getNormalKeyValues(form);
+            final Object[] values=FormStream.getNormalKeyValues(form, currentPdfFile.getObjectReader());
             form.setNormalOnState((String) values[0]);
             normalOnDic =(PdfObject) values[1];
             normalOffDic =(PdfObject) values[2];
@@ -1091,7 +1100,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
                 
                 if(1==2){
                 
-                    final Object[] values=FormStream.getDownKeyValues(form);               
+                    final Object[] values=FormStream.getDownKeyValues(form, currentPdfFile.getObjectReader());               
                     downOnDic =(PdfObject) values[1];
                     downOffDic =(PdfObject) values[2];
                 
@@ -1144,7 +1153,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         if (APobjR!=null) {
             
             if (1 == 2) {
-                final Object[] RValues = FormStream.getRolloverKeyValues(form);
+                final Object[] RValues = FormStream.getRolloverKeyValues(form, currentPdfFile.getObjectReader());
                 rollOffDic = (PdfObject) RValues[2];
                 rollOnDic = (PdfObject) RValues[1];
             } else {

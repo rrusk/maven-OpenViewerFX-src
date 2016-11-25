@@ -958,8 +958,8 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         //Set up from properties
         try {
             //Set whether to use hinting
-            propValue = properties.getValue("useHinting");
-            propValue2 = System.getProperty("org.jpedal.useTTFontHinting");
+            String propValue = properties.getValue("useHinting");
+            String propValue2 = System.getProperty("org.jpedal.useTTFontHinting");
 
             //check JVM flag first
             if (propValue2 != null) {
@@ -3537,7 +3537,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 //
 //            //				p.setTabDefaults(defaultValues);
 //            displayPane.setDividerLocation(startSize);
-            propValue = properties.getValue("startSideTabOpen");
+            String propValue = properties.getValue("startSideTabOpen");
             if (!propValue.isEmpty()) {
                 sideTabBarOpenByDefault = propValue.equalsIgnoreCase("true");
             }

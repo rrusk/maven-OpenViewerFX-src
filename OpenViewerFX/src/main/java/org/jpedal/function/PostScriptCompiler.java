@@ -36,6 +36,7 @@
 package org.jpedal.function;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Stack;
 
 //class will be used in future for speed execution
@@ -113,25 +114,27 @@ public class PostScriptCompiler {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // F    
     };
 
-    private final double[] dValues = new double[200]; //hold default values
-    private final int[] dTypes = new int[200]; //hold default types
+    private final double[] dValues = new double[1000]; //hold default values
+    private final int[] dTypes = new int[1000]; //hold default types
 
-    private final double[] cValues = new double[250];
-    private final int[] cTypes = new int[250];
+    private final double[] cValues ;
+    private final int[] cTypes ;
 
-    private int sp = 0;//stream pointer
-    private int dp = 0;//default pointer
-    private int cp = 0;//cur list pointer
+    private int sp;//stream pointer
+    private int dp;//default pointer
+    private int cp;//cur list pointer
 
     private final Stack<Boolean> braces = new Stack<Boolean>();
 
     public PostScriptCompiler(final byte[] stream) {
         parseStream(stream);
+        cValues = new double[Math.max(20, dp+10)];
+        cTypes = new int[cValues.length];
     }
 
     private void parseStream(byte[] stream) {
         int len = stream.length;
-        while (sp < len) {
+        while (sp < len && dp < dValues.length) {
             int cc = stream[sp++] & 0xff;
             if (cc == T_SBRACE) {
                 if (!braces.empty()) {
@@ -172,7 +175,7 @@ public class PostScriptCompiler {
                 }
             }
         }
-        System.out.println(new String(stream));
+       
     }
 
     private static int getCommand(String s) {
@@ -288,9 +291,8 @@ public class PostScriptCompiler {
     }
 
     private void executeCommand(int cmd) {
-        double[] first;
-        double[] second;
-        int n,j;
+        double[] first, second;
+        int n,j, old;
         switch (cmd) {
             case C_ABS:
                 first = popItem();
@@ -508,7 +510,7 @@ public class PostScriptCompiler {
             case C_NOT:
                 first = popItem();
                 if(first[1] == T_NUMBER){
-                    
+                    cValues[cp] = ~(int)first[0];
                 }else{
                     cValues[cp] = first[0] != 1 ? 1 : 0;                    
                 }
@@ -543,22 +545,77 @@ public class PostScriptCompiler {
                 }
                 cp++;
                 break;
-            case C_IF:
-                //todo
-                popItem();
+            case C_IF:                
+                old = dp;
+                first = popItem();
+                if (first[0] == 1) {
+                    while (dTypes[dp] != T_SBRACE && dp > 0) {
+                        dp--;
+                    }
+                    dp++;
+                    executeInterval(old);
+                }
+                dp = old;                
                 break;
             case C_IFELSE:
                 //todo
-                popItem();
+                old = dp;
+                first = popItem();
+                if (first[0] == 1) {
+                    int br = 0;
+                    while(dp > 0){
+                        int cdp = dTypes[dp--];
+                        if(cdp == T_SBRACE){
+                            br++;
+                        }else if(cdp == T_EBRACE){
+                            br--;
+                        }                        
+                        if(cdp == T_SBRACE && br == 0){    
+                            break;
+                        }
+                    }
+                    int end = dp;
+                    br = 0;
+                    while(dp > 0){
+                        int cdp = dTypes[dp--];
+                        if(cdp == T_SBRACE){
+                            br++;
+                        }else if(cdp == T_EBRACE){
+                            br--;
+                        }                        
+                        if(cdp == T_SBRACE && br == 0){                            
+                            break;
+                        }
+                    }                    
+                    dp+=2;
+                    executeInterval(end);
+                } else {
+                    int br = 0;
+                    while(dp > 0){
+                        int cdp = dTypes[dp--];
+                        if(cdp == T_SBRACE){
+                            br++;
+                        }else if(cdp == T_EBRACE){
+                            br--;
+                        }                        
+                        if(cdp == T_SBRACE && br == 0){
+                            break;
+                        }
+                    }
+                    dp+=2;
+                    executeInterval(old);
+                }
+                
+                dp = old;
                 break;
             case C_COPY:
                 first = popItem();
-                if(first[0]>1){
-                    n = (int)first[0];
-                    double [] values = new double[n];
-                    int [] types = new int[n];
-                    System.arraycopy(cValues, cValues.length-n , values, 0, n);
-                    System.arraycopy(cTypes, cValues.length-n , types, 0, n);
+                if (first[0] > 0) {
+                    n = (int) first[0];
+                    double[] values = new double[n];
+                    int[] types = new int[n];
+                    System.arraycopy(cValues, cValues.length - n, values, 0, n);
+                    System.arraycopy(cTypes, cValues.length - n, types, 0, n);
                     for (int i = 0; i < n; i++) {
                         cValues[cp] = values[0];
                         cTypes[cp] =  types[1];
@@ -580,8 +637,12 @@ public class PostScriptCompiler {
                 popItem();
                 break;
             case C_DUP:
-                cValues[cp] = cValues[cp - 1];
-                cTypes[cp] = cTypes[cp - 1];
+                first = popItem();
+                cValues[cp] = first[0];
+                cTypes[cp] = (int)first[1];
+                cp++;
+                cValues[cp] = first[0];
+                cTypes[cp] = (int)first[1];
                 cp++;
                 break;
             case C_INDEX:
@@ -592,19 +653,43 @@ public class PostScriptCompiler {
                 cp++;
                 break;
             case C_ROLL:
-                j = (int)popItem()[0];
-                n = (int)popItem()[0];
-                double [] values = new double[n];
-                int [] types = new int[n];
-                System.arraycopy(cValues, cValues.length-n , values, 0, n);
-                System.arraycopy(cTypes, cValues.length-n , types, 0, n);
-                for (int x = 0; x < j; x++) {
-                    for (int i = 0; i < n; i++) {
-                        cValues[cp] = values[0];
-                        cTypes[cp] = types[1];
-                        cp++;
+                j = (int)(popItem()[0]);
+                n = (int)(popItem()[0]);
+                
+                if(n == 0 || j == 0 || n > cp){ //should not roll in these cases
+                    break;
+                }
+                LinkedList<Double> listV = new LinkedList<Double>();
+                LinkedList<Integer> listT = new LinkedList<Integer>();
+                
+                for (int i = 0; i < n; i++) {
+                    double[] dd = popItem();
+                    listV.add(dd[0]);
+                    listT.add((int)dd[1]);
+                }
+                
+                if (j > 0) {
+                    for (int i = 0; i < j; i++) {
+                        double v = listV.removeFirst();
+                        int t = listT.removeFirst();
+                        listV.addLast(v);
+                        listT.addLast(t);
+                    }
+                } else {
+                    j *= -1;
+                    for (int i = 0; i < j; i++) {
+                        double v = listV.removeLast();
+                        int t = listT.removeLast();
+                        listV.addFirst(v);
+                        listT.addFirst(t);
                     }
                 }
+                
+                for (int i = 0; i < n; i++) {
+                    cValues[cp] = listV.removeLast();
+                    cTypes[cp] = listT.removeLast();
+                    cp++;
+                }                
                 break;
         }
     }
@@ -620,11 +705,21 @@ public class PostScriptCompiler {
         int dLen = dValues.length;
         dp = 0;
 
-        System.arraycopy(inp, 0, cValues, 0, inp.length);
+        for (int i = 0; i < inp.length; i++) {
+            cValues[i] = inp[i];           
+            cTypes[i] = T_NUMBER;
+        }
 
+        executeInterval(dLen);
+
+        return cValues;
+
+    }
+    
+    private void executeInterval(int maxDP){
         int type;
         double value;
-        while (dp < dLen) {
+        while (dp < maxDP) {
             type = dTypes[dp];
             value = dValues[dp];
             switch (type) {
@@ -639,17 +734,21 @@ public class PostScriptCompiler {
                     dp++;
                     break;
                 case T_SBRACE:
-                    while(dTypes[dp] == T_EBRACE){
+                    int buff = 1;
+                    while (buff != 0 && dp < maxDP) {
                         dp++;
+                        int t = dTypes[dp];
+                        if(t == T_SBRACE){
+                            buff++;
+                        }else if(t == T_EBRACE){
+                            buff--;
+                        }                        
                     }
                     break;
                 default:
                     dp++;
             }
         }
-
-        return cValues;
-
     }
 
 //    public static void main(String[] args) {
@@ -663,13 +762,15 @@ public class PostScriptCompiler {
 ////            System.out.println("case C_" + cmd.toUpperCase() + " :\n return C_" + cmd.toUpperCase() + ";");
 //        }
 //
-//        String ss = "{ abs }";
+//        String ss = "{ 1 index}";
 //        PostScriptCompiler pp = new PostScriptCompiler(ss.getBytes());
 //
-//        float inp[] = new float[]{-5.2f};
-////        inp = pp.executeScript(inp);
+//        float inp[] = new float[]{4,1,3,2};
+//        double vv[] = pp.executeScript(inp);
 //
-//        System.out.println(inp[0]);
+//        for (int i = 0; i < 5; i++) {
+//            System.out.println(vv[i]);
+//        }
 //    }
 
 }

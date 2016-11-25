@@ -42,6 +42,7 @@ import org.jpedal.external.GlyphTracker;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.fonts.glyph.*;
+import org.jpedal.fonts.tt.FontFile2;
 import org.jpedal.fonts.tt.TTGlyph;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfData;
@@ -513,26 +514,37 @@ public class Tj extends BaseDecoder {
                 glyphData.setLeading(0); //reset leading
                 
                 float actualWidth=glyphData.getActualWidth();
-                
-                if(currentFontData.isCIDFont()){
-                    
-                    final int idx=glyphs.getCMAPValue(glyphData.getRawInt());
-                    if(idx>0){ 
-                        if(glyphs.is1C() && !glyphs.isIdentity()) {
-                            glyphData.setRawInt(idx);
-                        }
-                        actualWidth = currentFontData.getWidth(idx);
-                    }   
-                }
-                
+
                 int idx=glyphData.getRawInt();
-                
+                boolean  isInvalid=false;
+
                 if(!glyphs.isCorrupted()){
-                    if(currentFontData.isCIDFont() && !glyphs.isIdentity() && !glyphs.hasGIDtoCID()){ //should only be use dif no CIDtoGID used in mapping
-                        final int mappedIdx=glyphs.getConvertedGlyph(idx);
-                        
-                        if(mappedIdx!=-1) {
-                            idx = mappedIdx;
+                    if(currentFontData.isCIDFont()&& !glyphs.isIdentity()){
+                        if(glyphs.hasGIDtoCID() && glyphs.getTable(FontFile2.CMAP)==null){
+                                final int mappedIdx=currentFontData.getEncodedCMAPValue(idx);
+                                if(mappedIdx>0) {
+                                    idx = mappedIdx;
+                                    glyphData.setRawInt(idx);
+                                    actualWidth = currentFontData.getWidth(mappedIdx);
+                                }else{
+                                    isInvalid=true;
+                                }
+                        }else{ //should only be use dif no CIDtoGID used in mapping
+
+                            final int idx2=glyphs.getCMAPValue(glyphData.getRawInt());
+                            if(idx2>0){
+                                if(glyphs.is1C()) {
+                                    glyphData.setRawInt(idx2);
+                                    idx=idx2;
+                                }
+                                actualWidth = currentFontData.getWidth(idx2);
+                            }
+
+                            final int mappedIdx=glyphs.getConvertedGlyph(idx);
+
+                            if(mappedIdx!=-1) {
+                                idx = mappedIdx;
+                            }
                         }
                     }else if(currentFontData.getFontType()==StandardFonts.TYPE1){//if a numeric value we need to replace to get correct glyph
                        final int diff=currentFontData.getDiffChar(idx);
@@ -638,8 +650,9 @@ public class Tj extends BaseDecoder {
                         //lose returns which can cause odd display
                     }else if(((textPrint!=PdfDecoderInt.TEXTGLYPHPRINT)||(javaFont==null))&&(currentFontData.isFontSubstituted() && currentWidth==0 && glyphData.getDisplayValue().charAt(0)==13)){ //remove substituted  values so do not enter test below
                     }else if(((textPrint!=PdfDecoderInt.TEXTGLYPHPRINT)||(javaFont==null))&&(currentFontData.isFontEmbedded)){
-                        renderText(currentWidth, type, Tmode, multiplyer, isTextShifted);
-                        
+                        if(!isInvalid){
+                            renderText(currentWidth, type, Tmode, multiplyer, isTextShifted);
+                        }
                     }else if(!glyphData.getDisplayValue().isEmpty() && !glyphData.getDisplayValue().startsWith("&#")) {
                         JavaTextRenderer.renderTextWithJavaFonts(gs, current, streamType, parserOptions, currentFontData, glyphData, Tmode, currentWidth, isTextShifted,glyphs,Trm);
                     }
@@ -1068,6 +1081,10 @@ public class Tj extends BaseDecoder {
         
         if(fontSize==0) {
             fontSize = 1;
+        }else{
+            if(fontSize<0){
+                fontSize=-fontSize;
+            }
         }
         
         glyphData.setFontSize(fontSize);

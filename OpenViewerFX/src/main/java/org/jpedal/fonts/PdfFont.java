@@ -686,6 +686,7 @@ public class PdfFont implements Serializable {
                         //CMAP[i]= String.valueOf((char) entry);
                         //} else {
                         
+                        rawCMAP[begin]= end;
                         glyphs.CMAP_Translate[begin]= end;
                         //entry++;
                         //}
@@ -1881,7 +1882,7 @@ public class PdfFont implements Serializable {
         }else if(isFirstScan ){ //don't bother with test if we have figured it out already
             
             if((firstVal==secondByte && firstVal>0) || (!isHex && secondByte==41 && !secondByteIsEscaped) || (getMappedChar(firstVal, true)!=null && getMappedChar(secondByte,true)!=null)){
-                isDouble=0;
+                isDouble=0; 
             }else{
                 isDouble=1;
             }
@@ -1907,6 +1908,20 @@ public class PdfFont implements Serializable {
     
     public int[] getCIDToGIDMap() {
         return CIDToGIDMap;
+    }
+    
+    /**
+     * looks up ptr in any CID CMAP in font
+     * @param ptr
+     * @return -1 if no CMAP, otherwise value 
+     */
+    public int getEncodedCMAPValue(int ptr) {
+        
+        if(rawCMAP==null || ptr>rawCMAP.length){
+            return -1;
+        }else{
+            return rawCMAP[ptr];
+        }
     }
     
     public String[] getCMAP() {

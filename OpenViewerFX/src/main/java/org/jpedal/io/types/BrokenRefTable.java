@@ -72,9 +72,13 @@ public class BrokenRefTable {
             if (line.contains(" obj")) {
 
                 pointer = line.indexOf(' ');
-                
-                if (pointer > 0) {
-                    offset.storeObjectOffset(Integer.parseInt(line.substring(0, pointer)), i, 1, false, true);
+
+                try {
+                    if (pointer > 0) {
+                        offset.storeObjectOffset(Integer.parseInt(line.substring(0, pointer)), i, 1, false, true);
+                    }
+                }catch(Exception e){
+                    LogWriter.writeLog("[PDF] Exception "+e+" Unable to manually read line "+line);
                 }
                 
             } else if (line.contains("/Root")) {

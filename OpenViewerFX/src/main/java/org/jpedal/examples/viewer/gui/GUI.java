@@ -34,10 +34,8 @@
 package org.jpedal.examples.viewer.gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.tree.TreeNode;
 import org.jpedal.FileAccess;
@@ -62,7 +60,6 @@ import org.jpedal.gui.GUIFactory;
 import org.jpedal.gui.ShowGUIMessage;
 import org.jpedal.io.StatusBar;
 import org.jpedal.linear.LinearThread;
-import org.jpedal.objects.acroforms.ReturnValues;
 import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.layers.PdfLayerList;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -208,10 +205,6 @@ public abstract class GUI implements GUIFactory {
     protected final GUIThumbnailPanel thumbnails;
 
     protected final PropertiesFile properties;
-
-    protected String propValue;
-
-    protected String propValue2;
     
     public static final boolean debugFX=false;
     
@@ -454,146 +447,140 @@ public abstract class GUI implements GUIFactory {
         /*
          * Set up from properties
          */
-        try {
-            //Set viewer page inset
-            propValue = properties.getValue("pageInsets");
+        String propValue = properties.getValue("pageInsets");
+        if (!propValue.isEmpty()) {
+            inset = Integer.parseInt(propValue);
+        }
+
+        propValue = properties.getValue("changeTextAndLineart");
+        if (!propValue.isEmpty()
+                && propValue.equalsIgnoreCase("true")) {
+            currentCommands.executeCommand(Commands.CHANGELINEART, new Object[]{Boolean.parseBoolean(propValue)});
+        }
+
+        propValue = properties.getValue("windowTitle");
+        if (!propValue.isEmpty()) {
+            windowTitle = propValue;
+        } else {
+            windowTitle=getTitle();
+        }
+
+        propValue = properties.getValue("vbgColor");
+        if (!propValue.isEmpty()) {
+            currentCommands.executeCommand(Commands.SETPAGECOLOR, new Object[]{Integer.parseInt(propValue)});
+        }
+
+        propValue = properties.getValue("replaceDocumentTextColors");
+        if (!propValue.isEmpty()
+                && propValue.equalsIgnoreCase("true")) {
+
+            propValue = properties.getValue("vfgColor");
             if (!propValue.isEmpty()) {
-                inset = Integer.parseInt(propValue);
+                currentCommands.executeCommand(Commands.SETTEXTCOLOR, new Object[]{Integer.parseInt(propValue)});
             }
 
-            propValue = properties.getValue("changeTextAndLineart");
-            if (!propValue.isEmpty()
-                    && propValue.equalsIgnoreCase("true")) {
-                currentCommands.executeCommand(Commands.CHANGELINEART, new Object[]{Boolean.parseBoolean(propValue)});
+        }
+
+        propValue = properties.getValue("TextColorThreshold");
+        if (!propValue.isEmpty()) {
+            currentCommands.executeCommand(Commands.SETREPLACEMENTCOLORTHRESHOLD, new Object[]{Integer.parseInt(propValue)});
+        }
+
+        propValue = properties.getValue("enhanceFractionalLines");
+        if (!propValue.isEmpty()) {
+            currentCommands.executeCommand(Commands.SETENHANCEFRACTIONALLINES, new Object[]{Boolean.parseBoolean(propValue)});
+        }
+
+        //Set autoScroll default and add to properties file
+        propValue = properties.getValue("autoScroll");
+        if (!propValue.isEmpty()) {
+            allowScrolling = Boolean.getBoolean(propValue);
+        }
+
+        //set confirmClose
+        propValue = properties.getValue("confirmClose");
+        if (!propValue.isEmpty()) {
+            confirmClose = propValue.equals("true");
+        }
+
+        //Dpi is taken into effect when zoom is called
+        propValue = properties.getValue("resolution");
+        if (!propValue.isEmpty()) {
+            decode_pdf.getDPIFactory().setDpi(Integer.parseInt(propValue));
+        }
+
+        //Ensure valid value if not recognised
+        propValue = properties.getValue("startView");
+
+        if (!propValue.isEmpty()) {
+            int pageMode = Integer.parseInt(propValue);
+            //  pageMode=2;
+            //  System.out.println(SwingUtilities.isEventDispatchThread());
+            if (pageMode < Display.SINGLE_PAGE || pageMode > Display.PAGEFLOW) {
+                pageMode = Display.SINGLE_PAGE;
+            }
+            //Default Page Layout
+            decode_pdf.setPageMode(pageMode);
+        }
+
+        propValue = properties.getValue("maxmuliviewers");
+        if (!propValue.isEmpty()) {
+            commonValues.setMaxMiltiViewers(Integer.parseInt(propValue));
+        }
+
+        final String val = properties.getValue("highlightBoxColor"); //empty string to old users
+        if (!val.isEmpty()) {
+            DecoderOptions.highlightColor = new Color(Integer.parseInt(val));
+        }
+
+        propValue = properties.getValue("highlightTextColor");
+        if (!propValue.isEmpty()) {
+            DecoderOptions.backgroundColor = new Color(Integer.parseInt(propValue));
+        }
+
+        propValue = properties.getValue("showMouseSelectionBox");
+        if (!propValue.isEmpty()) {
+            DecoderOptions.showMouseBox = Boolean.valueOf(propValue);
+        }
+
+        propValue = properties.getValue("enhancedViewerMode");
+        if (!propValue.isEmpty()) {
+            decode_pdf.useNewGraphicsMode(Boolean.valueOf(propValue));
+        }
+
+        propValue = properties.getValue("highlightComposite");
+        if (!propValue.isEmpty()) {
+            float value = Float.parseFloat(propValue);
+            if (value > 1) {
+                value = 1;
+            }
+            if (value < 0) {
+                value = 0;
             }
 
-            propValue = properties.getValue("windowTitle");
-            if (!propValue.isEmpty()) {
-                windowTitle = propValue;
-            } else {
-                windowTitle=getTitle();
-            }
+            DecoderOptions.highlightComposite = value;
+        }
 
-            propValue = properties.getValue("vbgColor");
-            if (!propValue.isEmpty()) {
-                currentCommands.executeCommand(Commands.SETPAGECOLOR, new Object[]{Integer.parseInt(propValue)});
-            }
+        //Set border config value and repaint
+        propValue = properties.getValue("borderType");
+        if (!propValue.isEmpty()) {
+            decode_pdf.setBorderPresent(Integer.parseInt(propValue)==1);
+        }
 
-            propValue = properties.getValue("replaceDocumentTextColors");
-            if (!propValue.isEmpty()
-                    && propValue.equalsIgnoreCase("true")) {
+        //Allow cursor to change
+        propValue = properties.getValue("allowCursorToChange");
+        if (!propValue.isEmpty()) {
+            GUIDisplay.allowChangeCursor = propValue.equalsIgnoreCase("true");
+        }
 
-                propValue = properties.getValue("vfgColor");
-                if (!propValue.isEmpty()) {
-                    currentCommands.executeCommand(Commands.SETTEXTCOLOR, new Object[]{Integer.parseInt(propValue)});
-                }
+        propValue = properties.getValue("invertHighlights");
+        if (!propValue.isEmpty()) {
+            BaseDisplay.invertHighlight = Boolean.valueOf(propValue);
+        }
 
-            }
-
-            propValue = properties.getValue("TextColorThreshold");
-            if (!propValue.isEmpty()) {
-                currentCommands.executeCommand(Commands.SETREPLACEMENTCOLORTHRESHOLD, new Object[]{Integer.parseInt(propValue)});
-            }
-
-            propValue = properties.getValue("enhanceFractionalLines");
-            if (!propValue.isEmpty()) {
-                currentCommands.executeCommand(Commands.SETENHANCEFRACTIONALLINES, new Object[]{Boolean.parseBoolean(propValue)});
-            }
-            
-            //Set autoScroll default and add to properties file
-            propValue = properties.getValue("autoScroll");
-            if (!propValue.isEmpty()) {
-                allowScrolling = Boolean.getBoolean(propValue);
-            }
-
-            //set confirmClose
-            propValue = properties.getValue("confirmClose");
-            if (!propValue.isEmpty()) {
-                confirmClose = propValue.equals("true");
-            }
-
-            //Dpi is taken into effect when zoom is called
-            propValue = properties.getValue("resolution");
-            if (!propValue.isEmpty()) {
-                decode_pdf.getDPIFactory().setDpi(Integer.parseInt(propValue));
-            }
-
-            //Ensure valid value if not recognised
-            propValue = properties.getValue("startView");
-
-            if (!propValue.isEmpty()) {
-                int pageMode = Integer.parseInt(propValue);
-                //  pageMode=2;
-                //  System.out.println(SwingUtilities.isEventDispatchThread());
-                if (pageMode < Display.SINGLE_PAGE || pageMode > Display.PAGEFLOW) {
-                    pageMode = Display.SINGLE_PAGE;
-                }
-                //Default Page Layout
-                decode_pdf.setPageMode(pageMode);
-            }
-
-            propValue = properties.getValue("maxmuliviewers");
-            if (!propValue.isEmpty()) {
-                commonValues.setMaxMiltiViewers(Integer.parseInt(propValue));
-            }
-            
-            final String val = properties.getValue("highlightBoxColor"); //empty string to old users
-            if (!val.isEmpty()) {
-                DecoderOptions.highlightColor = new Color(Integer.parseInt(val));
-            }
-
-            propValue = properties.getValue("highlightTextColor");
-            if (!propValue.isEmpty()) {
-                DecoderOptions.backgroundColor = new Color(Integer.parseInt(propValue));
-            }
-
-            propValue = properties.getValue("showMouseSelectionBox");
-            if (!propValue.isEmpty()) {
-                DecoderOptions.showMouseBox = Boolean.valueOf(propValue);
-            }
-
-            propValue = properties.getValue("enhancedViewerMode");
-            if (!propValue.isEmpty()) {
-                decode_pdf.useNewGraphicsMode(Boolean.valueOf(propValue));
-            }
-
-            propValue = properties.getValue("highlightComposite");
-            if (!propValue.isEmpty()) {
-                float value = Float.parseFloat(propValue);
-                if (value > 1) {
-                    value = 1;
-                }
-                if (value < 0) {
-                    value = 0;
-                }
-
-                DecoderOptions.highlightComposite = value;
-            }
-
-            //Set border config value and repaint
-            propValue = properties.getValue("borderType");
-            if (!propValue.isEmpty()) {
-                decode_pdf.setBorderPresent(Integer.parseInt(propValue)==1);
-            }
-
-            //Allow cursor to change
-            propValue = properties.getValue("allowCursorToChange");
-            if (!propValue.isEmpty()) {
-                GUIDisplay.allowChangeCursor = propValue.equalsIgnoreCase("true");
-            }
-
-            propValue = properties.getValue("invertHighlights");
-            if (!propValue.isEmpty()) {
-                BaseDisplay.invertHighlight = Boolean.valueOf(propValue);
-            }
-
-            propValue = properties.getValue("enhancedFacingMode");
-            if (!propValue.isEmpty()) {
-                GUIDisplay.default_turnoverOn = Boolean.valueOf(propValue);
-            }
-
-        } catch (final Exception e) {
-            e.printStackTrace();
+        propValue = properties.getValue("enhancedFacingMode");
+        if (!propValue.isEmpty()) {
+            GUIDisplay.default_turnoverOn = Boolean.valueOf(propValue);
         }
 
         this.currentCommands = currentCommands;
@@ -800,12 +787,7 @@ public abstract class GUI implements GUIFactory {
         this.decode_pdf = decode_pdf;
     }
 
-    /**
-     * called by nav functions to decode next page (in GUI code as needs to
-     * manipulate large part of GUI)
-     */
-    public void decodeGUIPage(final GUIFactory currentGUI){
-
+    private void prepareForDecode(final GUIFactory currentGUI){
         //Remove Image extraction outlines when page is changed
         decode_pdf.getPages().setHighlightedImage(null);
 
@@ -847,36 +829,9 @@ public abstract class GUI implements GUIFactory {
 
         //remove any search highlight
         decode_pdf.getTextLines().clearHighlights();
-
-        //kick-off thread to create pages
-        if(decode_pdf.getDisplayView() == Display.FACING){
-
-            currentGUI.scaleAndRotate();
-            currentGUI.scrollToPage(commonValues.getCurrentPage());
-
-            decode_pdf.getPages().decodeOtherPages(commonValues.getCurrentPage(),commonValues.getPageCount());
-
-            return ;
-        }else if(decode_pdf.getDisplayView() == Display.CONTINUOUS || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING){
-
-            //resize (ensure at least certain size)
-            //must be here as otherwise will not redraw if new page opened
-            //in multipage mode
-            currentGUI.scaleAndRotate();
-
-            currentGUI.scrollToPage(commonValues.getCurrentPage());
-
-                if(!SharedViewer.isFX()){
-                return ;
-            }
-        }else if(decode_pdf.getDisplayView() == Display.PAGEFLOW) {
-            return;
-        }
-
-        //stop user changing scaling while decode in progress
-        currentGUI.resetComboBoxes(false);
-        currentGUI.getButtons().setPageLayoutButtonsEnabled(false);
-
+    }
+    
+    private void performDecoding(final GUIFactory currentGUI){
         Values.setProcessing(true);
 
         //SwingWorker worker = new SwingWorker() {
@@ -1034,20 +989,53 @@ public abstract class GUI implements GUIFactory {
             Values.setProcessing(false);//remove processing flag so that the viewer can be exited.
             currentGUI.setViewerTitle(null); //restore title
         }
+    }
+    
+    /**
+     * called by nav functions to decode next page (in GUI code as needs to
+     * manipulate large part of GUI)
+     */
+    public void decodeGUIPage(final GUIFactory currentGUI){
+        
+        //Prepare GUI for decoding
+        prepareForDecode(currentGUI);
+
+        //kick-off thread to create pages
+        if(decode_pdf.getDisplayView() == Display.FACING){
+
+            currentGUI.scaleAndRotate();
+            currentGUI.scrollToPage(commonValues.getCurrentPage());
+
+            decode_pdf.getPages().decodeOtherPages(commonValues.getCurrentPage(),commonValues.getPageCount());
+
+            return ;
+        }else if(decode_pdf.getDisplayView() == Display.CONTINUOUS || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING){
+
+            //resize (ensure at least certain size)
+            //must be here as otherwise will not redraw if new page opened
+            //in multipage mode
+            currentGUI.scaleAndRotate();
+
+            currentGUI.scrollToPage(commonValues.getCurrentPage());
+
+                if(!SharedViewer.isFX()){
+                return ;
+            }
+        }else if(decode_pdf.getDisplayView() == Display.PAGEFLOW) {
+            return;
+        }
+
+        //stop user changing scaling while decode in progress
+        currentGUI.resetComboBoxes(false);
+        currentGUI.getButtons().setPageLayoutButtonsEnabled(false);
+
+        //Decoding happens here
+        performDecoding(currentGUI);
 
         //Update multibox
         if(!SharedViewer.isFX()){
             ((StatusBar)currentGUI.getStatusBar()).setProgress(100);
         }
-//                    ActionListener listener = new ActionListener(){
-//                        public void actionPerformed(ActionEvent e) {
-//                            setMultibox(new int[]{});
-//                        }
-//                    };
-//                    t = new Timer(800, listener);
-//                    t.setRepeats(false);
-//                    t.start();
-
 
         currentGUI.setMultibox(new int[]{});
 
@@ -1056,108 +1044,6 @@ public abstract class GUI implements GUIFactory {
 
         if(decode_pdf.getPageCount()>1) {
             currentGUI.getButtons().setPageLayoutButtonsEnabled(true);
-        }
-
-
-        /*adds listeners to GUI widgets to track changes*/
-
-        //rest forms changed flag to show no changes
-        //commonValues.setFormsChanged(false);
-
-        /*see if flag set - not default behaviour*/
-        boolean showMessage=false;
-        final String formsFlag=System.getProperty("org.jpedal.listenforms");
-        if(formsFlag!=null) {
-            showMessage = true;
-        }
-
-        //get the form renderer which also contains the processed form data.
-        //if you want simple form data, also look at the ExtractFormDataAsObject.java example
-        final org.jpedal.objects.acroforms.AcroRenderer formRenderer=decode_pdf.getFormRenderer();
-
-        if(formRenderer==null) {
-            return;
-        }
-
-        //get list of forms on page
-        final Object[] formsOnPage = formRenderer.getFormComponents(null,ReturnValues.FORM_NAMES,commonValues.getCurrentPage());
-
-        //allow for no forms
-        if(formsOnPage==null){
-
-            if(showMessage) {
-                currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.NoFields"));
-            }
-
-            return;
-        }
-
-        final int formCount=formsOnPage.length;
-
-        final JPanel formPanel=new JPanel();
-        /*
-         * create a JPanel to list forms and tell user a box example
-         **/
-        if(showMessage){
-            formPanel.setLayout(new BoxLayout(formPanel,BoxLayout.Y_AXIS));
-            final JLabel formHeader = new JLabel("This page contains "+formCount+" form objects");
-            formHeader.setFont(headFont);
-            formPanel.add(formHeader);
-
-            formPanel.add(Box.createRigidArea(new Dimension(10,10)));
-            final JTextPane instructions = new JTextPane();
-            instructions.setPreferredSize(new Dimension(450,180));
-            instructions.setEditable(false);
-            instructions.setText("This provides a simple example of Forms handling. We have"+
-                    " added a listener to each form so clicking on it shows the form name.\n\n"+
-                    "Code is in addExampleListeners() in org.examples.viewer.Viewer\n\n"+
-                    "This could be easily be extended to interface with a database directly "+
-                    "or collect results on an action and write back using itext.\n\n"+
-                    "Forms have been converted into Swing components and are directly accessible"+
-                    " (as is the original data).\n\n"+
-                    "If you don't like the standard SwingSet you can replace with your own set.");
-            instructions.setFont(textFont);
-            formPanel.add(instructions);
-            formPanel.add(Box.createRigidArea(new Dimension(10,10)));
-        }
-
-        /*
-         * pop-up to show forms on page
-         **/
-        if(showMessage){
-            final JDialog displayFrame =  new JDialog((Frame)null,true);
-            displayFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            if(commonValues.getModeOfOperation()!=Values.RUNNING_APPLET){
-                displayFrame.setLocationRelativeTo(null);
-                displayFrame.setLocation(((Component)currentGUI.getFrame()).getLocationOnScreen().x+10,((Component)currentGUI.getFrame()).getLocationOnScreen().y+10);
-            }
-
-            final JScrollPane scroll=new JScrollPane();
-            scroll.getViewport().add(formPanel);
-            scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-            displayFrame.setSize(500,500);
-            displayFrame.setTitle("List of forms on this page");
-            displayFrame.getContentPane().setLayout(new BorderLayout());
-            displayFrame.getContentPane().add(scroll,BorderLayout.CENTER);
-
-            final JPanel buttonBar=new JPanel();
-            buttonBar.setLayout(new BorderLayout());
-            displayFrame.getContentPane().add(buttonBar,BorderLayout.SOUTH);
-
-            // close option just removes display
-            final JButton no=new JButton(Messages.getMessage("PdfViewerButton.Close"));
-            no.setFont(new Font("SansSerif", Font.PLAIN, 12));
-            buttonBar.add(no,BorderLayout.EAST);
-            no.addActionListener(new ActionListener(){
-
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    displayFrame.dispose();
-                }});
-
-            displayFrame.setVisible(true);
         }
         
         /*
@@ -1184,13 +1070,12 @@ public abstract class GUI implements GUIFactory {
         }
 
         finishedDecoding=true;
-
+        
         //Ensure page is at the correct scaling and rotation for display
         currentGUI.scaleAndRotate();
-
+        
         setCursor(1);
-
-
+        
     }
 
     void setCursor(int type) {

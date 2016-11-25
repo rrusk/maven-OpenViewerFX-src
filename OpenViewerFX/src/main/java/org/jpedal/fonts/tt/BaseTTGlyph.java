@@ -451,8 +451,6 @@ public abstract class BaseTTGlyph extends PdfGlyph {
                 depth--;
                 existingXTranslate -= localX;
                 existingYTranslate -= localY;
-            }else{
-                System.err.println("Wrong value in complex");
             }
 
             currentFontFile.setPointer(pointer);

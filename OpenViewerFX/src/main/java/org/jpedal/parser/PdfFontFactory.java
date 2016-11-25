@@ -95,7 +95,7 @@ public class PdfFontFactory {
 
         boolean isEmbedded= isFontEmbedded(pdfObject);
 
-        if(isHTML && !isEmbedded && 1==2){
+        if(isHTML && !isEmbedded){
             if(inlineLiberationFontForHTML(pdfObject, font_id, descendantFont)) {
                 fontType = StandardFonts.TRUETYPE;
                 isEmbedded = true;
@@ -270,8 +270,9 @@ public class PdfFontFactory {
 
                     PdfObject pdfFontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
 
-                    pdfFontDescriptor.setDictionary(PdfDictionary.FontFile2, fontObj);
-
+                    if (pdfFontDescriptor != null){
+                        pdfFontDescriptor.setDictionary(PdfDictionary.FontFile2, fontObj);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     LogWriter.writeLog("[PDF] Exception replacing Liberation font " + e);

@@ -36,7 +36,6 @@ package org.jpedal.examples.viewer.utils;
 //import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.gui.popups.*;
 import org.jpedal.examples.viewer.objects.SignData;
-//import org.jpedal.gui.GUIFactory;
 import org.jpedal.objects.PdfPageData;
 
 

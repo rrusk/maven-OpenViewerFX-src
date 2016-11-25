@@ -2146,7 +2146,7 @@ public class PdfGroupingAlgorithms {
 
 	/**
 	 * 
-	 * calls various low level merging routines on merge - 
+	 * Calls various low level merging routines on merge - 
 	 * 
 	 * isCSV sets if output is XHTML or CSV format -
 	 * 
@@ -2297,7 +2297,7 @@ public class PdfGroupingAlgorithms {
 
 	/**
 	 * 
-	 * algorithm to place data from within coordinates to a vector of word, word coords (x1,y1,x2,y2)
+	 * Algorithm to place data from within coordinates to a vector of word, word coords (x1,y1,x2,y2)
 	 *
 	 * @param x1 is the x coord of the top left corner
 	 * @param y1 is the y coord of the top left corner
@@ -2447,7 +2447,7 @@ public class PdfGroupingAlgorithms {
     }
 
     /**
-	 * algorithm to place data from specified coordinates on a page into a String.
+	 * Algorithm to place data from specified coordinates on a page into a String.
 	 * 
 	 * @param x1 is the x coord of the top left corner
 	 * @param y1 is the y coord of the top left corner
@@ -3421,7 +3421,9 @@ public class PdfGroupingAlgorithms {
 	
 	//<link><a name="findMultipleTermsInRectangleWithMatchingTeasers" />
 	/**
-	 * Algorithm to find multiple text terms in x1,y1,x2,y2 rectangle on <b>page_number</b>, with matching teaser
+	 * Algorithm to find multiple text terms in x1,y1,x2,y2 rectangle on <b>page_number</b>, with matching teaser.
+     * The teaser is a section of text that start before the result and ends after, should a teaser not be discovered
+     * it will instead be set to the search results text.
 	 * 
 	 * @param x1 the left x cord
 	 * @param y1 the upper y cord
@@ -3465,7 +3467,8 @@ public class PdfGroupingAlgorithms {
     /**
 	 * Method to search a specified area on a specified page for a search term.
      * The returned map contains a set of coordinate for found values and a teaser.
-     * A teaser is the found search term and surrounding text.
+     * The teaser is a section of text that start before the result and ends after, 
+     * should a teaser not be discovered it will instead be set to the search results text.
 	 * 
 	 * @param x1 the left x cord
 	 * @param y1 the upper y cord
@@ -3644,7 +3647,9 @@ public class PdfGroupingAlgorithms {
 	}
     
 	/**
-	 * Search a particular area with in pdf page currently loaded
+	 * Search a particular area with in pdf page currently loaded and return the areas
+     * of the results found as an array of float values.
+     * 
 	 * @param x1 is the x coord of the top left corner
 	 * @param y1 is the y coord of the top left corner
 	 * @param x2 is the x coord of the bottom right corner
@@ -3715,7 +3720,10 @@ public class PdfGroupingAlgorithms {
 
     //<link><a name="findTextInRectangle" />
 	/**
-	 * Method to find text in the specified area allowing for the text to be split across multiple lines.<br>
+	 * Search with in pdf page currently loaded and return the areas
+     * of the results found as an array of float values.
+     * 
+     * Method to find text in the specified area allowing for the text to be split across multiple lines.<br>
 	 * @param terms = the text to search for
 	 * @param searchType = info on how to search the pdf
 	 * @return the coords of the found text in a float[] where the coords are pdf page coords.

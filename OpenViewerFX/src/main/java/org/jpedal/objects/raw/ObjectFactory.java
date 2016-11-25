@@ -222,10 +222,7 @@ public class ObjectFactory {
 
             case PdfDictionary.OCProperties:
                 return new OCObject(ref);
-
-            case PdfDictionary.OpenAction:
-                return new FormObject(ref);
-                
+    
             case PdfDictionary.OPI:
                 return new XObject(ref);
 
@@ -558,10 +555,7 @@ return new OutlineObject(ref);
 
             case PdfDictionary.O:
             	return new FormObject(ref, gen);
-               
-            case PdfDictionary.OpenAction:
-                return new FormObject(ref,gen);
-
+            
             case PdfDictionary.OC:
                 return new OCObject(ref, gen);
          

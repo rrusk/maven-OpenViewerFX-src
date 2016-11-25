@@ -137,6 +137,10 @@ class ModeChange {
         
         if(decode_pdf.getDisplayView()==Display.FACING){
                 
+                //Ensure value is set correctly
+                final boolean separateCoverOn = currentGUI.getProperties().getValue("separateCoverOn").equalsIgnoreCase("true");
+                decode_pdf.getPages().setBoolean(Display.BoolValue.SEPARATE_COVER, separateCoverOn);
+                
                 int p = commonValues.getCurrentPage();
                 if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) && ((p & 1) == 1 && p != 1)) {
                     p--;

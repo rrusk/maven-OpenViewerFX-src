@@ -230,7 +230,7 @@ public class PdfResources {
     }
 
     public boolean isForm() {
-        return acroFormObj!=null;
+        return acroFormObj!=null && acroFormObj.getMixedArray(PdfDictionary.Fields).getTokenCount()>0;
     }
 
     public PdfLayerList getPdfLayerList() {

@@ -520,7 +520,7 @@ public class ObjectStore {
             final String file = ((String)filesTodelete.next());
 
             if (file.contains(key)) {
-
+                
                 //System.out.println("temp_dir="+temp_dir);
                 final File delete_file = new File(file);
                 
@@ -701,9 +701,12 @@ public class ObjectStore {
         final String file_name = temp_dir + key + current_image + ending;
                 
         if(ending.equals(".jpl")){
+            File file = new File(file_name);
+            if(!file.exists()){
+                return null;
+            }
             FileInputStream fis = null;
-            try {
-                File file = new File(file_name);
+            try {                
                 byte[] data= new byte[(int)file.length()];
                 fis = new FileInputStream(file_name);
                 fis.read(data);                

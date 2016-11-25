@@ -533,7 +533,7 @@ public class PdfStreamDecoder extends BaseDecoder{
         
         currentPdfFile.checkResolved(Resources);
         
-        cache.readResources(Resources, resetList);
+        cache.readResources(Resources, resetList, currentPdfFile.getObjectReader());
         
     }
     

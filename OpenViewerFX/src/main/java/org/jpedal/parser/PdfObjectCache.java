@@ -37,6 +37,9 @@ import java.util.Iterator;
 import java.util.Map;
 import org.jpedal.exception.PdfException;
 import org.jpedal.fonts.PdfFont;
+import org.jpedal.io.ObjectDecoder;
+import org.jpedal.io.PdfFileReader;
+import org.jpedal.objects.raw.ObjectFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfKeyPairsIterator;
 import org.jpedal.objects.raw.PdfObject;
@@ -172,28 +175,37 @@ public class PdfObjectCache {
         return XObject;
     }
 
-    public void readResources(final PdfObject Resources, final boolean resetList)  throws PdfException{
+    public void readResources(final PdfObject Resources, final boolean resetList, final PdfFileReader objectReader)  throws PdfException{
 
         final int[] keys={PdfDictionary.ColorSpace, PdfDictionary.ExtGState, PdfDictionary.Font,
                 PdfDictionary.Pattern, PdfDictionary.Shading,PdfDictionary.XObject};
 
         PdfObject resObj;
+        
+        final int length=keys.length;
+        
+        final boolean verifyResourcesAvaiable=Resources.isDataExternal();
          
-        for(int ii=0;ii<keys.length;ii++){
+        for(int ii=0;ii<length;ii++){
 
             resObj=Resources.getDictionary(keys[ii]);
 
             if(resObj!=null){
                 if(keys[ii]==PdfDictionary.Font || keys[ii]==PdfDictionary.XObject) {
-                    readArrayPairs(resObj, resetList, keys[ii]);
+                    readArrayPairs(resObj, resetList, keys[ii], objectReader,verifyResourcesAvaiable);
                 } else {
-                    readArrayPairs(resObj, false, keys[ii]);
+                    readArrayPairs(resObj, false, keys[ii], objectReader, verifyResourcesAvaiable);
                 }
-            }
+                
+                if(verifyResourcesAvaiable && !resObj.isFullyResolved()){
+                    Resources.setFullyResolved(false);
+                    ii=length;
+                }
+            }         
         }
     }
 
-    private void readArrayPairs(final PdfObject resObj, final boolean resetFontList, final int type) {
+    private void readArrayPairs(final PdfObject resObj, final boolean resetFontList, final int type, final PdfFileReader objectReader, final boolean verifyResourcesAvaiable) {
 
         String id;
         byte[] data;      
@@ -204,6 +216,12 @@ public class PdfObjectCache {
             id=keyPairs.getNextKeyAsString();
             data=keyPairs.getNextValueAsBytes();
 
+            //check we can fully load object if in Linearized mode and return on first failure
+            if(verifyResourcesAvaiable &&
+                    cannotFullyLoadObjectAndChildren(id, data, type, objectReader, resObj)){
+                    return;
+            }
+            
             switch(type){
 
                 case PdfDictionary.ColorSpace:
@@ -240,6 +258,25 @@ public class PdfObjectCache {
             }
             keyPairs.nextPair();
         }
+    }
+
+    private boolean cannotFullyLoadObjectAndChildren(final String id, byte[] data, final int type, final PdfFileReader objectReader, final PdfObject resObj) {
+        
+        //System.out.println(id+" "+" "+new String(data));
+        
+        PdfObject pdfObject=ObjectFactory.createObject(type, 0, 0, type);
+        pdfObject.setStatus(PdfObject.UNDECODED_DIRECT);
+        pdfObject.setUnresolvedData(data, type);
+        pdfObject.isDataExternal(true);
+        
+        if (!ObjectDecoder.resolveFully(pdfObject,objectReader)) {
+            resObj.setFullyResolved(false);
+            
+           // System.out.println("failed");
+            
+            return true;
+        }
+        return false;
     }
 
     public void reset(final PdfObjectCache newCache) {

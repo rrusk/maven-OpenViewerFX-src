@@ -39,8 +39,8 @@ import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.io.types.Array;
-import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.io.types.KeyArray;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.objects.raw.*;
 
 /**

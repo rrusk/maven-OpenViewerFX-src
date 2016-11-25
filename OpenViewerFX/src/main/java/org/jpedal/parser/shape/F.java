@@ -34,7 +34,9 @@ package org.jpedal.parser.shape;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import org.jpedal.color.ColorSpaces;
+import org.jpedal.color.PdfPaint;
 import org.jpedal.external.ShapeTracker;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
@@ -80,7 +82,7 @@ public class F {
          *  (only case of white with BC of 1,1,1 at present for 11jun/4.pdf)
          */
         if(gs.SMask!=null && gs.nonstrokeColorSpace.getID() == ColorSpaces.ICC){
-            
+        
             final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
             if(gs.nonstrokeColorSpace.getColor().getRGB()==-16777216 && BC!=null && BC[0]==0.0f) {
                 currentDrawShape.resetPath();
@@ -223,28 +225,70 @@ public class F {
          * get the SMAsk
          */
         final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions,formLevel, multiplyer,false,1f);
-   
-
+        
+        
         /*
          * draw the shape as image
          */
         final GraphicsState gs1 = gs.deepCopy();
         gs1.CTM=new float[][]{{smaskImage.getWidth(),0,1},{0,-smaskImage.getHeight(),1},{0,0,0}};
-
-        /*
-         * interim solution as throws exception in HTML due to unknown type
-         */
-        if(!current.isHTMLorSVG()){
-            gs1.setBMValue(PdfDictionary.SMask);
-        }
-        
         gs1.x=fx;
         gs1.y=fy;
         
         //add as image
         gs1.CTM[2][0]= gs1.x;
         gs1.CTM[2][1]= gs1.y;
-        current.drawImage(parserOptions.getPageNumber(),smaskImage, gs1,false, "F", -1);
+        
+        //old method useful for testing purposes
+        if (1 == 2) {
+            gs1.setBMValue(PdfDictionary.SMask);
+            current.drawImage(parserOptions.getPageNumber(), smaskImage, gs1, false, "F", -1);
+            return;
+        }
+
+        //now do the smasking in image
+        BufferedImage result;
+        
+        PdfPaint prev = gs.nonstrokeColorSpace.getColor();
+        int prevInt = prev.getRGB();
+        
+        float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
+        int brgb = 0;
+        if(BC!=null){
+            gs.nonstrokeColorSpace.setColor(BC, BC.length);
+            brgb = gs.nonstrokeColorSpace.getColor().getRGB();
+            gs.nonstrokeColorSpace.setColor(prev);
+        }       
+            
+        int br = ((brgb >> 16) & 0xff);
+        int bg = ((brgb >> 8) & 0xff);
+        int bb = (brgb & 0xff);
+
+        result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
+        int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
+        for (int i = 0; i < sPixels.length; i++) {
+            int sargb = sPixels[i];
+            int sa = ((sargb >>> 24) & 0xff);
+            int sr = ((sargb >> 16) & 0xff);
+            int sg = ((sargb >> 8) & 0xff);
+            int sb = (sargb & 0xff);            
+            if (sa == 0) {
+                sr = br;
+                sg = bg;
+                sb = bb;
+            } else if (sa < 255) {
+                int alpha_ = 255 - sa;
+                sr = (sr * sa + br * alpha_) >> 8;
+                sg = (sg * sa + bg * alpha_) >> 8;
+                sb = (sb * sa + bb * alpha_) >> 8;
+            }
+            int y = (sr * 77) + (sg * 152) + (sb * 28);
+            sa = (sa * y) >> 16;
+            dPixels[i] = (sa << 24) | (prevInt & 0xffffff);
+        }        
+       
+        current.drawImage(parserOptions.getPageNumber(),result, gs1,false, "F", -1);
         
         smaskImage.flush();
         

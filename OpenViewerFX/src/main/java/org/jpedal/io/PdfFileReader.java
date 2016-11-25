@@ -1179,7 +1179,14 @@ public class PdfFileReader
             if(isCompressed){
                 raw = readCompressedObjectAsByteArray(pdfObject, objectID, gen);
             }else{
-                movePointer( offset.elementAt(objectID) );
+                
+                final long objectOffset=offset.elementAt(objectID);
+                
+                if(objectOffset==0){ //error or not yet loaded
+                    return null;
+                }
+                
+                movePointer(objectOffset);
 
                 if(ObjLengthTable==null || offset.isRefTableInvalid()) {
                     raw = objectReader.readObjectData(-1, pdfObject);

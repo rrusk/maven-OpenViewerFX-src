@@ -61,8 +61,7 @@ class OneBitDownSampler {
     
     public static GenericColorSpace downSample(int sampling, final ImageData imageData,
             final byte[] maskCol, final byte[] index, GenericColorSpace decodeColorData) {
-        
-        
+
         final boolean imageMask=(maskCol!=null);
         
         byte[] data=imageData.getObjectData();
@@ -84,16 +83,13 @@ class OneBitDownSampler {
         final int[] flag={1,2,4,8,16,32,64,128};
         
         final int origLineLength= (imageData.getWidth()+7)>>3;
-        
-        
+
         byte currentByte;
         int bit;
         //scan all pixels and down-sample
         for(int y=0;y<newH;y++){
             for(int x=0;x<newW;x++){
-                
-                int bytes=0,count=0;
-                
+
                 //allow for edges in number of pixels left
                 int wCount=sampling,hCount=sampling;
                 final int wGapLeft=imageData.getWidth()-x;
@@ -106,31 +102,10 @@ class OneBitDownSampler {
                 }
                 
                 //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
-                int ptr;
-                for(int yy=0;yy<hCount;yy++){
-                    for(int xx=0;xx<wCount;xx++){
-                        
-                        ptr=((yy+(y*sampling))*origLineLength)+(((x*sampling)+xx)>>3);
-                        
-                        if(ptr<data.length){
-                            currentByte=data[ptr];
-                        }else{
-                            currentByte=0;
-                        }
-                        
-                        if(imageMask) {
-                            currentByte = (byte) (currentByte ^ 255);
-                        }
-                        
-                        bit=currentByte & flag[7-(((x*sampling)+xx)& 7)];
-                        
-                        if(bit!=0) {
-                            bytes++;
-                        }
-                        count++;
-                    }
-                }
-                
+                final int bytes = getPixelSetCount(sampling, imageMask, data, flag, origLineLength, y, x, wCount, hCount);
+
+                final int count=(wCount*hCount);
+
                 //set value as white or average of pixels
                 final int offset=x+(newW*y);
                 
@@ -140,7 +115,7 @@ class OneBitDownSampler {
                             newData[(offset * 4) + ii] = (byte) ((((maskCol[ii] & 255) * bytes) / count));
                         }
                         
-                    }else if(index!=null && imageData.getDepth()==1){
+                    }else if(index!=null){
                         int av;
                         
                         for(int ii=0;ii<3;ii++){
@@ -158,10 +133,6 @@ class OneBitDownSampler {
                                 }
                                 
                             }
-                        }
-                    }else if(index!=null){
-                        for(int ii=0;ii<3;ii++) {
-                            newData[(offset * 3) + ii] = (byte) (((index[ii] & 255) * bytes) / count);
                         }
                     }else {
                         newData[offset] = (byte) ((255 * bytes) / count);
@@ -211,5 +182,38 @@ class OneBitDownSampler {
         imageData.setDepth(8);
         
         return decodeColorData;
+    }
+
+    private static int getPixelSetCount(final int sampling, boolean imageMask, final byte[] data, final int[] flag, final int origLineLength,
+                                        final int y, final int x, final int wCount, final int hCount) {
+
+        byte currentByte;
+        int bit;
+        int bytes=0;
+        int ptr;
+
+        for(int yy=0;yy<hCount;yy++){
+            for(int xx=0;xx<wCount;xx++){
+
+                ptr=((yy+(y*sampling))*origLineLength)+(((x*sampling)+xx)>>3);
+
+                if(ptr<data.length){
+                    currentByte=data[ptr];
+                }else{
+                    currentByte=0;
+                }
+
+                if(imageMask) {
+                    currentByte = (byte) (currentByte ^ 255);
+                }
+
+                bit=currentByte & flag[7-(((x*sampling)+xx)& 7)];
+
+                if(bit!=0) {
+                    bytes++;
+                }
+            }
+        }
+        return bytes;
     }
 }

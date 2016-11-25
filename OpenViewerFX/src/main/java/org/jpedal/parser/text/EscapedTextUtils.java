@@ -77,15 +77,6 @@ class EscapedTextUtils {
             
             if (parserOptions.isTextExtracted()) { 
                 glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), rawInt));
-                
-                //if ffi or similar we want to map to correct value
-                if(glyphData.getUnicodeValue().length()>1){
-                    final int mapped=StandardFonts.getAdobeMap(glyphData.getUnicodeValue());
-                    
-                    if(mapped!=-1){
-                        glyphData.setUnicodeValue(String.valueOf((char)mapped));
-                    }
-                }
             }
             
             //allow for \134 (ie \\)

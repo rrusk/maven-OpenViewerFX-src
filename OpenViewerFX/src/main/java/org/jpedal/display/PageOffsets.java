@@ -62,138 +62,129 @@ public class PageOffsets {
     public PageOffsets(final int pageCount, final PdfPageData pageData) {
 
 
-			/* calulate sizes for continuous and facing page modes */
-            int pageH, pageW,rotation;
-            int facingW = 0, facingH = 0;
-            int greatestW = 0, greatestH = 0;
-            totalSingleHeight = 0;
-            totalSingleWidth = 0;
+        /* calulate sizes for continuous and facing page modes */
+        int pageH, pageW, rotation;
+        int greatestW = 0, greatestH = 0;
+        totalSingleHeight = 0;
+        totalSingleWidth = 0;
 
-			int widestLeftPage=0,widestRightPage=0,highestLeftPage=0,highestRightPage=0;
+        int widestLeftPage = 0, widestRightPage = 0, highestLeftPage = 0, highestRightPage = 0;
 
-			widestPageR=0;
-			widestPageNR=0;
+        widestPageR = 0;
+        widestPageNR = 0;
 
-			totalDoubleWidth = 0;
-            totalDoubleHeight = 0;
-            gaps=0;
-            doubleGaps=0;
+        totalDoubleWidth = 0;
+        totalDoubleHeight = 0;
+        gaps = 0;
+        doubleGaps = 0;
 
-            biggestWidth = 0;
-            biggestHeight = 0;
+        biggestWidth = 0;
+        biggestHeight = 0;
 
-			for (int i = 1; i < pageCount + 1; i++) {
+        for (int i = 1; i < pageCount + 1; i++) {
 
-				//get page sizes
-                pageW = pageData.getCropBoxWidth(i);
-                pageH = pageData.getCropBoxHeight(i);
-				rotation = pageData.getRotation(i);
+            //get page sizes
+            pageW = pageData.getCropBoxWidth(i);
+            pageH = pageData.getCropBoxHeight(i);
+            rotation = pageData.getRotation(i);
 
-				//swap if this page rotated and flag
-				if((rotation==90|| rotation==270)){
-	                final int tmp=pageW;
-	                pageW=pageH;
-	                pageH=tmp;
-				}
-
-                if (pageW > maxW) {
-                    maxW = pageW;
-                }
-
-                if (pageH > maxH) {
-                    maxH = pageH;
-                }
-
-				gaps += pageGap;
-
-
-				totalSingleWidth += pageW;
-				totalSingleHeight += pageH;
-
-				//track page sizes
-				if(( i & 1)==1){//odd
-					if(widestRightPage<pageW) {
-                        widestRightPage = pageW;
-                    }
-					if(highestRightPage<pageH) {
-                        highestRightPage = pageH;
-                    }
-				}else{
-					if(widestLeftPage<pageW) {
-                        widestLeftPage = pageW;
-                    }
-					if(highestLeftPage<pageH) {
-                        highestLeftPage = pageH;
-                    }
-				}
-
-				if(widestPageNR<pageW) {
-                    widestPageNR = pageW;
-                }
-
-				if(widestPageR<pageH) {
-                    widestPageR = pageH;
-                }
-
-				if (pageW > biggestWidth) {
-                    biggestWidth = pageW;
-                }
-				if (pageH > biggestHeight) {
-                    biggestHeight = pageH;
-                }
-
-				// track widest and highest combination of facing pages
-                if ((i & 1) == 1) {
-
-					if (greatestW < pageW) {
-                        greatestW = pageW;
-                    }
-                    if (greatestH < pageH) {
-                        greatestH = pageH;
-                    }
-
-					if (i == 1) {// first page special case
-						totalDoubleWidth = pageW;
-						totalDoubleHeight = pageH;
-					} else {
-                        totalDoubleWidth += greatestW;
-                        totalDoubleHeight += greatestH;
-					}
-
-					doubleGaps += pageGap;
-
-					facingW = pageW;
-                    facingH = pageH;
-
-                } else {
-
-					facingW += pageW;
-                    facingH += pageH;
-
-					greatestW = pageW;
-					greatestH = pageH;
-
-                    if (i == pageCount) { // allow for even number of pages
-                        totalDoubleWidth = totalDoubleWidth + greatestW + pageGap;
-                        totalDoubleHeight = totalDoubleHeight + greatestH + pageGap;
-                    }
-                }
-
-                //choose largest (to allow for rotation on specific pages)
-                //int max=facingW;
-                //if(max<facingH)
-                //	max=facingH;
-
+            //swap if this page rotated and flag
+            if ((rotation == 90 || rotation == 270)) {
+                final int tmp = pageW;
+                pageW = pageH;
+                pageH = tmp;
             }
 
-			doublePageWidth=widestLeftPage+widestRightPage+pageGap;
-			doublePageHeight=highestLeftPage+highestRightPage+pageGap;
+            if (pageW > maxW) {
+                maxW = pageW;
+            }
 
-            // subtract pageGap to make sum correct
-            totalSingleWidth -= pageGap;
-			totalSingleHeight -= pageGap;
+            if (pageH > maxH) {
+                maxH = pageH;
+            }
 
-		}
+            gaps += pageGap;
+
+            totalSingleWidth += pageW;
+            totalSingleHeight += pageH;
+
+            //track page sizes
+            if ((i & 1) == 1) {//odd
+                if (widestRightPage < pageW) {
+                    widestRightPage = pageW;
+                }
+                if (highestRightPage < pageH) {
+                    highestRightPage = pageH;
+                }
+            } else {
+                if (widestLeftPage < pageW) {
+                    widestLeftPage = pageW;
+                }
+                if (highestLeftPage < pageH) {
+                    highestLeftPage = pageH;
+                }
+            }
+
+            if (widestPageNR < pageW) {
+                widestPageNR = pageW;
+            }
+
+            if (widestPageR < pageH) {
+                widestPageR = pageH;
+            }
+
+            if (pageW > biggestWidth) {
+                biggestWidth = pageW;
+            }
+            if (pageH > biggestHeight) {
+                biggestHeight = pageH;
+            }
+
+            // track widest and highest combination of facing pages
+            if ((i & 1) == 1) {
+
+                if (greatestW < pageW) {
+                    greatestW = pageW;
+                }
+                if (greatestH < pageH) {
+                    greatestH = pageH;
+                }
+
+                if (i == 1) {// first page special case
+                    totalDoubleWidth = pageW;
+                    totalDoubleHeight = pageH;
+                } else {
+                    totalDoubleWidth += greatestW;
+                    totalDoubleHeight += greatestH;
+                }
+
+                doubleGaps += pageGap;
+
+            } else {
+
+                greatestW = pageW;
+                greatestH = pageH;
+
+                if (i == pageCount) { // allow for even number of pages
+                    totalDoubleWidth = totalDoubleWidth + greatestW + pageGap;
+                    totalDoubleHeight = totalDoubleHeight + greatestH + pageGap;
+                }
+            }
+
+            //choose largest (to allow for rotation on specific pages)
+            //int max=facingW;
+            //if(max<facingH)
+            //	max=facingH;
+        }
+
+        doublePageWidth = widestLeftPage + widestRightPage + pageGap;
+        doublePageHeight = highestLeftPage + highestRightPage + pageGap;
+
+        // subtract pageGap to make sum correct
+        totalSingleWidth -= pageGap;
+        totalSingleHeight -= pageGap;
+
+    }
 
     public int getMaxH() {
         return maxH;
@@ -210,14 +201,7 @@ public class PageOffsets {
 	public int getWidestPageNR() {
 		return widestPageNR;
 	}
-
-    /**
-     * @return the totalSingleWidth
-     */
-    public int getTotalSingleWidth() {
-        return totalSingleWidth;
-    }
-
+    
     /**
      * @param totalSingleWidth the totalSingleWidth to set
      */
@@ -254,40 +238,19 @@ public class PageOffsets {
     }
 
     /**
-     * @return the totalDoubleWidth
-     */
-    public int getTotalDoubleWidth() {
-        return totalDoubleWidth;
-    }
-
-    /**
      * @param totalDoubleWidth the totalDoubleWidth to set
      */
     public void setTotalDoubleWidth(int totalDoubleWidth) {
         this.totalDoubleWidth = totalDoubleWidth;
     }
-
-    /**
-     * @return the totalSingleHeight
-     */
-    public int getTotalSingleHeight() {
-        return totalSingleHeight;
-    }
-
+    
     /**
      * @param totalSingleHeight the totalSingleHeight to set
      */
     public void setTotalSingleHeight(int totalSingleHeight) {
         this.totalSingleHeight = totalSingleHeight;
     }
-
-    /**
-     * @return the totalDoubleHeight
-     */
-    public int getTotalDoubleHeight() {
-        return totalDoubleHeight;
-    }
-
+    
     /**
      * @param totalDoubleHeight the totalDoubleHeight to set
      */

@@ -1321,7 +1321,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
         
         if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
 
-            final Object[] values= FormStream.getNormalKeyValues(form);
+            final Object[] values= FormStream.getNormalKeyValues(form, currentPdfFile.getObjectReader());
             form.setNormalOnState((String) values[0]);
             normalOnDic =(PdfObject) values[1];
             normalOffDic =(PdfObject) values[2];
@@ -1365,7 +1365,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
                 
                 if(1==2) {
                     
-                    final Object[] values = FormStream.getDownKeyValues(form);
+                    final Object[] values = FormStream.getDownKeyValues(form, currentPdfFile.getObjectReader());
                     downOnDic =(PdfObject) values[1];
                     downOffDic =(PdfObject) values[2];
                     
@@ -1414,7 +1414,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
         
         if (APobjR!=null) {
             if (1 == 2) {
-                final Object[] values = FormStream.getRolloverKeyValues(APobjR);
+                final Object[] values = FormStream.getRolloverKeyValues(APobjR, currentPdfFile.getObjectReader());
                 rollOnDic = (PdfObject) values[1];
                 rollOffDic = (PdfObject) values[2];  
             } else {

@@ -252,7 +252,7 @@ public class RefTable {
      * @throws PdfException
      */
     public final PdfObject readReferenceTable(final PdfObject linearObj, final PdfFileReader currentPdfFile, final ObjectReader objectReader) throws PdfException {
-        
+
         int pointer = -1;
         final int eof = (int) this.eof;
 
@@ -294,27 +294,42 @@ public class RefTable {
         offset.addXref(pointer);
         
         PdfObject rootObj=null;
+
+        boolean isInvalid=true;
         
         if (pointer >= eof || pointer==0) {
             
             LogWriter.writeLog("Pointer not if file - trying to manually find startref");
-            
+
+        } else {
+            try {
+                if (islinearizedCompressed || isCompressedStream(pointer, eof)) {
+                    rootObj = readCompressedStream(rootObj, pointer, currentPdfFile, objectReader, linearObj);
+                    isInvalid = false;
+
+                } else {
+                    rootObj = readLegacyReferenceTable(rootObj, pointer, eof, currentPdfFile);
+                    isInvalid = false;
+                }
+            }catch(Exception e){
+                LogWriter.writeLog("[PDF] Exception reading reg table "+e+" - trying to manually find startref");
+            }
+        }
+
+        if(isInvalid){
             offset.setRefTableInvalid(true);
-            
+
             try{
                 rootObj=new PageObject(BrokenRefTable.findOffsets(pdf_datafile, offset));
             }catch(Error err){
                 throw new PdfException(err.getMessage()+" attempting to manually scan file for objects");
             }
-            
+
             currentPdfFile.readObject(rootObj);
-            return rootObj;
-            
-        } else if (islinearizedCompressed || isCompressedStream(pointer, eof)) {
-            return readCompressedStream(rootObj,pointer, currentPdfFile, objectReader,linearObj);
-        } else {
-            return readLegacyReferenceTable(rootObj,pointer, eof,currentPdfFile);
+
         }
+
+        return rootObj;
             
         
     }

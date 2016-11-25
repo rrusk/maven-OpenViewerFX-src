@@ -314,6 +314,9 @@ public class JPEGDecoder {
             boolean isInverted = ArrayUtils.isArrayInverted(XObject.getFloatArray(PdfDictionary.Decode));
             boolean isMask=XObject instanceof MaskObject;
             boolean isDeviceN = decodeColorData instanceof DeviceNColorSpace;
+            //happy for me to replace line above with line below?s
+           // boolean isDeviceN = decodeColorData.getType()==ColorSpaces.DeviceN;
+           
             if(!isDeviceN){
                 try{
                     db = JDeliHelper.getBytesFromJPEG(isInverted, data, isMask);
