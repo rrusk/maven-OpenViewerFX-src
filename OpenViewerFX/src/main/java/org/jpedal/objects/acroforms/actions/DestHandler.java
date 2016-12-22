@@ -49,48 +49,51 @@ public class DestHandler {
 
     
     public static PdfArrayIterator getDestFromObject(PdfObject formObj, PdfObjectReader currentPdfFile) {
-        
-        PdfArrayIterator Dest=formObj.getMixedArray(PdfDictionary.Dest);
-        
-        if(Dest==null || Dest.getTokenCount()==0){
-            
+
+        PdfArrayIterator Dest = formObj.getMixedArray(PdfDictionary.Dest);
+
+        if (Dest == null || Dest.getTokenCount() == 0) {
+
             //aData can either be in top level of Form (as in Annots) and in A or AA
             //or second level (as in A/ /D - this allows for both
             //which this routine handles
-            PdfObject Aobj=formObj.getDictionary(PdfDictionary.A);
-            if(Aobj==null) {
+            PdfObject Aobj = formObj.getDictionary(PdfDictionary.A);
+            if (Aobj == null) {
                 Aobj = formObj.getDictionary(PdfDictionary.AA);
             }
-            if(Aobj!=null) {
+            if (Aobj != null) {
                 formObj = Aobj;
             }
-            
+
             //allow for D as indirect
-            final PdfObject Dobj=formObj.getDictionary(PdfDictionary.D);
-            if(Dobj!=null) {
+            final PdfObject Dobj = formObj.getDictionary(PdfDictionary.D);
+            if (Dobj != null) {
                 formObj = Dobj;
             }
-            
-            Dest=formObj.getMixedArray(PdfDictionary.D);
+
+            Dest = formObj.getMixedArray(PdfDictionary.D);
         }
-        
+
+        String DestString = formObj.getTextStreamValue(PdfDictionary.D);
+
         //its nameString name (name) linking to obj so read that
-        if (Dest != null && Dest.getTokenCount()>0 && !Dest.isNextValueRef()){            
-            Dest=decodeDest(Dest.getNextValueAsString(false), currentPdfFile, Dest);           
+        if (DestString != null) {
+            Dest = decodeDest(DestString, currentPdfFile, Dest);
+        } else if (Dest != null && Dest.getTokenCount() > 0 && !Dest.isNextValueRef()) {  //its nameString name (name) linking to obj so read that
+            Dest = decodeDest(Dest.getNextValueAsString(false), currentPdfFile, Dest);
         }
-        
+
         return Dest;
-        
+
     }
    
     /**
      * Gets the page number from an A entry and Dest or D entry
      * @param dest Dest or D entry
+     * @param currentPdfFile
      * @return page number
      */
     public static int getPageNumberFromLink(PdfArrayIterator dest, final PdfObjectReader currentPdfFile){
-
-        dest = resolveIfIndirect(dest, currentPdfFile);
 
         int page=-1;
         
@@ -131,7 +134,7 @@ public class DestHandler {
         PdfArrayIterator dest=null;
         final PdfObject aData=new OutlineObject(ref);
         //can be indirect object stored between []
-        if(ref.charAt(0)=='['){           
+        if(ref.charAt(0)=='['){   
             dest= converDestStringToMixedArray(ref, currentPdfFile, aData);            
         }else{
             dest =decodeDest(ref, currentPdfFile, dest);
@@ -195,6 +198,11 @@ public class DestHandler {
                     OutlineObject Aobj=new OutlineObject(nameString);
                     currentPdfFile.readObject(Aobj);
                     DestObj=Aobj.getMixedArray(PdfDictionary.D);
+                    
+                    String DestString=Aobj.getTextStreamValue(PdfDictionary.D);
+                    if(DestString!=null){
+                        nameString=DestString;
+                    }
                 }
             }
         }
@@ -206,8 +214,19 @@ public class DestHandler {
         return DestObj;
     }
 
-    private static PdfArrayIterator resolveIfIndirect(PdfArrayIterator dest, final PdfObjectReader currentPdfFile) {
-        if (dest.getTokenCount() == 1) { //indirect value to remap (Name or ref)
+    public static PdfArrayIterator resolveIfIndirect(final PdfObject formObj, PdfArrayIterator dest, final PdfObjectReader currentPdfFile) {
+        
+        final byte[] rawName=formObj.getTextStreamValueAsByte(PdfDictionary.D);
+        
+        if(rawName!=null){
+            final String name=new String(rawName);
+            final String ref = currentPdfFile.convertNameToRef(name);
+            if (ref != null) {
+                dest = convertRef(ref, currentPdfFile);
+            } else {
+                dest = decodeDest(name, currentPdfFile, dest);
+            }
+        }else if (dest.getTokenCount() == 1) { //indirect value to remap (Name or ref)
             final String ref = currentPdfFile.convertNameToRef(dest.getNextValueAsString(false));
             if (ref != null) {
                 dest = convertRef(ref, currentPdfFile);
@@ -227,10 +246,8 @@ public class DestHandler {
         }
     }
 
-    public static Object[] getZoomFromDest(PdfArrayIterator dest, final PdfObjectReader currentPdfFile) {
-        dest.resetToStart();
-        dest = resolveIfIndirect(dest, currentPdfFile);
-
+    public static Object[] getZoomFromDest(PdfArrayIterator dest) {
+        
         while (dest.hasMoreTokens()) {
             final Object[] action;
             final int key = dest.getNextValueAsKey();

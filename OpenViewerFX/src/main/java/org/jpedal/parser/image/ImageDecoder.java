@@ -177,12 +177,6 @@ public class ImageDecoder extends BaseDecoder{
             }
         }
         
-        //pass through decode params
-        final PdfObject parms=XObject.getDictionary(PdfDictionary.DecodeParms);
-        if(parms!=null) {
-            decodeColorData.setDecodeParms(parms);
-        }
-        
         return decodeColorData;
     }
     

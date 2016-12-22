@@ -1248,15 +1248,8 @@ public class Type1C extends Type1{
             LogWriter.writeLog("Exception: "+e.getMessage());
         }
         
-        //setWidths(pdfObject);
         readWidths(pdfObject,true);
-        
-//            if(embeddedFontName!=null && is1C() && PdfStreamDecoder.runningStoryPad){
-//            	embeddedFontName= cleanupFontName(embeddedFontName);
-//            	this.setBaseFontName(embeddedFontName);
-//            	this.setFontName(embeddedFontName);
-//            }
-        
+
         //make sure a font set
         if (renderPage) {
             setFont(getBaseFontName(), 1);
@@ -1931,7 +1924,7 @@ public class Type1C extends Type1{
                 }
             }
             
-            if(isCID){
+            if(isCID || getGlyphData().isRemappedCFFFont()){
                 glyphName =String.valueOf(names[jj - 1]);
             }else{
                 

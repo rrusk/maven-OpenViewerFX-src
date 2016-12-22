@@ -84,6 +84,9 @@ public class JavaFXButtons implements GUIButtons{
     private GUIButton infoButton;
     private GUIButton snapshotButton; //allows user to toggle on/off text/image snapshot
 
+    //Buttons for rotation
+    private GUIButton rotateRightButton, rotateLeftButton;
+
     //Buttons to control the view mode
     private GUIButton singleButton, continuousButton, continuousFacingButton, facingButton, pageFlowButton;
 
@@ -115,6 +118,9 @@ public class JavaFXButtons implements GUIButtons{
         last = new JavaFXButton();
 
         snapshotButton = new JavaFXButton();
+
+        rotateRightButton = new JavaFXButton();
+        rotateLeftButton = new JavaFXButton();
 
         buyButton = new JavaFXButton();
         helpButton = new JavaFXButton();
@@ -190,6 +196,10 @@ public class JavaFXButtons implements GUIButtons{
                 return previousSearch;
             case Commands.NEXTRESULT:
                 return nextSearch;
+            case Commands.ROTATELEFT:
+                return rotateLeftButton;
+            case Commands.ROTATERIGHT:
+                return rotateRightButton;
         }
         return null;
     }
@@ -213,6 +223,8 @@ public class JavaFXButtons implements GUIButtons{
         facingButton = null;
         pageFlowButton = null;
         snapshotButton = null;
+        rotateLeftButton = null;
+        rotateRightButton = null;
        
         buyButton = null;
         helpButton = null;
@@ -503,6 +515,12 @@ public class JavaFXButtons implements GUIButtons{
                     }
                 });
                 newButton.setName("mousemode");
+                break;
+            case Commands.ROTATELEFT:
+                newButton = getButton(Commands.ROTATELEFT);
+                break;
+            case Commands.ROTATERIGHT:
+                newButton = getButton(Commands.ROTATERIGHT);
                 break;
         }
 

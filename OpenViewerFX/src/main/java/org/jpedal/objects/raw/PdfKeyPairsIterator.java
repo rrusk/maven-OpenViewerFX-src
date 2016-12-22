@@ -36,31 +36,30 @@ import org.jpedal.utils.NumberUtils;
 
 /**
  * allow fast access to data from PDF object
- *
  */
 public class PdfKeyPairsIterator {
-    
-	private final byte[][] keys,values;
-	
-    int maxCount,current;
+
+    private final byte[][] keys, values;
+
+    int maxCount, current;
 
     public PdfKeyPairsIterator(final byte[][] keys, final byte[][] values) {
 
-        this.keys=keys;
-        this.values=values;
-        
-        if(keys!=null) {
+        this.keys = keys;
+        this.values = values;
+
+        if (keys != null) {
             maxCount = keys.length;
         }
-        
-        current=0;
+
+        current = 0;
     }
 
     /**
      * number of PAIRS (or keys)
+     *
      * @return
      */
-    @SuppressWarnings("UnusedDeclaration")
     public int getTokenCount() {
         return maxCount;
     }
@@ -70,7 +69,7 @@ public class PdfKeyPairsIterator {
      */
     public void nextPair() {
 
-        if(current<maxCount) {
+        if (current < maxCount) {
             current++;
         } else {
             throw new RuntimeException("No keys left in PdfKeyPairsIterator");
@@ -79,6 +78,7 @@ public class PdfKeyPairsIterator {
 
     /**
      * next key
+     *
      * @return
      */
     public String getNextKeyAsString() {
@@ -86,59 +86,57 @@ public class PdfKeyPairsIterator {
         return new String(keys[current]);
 
     }
-    
+
     /**
      * used by CharProcs to return number or number of key (ie /12 or /A)
+     *
      * @return
      */
     public int getNextKeyAsNumber() {
 
-        //System.out.println((char)keys[current-1][0]+"<length="+keys[current-1].length);
-        	
-        final int length=keys[current].length;
+        final int length = keys[current].length;
         final boolean isNumber = isNextKeyANumber();
 
-        if(!isNumber){
-        	if(keys[current].length!=1){
-        		if(1==1) {
+        if (!isNumber) {
+            if (keys[current].length != 1) {
+                if (1 == 1) {
                     throw new RuntimeException("Unexpected value in getNextKeyAsNumber >" + new String(keys[current]) + '<');
                 }
-        	}else {
+            } else {
                 return (keys[current][0] & 255);
             }
-        }else {
+        } else {
             return NumberUtils.parseInt(0, length, keys[current]);
         }
-       
+
         return -1;
     }
 
-	public boolean isNextKeyANumber() {
-		
-		final int length=keys[current].length;
-        
-		boolean isNumber=true;
-        
-		for(int ii=0;ii<length;ii++){
-            final int nextChar=keys[current][ii];
-            
-            //System.out.println(nextChar);
-            if(nextChar>='0' && nextChar<='9'){
+    public boolean isNextKeyANumber() {
 
-            }else{
-                isNumber=false;
-                ii=length;
+        final int length = keys[current].length;
+
+        boolean isNumber = true;
+
+        for (int ii = 0; ii < length; ii++) {
+            final int nextChar = keys[current][ii];
+
+            if (nextChar >= '0' && nextChar <= '9') {
+
+            } else {
+                isNumber = false;
+                ii = length;
             }
         }
-		return isNumber;
-	}
+        return isNumber;
+    }
 
     public boolean hasMorePairs() {
-        return current<maxCount;
+        return current < maxCount;
     }
-    
+
     public byte[] getNextValueAsBytes() {
-        if(values[current]==null) {
+        if (values[current] == null) {
             return null;
         } else {
             return values[current];
@@ -146,7 +144,7 @@ public class PdfKeyPairsIterator {
     }
 
     public String getNextValueAsString() {
-        if(values[current]==null) {
+        if (values[current] == null) {
             return null;
         } else {
             return new String(values[current]);

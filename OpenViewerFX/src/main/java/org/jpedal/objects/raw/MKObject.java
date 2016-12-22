@@ -36,53 +36,46 @@ import org.jpedal.utils.StringUtils;
 
 public class MKObject extends FormObject {
 
-	//unknown CMAP as String
-	//String unknownValue=null;
+    private float[] BC, BG;
 
-	private float[] BC, BG;
-	
-	protected String AC, CA, RC;
-	
-	protected byte[] rawAC, rawCA, rawRC;
+    protected String AC, CA, RC;
 
-	private int TP=-1;
+    protected byte[] rawAC, rawCA, rawRC;
 
-	int R;
-	
-	//boolean ImageMask=false;
+    private int TP = -1;
 
-	//int FormType=0, Height=1, Width=1;
+    int R;
 
-	private PdfObject I;
+    private PdfObject I;
 
-	
-	@Override
-    public String toString(){
-		return "BC="+org.jpedal.objects.acroforms.utils.ConvertToString.convertArrayToString(getFloatArray(PdfDictionary.BC))+
-			" BG="+org.jpedal.objects.acroforms.utils.ConvertToString.convertArrayToString(getFloatArray(PdfDictionary.BG))+
-			" AC="+getTextStreamValue(PdfDictionary.AC)+" CA="+getTextStreamValue(PdfDictionary.CA)+
-			" RC="+getTextStreamValue(PdfDictionary.RC)+
-			" TP="+TP+" R="+R+" I="+I;
-	}
-	
-	/** creates a copy of this MKObject but in a new Object so that changes wont affect this MkObject*/
-	@Override
-    public PdfObject duplicate(){
-		
-		final MKObject copy = new MKObject();
-		
-		//System.out.println(source.getMKInt(PdfDictionary.TP)+" "+TP);
 
-		final int sourceTP=this.getInt(PdfDictionary.TP);
-		if(sourceTP!=-1) {
+    @Override
+    public String toString() {
+        return "BC=" + org.jpedal.objects.acroforms.utils.ConvertToString.convertArrayToString(getFloatArray(PdfDictionary.BC)) +
+                " BG=" + org.jpedal.objects.acroforms.utils.ConvertToString.convertArrayToString(getFloatArray(PdfDictionary.BG)) +
+                " AC=" + getTextStreamValue(PdfDictionary.AC) + " CA=" + getTextStreamValue(PdfDictionary.CA) +
+                " RC=" + getTextStreamValue(PdfDictionary.RC) +
+                " TP=" + TP + " R=" + R + " I=" + I;
+    }
+
+    /**
+     * creates a copy of this MKObject but in a new Object so that changes wont affect this MkObject
+     */
+    @Override
+    public PdfObject duplicate() {
+
+        final MKObject copy = new MKObject();
+
+        final int sourceTP = this.getInt(PdfDictionary.TP);
+        if (sourceTP != -1) {
             copy.setIntNumber(PdfDictionary.TP, sourceTP);
         }
 
-		final int sourceR=this.getInt(PdfDictionary.R);
-		copy.setIntNumber(PdfDictionary.R,sourceR);
+        final int sourceR = this.getInt(PdfDictionary.R);
+        copy.setIntNumber(PdfDictionary.R, sourceR);
 
-		//make sure also added to getTextStreamValueAsByte
-		final int[] textStreams= {PdfDictionary.AC,PdfDictionary.CA, PdfDictionary.RC};
+        //make sure also added to getTextStreamValueAsByte
+        final int[] textStreams = {PdfDictionary.AC, PdfDictionary.CA, PdfDictionary.RC};
 
         for (final int textStream : textStreams) {
             final byte[] bytes = this.getTextStreamValueAsByte(textStream);
@@ -91,8 +84,8 @@ public class MKObject extends FormObject {
             }
         }
 
-		//make sure also added to getTextStreamValueAsByte
-		final int[] floatStreams= {PdfDictionary.BC,PdfDictionary.BG};
+        //make sure also added to getTextStreamValueAsByte
+        final int[] floatStreams = {PdfDictionary.BC, PdfDictionary.BG};
 
         for (final int floatStream : floatStreams) {
             final float[] floats = this.getFloatArray(floatStream);
@@ -100,38 +93,34 @@ public class MKObject extends FormObject {
                 copy.setFloatArray(floatStream, floats);
             }
         }
-		
-		if(this.I!=null) {
+
+        if (this.I != null) {
             copy.I = I.duplicate();
         }
-		
-		return copy;
+
+        return copy;
     }
-	
+
     public MKObject(final String ref) {
         super(ref);
     }
 
     public MKObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
 
     public MKObject() {
-		// TODO Auto-generated constructor stub
-	}
+    }
 
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.I:
-	        	return I;
-//
-//            case PdfDictionary.XObject:
-//                return XObject;
+            case PdfDictionary.I:
+                return I;
 
             default:
                 return super.getDictionary(id);
@@ -139,82 +128,70 @@ public class MKObject extends FormObject {
     }
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.R:
-            R=value;
-        break;
-        
-        case PdfDictionary.TP:
-            TP=value;
-        break;
+            case PdfDictionary.R:
+                R = value;
+                break;
+
+            case PdfDictionary.TP:
+                TP = value;
+                break;
 
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.R:
-        	return R;
-            
-        case PdfDictionary.TP:
-            return TP;
+            case PdfDictionary.R:
+                return R;
+
+            case PdfDictionary.TP:
+                return TP;
 
 
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-        switch(id){
+        value.setID(id);
+        switch (id) {
 
-	        case PdfDictionary.I:
-	        	I=value;
-			break;
-//
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
+            case PdfDictionary.I:
+                I = value;
+                break;
 
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
-
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
 
     @Override
     public float[] getFloatArray(final int id) {
 
-        switch(id){
-        
-        case PdfDictionary.BC:
-        	return BC;
-        	
-        case PdfDictionary.BG:
-        	return BG;
-        	
-        	
+        switch (id) {
+
+            case PdfDictionary.BC:
+                return BC;
+
+            case PdfDictionary.BG:
+                return BG;
+
+
             default:
-            	return super.getFloatArray(id);
+                return super.getFloatArray(id);
 
         }
     }
@@ -222,19 +199,19 @@ public class MKObject extends FormObject {
     @Override
     public void setFloatArray(final int id, final float[] value) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.BC:
-    		BC=value;
-    		break;
-    		
-        	case PdfDictionary.BG:
-        		BG=value;
-        		break;
-        	
+            case PdfDictionary.BC:
+                BC = value;
+                break;
+
+            case PdfDictionary.BG:
+                BG = value;
+                break;
+
 
             default:
-            	super.setFloatArray(id, value);
+                super.setFloatArray(id, value);
         }
     }
 
@@ -242,16 +219,16 @@ public class MKObject extends FormObject {
     @Override
     public byte[] getTextStreamValueAsByte(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.AC:
-	            return rawAC;
-	            
-	        case PdfDictionary.CA:
-	            return rawCA;
-	            
-	        case PdfDictionary.RC:
-	            return rawRC;    
+            case PdfDictionary.AC:
+                return rawAC;
+
+            case PdfDictionary.CA:
+                return rawCA;
+
+            case PdfDictionary.RC:
+                return rawRC;
 
             default:
                 return super.getTextStreamValueAsByte(id);
@@ -259,26 +236,26 @@ public class MKObject extends FormObject {
         }
     }
 
-    
+
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.AC:
-	            rawAC=value;
-	    	break;
-	    	
-	        case PdfDictionary.CA:
-	        	rawCA=value;
-	    	break;
-        
-        	case PdfDictionary.RC:
-	            rawRC=value;
-        	break;
-        
+            case PdfDictionary.AC:
+                rawAC = value;
+                break;
+
+            case PdfDictionary.CA:
+                rawCA = value;
+                break;
+
+            case PdfDictionary.RC:
+                rawRC = value;
+                break;
+
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
 
@@ -287,105 +264,42 @@ public class MKObject extends FormObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.AC:
+            case PdfDictionary.AC:
 
-            //setup first time
-            if(AC==null && rawAC!=null) {
-                AC = StringUtils.getTextString(rawAC, false);
-            }
+                //setup first time
+                if (AC == null && rawAC != null) {
+                    AC = StringUtils.getTextString(rawAC, false);
+                }
 
-            return AC; 
-            
-        case PdfDictionary.CA:
+                return AC;
 
-            //setup first time
-            if(CA==null && rawCA!=null) {
-                CA = StringUtils.getTextString(rawCA, false);
-            }
-            return CA; 
-               
+            case PdfDictionary.CA:
+
+                //setup first time
+                if (CA == null && rawCA != null) {
+                    CA = StringUtils.getTextString(rawCA, false);
+                }
+                return CA;
+
             case PdfDictionary.RC:
 
-	            //setup first time
-	            if(RC==null && rawRC!=null) {
+                //setup first time
+                if (RC == null && rawRC != null) {
                     RC = StringUtils.getTextString(rawRC, false);
                 }
-	
-	            return RC;    
-	            
+
+                return RC;
+
             default:
                 return super.getTextStreamValue(id);
 
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
     @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-      //  switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-      //  }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
-
-
-    @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.MK;
     }
 }

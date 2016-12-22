@@ -36,16 +36,13 @@ import org.jpedal.utils.LogWriter;
 
 public class ExtGStateObject extends PdfObject {
 
-	//unknown CMAP as String
-	//String unknownValue=null;
+    private float[] Matrix;
 
-	private float[] Matrix;
-
-    float CA=-1,ca=-1, LW=-1,OPM=-1;
+    float CA = -1, ca = -1, LW = -1, OPM = -1;
 
     byte[][] TR;
-    
-    boolean AIS,op, OP;
+
+    boolean AIS, op, OP;
 
     PdfObject TRobj;
     private byte[][] BM;
@@ -55,97 +52,93 @@ public class ExtGStateObject extends PdfObject {
     }
 
     public ExtGStateObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
     @Override
-    public float getFloatNumber(final int id){
+    public float getFloatNumber(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.CA:
-	        	return CA;
-	        	
-	        case PdfDictionary.ca:
-	        	return ca;
-        	
-	        case PdfDictionary.LW:
-	        	return LW;
+            case PdfDictionary.CA:
+                return CA;
 
-	        case PdfDictionary.OPM:
-	        	return OPM;
-	        	
+            case PdfDictionary.ca:
+                return ca;
+
+            case PdfDictionary.LW:
+                return LW;
+
+            case PdfDictionary.OPM:
+                return OPM;
+
             default:
-            	return super.getFloatNumber(id);
+                return super.getFloatNumber(id);
         }
     }
 
     @Override
-    public void setFloatNumber(final int id, final float value){
+    public void setFloatNumber(final int id, final float value) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.CA:
-		        	CA=value;
-	    	break;
-    	
-    		case PdfDictionary.ca:
-		        	ca=value;
-	    	break;
-	    	
-	        case PdfDictionary.LW:
-	        	LW=value;
-	        	break;
-	        	
-	        case PdfDictionary.OPM:
-	        	OPM=value;
-	        	break;
+            case PdfDictionary.CA:
+                CA = value;
+                break;
+
+            case PdfDictionary.ca:
+                ca = value;
+                break;
+
+            case PdfDictionary.LW:
+                LW = value;
+                break;
+
+            case PdfDictionary.OPM:
+                OPM = value;
+                break;
 
             default:
-            	super.setFloatNumber(id, value);
+                super.setFloatNumber(id, value);
         }
     }
 
     @Override
-    public boolean getBoolean(final int id){
+    public boolean getBoolean(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.AIS:
-        	return AIS;
+            case PdfDictionary.AIS:
+                return AIS;
 
-        case PdfDictionary.op:
-        	return op;
-        	
-        case PdfDictionary.OP:
-        	return OP;
+            case PdfDictionary.op:
+                return op;
+
+            case PdfDictionary.OP:
+                return OP;
 
             default:
-            	return super.getBoolean(id);
+                return super.getBoolean(id);
         }
 
     }
 
     @Override
-    public void setBoolean(final int id, final boolean value){
+    public void setBoolean(final int id, final boolean value) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.AIS:
-        	AIS=value;
-        	break;
-        	
-        case PdfDictionary.OP:
-        	OP=value;
-    	break;
-    	
-    	case PdfDictionary.op:
-        	op=value;
-    	break;
-    	
-//    	case PdfDictionary.SA:
-//        	SA=value;
-//        	break;
+            case PdfDictionary.AIS:
+                AIS = value;
+                break;
+
+            case PdfDictionary.OP:
+                OP = value;
+                break;
+
+            case PdfDictionary.op:
+                op = value;
+                break;
 
             default:
                 super.setBoolean(id, value);
@@ -153,9 +146,9 @@ public class ExtGStateObject extends PdfObject {
     }
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.TR:
                 return TRobj;
@@ -166,20 +159,19 @@ public class ExtGStateObject extends PdfObject {
     }
 
 
-
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-        switch(id){
+        value.setID(id);
+
+        switch (id) {
 
             case PdfDictionary.TR:
-            	TRobj=value;
-    		break;
+                TRobj = value;
+                break;
 
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
 
@@ -187,150 +179,77 @@ public class ExtGStateObject extends PdfObject {
     @Override
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
-        int PDFvalue =PdfDictionary.Unknown;
+        int PDFvalue = PdfDictionary.Unknown;
 
-        int id=0,x=0,next;
+        try {
 
-        try{
+            final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-            //convert token to unique key which we can lookup
+            switch (id) {
 
-            for(int i2=keyLength-1;i2>-1;i2--){
+                case PdfDictionary.Image:
+                    PDFvalue = PdfDictionary.Image;
+                    break;
 
-            	next=raw[keyStart+i2];
-
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-            case PdfDictionary.Image:
-                PDFvalue =PdfDictionary.Image;
-            break;
-
-            case PdfDictionary.Form:
-                PDFvalue =PdfDictionary.Form;
-            break;
-
-//                case StandardFonts.CIDTYPE0:
-//                    PDFvalue =StandardFonts.CIDTYPE0;
-//                break;
-
+                case PdfDictionary.Form:
+                    PDFvalue = PdfDictionary.Form;
+                    break;
 
                 default:
-
-//                	if(pdfKeyType==PdfDictionary.Encoding){
-//                		PDFvalue=PdfCIDEncodings.getConstant(id);
-//
-//                		if(PDFvalue==PdfDictionary.Unknown){
-//
-//                			byte[] bytes=new byte[keyLength];
-//
-//                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//
-//                			unknownValue=new String(bytes);
-//                		}
-//
-//                		if(debug && PDFvalue==PdfDictionary.Unknown){
-//                			System.out.println("Value not in PdfCIDEncodings");
-//
-//                           	 byte[] bytes=new byte[keyLength];
-//
-//                               System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//                               System.out.println("Add to CIDEncodings and as String");
-//                               System.out.println("key="+new String(bytes)+" "+id+" not implemented in setConstant in PdfFont Object");
-//
-//                               System.out.println("final public static int CMAP_"+new String(bytes)+"="+id+";");
-//                               
-//                		}
-//                	}else
-                		PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                            
-                        }
-
+                    PDFvalue = super.setConstant(pdfKeyType, id);
                     break;
 
             }
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-        //switch(pdfKeyType){
-
-//        	case PdfDictionary.Subtype:
-//        		subtype=PDFvalue;
-//        		break;
-
-        //}
 
         return PDFvalue;
     }
 
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
     @Override
     public PdfArrayIterator getMixedArray(final int id) {
 
-    	switch(id){
+        switch (id) {
 
             case PdfDictionary.BM:
-                
+
                 return new PdfArrayIterator(BM);
 
             default:
 
-            return super.getMixedArray(id);
+                return super.getMixedArray(id);
         }
-	}
-
+    }
 
 
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
 
             case PdfDictionary.BM:
-	
-                BM=value;
+
+                BM = value;
                 break;
 
             default:
-            	super.setMixedArray(id, value);
+                super.setMixedArray(id, value);
         }
     }
 
     @Override
     public float[] getFloatArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.Matrix:
-        		return deepCopy(Matrix);
+            case PdfDictionary.Matrix:
+                return deepCopy(Matrix);
 
             default:
-            	return super.getFloatArray(id);
+                return super.getFloatArray(id);
 
         }
     }
@@ -338,105 +257,41 @@ public class ExtGStateObject extends PdfObject {
     @Override
     public void setFloatArray(final int id, final float[] value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.Matrix:
-	            Matrix=value;
-	        break;
+            case PdfDictionary.Matrix:
+                Matrix = value;
+                break;
 
             default:
-            	super.setFloatArray(id, value);
+                super.setFloatArray(id, value);
         }
     }
 
-
-
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-     //   switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-    //    }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-    
-    
     @Override
     public byte[][] getKeyArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.TR:
-       		    return deepCopy(TR);
+                return deepCopy(TR);
 
             default:
-            	return super.getKeyArray(id);
+                return super.getKeyArray(id);
         }
     }
 
     @Override
     public void setKeyArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.TR:
-                TR=value;
-            break;
+                TR = value;
+                break;
 
             default:
-            	super.setKeyArray(id, value);
+                super.setKeyArray(id, value);
         }
 
     }

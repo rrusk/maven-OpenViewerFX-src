@@ -178,4 +178,12 @@ public class JDeliHelper {
     public static void write(BufferedImage image, String type, String file_name, boolean fasterPNG) throws IOException {
         ImageIO.write(image,type,new File(file_name));
     }
+        
+    public static int getDicomFrameCount(final String fn) {
+        return 0;
+    }
+
+    public static BufferedImage getDicomImage(String fn, int frameNumber) throws Exception {
+        return null;
+    }
 }

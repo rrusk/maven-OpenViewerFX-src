@@ -32,25 +32,18 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class EncryptionObject extends PdfObject {
 
-	//unknown CMAP as String
-	//String unknownValue=null;
+    boolean EncryptMetadata = true;
 
-	//private float[] Matrix;
+    int V = 1; //default value
 
-	boolean EncryptMetadata=true;
+    int R = -1, P = -1;
 
-	int V=1; //default value
-	
-	int R=-1,P=-1;
-	
-	byte[] rawPerms,rawU,rawUE,rawO, rawOE, rawCFM, rawEFF, rawStrF, rawStmF;
-	String U,UE,O,OE, EFF,CFM, StrF,StmF;
+    byte[] rawPerms, rawU, rawUE, rawO, rawOE, rawCFM, rawEFF, rawStrF, rawStmF;
+    String U, UE, O, OE, EFF, CFM, StrF, StmF;
 
-	private PdfObject CF;
+    private PdfObject CF;
     private byte[][] Recipients;
 
     public EncryptionObject(final String ref) {
@@ -58,32 +51,31 @@ public class EncryptionObject extends PdfObject {
     }
 
     public EncryptionObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
     @Override
-    public boolean getBoolean(final int id){
+    public boolean getBoolean(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.EncryptMetadata:
-        	return EncryptMetadata;
-
+            case PdfDictionary.EncryptMetadata:
+                return EncryptMetadata;
 
             default:
-            	return super.getBoolean(id);
+                return super.getBoolean(id);
         }
 
     }
 
     @Override
-    public void setBoolean(final int id, final boolean value){
+    public void setBoolean(final int id, final boolean value) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.EncryptMetadata:
-        	EncryptMetadata=value;
-        	break;
+            case PdfDictionary.EncryptMetadata:
+                EncryptMetadata = value;
+                break;
 
             default:
                 super.setBoolean(id, value);
@@ -91,15 +83,12 @@ public class EncryptionObject extends PdfObject {
     }
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.CF:
-	        	return CF;
-
-//            case PdfDictionary.XObject:
-//                return XObject;
+            case PdfDictionary.CF:
+                return CF;
 
             default:
                 return super.getDictionary(id);
@@ -107,173 +96,86 @@ public class EncryptionObject extends PdfObject {
     }
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.P:
-	        	P=value;
-	        break;
-	
-	        
-	        case PdfDictionary.R:
-	        	R=value;
-	        break;
+            case PdfDictionary.P:
+                P = value;
+                break;
 
-	        case PdfDictionary.V:
-	        	V=value;
-	        break;
+            case PdfDictionary.R:
+                R = value;
+                break;
 
-//	        case PdfDictionary.Height:
-//	            Height=value;
-//	        break;
-//
-//	        case PdfDictionary.Width:
-//	            Width=value;
-//	        break;
+            case PdfDictionary.V:
+                V = value;
+                break;
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.P:
-	            return P;
-	            
-	        case PdfDictionary.R:
-	            return R;
-            
-        	case PdfDictionary.V:
-            return V;
+            case PdfDictionary.P:
+                return P;
 
-//        	case PdfDictionary.Height:
-//            return Height;
-//
-//	        case PdfDictionary.Width:
-//	            return Width;
+            case PdfDictionary.R:
+                return R;
+
+            case PdfDictionary.V:
+                return V;
 
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-        switch(id){
+        value.setID(id);
 
-	        case PdfDictionary.CF:
-	        	CF=value;
-			break;
+        switch (id) {
 
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
-
+            case PdfDictionary.CF:
+                CF = value;
+                break;
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
-
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	//System.out.println((char)next);
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-                default:
-
-                	PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                            
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        switch(pdfKeyType){
-
-
-    		default:
-    			super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
 
 
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
 
             case PdfDictionary.CFM:
-                rawCFM=value;
-            break;
+                rawCFM = value;
+                break;
 
             case PdfDictionary.EFF:
-                rawEFF=value;
-            break;
+                rawEFF = value;
+                break;
 
             case PdfDictionary.StmF:
-                rawStmF=value;
-            break;
-            
+                rawStmF = value;
+                break;
+
             case PdfDictionary.StrF:
-                rawStrF=value;
-            break;
-            
+                rawStrF = value;
+                break;
+
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
 
@@ -282,31 +184,31 @@ public class EncryptionObject extends PdfObject {
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.O:
-	            rawO=value;
-	        break;
+            case PdfDictionary.O:
+                rawO = value;
+                break;
 
             case PdfDictionary.OE:
-                rawOE=value;
+                rawOE = value;
                 break;
 
             case PdfDictionary.Perms:
-                rawPerms=value;
+                rawPerms = value;
                 break;
 
-	        case PdfDictionary.U:
-	            rawU=value;
-	        break;
+            case PdfDictionary.U:
+                rawU = value;
+                break;
 
             case PdfDictionary.UE:
-                rawUE=value;
+                rawUE = value;
                 break;
 
-	        
+
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
 
@@ -315,40 +217,40 @@ public class EncryptionObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.CFM:
 
-            //setup first time
-            if(CFM==null && rawCFM!=null) {
-                CFM = new String(rawCFM);
-            }
+                //setup first time
+                if (CFM == null && rawCFM != null) {
+                    CFM = new String(rawCFM);
+                }
 
-            return CFM;
+                return CFM;
 
             case PdfDictionary.EFF:
 
                 //setup first time
-                if(EFF==null && rawEFF!=null) {
+                if (EFF == null && rawEFF != null) {
                     EFF = new String(rawEFF);
                 }
 
                 return EFF;
-                
+
             case PdfDictionary.StmF:
 
                 //setup first time
-                if(StmF==null && rawStmF!=null) {
+                if (StmF == null && rawStmF != null) {
                     StmF = new String(rawStmF);
                 }
 
                 return StmF;
 
-                
+
             case PdfDictionary.StrF:
 
                 //setup first time
-                if(StrF==null && rawStrF!=null) {
+                if (StrF == null && rawStrF != null) {
                     StrF = new String(rawStrF);
                 }
 
@@ -363,40 +265,40 @@ public class EncryptionObject extends PdfObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.O:
+            case PdfDictionary.O:
 
-	            //setup first time
-	            if(O==null && rawO!=null) {
+                //setup first time
+                if (O == null && rawO != null) {
                     O = new String(rawO);
                 }
 
-	            return O;
+                return O;
 
             case PdfDictionary.OE:
 
                 //setup first time
-                if(OE==null && rawOE!=null) {
+                if (OE == null && rawOE != null) {
                     OE = new String(rawOE);
                 }
 
                 return OE;
-	            
-	            
-	        case PdfDictionary.U:
 
-	            //setup first time
-	            if(U==null && rawU!=null) {
+
+            case PdfDictionary.U:
+
+                //setup first time
+                if (U == null && rawU != null) {
                     U = new String(rawU);
                 }
 
-	            return U;
+                return U;
 
             case PdfDictionary.UE:
 
                 //setup first time
-                if(UE==null && rawUE!=null) {
+                if (UE == null && rawUE != null) {
                     UE = new String(rawUE);
                 }
 
@@ -408,15 +310,15 @@ public class EncryptionObject extends PdfObject {
 
         }
     }
-    
+
     @Override
     public byte[] getTextStreamValueAsByte(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.O:
+            case PdfDictionary.O:
 
-	            return rawO;
+                return rawO;
 
             case PdfDictionary.OE:
 
@@ -426,19 +328,19 @@ public class EncryptionObject extends PdfObject {
 
                 return rawPerms;
 
-	        case PdfDictionary.U:
+            case PdfDictionary.U:
 
-	            //setup first time
-	            if(U==null && rawU!=null) {
+                //setup first time
+                if (U == null && rawU != null) {
                     U = new String(rawU);
                 }
 
-	            return rawU;
+                return rawU;
 
             case PdfDictionary.UE:
 
                 //setup first time
-                if(UE==null && rawUE!=null) {
+                if (UE == null && rawUE != null) {
                     UE = new String(rawUE);
                 }
 
@@ -450,100 +352,37 @@ public class EncryptionObject extends PdfObject {
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-      //  switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-       // }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getStringValue(int,mode) in "+this);
-        }
-    }
-
-
-
     @Override
     public byte[][] getStringArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Recipients:
-                            return deepCopy(Recipients);
+                return deepCopy(Recipients);
 
             default:
-            	return super.getStringArray(id);
+                return super.getStringArray(id);
         }
     }
 
     @Override
     public void setStringArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Recipients:
-                Recipients=value;
+                Recipients = value;
                 break;
 
             default:
-            	super.setStringArray(id, value);
+                super.setStringArray(id, value);
         }
 
     }
 
 
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.Encrypt;
     }
 }

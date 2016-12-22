@@ -122,9 +122,9 @@ public class OutlineData {
                 isClosed = numberOfItems < 0;
             }
 
-            final PdfArrayIterator dest = DestHandler.getDestFromObject(outlineObj, currentPdfFile);
+            final PdfArrayIterator dest =DestHandler.resolveIfIndirect(outlineObj, DestHandler.getDestFromObject(outlineObj, currentPdfFile), currentPdfFile);
 			page = DestHandler.getPageNumberFromLink(dest, currentPdfFile); //set to -1 as default
-			final Object[] zoomArray = DestHandler.getZoomFromDest(dest, currentPdfFile);
+			final Object[] zoomArray = DestHandler.getZoomFromDest(dest);
 
 			//add title to tree
 			final byte[] titleData=outlineObj.getTextStreamValueAsByte(PdfDictionary.Title);

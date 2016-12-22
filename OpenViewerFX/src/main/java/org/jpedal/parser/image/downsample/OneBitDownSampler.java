@@ -84,8 +84,6 @@ class OneBitDownSampler {
         
         final int origLineLength= (imageData.getWidth()+7)>>3;
 
-        byte currentByte;
-        int bit;
         //scan all pixels and down-sample
         for(int y=0;y<newH;y++){
             for(int x=0;x<newW;x++){

@@ -32,28 +32,26 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class DecodeParmsObject extends PdfObject {
 
-    boolean EncodedByteAlign,EndOfBlock=true, EndOfLine, BlackIs1,Uncompressed;
+    boolean EncodedByteAlign, EndOfBlock = true, EndOfLine, BlackIs1, Uncompressed;
 
     PdfObject JBIG2Globals;
 
-    int Blend=-1, Colors=-1, ColorTransform=1, Columns=-1,DamagedRowsBeforeError, EarlyChange=1, K, Predictor=1, QFactor=-1,Rows=-1;
+    int Blend = -1, Colors = -1, ColorTransform = 1, Columns = -1, DamagedRowsBeforeError, EarlyChange = 1, K, Predictor = 1, QFactor = -1, Rows = -1;
 
     public DecodeParmsObject(final String ref) {
         super(ref);
     }
 
     public DecodeParmsObject(final int ref, final int gen) {
-        super(ref,gen);
+        super(ref, gen);
     }
 
     @Override
-    public boolean getBoolean(final int id){
+    public boolean getBoolean(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BlackIs1:
                 return BlackIs1;
@@ -77,28 +75,28 @@ public class DecodeParmsObject extends PdfObject {
     }
 
     @Override
-    public void setBoolean(final int id, final boolean value){
+    public void setBoolean(final int id, final boolean value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BlackIs1:
-                BlackIs1=value;
+                BlackIs1 = value;
                 break;
 
             case PdfDictionary.EncodedByteAlign:
-                EncodedByteAlign=value;
+                EncodedByteAlign = value;
                 break;
 
             case PdfDictionary.EndOfBlock:
-                EndOfBlock=value;
+                EndOfBlock = value;
                 break;
 
             case PdfDictionary.EndOfLine:
-                EndOfLine=value;
+                EndOfLine = value;
                 break;
 
             case PdfDictionary.Uncompressed:
-                Uncompressed=value;
+                Uncompressed = value;
                 break;
 
             default:
@@ -107,9 +105,9 @@ public class DecodeParmsObject extends PdfObject {
     }
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.JBIG2Globals:
                 return JBIG2Globals;
@@ -120,48 +118,48 @@ public class DecodeParmsObject extends PdfObject {
     }
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Blend:
-                Blend=value;
+                Blend = value;
                 break;
 
             case PdfDictionary.Colors:
-                Colors=value;
+                Colors = value;
                 break;
 
             case PdfDictionary.ColorTransform:
-                ColorTransform=value;
+                ColorTransform = value;
                 break;
 
             case PdfDictionary.Columns:
-                Columns=value;
+                Columns = value;
                 break;
 
             case PdfDictionary.DamagedRowsBeforeError:
-                DamagedRowsBeforeError=value;
+                DamagedRowsBeforeError = value;
                 break;
 
             case PdfDictionary.EarlyChange:
-                EarlyChange=value;
+                EarlyChange = value;
                 break;
 
             case PdfDictionary.K:
-                K=value;
+                K = value;
                 break;
 
             case PdfDictionary.Predictor:
-                Predictor=value;
+                Predictor = value;
                 break;
 
             case PdfDictionary.QFactor:
-                QFactor=value;
+                QFactor = value;
                 break;
 
             case PdfDictionary.Rows:
-                Rows=value;
+                Rows = value;
                 break;
 
             default:
@@ -170,9 +168,9 @@ public class DecodeParmsObject extends PdfObject {
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Blend:
                 return Blend;
@@ -211,14 +209,14 @@ public class DecodeParmsObject extends PdfObject {
 
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
         value.setID(id);
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.JBIG2Globals:
-                JBIG2Globals=value;
+                JBIG2Globals = value;
                 break;
 
 
@@ -226,119 +224,6 @@ public class DecodeParmsObject extends PdfObject {
                 super.setDictionary(id, value);
         }
     }
-
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-                next=raw[keyStart+i2];
-
-                next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-//                case StandardFonts.CIDTYPE0:
-//                    PDFvalue =StandardFonts.CIDTYPE0;
-//                break;
-
-                default:
-
-                    PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                            final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-
-                        }
-                    
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-    //    switch(pdfKeyType){
-
-//        	case PdfDictionary.BaseEncoding:
-//        		BaseEncoding=PDFvalue;
-//        		break;
-
-    //    }
-
-        return PDFvalue;
-    }
-
-    @Override
-    public int getParameterConstant(final int key) {
-
-        final int def ;
-
-  //      switch(key){
-
-
-//            case PdfDictionary.BaseEncoding:
-//
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
- //       }
-
-        //check general values
-        def=super.getParameterConstant(key);
-
-        return def;
-    }
-
-
-
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-            case PdfDictionary.BaseFont:
-
-                //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-
-
-            default:
-                return super.getName(id);
-
-        }
-    }
-
-
 
     @Override
     public boolean decompressStreamWhenRead() {

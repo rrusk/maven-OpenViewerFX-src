@@ -32,46 +32,35 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
 
 public class NamesObject extends PdfObject {
-
-	//unknown CMAP as String
-	//String unknownValue=null;
 
     byte[] rawJS;
 
     String JSString;
-    
-	//private float[] Matrix;
 
-	//boolean ImageMask=false;
+    private PdfObject Dests, EmbeddedFiles, JavaScript, JS, XFAImages;
 
-	//int FormType=0, Height=1, Width=1;
+    private byte[][] Kids, Names;
 
-	private PdfObject Dests, EmbeddedFiles, JavaScript, JS,XFAImages;
-
-    private byte[][] Kids,Names;
-    
     private byte[][] Limits;
 
-    
+
     public NamesObject(final String ref) {
         super(ref);
     }
 
     public NamesObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
 
-
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.Dests:
+            case PdfDictionary.Dests:
                 return Dests;
 
             case PdfDictionary.EmbeddedFiles:
@@ -85,180 +74,106 @@ public class NamesObject extends PdfObject {
 
             case PdfDictionary.XFAImages:
                 return XFAImages;
-                
+
             default:
                 return super.getDictionary(id);
         }
     }
 
 
-
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-         //if in AP array as other value store here
-        if(currentKey!=null){
+        value.setID(id);
+
+        //if in AP array as other value store here
+        if (currentKey != null) {
 
             setOtherValues(value);
             return;
         }
-        
-        switch(id){
-            
+
+        switch (id) {
+
             case PdfDictionary.Dests:
-                Dests=value;
+                Dests = value;
                 break;
 
             case PdfDictionary.EmbeddedFiles:
-                EmbeddedFiles=value;
+                EmbeddedFiles = value;
                 break;
-                
+
             case PdfDictionary.JavaScript:
-                JavaScript=value;
+                JavaScript = value;
                 break;
-                
+
             case PdfDictionary.JS:
-                JS=value;
+                JS = value;
                 break;
-                
+
             case PdfDictionary.XFAImages:
-                XFAImages=value;
+                XFAImages = value;
                 break;
-                
+
             default:
                 super.setDictionary(id, value);
         }
     }
 
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	//System.out.println((char)next);
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-                default:
-                	PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                           
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        switch(pdfKeyType){
-
-    		default:
-    			super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
-
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
     @Override
     public PdfArrayIterator getMixedArray(final int id) {
 
-    	switch(id){
+        switch (id) {
 
             case PdfDictionary.Names:
                 return new PdfArrayIterator(Names);
 
             default:
-			return super.getMixedArray(id);
+                return super.getMixedArray(id);
         }
-	}
-
-
+    }
 
 
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Names:
-                Names=value;
-            break;
+                Names = value;
+                break;
 
             default:
-            	super.setMixedArray(id, value);
+                super.setMixedArray(id, value);
         }
     }
 
     @Override
     public void setStringArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Limits:
-                Limits=value;
-            break;
+                Limits = value;
+                break;
 
             default:
-            	super.setMixedArray(id, value);
+                super.setMixedArray(id, value);
         }
     }
-
 
 
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//
             case PdfDictionary.JS:
-                rawJS=value;
-            break;
+                rawJS = value;
+                break;
 
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
 
@@ -268,24 +183,16 @@ public class NamesObject extends PdfObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
-
-//	        case PdfDictionary.CharSet:
-//
-//	            //setup first time
-//	            if(CharSet==null && rawCharSet!=null)
-//	            	CharSet=new String(rawCharSet);
-//
-//	            return CharSet;
+        switch (id) {
 
             case PdfDictionary.JS:
 
-            //setup first time
-            if(JSString==null && rawJS!=null){
-                //JSString= PdfObjectReader.getTextString(rawJS);
-                JSString= new String(rawJS);
-            }
-            return JSString;
+                //setup first time
+                if (JSString == null && rawJS != null) {
+                    //JSString= PdfObjectReader.getTextString(rawJS);
+                    JSString = new String(rawJS);
+                }
+                return JSString;
 
             default:
                 return super.getTextStreamValue(id);
@@ -293,116 +200,54 @@ public class NamesObject extends PdfObject {
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-  //      switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-  //      }
-
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
     @Override
     public byte[][] getStringArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Limits:
-                               return deepCopy(Limits);
+                return deepCopy(Limits);
 
             default:
-            	return super.getKeyArray(id);
+                return super.getKeyArray(id);
         }
     }
-    
+
     @Override
     public byte[][] getKeyArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Kids:
-                               return deepCopy(Kids);
+                return deepCopy(Kids);
 
             default:
-            	return super.getKeyArray(id);
+                return super.getKeyArray(id);
         }
     }
 
     @Override
     public void setKeyArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Kids:
-                Kids=value;
-            break;
-            
+                Kids = value;
+                break;
+
             default:
-            	super.setKeyArray(id, value);
+                super.setKeyArray(id, value);
         }
 
     }
 
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
+        return true;
+    }
 
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.Names;
     }
 }

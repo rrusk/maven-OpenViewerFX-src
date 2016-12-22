@@ -32,157 +32,76 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class InfoObject extends PdfObject {
 
     private String Author, CreationDate, Creator, ModDate, Producer, Keywords, Subject, Title, Trapped;
 
     private byte[] rawAuthor, rawCreationDate, rawCreator, rawModDate, rawProducer, rawKeywords, rawSubject, rawTitle, rawTrapped;
 
-    //unknown CMAP as String
-    //String unknownValue=null;
-
-    //private float[] Matrix;
-
-    //boolean ImageMask=false;
-
-    //int FormType=0, Height=1, Width=1;
-
-    //private PdfObject OPI=null, XObject=null;
-
     public InfoObject(final String ref) {
         super(ref);
     }
 
     public InfoObject(final int ref, final int gen) {
-        super(ref,gen);
+        super(ref, gen);
     }
-    
-
-
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-                next=raw[keyStart+i2];
-
-                //System.out.println((char)next);
-                next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-
-                default:
-
-                    PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                            final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-
-                        }
-
-                    break;
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        switch(pdfKeyType){
-
-            default:
-                super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
-
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
 
 
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Trapped:
-                rawTrapped=value;
+                rawTrapped = value;
                 break;
 
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
     }
 
-        @Override
-        public void setTextStreamValue(final int id, final byte[] value) {
+    @Override
+    public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Author:
-                rawAuthor=value;
+                rawAuthor = value;
                 break;
 
             case PdfDictionary.CreationDate:
-                rawCreationDate=value;
+                rawCreationDate = value;
                 break;
 
             case PdfDictionary.Creator:
-                rawCreator=value;
+                rawCreator = value;
                 break;
 
             case PdfDictionary.Keywords:
-                rawKeywords=value;
+                rawKeywords = value;
                 break;
 
             case PdfDictionary.ModDate:
-                rawModDate=value;
+                rawModDate = value;
                 break;
 
             case PdfDictionary.Producer:
-                rawProducer=value;
+                rawProducer = value;
                 break;
 
             case PdfDictionary.Subject:
-                rawSubject=value;
+                rawSubject = value;
                 break;
 
             case PdfDictionary.Title:
-                rawTitle=value;
+                rawTitle = value;
                 break;
 
 
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
 
@@ -191,7 +110,7 @@ public class InfoObject extends PdfObject {
     @Override
     public byte[] getTextStreamValueAsByte(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Author:
                 return rawAuthor;
@@ -230,16 +149,16 @@ public class InfoObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Trapped:
 
-            //setup first time
-            if(Trapped==null && rawTrapped!=null) {
-                Trapped = new String(rawTrapped);
-            }
+                //setup first time
+                if (Trapped == null && rawTrapped != null) {
+                    Trapped = new String(rawTrapped);
+                }
 
-            return Trapped;
+                return Trapped;
 
             default:
                 return super.getName(id);
@@ -250,12 +169,12 @@ public class InfoObject extends PdfObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Author:
 
                 //setup first time
-                if(Author==null && rawAuthor!=null) {
+                if (Author == null && rawAuthor != null) {
                     Author = new String(rawAuthor);
                 }
 
@@ -264,7 +183,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.CreationDate:
 
                 //setup first time
-                if(CreationDate==null && rawCreationDate!=null) {
+                if (CreationDate == null && rawCreationDate != null) {
                     CreationDate = new String(rawCreationDate);
                 }
 
@@ -273,7 +192,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.Creator:
 
                 //setup first time
-                if(Creator==null && rawCreator!=null) {
+                if (Creator == null && rawCreator != null) {
                     Creator = new String(rawCreator);
                 }
 
@@ -282,7 +201,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.Keywords:
 
                 //setup first time
-                if(Keywords==null && rawKeywords!=null) {
+                if (Keywords == null && rawKeywords != null) {
                     Keywords = new String(rawKeywords);
                 }
 
@@ -291,7 +210,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.ModDate:
 
                 //setup first time
-                if(ModDate==null && rawModDate!=null) {
+                if (ModDate == null && rawModDate != null) {
                     ModDate = new String(rawModDate);
                 }
 
@@ -300,7 +219,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.Producer:
 
                 //setup first time
-                if(Producer==null && rawProducer!=null) {
+                if (Producer == null && rawProducer != null) {
                     Producer = new String(rawProducer);
                 }
 
@@ -309,7 +228,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.Subject:
 
                 //setup first time
-                if(Subject==null && rawSubject!=null) {
+                if (Subject == null && rawSubject != null) {
                     Subject = new String(rawSubject);
                 }
 
@@ -319,7 +238,7 @@ public class InfoObject extends PdfObject {
             case PdfDictionary.Title:
 
                 //setup first time
-                if(Title==null && rawTitle!=null) {
+                if (Title == null && rawTitle != null) {
                     Title = new String(rawTitle);
                 }
 
@@ -332,70 +251,8 @@ public class InfoObject extends PdfObject {
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
     @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-    //    switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-     //   }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                    final int len=data.length;
-                    if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                        final int length=len-7;
-                        final byte[] newData=new byte[length];
-                        System.arraycopy(data, 7, newData, 0, length);
-                        return new String(newData);
-                    }else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
-
-    @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.Metadata;
     }
 }

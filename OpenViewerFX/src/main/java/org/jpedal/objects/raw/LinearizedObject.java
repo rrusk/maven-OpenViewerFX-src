@@ -32,380 +32,123 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class LinearizedObject extends PdfObject {
 
-	//unknown CMAP as String
-	//String unknownValue=null;
-
-	//private float[] Matrix;
-
-	//boolean ImageMask=false;
-
-	//byte[] rawUF;
-
-	//String UF;
-
-    int L=-1, O=-1,E=-1,N=-1,P,S=-1,T=-1;
+    int L = -1, O = -1, E = -1, N = -1, P, S = -1, T = -1;
     private int[] H;
-    //int B=-1,Cint=-1,R=-1;
-
-	//int FormType=0, Height=1, Width=1;
-
-	//private PdfObject EF=null;
 
     public LinearizedObject(final String ref) {
         super(ref);
     }
 
     public LinearizedObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
-
-
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.E:
-    		E=value;
-        break;
+                E = value;
+                break;
 
-        case PdfDictionary.L:
-    		L=value;
-        break;
+            case PdfDictionary.L:
+                L = value;
+                break;
 
-        case PdfDictionary.N:
-    		N=value;
-        break;
+            case PdfDictionary.N:
+                N = value;
+                break;
 
-        case PdfDictionary.O:
-    		O=value;
-        break;
+            case PdfDictionary.O:
+                O = value;
+                break;
 
-        case PdfDictionary.P:
-    		P=value;
-        break;
+            case PdfDictionary.P:
+                P = value;
+                break;
 
-        case PdfDictionary.S:
-    		S=value;
-        break;
+            case PdfDictionary.S:
+                S = value;
+                break;
 
-        case PdfDictionary.T:
-    		T=value;
-        break;
-
-//
-//        case PdfDictionary.C:
-//        	Cint=value;
-//        break;
-//
-//        case PdfDictionary.R:
-//            R=value;
-//        break;
-//	        case PdfDictionary.FormType:
-//	        	FormType=value;
-//	        break;
-//
-//	        case PdfDictionary.Height:
-//	            Height=value;
-//	        break;
-//
-//	        case PdfDictionary.Width:
-//	            Width=value;
-//	        break;
+            case PdfDictionary.T:
+                T = value;
+                break;
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.E:
-    		return E;
+            case PdfDictionary.E:
+                return E;
 
-        case PdfDictionary.L:
-    		return L;
+            case PdfDictionary.L:
+                return L;
 
-        case PdfDictionary.N:
-    		return N;
+            case PdfDictionary.N:
+                return N;
 
-        case PdfDictionary.O:
-    		return O;
+            case PdfDictionary.O:
+                return O;
 
-        case PdfDictionary.P:
-    		return P;
+            case PdfDictionary.P:
+                return P;
 
-        case PdfDictionary.S:
-    		return S;
+            case PdfDictionary.S:
+                return S;
 
-        case PdfDictionary.T:
-    		return T;
-//
-//        case PdfDictionary.C:
-//    		return Cint;
-//
-//        case PdfDictionary.R:
-//            return R;
-
-//        	case PdfDictionary.FormType:
-//            return FormType;
-//
-//        	case PdfDictionary.Height:
-//            return Height;
-//
-//	        case PdfDictionary.Width:
-//	            return Width;
+            case PdfDictionary.T:
+                return T;
 
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
-
-    @Override
-    public void setDictionary(final int id, final PdfObject value){
-
-    	value.setID(id);
-        switch(id){
-
-//	        case PdfDictionary.EF:
-//	        	EF=value;
-//			break;
-
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
-
-            default:
-            	super.setDictionary(id, value);
-        }
-    }
-
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	//System.out.println((char)next);
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-                default:
-
-                	PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        switch(pdfKeyType){
-
-    		default:
-    			super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
-    @Override
-    public int getParameterConstant(final int key) {
-
-    	//System.out.println("Get constant for "+key +" "+this);
-        switch(key){
-
-
-//            case PdfDictionary.BaseEncoding:
-//
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
-        default:
-        	return super.getParameterConstant(key);
-
-        }
-    }
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
 
     @Override
     public int[] getIntArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.H:
                 return H;
 
             default:
-            	return super.getIntArray(id);
+                return super.getIntArray(id);
         }
     }
 
     @Override
     public void setIntArray(final int id, final int[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.H:
-                H=value;
+                H = value;
                 break;
 
             default:
-            	super.setIntArray(id, value);
+                super.setIntArray(id, value);
         }
     }
-
-
-
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-        case PdfDictionary.E:
-
-            //setup first time
-//            if(E==null && rawE!=null)
-//            	E=PdfObjectReader.getTextString(rawE);
-//
-//            return E;
-
-//            case PdfDictionary.BaseFont:
-//
-//            //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-
-            default:
-                return super.getName(id);
-
-        }
-    }
-
-
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-      //  switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-      //  }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
 
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
-
-
-
+        return true;
+    }
 
 
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.Linearized;
     }
 }

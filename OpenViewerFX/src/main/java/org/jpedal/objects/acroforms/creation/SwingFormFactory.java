@@ -57,16 +57,7 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.DecoderOptions;
 import org.jpedal.utils.Strip;
 
-
 public class SwingFormFactory extends GenericFormFactory implements FormFactory{
-    
-    
-    /**
-     * allows access to renderer variables
-     *
-     */
-    public SwingFormFactory() {}
-    
     
     private JButton setupAnnotationButton(final FormObject form){
         //point where testActions breaks - ignore this halting error as it is within the testActions flag.
@@ -239,7 +230,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         return but;
     }
     
-     private JButton createAnnotationSquiggly(final FormObject form) {
+    private JButton createAnnotationSquiggly(final FormObject form) {
         JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
@@ -256,7 +247,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup annotations display with popups, etc
+     * Setup and return the Annotation specified in the FormObject
+     * @param form FormObject containing all values for the Annotation
+     * @return Object to display the PDF Annotation in the viewer
      */
     @Override
     public Object annotationButton(final FormObject form) {
@@ -446,7 +439,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the ComboBox field specified in the FormObject
+     * Setup and return the ComboBox specified in the FormObject
+     * @param form FormObject containing all values or the ComboBox
+     * @return Object to display the PDF ComboBox in the viewer
      */
     @Override
     public Object comboBox(final FormObject form) {
@@ -511,7 +506,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the CheckBox button specified in the FormObject
+     * Setup and return the CheckBox specified in the FormObject
+     * @param form FormObject containing all values or the CheckBox
+     * @return Object to display the PDF CheckBox in the viewer
      */
     @Override
     public Object checkBoxBut(final FormObject form) {
@@ -537,7 +534,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the List field specified in the FormObject
+     * Setup and return the List specified in the FormObject
+     * @param form FormObject containing all values or the List
+     * @return Object to display the PDF List in the viewer
      */
     @Override
     public Object listField(final FormObject form) {
@@ -580,7 +579,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the multi line password field specified in the FormObject
+     * Setup and return the MultiLine Password specified in the FormObject
+     * @param form FormObject containing all values or the MultiLine Password
+     * @return Object to display the PDF MultiLine Password in the viewer
      */
     @Override
     public Object multiLinePassword(final FormObject form) {
@@ -612,7 +613,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the multi line text area specified in the FormObject
+     * Setup and return the MultiLine Text Area specified in the FormObject
+     * @param form FormObject containing all values or the MultiLine Text Area
+     * @return Object to display the PDF MultiLine Text Area in the viewer
      */
     @Override
     public Object multiLineText(final FormObject form) {
@@ -694,8 +697,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return a signature field component,
-     * <b>Note:</b> SKELETON METHOD FOR FUTURE UPGRADES.
+     * Setup and return the Signature Field specified in the FormObject
+     * @param form FormObject containing all values or the Signature Field
+     * @return Object to display the PDF Signature Field in the viewer
      */
     @Override
     public Object signature(final FormObject form) {
@@ -729,7 +733,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the Push button specified in the FormObject
+     * Setup and return the Push Button specified in the FormObject
+     * @param form FormObject containing all values or the Push Button
+     * @return Object to display the PDF Push Button in the viewer
      */
     @Override
     public Object pushBut(final FormObject form) {
@@ -752,7 +758,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the Radio button specified in the FormObject
+     * Setup and return the Radio Button specified in the FormObject
+     * @param form FormObject containing all values or the Radio Button
+     * @return Object to display the PDF Radio Button in the viewer
      */
     @Override
     public Object radioBut(final FormObject form) {
@@ -774,9 +782,10 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         return radioBut;
     }
     
-    
     /**
-     * setup and return the single line password field specified in the FormObject
+     * Setup and return the Single Line Password specified in the FormObject
+     * @param form FormObject containing all values or the Single Line Password
+     * @return Object to display the PDF Single Line Password in the viewer
      */
     @Override
     public Object singleLinePassword(final FormObject form) {
@@ -806,7 +815,9 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * setup and return the single line text field specified in the FormObject
+     * Setup and return the Single Line Text Field specified in the FormObject
+     * @param form FormObject containing all values or the Single Line Text Field
+     * @return Object to display the PDF Single Line Text Field in the viewer
      */
     @Override
     public Object singleLineText(final FormObject form) {
@@ -1309,7 +1320,8 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * new data object to hold all widget implementations
+     * Get new data object to hold all widget implementations
+     * @return GUIData object to hold widget data
      */
     @Override
     public GUIData getCustomCompData() {
@@ -1323,15 +1335,18 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     /**
-     * pass in Map contains annot field list in order to set tabindex
-     */
+     * Set the annot field lists tab order from the map provided.
+     * Currently not implemented.
+     * @param annotOrder Map where keys are pdf object references as Strings and values are tab indices as Strings
+    */
     @Override
     public void setAnnotOrder(final Map<String, String> annotOrder) {
     }
     
     /**
      * public method to allow user to replace Popup with their own implementation
-     * @param form
+     * @param form FormObject representing the popup
+     * @param cropBoxWith int value representing the width of the page for this popup
      * @return Swing component to use as popup (see org.jpedal.objects.acroforms.overridingImplementations.PdfSwingPopup)
      */
     @SuppressWarnings("MethodMayBeStatic")

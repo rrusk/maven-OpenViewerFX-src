@@ -59,114 +59,116 @@ public class NumberValue {
         //actual value or first part of ref
         int number= NumberUtils.parseInt(keyStart, i, raw);
         
-        int jj=i;
-        jj = StreamReaderUtils.skipSpaces(raw, jj);
-        
-        boolean  isRef=false;
-        
+        final int jj = StreamReaderUtils.skipSpaces(raw, i);
+
         //check its not a ref (assumes it XX 0 R)
-        if(raw[jj]>= 48 && raw[jj]<=57){ //if next char is number 0-9 it may be a ref
-            
-            int aa=jj;
-            
+        if(raw[jj]>= 48 && raw[jj]<=57) { //if next char is number 0-9 it may be a ref
+
             //move cursor to end of number
-            aa = StreamReaderUtils.skipToEndOfRef(raw, aa);
-            
+            int aa = StreamReaderUtils.skipToEndOfRef(raw, jj);
+
             //move cursor to start of text
             aa = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, aa, 47);
-            
-            isRef=aa<rawLength && raw[aa]=='R';
-            
-        }
-        
-        if(isRef){
-            //move cursor to start of generation
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
-            keyStart=i;
-            //move cursor to end of reference
-            i = StreamReaderUtils.skipToEndOfRef(raw, i);
-            
-            final int generation= NumberUtils.parseInt(keyStart, i, raw);
-            
-            //move cursor to start of R
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                i++;
-            }
-            
-            if(raw[i]!=82){ //we are expecting R to end ref
-                throw new RuntimeException("3. Unexpected value in file - please send to IDRsolutions for analysis");
-            }
-            
-            //read the Dictionary data
-            final byte[] data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
-            
-            //allow for data in Linear object not yet loaded
-            if(data==null){
-                pdfObject.setFullyResolved(false);
-                
-                if(debugFastCode) {
-                    System.out.println(padding + "Data not yet loaded");
-                }
-                
-                LogWriter.writeLog("[Linearized] " + pdfObject.getObjectRefAsString() + " not yet available (8)");
-                
-                return rawLength;
-            }
-            
-            //lose obj at start
-            int j=0;
-            final int len=data.length;
 
-            //allow for example where start <<
-            if(len>1 && data[0]=='<' && data[1]=='<'){
-            }else if(len<=3){ //fix for short indirect value /K 30 0 R where 30 0R is -1 ie (11dec/Real Estate Tax Bill 2011.pdf)
-            }else{
-                j=3;
-                if(len>3){ //allow for small values (ie Rotate object pointing to value 0)
-                    while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111){
-                        j++;
-                        
-                        if(j==len){
-                            j=0;
-                            break;
-                        }
-                    }
-                }
+            final boolean isRef = aa < rawLength && raw[aa] == 'R';
+
+            if (isRef) {
+                return readNumberFromIndirectObj(PDFkeyInt, pdfObject, i, raw, objectReader, rawLength, number);
             }
-            
-            //skip any spaces after
-            if(len>1){//allow for small values (ie Rotate object pointing to value 0)
-               j = StreamReaderUtils.skipSpaces(data, j);
-            }
-            
-            int count=j;
-            
-            //skip any spaces at end
-            while(count<len && data[count]!=9 && data[count]!=10 && data[count]!=13 && data[count]!=32)// || data[j]==47 || data[j]==60)
-            {
-                count++;
-            }
-            
-            number= NumberUtils.parseInt(j, count, data);
-            
         }
         
         //store value
         pdfObject.setIntNumber(PDFkeyInt,number);
         
         if(debugFastCode) {
-            System.out.println(padding + "set numberValue=" + number);//+" in "+pdfObject);
+            System.out.println(padding + "set numberValue=" + number);
         }
         
-        i--;// move back so loop works
-        
-        return i;
+        // move back so loop works
+        return i-1;
     }
-    
 
+    static int readNumberFromIndirectObj(final int PDFkeyInt, final PdfObject pdfObject, int i, final byte[] raw, final PdfFileReader objectReader, int rawLength, int number) {
+
+        int keyStart;
+        i = StreamReaderUtils.skipSpaces(raw, i);
+
+        keyStart=i;
+        //move cursor to end of reference
+        i = StreamReaderUtils.skipToEndOfRef(raw, i);
+
+        final int generation= NumberUtils.parseInt(keyStart, i, raw);
+
+        //move cursor to start of R
+        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
+            i++;
+        }
+
+        if(raw[i]!=82){ //we are expecting R to end ref
+            throw new RuntimeException("3. Unexpected value in file - please send to IDRsolutions for analysis");
+        }
+
+        //read the Dictionary data
+        final byte[] data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
+
+        //allow for data in Linear object not yet loaded
+        if(data==null){
+            pdfObject.setFullyResolved(false);
+
+            if(debugFastCode) {
+                System.out.println(padding + "Data not yet loaded");
+            }
+
+            LogWriter.writeLog("[Linearized] " + pdfObject.getObjectRefAsString() + " not yet available (8)");
+
+            return rawLength;
+        }
+
+        //lose obj at start
+        int j=0;
+        final int len=data.length;
+
+        //allow for example where start <<
+        if(len>1 && data[0]=='<' && data[1]=='<'){
+        }else if(len<=3){ //fix for short indirect value /K 30 0 R where 30 0R is -1 ie (11dec/Real Estate Tax Bill 2011.pdf)
+        }else{
+            j=3;
+            if(len>3){ //allow for small values (ie Rotate object pointing to value 0)
+                while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111){
+                    j++;
+
+                    if(j==len){
+                        j=0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        //skip any spaces after
+        if(len>1){//allow for small values (ie Rotate object pointing to value 0)
+           j = StreamReaderUtils.skipSpaces(data, j);
+        }
+
+        int count=j;
+
+        //skip any spaces at end
+        while(count<len && data[count]!=9 && data[count]!=10 && data[count]!=13 && data[count]!=32)// || data[j]==47 || data[j]==60)
+        {
+            count++;
+        }
+
+        number= NumberUtils.parseInt(j, count, data);
+
+        pdfObject.setIntNumber(PDFkeyInt,number);
+
+        if(debugFastCode) {
+            System.out.println(padding + "set numberValue=" + number);//+" in "+pdfObject);
+        }
+
+        // move back so loop works
+        return i-1;
+    }
 }
 
 

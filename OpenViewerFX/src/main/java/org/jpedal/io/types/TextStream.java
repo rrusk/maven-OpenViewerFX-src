@@ -69,28 +69,17 @@ public class TextStream {
                 final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
                 final int number = values[0];
                 final int generation = values[1];
-                i = values[2];
-                //move cursor to start of R
-                while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
-                    i++;
-                }
 
-                if(raw[i]!=82) //we are expecting R to end ref
-                {
+                i=StreamReaderUtils.skipSpaces(raw,values[2]);
+
+                if(raw[i]!=82){ //we are expecting R to end ref
                     return raw.length;
                 }
-                //throw new RuntimeException(i+" 3. Unexpected value in file " + (char) raw[i - 2]+ (char) raw[i-1] + (char) raw[i] + (char) raw[i+1] + (char) raw[i+2]+(char)raw[i]+" - please send to IDRsolutions for analysis "+pdfObject.getObjectRefAsString()+" "+pdfObject);
 
                 if(!ignoreRecursion){
 
                     //read the Dictionary data
                     data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
-
-                    //							System.out.println("data read is>>>>>>>>>>>>>>>>>>>\n");
-                    //							for(int ab=0;ab<data.length;ab++)
-                    //							System.out.print((char)data[ab]);
-                    //							System.out.println("\n<<<<<<<<<<<<<<<<<<<\n");
-
 
                     //allow for data in Linear object not yet loaded
                     if(data==null){
@@ -119,7 +108,7 @@ public class TextStream {
                     }
                 }
             }
-            /////////////////
+
             int start=0;
             if(!isRef || !ignoreRecursion){
                 //move to start
@@ -128,33 +117,9 @@ public class TextStream {
 
                 }
 
-                final byte startChar=data[j];
-
                 start=j;
 
-                //move to end (allow for ((text in brackets))
-                int bracketCount=1;
-                while(j<data.length){
-                    //System.out.println(i+"="+raw[j]+" "+(char)raw[j]);
-                    j++;
-
-                    if(startChar=='(' && (data[j]==')' || data[j]=='(') && !ObjectUtils.isEscaped(data, j)){
-                        //allow for non-escaped brackets
-                        if(data[j]=='(') {
-                            bracketCount++;
-                        } else if(data[j]==')') {
-                            bracketCount--;
-                        }
-
-                        if(bracketCount==0) {
-                            break;
-                        }
-                    }
-
-                    if(startChar=='<' && (data[j]=='>' || data[j]==0)) {
-                        break;
-                    }
-                }
+                j = skipToEnd(data, j);
 
             }
 
@@ -177,48 +142,20 @@ public class TextStream {
 
                         start=StreamReaderUtils.skipSpaces(data,start);
 
-                        topHex=data[start];
+                        topHex=toNumber(data[start]);
 
-                        //convert to number
-                        if(topHex>='A' && topHex<='F'){
-                            topHex -= 55;
-                        }else if(topHex>='a' && topHex<='f'){
-                            topHex -= 87;
-                        }else if(topHex>='0' && topHex<='9'){
-                            topHex -= 48;
-                        }
+                        start=StreamReaderUtils.skipSpaces(data,start+1);
 
-                        start++;
-
-                        start=StreamReaderUtils.skipSpaces(data,start);
-
-                        bottomHex=data[start];
-
-                        if(bottomHex>='A' && bottomHex<='F'){
-                            bottomHex -= 55;
-                        }else if(bottomHex>='a' && bottomHex<='f'){
-                            bottomHex -= 87;
-                        }else if(bottomHex>='0' && bottomHex<='9'){
-                            bottomHex -= 48;
-                        }else{
-
-                            LogWriter.writeLog("Unexpected number " + (char) data[start]);
-
-                            return i;
-                        }
+                        bottomHex=toNumber(data[start]);
 
                         start++;
 
                         //calc total
-                        final int finalValue=bottomHex+(topHex<<4);
-
-                        newString[byteReached] = (byte)finalValue;
+                        newString[byteReached] = (byte)(bottomHex+(topHex<<4));
 
                         byteReached++;
 
                     }
-
-
 
                 }else{
                     //roll past (
@@ -274,6 +211,49 @@ public class TextStream {
         return i;
     }
 
+    static int skipToEnd(final byte[] data, int j) {
+
+        final byte startChar=data[j];
+
+        //move to end (allow for ((text in brackets))
+        int bracketCount=1;
+        while(j<data.length){
+
+            j++;
+
+            if(startChar=='(' && (data[j]==')' || data[j]=='(') && !ObjectUtils.isEscaped(data, j)){
+                //allow for non-escaped brackets
+                if(data[j]=='(') {
+                    bracketCount++;
+                } else if(data[j]==')') {
+                    bracketCount--;
+                }
+
+                if(bracketCount==0) {
+                    break;
+                }
+            }
+
+            if(startChar=='<' && (data[j]=='>' || data[j]==0)) {
+                break;
+            }
+        }
+        return j;
+    }
+
+    private static int toNumber(int rawVal) {
+
+        if(rawVal >='A' && rawVal <='F'){
+            rawVal -= 55;
+        }else if(rawVal >='a' && rawVal <='f'){
+            rawVal -= 87;
+        }else if(rawVal >='0' && rawVal <='9'){
+            rawVal -= 48;
+        }
+
+        return rawVal;
+    }
+
     public static int setTextStreamValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean ignoreRecursion, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         if(raw[i+1]==40 && raw[i+2]==41){ //allow for empty stream
@@ -289,8 +269,6 @@ public class TextStream {
         
         return i;
     }
-    
-    
 }
 
 

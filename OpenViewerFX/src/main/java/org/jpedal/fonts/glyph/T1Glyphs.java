@@ -172,7 +172,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
     private int[] nominalWidthX = {0}, defaultWidthX = {};
     private boolean defaultWidthsPassed;
     private int[] fdSelect;
-    
+
     public T1Glyphs(final boolean isCID) {
         this.isCID=isCID;
     }
@@ -886,11 +886,12 @@ public class T1Glyphs extends PdfJavaGlyphs {
         byte[]  glyphStream;
 
         //System.out.println(glyph+" "+baseFontName+" "+rawInt+" "+currentWidth);
-        
+
         allowAll=false; //used by T1 to make sure sbw of hsbw
-        
+
+
         if(isCID){
-            glyphStream= charStrings.get(String.valueOf(rawInt));
+            glyphStream = charStrings.get(String.valueOf(rawInt));
         }else{
             if(glyph==null) {
                 glyph = displayValue;//getMappedChar(rawInt,false);
@@ -920,7 +921,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
                 }
             }
         }
-        
+
         if(glyphStream!=null){
 
             decodeGlyphStream(factory, glyph, rawInt, glyphStream);

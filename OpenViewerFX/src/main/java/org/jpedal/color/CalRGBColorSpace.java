@@ -37,6 +37,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
+import org.jpedal.utils.LogWriter;
 
 
 
@@ -213,11 +214,10 @@ public class CalRGBColorSpace extends  GenericColorSpace{
             lastI = I;
             lastE = E;
             
-            
-            //dummy assignment so passes SA test
-            //please delete once B used
-            kr = this.B[0] + 1;
-      
+            //remove when we implement BlackPoint
+            if(B[0]!=1.0f){
+                LogWriter.writeLog("[PDF] Non-standard BlackPoint set to  " + B[0]);
+            }
         }
     }
     

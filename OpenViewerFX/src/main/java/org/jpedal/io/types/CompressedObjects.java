@@ -76,17 +76,9 @@ public class CompressedObjects {
             }
             endKey=ii-1;
 
-            /*extract key*/
+            /*extract key as String and Number*/
             int length=endKey-startKey+1;
-            char[] newCommand=new char[length];
-
-            for(int i=0;i<length;i++) {
-                newCommand[i] = (char) compressedStream[startKey + i];
-            }
-
-            key =new String(newCommand);
-
-            //track as number for later
+            key = getString(compressedStream, startKey, length);
             id= NumberUtils.parseInt(startKey, startKey + length, compressedStream);
                 
             /*move to offset*/
@@ -100,12 +92,7 @@ public class CompressedObjects {
 
             /*extract offset*/
             length=endOff-startOff+1;
-            newCommand=new char[length];
-            for(int i=0;i<length;i++) {
-                newCommand[i] = (char) compressedStream[startOff + i];
-            }
-
-            offsetRef =new String(newCommand);
+            offsetRef = getString(compressedStream, startOff, length);
 
             /*
              * save values if in correct block (can list items over-written in another compressed obj)
@@ -122,8 +109,19 @@ public class CompressedObjects {
             }
         }
     }
-     
-     
+
+    static String getString(final byte[] compressedStream,final int startOff,final int length) {
+
+        final char[] newCommand=new char[length];
+
+        for(int i=0;i<length;i++) {
+            newCommand[i] = (char) compressedStream[startOff + i];
+        }
+
+        return new String(newCommand);
+    }
+
+
     public static int readCompressedOffsets(int pntr, int current, final int numbEntries, final int[] fieldSizes, final byte[] xrefs, final Offsets offset, final RandomAccessBuffer pdf_datafile) throws PdfException {
 
         //now parse the stream and extract values

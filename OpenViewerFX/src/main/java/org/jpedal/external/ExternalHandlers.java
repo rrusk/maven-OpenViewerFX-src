@@ -40,6 +40,7 @@ import org.jpedal.fonts.glyph.JavaFXSupport;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.acroforms.AcroRenderer;
+import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.acroforms.creation.SwingFormCreator;
 import org.jpedal.objects.javascript.ExpressionEngine;
@@ -126,6 +127,8 @@ public class ExternalHandlers {
     private DynamicVectorRenderer customDVR;
     
     ImageHandler customImageHandler;
+    
+    private ActionHandler userActionHandler;
     
 //    ImageHelper images;
     
@@ -342,6 +345,11 @@ public class ExternalHandlers {
                 customDVR = (DynamicVectorRenderer) newHandler;
                 break;
                 
+              
+            case Options.FormsActionHandler:
+                userActionHandler = (ActionHandler) newHandler;
+                break;
+                
              
             default:
                 if(additionalHandler!=null){
@@ -523,7 +531,8 @@ public class ExternalHandlers {
             formRenderer.dispose();
         }
         formRenderer = null;
-
+        
+        userActionHandler = null;
     }
     
     /**
@@ -531,6 +540,13 @@ public class ExternalHandlers {
      */
     public AcroRenderer getFormRenderer() {
         return formRenderer;
+    }
+    
+    /**
+     * Allow user to access Forms Action Handler object if needed
+     */
+    public ActionHandler getFormActionHandler() {
+        return userActionHandler;
     }
     
     public void setJavaScript(final Javascript javascript) {

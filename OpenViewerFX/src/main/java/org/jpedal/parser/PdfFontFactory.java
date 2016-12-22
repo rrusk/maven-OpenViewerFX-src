@@ -144,7 +144,8 @@ public class PdfFontFactory {
             /*
              * check for OpenType fonts and reassign type
              */
-            if(fontType==StandardFonts.TYPE1 || fontType==StandardFonts.CIDTYPE2) {
+            int rawFontType=fontType;
+            if(fontType==StandardFonts.TYPE1 || fontType==StandardFonts.CIDTYPE0) {
                 fontType = scanForOpenType(pdfObject, currentPdfFile, fontType);
             }
 
@@ -178,6 +179,10 @@ public class PdfFontFactory {
 
             try{
                 currentFontData=FontFactory.createFont(fontType,currentPdfFile,subFont, isPrinting);
+
+                if(rawFontType==StandardFonts.CIDTYPE0 && fontType==StandardFonts.CIDTYPE2) {
+                    currentFontData.getGlyphData().setRemappedCFFFont(true);
+                }
 
                 /*set an alternative to Lucida*/
                 if(FontMappings.defaultFont!=null) {
@@ -339,14 +344,19 @@ public class PdfFontFactory {
 
     private static int scanForOpenType(final PdfObject pdfObject, final PdfObjectReader currentPdfFile, int fontType) {
 
-        if(fontType==StandardFonts.CIDTYPE2){
+        if(fontType==StandardFonts.CIDTYPE0){
             final PdfObject desc=pdfObject.getDictionary(PdfDictionary.DescendantFonts);
 
             if(pdfObject!=null){
                 final PdfObject FontDescriptor=desc.getDictionary(PdfDictionary.FontDescriptor);
 
                 if(FontDescriptor!=null){
-                    final PdfObject FontFile2=FontDescriptor.getDictionary(PdfDictionary.FontFile2);
+                    PdfObject FontFile2=FontDescriptor.getDictionary(PdfDictionary.FontFile2);
+
+                    if(FontFile2==null) { //must be present for OTTF font
+                        FontFile2=FontDescriptor.getDictionary(PdfDictionary.FontFile3);
+                    }
+
                     if(FontFile2!=null){ //must be present for OTTF font
 
                         //get data
@@ -354,7 +364,7 @@ public class PdfFontFactory {
 
                         //check first 4 bytes
                         if(stream!=null && stream.length>3 && stream[0]==79 && stream[1]==84 && stream[2]==84 && stream[3]==79) {
-                            fontType = StandardFonts.CIDTYPE0; //put it through our TT handler which also does OT
+                            fontType = StandardFonts.CIDTYPE2; //put it through our TT handler which also does OT
                         }
 
                     }

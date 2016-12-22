@@ -32,26 +32,13 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class FSObject extends FormObject {
 
-    //unknown CMAP as String
-    //String unknownValue=null;
+    byte[] rawUF, rawDesc;
 
-    //private float[] Matrix;
-
-    //boolean ImageMask=false;
-
-    byte[] rawUF,rawDesc;
-
-    String UF,Desc;
+    String UF, Desc;
 
     private byte[][] Names;
-
-    //int B=-1,Cint=-1,R=-1;
-
-    //int FormType=0, Height=1, Width=1;
 
     private PdfObject Assets, EF;
 
@@ -60,15 +47,13 @@ public class FSObject extends FormObject {
     }
 
     public FSObject(final int ref, final int gen) {
-        super(ref,gen);
+        super(ref, gen);
     }
 
-
-
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Assets:
                 return Assets;
@@ -76,33 +61,25 @@ public class FSObject extends FormObject {
             case PdfDictionary.EF:
                 return EF;
 
-//            case PdfDictionary.XObject:
-//                return XObject;
-
             default:
                 return super.getDictionary(id);
         }
     }
 
 
-
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
         value.setID(id);
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Assets:
-                Assets=value;
+                Assets = value;
                 break;
 
             case PdfDictionary.EF:
-                EF=value;
+                EF = value;
                 break;
-
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
 
             default:
                 super.setDictionary(id, value);
@@ -111,80 +88,12 @@ public class FSObject extends FormObject {
 
 
     @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-                next=raw[keyStart+i2];
-
-                //System.out.println((char)next);
-                next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-                default:
-
-                    PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                            final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        switch(pdfKeyType){
-
-            default:
-                super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
-    @Override
     public PdfArrayIterator getMixedArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Names:
                 return new PdfArrayIterator(Names);
-
-            //case PdfDictionary.Differences:
-            //    return new PdfArrayIterator(Differences);
 
             default:
                 return super.getMixedArray(id);
@@ -192,18 +101,14 @@ public class FSObject extends FormObject {
     }
 
 
-
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Names:
-                Names=value;
+                Names = value;
                 break;
-//            case PdfDictionary.Differences:
-//                Differences=value;
-//            break;
 
             default:
                 super.setMixedArray(id, value);
@@ -211,55 +116,21 @@ public class FSObject extends FormObject {
     }
 
 
-
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Desc:
-                rawDesc=value;
+                rawDesc = value;
                 break;
 
             case PdfDictionary.UF:
-                rawUF=value;
+                rawUF = value;
                 break;
 
-//	        case PdfDictionary.CharSet:
-//	            rawCharSet=value;
-//	        break;
-//
-
             default:
-                super.setTextStreamValue(id,value);
-
-        }
-
-    }
-
-    @Override
-    public String getName(final int id) {
-
-        switch(id){
-
-            case PdfDictionary.E:
-
-                //setup first time
-//            if(E==null && rawE!=null)
-//            	E=PdfObjectReader.getTextString(rawE);
-//
-//            return E;
-
-//            case PdfDictionary.BaseFont:
-//
-//            //setup first time
-//            if(BaseFont==null && rawBaseFont!=null)
-//                BaseFont=new String(rawBaseFont);
-//
-//            return BaseFont;
-
-            default:
-                return super.getName(id);
+                super.setTextStreamValue(id, value);
 
         }
     }
@@ -267,12 +138,12 @@ public class FSObject extends FormObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Desc:
 
                 //setup first time
-                if(Desc==null && rawDesc!=null) {
+                if (Desc == null && rawDesc != null) {
                     Desc = new String(rawDesc);
                 }
 
@@ -281,7 +152,7 @@ public class FSObject extends FormObject {
             case PdfDictionary.UF:
 
                 //setup first time
-                if(UF==null && rawUF!=null) {
+                if (UF == null && rawUF != null) {
                     UF = new String(rawUF);
                 }
 
@@ -293,78 +164,14 @@ public class FSObject extends FormObject {
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-   //     switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-  //      }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                    final int len=data.length;
-                    if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                        final int length=len-7;
-                        final byte[] newData=new byte[length];
-                        System.arraycopy(data, 7, newData, 0, length);
-                        return new String(newData);
-                    }else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
-
     @Override
     public boolean decompressStreamWhenRead() {
         return false;
     }
 
 
-
-
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.FS;
     }
 }

@@ -239,7 +239,7 @@ public class PropertiesFile {
       "Flag to control if we requestion confirmation to close the viewer","confirmClose","false",
       "Location where the icons to be used by the viewer are stored","iconLocation","/org/jpedal/examples/viewer/res/new/",
       "Flag to control if we show a message when entering page flow mode","showpageflowmessage","true",
-      "Specify a default printer to use","defaultPrinter","",
+      "Specify a default printer to use when first opening the print dialog","defaultPrinter","",
       "Flag to output additional printer / printing info","debugPrinter","false",
       "Default printing DPI","defaultDPI","600",
       "Default printing page size","defaultPagesize","",
@@ -797,7 +797,7 @@ public class PropertiesFile {
                     }else{
                         
                         //Is it running in the IDE
-                        if(properties[position+1].equals("7.7.25")){
+                        if(properties[position+1].equals("7.8.22")){
                             //Do nothing as we are in the IDE
                             //Refactor for testing purposes
                             //refactorProperties  = true;

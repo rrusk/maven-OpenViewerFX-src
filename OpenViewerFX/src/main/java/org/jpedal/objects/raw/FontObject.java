@@ -38,44 +38,44 @@ import org.jpedal.utils.LogWriter;
 public class FontObject extends PdfObject {
 
     //mapped onto Type1
-    private static final int MMType1=1230852645;
+    private static final int MMType1 = 1230852645;
 
     //mapped onto Type1
-    private static final int Type1C=1077224796;
+    private static final int Type1C = 1077224796;
 
-    private static final int ZaDb=707859506;
+    private static final int ZaDb = 707859506;
 
-    private static final int ZapfDingbats=1889256112;
+    private static final int ZapfDingbats = 1889256112;
 
-    private static final int Symbol=1026712197;
+    private static final int Symbol = 1026712197;
 
     private PdfObject CharProcs, CIDSet, CIDSystemInfo, CIDToGIDMap,
-    DescendantFonts,
-    FontDescriptor,FontFile,
-    FontFile2, FontFile3, ToUnicode;
+            DescendantFonts,
+            FontDescriptor, FontFile,
+            FontFile2, FontFile3, ToUnicode;
 
-    int BaseEncoding=PdfDictionary.Unknown;
+    int BaseEncoding = PdfDictionary.Unknown;
 
-	int CIDToGIDMapAsConstant=PdfDictionary.Unknown;
+    int CIDToGIDMapAsConstant = PdfDictionary.Unknown;
 
-    int FirstChar,LastChar=255,Flags,MissingWidth,DW=-1,StemV, Supplement;
+    int FirstChar, LastChar = 255, Flags, MissingWidth, DW = -1, StemV, Supplement;
 
-    float Ascent,Descent;
+    float Ascent, Descent;
 
-    float[] Widths,FontBBox;
+    float[] Widths, FontBBox;
 
     double[] FontMatrix;
 
     byte[][] Differences;
-    
-    Object[] W,W2;
 
-    private byte[] rawBaseFont,rawCharSet, rawCMapName,
-    rawFontName,rawFontStretch,
-    rawOrdering, rawRegistry;
+    Object[] W, W2;
 
-    private String BaseFont,CharSet, CMapName,
-    FontName,FontStretch, Ordering,Registry;
+    private byte[] rawBaseFont, rawCharSet, rawCMapName,
+            rawFontName, rawFontStretch,
+            rawOrdering, rawRegistry;
+
+    private String BaseFont, CharSet, CMapName,
+            FontName, FontStretch, Ordering, Registry;
     private int[] DW2;
 
     public FontObject(final String ref) {
@@ -83,18 +83,18 @@ public class FontObject extends PdfObject {
     }
 
     public FontObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
 
     public FontObject(final int type) {
-    	super(type);
-	}
+        super(type);
+    }
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.CharProcs:
                 return CharProcs;
@@ -103,10 +103,10 @@ public class FontObject extends PdfObject {
                 return CIDSet;
 
             case PdfDictionary.CIDSystemInfo:
-	        	return CIDSystemInfo;
+                return CIDSystemInfo;
 
-	        case PdfDictionary.CIDToGIDMap:
-	        	return CIDToGIDMap;
+            case PdfDictionary.CIDToGIDMap:
+                return CIDToGIDMap;
 
             case PdfDictionary.DescendantFonts:
                 return DescendantFonts;
@@ -135,58 +135,58 @@ public class FontObject extends PdfObject {
     }
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Ascent:
-                Ascent=value;
+                Ascent = value;
                 break;
 
             case PdfDictionary.Descent:
-                Descent=value;
+                Descent = value;
                 break;
 
-	        case PdfDictionary.DW:
-	            DW=value;
-	        break;
+            case PdfDictionary.DW:
+                DW = value;
+                break;
 
             case PdfDictionary.FirstChar:
-                FirstChar=value;
-            break;
+                FirstChar = value;
+                break;
 
             case PdfDictionary.Flags:
-                Flags=value;
-            break;
+                Flags = value;
+                break;
 
             case PdfDictionary.LastChar:
-                LastChar=value;
-            break;
+                LastChar = value;
+                break;
 
             case PdfDictionary.MissingWidth:
-                MissingWidth=value;
-            break;
+                MissingWidth = value;
+                break;
 
             case PdfDictionary.StemV:
-                StemV=value;
-            break;
+                StemV = value;
+                break;
 
             case PdfDictionary.Supplement:
-            	Supplement=value;
-            break;
+                Supplement = value;
+                break;
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.DW:
-	            return DW;
+            case PdfDictionary.DW:
+                return DW;
 
             case PdfDictionary.FirstChar:
                 return FirstChar;
@@ -207,21 +207,21 @@ public class FontObject extends PdfObject {
                 return Supplement;
 
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
 
     @Override
-    public void setFloatNumber(final int id, final float value){
+    public void setFloatNumber(final int id, final float value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Ascent:
-                Ascent=value;
+                Ascent = value;
                 break;
 
             case PdfDictionary.Descent:
-                Descent=value;
+                Descent = value;
                 break;
 
             default:
@@ -230,9 +230,9 @@ public class FontObject extends PdfObject {
     }
 
     @Override
-    public float getFloatNumber(final int id){
+    public float getFloatNumber(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Ascent:
                 return Ascent;
@@ -246,64 +246,64 @@ public class FontObject extends PdfObject {
     }
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
+        value.setID(id);
 
         //flag embedded data
-        if(id==PdfDictionary.FontFile || id==PdfDictionary.FontFile2 || id==PdfDictionary.FontFile3) {
+        if (id == PdfDictionary.FontFile || id == PdfDictionary.FontFile2 || id == PdfDictionary.FontFile3) {
             hasStream = true;
         }
 
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.CharProcs:
-    		    CharProcs=value;
-    		    break;
+                CharProcs = value;
+                break;
 
             case PdfDictionary.CIDSet:
-                CIDSet=value;
+                CIDSet = value;
                 break;
 
             case PdfDictionary.CIDSystemInfo:
-	        	CIDSystemInfo=value;
-	        break;
+                CIDSystemInfo = value;
+                break;
 
-	        case PdfDictionary.CIDToGIDMap:
-	        	CIDToGIDMap=value;
-            break;
+            case PdfDictionary.CIDToGIDMap:
+                CIDToGIDMap = value;
+                break;
 
             case PdfDictionary.DescendantFonts:
-                DescendantFonts=value;
-            break;
+                DescendantFonts = value;
+                break;
 
             case PdfDictionary.Encoding:
-                Encoding=value;
-            break;
+                Encoding = value;
+                break;
 
             case PdfDictionary.FontDescriptor:
-                FontDescriptor=value;
-            break;
+                FontDescriptor = value;
+                break;
 
             case PdfDictionary.FontFile:
-                FontFile=value;
-            break;
+                FontFile = value;
+                break;
 
             case PdfDictionary.FontFile2:
-                FontFile2=value;
-            break;
+                FontFile2 = value;
+                break;
 
             case PdfDictionary.FontFile3:
-                FontFile3=value;
-            break;
+                FontFile3 = value;
+                break;
 
             case PdfDictionary.ToUnicode:
-            	ToUnicode=value;
-            break;
+                ToUnicode = value;
+                break;
 
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
 
@@ -311,172 +311,120 @@ public class FontObject extends PdfObject {
     @Override
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
-        int PDFvalue =PdfDictionary.Unknown;
+        int PDFvalue = PdfDictionary.Unknown;
 
-        int id=0,x=0,next;
+        try {
 
-        try{
+            final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
+            switch (id) {
 
                 case StandardFonts.CIDTYPE0:
-                    PDFvalue =StandardFonts.CIDTYPE0;
-                break;
+                    PDFvalue = StandardFonts.CIDTYPE0;
+                    break;
 
                 case PdfDictionary.CIDFontType0C:
-                    PDFvalue =PdfDictionary.CIDFontType0C;
-                break;
+                    PDFvalue = PdfDictionary.CIDFontType0C;
+                    break;
 
                 case StandardFonts.CIDTYPE2:
-                    PDFvalue =StandardFonts.CIDTYPE2;
-                break;
+                    PDFvalue = StandardFonts.CIDTYPE2;
+                    break;
 
                 case PdfDictionary.CMap:
-                    PDFvalue =PdfDictionary.CMap;
-                break;
+                    PDFvalue = PdfDictionary.CMap;
+                    break;
 
                 case PdfDictionary.Encoding:
-                    PDFvalue =PdfDictionary.Encoding;
-                break;
+                    PDFvalue = PdfDictionary.Encoding;
+                    break;
 
                 case PdfDictionary.Identity_H:
-                    PDFvalue =PdfDictionary.Identity_H;
-                break;
+                    PDFvalue = PdfDictionary.Identity_H;
+                    break;
 
                 case PdfDictionary.Identity_V:
-                    PDFvalue =PdfDictionary.Identity_V;
-                break;
+                    PDFvalue = PdfDictionary.Identity_V;
+                    break;
 
                 case PdfDictionary.MacExpertEncoding:
-                    PDFvalue =StandardFonts.MACEXPERT;
-                break;
+                    PDFvalue = StandardFonts.MACEXPERT;
+                    break;
 
                 case PdfDictionary.MacRomanEncoding:
-                    PDFvalue =StandardFonts.MAC;
-                break;
+                    PDFvalue = StandardFonts.MAC;
+                    break;
 
                 case PdfDictionary.PDFDocEncoding:
-                    PDFvalue =StandardFonts.PDF;
-                break;
+                    PDFvalue = StandardFonts.PDF;
+                    break;
 
                 case MMType1:
-                    PDFvalue =StandardFonts.TYPE1;
-                break;
+                    PDFvalue = StandardFonts.TYPE1;
+                    break;
 
                 case PdfDictionary.StandardEncoding:
-                    PDFvalue =StandardFonts.STD;
-                break;
+                    PDFvalue = StandardFonts.STD;
+                    break;
 
                 case StandardFonts.TYPE0:
-                    PDFvalue =StandardFonts.TYPE0;
-                break;
+                    PDFvalue = StandardFonts.TYPE0;
+                    break;
 
                 case StandardFonts.TYPE1:
-                    PDFvalue =StandardFonts.TYPE1;
-                break;
+                    PDFvalue = StandardFonts.TYPE1;
+                    break;
 
                 case Type1C:
-                    PDFvalue =StandardFonts.TYPE1;
-                break;
+                    PDFvalue = StandardFonts.TYPE1;
+                    break;
 
                 case StandardFonts.TYPE3:
-                    PDFvalue =StandardFonts.TYPE3;
-                break;
+                    PDFvalue = StandardFonts.TYPE3;
+                    break;
 
                 case StandardFonts.TRUETYPE:
-                    PDFvalue =StandardFonts.TRUETYPE;
-                break;
+                    PDFvalue = StandardFonts.TRUETYPE;
+                    break;
 
                 case PdfDictionary.WinAnsiEncoding:
-                    PDFvalue =StandardFonts.WIN;
-                break;
+                    PDFvalue = StandardFonts.WIN;
+                    break;
 
                 default:
 
-                	if(pdfKeyType==PdfDictionary.Encoding){
-                		PDFvalue=CIDEncodings.getConstant(id);
-
-//                		if(PDFvalue==PdfDictionary.Unknown){
-//
-//                			byte[] bytes=new byte[keyLength];
-//
-//                          System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//
-//                			unknownValue=new String(bytes);
-//                		}
-
-                		if(debug && PDFvalue==PdfDictionary.Unknown){
-                			System.out.println("Value not in PdfCIDEncodings");
-
-                           	 final byte[] bytes=new byte[keyLength];
-
-                               System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                               System.out.println("Add to CIDEncodings and as String");
-                               System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in PdfFont Object");
-
-                               System.out.println("final public static int CMAP_"+new String(bytes)+ '=' +id+ ';');
-
-                		}
-                	}else {
+                    if (pdfKeyType == PdfDictionary.Encoding) {
+                        PDFvalue = CIDEncodings.getConstant(id);
+                    } else {
                         PDFvalue = super.setConstant(pdfKeyType, id);
                     }
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in PdfFont Object");
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-
-                        }
 
                     break;
 
             }
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-        switch(pdfKeyType){
+        switch (pdfKeyType) {
 
-        	case PdfDictionary.BaseEncoding:
-        		BaseEncoding=PDFvalue;
-        		break;
+            case PdfDictionary.BaseEncoding:
+                BaseEncoding = PDFvalue;
+                break;
 
-			case PdfDictionary.CIDToGIDMap:
-				CIDToGIDMapAsConstant = PDFvalue;
-				break;
+            case PdfDictionary.CIDToGIDMap:
+                CIDToGIDMapAsConstant = PDFvalue;
+                break;
 
-	        case PdfDictionary.Encoding:
-	        	generalType=PDFvalue;
-	            break;
-
-//            case PdfDictionary.Subtype:
-//                subtype=PDFvalue;
-//                //System.out.println("value set to "+subtype);
-//                break;
+            case PdfDictionary.Encoding:
+                generalType = PDFvalue;
+                break;
             case PdfDictionary.ToUnicode:
-                generalType=PDFvalue;
+                generalType = PDFvalue;
                 break;
             default:
-            	super.setConstant(pdfKeyType, PDFvalue);
+                super.setConstant(pdfKeyType, PDFvalue);
         }
 
         return PDFvalue;
@@ -487,26 +435,26 @@ public class FontObject extends PdfObject {
 
         final int def;
 
-        switch(key){
+        switch (key) {
 
 
             case PdfDictionary.BaseEncoding:
 
-            	//special cases first
-            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats) {
+                //special cases first
+                if (key == PdfDictionary.BaseEncoding && Encoding != null && Encoding.isZapfDingbats) {
                     return StandardFonts.ZAPF;
-                } else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol) {
+                } else if (key == PdfDictionary.BaseEncoding && Encoding != null && Encoding.isSymbol) {
                     return StandardFonts.SYMBOL;
                 } else {
                     return BaseEncoding;
                 }
 
-			case PdfDictionary.CIDToGIDMap:
-				return CIDToGIDMapAsConstant;
+            case PdfDictionary.CIDToGIDMap:
+                return CIDToGIDMapAsConstant;
         }
 
         //check general values
-        def=super.getParameterConstant(key);
+        def = super.getParameterConstant(key);
 
         return def;
     }
@@ -514,42 +462,42 @@ public class FontObject extends PdfObject {
     @Override
     public PdfArrayIterator getMixedArray(final int id) {
 
-    	switch(id){
+        switch (id) {
 
             case PdfDictionary.Differences:
                 return new PdfArrayIterator(Differences);
 
             default:
-            	return super.getMixedArray(id);
+                return super.getMixedArray(id);
 
         }
-	}
+    }
 
     @Override
-    public byte[][] getByteArray(final int id){
+    public byte[][] getByteArray(final int id) {
 
-    	switch(id){
+        switch (id) {
 
-    	case PdfDictionary.Differences:
-	        return Differences;
+            case PdfDictionary.Differences:
+                return Differences;
 
-        default:
-        	return super.getByteArray(id);
+            default:
+                return super.getByteArray(id);
 
-    	}
+        }
 
     }
 
     @Override
     public double[] getDoubleArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.FontMatrix:
                 return deepCopy(FontMatrix);
 
             default:
-            	return super.getDoubleArray(id);
+                return super.getDoubleArray(id);
         }
 
     }
@@ -557,14 +505,14 @@ public class FontObject extends PdfObject {
     @Override
     public void setDoubleArray(final int id, final double[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.FontMatrix:
-                FontMatrix=value;
-            break;
+                FontMatrix = value;
+                break;
 
             default:
-            	super.setDoubleArray(id, value);
+                super.setDoubleArray(id, value);
         }
 
     }
@@ -572,14 +520,14 @@ public class FontObject extends PdfObject {
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Differences:
-                Differences=value;
-            break;
+                Differences = value;
+                break;
 
             default:
-            	super.setMixedArray(id, value);
+                super.setMixedArray(id, value);
 
         }
 
@@ -588,10 +536,10 @@ public class FontObject extends PdfObject {
     @Override
     public void setIntArray(final int id, final int[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.DW2:
-                DW2=value;
+                DW2 = value;
                 break;
 
             default:
@@ -602,7 +550,7 @@ public class FontObject extends PdfObject {
     @Override
     public int[] getIntArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.DW2:
                 return deepCopy(DW2);
@@ -615,10 +563,10 @@ public class FontObject extends PdfObject {
     @Override
     public float[] getFloatArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.FontBBox:
-        		return deepCopy(FontBBox);
+            case PdfDictionary.FontBBox:
+                return deepCopy(FontBBox);
 
             case PdfDictionary.Widths:
                 return deepCopy(Widths);
@@ -631,58 +579,58 @@ public class FontObject extends PdfObject {
     @Override
     public void setFloatArray(final int id, final float[] value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.FontBBox:
-	            FontBBox=value;
-	        break;
+            case PdfDictionary.FontBBox:
+                FontBBox = value;
+                break;
 
             case PdfDictionary.Widths:
-                Widths=value;
-            break;
+                Widths = value;
+                break;
 
             default:
-            	super.setFloatArray(id, value);
+                super.setFloatArray(id, value);
         }
     }
 
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BaseFont:
-                rawBaseFont=value;
+                rawBaseFont = value;
 
                 //track if font called ZapfDingbats and flag
                 final int checksum = PdfDictionary.generateChecksum(0, value.length, value);
 
-                isZapfDingbats=(checksum==ZapfDingbats || checksum==ZaDb);
-                isSymbol=(checksum==Symbol);
+                isZapfDingbats = (checksum == ZapfDingbats || checksum == ZaDb);
+                isSymbol = (checksum == Symbol);
 
                 //store in both as we can't guarantee creation order
-                if(Encoding!=null){
-                	Encoding.isZapfDingbats=isZapfDingbats;
-                	Encoding.isSymbol=isSymbol;
+                if (Encoding != null) {
+                    Encoding.isZapfDingbats = isZapfDingbats;
+                    Encoding.isSymbol = isSymbol;
                 }
 
-              break;
+                break;
 
             case PdfDictionary.CMapName:
-                rawCMapName=value;
-            break;
+                rawCMapName = value;
+                break;
 
             case PdfDictionary.FontName:
-                rawFontName=value;
-            break;
+                rawFontName = value;
+                break;
 
             case PdfDictionary.FontStretch:
-                rawFontStretch=value;
-            break;
+                rawFontStretch = value;
+                break;
 
 
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
 
@@ -691,22 +639,22 @@ public class FontObject extends PdfObject {
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.CharSet:
-	            rawCharSet=value;
-	        break;
+            case PdfDictionary.CharSet:
+                rawCharSet = value;
+                break;
 
             case PdfDictionary.Ordering:
-                rawOrdering=value;
-            break;
+                rawOrdering = value;
+                break;
 
             case PdfDictionary.Registry:
-                rawRegistry=value;
-            break;
+                rawRegistry = value;
+                break;
 
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
 
@@ -715,21 +663,21 @@ public class FontObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BaseFont:
 
-            //setup first time
-            if(BaseFont==null && rawBaseFont!=null) {
-                BaseFont = new String(rawBaseFont);
-            }
+                //setup first time
+                if (BaseFont == null && rawBaseFont != null) {
+                    BaseFont = new String(rawBaseFont);
+                }
 
-            return BaseFont;
+                return BaseFont;
 
             case PdfDictionary.CMapName:
 
                 //setup first time
-                if(CMapName==null && rawCMapName!=null) {
+                if (CMapName == null && rawCMapName != null) {
                     CMapName = new String(rawCMapName);
                 }
 
@@ -737,16 +685,16 @@ public class FontObject extends PdfObject {
 
             case PdfDictionary.FontName:
 
-            //setup first time
-            if(FontName==null && rawFontName!=null) {
-                FontName = new String(rawFontName);
-            }
+                //setup first time
+                if (FontName == null && rawFontName != null) {
+                    FontName = new String(rawFontName);
+                }
 
-            return FontName;
+                return FontName;
 
             case PdfDictionary.FontStretch:
-            	//setup first time
-                if(FontStretch==null && rawFontStretch!=null) {
+                //setup first time
+                if (FontStretch == null && rawFontStretch != null) {
                     FontStretch = new String(rawFontStretch);
                 }
 
@@ -761,21 +709,21 @@ public class FontObject extends PdfObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.CharSet:
+            case PdfDictionary.CharSet:
 
-	            //setup first time
-	            if(CharSet==null && rawCharSet!=null) {
+                //setup first time
+                if (CharSet == null && rawCharSet != null) {
                     CharSet = new String(rawCharSet);
                 }
 
-	            return CharSet;
+                return CharSet;
 
             case PdfDictionary.Ordering:
 
                 //setup first time
-                if(Ordering==null && rawOrdering!=null) {
+                if (Ordering == null && rawOrdering != null) {
                     Ordering = new String(rawOrdering);
                 }
 
@@ -784,7 +732,7 @@ public class FontObject extends PdfObject {
             case PdfDictionary.Registry:
 
                 //setup first time
-                if(Registry==null && rawRegistry!=null) {
+                if (Registry == null && rawRegistry != null) {
                     Registry = new String(rawRegistry);
                 }
 
@@ -803,34 +751,34 @@ public class FontObject extends PdfObject {
     @Override
     public String getStringValue(final int id, final int mode) {
 
-        byte[] data=null;
+        byte[] data = null;
 
         //get data
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BaseFont:
-                data=rawBaseFont;
+                data = rawBaseFont;
                 break;
 
             case PdfDictionary.CMapName:
-                data=rawCMapName;
+                data = rawCMapName;
                 break;
 
             case PdfDictionary.FontName:
-                data=rawFontName;
+                data = rawFontName;
                 break;
 
             case PdfDictionary.FontStretch:
-                data=rawFontStretch;
+                data = rawFontStretch;
                 break;
         }
 
         //convert
-        switch(mode){
+        switch (mode) {
             case PdfDictionary.STANDARD:
 
                 //setup first time
-                if(data!=null) {
+                if (data != null) {
                     return new String(data);
                 } else {
                     return null;
@@ -840,7 +788,7 @@ public class FontObject extends PdfObject {
             case PdfDictionary.LOWERCASE:
 
                 //setup first time
-                if(data!=null) {
+                if (data != null) {
                     return new String(data);
                 } else {
                     return null;
@@ -849,22 +797,22 @@ public class FontObject extends PdfObject {
             case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
 
                 //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                    if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                    }else if(len>7 && data[len-7]=='+'){ //lose +ABCDEF if present
-                        final int length=len-7;
-                        final byte[] newData=new byte[length];
+                if (data != null) {
+                    final int len = data.length;
+                    if (len > 6 && data[6] == '+') { //lose ABCDEF+ if present
+                        final int length = len - 7;
+                        final byte[] newData = new byte[length];
+                        System.arraycopy(data, 7, newData, 0, length);
+                        return new String(newData);
+                    } else if (len > 7 && data[len - 7] == '+') { //lose +ABCDEF if present
+                        final int length = len - 7;
+                        final byte[] newData = new byte[length];
                         System.arraycopy(data, 0, newData, 0, length);
                         return new String(newData);
-                    }else {
+                    } else {
                         return new String(data);
                     }
-                }else {
+                } else {
                     return null;
                 }
 
@@ -875,47 +823,47 @@ public class FontObject extends PdfObject {
 
     @Override
     public int getObjectType() {
-		return PdfDictionary.Font;
-	}
+        return PdfDictionary.Font;
+    }
 
 
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
-   
+        return true;
+    }
+
     @Override
     public Object[] getObjectArray(final int id) {
-        
-        switch(id){
-            
+
+        switch (id) {
+
             case PdfDictionary.W:
-                return W;                
-                
+                return W;
+
             case PdfDictionary.W2:
-                return W2; 
-                
-            default:    
+                return W2;
+
+            default:
                 return super.getObjectArray(id);
         }
-        
+
     }
-    
+
     @Override
     public void setObjectArray(final int id, final Object[] objectValues) {
-        
-        switch(id){
-            
+
+        switch (id) {
+
             case PdfDictionary.W:
-                
-                W= objectValues;
+
+                W = objectValues;
                 break;
-                
+
             case PdfDictionary.W2:
-                
-                W2= objectValues;
-                break;    
-                
+
+                W2 = objectValues;
+                break;
+
             default:
                 super.setObjectArray(id, objectValues);
         }

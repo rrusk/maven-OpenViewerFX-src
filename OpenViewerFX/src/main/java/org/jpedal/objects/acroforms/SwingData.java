@@ -1111,43 +1111,41 @@ public class SwingData extends GUIData {
                     formObject.setCurrentScaling(currentScaling);
                     rawComp= (Component) formObject.getGUIComponent();
 
-                    if(rawComp!=null && formObject.getBoundingRectangle().height<rawComp.getPreferredSize().height && rawComp instanceof JList){ //rawComp!=null check for xfa
+                    if(rawComp!=null){
+                        if(formObject.getBoundingRectangle().height<rawComp.getPreferredSize().height && rawComp instanceof JList){ //rawComp!=null check for xfa
 
-                        final JList comp = (JList) rawComp;
+                            final JList comp = (JList) rawComp;
 
-                        rawComp=wrapComponentInScrollPane(comp);
-                        formObject.setGUIComponent(comp, FormFactory.SWING);
+                            rawComp=wrapComponentInScrollPane(comp);
+                            formObject.setGUIComponent(comp, FormFactory.SWING);
 
-                        // ensure visible (do it before we add)
-                        final int index = comp.getSelectedIndex();
-                        if (index > -1) {
-                            comp.ensureIndexIsVisible(index);
+                            // ensure visible (do it before we add)
+                            final int index = comp.getSelectedIndex();
+                            if (index > -1) {
+                                comp.ensureIndexIsVisible(index);
+                            }
+
                         }
 
-                    }
+                        if (SwingUtilities.isEventDispatchThread()){
 
-                    if (SwingUtilities.isEventDispatchThread()){
-
-                        if(rawComp!=null){
                             panel.remove(rawComp);
                             scaleComponent(formObject,currentScaling, currentRotation, rawComp, true, indent, false);
                             panel.add(rawComp);
 
+                        }else {
+                            final Component finalComp=rawComp;
+                            final FormObject fo=formObject;
+                            final Runnable doPaintComponent = new Runnable() {
+                                @Override
+                                public void run() {
+                                    panel.remove(finalComp);
+                                    scaleComponent(fo,currentScaling, currentRotation, finalComp, true, indent, false);
+                                    panel.add(finalComp);
+                                }
+                            };
+                            SwingUtilities.invokeLater(doPaintComponent);
                         }
-                    }else {
-                        final Component finalComp=rawComp;
-                        final FormObject fo=formObject;
-                        final Runnable doPaintComponent = new Runnable() {
-                            @Override
-                            public void run() {
-
-                                panel.remove(finalComp);
-                                scaleComponent(fo,currentScaling, currentRotation, finalComp, true, indent, false);
-                                panel.add(finalComp);
-
-                            }
-                        };
-                        SwingUtilities.invokeLater(doPaintComponent);
                     }
                 }
             }

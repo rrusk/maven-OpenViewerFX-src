@@ -87,7 +87,12 @@ public class CIDFontType2 extends TrueType {
         if (pdfFontDescriptor!= null) {
             
             final byte[] stream;
-            final PdfObject FontFile2=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile2);
+            PdfObject FontFile2=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile2);
+
+            if(FontFile2==null){
+                FontFile2=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile3);
+            }
+
             if(FontFile2!=null){
                 stream=currentPdfFile.readStream(FontFile2,true,true,false, false,false, FontFile2.getCacheName(currentPdfFile.getObjectReader()));
                 

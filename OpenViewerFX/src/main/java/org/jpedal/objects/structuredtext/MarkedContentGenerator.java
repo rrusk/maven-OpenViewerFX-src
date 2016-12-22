@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jpedal.PdfDecoderInt;
+import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.PdfPageData;
@@ -337,31 +338,18 @@ public class MarkedContentGenerator {
         String KValue;
         
         for(int i=0;i<count;i++){
-
-            KValue=new String(Karray.getNextValueAsByte(true));
+            byte[] Kbyte = Karray.getNextValueAsByte(true);
+            KValue=new String(Kbyte);
 
             if(debug) {
-            System.out.println(indent + "aK value=" + KValue);
+                System.out.println(indent + "aK value=" + KValue);
             }
-
-            if(KValue.endsWith(" R")){ //it is probably a ref
-
-              //  lastChar=Karray[i+2];
-                    
-               // if(lastChar[0]=='R'){ //it is a ref
-                    
-                    kidObj = new MCObject(KValue);
-                    
+            
+            if (KValue.contains("R")) {
+                kidObj = getMCObjectFromRefOrDirect(currentPdfFile, Kbyte);
                 currentPdfFile.readObject(kidObj);
-
-                    readChildNode(kidObj, root, pageStream,fullS);
-                   // i += 2; //allow for 3 values read in loop
-
-            //}else{
-            //        addContentToNode(pageStream, KValue, root);
-            //    }
-            }else{
-               
+                readChildNode(kidObj, root, pageStream, fullS);
+            } else {
                 if(isHTML){
                     if(!reverseLookup.containsKey(KValue)){
                         reverseLookup.put(KValue,fullS);
@@ -473,5 +461,22 @@ public class MarkedContentGenerator {
                 isDecoding=false;
             }
         }
+    }
+    
+    private static MCObject getMCObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
+        
+        final MCObject mcObj  = new MCObject(new String(data));
+
+        if(data[0]=='<') {
+            mcObj.setStatus(PdfObject.UNDECODED_DIRECT);
+        } else {
+            mcObj.setStatus(PdfObject.UNDECODED_REF);
+        }
+        mcObj.setUnresolvedData(data,PdfDictionary.MCID);
+        
+        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        objectDecoder.checkResolved(mcObj);
+        
+        return mcObj;
     }
 }

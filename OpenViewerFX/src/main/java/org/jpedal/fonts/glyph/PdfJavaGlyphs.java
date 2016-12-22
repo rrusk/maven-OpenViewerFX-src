@@ -83,6 +83,7 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     private boolean isFontEmbedded;
     private boolean hasWidths=true;
     protected int objID;
+    protected boolean remappedCFFFont;
 
     public void flush(){
         cachedShapes = null;
@@ -317,6 +318,10 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
             return cache[idx];
         }
 
+    }
+    
+    public boolean isValidGIDtoCID(final int value) {
+        return false;
     }
 
     /**
@@ -807,5 +812,13 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
     public void setObjID(int objID) {
         this.objID = objID;
+    }
+
+    public void setRemappedCFFFont(boolean remappedCFFFont) {
+        this.remappedCFFFont=remappedCFFFont;
+    }
+
+    public boolean isRemappedCFFFont() {
+        return remappedCFFFont;
     }
 }

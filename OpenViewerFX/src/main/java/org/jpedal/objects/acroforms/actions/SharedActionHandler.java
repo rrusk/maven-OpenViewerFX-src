@@ -91,15 +91,17 @@ public abstract class SharedActionHandler implements ActionHandler {
         if(showMethods) {
             System.out.println("DefaultActionHandler.init()");
         }
+        this.decode_pdf = decode_pdf;
+        if(decode_pdf==null && gui!=null && gui.getPdfDecoder()!=null){
+            this.decode_pdf = gui.getPdfDecoder();
+        }
         
-        if(decode_pdf!=null){
-            currentPdfFile = decode_pdf.getIO();
+        if(this.decode_pdf!=null){
+            currentPdfFile = this.decode_pdf.getIO();
         }
         
         this.javascript = javascript;
         this.acrorend = acrorend;
-        this.decode_pdf = decode_pdf;
-        
     }
     
     @Override
@@ -225,15 +227,11 @@ public abstract class SharedActionHandler implements ActionHandler {
                     break;
 
                 case PdfDictionary.GoTo:
-                    if (aData != null) {
                         gotoDest(aData, eventType, command);
-                    }
                     break;
 
                 case PdfDictionary.GoToR:
-                    if (aData != null) {
                         gotoDest(aData, eventType, command);
-                    }
                     break;
 
                 case PdfDictionary.ResetForm:
@@ -1652,7 +1650,7 @@ public abstract class SharedActionHandler implements ActionHandler {
                     
                     final FormObject formObject2= (FormObject) possiblyHiddenObj;
                     
-                    if(formObject2!=null && rootRect!=null && formObject2.getBoundingRectangle()!=null && rootRect.contains(formObject2.getBoundingRectangle())){
+                    if(formObject2!=null && formObject2.getBoundingRectangle()!=null && rootRect.contains(formObject2.getBoundingRectangle())){
                         formObject2.setVisible(!visible);
                     }
                 }

@@ -45,9 +45,11 @@ public class CFF extends Table {
 
     boolean hasCFFdata;
 
-    CFF(final FontFile2 currentFontFile, final boolean isCID){
+    CFF(final FontFile2 currentFontFile, final boolean isCID, final boolean remappedCFFFont){
 
         glyphs=new T1Glyphs(isCID);
+        glyphs.setRemappedCFFFont(remappedCFFFont);
+
         if(isCID) {
             glyphs.init(65536, true);
         }

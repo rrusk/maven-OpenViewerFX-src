@@ -37,16 +37,40 @@ import java.io.File;
 import java.io.IOException;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.gui.GUIFactory;
+import org.jpedal.parser.DecoderOptions;
+import org.jpedal.utils.LogWriter;
+import org.jpedal.utils.Messages;
 
 public class OpenInSystemDefault {
     
     public static void execute(final GUIFactory currentGUI, final Values commonValues) {
+
         if (commonValues.getSelectedFile() != null) {
             try {
-                Desktop.getDesktop().open(new File(commonValues.getSelectedFile()));
+
+                if (DecoderOptions.isRunningOnWindows) {
+                    Runtime.getRuntime().exec(new String[]{"rundll32", "url.dll,FileProtocolHandler",
+                        commonValues.getSelectedFile()});
+                } else {
+                    if (DecoderOptions.isRunningOnMac || DecoderOptions.isRunningOnLinux) {
+                        Runtime.getRuntime().exec(new String[]{"/usr/bin/open",
+                            commonValues.getSelectedFile()});
+                    } else {
+                        if (Desktop.isDesktopSupported()) {
+                            try {
+                                Desktop.getDesktop().open(new File(commonValues.getSelectedFile()));
+                            } catch (IOException ex) {
+                                currentGUI.showMessageDialog(Messages.getMessage("PdfSystemDefault.error"));
+                                LogWriter.writeLog(Messages.getMessage("PdfSystemDefault.exception") + ex.getMessage());
+                            }
+                        } else {
+                            currentGUI.showMessageDialog(Messages.getMessage("PdfSystemDefault.unsupported"));
+                        }
+                    }
+                }
             } catch (IOException ex) {
-                currentGUI.showMessageDialog("Error caused when opening in systems default application.");
-                ex.printStackTrace();
+                currentGUI.showMessageDialog(Messages.getMessage("PdfSystemDefault.error"));
+                LogWriter.writeLog(Messages.getMessage("PdfSystemDefault.exception") + ex.getMessage());
             }
         }
     }

@@ -242,9 +242,10 @@ public class ObjectDecoder implements Serializable {
     private boolean isMapObject(final PdfObject pdfObject, final int i, final byte[] raw, final int length, final int keyStart, final int keyLength, final boolean stringPair, final int type) {
         
         final boolean isMap;//ensure all go into 'pool'
-        if(type== PdfDictionary.MCID && (pdfObject.getID()==PdfDictionary.RoleMap ||
-                (pdfObject.getID()==PdfDictionary.BDC && stringPair) ||
-                (pdfObject.getID()==PdfDictionary.A && raw[i-2]=='/'))){
+        final int id=pdfObject.getID();
+        if(type== PdfDictionary.MCID && (id==PdfDictionary.RoleMap ||
+                (id==PdfDictionary.BDC && stringPair) ||
+                (id==PdfDictionary.A && raw[i-2]=='/'))){
             
             pdfKeyType=PdfDictionary.VALUE_IS_NAME;
             
@@ -255,92 +256,31 @@ public class ObjectDecoder implements Serializable {
             
         }else{
             isMap=false;
-            PDFkey=null;
             getKeyType(pdfObject, i, raw, length, keyLength, keyStart, type);
         }
         return isMap;
     }
     
     private void getKeyType(final PdfObject pdfObject, final int i, final byte[] raw, final int length, final int keyLength, final int keyStart, final int type) {
-        /*
-         * get Dictionary key and type of value it takes
-         */
-        if(debugFastCode)//used in debug
-        {
+        
+        if(debugFastCode){//used in debug
             PDFkey = PdfDictionary.getKey(keyStart, keyLength, raw);
         }
-            
+           
         PDFkeyInt=PdfDictionary.getIntKey(keyStart,keyLength,raw);
-        
-        //correct mapping
-        if(PDFkeyInt==PdfDictionary.Indexed && (type==PdfDictionary.MK ||type==PdfDictionary.Form || type==PdfDictionary.Linearized || type==PdfDictionary.Group)) {
-            PDFkeyInt = PdfDictionary.I;
-        }
-        
+         
         if(isInlineImage) {
             PDFkeyInt = PdfObjectFactory.getInlineID(PDFkeyInt);
         }
         
-        final int id=pdfObject.getID();
-        
-        if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && PDFkeyInt== PdfDictionary.D){
-            if(id==PdfDictionary.AP || id==PdfDictionary.AA){
-                pdfKeyType= PdfDictionary.VALUE_IS_VARIOUS;
-            }else if(id==PdfDictionary.Win){
-                pdfKeyType= PdfDictionary.VALUE_IS_TEXTSTREAM;
-            }else{
-                pdfKeyType = PdfDictionary.getKeyType(PDFkeyInt, type);
-            }
-        }else if ((type==PdfDictionary.Form || type==PdfDictionary.MK) && (id==PdfDictionary.AP || id==PdfDictionary.AA) && PDFkeyInt== PdfDictionary.A){
-            pdfKeyType= PdfDictionary.VALUE_IS_VARIOUS;
-        }else if(id==PdfDictionary.Win && pdfObject.getObjectType()==PdfDictionary.Form &&
-                (PDFkeyInt==PdfDictionary.P || PDFkeyInt==PdfDictionary.O)){
-            pdfKeyType= PdfDictionary.VALUE_IS_TEXTSTREAM;
-        }else {
-            pdfKeyType = PdfDictionary.getKeyType(PDFkeyInt, type);
-        }
+        pdfKeyType = PdfDictionary.getKeyType(PDFkeyInt, type);
         
         //allow for other values in D,N,R definitions
-        if(pdfKeyType==-1 && (id== PdfDictionary.ClassMap || id== PdfDictionary.Dests)){
+        if(pdfKeyType==-1 && pdfObject.getID()== PdfDictionary.Dests){
             pdfKeyType = Dictionary.getPairedValues(pdfObject, i, raw, pdfKeyType, length, keyLength, keyStart);
-        }else
-            
-            //@zain @bethan - you will need to disable here (do this 4th)
-            //once done I can remove all this code and methods
-            
-            //allow for other values in D,N,R definitions as key pairs
-            if(((((id==PdfDictionary.D && 1==1)))) &&
-                    pdfObject.getParentID()==PdfDictionary.AP && pdfObject.getObjectType()==PdfDictionary.Form && raw[i]!='['  ){
-               
-                //get next non number/char value
-                int ptr=i;
-                while((raw[ptr]>=48 && raw[ptr]<58) || raw[ptr]==32){
-                    ptr++;
-                }
-                
-                //decide if pair
-                if(raw[keyStart]=='L' && raw[keyStart+1]=='e' && raw[keyStart+2]=='n' && raw[keyStart+3]=='g' && raw[keyStart+4]=='t' && raw[keyStart+5]=='h'){
-                }else if(raw[keyStart]=='O' && raw[keyStart+1]=='n'){
-                }else if(raw[keyStart]=='O' && raw[keyStart+1]=='f' && raw[keyStart+2]=='f'){
-                }else
-                    if(raw[ptr]=='R'){
-                        pdfKeyType = Dictionary.getPairedValues(pdfObject, i, raw, pdfKeyType, length, keyLength, keyStart);
-                        
-                        if(debugFastCode) {
-                            System.out.println("new Returns " + pdfKeyType + " i=" + i);
-                        }
-                    }
-            }
-        
-        /**/
-        
-        //DecodeParms can be an array as well as a dictionary so check next char and alter if so
-        if(PDFkeyInt==PdfDictionary.DecodeParms) {
-            pdfKeyType = setTypeForDecodeParams(i, raw, pdfKeyType);
         }
         
         if(debugFastCode && pdfKeyType==-1 &&  pdfObject.getObjectType()!=PdfDictionary.Page){
-            System.out.println(id+" "+type);
             System.out.println(padding +PDFkey+" NO type setting for "+PdfDictionary.getKey(keyStart,keyLength,raw)+" id="+i);
         }
     }
@@ -368,7 +308,7 @@ public class ObjectDecoder implements Serializable {
                 break;
                 
             }case PdfDictionary.VALUE_IS_NAMETREE:{
-                i = Name.setNameTreeValue(pdfObject, i, raw, length, ignoreRecursion,PDFkeyInt,objectReader);
+                i = Name.setNameTreeValue(pdfObject, i, raw, length,PDFkeyInt,objectReader);
                 break;
                 
                 //readDictionary keys << /A 12 0 R /B 13 0 R >>
@@ -547,6 +487,14 @@ public class ObjectDecoder implements Serializable {
                     i=objDecoder.readArray(pdfObject, PDFkeyInt);
                     break;
                 }
+                
+            case PdfDictionary.DecodeParms:
+                {
+                    final ArrayDecoder objDecoder=new ObjectArray(objectReader, i, raw);
+                    i=objDecoder.readArray(pdfObject, PDFkeyInt);
+                    break;
+                }
+               
            
             default:
                 {
@@ -556,24 +504,6 @@ public class ObjectDecoder implements Serializable {
                 }
         }
         return i;
-    }
-
-    static int setTypeForDecodeParams(final int i, final byte[] raw, int pdfKeyType) {
-        int ii=i;
-        
-        ii = StreamReaderUtils.skipSpaces(raw, ii);
-        
-        //see if might be object arrays
-        if(raw[ii]!='<'){
-            
-            ii = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, ii, 91);
-            
-            if(raw[ii]=='<' || (raw[ii]>='0' && raw[ii]<='9')) {
-                pdfKeyType = PdfDictionary.VALUE_IS_OBJECT_ARRAY;
-            }
-            
-        }
-        return pdfKeyType;
     }
 
     /**

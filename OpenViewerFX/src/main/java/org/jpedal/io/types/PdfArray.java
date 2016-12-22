@@ -40,28 +40,8 @@ public class PdfArray {
 	 * @return
 	 */
 	public static float[] convertToFloatArray(final String value) {
-		
 
-		//ie [1.0 10.0 11 1 ]
-		
-		//do new version with flags and then get it to compare output against repository
-		
-		//could be values speeded up if we converted to byte[]
-		//scanned once for spaces to get number of values, ignore space following space
-		//use code similar to parseDouble code we use in PostScript Factory
-		final float[] returnValue;
-
-	    // my implementation
-		//System.err.println("Value being processed : " + value+ "-end");
-		final char[] bts = value.toCharArray();
-		returnValue = byteStreamToFloatArray(bts);
-
-
-
-		return returnValue;
-	}
-
-    private static float[] byteStreamToFloatArray(final char[] bts) {
+        final char[] bts=value.toCharArray();
 
         final float[] f;
         int fPointer =0,wStart;
@@ -122,8 +102,6 @@ public class PdfArray {
         final float[] toBeReturned = new float[fPointer];
 
         System.arraycopy(f, 0, toBeReturned, 0, fPointer);
-
-        //generate values with StringTokwenizer and compare
 
         return toBeReturned;
     }

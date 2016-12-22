@@ -36,10 +36,7 @@ import java.util.Map;
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.fonts.FontMappings;
 import org.jpedal.fonts.StandardFonts;
-import org.jpedal.fonts.glyph.GlyphFactory;
-import org.jpedal.fonts.glyph.MarkerGlyph;
-import org.jpedal.fonts.glyph.PdfGlyph;
-import org.jpedal.fonts.glyph.PdfJavaGlyphs;
+import org.jpedal.fonts.glyph.*;
 import org.jpedal.fonts.objects.FontData;
 import org.jpedal.fonts.tt.hinting.TTVM;
 import org.jpedal.utils.LogWriter;
@@ -113,17 +110,17 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
             //use CMAP to get actual glyph ID
             int idx=rawInt;
-            
-            
-            if((!isCID || !isIdentity()) && currentCMAP!=null) {
+
+
+            if ((!isCID || !isIdentity()) && currentCMAP != null) {
                 idx = currentCMAP.convertIndexToCharacterCode(glyph, rawInt);
             }
-            
+
             //if no value use post to lookup
-            if(idx<1){
+            if (idx < 1) {
                 idx = currentPost.convertGlyphToCharacterCode(glyph);
             }
-            
+
             //shape to draw onto
             try{
                 if(hasCFF){
@@ -132,7 +129,13 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
                     //set raw width to use for scaling
                     if(transformedGlyph2!=null) {
-                        transformedGlyph2.setWidth(getUnscaledWidth(glyph, rawInt, false));
+
+                        if(isCID && remappedCFFFont) {
+                           idx = currentCMAP.getGlyphToIndex(rawInt);
+                        }
+
+                        //transformedGlyph2.setWidth(getUnscaledWidth(glyph, rawInt, false));
+                        transformedGlyph2.setWidth(getUnscaledWidth(glyph, idx, false));
                     }
 
                 }else {
@@ -304,6 +307,12 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
 
     @Override
+    public boolean isValidGIDtoCID(final int value) {
+
+        return CIDToGIDMap!=null && CIDToGIDMap.length>value && CIDToGIDMap[value]>0;
+    }
+    
+    @Override
     public void setGIDtoCID(final int[] cidToGIDMap) {
 
         hasGIDtoCID=true;
@@ -450,7 +459,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
         currentGlyf=new Glyf(currentFontFile,glyphCount,currentLoca.getIndices());
 
-        currentCFF=new CFF(currentFontFile,isCID);
+        currentCFF=new CFF(currentFontFile,isCID, remappedCFFFont);
 
         hasCFF=currentCFF.hasCFFData();
         if(hasCFF) {

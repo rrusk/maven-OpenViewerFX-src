@@ -54,6 +54,7 @@ import org.jpedal.objects.Javascript;
 import org.jpedal.objects.PdfPageData;
 import org.jpedal.objects.PdfResources;
 import org.jpedal.objects.acroforms.AcroRenderer;
+import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.raw.PageObject;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -933,6 +934,11 @@ public class FileAccess {
                 pageData.setPageCount(pageCount);
             }
 
+            ActionHandler handler = externalHandlers.getFormActionHandler();
+            if(handler!=null){
+                handler.init(null, externalHandlers.getJavaScript(), formRenderer);
+            }
+            
             currentOffset = null;
 
             isOpen = true;

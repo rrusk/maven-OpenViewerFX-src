@@ -595,7 +595,8 @@ public class CMAP extends Table {
                     if(platformSpecificID[formatToUse]==3 && platformID[formatToUse]==0 && count>1 && (hasEncoding || fontEncoding==StandardFonts.STD)){
                         remapType4=true;
                       // System.out.println("a "+wasCase2);
-                    }else if(platformSpecificID[formatToUse]==1 && platformID[formatToUse]==0 && hasEncoding && fontEncoding==StandardFonts.WIN){
+                    }else if((platformSpecificID[formatToUse]==1 || platformSpecificID[formatToUse]==3) &&
+                            platformID[formatToUse]==0 && hasEncoding && fontEncoding==StandardFonts.WIN){
                         remapType4=true;  
                       //  System.out.println("b");
                     }else if(platformSpecificID[formatToUse]==0 && platformID[formatToUse]==0 && hasEncoding && fontEncoding==StandardFonts.WIN){
@@ -709,5 +710,10 @@ public class CMAP extends Table {
         }
 
         return glyfValues;
+    }
+
+    public int getGlyphToIndex(int rawInt) {
+
+        return glyphToIndex[rawInt];
     }
 }

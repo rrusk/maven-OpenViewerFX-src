@@ -54,19 +54,13 @@ import org.jpedal.utils.StringUtils;
 public class FormObject extends PdfObject{
     
     private static Color FieldsHightlightColor;
-//    private static Color RequiredFieldsHighlightColor = null;
+
     static{
         String cs = System.getProperty("org.jpedal.FieldsHighlightColor");
         if(cs != null){
             float[] ff = generateFloatFromString(cs);                    
             FieldsHightlightColor = new Color((int)ff[0],(int)ff[1],(int)ff[2]);
         }
-//        cs = System.getProperty("org.jpedal.RequiredFieldsHighlightColor");
-//        if(cs != null){
-//            float[] ff = generateFloatFromString(cs);                    
-//            RequiredFieldsHighlightColor = new Color((int)ff[0],(int)ff[1],(int)ff[2]);
-//        }
-        
     }
 
     private static final JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
@@ -209,8 +203,6 @@ public class FormObject extends PdfObject{
     public static final int POPUP = 1;
 
     private String layerName;
-    
-    //private ActionHandler formHandler;
 
     private boolean[] Farray;
     
@@ -236,7 +228,6 @@ public class FormObject extends PdfObject{
 
     //internal flag used to store status on additional actions when we decode
     private int popupFlag;
-
 
 	protected PdfObject AA,AP, Cdict;
 
@@ -462,10 +453,6 @@ public class FormObject extends PdfObject{
 	        case PdfDictionary.C:
 	        	return Cdict;
 
-
-	        //case PdfDictionary.C2:
-	        	//return C2;
-
 	        case PdfDictionary.D:
 	        	return D;
 
@@ -496,9 +483,6 @@ public class FormObject extends PdfObject{
 	        case PdfDictionary.JS:
                 return JS;
 
-	        //case PdfDictionary.I:
-	        	//return I;
-                
             case PdfDictionary.IF:
 	        	return IF;    
                 
@@ -534,21 +518,10 @@ public class FormObject extends PdfObject{
                 return OC;
 
             case PdfDictionary.Off:
-
-                //System.out.println("Off "+this.getObjectRefAsString()+" "+Off);
-//                if(Off==null){
-//                    System.out.println(otherValues);
-//                    return (PdfObject) otherValues.get("Off");
-//                }else
-                    return Off;
+                return Off;
 
             case PdfDictionary.On:
-              //    System.out.println("On "+this.getObjectRefAsString()+" "+On);
-//                if(On==null){
-//                    System.out.println(otherValues);
-//                    return (PdfObject) otherValues.get("On");
-//                }else
-            	    return On;
+                return On;
 
             case PdfDictionary.P:
 	        	return P;
@@ -664,8 +637,7 @@ public class FormObject extends PdfObject{
                         diff = 360 + diff;
                     }
 
-                    //if(diff!=0)
-	                    MK.setIntNumber(PdfDictionary.R,diff);
+                    MK.setIntNumber(PdfDictionary.R,diff);
 	                    
                 }
 
@@ -740,8 +712,6 @@ public class FormObject extends PdfObject{
 
         //if in AP array as other value store here
         if(currentKey!=null){
-
-            //System.out.println("Other values---- "+id+" "+value+" "+objType);
             setOtherValues(value);
             return;
         }
@@ -781,10 +751,6 @@ public class FormObject extends PdfObject{
 	        case PdfDictionary.C:
 	        	Cdict=value;
 			break;
-
-	        //case PdfDictionary.C2:
-	        	//C2=value;
-			//break;
 
 	        case PdfDictionary.D:
 	        	D=value;
@@ -837,10 +803,6 @@ public class FormObject extends PdfObject{
 	        case PdfDictionary.K:
 	        	K=value;
 			break;
-
-			//case PdfDictionary.I:
-	        	//I=value;
-			//break;
 
             case PdfDictionary.MK:
             	MK=value;
@@ -943,58 +905,6 @@ public class FormObject extends PdfObject{
         }
     }
 
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-        int id = 0;
-        
-        try{
-
-            //convert token to unique key which we can lookup
-            id = PdfDictionary.generateChecksum(keyStart, keyLength, raw);
-            
-            /*
-             * not standard
-             */
-            switch(id){
-
-                default:
-
-                	PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-        switch(pdfKeyType){
-
-
-    		default:
-    			super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
   //return as constnt we can check
     @Override
     public int getNameAsConstant(final int id) {
@@ -1080,7 +990,10 @@ public class FormObject extends PdfObject{
 	        	
             case PdfDictionary.Contents:
 	        	return rawContents;
-                
+               
+            case PdfDictionary.D:
+                return rawDstring;
+
            case PdfDictionary.DA:
 	        	return rawDA;     
 
@@ -1395,6 +1308,7 @@ public class FormObject extends PdfObject{
 
 	        case PdfDictionary.RC:
 	            rawRC=value;
+                RC = null;
 	            break;
 
             case PdfDictionary.Reason:
@@ -1738,68 +1652,6 @@ public class FormObject extends PdfObject{
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-  //      switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-   //     }
-
-        
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
     @Override
     public byte[][] getKeyArray(final int id) {
 
@@ -1807,8 +1659,6 @@ public class FormObject extends PdfObject{
 
         case PdfDictionary.Kids:
             return deepCopy(Kids);
-
-
 
             default:
             	return super.getKeyArray(id);
@@ -1940,9 +1790,6 @@ public class FormObject extends PdfObject{
                 }
             case 3:
                 {
-                    if(debug) {
-                        System.out.println("rgb color=" + toks[0] + ' ' + toks[1] + ' ' + toks[2]);
-                    }       
                     final float tok0 = toks[0];
                     final float tok1 = toks[1];
                     final float tok2 = toks[2];
@@ -2668,22 +2515,13 @@ public class FormObject extends PdfObject{
 //		1=gray
 //		3=rgb
 //		4=cmyk
-		if(debug) {
-            System.out.println("CHECK generateColorFromString=" + colorString);
-        }
-		
+
 		final StringTokenizer tokens = new StringTokenizer(colorString,"[()] ,");
 		
 		final float[] toks = new float[tokens.countTokens()];
 		int i=0;
 		while(tokens.hasMoreTokens()){
-			
-			final String tok = tokens.nextToken();
-			if(debug) {
-                System.out.println("token" + (i + 1) + '=' + tok + ' ' + colorString);
-            }
-			
-			toks[i] = Float.parseFloat(tok);
+			toks[i] = Float.parseFloat(tokens.nextToken());
 			i++;
 		}
 		

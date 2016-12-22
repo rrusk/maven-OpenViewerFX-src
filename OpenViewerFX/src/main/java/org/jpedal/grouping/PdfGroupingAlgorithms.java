@@ -133,6 +133,7 @@ public class PdfGroupingAlgorithms {
 	//Value placed between result areas to show they are part of the same result
 	private static final int linkedSearchAreas=-101;
 	
+    PdfSearchUtils searcher;
 	/**
      * Create a new instance, passing in raw data
      * @param pdf_data PdfData from the pdf to search
@@ -142,6 +143,8 @@ public class PdfGroupingAlgorithms {
 		this.pdf_data = pdf_data;
         this.isXMLExtraction=isXMLExtraction;
 		colorExtracted=pdf_data.isColorExtracted();
+//        searcher = new PdfSearchUtils(pdf_data);
+        searcher = null;
     }
 	
 	/**
@@ -3675,6 +3678,10 @@ public class PdfGroupingAlgorithms {
 			final int searchType)
 	throws PdfException {
 
+        if(searcher!=null){
+            return searcher.findText(x1, y1, x2, y2, terms, searchType);
+        }
+        
 		//Failed to supply search terms to do nothing
 		if (terms == null) {
             return new float[]{};
@@ -3739,7 +3746,11 @@ public class PdfGroupingAlgorithms {
 			final String[] terms,
 			final int searchType)
 	throws PdfException {
-
+        
+        if(searcher!=null){
+            return searcher.findText(terms, searchType);
+        }
+        
 		//Failed to supply search terms to do nothing
 		if (terms == null) {
             return new float[]{};
@@ -3789,6 +3800,9 @@ public class PdfGroupingAlgorithms {
 	 */
 	public String[] getTeasers() {
 		
+        if(searcher!=null){
+            return searcher.getTeasers();
+        }
 		return teasers;
 	}
 	
@@ -4274,7 +4288,7 @@ public class PdfGroupingAlgorithms {
                 teaserFinder.region(termEnds+1, teaserFinder.regionEnd());
             }
         }
-        
+//        System.out.println("teaser : "+teaser);
         //Store teaser
         resultTeasers.addElement(teaser);
     }

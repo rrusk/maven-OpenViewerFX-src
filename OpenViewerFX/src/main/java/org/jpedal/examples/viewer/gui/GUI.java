@@ -799,12 +799,12 @@ public abstract class GUI implements GUIFactory {
         }
 
         if(thumbnails.isShownOnscreen()){
-
+            currentGUI.setupThumbnailPanel();
+            
             final LinearThread linearizedBackgroundRenderer = (LinearThread) decode_pdf.getJPedalObject(PdfDictionary.LinearizedReader);
 
-            if(linearizedBackgroundRenderer==null ||
-                    (linearizedBackgroundRenderer!=null && !linearizedBackgroundRenderer.isAlive())) {
-                currentGUI.setupThumbnailPanel();
+            if(linearizedBackgroundRenderer!=null && !linearizedBackgroundRenderer.isAlive()) {
+                thumbnails.drawThumbnails();
             }
         }
 

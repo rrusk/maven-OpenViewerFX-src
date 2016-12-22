@@ -64,7 +64,7 @@ public class Dictionary {
             
             i = readKey(pdfObject, i+1, raw, PDFkeyInt);
 
-        }else if(raw[i]=='e' && raw[i+1]=='n' && raw[i+2]=='d' && raw[i+3]=='o' && raw[i+4]=='b' ){ //allow for empty object
+        }else if(StreamReaderUtils.isEndObj(raw,i)){ //allow for empty object
                 
                 if(debugFastCode) {
                     System.out.println(padding + "Empty object" + new String(raw) + "<<");
@@ -554,7 +554,12 @@ public class Dictionary {
                 
                 //@zain @bethan - you will need to enable here
                 //do this third
-                if(PDFkeyInt==PdfDictionary.N || PDFkeyInt==PdfDictionary.R) {// || PDFkeyInt==PdfDictionary.D){
+                
+                //we need to avoid this for AA as D can occur in there as a Dictionary
+                final int parentType=pdfObject.getPDFkeyInt();
+                
+                if((parentType!=PdfDictionary.AA) &&
+                        (PDFkeyInt==PdfDictionary.N || PDFkeyInt==PdfDictionary.R || PDFkeyInt==PdfDictionary.D)){
                     isPairs=isDictionaryPairs(i, raw);    
                 }
                 

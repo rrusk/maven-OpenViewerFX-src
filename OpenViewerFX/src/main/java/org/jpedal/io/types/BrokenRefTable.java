@@ -96,7 +96,70 @@ public class BrokenRefTable {
 
         return root_id;
     }
-
+		
+	public static byte[] findFirstRootDict(final RandomAccessBuffer buffer) throws PdfSecurityException {		
+		long len = 0;
+        try {
+            buffer.seek(0);
+			len = buffer.length();
+			while (true) {
+				int p = (int) buffer.getFilePointer();
+				int x1 = buffer.read();
+				int x2 = buffer.read();
+				int x3 = buffer.read();
+				int x4 = buffer.read();
+				int x5 = buffer.read();
+				long ps = -1; // start of << 
+				long pe = -1;
+				if(x1 == 47 && x2 == 82 && x3 == 111 && x4 == 111 && x5 == 116){ //check for /Root
+					buffer.seek(p-5);
+					while(buffer.getFilePointer() > 0){
+						long ss = buffer.getFilePointer();
+						int neg = 2;
+						if(buffer.read() == 60){
+							if(buffer.read() == 60){
+								ps = buffer.getFilePointer()-2;
+								break;
+							}
+							neg++;
+						}
+						buffer.seek(ss - neg);
+					}					
+					buffer.seek(p+5);
+					int braces = 0;
+					while(buffer.getFilePointer() < len){
+						int pp = (int)buffer.getFilePointer();
+						int j1 = buffer.read();
+						int j2 = buffer.read();						
+						if(j1==60 && j2 == 60){
+							braces++;
+						}						
+						if(j1==62 && j2 == 62){							
+							if(braces == 0){
+								pe = buffer.getFilePointer();
+								break;
+							}
+							braces--;
+						}						
+						buffer.seek(pp+1);
+					}
+					if(pe >-1 && ps >-1){
+						byte[] bb = new byte[(int)(pe - ps)];
+						buffer.seek(ps);
+						buffer.read(bb);
+						return bb;
+					}
+				}
+				buffer.seek(p+1);
+				if((buffer.getFilePointer()+5) > len){
+					break;
+				}
+			}
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception " + e + " corrupted stream");
+        }      		
+		return null;          
+    }
 }
 
 

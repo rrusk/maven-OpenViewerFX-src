@@ -32,7 +32,6 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.StringUtils;
 
 public class MCObject extends PdfObject {
@@ -41,65 +40,54 @@ public class MCObject extends PdfObject {
 
     private byte[] rawID, rawOC, rawRoot, rawS;
 
-    //unknown CMAP as String
-	//String unknownValue=null;
+    int Kint = -1, MCID = -1;
 
-	//private float[] Matrix;
+    private PdfObject A, ClassMap, K, Layer, ParentTree, Pg, RoleMap;
 
-	//boolean ImageMask=false;
-
-	int Kint=-1, MCID=-1;
-
-	private PdfObject A, ClassMap,K, Layer,ParentTree,Pg, RoleMap;
-
-	private byte[] rawActualText, rawLang, rawIDTree, rawT;
+    private byte[] rawActualText, rawLang, rawIDTree, rawT;
 
     private byte[][] Karray;
-    
-	private String ActualText, IDTree, Lang, T;
+
+    private String ActualText, IDTree, Lang, T;
 
     public MCObject(final String ref) {
         super(ref);
 
-        objType=PdfDictionary.MCID;
+        objType = PdfDictionary.MCID;
     }
 
     public MCObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
 
-        objType=PdfDictionary.MCID;
+        objType = PdfDictionary.MCID;
     }
 
 
-
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.A:
-	    		return A;
-	    		
+            case PdfDictionary.A:
+                return A;
+
             case PdfDictionary.ClassMap:
-	        	return ClassMap;
+                return ClassMap;
 
             case PdfDictionary.K:
-	        	return K;
+                return K;
 
             case PdfDictionary.Layer:
-	        	return Layer;
+                return Layer;
 
             case PdfDictionary.ParentTree:
-	        	return ParentTree;
-	        	
+                return ParentTree;
+
             case PdfDictionary.Pg:
-	        	return Pg;
+                return Pg;
 
             case PdfDictionary.RoleMap:
-	        	return RoleMap;
-
-//            case PdfDictionary.XObject:
-//                return XObject;
+                return RoleMap;
 
             default:
                 return super.getDictionary(id);
@@ -107,210 +95,99 @@ public class MCObject extends PdfObject {
     }
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.K:
-	        	Kint=value;
-	        break;
+                Kint = value;
+                break;
 
-	        case PdfDictionary.MCID:
-	        	MCID=value;
-	        break;
-
-//	        case PdfDictionary.Height:
-//	            Height=value;
-//	        break;
-//
-//	        case PdfDictionary.Width:
-//	            Width=value;
-//	        break;
+            case PdfDictionary.MCID:
+                MCID = value;
+                break;
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.K:
-            return Kint;
+                return Kint;
 
-        	case PdfDictionary.MCID:
-            return MCID;
-
-//        	case PdfDictionary.Height:
-//            return Height;
-//
-//	        case PdfDictionary.Width:
-//	            return Width;
+            case PdfDictionary.MCID:
+                return MCID;
 
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-        switch(id){
+        value.setID(id);
 
-        	case PdfDictionary.A:
-        		A=value;
-        		break;
-        		
+        switch (id) {
+
+            case PdfDictionary.A:
+                A = value;
+                break;
+
             case PdfDictionary.ClassMap:
-                ClassMap=value;
+                ClassMap = value;
                 break;
 
             case PdfDictionary.K:
-                K=value;
+                K = value;
                 break;
-                
+
             case PdfDictionary.Layer:
-	        	Layer=value;
-			break;
+                Layer = value;
+                break;
 
             case PdfDictionary.ParentTree:
-	        	ParentTree=value;
-			break;
-			
+                ParentTree = value;
+                break;
+
             case PdfDictionary.Pg:
-	        	Pg=value;
-			break;
+                Pg = value;
+                break;
 
             case PdfDictionary.RoleMap:
-	        	RoleMap=value;
-			break;
-
-//            case PdfDictionary.XObject:
-//            	XObject=value;
-//    		break;
+                RoleMap = value;
+                break;
 
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
-
-
-    @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
-
-        int PDFvalue =PdfDictionary.Unknown;
-
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	//System.out.println((char)next);
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-//                case StandardFonts.CIDTYPE0:
-//                    PDFvalue =StandardFonts.CIDTYPE0;
-//                break;
-
-
-                default:
-
-//                	if(pdfKeyType==PdfDictionary.Encoding){
-//                		PDFvalue=PdfCIDEncodings.getConstant(id);
-//
-//                		if(PDFvalue==PdfDictionary.Unknown){
-//
-//                			byte[] bytes=new byte[keyLength];
-//
-//                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//
-//                			unknownValue=new String(bytes);
-//                		}
-//
-//                		if(debug && PDFvalue==PdfDictionary.Unknown){
-//                			System.out.println("Value not in PdfCIDEncodings");
-//
-//                           	 byte[] bytes=new byte[keyLength];
-//
-//                               System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//                               System.out.println("Add to CIDEncodings and as String");
-//                               System.out.println("key="+new String(bytes)+" "+id+" not implemented in setConstant in PdfFont Object");
-//
-//                               System.out.println("final public static int CMAP_"+new String(bytes)+"="+id+";");
-//                               
-//                		}
-//                	}else
-                	PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                            
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-        switch(pdfKeyType){
-
-
-    		default:
-    			super.setConstant(pdfKeyType,id);
-
-        }
-
-        return PDFvalue;
-    }
-
-
 
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
 
             case PdfDictionary.OC:
-                rawOC=value;
-            break;
-            
+                rawOC = value;
+                break;
+
             case PdfDictionary.Root:
-                rawRoot=value;
-            break;
+                rawRoot = value;
+                break;
 
             case PdfDictionary.S:
-                rawS=value;
-            break;
+                rawS = value;
+                break;
 
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
 
@@ -319,30 +196,30 @@ public class MCObject extends PdfObject {
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.ActualText:
-                rawActualText=value;
-            break;
+                rawActualText = value;
+                break;
 
             case PdfDictionary.ID:
-	        	rawID=value;
-	        break;
+                rawID = value;
+                break;
 
-	        case PdfDictionary.IDTree:
-	        	rawIDTree=value;
-	        break;
+            case PdfDictionary.IDTree:
+                rawIDTree = value;
+                break;
 
-	        case PdfDictionary.Lang:
-	        	rawLang=value;
-	        break;
-	        
-	        case PdfDictionary.T:
-	        	rawT=value;
-	        break;
+            case PdfDictionary.Lang:
+                rawLang = value;
+                break;
+
+            case PdfDictionary.T:
+                rawT = value;
+                break;
 
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
 
@@ -351,21 +228,21 @@ public class MCObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.OC:
 
-            //setup first time
-            if(OC==null && rawOC!=null) {
-                OC = new String(rawOC);
-            }
+                //setup first time
+                if (OC == null && rawOC != null) {
+                    OC = new String(rawOC);
+                }
 
-            return OC;
+                return OC;
 
             case PdfDictionary.Root:
 
                 //setup first time
-                if(Root==null && rawRoot!=null) {
+                if (Root == null && rawRoot != null) {
                     Root = new String(rawRoot);
                 }
 
@@ -373,13 +250,13 @@ public class MCObject extends PdfObject {
 
             case PdfDictionary.S:
 
-            //setup first time
-            if(S==null && rawS!=null) {
-                S = new String(rawS);
-            }
+                //setup first time
+                if (S == null && rawS != null) {
+                    S = new String(rawS);
+                }
 
-            return S;
-            
+                return S;
+
             default:
                 return super.getName(id);
 
@@ -389,12 +266,12 @@ public class MCObject extends PdfObject {
     @Override
     public String getTextStreamValue(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.ActualText:
 
                 //setup first time
-                if(ActualText==null && rawActualText!=null) {
+                if (ActualText == null && rawActualText != null) {
                     ActualText = StringUtils.getTextString(rawActualText, false);
                 }
 
@@ -402,135 +279,74 @@ public class MCObject extends PdfObject {
 
             case PdfDictionary.ID:
 
-	            //setup first time
-	            if(ID==null && rawID!=null) {
+                //setup first time
+                if (ID == null && rawID != null) {
                     ID = new String(rawID);
                 }
 
-	            return ID;
+                return ID;
 
-	        case PdfDictionary.IDTree:
+            case PdfDictionary.IDTree:
 
-	            //setup first time
-	            if(IDTree==null && rawIDTree!=null) {
+                //setup first time
+                if (IDTree == null && rawIDTree != null) {
                     IDTree = new String(rawIDTree);
                 }
 
-	            return IDTree;
+                return IDTree;
 
-	        case PdfDictionary.Lang:
-	        	
-	        	//setup first time
-	            if(Lang==null && rawLang!=null) {
+            case PdfDictionary.Lang:
+
+                //setup first time
+                if (Lang == null && rawLang != null) {
                     Lang = new String(rawLang);
                 }
 
-	            return Lang;
-	            
-	        case PdfDictionary.T:
-	        	
-	        	//setup first time
-	            if(T==null && rawT!=null) {
+                return Lang;
+
+            case PdfDictionary.T:
+
+                //setup first time
+                if (T == null && rawT != null) {
                     T = new String(rawT);
                 }
 
-	            return T;    
-	        	
+                return T;
+
             default:
                 return super.getTextStreamValue(id);
 
         }
     }
 
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-     //   switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-     //   }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-
     @Override
     public PdfArrayIterator getMixedArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.K:
-                if(Karray==null){
+                if (Karray == null) {
                     return null;
-                }else {
+                } else {
                     return new PdfArrayIterator(Karray);
                 }
 
             default:
-            	return super.getMixedArray(id);
+                return super.getMixedArray(id);
         }
     }
 
     @Override
     public void setMixedArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.K:
-                Karray=value;
+                Karray = value;
                 break;
-                
+
             default:
-            	super.setStringArray(id, value);
+                super.setStringArray(id, value);
         }
 
     }

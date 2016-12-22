@@ -32,11 +32,14 @@
  */
 package org.jpedal.parser.shape;
 
+import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.PdfPaint;
+import org.jpedal.color.ShearedTexturePaint;
 import org.jpedal.external.ShapeTracker;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
@@ -93,8 +96,36 @@ public class F {
         //replace F with image if soft mask set (see randomHouse/9781609050917_DistX.pdf)
         if(gs.SMask!=null && gs.SMask.getDictionary(PdfDictionary.G)!=null && 
                 (gs.nonstrokeColorSpace.getID()==ColorSpaces.DeviceRGB || gs.nonstrokeColorSpace.getID()==ColorSpaces.DeviceCMYK)){
-                      
-            createSMaskFill(gs,currentPdfFile, current, parserOptions,formLevel, multiplyer);
+            
+            if (isStar){
+                currentDrawShape.setEVENODDWindingRule();
+            }else {
+                currentDrawShape.setNONZEROWindingRule();
+            }
+            
+            currentDrawShape.closeShape();
+            Shape currentShape =currentDrawShape.generateShapeFromPath(gs.CTM,gs.getLineWidth(), Cmd.F);
+            
+            if(currentShape == null){
+                createSMaskFill(gs,currentPdfFile, current, parserOptions,formLevel, multiplyer);
+            }else{
+                BufferedImage result = getSmaskAppliedImage(gs, currentPdfFile, parserOptions, formLevel, multiplyer);
+                final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
+                currentPdfFile.checkResolved(maskObj);
+                final float[] BBox= maskObj.getFloatArray(PdfDictionary.BBox);
+                int fx=(int)(BBox[0]+0.5f);
+                int fy=(int)(BBox[1]+0.5f);
+                
+                Rectangle rect = new Rectangle(fx, fy, result.getWidth(), result.getHeight());
+                
+                GraphicsState gs1 = gs.deepCopy();                
+                gs1.setNonstrokeColor(new ShearedTexturePaint(result, rect, new AffineTransform(gs.CTM[0][0], gs.CTM[0][1], gs.CTM[1][0], gs.CTM[1][1], gs.CTM[2][0], gs.CTM[2][1])));
+                gs1.setFillType(GraphicsState.FILL);               
+                gs1.setStrokeColor(gs.strokeColorSpace.getColor());
+                
+                current.drawShape(currentDrawShape,gs1, Cmd.F);
+                                
+            }
 
             currentDrawShape.resetPath();
             
@@ -197,6 +228,63 @@ public class F {
         currentDrawShape.resetPath(); // flush all path ops stored
         
     }
+    
+    
+    private static BufferedImage getSmaskAppliedImage(final GraphicsState gs, final PdfObjectReader currentPdfFile,
+            final ParserOptions parserOptions, final int formLevel, final float multiplyer) {
+         final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
+        currentPdfFile.checkResolved(maskObj);
+        final float[] BBox= maskObj.getFloatArray(PdfDictionary.BBox);
+        int fx=(int)(BBox[0]+0.5f);
+        int fy=(int)(BBox[1]+0.5f);
+        int fw=(int)(BBox[2]+0.5f);
+        int fh=(int)(BBox[3]+0.5f);
+        
+        final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions,formLevel, multiplyer,false,1f);
+        
+        PdfPaint prev = gs.nonstrokeColorSpace.getColor();
+        int prevInt = prev.getRGB();
+        
+        float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
+        int brgb = 0;
+        if(BC!=null){
+            gs.nonstrokeColorSpace.setColor(BC, BC.length);
+            brgb = gs.nonstrokeColorSpace.getColor().getRGB();
+            gs.nonstrokeColorSpace.setColor(prev);
+        }       
+            
+        int br = ((brgb >> 16) & 0xff);
+        int bg = ((brgb >> 8) & 0xff);
+        int bb = (brgb & 0xff);
+
+        BufferedImage result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
+        int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
+        for (int i = 0; i < sPixels.length; i++) {
+            int sargb = sPixels[i];
+            int sa = ((sargb >>> 24) & 0xff);
+            int sr = ((sargb >> 16) & 0xff);
+            int sg = ((sargb >> 8) & 0xff);
+            int sb = (sargb & 0xff);            
+            if (sa == 0) {
+                sr = br;
+                sg = bg;
+                sb = bb;
+            } else if (sa < 255) {
+                int alpha_ = 255 - sa;
+                sr = (sr * sa + br * alpha_) >> 8;
+                sg = (sg * sa + bg * alpha_) >> 8;
+                sb = (sb * sa + bb * alpha_) >> 8;
+            }
+            int y = (sr * 77) + (sg * 152) + (sb * 28);
+            sa = (sa * y) >> 16;
+            dPixels[i] = (sa << 24) | (prevInt & 0xffffff);
+        }
+        
+        smaskImage.flush();
+        return result;
+    }
+    
     
     
     /**

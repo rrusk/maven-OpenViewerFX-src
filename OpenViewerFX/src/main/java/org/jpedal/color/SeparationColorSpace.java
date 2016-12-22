@@ -203,39 +203,33 @@ public class SeparationColorSpace extends GenericColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h, final int pX, final int pY, final int d) throws PdfException{
-        
-        
-        byte[] rawData = null;
-        
-        try {
-            rawData = JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
-        } catch (Exception ex) {//rethrow as Pdfexception
-            throw new PdfException(ex.getMessage());
-        }
-        
+    public BufferedImage JPEG2000ToRGBImage(final byte[] data, int w, int h, final int pX, final int pY, final int d) throws PdfException {
+
         BufferedImage image = null;
 
-        if(rawData!=null){
-            try{
+        try {
+            byte[] rawData = JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
+
+            if (rawData != null) {
 
                 IndexedColorMap = null;//make index null as we already processed
 
                 //convert the image
-                if(getID()==ColorSpaces.DeviceN){
-                    image=createImageN(w, h, rawData);
-                }else{
-                    image=createImage(w, h, rawData);
+                if (getID() == ColorSpaces.DeviceN) {
+                    image = createImageN(w, h, rawData);
+                } else {
+                    image = createImage(w, h, rawData);
                 }
-            } catch (final Exception ee) {
-                image = null;
-
-                LogWriter.writeLog("Exception in JPEG2000ToRGBImage: " + ee);
             }
+        } catch (final Exception ee) {
+            image = null;
+
+            LogWriter.writeLog("Exception in JPEG2000ToRGBImage: " + ee);
         }
-        
+
+
         return image;
-        
+
     }
     
     private BufferedImage createImageN(final int w, final int h, final byte[] rawData) {

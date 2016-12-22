@@ -33,66 +33,54 @@
 package org.jpedal.objects.raw;
 
 import org.jpedal.color.ColorSpaces;
-import org.jpedal.utils.LogWriter;
 
 public class GroupingObject extends PdfObject {
 
-	//unknown CMAP as String
-	//String unknownValue=null;
+    private String Name;
 
-	private String Name;
+    private byte[] rawName;
 
-	private byte[] rawName;
-
-    private boolean K,I;
+    private boolean K, I;
 
     private PdfObject colorSpace;
-
-
 
     public GroupingObject(final String ref) {
         super(ref);
     }
 
     public GroupingObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
-
-
     @Override
-    public boolean getBoolean(final int id){
-        
-        switch(id){
-            
+    public boolean getBoolean(final int id) {
+
+        switch (id) {
+
             case PdfDictionary.I:
                 return I;
-                
+
             case PdfDictionary.K:
                 return K;
-                
+
             default:
                 return super.getBoolean(id);
         }
-        
+
     }
-    
+
     @Override
-    public void setBoolean(final int id, final boolean value){
-        
-        switch(id){
-            
+    public void setBoolean(final int id, final boolean value) {
+
+        switch (id) {
+
             case PdfDictionary.I:
-                I=value;
+                I = value;
                 break;
-                
+
             case PdfDictionary.K:
-                K=value;
+                K = value;
                 break;
-                
-//        case PdfDictionary.ImageMask:
-//        	ImageMask=value;
-//        	break;
 
             default:
                 super.setBoolean(id, value);
@@ -100,12 +88,12 @@ public class GroupingObject extends PdfObject {
     }
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.ColorSpace:
-        	return colorSpace;
+            case PdfDictionary.ColorSpace:
+                return colorSpace;
 
             default:
                 return super.getDictionary(id);
@@ -114,20 +102,19 @@ public class GroupingObject extends PdfObject {
 
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-        switch(id){
+        value.setID(id);
 
-	        case PdfDictionary.ColorSpace:
-	        	colorSpace=value;
+        switch (id) {
+
+            case PdfDictionary.ColorSpace:
+                colorSpace = value;
 
                 break;
 
-
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
 
@@ -135,116 +122,49 @@ public class GroupingObject extends PdfObject {
     @Override
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
-        int PDFvalue =PdfDictionary.Unknown;
+        int PDFvalue;
 
-        int id=0,x=0,next;
+        final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-        try{
+        switch (id) {
 
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-//            case PdfDictionary.Image:
-//                PDFvalue =PdfDictionary.Image;
-//            break;
-//
-//            case PdfDictionary.Form:
-//                PDFvalue =PdfDictionary.Form;
-//            break;
-
-                case PdfDictionary.G:
-                    PDFvalue =ColorSpaces.DeviceGray;
+            case PdfDictionary.G:
+                PDFvalue = ColorSpaces.DeviceGray;
                 break;
 
 
-                case PdfDictionary.RGB:
-                    PDFvalue =ColorSpaces.DeviceRGB;
+            case PdfDictionary.RGB:
+                PDFvalue = ColorSpaces.DeviceRGB;
                 break;
-                
-                default:
 
-//                	if(pdfKeyType==PdfDictionary.Encoding){
-//                		PDFvalue=PdfCIDEncodings.getConstant(id);
-//
-//                		if(PDFvalue==PdfDictionary.Unknown){
-//
-//                			byte[] bytes=new byte[keyLength];
-//
-//                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//
-//                			unknownValue=new String(bytes);
-//                		}
-//
-//                		if(debug && PDFvalue==PdfDictionary.Unknown){
-//                			System.out.println("Value not in PdfCIDEncodings");
-//
-//                           	 byte[] bytes=new byte[keyLength];
-//
-//                               System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//                               System.out.println("Add to CIDEncodings and as String");
-//                               System.out.println("key="+new String(bytes)+" "+id+" not implemented in setConstant in PdfFont Object");
-//
-//                               System.out.println("final public static int CMAP_"+new String(bytes)+"="+id+";");
-//                		}
-//                	}else
-                		PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                    }
-
-                    break;
-            }
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
+            default:
+                PDFvalue = super.setConstant(pdfKeyType, id);
+                break;
         }
 
         return PDFvalue;
     }
 
 
-
-
-
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
-
+        switch (id) {
 
             case PdfDictionary.Name:
-                rawName=value;
-            break;
+                rawName = value;
+                break;
 
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
-
     }
-    
+
     @Override
     public byte[] getStringValueAsByte(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Name:
                 return rawName;
@@ -253,24 +173,21 @@ public class GroupingObject extends PdfObject {
                 return super.getStringValueAsByte(id);
 
         }
-
     }
-
-
 
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Name:
 
-            //setup first time
-            if(Name==null && rawName!=null) {
-                Name = new String(rawName);
-            }
+                //setup first time
+                if (Name == null && rawName != null) {
+                    Name = new String(rawName);
+                }
 
-            return Name;
+                return Name;
 
             default:
                 return super.getName(id);
@@ -278,78 +195,14 @@ public class GroupingObject extends PdfObject {
         }
     }
 
-
-
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-    //    switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-    //    }
-
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-    
     @Override
     public int getObjectType() {
-		return PdfDictionary.Group;
-	}
-    
-    
+        return PdfDictionary.Group;
+    }
+
+
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
+        return true;
+    }
 }

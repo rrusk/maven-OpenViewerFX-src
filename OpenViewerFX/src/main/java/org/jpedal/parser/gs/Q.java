@@ -46,7 +46,7 @@ public class Q {
         if (isLowerCase) {
             graphicsStates.pushGraphicsState(gs, current);
         } else{
-            gs = graphicsStates.restoreGraphicsState(gs, current);
+            gs = graphicsStates.restoreGraphicsState(current);
 
             //flag font has changed
             gs.getTextState().setFontChanged(true);

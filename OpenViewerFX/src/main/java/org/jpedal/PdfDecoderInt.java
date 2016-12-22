@@ -63,7 +63,7 @@ public interface PdfDecoderInt {
     /**
      * build number of this version
      */
-    String version = "7.7.25";
+    String version = "7.8.22";
     /**
      * flag to show extraction mode should include any text
      */

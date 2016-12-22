@@ -32,23 +32,18 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class PatternObject extends XObject {
 
-	//unknown CMAP as String 
-	//String unknownValue=null;
+    int PatternType, PaintType = -1, TilingType = -1;
 
-    int PatternType,PaintType=-1,TilingType=-1;
+    float XStep = -1, YStep = -1;
 
-    float XStep=-1,YStep=-1;
-	
     public PatternObject(final String ref) {
         super(ref);
     }
 
     public PatternObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
 
@@ -59,245 +54,77 @@ public class PatternObject extends XObject {
 
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.PaintType:
-	            PaintType=value;
-	        break;
-        
-	        case PdfDictionary.PatternType:
-	            PatternType=value;
-	        break;
-	        
-	        case PdfDictionary.TilingType:
-	        	TilingType=value;
+            case PdfDictionary.PaintType:
+                PaintType = value;
                 break;
-        
+
+            case PdfDictionary.PatternType:
+                PatternType = value;
+                break;
+
+            case PdfDictionary.TilingType:
+                TilingType = value;
+                break;
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
-     @Override
-     public void setFloatNumber(final int id, final float value){
+    @Override
+    public void setFloatNumber(final int id, final float value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.XStep:
-	        	XStep=value;
+            case PdfDictionary.XStep:
+                XStep = value;
                 break;
 
             case PdfDictionary.YStep:
-	        	YStep=value;
+                YStep = value;
                 break;
 
             default:
-            	super.setFloatNumber(id, value);
+                super.setFloatNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.PaintType:
-	        	return PaintType;
+            case PdfDictionary.PaintType:
+                return PaintType;
 
             case PdfDictionary.PatternType:
-	            return PatternType;
-	            
-	        case PdfDictionary.TilingType:
-	        	return TilingType;
+                return PatternType;
+
+            case PdfDictionary.TilingType:
+                return TilingType;
 
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
-
-     @Override
-     public float getFloatNumber(final int id){
-
-        switch(id){
-
-	        case PdfDictionary.XStep:
-	        	return XStep;
-
-	        case PdfDictionary.YStep:
-	        	return YStep;
-
-            default:
-            	return super.getFloatNumber(id);
-        }
-    }
-
-    
-
 
     @Override
-    public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
+    public float getFloatNumber(final int id) {
 
-        int PDFvalue =PdfDictionary.Unknown;
+        switch (id) {
 
-        int id=0,x=0,next;
-       
-        try{
+            case PdfDictionary.XStep:
+                return XStep;
 
-            //convert token to unique key which we can lookup
-            
-            for(int i2=keyLength-1;i2>-1;i2--){
-               
-            	next=raw[keyStart+i2];
-
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-            
-            
-//            case PdfDictionary.Form:
-//                PDFvalue =PdfDictionary.Form;
-//            break;
-
-//                case StandardFonts.CIDTYPE0:
-//                    PDFvalue =StandardFonts.CIDTYPE0;
-//                break;
-               
-
-                default:
-
-//                	if(pdfKeyType==PdfDictionary.Encoding){
-//                		PDFvalue=PdfCIDEncodings.getConstant(id);
-//                		
-//                		if(PDFvalue==PdfDictionary.Unknown){
-//                			
-//                			byte[] bytes=new byte[keyLength];
-//
-//                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//                           
-//                			unknownValue=new String(bytes);
-//                		}
-//                		
-//                		if(debug && PDFvalue==PdfDictionary.Unknown){
-//                			System.out.println("Value not in PdfCIDEncodings");
-//                			   
-//                           	 byte[] bytes=new byte[keyLength];
-//
-//                               System.arraycopy(raw,keyStart,bytes,0,keyLength);
-//                               System.out.println("Add to CIDEncodings and as String");
-//                               System.out.println("key="+new String(bytes)+" "+id+" not implemented in setConstant in PdfFont Object");
-//
-//                               System.out.println("final public static int CMAP_"+new String(bytes)+"="+id+";");
-//                              
-//                		}
-//                	}else
-                		PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-                            
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                            
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
-
-        //System.out.println(pdfKeyType+"="+PDFvalue);
-     //   switch(pdfKeyType){
-//
-//        	case PdfDictionary.Subtype:
-//        		subtype=PDFvalue;
-//        		break;
-//        
-     //   }
-        
-        return PDFvalue;
-    }
-
-
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-    
-
-
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-     //   switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-            
-    //    }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-            
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
+            case PdfDictionary.YStep:
+                return YStep;
 
             default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
+                return super.getFloatNumber(id);
         }
     }
 }

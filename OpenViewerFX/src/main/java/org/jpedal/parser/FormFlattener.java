@@ -388,7 +388,11 @@ public class FormFlattener {
                 }
                 newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
             } else {
-                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
+                if(form.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Ink){
+                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x-BBox[0], y-BBox[1], 1}};
+                }else{
+                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
+                }
                 newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
             }
         }

@@ -55,7 +55,6 @@ import org.jpedal.exception.PdfException;
 import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 import org.w3c.dom.NodeList;
 
@@ -122,8 +121,6 @@ public class GenericColorSpace {
     boolean failed;
     
     int alternative=PdfDictionary.Unknown;
-    
-    private PdfObject decodeParms;
     
     private boolean hasYCCKimages;
     
@@ -951,12 +948,7 @@ public class GenericColorSpace {
      * convert byte[] datastream JPEG to an image in RGB
      */
     public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY) {
-        
-        //see if LUV
-        if(decodeParms!=null && decodeParms.getInt(PdfDictionary.ColorTransform)==1 && this.value!=ColorSpaces.DeviceGray) {
-            return JPEGDecoder.JPEGToRGBImageFromLUV(data, pX, pY);
-        }
-        
+       
         BufferedImage image;
         
         try {
@@ -981,11 +973,6 @@ public class GenericColorSpace {
             image = null;
             
             LogWriter.writeLog("Problem reading JPEG: " + ee);
-        }
-        
-        //if all else has failed try this
-        if(image==null){
-            image=JPEGDecoder.JPEGToRGBImageFromLUV(data, pX, pY);
         }
         
 //        if(arrayInverted && this.value ==ColorSpaces.DeviceGray ) {
@@ -1272,11 +1259,7 @@ public class GenericColorSpace {
     public boolean isImageYCCK() {
         return hasYCCKimages;
     }
-    
-    public void setDecodeParms(final PdfObject parms) {
-        this.decodeParms=parms;
-    }
-    
+   
     public boolean isIndexConverted() {
         return isConverted;
     }

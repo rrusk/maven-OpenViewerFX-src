@@ -46,6 +46,12 @@ public class PdfObjectFactory {
     public static int getInlineID(final int PDFkeyInt) {
         switch(PDFkeyInt){
 
+            case PdfDictionary.BPC:
+                return PdfDictionary.BitsPerComponent;
+
+            case PdfDictionary.CMYK:
+                return ColorSpaces.DeviceCMYK;
+               
             case PdfDictionary.D:
                 return PdfDictionary.Decode;
 
@@ -57,6 +63,9 @@ public class PdfObjectFactory {
 
             case PdfDictionary.H:
                 return PdfDictionary.Height;
+                
+            case PdfDictionary.I:
+                return PdfDictionary.Indexed;
 
             case PdfDictionary.RGB:
                 return ColorSpaces.DeviceRGB;

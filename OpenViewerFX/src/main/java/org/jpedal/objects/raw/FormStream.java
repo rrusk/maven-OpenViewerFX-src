@@ -222,38 +222,30 @@ public class FormStream {
             } 
             
             else {
-
-                if(PdfDictionary.getKeyType(PdfDictionary.D, PdfDictionary.Form)==PdfDictionary.VALUE_IS_DICTIONARY_PAIRS) {
-
-                        //down on
-                        if(APobjD.getDictionary(PdfDictionary.On) !=null){
-                            key = "On";
-                            val = APobjD.getDictionary(PdfDictionary.On);
-                        }else {
-                            final Map otherValues=APobjD.getOtherDictionaries();
-                            if(otherValues!=null && !otherValues.isEmpty()){
-                                final Iterator keys=otherValues.keySet().iterator();
-                                while(keys.hasNext()){
-                                    key=(String)keys.next();
-                                    val=(PdfObject)otherValues.get(key);
-                                }
-                            }
-                        }
-
-                } else {
-
-                    //down off
-                    //if we have a root stream then it is the off value
-                    if(APobjD.getDecodedStream()!=null){
-                        downOffDic = APobjD;
-                    }else if(APobjD.getDictionary(PdfDictionary.Off) !=null){
-                        downOffDic = APobjD.getDictionary(PdfDictionary.Off);
-                    }
-
-
-
-                  }
                 
+                //down on
+                if (APobjD.getDictionary(PdfDictionary.On) != null) {
+                    key = "On";
+                    val = APobjD.getDictionary(PdfDictionary.On);
+                } else {
+                    final Map otherValues = APobjD.getOtherDictionaries();
+                    if (otherValues != null && !otherValues.isEmpty()) {
+                        final Iterator keys = otherValues.keySet().iterator();
+                        while (keys.hasNext()) {
+                            key = (String) keys.next();
+                            val = (PdfObject) otherValues.get(key);
+                        }
+                    }
+                }
+
+                //down off
+                //if we have a root stream then it is the off value
+                if (APobjD.getDecodedStream() != null) {
+                    downOffDic = APobjD;
+                } else if (APobjD.getDictionary(PdfDictionary.Off) != null) {
+                    downOffDic = APobjD.getDictionary(PdfDictionary.Off);
+                }
+
             }
 
             return new Object[]{key, val, downOffDic};
@@ -714,6 +706,9 @@ public class FormStream {
     			flip.translate(0, offset);
     			flip.scale(1, -1);
     			g2.setTransform(flip);
+                if(subtype==PdfDictionary.Ink){
+                    g2.translate(-(BBox[0]*scaling), -(BBox[3]*scaling));
+                }
     		}
 
             if(offsetImage==2)//invert

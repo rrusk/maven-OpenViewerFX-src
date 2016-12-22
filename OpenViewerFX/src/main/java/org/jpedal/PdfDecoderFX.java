@@ -151,8 +151,6 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     
     private final DisplayOffsets displayOffsets=new DisplayOffsets();
     
-    private ActionHandler formsActionHandler,userActionHandler;
-   
     /**amount we scroll screen to make visible*/
     private int scrollInterval=10;
     
@@ -1516,9 +1514,12 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         } else {
             options.setDisplayView(options.getPageMode());
         }
-         
-        formsActionHandler.init(this, externalHandlers.getJavaScript(), this.getFormRenderer());
-       
+        
+        ActionHandler handler = externalHandlers.getFormActionHandler();
+        if(handler!=null){
+            handler.init(this, externalHandlers.getJavaScript(), this.getFormRenderer());
+        }
+        
         PluginHandler customPluginHandle=(PluginHandler) externalHandlers.getExternalHandler(Options.PluginHandler);
             
         if(customPluginHandle!=null){
@@ -1558,14 +1559,14 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     
         final AcroRenderer formRenderer=externalHandlers.getFormRenderer();
         
-        if (userActionHandler != null) {
-            formsActionHandler = userActionHandler;
-        } else {
-            formsActionHandler = new org.jpedal.objects.acroforms.actions.JavaFXDefaultActionHandler(null);
+        
+        ActionHandler handler = externalHandlers.getFormActionHandler();
+        if(handler==null){
+            handler = new org.jpedal.objects.acroforms.actions.JavaFXDefaultActionHandler(null);
         }
         
         //pass in user handler if set
-        formRenderer.resetHandler(formsActionHandler, scalingdpi.getDpi(),externalHandlers.getJavaScript());
+        formRenderer.resetHandler(handler, scalingdpi.getDpi(),externalHandlers.getJavaScript());
         
         formRenderer.getCompData().setRootDisplayComponent(this);
    
@@ -1903,15 +1904,6 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         
         switch (type) {
             
-            
-          
-            case Options.FormsActionHandler:
-                
-                userActionHandler= (ActionHandler) newHandler;
-                
-                break;
-           
-           
             case Options.CustomMouseHandler:
                 JavaFXMouseListener.setCustomMouseFunctions((JavaFXMouseFunctionality) newHandler);
                 break;

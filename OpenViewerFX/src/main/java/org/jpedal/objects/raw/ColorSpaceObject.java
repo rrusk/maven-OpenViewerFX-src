@@ -33,90 +33,86 @@
 package org.jpedal.objects.raw;
 
 import org.jpedal.color.ColorSpaces;
-import org.jpedal.utils.LogWriter;
 
 public class ColorSpaceObject extends PdfObject {
 
-	//unknown CMAP as String
-	//String unknownValue=null;
-	
-	String Name;
-	
-	byte[] rawName;
-	
-	PdfObject Process;
-	
-	int Alternate=PdfDictionary.Unknown;
+    String Name;
 
-	private byte[][] rawComponents;
-	
-	private float[] BlackPoint, Gamma, WhitePoint;
-	
-	float N=-1;
-	
+    byte[] rawName;
+
+    PdfObject Process;
+
+    int Alternate = PdfDictionary.Unknown;
+
+    private byte[][] rawComponents;
+
+    private float[] BlackPoint, Gamma, WhitePoint;
+
+    float N = -1;
+
     public ColorSpaceObject(final String ref) {
         super(ref);
     }
 
     public ColorSpaceObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
-	@Override
+    @Override
     public byte[][] getStringArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Components:
-       		    return deepCopy(rawComponents);
+                return deepCopy(rawComponents);
 
             default:
-            	return super.getStringArray(id);
+                return super.getStringArray(id);
         }
     }
 
     @Override
     public void setStringArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Components:
-            	rawComponents=value;
-            break;
+                rawComponents = value;
+                break;
 
             default:
-            	super.setStringArray(id, value);
+                super.setStringArray(id, value);
         }
 
     }
 
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
-	
-        case PdfDictionary.Process:
-        	return Process;
-        
+        switch (id) {
+
+            case PdfDictionary.Process:
+                return Process;
+
             default:
                 return super.getDictionary(id);
         }
     }
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-        switch(id){
+        value.setID(id);
+
+        switch (id) {
 
             case PdfDictionary.Process:
-            	Process=value;
-    		break;
+                Process = value;
+                break;
 
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
 
@@ -124,72 +120,39 @@ public class ColorSpaceObject extends PdfObject {
     @Override
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
-        int PDFvalue =PdfDictionary.Unknown;
+        int PDFvalue;
 
-        int id=0,x=0,next;
+        final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-        try{
+        switch (id) {
 
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-                case PdfDictionary.G:
-                    PDFvalue =ColorSpaces.DeviceGray;
+            case PdfDictionary.G:
+                PDFvalue = ColorSpaces.DeviceGray;
                 break;
 
 
-                case PdfDictionary.RGB:
-                    PDFvalue =ColorSpaces.DeviceRGB;
+            case PdfDictionary.RGB:
+                PDFvalue = ColorSpaces.DeviceRGB;
                 break;
-                
-                default:
 
-                	PDFvalue=super.setConstant(pdfKeyType,id);
+            default:
+                PDFvalue = super.setConstant(pdfKeyType, id);
+                break;
 
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                            
-                        }
-                    
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
-        switch(pdfKeyType){
+        switch (pdfKeyType) {
 
-        case PdfDictionary.Alternate:
-        	Alternate=PDFvalue;
-    		break;       	
+            case PdfDictionary.Alternate:
+                Alternate = PDFvalue;
+                break;
         }
 
         return PDFvalue;
     }
-    
+
     @Override
     public int getParameterConstant(final int key) {
-        final int def = PdfDictionary.Unknown;
 
         switch (key) {
 
@@ -197,104 +160,99 @@ public class ColorSpaceObject extends PdfObject {
                 return Alternate;
 
             default:
-                super.getParameterConstant(key);
+                return super.getParameterConstant(key);
         }
-
-        return def;
     }
-
-
 
     @Override
     public float[] getFloatArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.BlackPoint:
-        		return deepCopy(BlackPoint);
+            case PdfDictionary.BlackPoint:
+                return deepCopy(BlackPoint);
 
-        	case PdfDictionary.Gamma:
-        		return deepCopy(Gamma);
-        		
-        	case PdfDictionary.WhitePoint:
-        		return deepCopy(WhitePoint);
-        		
+            case PdfDictionary.Gamma:
+                return deepCopy(Gamma);
+
+            case PdfDictionary.WhitePoint:
+                return deepCopy(WhitePoint);
+
             default:
-            	return super.getFloatArray(id);
+                return super.getFloatArray(id);
 
         }
     }
-    
+
     @Override
-    public void setFloatNumber(final int id, final float value){
+    public void setFloatNumber(final int id, final float value) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.N:
-		    N=value;
-	    	break;
-    	
+            case PdfDictionary.N:
+                N = value;
+                break;
+
             default:
-            	super.setFloatNumber(id, value);
+                super.setFloatNumber(id, value);
         }
     }
-    
+
     @Override
-    public float getFloatNumber(final int id){
+    public float getFloatNumber(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.N:
-	        return N;
-	        
+            case PdfDictionary.N:
+                return N;
+
             default:
-            	return super.getFloatNumber(id);
+                return super.getFloatNumber(id);
         }
     }
 
     @Override
     public void setFloatArray(final int id, final float[] value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.BlackPoint:
-	            BlackPoint=value;
-	        break;
+            case PdfDictionary.BlackPoint:
+                BlackPoint = value;
+                break;
 
-	        case PdfDictionary.Gamma:
-	            Gamma=value;
-	        break;
-	        
-	        case PdfDictionary.WhitePoint:
-	            WhitePoint=value;
-	        break;
-	        
+            case PdfDictionary.Gamma:
+                Gamma = value;
+                break;
+
+            case PdfDictionary.WhitePoint:
+                WhitePoint = value;
+                break;
+
             default:
-            	super.setFloatArray(id, value);
+                super.setFloatArray(id, value);
         }
     }
 
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
 
             case PdfDictionary.Name:
-                rawName=value;
-            break;
+                rawName = value;
+                break;
 
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
-
     }
-    
+
     @Override
     public byte[] getStringValueAsByte(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Name:
                 return rawName;
@@ -303,18 +261,16 @@ public class ColorSpaceObject extends PdfObject {
                 return super.getStringValueAsByte(id);
 
         }
-
     }
 
 
-    
     @Override
     public byte[] getRawName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Name:
-            return rawName;
+                return rawName;
 
             default:
                 return super.getRawName(id);
@@ -325,16 +281,16 @@ public class ColorSpaceObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Name:
 
-            //setup first time
-            if(Name==null && rawName!=null) {
-                Name = new String(rawName);
-            }
+                //setup first time
+                if (Name == null && rawName != null) {
+                    Name = new String(rawName);
+                }
 
-            return Name;
+                return Name;
 
             default:
                 return super.getName(id);
@@ -342,76 +298,14 @@ public class ColorSpaceObject extends PdfObject {
         }
     }
 
-
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-       // switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-      //  }
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
-        }
-    }
-    
     @Override
     public int getObjectType() {
-		return PdfDictionary.ColorSpace;
-	}
-    
-    
+        return PdfDictionary.ColorSpace;
+    }
+
+
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
+        return true;
+    }
 }

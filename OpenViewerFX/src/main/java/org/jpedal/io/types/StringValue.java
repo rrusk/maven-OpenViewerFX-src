@@ -44,43 +44,34 @@ public class StringValue {
     
     
     public static int setStringConstantValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
-        
-        i++;
 
-        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i+1, 47);
         
         final int keyStart=i;
-        int keyLength=0;
-        
+
         //move cursor to end of text
         while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
             i++;
-            keyLength++;
         }
-        
-        i--;// move back so loop works
-        
+
         //store value
-        pdfObject.setConstant(PDFkeyInt,keyStart,keyLength,raw);
+        pdfObject.setConstant(PDFkeyInt,keyStart,i-keyStart,raw);
         
         if(debugFastCode) {
-            System.out.println(padding + "Set constant in " + pdfObject + " to " + pdfObject.setConstant(PDFkeyInt, keyStart, keyLength, raw));
+            System.out.println(padding + "Set constant in " + pdfObject + " to " + pdfObject.setConstant(PDFkeyInt, keyStart, i-keyStart, raw));
         }
         
-        return i;
+        return i-1;   // move back so loop works
     }
     
 
     
     public static int setStringKeyValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
-        
-        i++;
 
-        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i+1, 47);
         
         final int keyStart=i;
-        int keyLength=1;
-        
+
         boolean isNull=false;
         
         //move cursor to end of text (allow for null)
@@ -92,28 +83,29 @@ public class StringValue {
             }
             
             i++;
-            keyLength++;
         }
-        
-        i--;// move back so loop works
-        
+
         if(!isNull){
-            
-            //set value
-            final byte[] stringBytes=new byte[keyLength];
-            System.arraycopy(raw,keyStart,stringBytes,0,keyLength);
-            
-            //store value
-            pdfObject.setStringKey(PDFkeyInt,stringBytes);
-            
-            
-            if(debugFastCode) {
-                System.out.println(padding + "Set constant in " + pdfObject + " to " + new String(stringBytes));
-            }
+            setValue(pdfObject, 1+i-keyStart, raw, PDFkeyInt, keyStart);
         }
-        return i;
+
+        return i-1; // move back so loop works
     }
-    
+
+    static void setValue(final PdfObject pdfObject, final int keyLength, final byte[] raw, final int PDFkeyInt, final int keyStart) {
+
+        //set value
+        final byte[] stringBytes=new byte[keyLength];
+        System.arraycopy(raw,keyStart,stringBytes,0,keyLength);
+
+        //store value
+        pdfObject.setStringKey(PDFkeyInt,stringBytes);
+
+        if(debugFastCode) {
+            System.out.println(padding + "Set constant in " + pdfObject + " to " + new String(stringBytes));
+        }
+    }
+
 }
 
 

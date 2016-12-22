@@ -631,6 +631,8 @@ public class Parser {
 
     void decodePage(int rawPage) {
 
+        TTGlyph.redecodePage = false;
+
         //flag if decoding started
         final Object customErrorTracker=externalHandlers.getExternalHandler(Options.ErrorTracker);
 
@@ -839,7 +841,6 @@ public class Parser {
 
         //Check for exceptions in TrueType hinting and re decode if neccessary
         if (TTGlyph.redecodePage) {
-            TTGlyph.redecodePage = false;
             decodePage(rawPage);
         }
         

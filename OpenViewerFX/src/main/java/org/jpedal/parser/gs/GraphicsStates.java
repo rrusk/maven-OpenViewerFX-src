@@ -124,8 +124,8 @@ public class GraphicsStates {
     /**
      * restore GraphicsState status from graphics stack
      */
-    public GraphicsState restoreGraphicsState(GraphicsState gs, final DynamicVectorRenderer current) {
-
+    public GraphicsState restoreGraphicsState(final DynamicVectorRenderer current) {
+		GraphicsState gs = null;
         if(!isStackInitialised){
 
             LogWriter.writeLog("No GraphicsState saved to retrieve");
@@ -176,8 +176,7 @@ public class GraphicsStates {
     public void correctDepth(final int currentDepth, final GraphicsState gs, final DynamicVectorRenderer current) {
 
         while(depth>currentDepth){
-
-            restoreGraphicsState(gs,current);
+            restoreGraphicsState(current);
         }
     }
 }

@@ -1030,6 +1030,10 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 
         addCombo(Messages.getMessage("PdfViewerToolbarTooltip.rotation"), Commands.ROTATION);
 
+        //rotation buttons
+        fxButtons.addButton(GUIFactory.BUTTONBAR, Messages.getMessage("PdfViewerToolbarTooltip.rotateLeft"), "rotateLeft.gif", Commands.ROTATELEFT, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
+        fxButtons.addButton(GUIFactory.BUTTONBAR, Messages.getMessage("PdfViewerToolbarTooltip.rotateRight"), "rotateRight.gif", Commands.ROTATERIGHT, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
+
         fxButtons.addButton(GUIFactory.BUTTONBAR, Messages.getMessage("PdfViewerToolbarTooltip.mouseMode"), "mouse_select.png", Commands.MOUSEMODE, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
 
         fxButtons.getTopButtons().getItems().add(sep);

@@ -32,16 +32,7 @@
  */
 package org.jpedal.objects.raw;
 
-import org.jpedal.utils.LogWriter;
-
 public class OCObject extends PdfObject {
-
-	//unknown CMAP as String
-	//String unknownValue=null;
-
-	//private float[] Matrix;
-
-	//boolean ImageMask=false;
 
     float max,min;
     
@@ -62,9 +53,6 @@ public class OCObject extends PdfObject {
     public OCObject(final int ref, final int gen) {
        super(ref,gen);
     }
-
-
-
 
     @Override
     public PdfObject getDictionary(final int id){
@@ -173,58 +161,15 @@ public class OCObject extends PdfObject {
     @Override
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
-        int PDFvalue =PdfDictionary.Unknown;
+        final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-        int id=0,x=0,next;
-
-        try{
-
-            //convert token to unique key which we can lookup
-
-            for(int i2=keyLength-1;i2>-1;i2--){
-
-            	next=raw[keyStart+i2];
-
-            	next -= 48;
-
-                id += ((next)<<x);
-
-                x += 8;
-            }
-
-            switch(id){
-
-                default:
-
-                	PDFvalue=super.setConstant(pdfKeyType,id);
-
-                    if(PDFvalue==-1 && debug){
-
-                        	 final byte[] bytes=new byte[keyLength];
-
-                            System.arraycopy(raw,keyStart,bytes,0,keyLength);
-                            System.out.println("key="+new String(bytes)+ ' ' +id+" not implemented in setConstant in "+this);
-
-                            System.out.println("final public static int "+new String(bytes)+ '=' +id+ ';');
-                            
-                        }
-
-                    break;
-
-            }
-
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception: " + e.getMessage());
-        }
+        final int PDFvalue=super.setConstant(pdfKeyType,id);
 
         switch(pdfKeyType){
 
             case PdfDictionary.Event:
                     Event=PDFvalue;
                 break;
-
-            default:
-    			super.setConstant(pdfKeyType,id);
 
         }
 
@@ -241,28 +186,11 @@ public class OCObject extends PdfObject {
             case PdfDictionary.Event:
                 return Event;
 
-
-//            case PdfDictionary.BaseEncoding:
-//
-//            	//special cases first
-//            	if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isZapfDingbats)
-//            		return StandardFonts.ZAPF;
-//            	else if(key==PdfDictionary.BaseEncoding && Encoding!=null && Encoding.isSymbol)
-//            		return StandardFonts.SYMBOL;
-//            	else
-//            		return BaseEncoding;
         default:
         	return super.getParameterConstant(key);
 
         }
     }
-
-//    public void setStream(){
-//
-//        hasStream=true;
-//    }
-
-
 
     @Override
     public void setName(final int id, final byte[] value) {
@@ -346,69 +274,6 @@ public class OCObject extends PdfObject {
             default:
                 return super.getName(id);
 
-        }
-    }
-
-
-    /**
-     * unless you need special fucntions,
-     * use getStringValue(int id) which is faster
-     */
-    @Override
-    public String getStringValue(final int id, final int mode) {
-
-        final byte[] data=null;
-
-        //get data
-   //     switch(id){
-
-//            case PdfDictionary.BaseFont:
-//                data=rawBaseFont;
-//                break;
-
-     //   }
-
-
-        //convert
-        switch(mode){
-            case PdfDictionary.STANDARD:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-
-            case PdfDictionary.LOWERCASE:
-
-                //setup first time
-                if(data!=null) {
-                    return new String(data);
-                } else {
-                    return null;
-                }
-
-            case PdfDictionary.REMOVEPOSTSCRIPTPREFIX:
-
-                //setup first time
-                if(data!=null){
-                	final int len=data.length;
-                	if(len>6 && data[6]=='+'){ //lose ABCDEF+ if present
-                		final int length=len-7;
-                		final byte[] newData=new byte[length];
-                		System.arraycopy(data, 7, newData, 0, length);
-                		return new String(newData);
-                	}else {
-                        return new String(data);
-                    }
-                }else {
-                    return null;
-                }
-
-            default:
-                throw new RuntimeException("Value not defined in getName(int,mode) in "+this);
         }
     }
 

@@ -262,6 +262,12 @@ public class JavaFXCommands extends Commands {
                 case CURRENTPAGE:
                     status = CurrentPage.execute(decode_pdf, currentGUI);
                     break;
+                case ROTATELEFT:
+                    RotationLeft.execute(currentGUI, commonValues);
+                    break;
+                case ROTATERIGHT:
+                    RotationRight.execute(currentGUI, commonValues);
+                    break;
                 default:
                     if(GUI.debugFX) {
                         System.out.println("Command ID " + ID + " not Implemented Yet for JavaFX");

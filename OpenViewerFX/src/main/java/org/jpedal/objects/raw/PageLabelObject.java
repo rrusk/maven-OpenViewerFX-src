@@ -35,84 +35,83 @@ package org.jpedal.objects.raw;
 import org.jpedal.utils.StringUtils;
 
 /**
- *
  * @author markee
  */
 public class PageLabelObject extends PdfObject {
 
-    private int St=-1; //note default is 1
-    
+    private int St = -1; //note default is 1
+
     String P;
     byte[] rawP;
-    
+
     public PageLabelObject(String key) {
         super(key);
-        
-        objType=PdfDictionary.PageLabels;
+
+        objType = PdfDictionary.PageLabels;
     }
-   
-   
-     @Override
+
+
+    @Override
     public String getTextStreamValue(final int id) {
-        
-        switch(id){
-         
+
+        switch (id) {
+
             case PdfDictionary.P:
-                
+
                 //setup first time
-                if(P==null && rawP!=null) {
+                if (P == null && rawP != null) {
                     P = StringUtils.getTextString(rawP, false);
                 }
-                
+
                 return P;
-                
+
             default:
                 return super.getTextStreamValue(id);
         }
     }
-    
+
     @Override
     public void setTextStreamValue(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
 
             case PdfDictionary.P:
-                rawP=value;
-            break;
+                rawP = value;
+                break;
 
             default:
-                super.setTextStreamValue(id,value);
+                super.setTextStreamValue(id, value);
 
         }
     }
-    
-    
+
+
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.St:
-	        	St=value;
-	        break;
-	
+            case PdfDictionary.St:
+                St = value;
+                break;
+
 
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
-    
-     @Override
-    public int getInt(final int id){
 
-        switch(id){
+    @Override
+    public int getInt(final int id) {
 
-	        case PdfDictionary.St:
-	            return St;
-	        
+        switch (id) {
+
+            case PdfDictionary.St:
+                return St;
+
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
 }

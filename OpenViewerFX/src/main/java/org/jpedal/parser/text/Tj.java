@@ -518,37 +518,39 @@ public class Tj extends BaseDecoder {
                 int idx=glyphData.getRawInt();
                 boolean  isInvalid=false;
 
-                if(!glyphs.isCorrupted()){
-                    if(currentFontData.isCIDFont()&& !glyphs.isIdentity()){
-                        if(glyphs.hasGIDtoCID() && glyphs.getTable(FontFile2.CMAP)==null){
-                                final int mappedIdx=currentFontData.getEncodedCMAPValue(idx);
-                                if(mappedIdx>0) {
-                                    idx = mappedIdx;
-                                    glyphData.setRawInt(idx);
-                                    actualWidth = currentFontData.getWidth(mappedIdx);
-                                }else{
-                                    isInvalid=true;
-                                }
-                        }else{ //should only be use dif no CIDtoGID used in mapping
+                if (!glyphs.isCorrupted()) {
+                    
+                    if (glyphs.is1C()) {
+                        final int idx2 = glyphs.getCMAPValue(idx);
+                        if (idx2 > 0) {
+                            idx = idx2;    
+                            glyphData.setRawInt(idx);
+                        }
+                    }
+                    
+                    if (currentFontData.isCIDFont() && !glyphs.isIdentity()) {
+                        
+                        if (!glyphs.hasGIDtoCID() || (  glyphs.getTable(FontFile2.CMAP) != null && glyphs.isValidGIDtoCID(idx))) {//should only be use dif no CIDtoGID used in mapping
 
-                            final int idx2=glyphs.getCMAPValue(glyphData.getRawInt());
-                            if(idx2>0){
-                                if(glyphs.is1C()) {
-                                    glyphData.setRawInt(idx2);
-                                    idx=idx2;
-                                }
-                                actualWidth = currentFontData.getWidth(idx2);
+                            final int idx2 = glyphs.getConvertedGlyph(idx);
+                            if (idx2 != -1) {
+                                idx = idx2;
                             }
 
-                            final int mappedIdx=glyphs.getConvertedGlyph(idx);
-
-                            if(mappedIdx!=-1) {
-                                idx = mappedIdx;
+                        } else if (glyphs.getTable(FontFile2.CMAP) == null) {
+                            final int idx2 = currentFontData.getEncodedCMAPValue(idx);
+                            if (idx2 > 0) {
+                                idx = idx2;
+                                glyphData.setRawInt(idx);
+                            } else {
+                                isInvalid = true;
                             }
                         }
-                    }else if(currentFontData.getFontType()==StandardFonts.TYPE1){//if a numeric value we need to replace to get correct glyph
-                       final int diff=currentFontData.getDiffChar(idx);
-                        if(diff>0){
+
+                        
+                    } else if (currentFontData.getFontType() == StandardFonts.TYPE1) {//if a numeric value we need to replace to get correct glyph
+                        final int diff = currentFontData.getDiffChar(idx);
+                        if (diff > 0) {
                             glyphData.setRawInt(diff);
                         }
                     }

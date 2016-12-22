@@ -48,11 +48,11 @@ import org.jpedal.utils.StringUtils;
  */
 public class Name {
 
-    public static int setNameTreeValue(final PdfObject pdfObject, int i, final byte[] raw, final int length, final boolean ignoreRecursion, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int setNameTreeValue(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final PdfFileReader objectReader) {
       
         boolean isRef=false;
         
-//move to start
+        //move to start
         while(raw[i]!='[' ){ //can be number as well
             
             if(raw[i]=='('){ //allow for W (7)
@@ -89,37 +89,35 @@ public class Name {
             {
                 throw new RuntimeException("3. Unexpected value in file " + raw[i] + " - please send to IDRsolutions for analysis");
             }
-            
-            if(!ignoreRecursion){
-                
-                //read the Dictionary data
-                data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
-                
-                //allow for data in Linear object not yet loaded
-                if(data==null){
-                    pdfObject.setFullyResolved(false);
-                    
-                    if(debugFastCode) {
-                        System.out.println(padding + "Data not yet loaded");
-                    }
-                    
-                    i=length;
-                    return i;
+
+            //read the Dictionary data
+            data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
+
+            //allow for data in Linear object not yet loaded
+            if(data==null){
+                pdfObject.setFullyResolved(false);
+
+                if(debugFastCode) {
+                    System.out.println(padding + "Data not yet loaded");
                 }
-                
-                //lose obj at start
-                j=3;
-                while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111 && data[j-3]!='<') {
-                    j++;
-                }
-                
-                j = StreamReaderUtils.skipSpaces(data, j);
-                
-                //reset pointer
-                start=j;
-                
+
+                i=length;
+                return i;
             }
+
+            //lose obj at start
+            j=3;
+            while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111 && data[j-3]!='<') {
+                j++;
+            }
+
+            j = StreamReaderUtils.skipSpaces(data, j);
+
+            //reset pointer
+            start=j;
+
         }
+
         
         //move to end
         while(j<data.length){
@@ -136,37 +134,40 @@ public class Name {
             
             j++;
         }
-        
-        if(!ignoreRecursion){
-            final int stringLength=j-start+1;
-            byte[] newString=new byte[stringLength];
-            
-            System.arraycopy(data, start, newString, 0, stringLength);
-            if(pdfObject.getObjectType()!= PdfDictionary.Encrypt){ 
-                final DecryptionFactory decryption=objectReader.getDecryptionObject();
-                if(decryption!=null){
-                    try {
-                        newString=decryption.decrypt(newString, pdfObject.getObjectRefAsString(), false,null, false,false);
-                    } catch (final PdfSecurityException e) {
-                        LogWriter.writeLog("Exception: " + e.getMessage());
-                    }
-                }
-            }
-            
-            pdfObject.setTextStreamValue(PDFkeyInt, newString);
-            
-            if(debugFastCode) {
-                System.out.println(padding + "name=" + new String(newString) + " set in " + pdfObject);
-            }
+
+        final byte[] newString = getString(pdfObject, objectReader, data, start, j);
+
+        pdfObject.setTextStreamValue(PDFkeyInt, newString);
+
+        if(debugFastCode) {
+            System.out.println(padding + "name=" + new String(newString) + " set in " + pdfObject);
         }
-        
+
         //roll on
         if(!isRef) {
             i = j;
         }
         return i;
     }
-    
+
+    static byte[] getString(final PdfObject pdfObject, final PdfFileReader objectReader, final byte[] data, final int start, final int j) {
+        final int stringLength=j-start+1;
+        byte[] newString=new byte[stringLength];
+
+        System.arraycopy(data, start, newString, 0, stringLength);
+        if(pdfObject.getObjectType()!= PdfDictionary.Encrypt){
+            final DecryptionFactory decryption=objectReader.getDecryptionObject();
+            if(decryption!=null){
+                try {
+                    newString=decryption.decrypt(newString, pdfObject.getObjectRefAsString(), false,null, false,false);
+                } catch (final PdfSecurityException e) {
+                    LogWriter.writeLog("Exception: " + e.getMessage());
+                }
+            }
+        }
+        return newString;
+    }
+
     public static int setNameStringValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean isMap, final Object PDFkey, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         byte[] stringBytes;
