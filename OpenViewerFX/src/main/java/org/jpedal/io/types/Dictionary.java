@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -50,7 +50,10 @@ import org.jpedal.utils.NumberUtils;
  */
 public class Dictionary {
 
-    public static int readDictionary(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final boolean ignoreRecursion, final PdfFileReader objectReader) {
+    public static int readDictionary(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
+        
+        //if we only need top level do not read whole tree
+        final boolean ignoreRecursion=pdfObject.ignoreRecursion();
         
         //roll on
         if(raw[i]!='<') {
@@ -116,70 +119,11 @@ public class Dictionary {
 
         return i;
     }
-    
-    public static int getPairedValues(final PdfObject pdfObject, final int i, final byte[] raw, final int pdfKeyType, final int length, final int keyLength, final int keyStart) {
-        
-        boolean isPair=false;
-        
-        int jj=i;
-        
-        while(jj<length){
-            
-            jj=StreamReaderUtils.skipSpaces(raw, jj);
-            
-            //number (possibly reference)
-            if(jj<length && raw[jj]>='0' && raw[jj]<='9'){
-                
-                //rest of ref
-                while(jj<length && raw[jj]>='0' && raw[jj]<='9') {
-                    jj++;
-                }
-                
-                jj=StreamReaderUtils.skipSpaces(raw, jj);
-        
-                //generation and spaces
-                while(jj<length && ((raw[jj]>='0' && raw[jj]<='9')||(raw[jj]==32 || raw[jj]==10 || raw[jj]==13))) {
-                    jj++;
-                }
-                
-                //not a ref
-                if(jj>=length || raw[jj]!='R') {
-                    break;
-                }
-                
-                //roll past R
-                jj++;
-            }
-            
-            jj=StreamReaderUtils.skipSpaces(raw, jj);
-                        
-            
-            //must be next key or end
-            if(raw[jj]=='>' && raw[jj+1]=='>'){
-                isPair=true;
-                break;
-            }else if(raw[jj]!='/') {
-                break;
-            }
-            
-            jj++;
-            
-            //ignore any spaces
-            while(jj<length && (raw[jj]!=32 && raw[jj]!=13 && raw[jj]!=10)) {
-                jj++;
-            }
-            
-        }
-        
-        if(isPair){
-            pdfObject.setCurrentKey(PdfDictionary.getKey(keyStart,keyLength,raw));
-            return PdfDictionary.VALUE_IS_UNREAD_DICTIONARY;
-        }else {
-            return pdfKeyType;
-        }
-    }
 
-    public static int setDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw, final int length, final boolean ignoreRecursion, final PdfFileReader objectReader, final int PDFkeyInt) {
+    public static int setDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw, final PdfFileReader objectReader, final int PDFkeyInt) {
+        
+        //if we only need top level do not read whole tree
+        final boolean ignoreRecursion=pdfObject.ignoreRecursion();
         
         if(debugFastCode) {
             System.out.println(padding + ">>>Reading Dictionary Pairs i=" + i + ' ' + (char) raw[i] + (char) raw[i + 1] + (char) raw[i + 2] + (char) raw[i + 3] + (char) raw[i + 4] + (char) raw[i + 5] + (char) raw[i + 6]);
@@ -215,8 +159,7 @@ public class Dictionary {
                         System.out.println(padding + "Data not yet loaded");
                     }
                     
-                    i=length;
-                    return i;
+                    return raw.length;
                 }
                 
                 if(data[0]=='<' && data[1]=='<'){
@@ -537,7 +480,7 @@ public class Dictionary {
      * @return
      */
     public static int readDictionaryFromRefOrDirect(final PdfObject pdfObject, final String objectRef, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
-        
+
         readDictionaryFromRefOrDirect:
         while (true) {
             
@@ -549,29 +492,15 @@ public class Dictionary {
             }
             
             if (raw[i] == 60) { //[<<data inside brackets>>]
-                
-                boolean isPairs=false;
-                
-                //@zain @bethan - you will need to enable here
-                //do this third
-                
-                //we need to avoid this for AA as D can occur in there as a Dictionary
-                final int parentType=pdfObject.getPDFkeyInt();
-                
-                if((parentType!=PdfDictionary.AA) &&
-                        (PDFkeyInt==PdfDictionary.N || PDFkeyInt==PdfDictionary.R || PDFkeyInt==PdfDictionary.D)){
-                    isPairs=isDictionaryPairs(i, raw);    
-                }
-                
-                if(isPairs){
-                    FormObject APobj=new FormObject(objectRef);
-                    pdfObject.setDictionary(PDFkeyInt, APobj);
-                    
-                    i=readKeyPairs(raw,  i,  APobj);
-                  
+
+                i = handlePairs(pdfObject, objectRef, i, raw, PDFkeyInt);
+
+                if(i<0) {
+                    i=-i;
                 }else{
                     i =  DirectDictionaryToObject.convert(pdfObject, objectRef, i, raw, PDFkeyInt,objectReader);
                 }
+
             } else if (raw[i] == 47) { //direct value such as /DeviceGray
                 
                 i = ObjectUtils.setDirectValue(pdfObject, i, raw, PDFkeyInt);
@@ -623,9 +552,9 @@ public class Dictionary {
                         }
                     }
 
-                       generation = values[1];
-                       j = values[2];
-                     
+                    generation = values[1];
+                    j = values[2];
+
                     data = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(ref, generation), ref, generation);
                     
                     //allow for data in Linear object not yet loaded
@@ -680,14 +609,45 @@ public class Dictionary {
                 }
                 
                 //allow for no data found (ie /PDFdata/baseline_screens/debug/hp_broken_file.pdf)
-                if (data != null) {               
-                    i=readObj(j, data, raw, ref, generation, i, pdfObject, PDFkeyInt, objectReader);
+                if (data != null) {
+                    i = handlePairs(pdfObject, objectRef, i, raw, PDFkeyInt);
+
+                    if(i<0) {
+                        i=-i;
+                    }else{
+                        i=readObj(j, data, raw, ref, generation, i, pdfObject, PDFkeyInt, objectReader);
+                    }
                 }
             }
             
             return i;
         }
-    }   
+    }
+
+    static int handlePairs(PdfObject pdfObject, String objectRef, int i, byte[] raw, int PDFkeyInt) {
+
+        boolean isPairs=false;
+
+        //@zain @bethan - you will need to enable here
+        //do this third
+
+        //we need to avoid this for AA as D can occur in there as a Dictionary
+        final int parentType=pdfObject.getPDFkeyInt();
+
+        if((parentType!= PdfDictionary.AA) &&
+                (PDFkeyInt==PdfDictionary.N || PDFkeyInt==PdfDictionary.R || PDFkeyInt==PdfDictionary.D || PDFkeyInt==PdfDictionary.Dests)){
+            isPairs=isDictionaryPairs(i, raw);
+        }
+
+        if(isPairs){
+            FormObject APobj=new FormObject(objectRef);
+            pdfObject.setDictionary(PDFkeyInt, APobj);
+
+            i=-readKeyPairs(raw,  i,  APobj);
+
+        }
+        return i;
+    }
 
     private static int readObj(int j, byte[] data, final byte[] raw, int ref, int generation, int i, final PdfObject pdfObject, final int PDFkeyInt, final PdfFileReader objectReader) {
 
@@ -735,7 +695,7 @@ public class Dictionary {
     }
 
 
-    public static int setDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean ignoreRecursion, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int setDictionaryValue(final PdfObject pdfObject, int i, final byte[] raw,final int PDFkeyInt, final PdfFileReader objectReader) {
 
         /*
          * workout actual end as not always returned right
@@ -806,7 +766,7 @@ public class Dictionary {
         }
 
         //boolean save=debugFastCode;
-        Dictionary.readDictionary(pdfObject,i, raw, PDFkeyInt, ignoreRecursion, objectReader);
+        Dictionary.readDictionary(pdfObject,i, raw, PDFkeyInt, objectReader);
 
         //use correct value
         return end;
@@ -905,7 +865,7 @@ public class Dictionary {
         
         final int length=raw.length;
         int level=-1;
-        
+
         //assume true and disprove
         boolean isPair=true;
         
@@ -920,10 +880,9 @@ public class Dictionary {
                 if(level<0){                    
                     break;
                 }
-            }else if(level==0 && (raw[j]=='[' || (raw[j]=='/' && raw[j+1]=='T' && raw[j+2]=='y' && raw[j+3]=='e')
+            }else if(level==0 && (raw[j]=='[' || (raw[j]=='/' && raw[j+1]=='T' && raw[j+2]=='y' && raw[j+3]=='p')
                     || (raw[j]=='/' && raw[j+1]=='R' && raw[j+2]=='e' && raw[j+3]=='s' && raw[j+4]=='o' && raw[j+5]=='u')
-                    || (raw[j]=='s' && raw[j+1]=='t' && raw[j+2]=='r' && raw[j+3]=='e' && raw[j+4]=='a' && raw[j+5]=='m'))){
-                    //System.out.println("Straight Dictionary");
+                    || (raw[j]=='s' && raw[j+1]=='t' && raw[j+2]=='r' && raw[j+3]=='e' && raw[j+4]=='a' && raw[j+5]=='m') || (raw[j]=='(' && raw[j+1]== ')'))){
                     j=length;
                     isPair=false;
             }

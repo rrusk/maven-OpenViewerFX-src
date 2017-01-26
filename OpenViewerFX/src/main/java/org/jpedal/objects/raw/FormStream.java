@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -38,8 +38,6 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.StringTokenizer;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.fonts.FontMappings;
@@ -109,15 +107,6 @@ public class FormStream {
             if(APobjR.getDictionary(PdfDictionary.On) !=null){
                 key = "On";
                 val = APobjR.getDictionary(PdfDictionary.On);
-            }else {
-                final Map otherValues=APobjR.getOtherDictionaries();
-                if(otherValues!=null && !otherValues.isEmpty()){
-                    final Iterator keys=otherValues.keySet().iterator();
-                    while(keys.hasNext()){
-                        key=(String)keys.next();
-                        val=(PdfObject)otherValues.get(key);
-                    }
-                }
             }
         }
         return new Object[] {key, val, rollOffDic};
@@ -174,15 +163,6 @@ public class FormStream {
             if(APobjN.getDictionary(PdfDictionary.On) !=null){
                 val = APobjN.getDictionary(PdfDictionary.On);
                 key = "On";
-            }else {
-                final Map otherValues=APobjN.getOtherDictionaries();
-                if(otherValues!=null && !otherValues.isEmpty()){
-                    final Iterator keys=otherValues.keySet().iterator();
-                    while(keys.hasNext()){
-                        key=(String)keys.next();
-                        val=(PdfObject)otherValues.get(key);
-                    }
-                }
             }
         }
         
@@ -227,15 +207,6 @@ public class FormStream {
                 if (APobjD.getDictionary(PdfDictionary.On) != null) {
                     key = "On";
                     val = APobjD.getDictionary(PdfDictionary.On);
-                } else {
-                    final Map otherValues = APobjD.getOtherDictionaries();
-                    if (otherValues != null && !otherValues.isEmpty()) {
-                        final Iterator keys = otherValues.keySet().iterator();
-                        while (keys.hasNext()) {
-                            key = (String) keys.next();
-                            val = (PdfObject) otherValues.get(key);
-                        }
-                    }
                 }
 
                 //down off
@@ -362,7 +333,6 @@ public class FormStream {
             final String ASvalue=formObject.getName(PdfDictionary.AS);
             
             formObject.setAppreancesUsed(true);
-            formObject.setNormalOnState(ASvalue);
 
             final String key=(String) getNormalKeyValues(formObject, pdfFileReader)[0];
             
@@ -434,64 +404,13 @@ public class FormStream {
         
     	currentPdfFile.checkResolved(XObject);
     	try{
-
-    		/*
-    		 * generate local object to decode the stream
-    		 */
-            final ObjectStore localStore = new ObjectStore();
-
-
-    		/*
-    		 * create renderer object
-    		 */
-    		final T3Renderer glyphDisplay=new T3Display(0,false,20,localStore);
             
-            final PdfStreamDecoder glyphDecoder=new PdfStreamDecoder(currentPdfFile);
-            glyphDecoder.setParameters(false,true,15,0,false,false);
-
-            glyphDecoder.setStreamType(ValueTypes.FORM);
-
-            glyphDecoder.setObjectValue(ValueTypes.ObjectStore,localStore);
-
-            glyphDecoder.setRenderer(glyphDisplay);
-
-    		/*read any resources*/
-    		try{
-    			PdfObject Resources =XObject.getDictionary(PdfDictionary.Resources);
-
-                //because N,D,R are very complicated with potentially paired values,
-                //Resources can end up here
-                //see   baseline_screens/14jul/18093.pdf
-                if(Resources==null) {
-                    Resources = (PdfObject) XObject.getOtherDictionaries().get("Resources");
-                }
-
-    			if (Resources != null) {
-                    glyphDecoder.readResources(Resources, false);
-                }
-
-    		}catch(final Exception e){
-    			LogWriter.writeLog("Exception: " + e.getMessage());
-            }
-
-            /*decode the stream*/
-    		final byte[] commands=XObject.getDecodedStream();
-
+    		//create renderer object
+    		org.jpedal.fonts.glyph.T3Glyph form = decodeStream(currentPdfFile, XObject);
+            
             final float[] matrix=XObject.getFloatArray(PdfDictionary.Matrix);
             final float[] BBox=XObject.getFloatArray(PdfDictionary.BBox);
     		
-            glyphDecoder.setBBox(BBox);
-            
-            if(commands!=null) {
-                glyphDecoder.decodeStreamIntoObjects(commands, false);
-            }
-
-    		final boolean ignoreColors=glyphDecoder.ignoreColors;
-
-    		localStore.flush();
-
-    		final org.jpedal.fonts.glyph.T3Glyph form= new org.jpedal.fonts.glyph.T3Glyph(glyphDisplay, 0,0,ignoreColors);
-
             final float scaling;
     		
     		float rectX1=0,rectY1=0;
@@ -592,12 +511,6 @@ public class FormStream {
     		if(width==0 || height==0) {
                 return null;
             }
-    		
-    		//This makes ink icons incorrect so commented out
-//    		if(scaling>1){
-//    			height+=2;
-//    			width+=2;
-//    		}
 
     		//if offset
     		if(offsetImage==1){
@@ -605,117 +518,19 @@ public class FormStream {
     			height+=2;
     		}
     		
-    		final BufferedImage aa;
-    		final Graphics2D g2;
-    		
-            final float a;
-            final float b;
-            final float c;
-            final float d;
-            float e;
-            float f;
-            int offset=height;
+            final BufferedImage aa;
+        
+            if (matrix != null && matrix[2] != 0) {
+                aa = new BufferedImage(height, width, BufferedImage.TYPE_INT_ARGB);
+            } else {
+                aa = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);                
+            }
+        
+    		final Graphics2D g2 = createGaphics(aa, formObj, matrix, BBox, pageScaling, scaling, rectX1, rectY1, width, height);
 
-            if(matrix!=null){
-
-                //Added for odd case 22179
-                //pageScaling!=1 added to lock out of html as when not 1 html baseline is affected
-                if (pageScaling==1 && matrix[4] > 0 && matrix[5] > 0) {
-                    
-//                    final float[] BoundingBox = XObject.getFloatArray(PdfDictionary.BBox);
-                    final float[] BBox2 = formObj.getFloatArray(PdfDictionary.Rect);
-                    if (BBox2[1] > BBox2[3]) {
-                        float t = BBox2[1];
-                        BBox2[1] = BBox2[3];
-                        BBox2[3] = t;
-                    }
-
-                    if (BBox2[0] > BBox2[2]) {
-                        float t = BBox2[0];
-                        BBox2[0] = BBox2[2];
-                        BBox2[2] = t;
-                    }
-                    
-                    matrix[0] = (BBox2[2] - BBox2[0]) / (BBox[2] - BBox[0]);
-                    matrix[1] = 0;
-                    matrix[2] = 0;
-                    matrix[3] = (BBox2[3] - BBox2[1]) / (BBox[3] - BBox[1]);
-                    matrix[4] = (BBox2[0] - BBox[0]);
-                    matrix[5] = (BBox2[1] - BBox[1]);
-
-                    a = matrix[0];
-                    b = matrix[1];
-                    c = matrix[2];
-                    d = matrix[3];
-                    //scale so they offset correctly
-                    e = matrix[4];
-                    f = matrix[5];
-                    //pdfStreamDecoder.gs.CTM = new float[][]{{matrix[0],matrix[1],0},{matrix[2],matrix[3],0},{matrix[4],matrix[5],1}};
-                    //newClip=new Area(new Rectangle((int)BBox2[0],(int)BBox2[1],(int)((BBox2[2]-BBox2[0])+2),(int)((BBox2[3]-BBox2[1])+2)));                   
-                }else{
-                    a = matrix[0];
-                    b = matrix[1];
-                    c = matrix[2];
-                    d = matrix[3];
-                    //scale so they offset correctly
-                    e = matrix[4] * scaling * pageScaling;
-                    f = matrix[5] * scaling * pageScaling;
-                }
-    			if(c!=0){
-    				aa=new BufferedImage(height,width,BufferedImage.TYPE_INT_ARGB);
-    				offset=width;
-    			}else{
-    				aa=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-    				if(b<0){
-    					//already set at this
-//	    				if(e!=0f)
-//	    					e = matrix[4];
-//	    				if(f!=0f)
-//	    					f = matrix[5];
-    				}else {
-    					//rectX1 and rectY1 already have the scaling applied
-	    				if(e!=0f) {
-                            e = -rectX1;
-                        }
-	    				if(f!=0f) {
-                            f = -rectY1;
-                        }
-    				}
-    				
-    			}
-    			
-    			g2=(Graphics2D) aa.getGraphics();
-    		    final AffineTransform flip=new AffineTransform();
-    			flip.translate(0, offset);
-    			flip.scale(1, -1);
-    			g2.setTransform(flip);
-
-    			if(debug) {
-                    System.out.println(" rectX1 = " + rectX1 + " rectY1 = " + rectY1 + " width = " + width + " height = " + height);
-                }
-
-    			final AffineTransform affineTransform = new AffineTransform(a,b,c,d,e,f);
-//				System.out.println("affine="+affineTransform);
-    			g2.transform(affineTransform);
-    		} else {
-    			aa=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-    			
-    			g2=(Graphics2D) aa.getGraphics();
-
-    			final AffineTransform flip=new AffineTransform();
-    			flip.translate(0, offset);
-    			flip.scale(1, -1);
-    			g2.setTransform(flip);
-                if(subtype==PdfDictionary.Ink){
-                    g2.translate(-(BBox[0]*scaling), -(BBox[3]*scaling));
-                }
-    		}
-
-            if(offsetImage==2)//invert
-            {
+            if(offsetImage==2){//invert
                 g2.scale(-1, -1);
-            } else if(offsetImage==1)//offset
-            {
+            } else if(offsetImage==1){//offset
                 g2.translate(1, 1);
             }
             
@@ -744,6 +559,135 @@ public class FormStream {
 
     		return null;
     	}
+    }
+    
+    private static Graphics2D createGaphics(BufferedImage aa, PdfObject formObj, float[] matrix, float[] BBox, float pageScaling, float scaling, float transformOffsetX, float transformOffsetY, int width, int height) {
+        
+        final Graphics2D g2;
+        int offset = height;
+        
+        if (matrix != null) {
+
+            //Added for odd case 22179
+            //pageScaling!=1 added to lock out of html as when not 1 html baseline is affected
+            if (pageScaling == 1 && matrix[4] > 0 && matrix[5] > 0) {
+                matrix = createMatrixFromBoundBoxes(BBox, formObj.getFloatArray(PdfDictionary.Rect));                
+            } else {
+                //scale so they offset correctly
+                matrix[4] = matrix[4] * scaling * pageScaling;
+                matrix[5] = matrix[5] * scaling * pageScaling;
+            }
+            
+            if (matrix[2] != 0) {
+                offset = width;
+            } else {
+                if (matrix[1] >= 0) {
+                    //rectX1 and rectY1 already have the scaling applied
+                    if (matrix[4] != 0f) {
+                        matrix[4] = -transformOffsetX;
+                    }
+                    if (matrix[5] != 0f) {
+                        matrix[5] = -transformOffsetY;
+                    }
+                }
+                
+            }
+            
+            g2 = (Graphics2D) aa.getGraphics();
+            final AffineTransform flip = new AffineTransform();
+            flip.translate(0, offset);
+            flip.scale(1, -1);
+            g2.setTransform(flip);
+            
+            if (debug) {
+                System.out.println(" rectX1 = " + transformOffsetX + " rectY1 = " + transformOffsetY + " width = " + width + " height = " + height);
+            }
+            
+            final AffineTransform affineTransform = new AffineTransform(matrix);
+            g2.transform(affineTransform);
+        } else {
+            g2 = (Graphics2D) aa.getGraphics();
+            
+            final AffineTransform flip = new AffineTransform();
+            flip.translate(0, offset);
+            flip.scale(1, -1);
+            g2.setTransform(flip);
+            if (formObj.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Ink) {
+                g2.translate(-(BBox[0] * scaling), -(BBox[3] * scaling));
+            }
+        }
+        
+        return g2;
+    }
+    
+    private static float[] createMatrixFromBoundBoxes(final float[] BBox, final float[] BBox2) {
+
+        final float[] matrix = new float[6];
+        if (BBox2[1] > BBox2[3]) {
+            final float t = BBox2[1];
+            BBox2[1] = BBox2[3];
+            BBox2[3] = t;
+        }
+
+        if (BBox2[0] > BBox2[2]) {
+            final float t = BBox2[0];
+            BBox2[0] = BBox2[2];
+            BBox2[2] = t;
+        }
+
+        matrix[0] = (BBox2[2] - BBox2[0]) / (BBox[2] - BBox[0]);
+        matrix[1] = 0;
+        matrix[2] = 0;
+        matrix[3] = (BBox2[3] - BBox2[1]) / (BBox[3] - BBox[1]);
+        matrix[4] = (BBox2[0] - BBox[0]);
+        matrix[5] = (BBox2[1] - BBox[1]);
+        
+        return matrix;
+    }
+    
+    private static org.jpedal.fonts.glyph.T3Glyph decodeStream(final PdfObjectReader currentPdfFile, final PdfObject XObject) {
+
+        //generate local object to decode the stream
+        final ObjectStore localStore = new ObjectStore();
+
+        final T3Renderer glyphDisplay = new T3Display(0, false, 20, localStore);
+
+        final PdfStreamDecoder glyphDecoder = new PdfStreamDecoder(currentPdfFile);
+        glyphDecoder.setParameters(false, true, 15, 0, false, false);
+
+        glyphDecoder.setStreamType(ValueTypes.FORM);
+
+        glyphDecoder.setObjectValue(ValueTypes.ObjectStore, localStore);
+
+        glyphDecoder.setRenderer(glyphDisplay);
+
+        /*read any resources*/
+        try {
+            final PdfObject Resources = XObject.getDictionary(PdfDictionary.Resources);
+
+            if (Resources != null) {
+                glyphDecoder.readResources(Resources, false);
+            }
+
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
+
+        final float[] BBox = XObject.getFloatArray(PdfDictionary.BBox);
+
+        glyphDecoder.setBBox(BBox);
+        /*decode the stream*/
+        final byte[] commands = XObject.getDecodedStream();
+        if (commands != null) {
+            glyphDecoder.decodeStreamIntoObjects(commands, false);
+        }
+
+        final boolean ignoreColors = glyphDecoder.ignoreColors;
+
+        localStore.flush();
+
+        return new org.jpedal.fonts.glyph.T3Glyph(glyphDisplay, 0, 0, ignoreColors);
+
     }
     
     public static String decipherTextFromAP(final PdfObjectReader currentPdfFile, final PdfObject Xobject){

@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -32,9 +32,12 @@
  */
 package org.jpedal.text;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.jpedal.objects.PdfData;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
@@ -42,8 +45,8 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 public class TextLines {
 
     /**stores area of arrays in which text should be highlighted*/
-    private Map<Integer, int[][]> lineAreas = new HashMap<Integer, int[][]>();
-    private Map<Integer, int[]> lineWritingMode = new HashMap<Integer, int[]>();
+    private Map<Integer, ArrayList<int[]>> lineAreas = new HashMap<Integer, ArrayList<int[]>>();
+    private Map<Integer, ArrayList<Integer>> lineWritingMode = new HashMap<Integer,  ArrayList<Integer>>();
 
     /**Highlight Areas stored here*/
     public Map<Integer, int[][]> areas = new HashMap<Integer, int[][]>();
@@ -173,169 +176,152 @@ public class TextLines {
 
         if(lineAreas==null){ //If null, create array
 
-            //Set area
-            lineAreas = new HashMap<Integer, int[][]>();
-            lineAreas.put(page, new int[][]{area});
+            lineAreas = new HashMap<Integer, ArrayList<int[]>>();
+            lineWritingMode = new HashMap<Integer, ArrayList<Integer>>();
+        }
+        
+        ArrayList<int[]> lastAreas = lineAreas.get(page);
+        ArrayList<Integer> lastWritingMode = (lineWritingMode.get(page));
 
-            //Set writing direction
-            lineWritingMode = new HashMap<Integer, int[]>();
-            lineWritingMode.put(page, new int[]{writingMode});
+        //Check for objects close to or intersecting each other
+        if (area != null) { //Ensure actual area is selected
+            if (lastAreas != null) {
+                int cx;
+                int cy;
+                int cw;
+                int ch;
+                //int cm = cy+(ch/2);
 
-        }else{
-            final int[][] lastAreas = lineAreas.get(page);
-            final int[] lastWritingMode = (lineWritingMode.get(page));
+                int lx;
+                int ly;
+                int lw;
+                int lh;
 
-            //Check for objects close to or intersecting each other
-            if(area!=null){ //Ensure actual area is selected
-                if(lastAreas!=null){
-                    for(int i=0; i!= lastAreas.length; i++){
-                        final int lwm = lastWritingMode[i];
-                        int cx = area[0];
-                        int cy = area[1];
-                        int cw = area[2];
-                        int ch = area[3];
-                        //int cm = cy+(ch/2);
+                for (int i = 0; i != lastAreas.size(); i++) {
+                    final int[] lastArea = lastAreas.get(i);
+                    final int lwm = lastWritingMode.get(i);
+                    cx = area[0];
+                    cy = area[1];
+                    cw = area[2];
+                    ch = area[3];
+                    //int cm = cy+(ch/2);
 
-                        int lx = lastAreas[i][0];
-                        int ly = lastAreas[i][1];
-                        int lw = lastAreas[i][2];
-                        int lh = lastAreas[i][3];
-                        //int lm = ly+(lh/2);
+                    lx = lastArea[0];
+                    ly = lastArea[1];
+                    lw = lastArea[2];
+                    lh = lastArea[3];
+                    //int lm = ly+(lh/2);
 
-                        final int currentBaseLine;
-                        final int lastBaseLine;
-                        final float heightMod = 5f;
-                        final float widthMod = 1.1f;
+                    final int currentBaseLine;
+                    final int lastBaseLine;
+                    final float heightMod = 5f;
+                    final float widthMod = 1.1f;
 
-                        switch(writingMode){
-                            case PdfData.HORIZONTAL_LEFT_TO_RIGHT :
+                    switch (writingMode) {
+                        case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
 
                                 if(lwm== writingMode && ((ly>(cy-(ch/heightMod))) && (ly<(cy+(ch/heightMod)))) && //Ensure this is actually the same line and are about the same size
                                         (((lh<ch+(ch/heightMod) && lh>ch-(ch/heightMod))) && //Check text is the same height
                                                 (((lx>(cx + cw-(ch*widthMod))) && (lx<(cx + cw+(ch*widthMod)))) || //Check for object at end of this object
                                                         ((lx + lw>(cx-(ch*widthMod))) && (lx + lw<(cx+(ch*widthMod)))) ||//Check for object at start of this object
-                                                        intersects(lastAreas[i], area)))//Check to see if it intersects at all
-                                        ){
-                                    addNew = false;
+                                    intersects(lastArea, area)))//Check to see if it intersects at all
+                                    ) {
+                                addNew = false;
 
-                                    //No need to reset the writing mode as already set
-                                    lastAreas[i]=mergePartLines(lastAreas[i], area);
-                                }
-                                break;
-                            case PdfData.HORIZONTAL_RIGHT_TO_LEFT :
+                                //No need to reset the writing mode as already set
+                                lastAreas.set(i, mergePartLines(lastArea, area));
+                            }
+                            break;
+                        case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
 
-                                lx = lastAreas[i][0];
-                                ly = lastAreas[i][1];
-                                lw = lastAreas[i][2];
-                                lh = lastAreas[i][3];
-                                cx = area[0];
-                                cy = area[1];
-                                cw = area[2];
-                                ch = area[3];
+                            lx = lastArea[0];
+                            ly = lastArea[1];
+                            lw = lastArea[2];
+                            lh = lastArea[3];
+                            cx = area[0];
+                            cy = area[1];
+                            cw = area[2];
+                            ch = area[3];
 
-                                if(lwm== writingMode && ((ly>(cy-5)) && (ly<(cy+5)) && lh<=(ch+(ch/5)) && lh>=(ch-(ch/5))) && //Ensure this is actually the same line and are about the same size
-                                        (((lx>(cx + cw-(ch*0.6))) && (lx<(cx + cw+(ch*0.6)))) || //Check for object at end of this object
-                                                ((lx + lw>(cx-(ch*0.6))) && (lx + lw<(cx+(ch*0.6)))) ||//Check for object at start of this object
-                                                intersects(lastAreas[i], area))//Check to see if it intersects at all
-                                        ){
-                                    addNew = false;
+                            if(lwm== writingMode && ((ly>(cy-5)) && (ly<(cy+5)) && lh<=(ch+(ch/5)) && lh>=(ch-(ch/5))) && //Ensure this is actually the same line and are about the same size
+                                    (((lx>(cx + cw-(ch*0.6))) && (lx<(cx + cw+(ch*0.6)))) || //Check for object at end of this object
+                                            ((lx + lw>(cx-(ch*0.6))) && (lx + lw<(cx+(ch*0.6)))) ||//Check for object at start of this object
+                                intersects(lastArea, area))//Check to see if it intersects at all
+                                ) {
+                                addNew = false;
 
-                                    //No need to reset the writing mode as already set
-                                    lastAreas[i]=mergePartLines(lastAreas[i], area);
-                                }
-                                break;
-                            case PdfData.VERTICAL_TOP_TO_BOTTOM :
+                                //No need to reset the writing mode as already set
+                                lastAreas.set(i, mergePartLines(lastArea, area));
+                            }
+                            break;
+                        case PdfData.VERTICAL_TOP_TO_BOTTOM:
 
-                                lx = lastAreas[i][1];
-                                ly = lastAreas[i][0];
-                                lw = lastAreas[i][3];
-                                lh = lastAreas[i][2];
-                                cx = area[1];
-                                cy = area[0];
-                                cw = area[3];
-                                ch = area[2];
+                            lx = lastArea[1];
+                            ly = lastArea[0];
+                            lw = lastArea[3];
+                            lh = lastArea[2];
+                            cx = area[1];
+                            cy = area[0];
+                            cw = area[3];
+                            ch = area[2];
 
-                                if(lwm== writingMode && ((ly>(cy-5)) && (ly<(cy+5)) && lh<=(ch+(ch/5)) && lh>=(ch-(ch/5))) && //Ensure this is actually the same line and are about the same size
-                                        (((lx>(cx + cw-(ch*0.6))) && (lx<(cx + cw+(ch*0.6)))) || //Check for object at end of this object
-                                                ((lx + lw>(cx-(ch*0.6))) && (lx + lw<(cx+(ch*0.6)))) ||//Check for object at start of this object
-                                                intersects(lastAreas[i], area))//Check to see if it intersects at all
-                                        ){
-                                    addNew = false;
+                        if(lwm== writingMode && ((ly>(cy-5)) && (ly<(cy+5)) && lh<=(ch+(ch/5)) && lh>=(ch-(ch/5))) && //Ensure this is actually the same line and are about the same size
+                                    (((lx>(cx + cw-(ch*0.6))) && (lx<(cx + cw+(ch*0.6)))) || //Check for object at end of this object
+                                            ((lx + lw>(cx-(ch*0.6))) && (lx + lw<(cx+(ch*0.6)))) ||//Check for object at start of this object
+                                intersects(lastArea, area))//Check to see if it intersects at all
+                                ) {
+                                addNew = false;
 
-                                    //No need to reset the writing mode as already set
-                                    lastAreas[i]=mergePartLines(lastAreas[i], area);
-                                }
+                                //No need to reset the writing mode as already set
+                                lastAreas.set(i, mergePartLines(lastArea, area));
+                            }
 
-                                break;
+                            break;
 
-                            case PdfData.VERTICAL_BOTTOM_TO_TOP :
+                        case PdfData.VERTICAL_BOTTOM_TO_TOP:
 
-                                //Calculate the coord value at the bottom of the text
-                                currentBaseLine = cx + cw;
-                                lastBaseLine = lx + lw;
+                            //Calculate the coord value at the bottom of the text
+                            currentBaseLine = cx + cw;
+                            lastBaseLine = lx + lw;
 
-                                if(
-                                        lwm== writingMode //Check the current writing mode
-                                                && (currentBaseLine >= (lastBaseLine-(lw/3))) && (currentBaseLine <= (lastBaseLine+(lw/3))) //Check is same line
-                                                && //Only check left or right if the same line is shared
-                                                (
-                                                        ( //Check for text on either side
-                                                                ((ly+(lh+(lw*0.6))>cy) && (ly+(lh-(lw*0.6))<cy))// Check for text to left of current area
-                                                                        || ((ly+(lw*0.6)>(cy+ch)) && (ly-(lw*0.6)<(cy+ch)))// Check for text to right of current area
-                                                        )
-                                                                || intersects(area, lastAreas[i])
-                                                )
-                                        ){
-                                    addNew = false;
+                            if(lwm== writingMode //Check the current writing mode
+                                            && (currentBaseLine >= (lastBaseLine-(lw/3))) && (currentBaseLine <= (lastBaseLine+(lw/3))) //Check is same line
+                                && //Only check left or right if the same line is shared
+                                (( //Check for text on either side
+                                ((ly + (lh + (lw * 0.6)) > cy) && (ly + (lh - (lw * 0.6)) < cy))// Check for text to left of current area
+                                || ((ly + (lw * 0.6) > (cy + ch)) && (ly - (lw * 0.6) < (cy + ch)))// Check for text to right of current area
+                                )
+                                || intersects(area, lastArea))) {
+                                addNew = false;
 
-                                    //No need to reset the writing mode as already set
-                                    lastAreas[i]=mergePartLines(lastAreas[i], area);
-                                }
+                                //No need to reset the writing mode as already set
+                                lastAreas.set(i, mergePartLines(lastArea, area));
+                            }
 
-                                break;
-
-                        }
+                            break;
 
                     }
-                }else{
-                    addNew = true;
+
                 }
+            } else {
 
-                //If no object near enough to merge, start a new area
-                if(addNew){
+                lastAreas = new ArrayList<int[]>();
+                lineAreas.put(page, lastAreas);
 
-                    final int[][] localLineAreas;
-                    final int[] localLineWritingMode;
+                lastWritingMode = new ArrayList<Integer>();
+                lineWritingMode.put(page, lastWritingMode);
 
-                    if(lastAreas!=null){
-                        localLineAreas = new int[lastAreas.length+1][4];
-                        for(int i=0; i!= lastAreas.length; i++){
-                            localLineAreas[i] = lastAreas[i];
-                        }
-                        localLineAreas[localLineAreas.length-1] = area;
+                addNew = true;
+            }
 
-                        localLineWritingMode = new int[lastWritingMode.length+1];
-                        for(int i=0; i!= lastWritingMode.length; i++){
-                            localLineWritingMode[i] = lastWritingMode[i];
-                        }
-                        localLineWritingMode[localLineWritingMode.length-1] = writingMode;
+            //If no object near enough to merge, start a new area
+            if (addNew) {
 
-                    }else{
-                        localLineAreas = new int[1][];
-                        localLineAreas[0] = area;
-
-                        localLineWritingMode = new int[1];
-                        localLineWritingMode[0] = writingMode;
-                    }
-
-                    //Set area
-                    this.lineAreas.put(page, localLineAreas);
-
-                    //Set writing direction
-                    this.lineWritingMode.put(page, localLineWritingMode);
-                }
+                lastAreas.add(area);
+                lastWritingMode.add(writingMode);
 
             }
+
         }
     }
 
@@ -755,12 +741,38 @@ public class TextLines {
     
 
     public void setLineAreas(final Map<Integer, int[][]> la) {
-        lineAreas = la;
+        if(la == null || la.keySet().isEmpty()){
+            lineAreas = null;
+        }else{
+            Set<Integer> keys = la.keySet();
+            
+            for(int i : keys){
+                final int[][] values = la.get(i);
+                final ArrayList<int[]> list = new ArrayList<int[]>();
+                
+                list.addAll(Arrays.asList(values));
+                lineAreas.put(i, list);
+            }
+        }
     }
 
     @SuppressWarnings("UnusedDeclaration")
     public void setLineWritingMode(final Map<Integer, int[]> lineOrientation) {
-        lineWritingMode = lineOrientation;
+        if(lineOrientation == null || lineOrientation.keySet().isEmpty()){
+            lineWritingMode = null;
+        }else{
+            Set<Integer> keys = lineOrientation.keySet();
+            
+            for(int i : keys){
+                final int[] values = lineOrientation.get(i);
+                final ArrayList<Integer> list = new ArrayList<Integer>();
+                
+                for(int ii : values){
+                    list.add(ii);
+                }
+                lineWritingMode.put(i, list);
+            }
+        }
     }
 
 
@@ -776,22 +788,22 @@ public class TextLines {
         if(lineAreas==null || lineAreas.get(page) == null) {
             return null;
         } else{
-            final int[][] localLineAreas = this.lineAreas.get(page);
+            final ArrayList<int[]> localLineAreas = this.lineAreas.get(page);
 
             if(localLineAreas==null) {
                 return null;
             }
 
-            final int count=localLineAreas.length;
+            final int count=localLineAreas.size();
 
             final int[][] returnValue=new int[count][4];
 
             for(int ii=0;ii<count;ii++){
-                if(localLineAreas[ii]==null) {
+                if(localLineAreas.get(ii)==null) {
                     returnValue[ii] = null;
                 } else {
-                    returnValue[ii] = new int[]{localLineAreas[ii][0], localLineAreas[ii][1],
-                            localLineAreas[ii][2], localLineAreas[ii][3]};
+                    returnValue[ii] = new int[]{localLineAreas.get(ii)[0], localLineAreas.get(ii)[1],
+                            localLineAreas.get(ii)[2], localLineAreas.get(ii)[3]};
                 }
             }
             
@@ -805,18 +817,19 @@ public class TextLines {
         if(lineWritingMode==null) {
             return null;
         } else{
-            final int[] localLineWritingMode = (this.lineWritingMode.get(page));
+            final ArrayList<Integer> localLineWritingMode = (this.lineWritingMode.get(page));
 
             if(localLineWritingMode==null) {
                 return null;
             }
 
-            final int count=localLineWritingMode.length;
-
+            final int count=localLineWritingMode.size();
+            
             final int[] returnValue=new int[count];
-
-            System.arraycopy(localLineWritingMode, 0, returnValue, 0, count);
-
+            for(int i=0; i!=count; i++){
+                returnValue[i] = localLineWritingMode.get(i);
+            }
+            
             return returnValue;
         }
     }

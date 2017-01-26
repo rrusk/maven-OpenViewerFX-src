@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -324,7 +324,7 @@ public class RefTable {
 				byte[] rootDictBytes = BrokenRefTable.findFirstRootDict(pdf_datafile); //fix for 28184				
 				if (rootDictBytes != null) {
 					final PdfObject pdfObject = new CompressedObject("0 0 R");	
-					Dictionary.readDictionary(pdfObject, 0, rootDictBytes, -1, true, currentPdfFile);
+					Dictionary.readDictionary(pdfObject, 0, rootDictBytes, -1, currentPdfFile);
 					encryptObj = pdfObject.getDictionary(PdfDictionary.Encrypt);
 					if (encryptObj != null) {
 
@@ -415,7 +415,7 @@ public class RefTable {
 
             i++;
             final PdfObject pdfObject = new CompressedObject("0 0 R");
-            Dictionary.readDictionary(pdfObject, i, Bytes, -1, true, currentPdfFile);
+            Dictionary.readDictionary(pdfObject, i, Bytes, -1, currentPdfFile);
 
             //move to beyond >>
             i = skipToEnd(Bytes, i);

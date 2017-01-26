@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -39,13 +39,6 @@ import java.util.Map;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
-/**
- * Created by IntelliJ IDEA.
- * User: test
- * Date: 11/04/11
- * Time: 09:49
- * To change this template use File | Settings | File Templates.
- */
 public class ASCII85 extends BaseFilter implements PdfFilter {
 
     /** lookup for hex multiplication */

@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -178,7 +178,7 @@ public final class FontMappings {
     /**
      * used to ensure we load once
      */
-    private static Map<String, String> isLiberationLoaded=new HashMap<String, String>();
+    private static final Map<String, String> isLiberationLoaded=new HashMap<String, String>();
     
     public static void addLiberationAsFallBackFont(final String family, final String path) throws IOException{
         

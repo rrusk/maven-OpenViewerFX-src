@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -784,16 +784,26 @@ public class SwingData extends GUIData {
         if (resetFont != null) {
             //send in scale, rotation, and curComp as they could be from the print routines,
             //which define these parameters.
-        	if(formObject.getParameterConstant(PdfDictionary.Subtype) != PdfDictionary.Popup){
-    				recalcFontSize(scale, rotate, formObject, curComp);
-        	}else{
-        		if(isPrinting){
-        	    	curComp.setFont(curComp.getFont().deriveFont(formObject.getFontSize()* (72.0f/96.0f)));
-        	    	
-        		}else{
-        			curComp.setFont(curComp.getFont().deriveFont(formObject.getFontSize()));
-        		}
-        	}
+            //FreeText is a special case so handle here
+            if(formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.FreeText){
+                final byte[] DSString = formObject.getTextStreamValueAsByte(PdfDictionary.DS);
+                if (DSString != null) {
+                    AnnotationFactory.loadFontValues(DSString, curComp, scale);
+                }else{
+                    curComp.setFont(curComp.getFont().deriveFont(formObject.getFontSize()));
+                }
+            }else{
+                if(formObject.getParameterConstant(PdfDictionary.Subtype) != PdfDictionary.Popup){
+                        recalcFontSize(scale, rotate, formObject, curComp);
+                }else{
+                    if(isPrinting){
+                        curComp.setFont(curComp.getFont().deriveFont(formObject.getFontSize()* (72.0f/96.0f)));
+
+                    }else{
+                        curComp.setFont(curComp.getFont().deriveFont(formObject.getFontSize()));
+                    }
+                }
+            }
         }
         
         //scale border if needed

@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -421,7 +421,9 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         while(arrayData[j2]!='R' && arrayData[j2]!=']'){
             
             //allow for embedded object
-            if(arrayData[j2]=='<' && arrayData[j2+1]=='<'){
+            if(arrayData[j2]=='(' && !ObjectUtils.isEscaped(arrayData, j2)){
+                j2 = TextStream.skipToEnd(arrayData, j2);
+            }else if(arrayData[j2]=='<' && arrayData[j2+1]=='<'){
                 int levels=1;
                 
                 if(debugFastCode) {
@@ -431,7 +433,9 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
                 while(levels>0){
                     j2++;
                     
-                    if(arrayData[j2]=='<' && arrayData[j2+1]=='<'){
+                    if (arrayData[j2] == '(' && !ObjectUtils.isEscaped(arrayData, j2)) {
+                        j2 = TextStream.skipToEnd(arrayData, j2);
+                    } else if (arrayData[j2] == '<' && arrayData[j2 + 1] == '<') {
                         j2++;
                         levels++;
                     }else if(arrayData[j2]=='>' && arrayData[j2+1]=='>'){
@@ -449,7 +453,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, true);
     }
-
+    
     byte[] writeNumber() {
         
         if(debugFastCode){

@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -32,13 +32,16 @@
  */
 package org.jpedal.grouping;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jpedal.exception.PdfException;
 import static org.jpedal.grouping.PdfGroupingAlgorithms.removeHiddenMarkers;
 import org.jpedal.objects.PdfData;
+import org.jpedal.utils.Fonts;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Strip;
 import org.jpedal.utils.repositories.Vector_Float;
@@ -46,15 +49,12 @@ import org.jpedal.utils.repositories.Vector_String;
 
 public class PdfSearchUtils {
     
+    private boolean includeHTMLtags;
+    
     private static final String MARKER = PdfData.marker;
 	private static final char MARKER2= MARKER.charAt(0);
-    
-    //teasers for findtext
-    private boolean usingMultipleTerms;
-            
-	private String[] teasers;
-
-	//private final List<String> multipleTermTeasers = new ArrayList<String>();
+        
+	private final List<String> multipleTermTeasers = new ArrayList<String>();
 
     //Hold data from pdf so we can create local version
 	private final PdfData pdf_data;
@@ -63,8 +63,10 @@ public class PdfSearchUtils {
     private Line[] lines;
     
 	//Value placed between result areas to show they are part of the same result
-	private static final int linkedSearchAreas=-101;
+	private static final int MULTIPLE_AREA_RESULT=-101;
 	
+    private boolean includeTease;
+    
     protected PdfSearchUtils(final PdfData pdf_data) {
 		this.pdf_data = pdf_data;
     }
@@ -107,7 +109,7 @@ public class PdfSearchUtils {
 		//Search result and teaser holders
 		final Vector_Float resultCoords = new Vector_Float(0);
 		final Vector_String resultTeasers = new Vector_String(0);
-		
+
 		//make sure co-ords valid and throw exception if not
 		final int[] v = validateCoordinates(x1, y1, x2, y2);
 		x1 = v[0];
@@ -130,13 +132,14 @@ public class PdfSearchUtils {
 		for(int u=0; u!=writingModes.length; u++){
 
 			final int mode = writingModes[u];
-
+            
 			//if not lines for writing mode, ignore
 			if(unsorted[mode]!=0){
-                searchWritingMode(mode, searchType, terms, true, false, resultCoords, resultTeasers);
+                searchWritingMode(mode, searchType, terms, true, resultCoords, resultTeasers);
             }
             
 		}
+        
 		//Return coord data for search results
 		return resultCoords.get();
 		 
@@ -144,10 +147,10 @@ public class PdfSearchUtils {
 
     /**
      * return text teasers from findtext if generateTeasers() called before find
+     * @return String[] representing teasers for each result (single of linked areas) in result order
 	 */
 	protected String[] getTeasers() {
-		
-		return teasers;
+		return multipleTermTeasers.toArray(new String[multipleTermTeasers.size()]);
 	}
     
 	/**
@@ -355,9 +358,9 @@ public class PdfSearchUtils {
 		for(int u=0; u!=writingModes.length; u++){
 
 			final int mode = writingModes[u];
-
+            
 			if(unsorted[mode]!=0){
-                searchWritingMode(mode, searchType, terms, true, false, resultCoords, resultTeasers);
+                searchWritingMode(mode, searchType, terms, true, resultCoords, resultTeasers);
             }
 		}
 		//Return coord data for search results
@@ -366,7 +369,7 @@ public class PdfSearchUtils {
 	}
     
     
-    private void searchWritingMode(int mode, int searchType, String[] terms, boolean includeTease, boolean includeHTMLtags, Vector_Float resultCoords, Vector_String resultTeasers) throws PdfException {
+    private void searchWritingMode(int mode, int searchType, String[] terms, boolean includeTease, Vector_Float resultCoords, Vector_String resultTeasers) throws PdfException {
 
         //Flags to control the different search options
         boolean firstOccuranceOnly = false;
@@ -398,13 +401,10 @@ public class PdfSearchUtils {
         //Check if coords need swapping
         boolean valuesSwapped = (mode == PdfData.VERTICAL_BOTTOM_TO_TOP || mode == PdfData.VERTICAL_TOP_TO_BOTTOM);
         
-//        for(int i=0; i!=lines.length; i++){
-//            System.out.println(i+" >> "+Strip.stripXML(removeHiddenMarkers(removeDuplicateSpaces(lines[i].getRawData())), true).toString());
-//        }
         //Portions of text to perform the search on and find teasers
         String searchText = buildSearchText(false, mode);
         String coordsText = buildSearchText(true, mode);
-//        System.out.println("searchText : "+searchText);
+        
         //Hold starting point data at page rotation
         int[] resultStart;
 
@@ -436,7 +436,7 @@ public class PdfSearchUtils {
             if (wholeWordsOnly) {
                 searchValue = "\\b" + searchValue + "\\b";
             }
-//            System.out.println("searchValue : "+searchValue);
+            
             //Create pattern to match search term
             final Pattern searchTerm = Pattern.compile(searchValue, options);
 
@@ -467,7 +467,7 @@ public class PdfSearchUtils {
                         }
                         
                         if (needToFindTeaser) {
-                            findTeaser(foundTerm, teaserFinder, termStarts, termEnds, includeHTMLtags, resultTeasers);
+                            findTeaser(foundTerm, teaserFinder, termStarts, termEnds, resultTeasers);
                         }
                     }
 
@@ -598,7 +598,7 @@ public class PdfSearchUtils {
             //Set up multi line result.
             if (startFound && !endFound && text.contains("\n")) {
 
-                storeResultsCoords(valuesSwapped, mode, resultCoords, resultStart[0], resultStart[1], (currentX + width), lines[lineCounter].getY2(), linkedSearchAreas);
+                storeResultsCoords(valuesSwapped, mode, resultCoords, resultStart[0], resultStart[1], (currentX + width), lines[lineCounter].getY2(), MULTIPLE_AREA_RESULT);
 
                 //Set start of term as not found
                 startFound = false;
@@ -623,30 +623,27 @@ public class PdfSearchUtils {
         }
     }
     
+    protected void clearStoredTeasers(){
+        multipleTermTeasers.clear();
+    }
+    
     private void storeTeasers(Vector_String resultTeasers){
         
         //Remove any trailing empty values
         resultTeasers.trim();
-
-        //Store teasers so they can be retrieved by different search methods
-        if (usingMultipleTerms) {
-			//Store all teasers for so they may be returned as a sorted map
-            //Only used for one method controled by the above flag
-//            for (int i = 0; i != resultTeasers.size(); i++) {
-//                multipleTermTeasers.add(resultTeasers.elementAt(i));
-//            }
-            //Prevent issue this not getting cleared between writing modes 
-            //resulting in duplicate teasers
-            resultTeasers.clear();
-        } else {
-            //Store all teasers to be retrieved by getTeaser() method
-            teasers = resultTeasers.get();
+        String[] results = resultTeasers.get();
+        for (int i = 0; i != results.length; i++) {
+            multipleTermTeasers.add(results[i]);
         }
+
+        //Prevent issue this not getting cleared between writing modes 
+        //resulting in duplicate teasers
+        resultTeasers.clear();
     }
     
     
     private static void storeResultsCoords(boolean valuesSwapped, int mode, Vector_Float resultCoords, float x1, float y1, float x2, float y2, float connected){
-//        System.out.println(x1+" , "+y1+" , "+x2+" , "+y2);
+
         //Set ends coords      
         if (valuesSwapped) {
             if (mode == PdfData.VERTICAL_BOTTOM_TO_TOP) {
@@ -674,7 +671,7 @@ public class PdfSearchUtils {
     }
     
     
-    private void findTeaser(String teaser, Matcher teaserFinder, int termStarts, int termEnds, boolean includeHTMLtags, Vector_String resultTeasers){
+    private void findTeaser(String teaser, Matcher teaserFinder, int termStarts, int termEnds, Vector_String resultTeasers){
         
         if (teaserFinder.find()) {
             //Get a teaser if found and set the search term to bold is allowed
@@ -697,7 +694,6 @@ public class PdfSearchUtils {
                 teaserFinder.region(termEnds+1, teaserFinder.regionEnd());
             }
         }
-//        System.out.println("teaser : "+teaser);
         //Store teaser
         resultTeasers.addElement(teaser);
     }
@@ -758,8 +754,7 @@ public class PdfSearchUtils {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i != lines.length; i++) {
             if (lines[i].getRawData() != null && mode == lines[i].getWritingMode()) {
-//                System.out.println("Line "+i+" : "+Strip.stripXML(removeHiddenMarkers(lines[i].getRawData()),true));
-                    str.append(lines[i].getRawData()).append('\n');
+                str.append(lines[i].getRawData()).append('\n');
             }
         }
         
@@ -1166,9 +1161,6 @@ public class PdfSearchUtils {
                             smallestHeight = (c_y1 - c_y2);
                         }
 
-//                        System.out.println(m_x1+" , "+m_x2+" <> "+c_x1+" , "+c_x2);
-//                        System.out.println(fontDifference+" , "+smallestHeight);
-//                        System.out.println(my+" , "+cy);
                         //Don't merge is font of 1 is twice the size
                         if (Math.abs(fontDifference) < smallestHeight * 2) {
                                 //Check for the same line by checking the center of 
@@ -1176,7 +1168,6 @@ public class PdfSearchUtils {
                             if (Math.abs(my - cy) < (smallestHeight * 0.5)) {
                                 if (mx < cx) {//Child on right
                                     float distance = c_x1 - m_x2;
-//                                    System.out.println("distance : "+distance);
                                     if (distance <= smallestHeight / 2) {
                                         id = child;
                                     }
@@ -1185,7 +1176,6 @@ public class PdfSearchUtils {
                         }
                         //Match has been found
                         if (id != -1) {
-//                            System.out.println("id!=-1");
                             float possSpace = c_x1 - m_x2;
                             if (mode == PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode == PdfData.VERTICAL_TOP_TO_BOTTOM) {
                                 possSpace = -possSpace;
@@ -1212,6 +1202,7 @@ public class PdfSearchUtils {
                                     && localLines[master].getWritingMode() == mode)))
                                     || (!isSearch && (child != master && ((c_x1 > m_x1 && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
                                     || c_x1 < m_x1 && mode == PdfData.VERTICAL_TOP_TO_BOTTOM && localLines[master].getWritingMode() == mode)))) { //see if on right
+                                
                                 merge(localLines[master], localLines[id], separator);
                                 finalCount--;
                                 
@@ -1253,20 +1244,67 @@ public class PdfSearchUtils {
                 master.setY2(child.getY2());
             }
 
-            //use font size of second text (ie at end of merged text)
-            master.setFontSize(child.getFontSize());
+            String test=Fonts.fe;
+            StringBuilder masterString = new StringBuilder(master.getRawData());
+            StringBuilder childString = new StringBuilder(child.getRawData());
+            
+				//move </Font> if needed and add separator
+				if ((masterString.toString().lastIndexOf(test)!=-1)) {
+					final String masterLocal = masterString.toString();
+					masterString =new StringBuilder(masterLocal.substring(0, masterLocal.lastIndexOf(test)));
+					masterString.append(separator);
+					masterString.append(masterLocal.substring(masterLocal.lastIndexOf(test)));	
+				} else{
+					masterString.append(separator);	
+				}
 
-            //add together
-            StringBuilder content = new StringBuilder();
-            content.append(master.getRawData()).append(separator).append(child.getRawData());
-            master.setRawData(content.toString());
+                //Only map out space if text length is longer than 1
+				if(child.getTextLength()>1 && masterString.toString().endsWith(" ")){
+					masterString.deleteCharAt(masterString.lastIndexOf(" "));
+				}
+				//use font size of second text (ie at end of merged text)
+                master.setFontSize(child.getFontSize());
+				
+				//Remove excess / redundent xml tags
+				if((childString.indexOf("<color")!=-1 && masterString.indexOf("<color")!=-1) && 
+					(childString.toString().startsWith(masterString.substring(masterString.lastIndexOf("<color"), masterString.indexOf(">", masterString.lastIndexOf("<color")))) &&
+							masterString.lastIndexOf("</color>")+7==masterString.lastIndexOf(">"))){
+						childString.replace(childString.indexOf("<color"), childString.indexOf(">")+1, "");
+						masterString.replace(masterString.lastIndexOf("</color>"), masterString.lastIndexOf("</color>")+8, "");
+					}
 
-            //track length of text less all tokens
-            master.setTextLength(master.getTextLength()+child.getTextLength());
+				if((childString.indexOf("<font")!=-1 && masterString.indexOf("<font")!=-1) && 
+					(childString.toString().startsWith(masterString.substring(masterString.lastIndexOf("<font"), masterString.indexOf(">",masterString.lastIndexOf("<font")))) &&
+							masterString.lastIndexOf("</font>")+6==masterString.lastIndexOf(">"))){
+						childString.replace(childString.indexOf("<font"), childString.indexOf(">")+1, "");
+						masterString.replace(masterString.lastIndexOf("</font>"), masterString.lastIndexOf("</font>")+7, "");
+					}
+				
+				masterString = masterString.append(childString);
+				
+				//track length of text less all tokens
+                master.setTextLength(master.getTextLength()+child.getTextLength());
 
-            //set objects to null to flush and log as used
-            child.setRawData(null);
-            child.setMerged(true);
+				//set objects to null to flush and log as used
+				child.setRawData(null);
+                child.setMerged(true);
+                
+                master.setRawData(masterString.toString());
+            
+//            //use font size of second text (ie at end of merged text)
+//            master.setFontSize(child.getFontSize());
+//
+//            //add together
+//            StringBuilder content = new StringBuilder();
+//            content.append(master.getRawData()).append(separator).append(child.getRawData());
+//            master.setRawData(content.toString());
+//
+//            //track length of text less all tokens
+//            master.setTextLength(master.getTextLength()+child.getTextLength());
+//
+//            //set objects to null to flush and log as used
+//            child.setRawData(null);
+//            child.setMerged(true);
 	}
 	
     private void copyToArrays() {
@@ -1280,7 +1318,31 @@ public class PdfSearchUtils {
             fragments[i] = new Line(pdf_data, i);
 		}
 	}
-        
+    /**
+     * sets if we include HTML in teasers
+     * (do we want this is <b>word</b> or this is word as teaser)
+     * @param value
+     */
+    protected void setIncludeHTML(final boolean value) {
+        includeHTMLtags=value;
+    }
+    
+	/**
+	 * Flag if teasers should be generated whilst searching
+     * @param value True to generate teasers, otherwise false
+	 */
+	public void generateTeasers(boolean value) {
+		includeTease=value;
+	}
+    
+    /**
+     * Return flag to control teaser generation
+     * @return True if teasers are being generated, otherwise false
+     */
+    public boolean isGeneratingTeasers(){
+        return includeTease;
+    }
+    
     private class Line implements Comparable<Line>{
         private float x1, y1, x2, y2, character_spacing, spaceWidth;
         private String raw, currentColor;

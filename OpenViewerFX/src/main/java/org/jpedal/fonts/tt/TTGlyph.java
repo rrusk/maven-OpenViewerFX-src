@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -50,8 +50,8 @@ import org.jpedal.utils.repositories.Vector_Path;
 
 public class TTGlyph extends BaseTTGlyph implements Serializable{
 
-
-
+    /** only used for debugging so make static */
+    static java.awt.image.BufferedImage img;
 
     Area glyphShape;
     
@@ -281,33 +281,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             if(endOfContour[ii]){
 
                 if(firstPt!=-1 && (!onCurve[start] || !onCurve[ii]) ){ //last point not on curve and we have a first point
-
-                    final int diff=firstPt-start;
-                    int newPos;
-
-                    //make a deep copy of values
-                    final int pXlength=pX.length;
-                    final int[] old_pX=new int[pXlength];
-                    System.arraycopy(pX,0,old_pX,0,pXlength);
-
-                    final int[] old_pY=new int[pXlength];
-                    System.arraycopy(pY,0,old_pY,0,pXlength);
-
-                    final boolean[] old_onCurve=new boolean[pXlength];
-                    System.arraycopy(onCurve,0,old_onCurve,0,pXlength);
-
-                    //rotate values to ensure point at start
-                    for(int oldPos=start;oldPos<ii+1;oldPos++){
-
-                        newPos=oldPos+diff;
-                        if(newPos>ii) {
-                            newPos -= (ii - start + 1);
-                        }
-                        pX[oldPos]=old_pX[newPos];
-                        pY[oldPos]=old_pY[newPos];
-                        onCurve[oldPos]=old_onCurve[newPos];
-
-                    }
+                    setPoint(pX, pY, onCurve, start, firstPt, ii);
                 }
 
                 //reset values
@@ -348,12 +322,6 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
         if(debug){
             System.out.println("first contour="+fc+"===================================="+pX[0]+ ' ' +pY[0]);
-            //System.out.println("start="+x1+ ' ' +y1+" unitsPerEm="+unitsPerEm);
-            //for (int i = 0; i <c-2; i++)
-            //System.out.println(i+" "+convertX(pX[i],pY[i])+ ' ' +convertY(pX[i],pY[i])+ ' ' +onCurve[i]+ ' ' +endOfContour[i]+" raw="+pX[i]+ ' ' +pY[i]);
-
-            //System.out.println("Move to "+x1+ ' ' +y1);
-
         }
 
         int xs=0,ys=0,lc=0;
@@ -561,22 +529,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                 }
 
                 if(debug){
-                    try{
-                        if(img==null) {
-                            img = new java.awt.image.BufferedImage(800, 800, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                        }
-
-                        final Graphics2D g2= img.createGraphics();
-                        g2.setColor(java.awt.Color.green);
-                        g2.draw(current_path);
-
-                        final String key= String.valueOf(p);
-
-                        org.jpedal.gui.ShowGUIMessage.showGUIMessage(key,img,key);
-
-                    }catch(final Exception e){
-                        LogWriter.writeLog("Exception: " + e.getMessage());
-                    }
+                    showDebugImage(current_path, p);
                 }
             }
         }
@@ -592,7 +545,54 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
     }
 
-    java.awt.image.BufferedImage img;
+    static void showDebugImage(final GeneralPath current_path, final int p) {
+        try{
+            if(img==null) {
+                img = new java.awt.image.BufferedImage(800, 800, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            }
+
+            final Graphics2D g2= img.createGraphics();
+            g2.setColor(Color.green);
+            g2.draw(current_path);
+
+            final String key= String.valueOf(p);
+
+            org.jpedal.gui.ShowGUIMessage.showGUIMessage(key,img,key);
+
+        }catch(final Exception e){
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
+    }
+
+    void setPoint(int[] pX, int[] pY, boolean[] onCurve, int start, int firstPt, int ii) {
+        final int diff=firstPt-start;
+        int newPos;
+
+        //make a deep copy of values
+        final int pXlength=pX.length;
+        final int[] old_pX=new int[pXlength];
+        System.arraycopy(pX,0,old_pX,0,pXlength);
+
+        final int[] old_pY=new int[pXlength];
+        System.arraycopy(pY,0,old_pY,0,pXlength);
+
+        final boolean[] old_onCurve=new boolean[pXlength];
+        System.arraycopy(onCurve,0,old_onCurve,0,pXlength);
+
+        //rotate values to ensure point at start
+        for(int oldPos=start;oldPos<ii+1;oldPos++){
+
+            newPos=oldPos+diff;
+            if(newPos>ii) {
+                newPos -= (ii - start + 1);
+            }
+            pX[oldPos]=old_pX[newPos];
+            pY[oldPos]=old_pY[newPos];
+            onCurve[oldPos]=old_onCurve[newPos];
+
+        }
+    }
+
 
 
 

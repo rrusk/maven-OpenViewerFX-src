@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -43,7 +43,6 @@ import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.ImageCommands;
-import org.jpedal.parser.image.JPeg2000ImageDecoder;
 import org.jpedal.parser.image.data.ImageData;
 
 /**
@@ -459,14 +458,10 @@ public class MaskDataDecoder {
     }
     
      public static byte[] getSMaskData(byte[] maskData,ImageData smaskData, PdfObject newSMask,GenericColorSpace maskColorData) {
-        smaskData.getFilter(newSMask);
-       
+        smaskData.getFilter(newSMask);     
+		
         if(smaskData.isDCT()){
             maskData=JPEGDecoder.getBytesFromJPEG(maskData,maskColorData,newSMask);
-            newSMask.setMixedArray(PdfDictionary.Filter,null);
-            newSMask.setDecodedStream(maskData);
-        }else if(1==2 && smaskData.isJPX()){
-            maskData=JPeg2000ImageDecoder.getBytesFromJPEG2000(maskData);
             newSMask.setMixedArray(PdfDictionary.Filter,null);
             newSMask.setDecodedStream(maskData);
         }

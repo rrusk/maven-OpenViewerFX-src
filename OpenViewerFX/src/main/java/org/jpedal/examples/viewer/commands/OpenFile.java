@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -793,6 +793,26 @@ public class OpenFile {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
                     
+                    }else if (fName.endsWith(".rgb")){
+                        File f = new File(selectedFile);
+                        byte[] rawData = new byte[(int) f.length()];
+                        FileInputStream fis;
+                        try {
+                            fis = new FileInputStream(f);
+                            fis.read(rawData);
+                            java.awt.image.BufferedImage img = JDeliHelper.getSGIImage(rawData);
+                            commonValues.setBufferedImg(img);
+                        } catch (Exception ex) {
+                            LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
+                        }
+                    }else if (fName.endsWith(".sgi")) {
+                        File f = new File(selectedFile);
+                        try {
+                            java.awt.image.BufferedImage img = JDeliHelper.getSGIImage(f);
+                            commonValues.setBufferedImg(img);
+                        } catch (Exception ex) {
+                            LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());                            
+                        }
                     }else {
                         try {
                             // Load the source image from a file.
@@ -897,8 +917,8 @@ public class OpenFile {
 
         final String[] pdf = {"pdf"};
         final String[] fdf = {"fdf"};
-        final String[] png = {"png", "tif", "tiff", "jpg", "jpeg", "jp2", "psd", "bmp"};
-        chooser.addChoosableFileFilter(new FileFilterer(png, "Images (Tiff, Jpeg, Png, Bmp)"));
+        final String[] png = {"png", "tif", "tiff", "jpg", "jpeg", "jp2", "psd", "bmp", "sgi", "rgb"};
+        chooser.addChoosableFileFilter(new FileFilterer(png, "Images (Tiff, Jpeg, Png, Bmp, Sgi, Rgb)"));
         chooser.addChoosableFileFilter(new FileFilterer(fdf, "fdf (*.fdf)"));
         chooser.addChoosableFileFilter(new FileFilterer(pdf, "Pdf (*.pdf)"));
 
@@ -914,7 +934,8 @@ public class OpenFile {
                     || (ext.endsWith(".tif")) || (ext.endsWith(".tiff"))
                     || (ext.endsWith(".png"))
                     || (ext.endsWith(".jpg")) || (ext.endsWith(".jpeg"))
-                    || (ext.endsWith(".jp2")) || ext.endsWith(".bmp"));
+                    || (ext.endsWith(".jp2")) || ext.endsWith(".bmp") || ext.endsWith(".rgb") || 
+                    ext.endsWith(".sgi"));
 
             if (isValid) {
                 //save path so we reopen her for later selections
@@ -1028,7 +1049,9 @@ public class OpenFile {
             final boolean isValid = ((selectedFile.endsWith(".pdf"))
                     || (selectedFile.endsWith(".fdf")) || (selectedFile.endsWith(".tif"))
                     || (selectedFile.endsWith(".tiff")) || (selectedFile.endsWith(".png"))
-                    || (selectedFile.endsWith(".jpg")) || (selectedFile.endsWith(".jpeg")));
+                    || (selectedFile.endsWith(".jpg")) || (selectedFile.endsWith(".jpeg")) 
+                    || selectedFile.endsWith(".bmp") || selectedFile.endsWith(".rgb") 
+                    || selectedFile.endsWith(".sgi"));
             
             
             if (!isValid) {

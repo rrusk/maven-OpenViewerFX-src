@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -453,7 +453,11 @@ public abstract class SharedActionHandler implements ActionHandler {
         
         //as we only call this now when we need to action the url just call it.
         try {
-            BrowserLauncher.openURL(url);
+            if(url!=null && !url.isEmpty()){
+                BrowserLauncher.openURL(url);
+            }else{
+                showMessageDialog(Messages.getMessage("PdfViewer.UrlError")+" "+url);
+            }
         } catch (final Exception e1) {
             showMessageDialog(Messages.getMessage("PdfViewer.ErrorWebsite"));
             

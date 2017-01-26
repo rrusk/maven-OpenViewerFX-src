@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -36,6 +36,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import org.jpedal.color.PdfPaint;
 import org.jpedal.exception.PdfException;
 import org.jpedal.function.FunctionFactory;
 import org.jpedal.function.PDFFunction;
@@ -116,7 +117,16 @@ public class MaskUtils {
             }
 
             if(gs.SMask.getNameAsConstant(PdfDictionary.S) == PdfDictionary.Luminosity){
-                image= SMask.applyLuminosityMask(image, smaskImage, tr);
+				float [] bcFloats =gs.SMask.getFloatArray(PdfDictionary.BC);
+				if(bcFloats != null){
+					PdfPaint prev = gs.nonstrokeColorSpace.getColor();
+					gs.nonstrokeColorSpace.setColor(bcFloats, bcFloats.length);
+					int bc = gs.nonstrokeColorSpace.getColor().getRGB();
+					gs.nonstrokeColorSpace.setColor(prev);
+					image= SMask.applyLuminosityMask(image, smaskImage, tr, true, bc);
+				}else{
+					image= SMask.applyLuminosityMask(image, smaskImage, tr, false, 0);
+				}
             }else{
                 image= SMask.applyAlphaMask(image, smaskImage);
             }

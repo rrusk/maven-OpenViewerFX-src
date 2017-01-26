@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -36,12 +36,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import org.jpedal.fonts.objects.FontData;
 
-/**
- * @author markee
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 @SuppressWarnings("UnusedDeclaration")
 public class FontFile2 implements Serializable{
     

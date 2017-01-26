@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -77,8 +77,6 @@ public class CommandParser {
 
 
     int getCommandValues(int dataPointer, final int tokenNumber) {
-
-        final boolean debug=false;
 
         final int count=prefixes.length;
         int nextChar=characterStream[dataPointer],start,end=0;
@@ -391,10 +389,6 @@ public class CommandParser {
             //option 2 -its a value followed by a deliminator (CR,space,/)
             if(!matchFound){
 
-                if(debug) {
-                    System.out.println("Not type 2");
-                }
-
                 start=dataPointer;
                 final int firstChar=characterStream[start];
 
@@ -416,14 +410,6 @@ public class CommandParser {
 
                 end=dataPointer;
 
-                if(debug) {
-                    System.out.println("start=" + start+ ' ' +characterStream[start]);
-                    System.out.println("end=" + end+ ' ' +characterStream[dataPointer]);
-                }
-            }
-
-            if(debug) {
-                System.out.println("stored start=" + start + " end=" + end);
             }
 
             if(end<characterStream.length){

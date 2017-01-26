@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -53,7 +53,7 @@ import org.jpedal.utils.LogWriter;
  */
 public class TensorContext implements PaintContext {
 
-    private GenericColorSpace shadingColorSpace;
+    private final GenericColorSpace shadingColorSpace;
     private final float[] background;
     private int bitsPerCoordinate;
     private int bitsPerComponent;

@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -35,13 +35,6 @@ package org.jpedal.examples.viewer.paper;
 
 import java.awt.print.Paper;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Sam
- * Date: 02-Jul-2010
- * Time: 16:41:28
- * To change this template use File | Settings | File Templates.
- */
 public class MarginPaper extends Paper {
     double minX, minY, maxRX, maxBY;
 

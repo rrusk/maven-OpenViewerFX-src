@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -47,8 +47,11 @@ import org.jpedal.utils.LogWriter;
  */
 public class General {
     
-    public static int readGeneral(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final boolean map, final boolean ignoreRecursion, final PdfFileReader objectReader,Object PDFkey){
+    public static int readGeneral(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader){
        
+        //if we only need top level do not read whole tree
+        final boolean ignoreRecursion=pdfObject.ignoreRecursion();
+        
         if(debugFastCode) {
             System.out.println(padding + "general case " + i);
         }
@@ -105,7 +108,7 @@ public class General {
                         System.out.println(padding + "Data not yet loaded");
                     }
 
-                    i=length;
+                    i=raw.length;
                     break;
                 }
 
@@ -157,9 +160,9 @@ public class General {
 
         if(typeFound==4){//direct ref done above
         }else if(data[jj]=='/' && getKeyCount(jj, data)==0){
-            jj = Name.setNameStringValue(pdfObject, jj, data, map, PDFkey, PDFkeyInt, objectReader);
+            jj = Name.setNameStringValue(pdfObject, jj, data, PDFkeyInt, objectReader);
         }else if(data[jj]=='('){
-            jj = TextStream.readTextStream(pdfObject, jj, data, PDFkeyInt, ignoreRecursion,objectReader);
+            jj = TextStream.readTextStream(pdfObject, jj, data, PDFkeyInt,objectReader);
         }else if(data[jj]=='['){
 
             final ArrayDecoder objDecoder=ArrayFactory.getDecoder(objectReader, jj,PdfDictionary.VALUE_IS_STRING_ARRAY, data);
@@ -175,7 +178,7 @@ public class General {
         }else if(isNumber){
             jj= NumberValue.setNumberValue(pdfObject, jj, data, PDFkeyInt,objectReader);
         }else if(typeFound==1){
-            jj = Name.setNameStringValue(pdfObject, jj, data, map,PDFkey, PDFkeyInt, objectReader);            
+            jj = Name.setNameStringValue(pdfObject, jj, data, PDFkeyInt, objectReader);
         }else if(debugFastCode) {
             System.out.println(padding + "Not read");
         }

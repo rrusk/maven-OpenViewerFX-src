@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -36,9 +36,6 @@ import java.awt.Shape;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfFileReader;
@@ -73,9 +70,6 @@ public class PdfObject {
 
     byte[] unresolvedData;
 
-    //hold Other dictionary values
-    final Map<Object, Object> otherValues = new HashMap<Object, Object>();
-
     protected int pageNumber = -1;
 
     int PDFkeyInt = -1;
@@ -93,7 +87,7 @@ public class PdfObject {
     private float[] ArtBox, BBox, BleedBox, CropBox, Decode, Domain, Matrix, Matte, MediaBox, Range, TrimBox;
 
     protected PdfObject ColorSpace, DecodeParms, Encoding, Function,
-            Resources, Shading, SMask;
+            Params, Resources, Shading, SMask;
 
     private boolean ignoreRecursion, ignoreStream;
 
@@ -132,9 +126,6 @@ public class PdfObject {
     private byte[][] values;
 
     private Object[] DecodeParmsAsArray;
-
-    //used by /Other
-    protected Object currentKey;
 
     //used to track AP
     protected int parentType = -1;
@@ -306,6 +297,9 @@ public class PdfObject {
             case PdfDictionary.Function:
                 return Function;
 
+            case PdfDictionary.Params:
+                return Params;
+
             case PdfDictionary.Resources:
                 return Resources;
 
@@ -472,6 +466,10 @@ public class PdfObject {
                 Function = value;
                 break;
 
+            case PdfDictionary.Params:
+                Params = value;
+                break;
+
             case PdfDictionary.Resources:
                 Resources = value;
                 break;
@@ -484,21 +482,6 @@ public class PdfObject {
                 SMask = value;
                 break;
 
-            default:
-
-                setOtherValues(value);
-        }
-    }
-
-    /**
-     * some values stored in a MAP for AP or Structurede Content
-     */
-    protected void setOtherValues(final PdfObject value) {
-
-        if (objType == PdfDictionary.Form || objType == PdfDictionary.MCID || currentKey != null) {
-
-            otherValues.put(currentKey, value);
-            currentKey = null;
         }
     }
 
@@ -975,23 +958,7 @@ public class PdfObject {
 
                 break;
 
-            default:
-
-                if (objType == PdfDictionary.MCID) {
-
-                    //if(1==1)
-                    //throw new RuntimeException("xx="+currentKey+" id="+id);
-                    otherValues.put(currentKey, value);
-                    //System.out.println("id="+id+" "+value+" "+type+" "+objType+" "+this+" "+otherValues);
-                }
         }
-
-    }
-
-    public void setName(final Object id, final String value) {
-
-        otherValues.put(id, value);
-        // System.out.println("id="+id+" "+value+" "+type+" "+objType+" "+this+" "+otherValues);
     }
 
     public void setStringKey(final int id, final byte[] value) {
@@ -1287,20 +1254,6 @@ public class PdfObject {
     public void setTextStreamValue(final int id2, final String value) {
         // TODO Auto-generated method stub
 
-    }
-
-    /**
-     * used in Forms code where keys can be page numbers
-     *
-     * @return
-     */
-    public Map getOtherDictionaries() {
-
-        return Collections.unmodifiableMap(otherValues);
-    }
-
-    public void setCurrentKey(final Object key) {
-        currentKey = key;
     }
 
     //convenience method to return array as String

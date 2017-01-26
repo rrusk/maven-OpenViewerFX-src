@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -1072,7 +1072,7 @@ public class PdfDictionary {
     /**
      * convert stream int key for dictionary entry
      */
-    public static Object getKey(final int keyStart, final int keyLength, final byte[] raw) {
+    public static String getKey(final int keyStart, final int keyLength, final byte[] raw) {
 
         //save pair and reset
         final byte[] bytes=new byte[keyLength];
@@ -1139,10 +1139,6 @@ public class PdfDictionary {
 
             case MacRomanEncoding:
                 PDFkey=StandardFonts.MAC;
-                break;
-
-            case Params:
-                PDFkey=DecodeParms;
                 break;
 
             case PDFDocEncoding:
@@ -1212,6 +1208,7 @@ public class PdfDictionary {
     /**
      * get type of object
      */
+    @SuppressWarnings("OverlyLongMethod")
     public static int getKeyType(final int id, final int type) {
 
         switch(id){
@@ -1446,7 +1443,7 @@ public class PdfDictionary {
 
             case Contents:
             	if(type==Form) {
-                    return VALUE_IS_TEXTSTREAM;
+                    return VALUE_IS_VARIOUS;
                 } else {
                     return VALUE_IS_KEY_ARRAY;
                 }
@@ -1518,7 +1515,7 @@ public class PdfDictionary {
                 return VALUE_IS_MIXED_ARRAY;
 
             case Dests:
-                return VALUE_IS_DICTIONARY;
+                return VALUE_IS_VARIOUS;
 
             case Differences:
                 return VALUE_IS_MIXED_ARRAY;
@@ -2068,6 +2065,9 @@ public class PdfDictionary {
             case PaintType:
                 return VALUE_IS_INT;
 
+            case Params:
+                return VALUE_IS_DICTIONARY;
+
             case ParentTree:
             	return VALUE_IS_DICTIONARY;
 
@@ -2189,7 +2189,7 @@ public class PdfDictionary {
                 return VALUE_IS_UNREAD_DICTIONARY;
 
             case RoleMap:
-                return VALUE_IS_DICTIONARY;
+                return VALUE_IS_DICTIONARY_PAIRS;
 
             case Rotate:
                 return VALUE_IS_INT;

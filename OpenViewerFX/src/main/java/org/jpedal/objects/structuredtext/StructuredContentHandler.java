@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -33,7 +33,6 @@
 package org.jpedal.objects.structuredtext;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -74,7 +73,7 @@ public class StructuredContentHandler {
 
     Element root;
 
-	private float x1,y1,x2,y2;
+	//private float x1,y1,x2,y2;
     boolean isHTML;
     
     public StructuredContentHandler(final Object markedContent) {
@@ -220,24 +219,24 @@ public class StructuredContentHandler {
             }
 
             //any custom tags
-            if(BDCobj!=null){
-                final Map metadata=BDCobj.getOtherDictionaries();
-                if(metadata!=null){
-                    final Iterator customValues=metadata.keySet().iterator();
-                    Object key;
-                    while(customValues.hasNext()){
-                        key=customValues.next();
-                        root.setAttribute(key.toString(), metadata.get(key).toString());
-
-                        //if(addCoordinates){
-                            root.setAttribute("x1", String.valueOf((int) x1));
-                            root.setAttribute("y1", String.valueOf((int) y1));
-                            root.setAttribute("x2", String.valueOf((int) x2));
-                            root.setAttribute("y2", String.valueOf((int) y2));
-                        //}
-                    }
-                }
-            }
+//            if(BDCobj!=null){
+//
+//                if(metadata!=null){
+//                    final Iterator customValues=metadata.keySet().iterator();
+//                    Object key;
+//                    while(customValues.hasNext()){
+//                        key=customValues.next();
+//                        root.setAttribute(key.toString(), metadata.get(key).toString());
+//
+//                        //if(addCoordinates){
+//                            root.setAttribute("x1", String.valueOf((int) x1));
+//                            root.setAttribute("y1", String.valueOf((int) y1));
+//                            root.setAttribute("x2", String.valueOf((int) x2));
+//                            root.setAttribute("y2", String.valueOf((int) y2));
+//                        //}
+//                    }
+//                }
+//            }
             
 			//add node with name for BMC
 			if(isBMC){
@@ -369,10 +368,10 @@ public class StructuredContentHandler {
 
     	}
     	
-    	this.x1=x1;
-    	this.y1=y1;
-    	this.x2=x2;
-    	this.y2=y2;
+//    	this.x1=x1;
+//    	this.y1=y1;
+//    	this.x2=x2;
+//    	this.y2=y2;
 
     }
 

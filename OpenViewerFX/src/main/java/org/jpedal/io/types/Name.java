@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -41,14 +41,13 @@ import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
-import org.jpedal.utils.StringUtils;
 
 /**
  *
  */
 public class Name {
 
-    public static int setNameTreeValue(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int setNameTreeValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
       
         boolean isRef=false;
         
@@ -101,8 +100,7 @@ public class Name {
                     System.out.println(padding + "Data not yet loaded");
                 }
 
-                i=length;
-                return i;
+                return raw.length;
             }
 
             //lose obj at start
@@ -168,7 +166,7 @@ public class Name {
         return newString;
     }
 
-    public static int setNameStringValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean isMap, final Object PDFkey, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int setNameStringValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         byte[] stringBytes;
 
@@ -328,12 +326,8 @@ public class Name {
             
         }
         
-        if(isMap){
-            pdfObject.setName(PDFkey, StringUtils.getTextString(stringBytes, false));
-        }else {
-            pdfObject.setName(PDFkeyInt, stringBytes);
-        }
-        
+        pdfObject.setName(PDFkeyInt, stringBytes);
+
         if(debugFastCode) {
             System.out.println(padding + "String set as =" + new String(stringBytes) + "< written to " + pdfObject);
         }

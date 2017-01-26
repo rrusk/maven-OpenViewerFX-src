@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -82,6 +82,8 @@ public class MarkedContentGenerator {
     static String indent="";
     
     final Map<String, String> reverseLookup=new HashMap<String, String>();
+
+    final Map<String, String> rolemapLookup = new HashMap<String, String>();
     
     boolean isHTML;
     
@@ -91,6 +93,7 @@ public class MarkedContentGenerator {
     public Document getMarkedContentTree(final PdfResources res, final PdfPageData pdfPageData, final PdfObjectReader currentPdfFile) {
         
         PdfObject structTreeRootObj=res.getPdfObject(PdfResources.StructTreeRootObj);
+
         //PdfObject markInfoObj=res.getPdfObject(PdfResources.MarkInfoObj);  //not used at present
         
         this.res=res;
@@ -102,7 +105,7 @@ public class MarkedContentGenerator {
         
         //read values as needed
         this.currentPdfFile.checkResolved(structTreeRootObj);
-        
+
         /*
          * create the empty XMLtree and root to add data onto
          **/
@@ -164,10 +167,30 @@ public class MarkedContentGenerator {
      */
     private void buildTree(PdfObject structTreeRootObj) {
 
+        final PdfObject RoleMap=structTreeRootObj.getDictionary(PdfDictionary.RoleMap);
+
+        if(RoleMap!=null){
+            readRoleMap(RoleMap);
+        }
+
         root = doc.createElement("TaggedPDF-doc");
         doc.appendChild(root);
         
         traverseContentTree(structTreeRootObj);
+    }
+
+    private void readRoleMap(final PdfObject roleMap) {
+
+        String key, value;
+
+        PdfKeyPairsIterator keyPairs=roleMap.getKeyPairsIterator();
+
+        while(keyPairs.hasMorePairs()){
+            key=keyPairs.getNextKeyAsString();
+            value=keyPairs.getNextValueAsString();
+            rolemapLookup.put(key, value);
+            keyPairs.nextPair();
+        }
     }
 
     public void traverseContentTree(PdfObject structTreeRootObj) {
@@ -214,8 +237,11 @@ public class MarkedContentGenerator {
         final PdfObject Kdict = K.getDictionary(PdfDictionary.K);
         
         final String lang = K.getTextStreamValue(PdfDictionary.Lang);
-        final String S = K.getName(PdfDictionary.S);
-        
+        String S = K.getName(PdfDictionary.S);
+
+        if (rolemapLookup.containsKey(S)) {
+            S = rolemapLookup.get(S);
+        }
         fullS=fullS+ '.' +S;
         
         Element child=null;

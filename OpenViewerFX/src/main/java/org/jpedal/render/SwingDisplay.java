@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -104,15 +104,15 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     
     private Map<Object, Object> fonts=new HashMap<Object, Object>(50);
     
-    private Set<String> fontsUsed=new HashSet<String>(50);
+    private final Set<String> fontsUsed=new HashSet<String>(50);
     
     protected GlyphFactory factory;
     
     private PdfGlyphs glyphs;
     
-    private Map<String, Integer> imageID=new HashMap<String, Integer>(10);
+    private final Map<String, Integer> imageID=new HashMap<String, Integer>(10);
     
-    private Map<String, double[]> storedImageValues=new HashMap<String, double[]>(10);
+    private final Map<String, double[]> storedImageValues=new HashMap<String, double[]>(10);
     
     //text highlights if needed
     private int[] textHighlightsX;

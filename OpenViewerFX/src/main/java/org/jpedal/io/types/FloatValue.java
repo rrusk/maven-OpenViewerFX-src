@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -44,7 +44,7 @@ import org.jpedal.utils.NumberUtils;
 public class FloatValue {
 
     
-    public static int setFloatValue(final PdfObject pdfObject, int i, final byte[] raw, final int length, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int setFloatValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         //roll on
         i++;
@@ -99,8 +99,7 @@ public class FloatValue {
                     System.out.println(padding + "Data not yet loaded");
                 }
                 
-                i=length;
-                return i;
+                return raw.length;
             }
             
             //lose obj at start

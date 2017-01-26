@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -447,16 +447,6 @@ public class FormFlattener {
 
             if(formData!=null){
                 pdfStreamDecoder.BBox=BBox;
-
-                //we can potentially have a local Resource object we need to read for GS and font values (see 18343)
-                if(APobjN!=null){
-                    final PdfObject res=(PdfObject) APobjN.getOtherDictionaries().get("Resources");
-                    if(res!=null){
-                        pdfStreamDecoder.currentPdfFile.checkResolved(res);
-                        pdfStreamDecoder.readResources(res, false);
-
-                    }
-                }
 
                 pdfStreamDecoder.decodeStreamIntoObjects(formData, false);
                 pdfStreamDecoder.BBox=null;

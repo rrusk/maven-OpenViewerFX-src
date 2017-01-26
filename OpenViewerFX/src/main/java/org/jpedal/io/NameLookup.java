@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -34,7 +34,6 @@ package org.jpedal.io;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.raw.*;
 import org.jpedal.utils.StringUtils;
@@ -66,10 +65,14 @@ public class NameLookup extends HashMap<String, Object> {
      */
     public void readNames(final PdfObject nameObject, final Javascript javascript, final boolean isKid){
 
-        final Map DestsAsList=nameObject.getOtherDictionaries();
-       
-        if(!DestsAsList.isEmpty()){
-            readDestList(DestsAsList);
+        final PdfKeyPairsIterator keyPairs=nameObject.getKeyPairsIterator();
+
+        if(keyPairs.getTokenCount()>0){
+
+            while(keyPairs.hasMorePairs()){
+                this.put(keyPairs.getNextKeyAsString(), keyPairs.getNextValueAsString());
+                keyPairs.nextPair();
+            }
         }else{
             readNamesObject(nameObject, javascript, isKid);
         }
@@ -280,20 +283,5 @@ public class NameLookup extends HashMap<String, Object> {
             }
         }
         return returnValues;
-    }
-
-    private void readDestList(final Map DestsAsList) {
-       
-        final Iterator keys=DestsAsList.keySet().iterator();
-        
-        String key,value;
-        PdfObject rawvalue;
-        
-        while(keys.hasNext()){
-            key=(String) keys.next();
-            rawvalue=(PdfObject)DestsAsList.get(key);
-            value=new String(rawvalue.getUnresolvedData());
-            this.put(key, value);
-        }
     }
 }

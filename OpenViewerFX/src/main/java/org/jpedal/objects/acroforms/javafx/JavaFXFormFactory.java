@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -33,7 +33,6 @@
 package org.jpedal.objects.acroforms.javafx;
 
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
 import java.util.Map;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -1384,20 +1383,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
                     //down on
                     if(APobjD.getDictionary(PdfDictionary.On) !=null){
                         downOnDic = APobjD.getDictionary(PdfDictionary.On);
-                    }else {
-                        final Map otherValues=APobjD.getOtherDictionaries();
-                        if(otherValues!=null && !otherValues.isEmpty()){
-                            final Iterator keys=otherValues.keySet().iterator();
-                            PdfObject val;
-                            String key;
-                            while(keys.hasNext()){
-                                key=(String)keys.next();
-                                val=(PdfObject)otherValues.get(key);
-                                downOnDic = val;
-                            }
-                        }
                     }
-                
                 }
             }
             
@@ -1428,18 +1414,6 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
                 //if we have a root stream then it is the off value
                 if(APobjR.getDictionary(PdfDictionary.On) !=null){
                     rollOnDic = APobjR.getDictionary(PdfDictionary.On);
-                }else {
-                    final Map otherValues=APobjR.getOtherDictionaries();
-                    if(otherValues!=null && !otherValues.isEmpty()){
-                        final Iterator keys=otherValues.keySet().iterator();
-                        PdfObject val;
-                        String key;
-                        while(keys.hasNext()){
-                            key=(String)keys.next();
-                            val=(PdfObject)otherValues.get(key);
-                            rollOnDic = val;
-                        }
-                    }
                 }
             }
             if(rollOffDic!=null){

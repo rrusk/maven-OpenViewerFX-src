@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -43,8 +43,8 @@ import org.jpedal.io.ColorSpaceConvertor;
  */
 public class SMask {
         
-    public static BufferedImage applyLuminosityMask(BufferedImage image, BufferedImage smask, int [] tr){
-                
+    public static BufferedImage applyLuminosityMask(BufferedImage image, BufferedImage smask, int [] tr, boolean hasBC, int bc){
+		
         if(smask==null){
             return image;
         }
@@ -73,23 +73,41 @@ public class SMask {
         int [] imagePixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         int [] maskPixels = ((DataBufferInt) smask.getRaster().getDataBuffer()).getData();
         
-        int ip,mp,r,g,b,a,y;
+        int ip,mp,r,g,b,resA,y,a;
+		int r0 = (bc >> 16) & 0xff;
+		int g0 = (bc >> 8) & 0xff;
+		int b0 = bc & 0xff;
         for (int i = 0; i < imagePixels.length; i++) {
             mp = maskPixels[i];
-            if(mp!=0){
-                r = (mp >> 16) & 0xff;
-                g = (mp >> 8) & 0xff;
-                b = mp & 0xff;
-                y = (r * 77) + (g * 152) + (b * 28);
-                ip = imagePixels[i];
-                a = (ip >> 24) & 0xff;
-                a = tr != null ? (a * tr[y >> 8]) >> 8 : (a * y) >> 16;
-                imagePixels[i] = (a << 24) | (ip & 0xffffff);
-            }
+			a = mp >>> 24;
+			r = (mp >> 16) & 0xff;
+			g = (mp >> 8) & 0xff;
+			b = mp & 0xff;			
+			if (hasBC) {
+				if (a == 0) {
+					r = r0;
+					g = g0;
+					b = b0;
+				} else if (a < 255) {
+					int a_ = 255 - a;
+					r = (r * a + r0 * a_) >> 8;
+					g = (g * a + g0 * a_) >> 8;
+					b = (b * a + b0 * a_) >> 8;
+				}
+			}
+			
+			y = (r * 77) + (g * 152) + (b * 28);
+			ip = imagePixels[i];
+			resA = (ip >> 24) & 0xff;
+			resA = tr != null ? (resA * tr[y >> 8]) >> 8 : (resA * y) >> 16;
+			imagePixels[i] = (resA << 24) | (ip & 0xffffff);
         }
         
         return image;
     }
+	
+	
+	
     
      public static BufferedImage applyAlphaMask(BufferedImage image, BufferedImage smask){
                        

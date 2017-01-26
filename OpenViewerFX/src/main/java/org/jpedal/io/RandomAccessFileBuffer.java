@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -33,7 +33,6 @@
 package org.jpedal.io;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -47,14 +46,14 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 	private final RandomAccessFile ra;
 	private final boolean isBig;
 
-	private int bp = 0;
-	private int bl = 0;
+	private int bp;
+	private int bl;
 	byte[] temp;
 	int tSize = 4096;
-	int ts = 0;
+	int ts;
 	int te;
 
-	public RandomAccessFileBuffer(final String fileName, final String mode) throws FileNotFoundException, IOException {
+	public RandomAccessFileBuffer(final String fileName, final String mode) throws IOException {
 		this.fileName = fileName;
 		File file = new File(fileName);
 		ra = new RandomAccessFile(file, mode);

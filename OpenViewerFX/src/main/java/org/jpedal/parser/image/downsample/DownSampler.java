@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -44,7 +44,7 @@ public class DownSampler {
     
     
     public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData, 
-            final ImageData imageData, final byte[] maskCol, final int sampling) {
+            final ImageData imageData, byte[] maskCol, final int sampling) {
         
         if(sampling>1){ //safety check
             
@@ -59,10 +59,13 @@ public class DownSampler {
                 if(index!=null) {
                     index = decodeColorData.convertIndexToRGB(index);
                     decodeColorData.setIndex(index, index.length/3);
+                    decodeColorData=OneBitDownSampler.downSampleIndexed(sampling, imageData, index, decodeColorData);
+
+                }else if(maskCol!=null){
+                    decodeColorData=OneBitDownSampler.downSampleMask(sampling, imageData, maskCol, decodeColorData);
+                }else{
+                    decodeColorData=OneBitDownSampler.downSample(sampling, imageData, decodeColorData);
                 }
-
-                decodeColorData=OneBitDownSampler.downSample(sampling, imageData, maskCol, index, decodeColorData);
-
             }else if(imageData.getDepth()==8){
                 decodeColorData=EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
             }

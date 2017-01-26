@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -40,9 +40,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -60,7 +58,6 @@ extends GenericColorSpace {
     //cache values to speed up translation
     private final int[] a1,b1,c1;
     
-    private final Map<Integer, Integer> cache=new HashMap<Integer, Integer>();
     private float[] prevFloat;
   
     public ICCColorSpace(final PdfObject colorSpace) {
@@ -142,95 +139,15 @@ extends GenericColorSpace {
     
     /**set color*/
     @Override
-    public final void setColor(final float[] operand, final int size) {
+    public final void setColor(final float[] operand, final int size) {        
         
-        if (1 == 1) {
             if (isSame(prevFloat, operand)) {
-                return;
+                //do nothing
             } else {
                 float[] result = cs.toRGB(operand);
                 currentColor = new PdfColor(result[0], result[1], result[2]);
                 prevFloat = operand.clone();
-                return;
             }
-        }
-//        if(hasNegative(operand)){//case 21017 contains negative values
-//            float[] result = cs.toRGB(operand);
-//            currentColor = new PdfColor(result[0], result[1], result[2]);
-////            prevFloat = operand.clone();
-//            return;
-//        }
-        
-        //if(isCached)
-        //	System.out.println("setColor "+size);
-        
-        float[] values=new float[size];
-        final int[] lookup=new int[size];
-        
-        rawValues=new float[size];
-        
-        for(int i=0;i<size;i++){
-            final float val=operand[i];
-            
-            rawValues[i]=val;
-            
-            values[i]=val;
-            if(val>1) {
-                lookup[i]=(int)(val);
-            } else {
-                lookup[i]=(int)(val*255);
-            }
-            
-        }
-        
-        if(size==3 && (a1[lookup[0]]!=-1) &&
-                (b1[lookup[1]]!=-1)&&(c1[lookup[2]]!=-1))
-        {
-            currentColor=new PdfColor(a1[lookup[0]],b1[lookup[1]],c1[lookup[2]]);
-            //System.out.println("cached "+operand[0]+" "+operand[1]+" "+operand[2]+" "+this);
-            
-        }else if(size==4 && cache.get((lookup[0] << 24) + (lookup[1] << 16) + (lookup[2] << 8) + lookup[3])!=null){
-            
-            final Integer val=cache.get((lookup[0] << 24) + (lookup[1] << 16) + (lookup[2] << 8) + lookup[3]);
-            final int raw = val;
-            final int rr = ((raw >> 16) & 255);
-            final int gg = ((raw >> 8) & 255);
-            final int bb = ((raw) & 255);
-            
-            currentColor=new PdfColor(rr,gg,bb);
-            
-        }else{
-            
-            try{
-                
-                values=cs.toRGB(values);
-                
-            }catch(final Exception ee){
-                //file with invalid values appears to work if we just replace
-                values=new float[]{values[0],values[0],values[0]};
-
-                LogWriter.writeLog("Invalid ICC values "+ee);
-                
-            }
-            currentColor=new PdfColor(values[0],values[1],values[2]);
-            
-            if(size==3){
-                a1[lookup[0]]=(int)(values[0]*255);
-                b1[lookup[1]]=(int)(values[1]*255);
-                c1[lookup[2]]=(int)(values[2]*255);
-                
-                
-            }else if(size==4){ //not used except as flag
-                
-                final int raw = ((int)(values[0]*255) << 16) +
-                        ((int)(values[1]*255) << 8) +
-                        (int)(values[2]*255);
-                
-                //store values in cache
-                cache.put((lookup[0] << 24) + (lookup[1] << 16) + (lookup[2] << 8) + lookup[3], raw);
-                
-            }
-        }
     }
     
     /**

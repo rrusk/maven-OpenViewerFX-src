@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -71,7 +71,12 @@ public class DownloadProgress {
             if(pdfUrl.startsWith("jar:/")) {
                 is=this.getClass().getResourceAsStream(pdfUrl.substring(4));
             }else{
-                url = new URL(pdfUrl);
+                //Allow for firefox drag and drop link without enough forward slashes
+                if(pdfUrl.startsWith("file:/") && pdfUrl.charAt(7)!='/') {
+                    url = new URL(pdfUrl.replaceFirst("file:/*?", "file:///"));
+                }else{
+                    url = new URL(pdfUrl);
+                }
 
                 is = url.openStream();
 

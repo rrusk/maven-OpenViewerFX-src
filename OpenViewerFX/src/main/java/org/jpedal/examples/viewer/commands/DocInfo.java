@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -77,7 +77,7 @@ public class DocInfo {
         if (args == null) {
             if (!commonValues.isPDF()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.ImageSearch"));
-            }else if(commonValues.getSelectedFile() == null){
+            }else if(commonValues.getSelectedFile() == null || !decode_pdf.isOpen()){
                     currentGUI.showMessageDialog(Messages.getMessage("PdfVieweremptyFile.message"), Messages.getMessage("PdfViewerTooltip.pageSize"), JOptionPane.PLAIN_MESSAGE);
             }else{
                 getDocumentProperties(commonValues.getSelectedFile(), commonValues.getFileSize(), commonValues.getPageCount(), commonValues.getCurrentPage(), decode_pdf, currentGUI);

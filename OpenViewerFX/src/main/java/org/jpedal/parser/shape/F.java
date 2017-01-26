@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -244,19 +244,22 @@ public class F {
         
         PdfPaint prev = gs.nonstrokeColorSpace.getColor();
         int prevInt = prev.getRGB();
-        
+        		
         float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
         int brgb = 0;
+		boolean hasBC = false;
         if(BC!=null){
             gs.nonstrokeColorSpace.setColor(BC, BC.length);
             brgb = gs.nonstrokeColorSpace.getColor().getRGB();
-            gs.nonstrokeColorSpace.setColor(prev);
+            gs.nonstrokeColorSpace.setColor(prev);			
+			hasBC = true;
         }       
-            
+        int pa = (prevInt >>> 24);
+//		int ba = ((brgb >> 24) & 0xff);
         int br = ((brgb >> 16) & 0xff);
         int bg = ((brgb >> 8) & 0xff);
         int bb = (brgb & 0xff);
-
+		
         BufferedImage result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
         int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
         int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
@@ -266,21 +269,24 @@ public class F {
             int sr = ((sargb >> 16) & 0xff);
             int sg = ((sargb >> 8) & 0xff);
             int sb = (sargb & 0xff);            
-            if (sa == 0) {
-                sr = br;
-                sg = bg;
-                sb = bb;
-            } else if (sa < 255) {
-                int alpha_ = 255 - sa;
-                sr = (sr * sa + br * alpha_) >> 8;
-                sg = (sg * sa + bg * alpha_) >> 8;
-                sb = (sb * sa + bb * alpha_) >> 8;
-            }
+			if(hasBC){
+				if (sa == 0) {
+					sr = br;
+					sg = bg;
+					sb = bb;
+				} else if (sa < 255) {
+					int alpha_ = 255 - sa;
+					sr = (sr * sa + br * alpha_) >> 8;
+					sg = (sg * sa + bg * alpha_) >> 8;
+					sb = (sb * sa + bb * alpha_) >> 8;
+				}
+			}
+            
             int y = (sr * 77) + (sg * 152) + (sb * 28);
-            sa = (sa * y) >> 16;
-            dPixels[i] = (sa << 24) | (prevInt & 0xffffff);
+			y = ( pa * y ) >> 16;
+            dPixels[i] = (y << 24) | (prevInt & 0xffffff);
         }
-        
+		
         smaskImage.flush();
         return result;
     }

@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -393,7 +393,8 @@ public class PageNavigator {
     
     public static void navigatePages(int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
-        if (count == 0) {
+        //Check isOpen as failling to load file may allow nav buttons to function
+        if (count == 0 || !decode_pdf.isOpen()) {
             return;
         }
 

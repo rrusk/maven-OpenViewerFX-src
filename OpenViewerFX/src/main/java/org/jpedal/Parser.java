@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -778,8 +778,7 @@ public class Parser {
                         }
                     }
 
-                    setResultsFromDecode(page, current);
-
+                    setResultsFromDecode(page, current, currentDisplay.isHTMLorSVG());
 
                     /* turn off status bar update */
                     if (t != null) {
@@ -960,9 +959,9 @@ public class Parser {
         return current;
     }
 
-    private void setResultsFromDecode(final int page, final PdfStreamDecoder current) {
+    private void setResultsFromDecode(final int page, final PdfStreamDecoder current, boolean isHTML) {
         //All data loaded so now get all line areas for page
-        if(textLines!=null && extractionMode>0){
+        if(textLines!=null && extractionMode>0 && !isHTML){
             final Vector_Rectangle_Int vr = (Vector_Rectangle_Int) current.getObjectValue(ValueTypes.TextAreas);
             vr.trim();
             final int[][] pageTextAreas = vr.get();

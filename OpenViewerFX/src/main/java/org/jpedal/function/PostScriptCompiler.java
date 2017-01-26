@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -291,409 +291,567 @@ public class PostScriptCompiler {
     }
 
     private void executeCommand(int cmd) {
-        double[] first, second;
-        int n,j, old;
         switch (cmd) {
             case C_ABS:
-                first = popItem();
-                cValues[cp] = Math.abs(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_ABS();
                 break;
             case C_ADD:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = first[0] + second[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_ADD();
                 break;
             case C_ATAN:
-                first = popItem();
-                second = popItem();        
-                double tt = 0;
-                final double tangent = second[0]/first[0];
-		if(first[0]>=0 && second[0]>=0){
-			tt = Math.toDegrees(Math.atan(tangent));
-		} else if (first[0]>0 && second[0]<=0){
-			double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
-                        tt = tmp+90;
-		} else if (first[0]<=0 && second[0]<=0){
-			double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
-			tt = tmp+180;
-		} else if (first[0]<=0 && second[0]>=0){
-			double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
-			tt = tmp + 270;
-		}                
-                cValues[cp] = tt;
-                cTypes[cp] = (int) first[1];
-                cp++;                
+                C_ATAN();                
                 break;
             case C_CEILING:
-                first = popItem();
-                cValues[cp] = Math.ceil(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_CEILING();
                 break;
             case C_COS:
-                first = popItem();
-                cValues[cp] = Math.sin(first[0] / radToDegrees);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_COS_OR_SIN();
                 break;
             case C_CVI:
-                first = popItem();
-                cValues[cp] = (int) first[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_CVI();
                 break;
             case C_CVR:
-                first = popItem();
-                cValues[cp] = first[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_CVR();
                 break;
             case C_DIV:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] / first[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_DIV();
                 break;
             case C_EXP:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = Math.pow(second[0],first[0]);
-                cTypes[cp] = (int) first[1];
+                C_EXP();
                 break;
             case C_FLOOR:
-                first = popItem();
-                cValues[cp] = Math.floor(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_FLOOR();
                 break;
             case C_IDIV:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = ((int) second[0]) / ((int) first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_IDIV();
                 break;
             case C_LN:
-                first = popItem();
-                cValues[cp] = Math.log(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_LN();
                 break;
             case C_LOG:
-                first = popItem();
-                cValues[cp] = Math.log(first[0])/toBase10;
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_LOG();
                 break;
             case C_MOD:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = ((int) second[0]) % ((int) first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_MOD();
                 break;
             case C_MUL:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = first[0] * second[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_MUL();
                 break;
             case C_NEG:
-                first = popItem();
-                cValues[cp] = -first[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_NEG();
                 break;
             case C_SIN:
-                first = popItem();
-                cValues[cp] = Math.sin(first[0] / radToDegrees);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_COS_OR_SIN();
                 break;
             case C_SQRT:
-                first = popItem();
-                cValues[cp] = Math.sqrt(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_SORT();
                 break;
             case C_SUB:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] - first[0];
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_SUB();
                 break;
             case C_ROUND:
-                first = popItem();
-                cValues[cp] = Math.round(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_ROUND();
                 break;
             case C_TRUNCATE:
-                first = popItem();
-                cValues[cp] = (int)(first[0]);
-                cTypes[cp] = (int) first[1];
-                cp++;
+                C_TRUNCATE();
                 break;
             case C_AND:
-                first = popItem();
-                second = popItem();
-                if(first[1] == T_NUMBER && second[1] == T_NUMBER){
-                    cValues[cp] = ((int)second[0]) & ((int)first[0]);
-                    cTypes[cp] = T_NUMBER;        
-                }else{
-                    cValues[cp] = first[0] == second[0] ? 1 : 0 ;
-                    cTypes[cp] = T_BOOLEAN;
-                }
-                cp++;
+                C_AND();
                 break;
             case C_BITSHIFT:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = ((int)second[0])<<((int)first[0]);
-                cTypes[cp] = (int)first[1];
-                cp++;
+                C_BITSHIFT();
                 break;
             case C_EQ:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = first[0] == second[0] ? 1 : 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_EQ();
                 break;
             case C_FALSE:
-                cValues[cp] = 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_FALSE();
                 break;
             case C_GE:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] >= first[0] ? 1 : 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_GE();
                 break;
             case C_GT:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] > first[0] ? 1 : 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_GT();
                 break;
             case C_LE:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] <= first[0] ? 1 : 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_LE();
                 break;
             case C_LT:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] < first[0] ? 1 : 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_LT();
                 break;
             case C_NE:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = second[0] != first[0] ? 1 : 0;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_NE();
                 break;
             case C_NOT:
-                first = popItem();
-                if(first[1] == T_NUMBER){
-                    cValues[cp] = ~(int)first[0];
-                }else{
-                    cValues[cp] = first[0] != 1 ? 1 : 0;                    
-                }
-                cTypes[cp] = (int)first[1];
-                cp++;
+                C_NOT();
                 break;
             case C_OR:
-                first = popItem();
-                second = popItem();
-                if(first[1] == T_NUMBER && second[1] == T_NUMBER){
-                    cValues[cp] = ((int)second[0]) | ((int)first[0]);
-                    cTypes[cp] = T_NUMBER;        
-                }else{
-                    cValues[cp] = first[0]==1 || second[0]==1 ? 1 : 0 ;
-                    cTypes[cp] = T_BOOLEAN;
-                }
-                cp++;
+                C_OR();
                 break;
             case C_TRUE:
-                cValues[cp] = 1;
-                cTypes[cp] = T_BOOLEAN;
-                cp++;
+                C_TRUE();
                 break;
             case C_XOR:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = ((int)second[0]) ^ ((int)first[0]);
-                if(first[1] == T_NUMBER && second[1] == T_NUMBER){                    
-                    cTypes[cp] = T_NUMBER;        
-                }else{
-                    cTypes[cp] = T_BOOLEAN;
-                }
-                cp++;
+                C_XOR();
                 break;
             case C_IF:                
-                old = dp;
-                first = popItem();
-                if (first[0] == 1) {
-                    while (dTypes[dp] != T_SBRACE && dp > 0) {
-                        dp--;
-                    }
-                    dp++;
-                    executeInterval(old);
-                }
-                dp = old;                
+                C_IF();                
                 break;
             case C_IFELSE:
-                //todo
-                old = dp;
-                first = popItem();
-                if (first[0] == 1) {
-                    int br = 0;
-                    while(dp > 0){
-                        int cdp = dTypes[dp--];
-                        if(cdp == T_SBRACE){
-                            br++;
-                        }else if(cdp == T_EBRACE){
-                            br--;
-                        }                        
-                        if(cdp == T_SBRACE && br == 0){    
-                            break;
-                        }
-                    }
-                    int end = dp;
-                    br = 0;
-                    while(dp > 0){
-                        int cdp = dTypes[dp--];
-                        if(cdp == T_SBRACE){
-                            br++;
-                        }else if(cdp == T_EBRACE){
-                            br--;
-                        }                        
-                        if(cdp == T_SBRACE && br == 0){                            
-                            break;
-                        }
-                    }                    
-                    dp+=2;
-                    executeInterval(end);
-                } else {
-                    int br = 0;
-                    while(dp > 0){
-                        int cdp = dTypes[dp--];
-                        if(cdp == T_SBRACE){
-                            br++;
-                        }else if(cdp == T_EBRACE){
-                            br--;
-                        }                        
-                        if(cdp == T_SBRACE && br == 0){
-                            break;
-                        }
-                    }
-                    dp+=2;
-                    executeInterval(old);
-                }
-                
-                dp = old;
+                C_IFELSE();
                 break;
             case C_COPY:
-                first = popItem();
-                if (first[0] > 0) {
-                    n = (int) first[0];
-                    double[] values = new double[n];
-                    int[] types = new int[n];
-                    System.arraycopy(cValues, cValues.length - n, values, 0, n);
-                    System.arraycopy(cTypes, cValues.length - n, types, 0, n);
-                    for (int i = 0; i < n; i++) {
-                        cValues[cp] = values[0];
-                        cTypes[cp] =  types[1];
-                        cp++;
-                    }
-                }
+                C_COPY();
                 break;
             case C_EXCH:
-                first = popItem();
-                second = popItem();
-                cValues[cp] = first[0];
-                cTypes[cp] = (int)first[1];
-                cp++;
-                cValues[cp] = second[0];
-                cTypes[cp] = (int)second[1];
-                cp++;
+                C_EXCH();
                 break;
             case C_POP:
                 popItem();
                 break;
             case C_DUP:
-                first = popItem();
-                cValues[cp] = first[0];
-                cTypes[cp] = (int)first[1];
-                cp++;
-                cValues[cp] = first[0];
-                cTypes[cp] = (int)first[1];
-                cp++;
+                C_DUP();
                 break;
             case C_INDEX:
-                first = popItem();
-                n = (int)first[0];
-                cValues[cp] = cValues[cp - 1 - n];
-                cTypes[cp] = cTypes[cp - 1 - n];
-                cp++;
+                C_INDEX();
                 break;
             case C_ROLL:
-                j = (int)(popItem()[0]);
-                n = (int)(popItem()[0]);
-                
-                if(n == 0 || j == 0 || n > cp){ //should not roll in these cases
-                    break;
-                }
-                LinkedList<Double> listV = new LinkedList<Double>();
-                LinkedList<Integer> listT = new LinkedList<Integer>();
-                
-                for (int i = 0; i < n; i++) {
-                    double[] dd = popItem();
-                    listV.add(dd[0]);
-                    listT.add((int)dd[1]);
-                }
-                
-                if (j > 0) {
-                    for (int i = 0; i < j; i++) {
-                        double v = listV.removeFirst();
-                        int t = listT.removeFirst();
-                        listV.addLast(v);
-                        listT.addLast(t);
-                    }
-                } else {
-                    j *= -1;
-                    for (int i = 0; i < j; i++) {
-                        double v = listV.removeLast();
-                        int t = listT.removeLast();
-                        listV.addFirst(v);
-                        listT.addFirst(t);
-                    }
-                }
-                
-                for (int i = 0; i < n; i++) {
-                    cValues[cp] = listV.removeLast();
-                    cTypes[cp] = listT.removeLast();
-                    cp++;
-                }                
+                C_ROLL();                
                 break;
         }
     }
 
+
+    private void C_ABS() {
+        final double[] first = popItem();
+        cValues[cp] = Math.abs(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+
+    private void C_ATAN() {
+        final double[] first = popItem();
+        final double[] second = popItem();
+        double tt = 0;
+        final double tangent = second[0] / first[0];
+        if (first[0] >= 0 && second[0] >= 0) {
+            tt = Math.toDegrees(Math.atan(tangent));
+        } else if (first[0] > 0 && second[0] <= 0) {
+            double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
+            tt = tmp + 90;
+        } else if (first[0] <= 0 && second[0] <= 0) {
+            double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
+            tt = tmp + 180;
+        } else if (first[0] <= 0 && second[0] >= 0) {
+            double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
+            tt = tmp + 270;
+        }
+        cValues[cp] = tt;
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_ADD() {
+        final double[] first = popItem();
+        final double[] second = popItem();
+        cValues[cp] = first[0] + second[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_CEILING() {
+        final double[] first = popItem();
+        cValues[cp] = Math.ceil(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_COS_OR_SIN() {
+        final double[] first = popItem();
+        cValues[cp] = Math.sin(first[0] / radToDegrees);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_CVI() {
+        final double[] first = popItem();        
+        cValues[cp] = (int) first[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_CVR() {
+        final double[] first = popItem();        
+        cValues[cp] = first[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_DIV() {
+        final double[] first = popItem();
+        final double[] second = popItem();
+        cValues[cp] = second[0] / first[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    
+    private void C_EXP() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = Math.pow(second[0],first[0]);
+        cTypes[cp] = (int) first[1];
+    }
+    
+    
+    private void C_FLOOR() {
+        final double[] first = popItem();
+        cValues[cp] = Math.floor(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+        
+    private void C_IDIV() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = ((int) second[0]) / ((int) first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }   
+    
+    private void C_LN() {
+        final double[] first = popItem();        
+        cValues[cp] = Math.log(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }    
+    
+    private void C_LOG() {
+        final double[] first = popItem();        
+        cValues[cp] = Math.log(first[0])/toBase10;
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_MOD() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = ((int) second[0]) % ((int) first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+       
+    private void C_MUL() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = first[0] * second[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_NEG() {
+        final double[] first = popItem();        
+        cValues[cp] = -first[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    
+    private void C_SORT() {
+        final double[] first = popItem();        
+        cValues[cp] = Math.sqrt(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_SUB() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = second[0] - first[0];
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_ROUND() {
+        final double[] first = popItem();        
+        cValues[cp] = Math.round(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+    
+    private void C_TRUNCATE() {
+        final double[] first = popItem();        
+        cValues[cp] = (int)(first[0]);
+        cTypes[cp] = (int) first[1];
+        cp++;
+    }
+        
+    private void C_AND() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        if(first[1] == T_NUMBER && second[1] == T_NUMBER){
+            cValues[cp] = ((int)second[0]) & ((int)first[0]);
+            cTypes[cp] = T_NUMBER;
+        }else{
+            cValues[cp] = first[0] == second[0] ? 1 : 0 ;
+            cTypes[cp] = T_BOOLEAN;
+        }
+        cp++;
+    }
+
+    private void C_BITSHIFT() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = ((int)second[0])<<((int)first[0]);
+        cTypes[cp] = (int)first[1];
+        cp++;
+    }
+     
+    private void C_EQ() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = first[0] == second[0] ? 1 : 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_FALSE() {
+        cValues[cp] = 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_GE() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = second[0] >= first[0] ? 1 : 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_GT() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = second[0] > first[0] ? 1 : 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_LE() {
+        final double[] first = popItem();
+        final double[] second = popItem();
+        cValues[cp] = second[0] <= first[0] ? 1 : 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_LT() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = second[0] < first[0] ? 1 : 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_NE() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        cValues[cp] = second[0] != first[0] ? 1 : 0;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+        
+    private void C_NOT() {
+        final double[] first = popItem();
+        if(first[1] == T_NUMBER){
+            cValues[cp] = ~(int)first[0];
+        }else{
+            cValues[cp] = first[0] != 1 ? 1 : 0;
+        }
+        cTypes[cp] = (int)first[1];
+        cp++;
+    }
+    
+    private void C_OR() {
+        final double[] first = popItem();
+        final double[] second = popItem();        
+        if(first[1] == T_NUMBER && second[1] == T_NUMBER){
+            cValues[cp] = ((int)second[0]) | ((int)first[0]);
+            cTypes[cp] = T_NUMBER;
+        }else{
+            cValues[cp] = first[0]==1 || second[0]==1 ? 1 : 0 ;
+            cTypes[cp] = T_BOOLEAN;
+        }
+        cp++;
+    }
+    
+    private void C_TRUE() {
+        cValues[cp] = 1;
+        cTypes[cp] = T_BOOLEAN;
+        cp++;
+    }
+    
+    private void C_XOR() {
+        final double[] first = popItem();
+        final double[] second = popItem();
+        cValues[cp] = ((int)second[0]) ^ ((int)first[0]);
+        if(first[1] == T_NUMBER && second[1] == T_NUMBER){
+            cTypes[cp] = T_NUMBER;
+        }else{
+            cTypes[cp] = T_BOOLEAN;
+        }
+        cp++;
+    }
+    
+    private void C_IF() {
+        final int old = dp;
+        final double[] first = popItem();        
+        if (first[0] == 1) {
+            while (dTypes[dp] != T_SBRACE && dp > 0) {
+                dp--;
+            }
+            dp++;
+            executeInterval(old);
+        }
+        dp = old;
+    }
+    
+    private void C_IFELSE() {
+        final int old = dp;
+        final double[] first = popItem();
+        //todo
+        if (first[0] == 1) {
+            int br = 0;
+            while(dp > 0){
+                int cdp = dTypes[dp--];
+                if(cdp == T_SBRACE){
+                    br++;
+                }else if(cdp == T_EBRACE){
+                    br--;
+                }
+                if(cdp == T_SBRACE && br == 0){
+                    break;
+                }
+            }
+            int end = dp;
+            br = 0;
+            while(dp > 0){
+                int cdp = dTypes[dp--];
+                if(cdp == T_SBRACE){
+                    br++;
+                }else if(cdp == T_EBRACE){
+                    br--;
+                }
+                if(cdp == T_SBRACE && br == 0){
+                    break;
+                }
+            }
+            dp+=2;
+            executeInterval(end);
+        } else {
+            int br = 0;
+            while(dp > 0){
+                int cdp = dTypes[dp--];
+                if(cdp == T_SBRACE){
+                    br++;
+                }else if(cdp == T_EBRACE){
+                    br--;
+                }
+                if(cdp == T_SBRACE && br == 0){
+                    break;
+                }
+            }
+            dp+=2;
+            executeInterval(old);
+        }
+        dp = old;
+    }
+    
+    private void C_COPY() {
+        final double[] first = popItem();
+        final int n;
+        if (first[0] > 0) {
+            n = (int) first[0];
+            double[] values = new double[n];
+            int[] types = new int[n];
+            System.arraycopy(cValues, cValues.length - n, values, 0, n);
+            System.arraycopy(cTypes, cValues.length - n, types, 0, n);
+            for (int i = 0; i < n; i++) {
+                cValues[cp] = values[0];
+                cTypes[cp] =  types[1];
+                cp++;
+            }
+        }
+    }
+    
+    private void C_EXCH() {
+        final double[] first = popItem();
+        final double[] second = popItem();
+        cValues[cp] = first[0];
+        cTypes[cp] = (int)first[1];
+        cp++;
+        cValues[cp] = second[0];
+        cTypes[cp] = (int)second[1];
+        cp++;
+    }
+    
+    private void C_DUP() {
+        final double[] first = popItem();
+        cValues[cp] = first[0];
+        cTypes[cp] = (int)first[1];
+        cp++;
+        cValues[cp] = first[0];
+        cTypes[cp] = (int)first[1];
+        cp++;
+    }
+    
+    private void C_INDEX() {
+        final double[] first = popItem();
+        final int n = (int)first[0];
+        cValues[cp] = cValues[cp - 1 - n];
+        cTypes[cp] = cTypes[cp - 1 - n];
+        cp++;
+    }
+    
+    private void C_ROLL() {
+        int j = (int)(popItem()[0]);
+        final int n = (int)(popItem()[0]);
+        if (n == 0 || j == 0 || n > cp) {
+            //should not roll in these cases
+            return;
+        }
+        LinkedList<Double> listV = new LinkedList<Double>();
+        LinkedList<Integer> listT = new LinkedList<Integer>();
+        
+        for (int i = 0; i < n; i++) {
+            double[] dd = popItem();
+            listV.add(dd[0]);
+            listT.add((int)dd[1]);
+        }
+        
+        if (j > 0) {
+            for (int i = 0; i < j; i++) {
+                double v = listV.removeFirst();
+                int t = listT.removeFirst();
+                listV.addLast(v);
+                listT.addLast(t);
+            }
+        } else {
+            j *= -1;
+            for (int i = 0; i < j; i++) {
+                double v = listV.removeLast();
+                int t = listT.removeLast();
+                listV.addFirst(v);
+                listT.addFirst(t);
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            cValues[cp] = listV.removeLast();
+            cTypes[cp] = listT.removeLast();
+            cp++;
+        }
+    }
+    
     private double[] popItem() {
         cp--;
         return new double[]{cValues[cp], cTypes[cp]};

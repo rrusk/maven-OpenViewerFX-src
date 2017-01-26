@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -292,12 +292,12 @@ public class FormObject extends PdfObject{
 
 	protected int[] ByteRange, selectionIndices;
 
-	protected byte[] rawAS, rawCert, rawContactInfo, rawContents, rawDstring, rawDA, rawDV, rawFstring, rawJS, rawH, rawN, rawNM, rawPstring, rawRC, rawRT, rawS, rawSubj, rawT, rawTM, rawTU,
+	protected byte[] rawAS, rawCert, rawContactInfo, rawContents, rawDstring, rawDA, rawDS, rawDV, rawFstring, rawJS, rawH, rawIT, rawN, rawNM, rawPstring, rawRC, rawRT, rawS, rawSubj, rawT, rawTM, rawTU,
 	rawURI, rawV,rawX;
 
     protected int FT=-1;
 
-    protected String AS, Cert, ContactInfo, Contents, Dstring, DA, DV, Fstring, JSString, H, N, NM, Pstring, RC, S, Subj, T, TM, TU, URI, Vstring;
+    protected String AS, Cert, ContactInfo, Contents, Dstring, DA, DSString, DV, Fstring, JSString, H, IT, N, NM, Pstring, RC, S, Subj, T, TM, TU, URI, Vstring;
 
     private byte[][] Border, DestMixedArray, DmixedArray, Fields, State, rawXFAasArray;
     protected PdfObject Bl, OC, Off, On, P;
@@ -710,12 +710,6 @@ public class FormObject extends PdfObject{
 
     	value.setID(id);
 
-        //if in AP array as other value store here
-        if(currentKey!=null){
-            setOtherValues(value);
-            return;
-        }
-
         switch(id){
 
             case PdfDictionary.A:
@@ -997,6 +991,9 @@ public class FormObject extends PdfObject{
            case PdfDictionary.DA:
 	        	return rawDA;     
 
+           case PdfDictionary.DS:
+	        	return rawDS;     
+
             default:
                 return super.getTextStreamValueAsByte(id);
 
@@ -1176,6 +1173,11 @@ public class FormObject extends PdfObject{
 	            //set H flags
 	    	break;
 
+	        case PdfDictionary.IT:
+	            rawIT=value;
+                IT = null;
+	    	break;
+            
         	case PdfDictionary.N:
                 rawN=value;
         	break;
@@ -1276,6 +1278,11 @@ public class FormObject extends PdfObject{
 	            rawDA=value;
         	break;
 
+        	case PdfDictionary.DS:
+	            rawDS=value;
+                DSString = null;
+        	break;
+
         	case PdfDictionary.DV:
 	            rawDV=value;
         	break;
@@ -1339,6 +1346,7 @@ public class FormObject extends PdfObject{
 
 	        case PdfDictionary.URI:
 	        	rawURI=value;
+	        	URI = null;
 	        break;
 
 	        case PdfDictionary.V:
@@ -1399,6 +1407,15 @@ public class FormObject extends PdfObject{
              }
 
              return H;
+
+        case PdfDictionary.IT:
+
+            //setup first time
+             if(IT==null && rawIT!=null) {
+                 IT = new String(rawIT);
+             }
+
+             return IT;
 
         case PdfDictionary.Filter:
 
@@ -1502,6 +1519,15 @@ public class FormObject extends PdfObject{
             }
 
             return DA;
+
+        	case PdfDictionary.DS:
+
+            //setup first time
+            if(DSString==null && rawDS!=null) {
+                DSString = StringUtils.getTextString(rawDS, false);
+            }
+
+            return DSString;
 
         	case PdfDictionary.DV:
 
@@ -1835,6 +1861,7 @@ public class FormObject extends PdfObject{
         newObject.contents = contents;
         newObject.Contents = Contents;
         newObject.DA=DA;
+        newObject.DSString=DSString;
         newObject.Dstring=Dstring;
         newObject.DV=DV;
         newObject.Filter=Filter;
@@ -1971,6 +1998,7 @@ public class FormObject extends PdfObject{
         newObject.rawContactInfo=rawContactInfo==null ? null : rawContactInfo.clone();
         newObject.rawContents=rawContents==null ? null : rawContents.clone();
         newObject.rawDA=rawDA==null ? null : rawDA.clone();
+        newObject.rawDS=rawDS==null ? null : rawDS.clone();
         newObject.rawDstring=rawDstring==null ? null : rawDstring.clone();
         newObject.rawDV=rawDV==null ? null : rawDV.clone();
         newObject.rawEOPROPtype=rawEOPROPtype==null ? null : rawEOPROPtype.clone();
@@ -2040,6 +2068,9 @@ public class FormObject extends PdfObject{
         }
 		if(rawDA==null) {
             rawDA = parentObj.rawDA;
+        }
+        if(rawDS==null) {
+            rawDS = parentObj.rawDS;
         }
 		if(rawDV==null) {
             rawDV = parentObj.rawDV;
@@ -2696,6 +2727,7 @@ public class FormObject extends PdfObject{
     	FT=form.FT;
         rawAS=(form.rawAS==null) ? null : form.rawAS.clone();
     	rawDA=(form.rawDA==null) ? null : form.rawDA.clone();
+    	rawDS=(form.rawDS==null) ? null : form.rawDS.clone();
         rawDV=(form.rawDV==null) ? null : form.rawDV.clone();
     	rawJS=(form.rawJS==null) ? null : form.rawJS.clone();
     	rawNM=(form.rawNM==null) ? null : form.rawNM.clone();

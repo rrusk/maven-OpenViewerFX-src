@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -36,6 +36,7 @@ package org.jpedal.objects.raw;
  * return required object according to key
  */
 public class ObjectFactory {
+    @SuppressWarnings("OverlyLongMethod")
     public static PdfObject createObject(final int id, final String ref, final int parentType, final int parentID) {
 
         switch (id) {
@@ -232,6 +233,9 @@ public class ObjectFactory {
             case PdfDictionary.Pages:
                 return new PageObject(ref);
 
+            case PdfDictionary.Params:
+                return new PdfObject(ref);
+
             case PdfDictionary.ParentTree:
                 return new MCObject(ref);
 
@@ -272,9 +276,6 @@ public class ObjectFactory {
 
             case PdfDictionary.RichMediaContent:
                 return new FSObject(ref);
-
-            case PdfDictionary.RoleMap:
-                return new MCObject(ref);
 
             case PdfDictionary.Root:
                 return new PageObject(ref);
@@ -384,6 +385,7 @@ public class ObjectFactory {
         }
     }
 
+    @SuppressWarnings("OverlyLongMethod")
     public static PdfObject createObject(final int id, final int ref, final int gen, final int parentType) {
 
         switch (id) {
@@ -574,6 +576,9 @@ public class ObjectFactory {
             case PdfDictionary.Pages:
                 return new PageObject(ref, gen);
 
+            case PdfDictionary.Params:
+                return new PdfObject(ref, gen);
+
             case PdfDictionary.ParentTree:
                 return new MCObject(ref, gen);
 
@@ -614,9 +619,6 @@ public class ObjectFactory {
 
             case PdfDictionary.RichMediaContent:
                 return new FSObject(ref, gen);
-
-            case PdfDictionary.RoleMap:
-                return new MCObject(ref, gen);
 
             case PdfDictionary.Root:
                 return new PageObject(ref, gen);

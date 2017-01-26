@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -47,8 +47,7 @@ import org.jpedal.utils.LogWriter;
  */
 public class TextStream {
     
-    public static int readTextStream(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final boolean ignoreRecursion,
-            final PdfFileReader objectReader) {
+    public static int readTextStream(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
             
         byte[] data;
@@ -76,130 +75,121 @@ public class TextStream {
                     return raw.length;
                 }
 
-                if(!ignoreRecursion){
+                //read the Dictionary data
+                data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
 
-                    //read the Dictionary data
-                    data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
+                //allow for data in Linear object not yet loaded
+                if(data==null){
+                    pdfObject.setFullyResolved(false);
 
-                    //allow for data in Linear object not yet loaded
-                    if(data==null){
-                        pdfObject.setFullyResolved(false);
-
-                        if(debugFastCode) {
-                            System.out.println(padding + "Data not yet loaded");
-                        }
-
-                        LogWriter.writeLog("[Linearized] " + pdfObject.getObjectRefAsString() + " not yet available (7)");
-
-                        return raw.length;
+                    if(debugFastCode) {
+                        System.out.println(padding + "Data not yet loaded");
                     }
 
-                    //lose obj at start
-                    if(data[0]=='('){
-                        j=0;
-                    }else{
-                        j=3;
-                        while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111) {
-                            j++;
-                        }
+                    LogWriter.writeLog("[Linearized] " + pdfObject.getObjectRefAsString() + " not yet available (7)");
 
-                        j=StreamReaderUtils.skipSpaces(data,j);
+                    return raw.length;
+                }
 
+                //lose obj at start
+                if(data[0]=='('){
+                    j=0;
+                }else{
+                    j=3;
+                    while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111) {
+                        j++;
                     }
-                }
+
+                    j=StreamReaderUtils.skipSpaces(data,j);
+                }               
             }
 
-            int start=0;
-            if(!isRef || !ignoreRecursion){
-                //move to start
-                while(data[j]!='(' && data[j]!='<'){
-                    j++;
-
-                }
-
-                start=j;
-
-                j = skipToEnd(data, j);
-
+            //move to start
+            while(data[j]!='(' && data[j]!='<'){
+                j++;
             }
 
-            if(!ignoreRecursion){
+            int start=j;
 
-                byte[] newString;
+            j = skipToEnd(data, j);
 
-                if(data[start]=='<'){
+            byte[] newString;
+
+            if(data[start]=='<'){
+                start++;
+
+                final int byteCount=(j-start)>>1;
+                newString=new byte[byteCount];
+
+                int byteReached=0,topHex,bottomHex;
+                while(true){
+
+                    if(start==j) {
+                        break;
+                    }
+
+                    start=StreamReaderUtils.skipSpaces(data,start);
+
+                    topHex=toNumber(data[start]);
+
+                    start=StreamReaderUtils.skipSpaces(data,start+1);
+
+                    bottomHex=toNumber(data[start]);
+
                     start++;
 
-                    final int byteCount=(j-start)>>1;
-                    newString=new byte[byteCount];
+                    //calc total
+                    newString[byteReached] = (byte)(bottomHex+(topHex<<4));
 
-                    int byteReached=0,topHex,bottomHex;
-                    while(true){
+                    byteReached++;
 
-                        if(start==j) {
-                            break;
-                        }
-
-                        start=StreamReaderUtils.skipSpaces(data,start);
-
-                        topHex=toNumber(data[start]);
-
-                        start=StreamReaderUtils.skipSpaces(data,start+1);
-
-                        bottomHex=toNumber(data[start]);
-
-                        start++;
-
-                        //calc total
-                        newString[byteReached] = (byte)(bottomHex+(topHex<<4));
-
-                        byteReached++;
-
-                    }
-
-                }else{
-                    //roll past (
-                    if(data[start]=='(') {
-                        start++;
-                    }
-
-                    boolean lbKeepReturns = false;
-                    switch ( PDFkeyInt ) {
-                        case PdfDictionary.ID:
-                            lbKeepReturns = true;
-                            break;
-                        case PdfDictionary.O:
-                        case PdfDictionary.U:
-                            // O and U in Encrypt may contain line breaks as valid password chars ...
-                            lbKeepReturns = pdfObject.getObjectType() == PdfDictionary.Encrypt;
-                            break;
-                    }
-
-                    newString = ObjectUtils.readEscapedValue(j,data, start,lbKeepReturns);
                 }
 
-                if(pdfObject.getObjectType()!= PdfDictionary.Encrypt && pdfObject.getObjectType()!= PdfDictionary.MCID){
-
-                    try {
-                        if(!pdfObject.isInCompressedStream() || PDFkeyInt==PdfDictionary.Name || PDFkeyInt==PdfDictionary.Reason || PDFkeyInt==PdfDictionary.Location || PDFkeyInt==PdfDictionary.M){
-                            final DecryptionFactory decryption=objectReader.getDecryptionObject();
-
-                            if(decryption!=null) {
-                                newString = decryption.decryptString(newString, pdfObject.getObjectRefAsString());
-                            }
-                        }
-                    } catch (final PdfSecurityException e) {
-                        LogWriter.writeLog("Exception: " + e.getMessage());
-                    }
+            }else{
+                //roll past (
+                if(data[start]=='(') {
+                    start++;
                 }
 
-                pdfObject.setTextStreamValue(PDFkeyInt, newString);
+                boolean lbKeepReturns = false;
+                switch ( PDFkeyInt ) {
+                    case PdfDictionary.Contents:
+                        lbKeepReturns = pdfObject.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.FreeText;
+                        break;
+                    case PdfDictionary.ID:
+                        lbKeepReturns = true;
+                        break;
+                    case PdfDictionary.O:
+                    case PdfDictionary.U:
+                        // O and U in Encrypt may contain line breaks as valid password chars ...
+                        lbKeepReturns = pdfObject.getObjectType() == PdfDictionary.Encrypt;
+                        break;
+                }
 
-                if(debugFastCode) {
-                    System.out.println(padding + "TextStream=" + new String(newString) + " in pdfObject=" + pdfObject);
+                newString = ObjectUtils.readEscapedValue(j,data, start,lbKeepReturns);
+            }
+
+            if(pdfObject.getObjectType()!= PdfDictionary.Encrypt && pdfObject.getObjectType()!= PdfDictionary.MCID){
+
+                try {
+                    if(!pdfObject.isInCompressedStream() || PDFkeyInt==PdfDictionary.Name || PDFkeyInt==PdfDictionary.Reason || PDFkeyInt==PdfDictionary.Location || PDFkeyInt==PdfDictionary.M){
+                        final DecryptionFactory decryption=objectReader.getDecryptionObject();
+
+                        if(decryption!=null) {
+                            newString = decryption.decryptString(newString, pdfObject.getObjectRefAsString());
+                        }
+                    }
+                } catch (final PdfSecurityException e) {
+                    LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
 
+            pdfObject.setTextStreamValue(PDFkeyInt, newString);
+
+            if(debugFastCode) {
+                System.out.println(padding + "TextStream=" + new String(newString) + " in pdfObject=" + pdfObject);
+            }
+            
             if(!isRef) {
                 i = j;
             }
@@ -254,7 +244,7 @@ public class TextStream {
         return rawVal;
     }
 
-    public static int setTextStreamValue(final PdfObject pdfObject, int i, final byte[] raw, final boolean ignoreRecursion, final int PDFkeyInt, final PdfFileReader objectReader) {
+    public static int setTextStreamValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
         if(raw[i+1]==40 && raw[i+2]==41){ //allow for empty stream
             i += 3;
@@ -264,7 +254,7 @@ public class TextStream {
                 i--;
             }
         }else {
-            i = TextStream.readTextStream(pdfObject, i, raw, PDFkeyInt, ignoreRecursion, objectReader);
+            i = TextStream.readTextStream(pdfObject, i, raw, PDFkeyInt, objectReader);
         }
         
         return i;

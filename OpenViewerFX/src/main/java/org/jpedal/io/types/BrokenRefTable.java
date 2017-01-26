@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -49,7 +49,7 @@ public class BrokenRefTable {
     	LogWriter.writeLog("Corrupt xref table - trying to find objects manually");
         
         String root_id = "",line=null;
-        int pointer,i=0;
+        int i=0;
 
         try {
             pdf_datafile.seek(0);
@@ -69,36 +69,56 @@ public class BrokenRefTable {
                 break;
             }
 
-            if (line.contains(" obj")) {
-
-                pointer = line.indexOf(' ');
-
-                try {
-                    if (pointer > 0) {
-                        offset.storeObjectOffset(Integer.parseInt(line.substring(0, pointer)), i, 1, false, true);
-                    }
-                }catch(Exception e){
-                    LogWriter.writeLog("[PDF] Exception "+e+" Unable to manually read line "+line);
-                }
-                
-            } else if (line.contains("/Root")) {
-
-                final int start = line.indexOf("/Root") + 5;
-                pointer = line.indexOf('R', start);
-                if (pointer > -1) {
-                    root_id = line.substring(start, pointer + 1).trim();
-                }
-            } else if (line.contains("/Encrypt")) {
-                //too much risk on corrupt file
-                throw new PdfSecurityException("Corrupted, encrypted file");
-            }
-        }
+			root_id = readRootObject(pdf_datafile, offset, line, i, root_id);
+		}
 
         return root_id;
     }
-		
-	public static byte[] findFirstRootDict(final RandomAccessBuffer buffer) throws PdfSecurityException {		
-		long len = 0;
+
+	private static String readRootObject(final RandomAccessBuffer pdf_datafile, final Offsets offset, String line, int i, String root_id) throws PdfSecurityException {
+
+		int pointer;
+
+    	if (line.contains(" obj")) {
+
+            pointer = line.indexOf(' ');
+            try {
+                if (pointer > 0) {
+                    offset.storeObjectOffset(Integer.parseInt(line.substring(0, pointer)), i, 1, false, true);
+                }
+            }catch(Exception e){
+                LogWriter.writeLog("[PDF] Exception "+e+" Unable to manually read line "+line);
+            }
+        } else if (line.contains("/Root")) {
+            root_id=readRootID(line,pdf_datafile);
+        } else if (line.contains("/Encrypt")) {
+            //too much risk on corrupt file
+            throw new PdfSecurityException("Corrupted, encrypted file");
+        }
+		return root_id;
+	}
+
+	private static String readRootID(String line, RandomAccessBuffer pdf_datafile) {
+
+    	int start = line.indexOf("/Root") + 5;
+
+		//read actual value which may be on this line or next
+		int pointer = line.indexOf('R', start);
+		while(pointer==-1){
+			start=0;
+			try{
+				line = pdf_datafile.readLine();
+			} catch (final Exception e) {
+				LogWriter.writeLog("Exception " + e + " reading line");
+			}
+			pointer = line.indexOf('R', start);
+		}
+
+		return line.substring(start, pointer + 1).trim();
+	}
+
+	public static byte[] findFirstRootDict(final RandomAccessBuffer buffer) {		
+		long len;
         try {
             buffer.seek(0);
 			len = buffer.length();

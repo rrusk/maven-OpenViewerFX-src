@@ -186,4 +186,21 @@ public class JDeliHelper {
     public static BufferedImage getDicomImage(String fn, int frameNumber) throws Exception {
         return null;
     }
+	
+	public static byte[] getScaledBytes(byte[] src, int srcWidth, int srcHeight, int dstWidth, int dstHeight, int nComp) {
+		return null;
+	}
+	
+	public static BufferedImage getScaledImage(BufferedImage srcImage, int dstWidth, int dstHeight){
+		return null;
+	}
+	
+	public static BufferedImage getSGIImage(byte[] data) throws Exception {
+		return null;
+	}
+        
+        public static BufferedImage getSGIImage(File data) throws Exception {
+		return null;
+	}
+	
 }

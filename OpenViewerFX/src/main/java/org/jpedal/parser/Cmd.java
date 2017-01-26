@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -201,6 +201,7 @@ public class Cmd {
 
     public static final int T3_COMMAND = 6;
 
+    @SuppressWarnings("OverlyLongMethod")
     public static int getCommandType(final int commandID){
 
         int type=-1;
@@ -456,6 +457,7 @@ public class Cmd {
     }
 
     /**identify if command*/
+    @SuppressWarnings("OverlyLongMethod")
     protected static int getCommandID(final int value) {
         int id = -1;
 
@@ -694,6 +696,7 @@ public class Cmd {
     }
 
     /**convert command into string*/
+    @SuppressWarnings("OverlyLongMethod")
     protected static String getCommandAsString(final int value) {
         String id = "";
 

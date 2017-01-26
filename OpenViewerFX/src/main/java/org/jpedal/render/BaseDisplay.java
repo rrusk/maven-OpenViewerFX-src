@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -402,11 +402,15 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
                 }
 	    }
 
-	    //breaks printing so disabled there
-	    if (!isPrinting && clip != null && (clip.getBounds2D().getHeight() < 1 || clip.getBounds2D().getWidth() < 1)) {
-	    	g2.setClip(defaultClip);  //use null or visible screen area
-	    	clipChanged=true;
-	    }
+	    //breaks printing so disabled there      
+        if(!isPrinting && clip != null){
+            final Double height = clip.getBounds2D().getHeight();
+            final Double width = clip.getBounds2D().getWidth();
+            if ((height < 1 && height > 0) || (width < 1 && width > 0)) {
+                g2.setClip(defaultClip);  //use null or visible screen area
+                clipChanged = true;
+            }
+        }
 
 	    g2.draw(currentShape);
 	    g2.setStroke(currentStroke);

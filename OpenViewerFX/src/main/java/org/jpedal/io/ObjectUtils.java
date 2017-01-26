@@ -6,7 +6,7 @@
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *
- * (C) Copyright 1997-2016 IDRsolutions and Contributors.
+ * (C) Copyright 1997-2017 IDRsolutions and Contributors.
  *
  * This file is part of JPedal/JPDF2HTML5
  *
@@ -367,11 +367,12 @@ public class ObjectUtils {
      * used to debug object reading code
      * @param pdfObject
      * @param i
-     * @param length
      * @param raw
      * @param padding
      */
-    static void showData(final PdfObject pdfObject, final int i, final int length, final byte[] raw, final String padding) {
+    static void showData(final PdfObject pdfObject, final int i, final byte[] raw, final String padding) {
+
+        final int length=raw.length;
 
         System.out.println("\n\n"+ padding +" ------------readDictionaryAsObject ref="+ pdfObject.getObjectRefAsString() +" into "+pdfObject+"-----------------\ni="+i+"\nData=>>>>");
         System.out.print(padding);
