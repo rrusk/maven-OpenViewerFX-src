@@ -1203,7 +1203,7 @@ public class T1Glyphs extends PdfJavaGlyphs {
 
     }
 
-    private boolean handle2ByteOp(GlyphFactory factory, int rawInt, int key, int lastVal, boolean isFlex) {
+    private boolean handle2ByteOp(final GlyphFactory factory, final int rawInt, final int key, final int lastVal, boolean isFlex) {
 
         switch(key) {
 

@@ -234,10 +234,10 @@ public abstract class PDFtoImageConvertor {
 
                 if (!formRenderer.useXFA()) {
 
-                    java.util.List[] formsOrdered = formRenderer.getCompData().getFormList(true);
+                    final java.util.List[] formsOrdered = formRenderer.getCompData().getFormList(true);
 
                     //get unsorted components and iterate over forms
-                    for (Object nextVal : formsOrdered[pageIndex]) {
+                    for (final Object nextVal : formsOrdered[pageIndex]) {
 
                         if (nextVal != null) {
                             formRenderer.getFormFlattener().drawFlattenedForm(currentImageDecoder, (PdfObject) nextVal, false, (PdfObject) formRenderer.getFormResources()[0]);
@@ -245,7 +245,7 @@ public abstract class PDFtoImageConvertor {
                     }
                     
                 } else {
-                    Graphics2D g2 = (Graphics2D)image.getGraphics();
+                    final Graphics2D g2 = (Graphics2D)image.getGraphics();
                     g2.scale(imageScaling.getScaleX(), -imageScaling.getScaleY());
                     formRenderer.getCompData().renderFormsOntoG2(g2, pageIndex, 0, displayRotation, null, null, pageData.getMediaBoxHeight(pageIndex));
                 }
@@ -281,7 +281,7 @@ public abstract class PDFtoImageConvertor {
         
     }
 
-    public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, boolean isTransparent) {
+    public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, final boolean isTransparent) {
         throw new UnsupportedOperationException(this+" Code should never be called ");
     }
     

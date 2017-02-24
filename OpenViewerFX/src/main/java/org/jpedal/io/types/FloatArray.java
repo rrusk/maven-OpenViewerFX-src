@@ -43,14 +43,14 @@ import org.jpedal.utils.NumberUtils;
  */
 public class FloatArray extends Array {
     
-    public FloatArray(final PdfFileReader pdfFileReader, int i,final byte[] raw) {
+    public FloatArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
         super(pdfFileReader, i,  PdfDictionary.VALUE_IS_FLOAT_ARRAY, raw);
     }
 
     @Override
-    void fillArray(final int elementCount, PdfObject pdfObject) {
+    void fillArray(final int elementCount, final PdfObject pdfObject) {
         
-        float[] finalByteValues = new float[elementCount];
+        final float[] finalByteValues = new float[elementCount];
         byte[] data;
         
         for(int a=0;a<elementCount;a++){

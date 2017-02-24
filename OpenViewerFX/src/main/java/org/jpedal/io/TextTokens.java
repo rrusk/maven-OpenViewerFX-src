@@ -77,7 +77,7 @@ public class TextTokens {
         //Added for file sample_pdfs_html/12jul/1997.pdf (popup characters incorrect)
         if(this.hasMoreTokens()){
             second=nextToken();
-            int combined=((first<<8)+second);
+            final int combined=((first<<8)+second);
         
             if(combined==13 && keepReturns ) {
                 return (char) combined;

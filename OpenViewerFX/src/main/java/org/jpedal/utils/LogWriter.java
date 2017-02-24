@@ -95,7 +95,7 @@ public class LogWriter
 
             try {
                 throw new RuntimeException("Exception thrown at");
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 e.printStackTrace(System.out);
             }
         

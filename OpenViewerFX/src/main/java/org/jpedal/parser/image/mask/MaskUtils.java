@@ -73,7 +73,7 @@ public class MaskUtils {
      */
     public static void createMaskForm(final PdfObject XObject, final String name, final PdfObject newSMask, final GraphicsState gs,
                                       final DynamicVectorRenderer current, final PdfObjectReader currentPdfFile,
-                                      final ParserOptions parserOptions, final int formLevel, final float multiplyer, final boolean useTransparancy, int blendMode) {
+                                      final ParserOptions parserOptions, final int formLevel, final float multiplyer, final boolean useTransparancy, final int blendMode) {
 
         final float[] BBox= XObject.getFloatArray(PdfDictionary.BBox);
 
@@ -93,8 +93,11 @@ public class MaskUtils {
         }
         
         final int iw,ih;
-        final float scaling=4f;
-
+        float scaling=4f;
+        if(fw*fh>=25000000){
+            scaling = 1f;
+        }
+        
         BufferedImage image = PDFObjectToImage.getImageFromPdfObject(XObject, fx, fw, fy, fh, currentPdfFile, parserOptions, formLevel, multiplyer,(newSMask==null && useTransparancy),scaling); 
 
         if(newSMask!=null){ //apply SMask to image
@@ -102,12 +105,12 @@ public class MaskUtils {
             final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(newSMask, fx, fw, fy, fh, currentPdfFile, parserOptions, formLevel, multiplyer,false,scaling);
 
             int[] tr = null;
-            PdfObject objTR = gs.SMask.getDictionary(PdfDictionary.TR);
+            final PdfObject objTR = gs.SMask.getDictionary(PdfDictionary.TR);
             //smask may contain tr values refer to case 25259
             if (objTR != null) {
                 final PdfObject funcObj = new FunctionObject(objTR.getObjectRefAsString());
                 currentPdfFile.readObject(funcObj);
-                PDFFunction function = FunctionFactory.getFunction(funcObj, currentPdfFile);
+                final PDFFunction function = FunctionFactory.getFunction(funcObj, currentPdfFile);
                 if (function != null) {
                     tr = new int[256];
                     for (int i = 0; i < 256; i++) {
@@ -117,11 +120,11 @@ public class MaskUtils {
             }
 
             if(gs.SMask.getNameAsConstant(PdfDictionary.S) == PdfDictionary.Luminosity){
-				float [] bcFloats =gs.SMask.getFloatArray(PdfDictionary.BC);
+				final float [] bcFloats =gs.SMask.getFloatArray(PdfDictionary.BC);
 				if(bcFloats != null){
-					PdfPaint prev = gs.nonstrokeColorSpace.getColor();
+					final PdfPaint prev = gs.nonstrokeColorSpace.getColor();
 					gs.nonstrokeColorSpace.setColor(bcFloats, bcFloats.length);
-					int bc = gs.nonstrokeColorSpace.getColor().getRGB();
+					final int bc = gs.nonstrokeColorSpace.getColor().getRGB();
 					gs.nonstrokeColorSpace.setColor(prev);
 					image= SMask.applyLuminosityMask(image, smaskImage, tr, true, bc);
 				}else{
@@ -135,8 +138,8 @@ public class MaskUtils {
             }
         }
         
-        iw=image.getWidth()/4;
-        ih=image.getHeight()/4;
+        iw=(int)(image.getWidth()/scaling);
+        ih=(int)(image.getHeight()/scaling);
 
         final GraphicsState gs1; //add in gs
 
@@ -160,7 +163,7 @@ public class MaskUtils {
             }
         }
         
-        int prevBM = gs1.getBMValue();
+        final int prevBM = gs1.getBMValue();
         if(formLevel==1){ //dont blend if it is not formlevel 1 
             gs1.setBMValue(blendMode);
         }
@@ -198,7 +201,7 @@ public class MaskUtils {
             /*
              * explicitly need clip passed through
              */
-            Area clip= gs.getClippingShape();
+            final Area clip= gs.getClippingShape();
             if(clip!=null){
                 gs1.updateClip(clip);
             }

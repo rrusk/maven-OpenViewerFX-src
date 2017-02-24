@@ -70,15 +70,17 @@ public class GlyphData {
     
     private int possibleVal;
 
+    private char lastTextChar = 'x';
+
     public int getRawInt() {
         return rawInt;
     }
 
-    public void setRawInt(int rawInt) {
+    public void setRawInt(final int rawInt) {
         this.rawInt = rawInt;
     }
     
-     public void setRaw(int rawInt) {
+     public void setRaw(final int rawInt) {
         this.rawInt = rawInt;
         this.rawChar=(char)rawInt;
     }
@@ -91,7 +93,7 @@ public class GlyphData {
         return leading;
     }
 
-    public void setLeading(float leading) {
+    public void setLeading(final float leading) {
         this.leading = leading;
     }
 
@@ -99,7 +101,7 @@ public class GlyphData {
         return width;
     }
 
-    public void setWidth(float width) {
+    public void setWidth(final float width) {
         this.width = width;
     }
 
@@ -107,7 +109,7 @@ public class GlyphData {
         return spacingAdded;
     }
 
-    public void setSpacingAdded(float spacingAdded) {
+    public void setSpacingAdded(final float spacingAdded) {
         this.spacingAdded = spacingAdded;
     }
    
@@ -121,7 +123,7 @@ public class GlyphData {
     /**
      * @param displayValue the displayValue to set
      */
-    public void setDisplayValue(String displayValue) {
+    public void setDisplayValue(final String displayValue) {
         this.displayValue = displayValue;
     }
 
@@ -135,7 +137,7 @@ public class GlyphData {
     /**
      * @param unicodeValue the unicodeValue to set
      */
-    public void setUnicodeValue(String unicodeValue) {
+    public void setUnicodeValue(final String unicodeValue) {
         this.unicodeValue = unicodeValue;
     }
     
@@ -173,10 +175,12 @@ public class GlyphData {
         openChar = ' ';
         
         numOfPrefixes=0;
+
+        lastTextChar = 'x';
         
     }
     
-    void set(String val) {
+    void set(final String val) {
         displayValue = val;
         unicodeValue=val;
     }
@@ -185,7 +189,7 @@ public class GlyphData {
         return inText;
     }
 
-    void setText(boolean b) {
+    void setText(final boolean b) {
         inText=b;
     }
 
@@ -193,11 +197,11 @@ public class GlyphData {
         return isHorizontal;
     }
 
-    void setHorizontal(boolean b) {
+    void setHorizontal(final boolean b) {
         isHorizontal=b;
     }
 
-    void setXMLExtraction(boolean xmlExtraction) {
+    void setXMLExtraction(final boolean xmlExtraction) {
         this.isXMLExtraction=xmlExtraction;
     }
 
@@ -205,7 +209,7 @@ public class GlyphData {
         return isXMLExtraction;
     }
 
-    void updateGlyphSettings(float value, char rc) {
+    void updateGlyphSettings(final float value, final char rc) {
 
         width += value;
         leading += value; //keep count on leading
@@ -214,11 +218,11 @@ public class GlyphData {
         rawChar=rc;
     }
 
-    void subtractLeading(float value) {
+    void subtractLeading(final float value) {
         leading -= value;
     }
 
-    void addToWidth(float currentWidth) {
+    void addToWidth(final float currentWidth) {
         textLength++; //counter on chars in data
                 
            width += currentWidth;
@@ -228,7 +232,7 @@ public class GlyphData {
         return rawChar;
     }
 
-    void setRawChar(char c) {
+    void setRawChar(final char c) {
        rawChar=c;
     }
 
@@ -242,11 +246,11 @@ public class GlyphData {
     /**
      * @param fontScale the fontScale to set
      */
-    public void setFontScale(float fontScale) {
+    public void setFontScale(final float fontScale) {
         this.fontScale = fontScale;
     }
 
-    void setActualWidth(float actualWidth) {
+    void setActualWidth(final float actualWidth) {
        this.actualWidth=actualWidth;
     }
     
@@ -264,11 +268,11 @@ public class GlyphData {
     /**
      * @param valueForHTML the valueForHTML to set
      */
-    public void setValueForHTML(int valueForHTML) {
+    public void setValueForHTML(final int valueForHTML) {
         this.valueForHTML = valueForHTML;
     }
     
-     void setDefaultCharSize(PdfFont currentFontData){
+     void setDefaultCharSize(final PdfFont currentFontData){
         setCharSize(2);
         if(currentFontData.isCIDFont() && !currentFontData.isSingleByte()){
             setCharSize(4);
@@ -286,7 +290,7 @@ public class GlyphData {
     /**
      * @param charSize the charSize to set
      */
-    public void setCharSize(int charSize) {
+    public void setCharSize(final int charSize) {
         this.charSize = charSize;
     }
 
@@ -294,11 +298,11 @@ public class GlyphData {
        return fontSize;
     }
 
-    void setFontSize(int fontSize) {
+    void setFontSize(final int fontSize) {
         this.fontSize=fontSize;
     }
 
-    void setLastChar(char newChar) {
+    void setLastChar(final char newChar) {
        lastChar=newChar;
     }
     
@@ -310,11 +314,11 @@ public class GlyphData {
         return openChar;
     }
 
-    void setOpenChar(char rawChar) {
+    void setOpenChar(final char rawChar) {
         openChar=rawChar;
     }
 
-    void updatePrefixCount(char testChar) {
+    void updatePrefixCount(final char testChar) {
         
         if(testChar==40){
             numOfPrefixes++;
@@ -343,16 +347,23 @@ public class GlyphData {
         return firstTime;
     }
 
-    void setFirstTime(boolean b) {
+    void setFirstTime(final boolean b) {
         firstTime=b;
     }
 
-    void setPossibleValue(int val) {
+    void setPossibleValue(final int val) {
         possibleVal=val;
     }
 
     int getPossibleValue() {
         return possibleVal;
     }
-    
+
+    public void setLastTextChar(final char lastTextChar) {
+        this.lastTextChar=lastTextChar;
+    }
+
+    public char getLastTextChar() {
+        return lastTextChar;
+    }
 }

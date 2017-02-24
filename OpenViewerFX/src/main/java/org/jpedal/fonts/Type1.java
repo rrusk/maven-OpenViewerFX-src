@@ -754,7 +754,7 @@ public class Type1 extends PdfFont {
     /**
      * read the encoded part from a type 1 font
      */
-    private int readEncodedContentNew(byte[] cont) throws Exception {
+    private int readEncodedContentNew(final byte[] cont) throws Exception {
         
         int glyphCount=0;
         String line  ;
@@ -791,8 +791,8 @@ public class Type1 extends PdfFont {
             end = size;
         }
         
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int len = (end-charstringStart);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final int len = (end-charstringStart);
         
         bos.write(cont, charstringStart, len);
         bos.close();
@@ -1000,107 +1000,25 @@ public class Type1 extends PdfFont {
         final String rd="rd";
         final String nd="nd";
         final int size = cont.length;
-        int charstringStart = -1;
-        int end = -1;
         int i;
         int cipher;
         int plain;
         StringBuilder tmp;
-        
-        for (i = 4; i < size; i++) { //find the start of /CharStrings (which is exec
-            if ((cont[i - 3] == 101)&& (cont[i - 2] == 120)&& (cont[i - 1] == 101)&& (cont[i] == 99)) {
-                charstringStart = i + 1;
-                while (cont[charstringStart] == 10 || cont[charstringStart] == 13) {
-                    charstringStart++;
-                }
-                i = size;
-            }
-        }
-        
-        if (charstringStart != -1) { //find the end
-            for (i = charstringStart; i < size - 10; i++) {
-                if ((cont[i] == 99)&& (cont[i + 1] == 108)&& (cont[i + 2] == 101)&& (cont[i + 3] == 97)&& (cont[i + 4] == 114)&& (cont[i + 5] == 116)&& (cont[i + 6] == 111)&& (cont[i + 7] == 109)&& (cont[i + 8] == 97)&& (cont[i + 9] == 114)&& (cont[i + 10] == 107)) {
-                    end = i - 1;
-                    while ((cont[end] == 10) || (cont[end] == 13)) {
-                        end--;
-                    }
-                    i = size;
-                }
-            }
-        }
-        
-        if (end == -1) {
-            end = size;
-        }
-        
+
+        int charstringStart = findStart(cont, size);
+
+        final int end = findEnd(cont, size, charstringStart);
+
         /* now decode the array */
-        int r = 55665;
         final int n = 4;
-        
+
         /* workout if binary or ascii - assume true and disprove */
-        boolean isAscii = true;
-        for (i = charstringStart; i < charstringStart + (n * 2); i++) {
-            final char c = (char) (cont[i]);
-            if ((c >= '0' && c <= '9')|| (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) {
-                //is okay
-            } else {
-                isAscii = false;
-                break;
-            }
-        }
+        final boolean isAscii = isAscii(cont, charstringStart, n);
         
         if (charstringStart != -1) {
-            
-            final FastByteArrayOutputStream bos = new FastByteArrayOutputStream(end-charstringStart);
-            
-            //allow for offset in real pfb file
-            if (isFontSubstituted && !isAscii) {
-                charstringStart = charstringStart + 2 + skipBytes;
-            }
-            
-            for (i = charstringStart; i < end; i++) {
-                
-                if (!isAscii){
-                    cipher = cont[i] & 0xff;
-                }else {
-                    int chars = 0;
-                    tmp = new StringBuilder();
-                    
-                    //get 2 chars for next hex value ignoring
-                    // whitespace/returns,etc
-                    while (chars < 2) {
-                        cipher = cont[i] & 0xff;
-                        i++;
-                        
-                        if (cipher != 10 &&  cipher != 13 && cipher != 9 && cipher != 32) {
-                            tmp.append((char)cipher);
-                            chars++;
-                        }
-                        
-                    }
-                    i--;
-                    
-                    //convert to hex value
-                    cipher = Integer.parseInt(tmp.toString(), 16);
-                }
-                
-                plain = (cipher ^ (r >> 8));
-                
-                r = ((cipher + r) * c1 + c2) & 0xffff;
-                
-                if (i > charstringStart + n) {
-                    bos.write(plain);
-                }
-                
-            }
-            
-            cont = bos.toByteArray();
+            cont = getBytes(cont, charstringStart, end, n, isAscii);
         }
-        
-        /* now charset decode and store */
-        //n=4;//set default value for n
-        
-        
+
         //read values from the stream
         final BufferedReader br =new BufferedReader(new StringReader(new String(cont)));
         
@@ -1111,12 +1029,7 @@ public class Type1 extends PdfFont {
             if (line == null) {
                 break;
             }
-            
-            //if(line.startsWith("/two"))
-            //System.out.println(line);
-            
-            //if(!line.startsWith("/"))
-            
+
             //get new value for n second value
             if(line.startsWith("/lenIV")){
                 final StringTokenizer vals=new StringTokenizer(line);
@@ -1300,7 +1213,122 @@ public class Type1 extends PdfFont {
         
         return glyphCount;
     }
-    
+
+    private byte[] getBytes(byte[] cont, int charstringStart, final int end, final int n, final boolean isAscii) {
+
+        int r = 55665;
+
+        int i;
+        int cipher;
+        StringBuilder tmp;
+        int plain;
+        final FastByteArrayOutputStream bos = new FastByteArrayOutputStream(end-charstringStart);
+
+        //allow for offset in real pfb file
+        if (isFontSubstituted && !isAscii) {
+            charstringStart = charstringStart + 2 + skipBytes;
+        }
+
+        for (i = charstringStart; i < end; i++) {
+
+            if (!isAscii){
+                cipher = cont[i] & 0xff;
+            }else {
+                int chars = 0;
+                tmp = new StringBuilder();
+
+                //get 2 chars for next hex value ignoring
+                // whitespace/returns,etc
+                while (chars < 2) {
+                    cipher = cont[i] & 0xff;
+                    i++;
+
+                    if (cipher != 10 &&  cipher != 13 && cipher != 9 && cipher != 32) {
+                        tmp.append((char)cipher);
+                        chars++;
+                    }
+
+                }
+                i--;
+
+                //convert to hex value
+                cipher = Integer.parseInt(tmp.toString(), 16);
+            }
+
+            plain = (cipher ^ (r >> 8));
+
+            r = ((cipher + r) * c1 + c2) & 0xffff;
+
+            if (i > charstringStart + n) {
+                bos.write(plain);
+            }
+
+        }
+
+        cont = bos.toByteArray();
+        return cont;
+    }
+
+    static boolean isAscii(final byte[] cont, final int charstringStart, final int n) {
+        int i;
+        boolean isAscii = true;
+        for (i = charstringStart; i < charstringStart + (n * 2); i++) {
+            final char c = (char) (cont[i]);
+            if ((c >= '0' && c <= '9')|| (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) {
+                //is okay
+            } else {
+                isAscii = false;
+                break;
+            }
+        }
+        return isAscii;
+    }
+
+    static int findEnd(final byte[] cont, final int rawSize, final int charstringStart) {
+
+        int i, end = -1;
+        final int size=rawSize-10;
+
+        if (charstringStart != -1) { //find the end
+            for (i = charstringStart; i < size; i++) {
+                if (cont[i] == 99 && cont[i + 1] == 108 && cont[i + 2] == 101 && cont[i + 3] == 97 && cont[i + 4] == 114
+                        && cont[i + 5] == 116 && cont[i + 6] == 111 && cont[i + 7] == 109 && cont[i + 8] == 97 &&
+                        cont[i + 9] == 114 && cont[i + 10] == 107) {
+
+                    end = i - 1;
+
+                    while ((cont[end] == 10) || (cont[end] == 13)) {
+                        end--;
+                    }
+                    
+                    i = size;
+                }
+            }
+        }
+
+        if (end == -1) {
+            return rawSize;
+        }else {
+            return end;
+        }
+    }
+
+    static int findStart(final byte[] cont, final int size) {
+        
+        int i, charstringStart = -1;
+        
+        for (i = 4; i < size; i++) { //find the start of /CharStrings (which is exec
+            if (cont[i - 3] == 101 && cont[i - 2] == 120 && cont[i - 1] == 101 && cont[i] == 99) {
+                charstringStart = i + 1;
+                while (cont[charstringStart] == 10 || cont[charstringStart] == 13) {
+                    charstringStart++;
+                }
+                i = size;
+            }
+        }
+        return charstringStart;
+    }
+
     /**
      * Reads an integer
      */

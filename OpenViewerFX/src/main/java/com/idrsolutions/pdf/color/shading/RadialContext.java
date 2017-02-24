@@ -60,13 +60,13 @@ public class RadialContext implements PaintContext {
     private final Color colorT0, colorT1;
     AffineTransform inversed = new AffineTransform();
 
-    RadialContext(AffineTransform xForm, GenericColorSpace shadingColorSpace, float[] background, PdfObject shading, float[][] mm, PDFFunction[] function) {
+    RadialContext(final AffineTransform xForm, final GenericColorSpace shadingColorSpace, final float[] background, final PdfObject shading, final float[][] mm, final PDFFunction[] function) {
 
         this.shadingColorSpace = shadingColorSpace;
         this.background = background;
         this.shadingObj = shading;
         this.function = function;
-        float[] src = shading.getFloatArray(PdfDictionary.Coords);
+        final float[] src = shading.getFloatArray(PdfDictionary.Coords);
         final boolean[] extension = shadingObj.getBooleanArray(PdfDictionary.Extend);
         if (extension != null) {
             extended = extension;
@@ -86,11 +86,11 @@ public class RadialContext implements PaintContext {
         }
         
         try {
-            AffineTransform invXF = xForm.createInverse();
-            AffineTransform invSH = shadeAffine.createInverse();
+            final AffineTransform invXF = xForm.createInverse();
+            final AffineTransform invSH = shadeAffine.createInverse();
             invSH.concatenate(invXF);
             inversed = (AffineTransform)invSH.clone();
-        } catch (NoninvertibleTransformException ex) {
+        } catch (final NoninvertibleTransformException ex) {
             LogWriter.writeLog("Exception "+ex+ ' ');
         }
                
@@ -131,7 +131,7 @@ public class RadialContext implements PaintContext {
     }
     
     @Override
-    public Raster getRaster(int startX, int startY, int w, int h) {
+    public Raster getRaster(final int startX, final int startY, final int w, final int h) {
         
         final int[] data = new int[w * h * 4];
         if (background != null) {
@@ -150,11 +150,11 @@ public class RadialContext implements PaintContext {
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                float[] xy = { startX + x, startY + y};                 
+                final float[] xy = { startX + x, startY + y};
                 inversed.transform(xy, 0, xy, 0, 1);
                 Color result = null;
 
-                float[] qr = quadraticEquate(xy[0], xy[1]);
+                final float[] qr = quadraticEquate(xy[0], xy[1]);
 
                 if (qr[1] >= 0 && qr[1] <= 1) {
                     result = calculateColor(getTfromS(qr[1]));
@@ -183,18 +183,18 @@ public class RadialContext implements PaintContext {
         return raster;
     }
 
-    private float getTfromS(float s) {
+    private float getTfromS(final float s) {
         return (s * (t1 - t0)) + t0;
     }
 
-    private float[] quadraticEquate(float x, float y) {
-        float xDiff = x - x0;
-        float yDiff = y - y0;
-        float p = -xDiff * deltaX - yDiff * deltaY - r0 * deltaR;
-        float q = xDiff * xDiff + yDiff * yDiff - powerR0; //dont use Math.pow to xdiff,ydiff; 
-        float sqrt = (float) Math.sqrt(p * p - deltaC * q);
-        float sA = (sqrt - p) / deltaC;
-        float sB = (-p - sqrt) / deltaC;
+    private float[] quadraticEquate(final float x, final float y) {
+        final float xDiff = x - x0;
+        final float yDiff = y - y0;
+        final float p = -xDiff * deltaX - yDiff * deltaY - r0 * deltaR;
+        final float q = xDiff * xDiff + yDiff * yDiff - powerR0; //dont use Math.pow to xdiff,ydiff;
+        final float sqrt = (float) Math.sqrt(p * p - deltaC * q);
+        final float sA = (sqrt - p) / deltaC;
+        final float sB = (-p - sqrt) / deltaC;
         return ((deltaC < 0) ? new float[]{sA, sB} : new float[]{sB, sA});
     }
 

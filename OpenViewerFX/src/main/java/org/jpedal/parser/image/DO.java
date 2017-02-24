@@ -53,7 +53,7 @@ public class DO extends ImageDecoder {
      * process image in XObject (XForm handled in PdfStreamDecoder)
      */
     @Override
-    public int processImage(String name, final int dataPointer, final PdfObject XObject) throws PdfException {
+    public int processImage(final String name, final int dataPointer, final PdfObject XObject) throws PdfException {
 
         //set if we need
         String key = null;

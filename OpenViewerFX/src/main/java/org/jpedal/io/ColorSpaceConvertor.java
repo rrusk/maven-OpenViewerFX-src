@@ -73,15 +73,15 @@ public class ColorSpaceConvertor {
             data = newData;
         }
             
-        int dim = width * height;
+        final int dim = width * height;
         byte [] bp = JDeliHelper.convertCMYK2RGB(width, height, size, data);
         
         if(bp == null){
             bp = DeviceCMYKColorSpace.convertCMYK2RGBWithSimple(width, height, size, data);
         }
         
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        int [] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+        final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        final int [] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
         int r,g,b,pos = 0;
         for (int i = 0; i < dim; i++) {
             r = bp[pos++]&0xff;
@@ -270,7 +270,7 @@ public class ColorSpaceConvertor {
             bands = bandsRGB;
         }
 
-        byte[] newData=convertIndexToRGBByte(index, w, h, components, d, data, isDownsampled, isARGB);
+        final byte[] newData=convertIndexToRGBByte(index, w, h, components, d, data, isDownsampled, isARGB);
         
         if(isARGB) {
             image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -306,7 +306,7 @@ public class ColorSpaceConvertor {
     }
     
     
-    public static byte[] normaliseTo8Bit(int d, int w, int h, byte[] data) throws RuntimeException {
+    public static byte[] normaliseTo8Bit(final int d, final int w, final int h, byte[] data) throws RuntimeException {
         
         if(d!=8){
             
@@ -349,7 +349,7 @@ public class ColorSpaceConvertor {
         return data;
     }
     
-    public static byte[] convertIndexToRGBByte(final byte[] index, final int w, final int h, int components, final int d, final byte[] data, final boolean isDownsampled, final boolean isARGB) {
+    public static byte[] convertIndexToRGBByte(final byte[] index, final int w, final int h, final int components, final int d, final byte[] data, final boolean isDownsampled, final boolean isARGB) {
         
         int indexLength=0;
         if(index!=null) {
@@ -357,8 +357,8 @@ public class ColorSpaceConvertor {
         }
         final int length=(w * h * components);
         final byte[] newData =new byte[length];
-        int id=0;
-        float ratio=0f;
+        final int id=0;
+        final float ratio=0f;
         switch(d){
             case 8:
                 flatten8bpc(data, isDownsampled, ratio, id, length, newData, index, indexLength, isARGB);
@@ -380,7 +380,7 @@ public class ColorSpaceConvertor {
         return newData;
     }
 
-    public static void flatten8bpc(final byte[] data, final boolean isDownsampled, float ratio, int id, final int length, final byte[] newData, final byte[] index, int indexLength, final boolean isARGB) {
+    public static void flatten8bpc(final byte[] data, final boolean isDownsampled, float ratio, int id, final int length, final byte[] newData, final byte[] index, final int indexLength, final boolean isARGB) {
         int pt=0;
         
         for(int ii=0;ii< data.length-1;ii++){
@@ -745,14 +745,14 @@ public class ColorSpaceConvertor {
         }
     }
     
-    public static BufferedImage createRGBImage(int width, int height, byte[] data) {
+    public static BufferedImage createRGBImage(final int width, final int height, final byte[] data) {
         
       //  System.out.println("createARGBImage "+width+" "+height+" "+data.length);
         
         final DataBuffer db = new DataBufferByte(data, data.length);
         
         final int[] bands = { 0, 1, 2 };
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         final Raster raster = Raster.createInterleavedRaster(db, width, height, width * 3,3, bands, null);
         
         image.setData(raster);
@@ -760,12 +760,12 @@ public class ColorSpaceConvertor {
         return image;
     }
     
-    public static BufferedImage createARGBImage(int width, int height, byte[] data) {
+    public static BufferedImage createARGBImage(final int width, final int height, final byte[] data) {
 
         final DataBuffer db = new DataBufferByte(data, data.length);
         
         final int[] bands = { 0, 1, 2,3 };
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         final Raster raster = Raster.createInterleavedRaster(db, width, height, width * 4, 4, bands, null);
         
         image.setData(raster);

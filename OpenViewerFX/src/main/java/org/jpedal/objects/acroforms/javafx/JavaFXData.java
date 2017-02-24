@@ -62,7 +62,7 @@ public class JavaFXData extends GUIData {
     private void scaleComponent(final FormObject formObject,final int rotate, final Region curComp, final boolean redraw,int indent, final boolean isPrinting) {
 
         // Ignore scaling for now (JavaFX handles the scaling itself
-        float scale = 1f;
+        final float scale = 1f;
 
         if (curComp == null || formObject.getPageNumber()==-1) {
             return;

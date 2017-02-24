@@ -77,7 +77,7 @@ public class ExternalHandlers {
         if(loader.getResource(fxClassPath)!=null){
             try {
                 javaFXSupport=(JavaFXSupport) loader.loadClass(fxClassName).newInstance();
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 
                 javaFXSupport=null;
                 
@@ -570,16 +570,16 @@ public class ExternalHandlers {
         
     }
     
-    public static BufferedImage decode(PdfObject pdfObject, PdfObjectReader currentPdfFile, PdfObject XObject, int subtype, int width, int height, int offsetImage, float pageScaling) {
+    public static BufferedImage decode(final PdfObject pdfObject, final PdfObjectReader currentPdfFile, final PdfObject XObject, final int subtype, final int width, final int height, final int offsetImage, final float pageScaling) {
         
         if(isXFAPresent){
             
             try {
-                AcroRenderer formRenderer=(AcroRenderer) loader.loadClass(xfaClassName).newInstance();
+                final AcroRenderer formRenderer=(AcroRenderer) loader.loadClass(xfaClassName).newInstance();
                 
                 return formRenderer.decode(pdfObject, currentPdfFile, XObject, subtype, width, height, offsetImage, pageScaling);
             
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 LogWriter.writeLog("[PDF] Unable to instance XFA "+ex);
             }
             
@@ -589,12 +589,12 @@ public class ExternalHandlers {
 
     }
 
-    void initObjects(final ExpressionEngine userExpressionEngine1, SwingFormCreator formCreator) {
+    void initObjects(final ExpressionEngine userExpressionEngine1, final SwingFormCreator formCreator) {
         
         if(isXFAPresent){
             try {
                 formRenderer=(AcroRenderer) loader.loadClass(xfaClassName).newInstance();
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 LogWriter.writeLog("[PDF] Unable to instance XFA "+ex);
                 
                 formRenderer = new AcroRenderer();
@@ -638,12 +638,12 @@ public class ExternalHandlers {
         return false;
     }
 
-    public void setDVR(FileAccess fileAccess) {
+    public void setDVR(final FileAccess fileAccess) {
         fileAccess.setDVR(new SwingDisplay(1, fileAccess.getObjectStore(), false));
     }
 
 
-    public PDFtoImageConvertor getConverter(float multiplyer, DecoderOptions options) {
+    public PDFtoImageConvertor getConverter(final float multiplyer, final DecoderOptions options) {
         return new PDFtoImageConvertorSwing(multiplyer, options);
     }
 }

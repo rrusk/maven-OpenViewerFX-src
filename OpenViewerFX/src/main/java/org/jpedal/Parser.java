@@ -212,16 +212,16 @@ public class Parser {
      */
     public Parser createNewParser(){
         //Get original DVR
-        DynamicVectorRenderer dvr = fileAcces.getDynamicRenderer();
+        final DynamicVectorRenderer dvr = fileAcces.getDynamicRenderer();
         
         //Creating a new parser overrides the existing DVR, this is not desired
-        Parser parser = new Parser(this.externalHandlers, this.options, this.fileAcces, this.res, this.resultsFromDecode);
+        final Parser parser = new Parser(this.externalHandlers, this.options, this.fileAcces, this.res, this.resultsFromDecode);
         
         //Add DVR back to fileaccess to prevent render issues oepning side tab bar
         fileAcces.setDVR(dvr);
         
         //Set the other values
-        int extractionMode = this.extractionMode;
+        final int extractionMode = this.extractionMode;
         parser.setRenderMode(renderMode);
         parser.setExtractionMode(extractionMode);
         parser.setGenerateGlyphOnRender(generateGlyphOnRender);
@@ -804,10 +804,10 @@ public class Parser {
                         //critical we enable this code in standard mode to render forms
                         if (!formRenderer.useXFA() && currentDisplay.isHTMLorSVG()) {
 
-                            java.util.List[] formsOrdered = formRenderer.getCompData().getFormList(true);
+                            final java.util.List[] formsOrdered = formRenderer.getCompData().getFormList(true);
 
                             //get unsorted components and iterate over forms
-                            for (Object nextVal : formsOrdered[page]) {
+                            for (final Object nextVal : formsOrdered[page]) {
 
                                 if (nextVal != null) {
 
@@ -824,7 +824,7 @@ public class Parser {
                         }
                     }
                 }
-            } catch (PdfException ex) {
+            } catch (final PdfException ex) {
                 Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 
@@ -959,7 +959,7 @@ public class Parser {
         return current;
     }
 
-    private void setResultsFromDecode(final int page, final PdfStreamDecoder current, boolean isHTML) {
+    private void setResultsFromDecode(final int page, final PdfStreamDecoder current, final boolean isHTML) {
         //All data loaded so now get all line areas for page
         if(textLines!=null && extractionMode>0 && !isHTML){
             final Vector_Rectangle_Int vr = (Vector_Rectangle_Int) current.getObjectValue(ValueTypes.TextAreas);

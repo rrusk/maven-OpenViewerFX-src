@@ -257,7 +257,7 @@ public class PdfFont implements Serializable {
     }
     
     /**Method to add the widths of a CID font*/
-    private void setCIDFontWidths( Object[] values) {
+    private void setCIDFontWidths(final Object[] values) {
          
         widthTable=new float[65536];
 
@@ -266,7 +266,10 @@ public class PdfFont implements Serializable {
             widthTable[ii]=noWidth;
         }
         
-        int ptr=0, count=values.length,start,end;
+        int ptr=0;
+        final int count=values.length;
+        int start;
+        int end;
         float nextWidth;
         byte[] nextNumber = null,rawNextWidth;
         Object o;
@@ -300,7 +303,7 @@ public class PdfFont implements Serializable {
             }else{
     
                 nextNumber=null;
-                for(Object widths: (Object[])o){
+                for(final Object widths: (Object[])o){
                     rawNextWidth=((byte[])widths);
                     nextWidth=NumberUtils.parseFloat(0, rawNextWidth.length, rawNextWidth)/1000f;
                     widthTable[ptr]= nextWidth;
@@ -939,7 +942,7 @@ public class PdfFont implements Serializable {
         }
         
         if(isCIDFont && rawCMAP!=null && (width==noWidth || (hasCIDToGIDMap && isArial))){ //case 25600 - fudge until we have more exmaples
-            int ptr=rawCMAP[charInt];
+            final int ptr=rawCMAP[charInt];
             if(ptr>0){
                 width =  widthTable[ptr];
             }
@@ -1263,7 +1266,7 @@ public class PdfFont implements Serializable {
      * used by PDF2HTML to replace unsuitable characters and make sure unique
      * @param newName
      */
-    public void resetNameForHTML(String newName){
+    public void resetNameForHTML(final String newName){
         glyphs.fontName=newName;
         glyphs.baseFontName=newName;
     }
@@ -1471,7 +1474,7 @@ public class PdfFont implements Serializable {
                         
                     }
                     
-                    String rawKey=Diffs.getNextValueAsString(false);
+                    final String rawKey=Diffs.getNextValueAsString(false);
                     
                      //   System.out.println(rawKey+" "+pointer);
                     rawDiffKeys.put(rawKey.substring(1),pointer);
@@ -1915,7 +1918,7 @@ public class PdfFont implements Serializable {
      * @param ptr
      * @return -1 if no CMAP, otherwise value 
      */
-    public int getEncodedCMAPValue(int ptr) {
+    public int getEncodedCMAPValue(final int ptr) {
         
         if(rawCMAP==null || ptr>rawCMAP.length){
             return -1;

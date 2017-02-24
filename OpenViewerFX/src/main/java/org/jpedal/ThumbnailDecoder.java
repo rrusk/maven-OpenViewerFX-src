@@ -66,7 +66,7 @@ public class ThumbnailDecoder {
             final AcroRenderer formRenderer=decode_pdf.getFormRenderer();
             final boolean originalRasterize = formRenderer.getCompData().formsRasterizedForDisplay();
             
-            boolean formsAlreadyDecoded = formRenderer.getCompData().getFormList(true)[pageNumber]!=null;
+            final boolean formsAlreadyDecoded = formRenderer.getCompData().getFormList(true)[pageNumber]!=null;
             
             formRenderer.getCompData().setRasterizeForms(true);
             

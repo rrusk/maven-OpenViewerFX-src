@@ -46,7 +46,7 @@ public class FXClientExternalHandler extends ClientExternalHandler {
     private FXAdditionalData additionaValuesforPage;
     
     @Override
-    public void addExternalHandler(Object newHandler, int type) {
+    public void addExternalHandler(final Object newHandler, final int type) {
         
         switch (type) {
             
@@ -61,7 +61,7 @@ public class FXClientExternalHandler extends ClientExternalHandler {
     } 
     
     @Override
-    public Object getExternalHandler(int type) {
+    public Object getExternalHandler(final int type) {
         
         switch (type) {
                

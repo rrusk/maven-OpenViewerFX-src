@@ -425,7 +425,7 @@ public class TextLines {
             //Flag that highlights have changed
             hasHighlightAreasUpdated = true;
             for (int j = 0; j != highlights.length; j++) {
-                int[][] values = getHighlightableInArea(highlights[j], areaSelect, page);
+                final int[][] values = getHighlightableInArea(highlights[j], areaSelect, page);
                 if (values != null) {
                     this.areas.put(page, values);
                 }
@@ -433,7 +433,7 @@ public class TextLines {
         }
     }
 
-    public int[][] getHighlightableInArea(int[] highlights, final boolean areaSelect, final int page) {
+    public int[][] getHighlightableInArea(final int[] highlights, final boolean areaSelect, final int page) {
 
         if (!areaSelect) {
             
@@ -744,13 +744,12 @@ public class TextLines {
         if(la == null || la.keySet().isEmpty()){
             lineAreas = null;
         }else{
-            Set<Integer> keys = la.keySet();
+            final Set<Integer> keys = la.keySet();
             
-            for(int i : keys){
+            for(final int i : keys){
                 final int[][] values = la.get(i);
-                final ArrayList<int[]> list = new ArrayList<int[]>();
-                
-                list.addAll(Arrays.asList(values));
+                final ArrayList<int[]> list = new ArrayList<int[]>(Arrays.asList(values));
+
                 lineAreas.put(i, list);
             }
         }
@@ -761,13 +760,13 @@ public class TextLines {
         if(lineOrientation == null || lineOrientation.keySet().isEmpty()){
             lineWritingMode = null;
         }else{
-            Set<Integer> keys = lineOrientation.keySet();
+            final Set<Integer> keys = lineOrientation.keySet();
             
-            for(int i : keys){
+            for(final int i : keys){
                 final int[] values = lineOrientation.get(i);
                 final ArrayList<Integer> list = new ArrayList<Integer>();
                 
-                for(int ii : values){
+                for(final int ii : values){
                     list.add(ii);
                 }
                 lineWritingMode.put(i, list);

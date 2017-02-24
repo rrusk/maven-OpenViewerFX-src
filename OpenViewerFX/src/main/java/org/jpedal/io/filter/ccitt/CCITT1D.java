@@ -552,7 +552,7 @@ public class CCITT1D implements CCITTDecoder{
 
     private int processCodeWord(final int itemFound, final int code, final int bits) {
 
-        int pixelCount;
+        final int pixelCount;
         final boolean isT;
 
         //values in the table

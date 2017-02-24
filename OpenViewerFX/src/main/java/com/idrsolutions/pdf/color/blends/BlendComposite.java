@@ -46,7 +46,7 @@ public class BlendComposite implements CompositeContext {
     private final ColorModel dstModel;
     private final int bm;
 
-    BlendComposite(final ColorModel srcColorModel, final ColorModel dstColorModel, int blendMode, float alpha) {
+    BlendComposite(final ColorModel srcColorModel, final ColorModel dstColorModel, final int blendMode, final float alpha) {
         srcModel = srcColorModel;
         dstModel = dstColorModel;
         fixedAlpha = alpha;
@@ -59,21 +59,21 @@ public class BlendComposite implements CompositeContext {
     }
 
     @Override
-    public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+    public void compose(final Raster src, final Raster dstIn, final WritableRaster dstOut) {
 
-        int snComp = srcModel.getNumComponents();
-        int bnComp = dstModel.getNumComponents();
-        int snColors = srcModel.getNumColorComponents();
-        int bnColors = dstModel.getNumColorComponents();
+        final int snComp = srcModel.getNumComponents();
+        final int bnComp = dstModel.getNumComponents();
+        final int snColors = srcModel.getNumColorComponents();
+        final int bnColors = dstModel.getNumColorComponents();
 
-        int width = Math.min(Math.min(src.getWidth(), dstIn.getWidth()), dstOut.getWidth());
-        int height = Math.min(Math.min(src.getHeight(), dstIn.getHeight()), dstOut.getHeight());
+        final int width = Math.min(Math.min(src.getWidth(), dstIn.getWidth()), dstOut.getWidth());
+        final int height = Math.min(Math.min(src.getHeight(), dstIn.getHeight()), dstOut.getHeight());
 
         float[] sColors = new float[snComp]; //src colors
         float[] bColors = new float[bnComp]; //backdrop colors
 
-        boolean hasAlphaS = srcModel.hasAlpha();
-        boolean hasAlphaB = dstModel.hasAlpha();
+        final boolean hasAlphaS = srcModel.hasAlpha();
+        final boolean hasAlphaB = dstModel.hasAlpha();
 
         Object srcPixel = null, dstPixel = null;
 
@@ -88,7 +88,7 @@ public class BlendComposite implements CompositeContext {
                 srcPixel = src.getDataElements(x, y, srcPixel);
                 sColors = srcModel.getNormalizedComponents(srcPixel, sColors, 0);
 
-                boolean isWhite = isWhiteBackdrop(bColors);
+                final boolean isWhite = isWhiteBackdrop(bColors);
 
                 aS = hasAlphaS ? sColors[snColors] : 1f;
                 aS *= fixedAlpha;
@@ -157,7 +157,7 @@ public class BlendComposite implements CompositeContext {
         }
     }
 
-    private static boolean isWhiteBackdrop(float[] bColors) {
+    private static boolean isWhiteBackdrop(final float[] bColors) {
         for (int i = 0; i < bColors.length; i++) {
             if (bColors[i] != 1) {
                 return false;

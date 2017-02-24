@@ -90,7 +90,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
         final int id=rawInt; 
         if(hasGIDtoCID && (isIdentity()|| currentCMAP==null) &&  CIDToGIDMap.length>rawInt){  
             
-            int mappedValue=CIDToGIDMap[rawInt];
+            final int mappedValue=CIDToGIDMap[rawInt];
             
             if(mappedValue>0){
                 rawInt=mappedValue;

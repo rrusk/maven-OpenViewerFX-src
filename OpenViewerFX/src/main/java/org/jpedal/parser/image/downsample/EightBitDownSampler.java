@@ -44,7 +44,7 @@ import org.jpedal.parser.image.data.ImageData;
  */
 class EightBitDownSampler {
     
-    static GenericColorSpace downSample(final ImageData imageData, GenericColorSpace decodeColorData, int sampling) {
+    static GenericColorSpace downSample(final ImageData imageData, GenericColorSpace decodeColorData, final int sampling) {
         
         byte[] index=decodeColorData.getIndexedMap();
         
@@ -71,15 +71,15 @@ class EightBitDownSampler {
         }
         
         
-        int newW=imageData.getWidth()/sampling;
-        int newH=imageData.getHeight()/sampling;
-        byte[] data=imageData.getObjectData();
+        final int newW=imageData.getWidth()/sampling;
+        final int newH=imageData.getHeight()/sampling;
+        final byte[] data=imageData.getObjectData();
         
         final int oldSize=data.length;
         
         int x,y,xx,yy,jj;
         
-        int origLineLength;
+        final int origLineLength;
         //black and white
         if(imageData.getWidth()*imageData.getHeight()==oldSize || decodeColorData.getID()==ColorSpaces.DeviceGray) {
             comp = 1;

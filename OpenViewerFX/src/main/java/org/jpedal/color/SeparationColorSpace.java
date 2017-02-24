@@ -60,7 +60,7 @@ public class SeparationColorSpace extends GenericColorSpace {
 
     public SeparationColorSpace() {}
     
-    public SeparationColorSpace(ColorMapping colorMapper,float[] domain, final GenericColorSpace altCS){
+    public SeparationColorSpace(final ColorMapping colorMapper, final float[] domain, final GenericColorSpace altCS){
         
         this.colorMapper=colorMapper;
         this.domain=domain;
@@ -113,7 +113,7 @@ public class SeparationColorSpace extends GenericColorSpace {
     }
     
     @Override
-    public void invalidateCaching(int color){
+    public void invalidateCaching(final int color){
         
         super.invalidateCaching(color);
         
@@ -203,12 +203,12 @@ public class SeparationColorSpace extends GenericColorSpace {
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEG2000ToRGBImage(final byte[] data, int w, int h, final int pX, final int pY, final int d) throws PdfException {
+    public BufferedImage JPEG2000ToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY, final int d) throws PdfException {
 
         BufferedImage image = null;
 
         try {
-            byte[] rawData = JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
+            final byte[] rawData = JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
 
             if (rawData != null) {
 
@@ -241,7 +241,7 @@ public class SeparationColorSpace extends GenericColorSpace {
         final int bytesCount=rawData.length;
         
         //convert data to RGB format
-        int byteCount;
+        final int byteCount;
         if(IndexedColorMap!=null){
             byteCount=rawData.length;
         }else{
@@ -322,7 +322,7 @@ public class SeparationColorSpace extends GenericColorSpace {
         final int pixelCount=3*w*h;
         final byte[] imageData=new byte[pixelCount];      
         float[] operand;
-        int inpLen = domain.length / 2;
+        final int inpLen = domain.length / 2;
         
         if (inpLen == 1) {
             float last = -1, cur;
@@ -342,7 +342,7 @@ public class SeparationColorSpace extends GenericColorSpace {
                 last = cur;
             }
         } else {
-            float[] inputs = new float[inpLen];
+            final float[] inputs = new float[inpLen];
             int p = 0, pp = 0, tt;
             for (int i = 0, ii = w * h; i < ii; i++) {
                 for (int j = 0; j < inpLen; j++) {
@@ -407,7 +407,7 @@ public class SeparationColorSpace extends GenericColorSpace {
         
         final BufferedImage image;
         
-        byte[]imageData=dataToRGBByteArray(rgb,w,h);
+        final byte[]imageData=dataToRGBByteArray(rgb,w,h);
         
         //create the RGB image
         image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
@@ -425,10 +425,10 @@ public class SeparationColorSpace extends GenericColorSpace {
 
         final byte[] newdata = new byte[3 * 256]; //converting to RGB so size known
 
-        int inpLen = domain.length / 2;
+        final int inpLen = domain.length / 2;
 
-        int palLen = data.length / inpLen;
-        float[] inputs = new float[inpLen];
+        final int palLen = data.length / inpLen;
+        final float[] inputs = new float[inpLen];
         float[] operand;
         int p = 0, pp = 0, tt;
         

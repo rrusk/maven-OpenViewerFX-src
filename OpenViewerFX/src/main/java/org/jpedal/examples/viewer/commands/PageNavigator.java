@@ -167,7 +167,7 @@ public class PageNavigator {
                 //Wait while pdf is loading
                 try {
                     Thread.sleep(5000);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LogWriter.writeLog("Attempting to set propeties values " + e);
                 }
             }
@@ -189,7 +189,7 @@ public class PageNavigator {
                 //Wait while pdf is loading
                    try {
                     Thread.sleep(5000);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LogWriter.writeLog("Attempting to set propeties values " + e);           
                 }
             }
@@ -210,7 +210,7 @@ public class PageNavigator {
         }
     }
 
-    private static int getUpdatedPageNumber(int displayMode, int currentPage, int totalPageCount, int changeCount) {
+    private static int getUpdatedPageNumber(final int displayMode, final int currentPage, final int totalPageCount, int changeCount) {
         //Facing modes need to move at least by 2 pages others page will not change
         if (displayMode == Display.FACING || displayMode == Display.CONTINUOUS_FACING) {
 
@@ -227,7 +227,7 @@ public class PageNavigator {
         return currentPage + changeCount;
     }
 
-    private static void changePage(PdfDecoderInt decode_pdf, GUIFactory currentGUI, Values commonValues, int updatedTotal) {
+    private static void changePage(final PdfDecoderInt decode_pdf, final GUIFactory currentGUI, final Values commonValues, final int updatedTotal) {
         commonValues.setCurrentPage(updatedTotal);
         
         if (decode_pdf.getDisplayView() == Display.CONTINUOUS
@@ -391,7 +391,7 @@ public class PageNavigator {
 
     }
     
-    public static void navigatePages(int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
+    public static void navigatePages(final int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
         //Check isOpen as failling to load file may allow nav buttons to function
         if (count == 0 || !decode_pdf.isOpen()) {
@@ -424,7 +424,7 @@ public class PageNavigator {
 		}
     }
 
-    private static void changeTiffPage(Values commonValues, PdfDecoderInt decode_pdf, GUIFactory currentGUI, int count, int updatedTotal){
+    private static void changeTiffPage(final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI, final int count, final int updatedTotal){
         //Update page number and draw new page
         commonValues.setTiffImageToLoad((lastPageDecoded - 1) + count);
         drawMultiPageTiff(commonValues, decode_pdf);

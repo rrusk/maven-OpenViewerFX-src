@@ -44,7 +44,7 @@ public class PageLabelObject extends PdfObject {
     String P;
     byte[] rawP;
 
-    public PageLabelObject(String key) {
+    public PageLabelObject(final String key) {
         super(key);
 
         objType = PdfDictionary.PageLabels;

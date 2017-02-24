@@ -54,7 +54,10 @@ public class DirectDictionaryToObject {
             valueObj=pdfObject;
             
             //if only 1 item use that ref not parent and indirect (ie <</Metadata 38 0 R>>)
-            int objCount=0, refStarts=-1,refEnds=-1,length=raw.length;
+            int objCount=0;
+            int refStarts=-1;
+            int refEnds=-1;
+            final int length=raw.length;
             if(raw[0]=='<'){
                 for(int ii=0;ii<length;ii++){
                     

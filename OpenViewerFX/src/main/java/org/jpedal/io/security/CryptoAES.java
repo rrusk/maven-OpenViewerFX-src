@@ -44,23 +44,23 @@ public class CryptoAES implements Crypto {
     }
     
     @Override
-    public byte[] encrypt(byte[] password, byte[] data) throws Exception {
-        SecretKeySpec secretKey = new SecretKeySpec(generateKey(password), "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+    public byte[] encrypt(final byte[] password, final byte[] data) throws Exception {
+        final SecretKeySpec secretKey = new SecretKeySpec(generateKey(password), "AES");
+        final Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         return cipher.doFinal(data);
     }
 
     @Override
-    public byte[] decrypt(byte[] password, byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-        SecretKeySpec secretKey = new SecretKeySpec(generateKey(password), "AES");
+    public byte[] decrypt(final byte[] password, final byte[] data) throws Exception {
+        final Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+        final SecretKeySpec secretKey = new SecretKeySpec(generateKey(password), "AES");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
         return cipher.doFinal(data);
     }
 
-    private static byte[] generateKey(byte[] pass) {
-        byte[] key = SALT.clone();
+    private static byte[] generateKey(final byte[] pass) {
+        final byte[] key = SALT.clone();
         System.arraycopy(pass, 0, key, 0, Math.min(pass.length, SALT.length));
         return key;
     }

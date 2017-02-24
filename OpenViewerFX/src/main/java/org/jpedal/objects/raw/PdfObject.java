@@ -86,7 +86,7 @@ public class PdfObject {
 
     private float[] ArtBox, BBox, BleedBox, CropBox, Decode, Domain, Matrix, Matte, MediaBox, Range, TrimBox;
 
-    protected PdfObject ColorSpace, DecodeParms, Encoding, Function,
+    protected PdfObject Collection, ColorSpace, DecodeParms, Encoding, Function,
             Params, Resources, Shading, SMask;
 
     private boolean ignoreRecursion, ignoreStream;
@@ -288,6 +288,9 @@ public class PdfObject {
 
         switch (id) {
 
+            case PdfDictionary.Collection:
+                return Collection;
+
             case PdfDictionary.ColorSpace:
                 return ColorSpace;
 
@@ -454,6 +457,10 @@ public class PdfObject {
 
         switch (id) {
 
+            case PdfDictionary.Collection:
+                Collection = value;
+                break;
+
             case PdfDictionary.ColorSpace:
                 ColorSpace = value;
                 break;
@@ -539,7 +546,7 @@ public class PdfObject {
         return setConstant(pdfKeyType, id);
     }
 
-    public static int getId(int keyStart, int keyLength, byte[] raw) {
+    public static int getId(final int keyStart, final int keyLength, final byte[] raw) {
 
         int id = 0, x = 0, next;
 
@@ -1008,7 +1015,7 @@ public class PdfObject {
                 bis.read(cached);
                 bis.close();
                 if (objReader.getEncHash() != null) {
-                    CryptoAES aes = new CryptoAES();
+                    final CryptoAES aes = new CryptoAES();
                     cached = aes.decrypt(objReader.getEncHash(), cached);
                 }
 
@@ -1307,7 +1314,7 @@ public class PdfObject {
 
     public String getCachedStreamFile(final PdfFileReader objReader) {
 
-        File tmpFile;
+        final File tmpFile;
 
         if (startStreamOnDisk != -1) { //cached so we need to read it
 
@@ -1423,7 +1430,7 @@ public class PdfObject {
         return convertedData;
     }
 
-    public void setConvertedData(byte[] convertedData) {
+    public void setConvertedData(final byte[] convertedData) {
         this.convertedData = convertedData;
     }
 }

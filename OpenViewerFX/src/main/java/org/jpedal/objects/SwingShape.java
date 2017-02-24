@@ -98,7 +98,7 @@ public class SwingShape implements Serializable, PdfShape
     /**flag to show if S.java needs to adjust lineWidth because we have modified the shape*/
     private Shape currentShape;
 
-    public SwingShape(Shape currentShape) {
+    public SwingShape(final Shape currentShape) {
         this.currentShape=currentShape;
     }
 
@@ -246,6 +246,9 @@ public class SwingShape implements Serializable, PdfShape
         //loop through commands and add to shape
         for(int i = 0; i < end; i++){
             if( current_path == null ){
+                if (command[i] != M) {
+                    continue;
+                }
                 current_path = new GeneralPath( winding_rule );
                 current_path.moveTo( x[i], y[i] );
                 //lx=x[i];
@@ -535,7 +538,7 @@ public class SwingShape implements Serializable, PdfShape
     }
 
     @Override
-    public void setShape(Shape currentShape) {
+    public void setShape(final Shape currentShape) {
         this.currentShape=currentShape;
     }
     

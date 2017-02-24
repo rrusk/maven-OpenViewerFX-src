@@ -86,7 +86,7 @@ public class TD {
      */
     static int readEscapeValue(final int start, final int count, final int base, final byte[] characterStream) {
 
-        int val;
+        final int val;
 
         switch(base) {
             case 8:
@@ -105,7 +105,7 @@ public class TD {
         return val;
     }
 
-    private static int getGeneral(int start, int count, int base, byte[] characterStream) {
+    private static int getGeneral(final int start, final int count, final int base, final byte[] characterStream) {
 
         final StringBuilder chars = new StringBuilder(10);
 
@@ -117,7 +117,7 @@ public class TD {
 
     }
 
-    private static int getHex(int start, int count, byte[] characterStream) {
+    private static int getHex(final int start, final int count, final byte[] characterStream) {
 
         int val=0;
 
@@ -143,7 +143,7 @@ public class TD {
         return val;
     }
 
-    private static int getOctal(int start, int count, byte[] characterStream) {
+    private static int getOctal(final int start, final int count, final byte[] characterStream) {
 
         //now convert to value
         int topHex, ptr=0, val=0;

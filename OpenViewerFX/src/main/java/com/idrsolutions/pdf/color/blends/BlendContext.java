@@ -45,7 +45,7 @@ public class BlendContext implements CompositeContext {
 //    private final float alpha;
     private final int blendMode;
 
-    public BlendContext(int blendMode) {
+    public BlendContext(final int blendMode) {
         this.blendMode = blendMode;
     }
 
@@ -55,14 +55,14 @@ public class BlendContext implements CompositeContext {
     }
 
     @Override
-    public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+    public void compose(final Raster src, final Raster dstIn, final WritableRaster dstOut) {
 
-        int width = Math.min(src.getWidth(), dstIn.getWidth());
-        int height = Math.min(src.getHeight(), dstIn.getHeight());
+        final int width = Math.min(src.getWidth(), dstIn.getWidth());
+        final int height = Math.min(src.getHeight(), dstIn.getHeight());
 
-        int[] srcPixels = new int[width];
-        int[] dstInPixels = new int[width];
-        int[] dstOutPixels = new int[width];
+        final int[] srcPixels = new int[width];
+        final int[] dstInPixels = new int[width];
+        final int[] dstOutPixels = new int[width];
 
         for (int y = 0; y < height; y++) {
             src.getDataElements(0, y, width, 1, srcPixels);
@@ -73,16 +73,16 @@ public class BlendContext implements CompositeContext {
             int oldR = 0;
 
             for (int x = 0; x < width; x++) {
-                int s = srcPixels[x];
-                int d = dstInPixels[x];
+                final int s = srcPixels[x];
+                final int d = dstInPixels[x];
 
                 if (s == oldS && d == oldD) {
                     dstOutPixels[x] = oldR;
                 } else {
                     oldS = s;
                     oldD = d;
-                    int[] sp = getRGBA(s);
-                    int[] dp = getRGBA(d);
+                    final int[] sp = getRGBA(s);
+                    final int[] dp = getRGBA(d);
                     int[] result = new int[4];
 
 //                    if (sp[3] != 255) { //transparency involved convert to rgb
@@ -118,11 +118,11 @@ public class BlendContext implements CompositeContext {
                         double sr = result[0] / 255.0;
                         double sg = result[1] / 255.0;
                         double sb = result[2] / 255.0;
-                        double sa = sp[3] / 255.0;
+                        final double sa = sp[3] / 255.0;
 
-                        double dr = dp[0] / 255.0;
-                        double dg = dp[1] / 255.0;
-                        double db = dp[2] / 255.0;
+                        final double dr = dp[0] / 255.0;
+                        final double dg = dp[1] / 255.0;
+                        final double db = dp[2] / 255.0;
 
                         sr = ((1 - sa) * dr) + (sa * sr);
                         sg = ((1 - sa) * dg) + (sa * sg);
@@ -144,27 +144,27 @@ public class BlendContext implements CompositeContext {
         }
     }
 
-    private static int[] getRGBA(int argb) {
+    private static int[] getRGBA(final int argb) {
         return new int[]{(argb >> 16) & 0xff, (argb >> 8) & 0xff, argb & 0xff, (argb >> 24) & 0xff};
     }
    
 
-    private static int[] doColor(int[] src, int[] dst) {
+    private static int[] doColor(final int[] src, final int[] dst) {
         
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
 
-        int[] result = new int[3];
-        double sr = src[0] / 255.0;
-        double sg = src[1] / 255.0;
-        double sb = src[2] / 255.0;
+        final int[] result = new int[3];
+        final double sr = src[0] / 255.0;
+        final double sg = src[1] / 255.0;
+        final double sb = src[2] / 255.0;
 
-        double dr = dst[0] / 255.0;
-        double dg = dst[1] / 255.0;
-        double db = dst[2] / 255.0;
+        final double dr = dst[0] / 255.0;
+        final double dg = dst[1] / 255.0;
+        final double db = dst[2] / 255.0;
 
-        double[] rgb = setLum(sr, sg, sb, lum(dr, dg, db));
+        final double[] rgb = setLum(sr, sg, sb, lum(dr, dg, db));
 
         result[0] = (int) (255 * rgb[0]);
         result[1] = (int) (255 * rgb[1]);
@@ -173,22 +173,22 @@ public class BlendContext implements CompositeContext {
         return result;
     }
 
-    private static int[] doLuminosity(int[] src, int[] dst) {
+    private static int[] doLuminosity(final int[] src, final int[] dst) {
                 
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
 
-        int[] result = new int[3];
-        double sr = src[0] / 255.0;
-        double sg = src[1] / 255.0;
-        double sb = src[2] / 255.0;
+        final int[] result = new int[3];
+        final double sr = src[0] / 255.0;
+        final double sg = src[1] / 255.0;
+        final double sb = src[2] / 255.0;
 
-        double dr = dst[0] / 255.0;
-        double dg = dst[1] / 255.0;
-        double db = dst[2] / 255.0;
+        final double dr = dst[0] / 255.0;
+        final double dg = dst[1] / 255.0;
+        final double db = dst[2] / 255.0;
 
-        double[] rgb = setLum(dr, dg, db, lum(sr, sg, sb));
+        final double[] rgb = setLum(dr, dg, db, lum(sr, sg, sb));
 
         result[0] = (int) (255 * rgb[0]);
         result[1] = (int) (255 * rgb[1]);
@@ -197,46 +197,46 @@ public class BlendContext implements CompositeContext {
         return result;
     }
 
-    private static int[] doHue(int[] src, int[] dst) {
+    private static int[] doHue(final int[] src, final int[] dst) {
                 
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
         
-        double[] srcHSL = new double[3];
+        final double[] srcHSL = new double[3];
         rgbToHSL(src[0], src[1], src[2], srcHSL);
-        double[] dstHSL = new double[3];
+        final double[] dstHSL = new double[3];
         rgbToHSL(dst[0], dst[1], dst[2], dstHSL);
 
-        int[] result = new int[4];
+        final int[] result = new int[4];
         hslToRGB(srcHSL[0], dstHSL[1], dstHSL[2], result);
 
         return result;
     }
 
-    private static int[] doSaturation(int[] src, int[] dst) {
+    private static int[] doSaturation(final int[] src, final int[] dst) {
                 
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
         
-        double[] srcHSL = new double[3];
+        final double[] srcHSL = new double[3];
         rgbToHSL(src[0], src[1], src[2], srcHSL);
-        double[] dstHSL = new double[3];
+        final double[] dstHSL = new double[3];
         rgbToHSL(dst[0], dst[1], dst[2], dstHSL);
 
-        int[] result = new int[4];
+        final int[] result = new int[4];
         hslToRGB(dstHSL[0], srcHSL[1], dstHSL[2], result);
 
         return result;
     }
 
-    private static double lum(double r, double g, double b) {
+    private static double lum(final double r, final double g, final double b) {
         return 0.3 * r + 0.59 * g + 0.11 * b;
     }
 
-    private static double[] setLum(double r, double g, double b, double l) {
-        double d = l - lum(r, g, b);
+    private static double[] setLum(double r, double g, double b, final double l) {
+        final double d = l - lum(r, g, b);
         r += d;
         g += d;
         b += d;
@@ -244,9 +244,9 @@ public class BlendContext implements CompositeContext {
     }
 
     private static double[] clipColor(double r, double g, double b) {
-        double l = lum(r, g, b);
-        double n = Math.min(Math.min(r, g), b);
-        double x = Math.max(Math.max(r, g), b);
+        final double l = lum(r, g, b);
+        final double n = Math.min(Math.min(r, g), b);
+        final double x = Math.max(Math.max(r, g), b);
         if (n < 0.0) {
             r = l + (((r - l) * l) / (l - n));
             g = l + (((g - l) * l) / (l - n));
@@ -260,16 +260,18 @@ public class BlendContext implements CompositeContext {
         return new double[]{r, g, b};
     }
 
-    private static void rgbToHSL(int r, int g, int b, double[] hsl) {
-        double rr = (r / 255.0);
-        double gg = (g / 255.0);
-        double bb = (b / 255.0);
+    private static void rgbToHSL(final int r, final int g, final int b, final double[] hsl) {
+        final double rr = (r / 255.0);
+        final double gg = (g / 255.0);
+        final double bb = (b / 255.0);
 
-        double var_Min = Math.min(Math.min(rr, gg), bb);
-        double var_Max = Math.max(Math.max(rr, gg), bb);
-        double del_Max = var_Max - var_Min;
+        final double var_Min = Math.min(Math.min(rr, gg), bb);
+        final double var_Max = Math.max(Math.max(rr, gg), bb);
+        final double del_Max = var_Max - var_Min;
 
-        double H, S, L;
+        double H;
+        final double S;
+        final double L;
         L = (var_Max + var_Min) / 2.0;
 
         if (del_Max - 0.01 <= 0.0) {
@@ -282,9 +284,9 @@ public class BlendContext implements CompositeContext {
                 S = del_Max / (2 - var_Max - var_Min);
             }
 
-            double del_R = (((var_Max - rr) / 6.0) + (del_Max / 2.0)) / del_Max;
-            double del_G = (((var_Max - gg) / 6.0) + (del_Max / 2.0)) / del_Max;
-            double del_B = (((var_Max - bb) / 6.0) + (del_Max / 2.0)) / del_Max;
+            final double del_R = (((var_Max - rr) / 6.0) + (del_Max / 2.0)) / del_Max;
+            final double del_G = (((var_Max - gg) / 6.0) + (del_Max / 2.0)) / del_Max;
+            final double del_B = (((var_Max - bb) / 6.0) + (del_Max / 2.0)) / del_Max;
 
             if (rr == var_Max) {
                 H = del_B - del_G;
@@ -306,15 +308,18 @@ public class BlendContext implements CompositeContext {
         hsl[2] = L;
     }
 
-    private static void hslToRGB(double h, double s, double l, int[] rgb) {
-        int R, G, B;
+    private static void hslToRGB(final double h, final double s, final double l, final int[] rgb) {
+        final int R;
+        final int G;
+        final int B;
 
         if (s - 0.01 <= 0.0) {
             R = (int) (l * 255.0f);
             G = (int) (l * 255.0f);
             B = (int) (l * 255.0f);
         } else {
-            double v1, v2;
+            final double v1;
+            final double v2;
             if (l < 0.5f) {
                 v2 = l * (1 + s);
             } else {
@@ -332,7 +337,7 @@ public class BlendContext implements CompositeContext {
         rgb[2] = B;
     }
 
-    private static double hueToRGB(double v1, double v2, double vH) {
+    private static double hueToRGB(final double v1, final double v2, double vH) {
         if (vH < 0.0) {
             vH += 1.0;
         }

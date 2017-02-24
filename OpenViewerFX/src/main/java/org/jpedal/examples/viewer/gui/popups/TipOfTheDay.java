@@ -57,6 +57,7 @@ import javax.swing.event.HyperlinkListener;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.utils.BrowserLauncher;
 import org.jpedal.utils.LogWriter;
+import org.jpedal.utils.Messages;
 
 public class TipOfTheDay extends JDialog {
 	
@@ -68,10 +69,10 @@ public class TipOfTheDay extends JDialog {
 
 	private final JEditorPane tipPane = new JEditorPane();
 
-	private final JCheckBox showTipsOnStartup = new JCheckBox("Show Tips on Startup");
+	private final JCheckBox showTipsOnStartup = new JCheckBox(Messages.getMessage("PdfViewerTipOfDay.Show"));
 	
 	public TipOfTheDay(final Container parent, final String tipsRoot, final PropertiesFile propertiesFile){
-		super((JFrame)null, "Tip of the Day", true);
+		super((JFrame)null, Messages.getMessage("PdfCustomGui.Tipoftheday"), true);
 		
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
@@ -160,7 +161,7 @@ public class TipOfTheDay extends JDialog {
 		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
 		bottomPanel.add(Box.createHorizontalGlue());
 		
-		final JButton previousTip = new JButton("Previous Tip");
+		final JButton previousTip = new JButton(Messages.getMessage("PdfViewerTipOfDay.Previous"));
 		previousTip.addActionListener(new ActionListener(){
 			@Override
             public void actionPerformed(final ActionEvent e) {
@@ -171,7 +172,7 @@ public class TipOfTheDay extends JDialog {
 		
 		bottomPanel.add(Box.createRigidArea(new Dimension(5,0)));
 		
-		final JButton nextTip = new JButton("Next Tip");
+		final JButton nextTip = new JButton(Messages.getMessage("PdfViewerTipOfDay.Next"));
 		nextTip.addActionListener(new ActionListener(){
 			@Override
             public void actionPerformed(final ActionEvent e) {
@@ -183,7 +184,7 @@ public class TipOfTheDay extends JDialog {
 		
 		bottomPanel.add(Box.createRigidArea(new Dimension(5,0)));
 		
-		final JButton close = new JButton("Close");
+		final JButton close = new JButton(Messages.getMessage("PdfViewerButton.Close"));
 		close.addActionListener(new ActionListener(){
 			@Override
             public void actionPerformed(final ActionEvent e) {
@@ -315,7 +316,7 @@ public class TipOfTheDay extends JDialog {
 		final JLabel tipImage = new JLabel(new ImageIcon(getClass().getResource("/org/jpedal/examples/viewer/res/tip.png")));
 		topPanel.add(tipImage);
 		
-		final JLabel label = new JLabel("Did you know ... ?");
+		final JLabel label = new JLabel(Messages.getMessage("PdfViewerTipOfDay.DidYouKnow"));
 		final Font font = label.getFont().deriveFont(16.0f);
 	    label.setFont(font);
 	    

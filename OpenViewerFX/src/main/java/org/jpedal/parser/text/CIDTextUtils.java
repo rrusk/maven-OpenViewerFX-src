@@ -194,9 +194,9 @@ public class CIDTextUtils {
             
             //if CIDtoGID use that first to see if double byte
             if(currentFontData.isCIDFont() && currentFontData.getGlyphData().getTable(FontFile2.CMAP)==null){
-                int first=currentFontData.getEncodedCMAPValue(firstVal);
-                int second=currentFontData.getEncodedCMAPValue(secondVal);
-                int combined=currentFontData.getEncodedCMAPValue(combinedVal);
+                final int first=currentFontData.getEncodedCMAPValue(firstVal);
+                final int second=currentFontData.getEncodedCMAPValue(secondVal);
+                final int combined=currentFontData.getEncodedCMAPValue(combinedVal);
                 if(combined<=0 && (first>0 || second>0)){
                     newValue=null;
                     isDouble=0;

@@ -168,7 +168,7 @@ public class Name {
 
     public static int setNameStringValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
-        byte[] stringBytes;
+        final byte[] stringBytes;
 
         //move cursor to end of last command if needed
         while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!='(' && raw[i]!='<') {

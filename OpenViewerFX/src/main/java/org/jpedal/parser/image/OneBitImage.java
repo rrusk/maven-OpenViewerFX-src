@@ -47,11 +47,11 @@ import org.jpedal.utils.LogWriter;
 class OneBitImage {
     
     
-    static  BufferedImage make(int d, int w, int h, byte[] data) throws RuntimeException {
+    static  BufferedImage make(final int d, final int w, final int h, byte[] data) throws RuntimeException {
         
         LogWriter.writeLog("comp=1 and d= " + d);
         
-        BufferedImage image;
+        final BufferedImage image;
         
         data = ColorSpaceConvertor.normaliseTo8Bit(d, w, h, data);
         

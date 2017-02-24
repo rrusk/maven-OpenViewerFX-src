@@ -41,7 +41,7 @@ import org.jpedal.objects.raw.PdfDictionary;
  */
 public class ArrayFactory {
 
-    public static ArrayDecoder getDecoder(final PdfFileReader objectReader, int i, final int type, final byte[] raw) {
+    public static ArrayDecoder getDecoder(final PdfFileReader objectReader, final int i, final int type, final byte[] raw) {
 
         switch (type) {
 

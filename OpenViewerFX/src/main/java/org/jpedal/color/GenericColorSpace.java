@@ -84,7 +84,7 @@ public class GenericColorSpace {
     float[] W;
     float[] G;
     float[] Ma;
-    float[] B;
+//    float[] B;
     float[] R;
     
     /**defines rgb colorspace*/
@@ -999,7 +999,7 @@ public class GenericColorSpace {
         BufferedImage image;
         try {
             image = JDeliHelper.JPEG2000ToRGBImage(data);
-        } catch (Exception ex) {//rethrow as Pdfexception
+        } catch (final Exception ex) {//rethrow as Pdfexception
             throw new PdfException(ex.getMessage());
         }
 
@@ -1041,18 +1041,18 @@ public class GenericColorSpace {
 
             }
 
-            ColorSpace cSpace = image.getColorModel().getColorSpace();
-            int csType = cSpace.getType();
-            int trnsType = image.getColorModel().getTransferType();
+            final ColorSpace cSpace = image.getColorModel().getColorSpace();
+            final int csType = cSpace.getType();
+            final int trnsType = image.getColorModel().getTransferType();
             if (image.getType() == BufferedImage.TYPE_CUSTOM
                     && (csType == ColorSpace.CS_sRGB || csType == ColorSpace.TYPE_RGB)
                     && trnsType == DataBuffer.TYPE_BYTE) {
-                BufferedImage temp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-                int[] tempData = ((DataBufferInt) temp.getRaster().getDataBuffer()).getData();
-                byte[] imgData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+                final BufferedImage temp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+                final int[] tempData = ((DataBufferInt) temp.getRaster().getDataBuffer()).getData();
+                final byte[] imgData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
                 int p = 0;
                 for (int i = 0; i < tempData.length; i++) {
-                    int rgb = ((imgData[p] & 0xFF) << 16) | ((imgData[p + 1] & 0xFF) << 8) | ((imgData[p + 2] & 0xFF));
+                    final int rgb = ((imgData[p] & 0xFF) << 16) | ((imgData[p + 1] & 0xFF) << 8) | ((imgData[p + 2] & 0xFF));
                     tempData[i] = rgb;
                     p += 3;
                 }
@@ -1093,7 +1093,7 @@ public class GenericColorSpace {
     /**
      * create a CIE values for conversion to RGB colorspace
      */
-    public final void setCIEValues(final float[] W, final float[] B, final float[] R, final float[] Ma, final float[] G){
+    public final void setCIEValues(final float[] W, final float[] R, final float[] Ma, final float[] G){
         
         cs = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
         
@@ -1101,7 +1101,7 @@ public class GenericColorSpace {
         this.G = G;
         this.Ma = Ma;
         this.W = W;
-        this.B = B;
+//        this.B = B;
         this.R = R;
         
     }
@@ -1303,13 +1303,13 @@ public class GenericColorSpace {
      * set PDF type (ColorSpaces variable)
      * @param rawValue 
      */
-    void setType(int rawValue) {
+    void setType(final int rawValue) {
         value=rawValue;
         rawCSType=rawValue;
 
     }
 
-    void setRawColorSpace(int rawType) {
+    void setRawColorSpace(final int rawType) {
         rawCSType=rawType;
     }
     
@@ -1329,7 +1329,7 @@ public class GenericColorSpace {
             }
             
            
-        } catch (Exception ex) {//rethrow as Pdfexception
+        } catch (final Exception ex) {//rethrow as Pdfexception
             throw new PdfException(ex.getMessage());
         }
 
@@ -1337,7 +1337,7 @@ public class GenericColorSpace {
         
     }
 
-    public void invalidateCaching(int color) {
+    public void invalidateCaching(final int color) {
         //does nothing
     }
     

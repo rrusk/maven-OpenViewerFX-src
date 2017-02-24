@@ -69,14 +69,14 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnntoationHighlight(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         return but;
     }
     
     private JButton createAnnotationFreeText(final FormObject form){
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         
         final String rc = form.getTextStreamValue(PdfDictionary.RC);
         if(rc!=null){
@@ -100,8 +100,8 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
         form.setTextFont(font);
         
         //Adjust position to counteract swing values misplacing text
-        FontMetrics fm = but.getFontMetrics(font);
-        Rectangle r = form.getBoundingRectangle();
+        final FontMetrics fm = but.getFontMetrics(font);
+        final Rectangle r = form.getBoundingRectangle();
         int offset = fm.getMaxAscent()-12;
         if(offset<0){
             offset = 0;
@@ -113,7 +113,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
                     
     private JButton createAnnotationText(final FormObject form){
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
 
         final int rot = pageData.getRotation(form.getPageNumber());
 
@@ -135,7 +135,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     
     private JComponent createAnnotationPopup(final FormObject form) {
     
-        JComponent comp = getPopupComponent(form, pageData.getCropBoxWidth(form.getPageNumber()));
+        final JComponent comp = getPopupComponent(form, pageData.getCropBoxWidth(form.getPageNumber()));
         form.setGUIComponent(comp, FormFactory.SWING);
         //set visibility
         comp.setVisible(form.getBoolean(PdfDictionary.Open));
@@ -145,14 +145,14 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationUnderline(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         return but;
     }
     
     private JButton createAnnotationInk(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
 
         //we need this bit
         but.setToolTipText(form.getTextStreamValue(PdfDictionary.Contents));
@@ -175,14 +175,14 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationStrikeOut(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         return but;
     }
     
     private JButton createAnnotationSquare(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -190,7 +190,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
         
     private JButton createAnnotationLine(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -198,7 +198,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
             
     private JButton createAnnotationPoly(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -206,7 +206,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationCaret(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -214,7 +214,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationFileAttachment(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -222,7 +222,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationCircle(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -230,7 +230,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationSquiggly(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -238,7 +238,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
     }
     
     private JButton createAnnotationSound(final FormObject form) {
-        JButton but = setupAnnotationButton(form);
+        final JButton but = setupAnnotationButton(form);
         but.setBackground(new Color(0, 0, 0, 0));
         but.setIcon(new FixImageIcon(form, AnnotationFactory.getIcon(form), 0));
         
@@ -1326,7 +1326,7 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory{
      */
     @SuppressWarnings("MethodMayBeStatic")
     public PdfSwingPopup getPopupComponent(final FormObject form, final int cropBoxWith) {
-        SwingListener listener = new SwingListener(form, formsActionHandler);
+        final SwingListener listener = new SwingListener(form, formsActionHandler);
         return new PdfSwingPopup(form,cropBoxWith, listener);
     }
     

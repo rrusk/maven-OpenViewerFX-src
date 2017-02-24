@@ -93,11 +93,11 @@ public class JavaFXCombo extends ComboBox<String> implements GUICombo{
     }
 
     @Override
-    public void setSelectedItem(Object index) {
+    public void setSelectedItem(final Object index) {
         setSelectedItem((String)index);
     }
 
-    public void setSelectedItem(String index) {
+    public void setSelectedItem(final String index) {
         getSelectionModel().select(index);
     }
     

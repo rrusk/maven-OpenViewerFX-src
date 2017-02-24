@@ -114,7 +114,7 @@ public class JavaFXLayersPanel extends Tab implements GUILayersPanel {
                     
                     final CheckBoxTreeItem<String> node = t.getTreeItem();
                     
-                    StringBuilder rawName = new StringBuilder(node.getValue());
+                    final StringBuilder rawName = new StringBuilder(node.getValue());
                     
                     TreeItem<String> parent = node.getParent();
                     

@@ -51,8 +51,8 @@ public class JPegImageDecoder {
     
     
     public static BufferedImage decode(final int w, final int h,
-            final GenericColorSpace decodeColorData, byte[] data, final ImageData imageData,
-            ErrorTracker errorTracker, ParserOptions parserOptions) {
+                                       final GenericColorSpace decodeColorData, final byte[] data, final ImageData imageData,
+                                       final ErrorTracker errorTracker, final ParserOptions parserOptions) {
         
         GenericColorSpace jpegDecodeColorData=decodeColorData;
         

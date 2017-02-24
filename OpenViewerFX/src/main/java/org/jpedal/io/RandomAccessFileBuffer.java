@@ -55,7 +55,7 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 
 	public RandomAccessFileBuffer(final String fileName, final String mode) throws IOException {
 		this.fileName = fileName;
-		File file = new File(fileName);
+		final File file = new File(fileName);
 		ra = new RandomAccessFile(file, mode);
 
 		isBig = file.length() > Integer.MAX_VALUE;
@@ -115,7 +115,7 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 	}
 
 	@Override
-	public void seek(long pos) throws IOException {
+	public void seek(final long pos) throws IOException {
 		if (isBig) {
 			ra.seek(pos);
 		} else {
@@ -130,14 +130,14 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 		} else {
 			if (bp < bl) {
 				if (bp >= ts && bp < te) {
-					int v = temp[(bp - ts)] & 0xff;
+					final int v = temp[(bp - ts)] & 0xff;
 					bp++;
 					return v;
 				} else {
 					ts = bp;
 					te = ts + tSize;
 					ra.seek(bp);
-					int max = Math.min(bl - bp, tSize);
+					final int max = Math.min(bl - bp, tSize);
 					ra.read(temp, 0, max);
 					bp++;
 					return temp[0] & 0xff;
@@ -149,7 +149,7 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 
 	@Override
 	public String readLine() throws IOException {
-		StringBuilder input = new StringBuilder();
+		final StringBuilder input = new StringBuilder();
 		int c = -1;
 		boolean eol = false;
 
@@ -161,7 +161,7 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 					break;
 				case '\r':
 					eol = true;
-					long cur = getFilePointer();
+					final long cur = getFilePointer();
 					if ((read()) != '\n') {
 						seek(cur);
 					}
@@ -191,12 +191,12 @@ public class RandomAccessFileBuffer implements RandomAccessBuffer {
 	}
 
 	@Override
-	public int read(byte[] b) throws IOException {
+	public int read(final byte[] b) throws IOException {
 		if (isBig) {
 			return ra.read(b);
 		}else{
 			ra.seek(bp);
-			int maxRead = ra.read(b);
+			final int maxRead = ra.read(b);
 			bp += maxRead;
 			return maxRead;
 		}

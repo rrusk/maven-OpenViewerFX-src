@@ -48,7 +48,7 @@ public class JCADecryption implements BaseDecryption {
     
     @Override
     public byte[] v5Decrypt(final byte[] rawValue, final byte[] encKey) throws PdfSecurityException {
-        byte[] returnKey;
+        final byte[] returnKey;
 
         try {
             final SecretKeySpec key = new SecretKeySpec(encKey, "AES");
@@ -71,7 +71,7 @@ public class JCADecryption implements BaseDecryption {
             c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(ivData));
             out = c.doFinal(encData);
         
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
     }
         return out;
@@ -89,7 +89,7 @@ public class JCADecryption implements BaseDecryption {
 
     @Override
     public byte[] readCertificate(final byte[][] recipients, final Certificate certificate, final Key key) {
-        String message = "This method is not supported without the BouncyCastle mail jar added "
+        final String message = "This method is not supported without the BouncyCastle mail jar added "
                 + "to the classpath. " + System.getProperty("line.separator") + 
                 "See https://www.idrsolutions.com/jpedal/support/additional-jars/ for more details.";
         

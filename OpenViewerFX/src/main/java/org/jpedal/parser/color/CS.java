@@ -50,9 +50,9 @@ public class CS {
         //set flag for stroke
         final boolean isStroke = !isLowerCase;
 
-        Object rawDict=cache.get(PdfObjectCache.Colorspaces,colorspaceObject);
+        final Object rawDict=cache.get(PdfObjectCache.Colorspaces,colorspaceObject);
 
-        PdfArrayIterator array=ColorspaceFactory.convertColValueToMixedArray(currentPdfFile,(byte[])rawDict);
+        final PdfArrayIterator array=ColorspaceFactory.convertColValueToMixedArray(currentPdfFile,(byte[])rawDict);
 
         final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, array);
 

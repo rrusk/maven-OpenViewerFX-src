@@ -351,7 +351,7 @@ public abstract class GUIData {
 	
 	if(!keepValues){
 	    
-            if(formsUnordered==null){
+            if(formsUnordered==null && pageCount!=0){
                 formsUnordered = new List[pageCount+1];
                 formsOrdered = new List[pageCount + 1];
             }

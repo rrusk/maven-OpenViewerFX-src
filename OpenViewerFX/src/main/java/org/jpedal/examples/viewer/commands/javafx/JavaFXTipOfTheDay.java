@@ -59,10 +59,11 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXDialog;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
+import org.jpedal.utils.Messages;
 
 /**
- * Class Which Displays the Tip of the Day
- * Can be toggle to display on Viewer Startup.
+ * Class which displays the Tip of the Day
+ * Can be toggled to display on Viewer Startup.
  */
 public class JavaFXTipOfTheDay {
     
@@ -71,7 +72,7 @@ public class JavaFXTipOfTheDay {
     private static final BorderPane border = new BorderPane();
     private static  WebEngine webEngine;
     private static int currentTip;
-    private static final CheckBox show = new CheckBox("Show Tips On Start Up");
+    private static final CheckBox show = new CheckBox(Messages.getMessage("PdfViewerTipOfDay.Show"));
     
     public static void execute(final Object[] args, final PropertiesFile properties) {
         if (args == null) {
@@ -91,9 +92,7 @@ public class JavaFXTipOfTheDay {
         setupStage();
         bottomButtons();
         
-        /*
-         * Code to Handle Auto Startup.
-         */
+        // Code to Handle Auto Startup.
 		final String propValue = properties.getValue("displaytipsonstartup");
 		if(!propValue.isEmpty()) {
             show.setSelected(propValue.equals("true"));
@@ -111,24 +110,18 @@ public class JavaFXTipOfTheDay {
    
     private static void setupStage(){
         
-        /*
-         * Setup the Main Stage.
-         */
+        // Setup the Main Stage.
         tipOfDayPopup = new FXDialog(null, Modality.APPLICATION_MODAL, border, 500, 400);
-        tipOfDayPopup.setTitle("Tip Of The Day");
+        tipOfDayPopup.setTitle(Messages.getMessage("PdfCustomGui.Tipoftheday"));
         
-        /*
-         * Setup Did You Know Top Element.
-         */
+        // Setup Did You Know Top Element.
         final HBox titleBar = new HBox();
-        final Label title = new Label("Did you know...?", new ImageView(new Image("/org/jpedal/examples/viewer/res/tip.png")));
+        final Label title = new Label(Messages.getMessage("PdfViewerTipOfDay.DidYouKnow"), new ImageView(new Image("/org/jpedal/examples/viewer/res/tip.png")));
         titleBar.getChildren().addAll(title);
         titleBar.setPadding(new Insets(10,0,20,10));
         border.setTop(titleBar);
         
-        /*
-         * Setup the Default WebView.
-         */
+        // Setup the Default WebView.
         final VBox middle = new VBox();
         final Random r = new Random();
 		currentTip = r.nextInt(urls.size());
@@ -149,11 +142,9 @@ public class JavaFXTipOfTheDay {
      */
     private static void bottomButtons (){
         
-        /*
-         * Setup the Next Button.
-         */
+        // Setup the Next Button.
         final HBox bottomButtons = new HBox();
-        final Button nextTip = new Button ("Next Tip");
+        final Button nextTip = new Button (Messages.getMessage("PdfViewerTipOfDay.Next"));
         nextTip.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override
             public void handle(final javafx.event.ActionEvent e) {
@@ -169,10 +160,8 @@ public class JavaFXTipOfTheDay {
             }
         });
         
-        /*
-         * Setup the Previous Button.
-         */
-        final Button prevTip = new Button ("Previous Tip");
+        // Setup the Previous Button.
+        final Button prevTip = new Button (Messages.getMessage("PdfViewerTipOfDay.Previous"));
         prevTip.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override
             public void handle(final javafx.event.ActionEvent e) {
@@ -187,6 +176,7 @@ public class JavaFXTipOfTheDay {
                 
             }
         });
+        
         show.setAlignment(Pos.BOTTOM_LEFT);
         show.setPadding(new Insets(0,0,10,10));
         final Region space =  new Region();
@@ -205,11 +195,9 @@ public class JavaFXTipOfTheDay {
      */
     private static void populateTipsList(final String tipRoot) throws IOException {
 		try {
-			final URL url = JavaFXTipOfTheDay.class.getResource(tipRoot); //"/org/jpedal/examples/viewer/res/tips"
+			final URL url = JavaFXTipOfTheDay.class.getResource(tipRoot);
 			
-			/*
-			 * allow for it in jar
-			 */
+			// allow for it in jar
 			if(url.toString().startsWith("jar")){
 				final JarURLConnection conn = (JarURLConnection) url.openConnection();
 				final JarFile jar = conn.getJarFile();
@@ -239,7 +227,6 @@ public class JavaFXTipOfTheDay {
 				in.close();
 			}
 		} catch (final IOException e) {
-			//<end-demo><end-full>
 			throw e;
 		}
 	}

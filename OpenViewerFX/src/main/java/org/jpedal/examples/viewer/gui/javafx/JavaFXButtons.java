@@ -95,17 +95,13 @@ public class JavaFXButtons implements GUIButtons{
 
     private GUIButton buyButton, helpButton, rssButton;
     
-    private boolean isSingle;
-
     /**
      * Initialises the buttons
      *
      * @param isSingle is of type boolean
      */
     public void init(final boolean isSingle) {
-
-        this.isSingle = isSingle;
-
+        
         previousSearch = new JavaFXButton();
         nextSearch = new JavaFXButton();
         searchButton = new JavaFXButton();
@@ -271,11 +267,6 @@ public class JavaFXButtons implements GUIButtons{
      */
     @Override
     public void setPageLayoutButtonsEnabled(final boolean flag) {
-
-        if (!isSingle) {
-            return;
-        }
-
         
         continuousButton.setEnabled(flag);
         continuousFacingButton.setEnabled(flag);
@@ -337,7 +328,7 @@ public class JavaFXButtons implements GUIButtons{
         int i = 1;
 
         //cycle set correct value to true, else false
-        for (CheckMenuItem item : layoutGroup) {
+        for (final CheckMenuItem item : layoutGroup) {
             item.setSelected(i == mode);
             i++;
         }

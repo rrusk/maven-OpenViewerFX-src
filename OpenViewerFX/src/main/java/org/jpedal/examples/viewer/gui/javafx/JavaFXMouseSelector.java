@@ -222,7 +222,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                     return;
                 }
 
-                String textToFind = currentGUI.showInputDialog(Messages.getMessage("PdfViewerMessage.GetUserInput"));
+                final String textToFind = currentGUI.showInputDialog(Messages.getMessage("PdfViewerMessage.GetUserInput"));
 
                 //if cancel return to menu.
                 if (textToFind == null || textToFind.length() < 1) {

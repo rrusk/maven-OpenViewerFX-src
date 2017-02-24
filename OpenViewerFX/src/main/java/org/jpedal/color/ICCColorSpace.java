@@ -125,7 +125,7 @@ extends GenericColorSpace {
 //        return false;
 //    }
     
-    private static boolean isSame(float[] arr0, float[] arr1){
+    private static boolean isSame(final float[] arr0, final float[] arr1){
         if(arr0==null || arr1==null){
             return false;
         }
@@ -144,7 +144,7 @@ extends GenericColorSpace {
             if (isSame(prevFloat, operand)) {
                 //do nothing
             } else {
-                float[] result = cs.toRGB(operand);
+                final float[] result = cs.toRGB(operand);
                 currentColor = new PdfColor(result[0], result[1], result[2]);
                 prevFloat = operand.clone();
             }
@@ -201,10 +201,10 @@ extends GenericColorSpace {
      * @throws org.jpedal.exception.PdfException
      */
     @Override
-    public BufferedImage  JPEG2000ToRGBImage(final byte[] data,int w,int h,
-            final int pX, final int pY, final int d) throws PdfException {
+    public BufferedImage  JPEG2000ToRGBImage(final byte[] data, final int w, final int h,
+                                             final int pX, final int pY, final int d) throws PdfException {
         
-        byte[] index=this.getIndexedMap();
+        final byte[] index=this.getIndexedMap();
         
         if(cs.getNumComponents()==3 || index!=null) {
             return super.JPEG2000ToRGBImage(data, w, h, pX, pY,d);

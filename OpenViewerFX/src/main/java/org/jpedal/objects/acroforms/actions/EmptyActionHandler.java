@@ -264,7 +264,7 @@ public class EmptyActionHandler implements ActionHandler {
         }
     }
 
-    private void additionalAction_Sound(PdfObject aData) {
+    private void additionalAction_Sound(final PdfObject aData) {
         final PdfObject soundObj = aData.getDictionary(PdfDictionary.Sound);
         
         // read now as lazy initialisation
@@ -623,7 +623,7 @@ public class EmptyActionHandler implements ActionHandler {
      * @return 
      */
     @Override
-    public int gotoDest(PdfObject aData, final int eventType, int command) {
+    public int gotoDest(final PdfObject aData, final int eventType, int command) {
         
         final boolean debugDest=false;
         
@@ -634,7 +634,7 @@ public class EmptyActionHandler implements ActionHandler {
             System.out.println("DefaultActionHandler.gotoDest()");
         }
         
-        PdfArrayIterator Dest = DestHandler.getDestFromObject(aData,currentPdfFile);
+        final PdfArrayIterator Dest = DestHandler.getDestFromObject(aData,currentPdfFile);
         if (Dest!=null) {
             
             if (eventType == MOUSECLICKED) {
@@ -924,7 +924,7 @@ public class EmptyActionHandler implements ActionHandler {
      * @param type - the type of action
      */
     @Override
-    public void changeTo(final String file, int page, Object location, final Integer type, final boolean storeView) {
+    public void changeTo(final String file, final int page, final Object location, final Integer type, final boolean storeView) {
         
         if (showMethods) {
             System.out.println("DefaultActionHandler.changeTo()" + file);
@@ -1410,7 +1410,7 @@ public class EmptyActionHandler implements ActionHandler {
             }
             
             
-            StringBuilder text = new StringBuilder();
+            final StringBuilder text = new StringBuilder();
             if(compsToSubmit != null && compsToSubmit.length > 0) {
                 for (final Component aCompsToSubmit : compsToSubmit) {
                     if (aCompsToSubmit instanceof JTextComponent) {

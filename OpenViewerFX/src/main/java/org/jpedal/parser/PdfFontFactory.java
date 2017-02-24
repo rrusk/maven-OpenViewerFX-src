@@ -80,7 +80,7 @@ public class PdfFontFactory {
 
     public PdfFont createFont(final boolean fallbackToArial, final PdfObject pdfObject, final String font_id, final ObjectStore objectStoreStreamRef,
                               final boolean renderPage, final ErrorTracker errorTracker,
-                              final boolean isPrinting, boolean isHTML) throws PdfException {
+                              final boolean isPrinting, final boolean isHTML) throws PdfException {
 
         PdfFont currentFontData=null;
 
@@ -113,7 +113,7 @@ public class PdfFontFactory {
             if(FontMappings.fontSubstitutionTable!=null && !isEmbedded &&
                     pdfObject.getParameterConstant(PdfDictionary.Subtype)!= StandardFonts.TYPE3) {
 
-                String rawFont = getFontName(pdfObject, font_id, descendantFont);
+                final String rawFont = getFontName(pdfObject, font_id, descendantFont);
 
                 fontType = getFontMapping(pdfObject, rawFont, fontType, descendantFont);
             }
@@ -144,7 +144,7 @@ public class PdfFontFactory {
             /*
              * check for OpenType fonts and reassign type
              */
-            int rawFontType=fontType;
+            final int rawFontType=fontType;
             if(fontType==StandardFonts.TYPE1 || fontType==StandardFonts.CIDTYPE0) {
                 fontType = scanForOpenType(pdfObject, currentPdfFile, fontType);
             }
@@ -245,10 +245,10 @@ public class PdfFontFactory {
         return currentFontData;
     }
 
-    boolean inlineLiberationFontForHTML(PdfObject pdfObject, String font_id, PdfObject descendantFont) {
+    boolean inlineLiberationFontForHTML(final PdfObject pdfObject, final String font_id, final PdfObject descendantFont) {
 
-        String rawFont = getFontName(pdfObject, font_id, descendantFont);
-        String test=rawFont.toLowerCase();
+        final String rawFont = getFontName(pdfObject, font_id, descendantFont);
+        final String test=rawFont.toLowerCase();
         String libFont=null;
 
         if(test.contains("timesnewroman")) {
@@ -260,11 +260,11 @@ public class PdfFontFactory {
         if(libFont!=null) {
 
             if (libFont != null) {
-                RandomAccessFile f;
+                final RandomAccessFile f;
                 try {
                     f = new RandomAccessFile(libFont, "r");
 
-                    byte[] stream = new byte[(int) f.length()];
+                    final byte[] stream = new byte[(int) f.length()];
 
                     f.readFully(stream);
 
@@ -273,12 +273,12 @@ public class PdfFontFactory {
                     final FontObject fontObj = new FontObject(pdfObject.getObjectRefAsString());
                     fontObj.setDecodedStream(stream);
 
-                    PdfObject pdfFontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
+                    final PdfObject pdfFontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
 
                     if (pdfFontDescriptor != null){
                         pdfFontDescriptor.setDictionary(PdfDictionary.FontFile2, fontObj);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     e.printStackTrace();
                     LogWriter.writeLog("[PDF] Exception replacing Liberation font " + e);
                 }
@@ -429,7 +429,7 @@ public class PdfFontFactory {
         return fontType;
     }
 
-    private String getFontName(PdfObject pdfObject, String font_id, PdfObject descendantFont) {
+    private String getFontName(final PdfObject pdfObject, final String font_id, final PdfObject descendantFont) {
         String rawFont;
 
         if(descendantFont==null) {

@@ -74,7 +74,7 @@ public class ObjectUtils {
     
     public static byte[] readRawValue(final int j, final byte[] data, final int start) {
 
-        byte[] newString;
+        final byte[] newString;
         final int stringLength = j - start;
 
         if (stringLength < 1) {

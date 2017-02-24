@@ -40,9 +40,11 @@ import org.jpedal.objects.raw.PdfObject;
 
 public class ConvertMaskToImage {
 
-    public static BufferedImage convert(PdfObject newSMask, PdfObjectReader currentPdfFile) {
-        BufferedImage image;
-        byte opacity, d0 = 0, d1 = (byte) 255;
+    public static BufferedImage convert(final PdfObject newSMask, final PdfObjectReader currentPdfFile) {
+        final BufferedImage image;
+        final byte opacity;
+        byte d0 = 0;
+        byte d1 = (byte) 255;
 
         // get opacity if not default
         final float[] maskDecode = newSMask.getFloatArray(PdfDictionary.Decode);

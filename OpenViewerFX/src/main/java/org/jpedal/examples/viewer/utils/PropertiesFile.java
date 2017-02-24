@@ -431,17 +431,17 @@ public class PropertiesFile {
     public void loadStyle(){
         
         //Get file location
-        String path = getValue("iconLocation")+"/style.css";
+        final String path = getValue("iconLocation")+"/style.css";
         File styleFile = new File(path);
         
         //If file not found on system, check if actually within the jar
         if(!styleFile.exists()){
             try {
-                URL url = getClass().getResource(path);
+                final URL url = getClass().getResource(path);
                 if(url!=null){
                     styleFile = new File(url.toURI());
                 }
-            } catch (URISyntaxException ex) {
+            } catch (final URISyntaxException ex) {
                 LogWriter.writeLog("Exception attempting to find style.xml " + ex);
             }
         }
@@ -451,7 +451,7 @@ public class PropertiesFile {
             try {
                 styleSheet = new StyleSheet();
                 styleSheet.loadRules(new FileReader(styleFile), null);
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 LogWriter.writeLog("Exception " + ex + " generating properties file");
             }
         }
@@ -545,12 +545,12 @@ public class PropertiesFile {
      */
     public String getStyleAttribute(final String styleName, final String attributeKey){
         if(styleSheet!=null){
-            Style style = styleSheet.getStyle(styleName);
+            final Style style = styleSheet.getStyle(styleName);
             if(style!=null){
                 //style is a Style object returned from PropertiesFile.getStyle(String name)
-                Enumeration e = style.getAttributeNames();
+                final Enumeration e = style.getAttributeNames();
                 while (e.hasMoreElements()) {
-                    Object o = e.nextElement();
+                    final Object o = e.nextElement();
                     if (o instanceof String) {
                         //Not a pairing
                     } else if (o == StyleConstants.NameAttribute) {
@@ -797,7 +797,7 @@ public class PropertiesFile {
                     }else{
                         
                         //Is it running in the IDE
-                        if(properties[position+1].equals("7.9.26")){
+                        if(properties[position+1].equals("7.10.24")){
                             //Do nothing as we are in the IDE
                             //Refactor for testing purposes
                             //refactorProperties  = true;

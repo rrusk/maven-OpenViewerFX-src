@@ -44,6 +44,7 @@ import org.jpedal.fonts.StandardFonts;
 import org.jpedal.fonts.glyph.*;
 import org.jpedal.fonts.tt.FontFile2;
 import org.jpedal.fonts.tt.TTGlyph;
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfData;
 import org.jpedal.objects.TextState;
@@ -170,7 +171,7 @@ public class Tj extends BaseDecoder {
      * y coords are calculated in the method
      * processTextArray(final byte[] stream,int startCommand,int dataPointer)
      */
-    private void calcCoordinates(final float x, final float[][] Trm, float charSpacing ) {
+    private void calcCoordinates(final float x, final float[][] Trm, final float charSpacing ) {
         
         //clone data so we can manipulate
         final float[][] trm=new float[3][3];
@@ -273,7 +274,7 @@ public class Tj extends BaseDecoder {
         return tjTextValue;
     }
     
-    private void resetValues(GlyphData glyphData){
+    private void resetValues(final GlyphData glyphData){
         
         glyphData.reset();
         
@@ -306,10 +307,8 @@ public class Tj extends BaseDecoder {
 
         final int Tmode=gs.getTextRenderType();
         boolean hasContent=false,isMultiple=false; //flag text found as opposed to just spacing
-        char lastTextChar = 'x';
         float TFS = currentTextState.getTfs();
-        final float rawTFS=TFS;
-        
+
         if(TFS<0) {
             TFS = -TFS;
         }
@@ -326,94 +325,41 @@ public class Tj extends BaseDecoder {
         
         //flag to show text highlight needs to be shifted up to allow for displacement in Trm
         boolean isTextShifted=false;
-        
+
+        startCommand= StreamReaderUtils.skipSpaces(stream, startCommand);
+
         //roll on at start if necessary
-        while(stream[startCommand]==91 || stream[startCommand]==10 || stream[startCommand]==13 || stream[startCommand]==32){
-            
-            if(stream[startCommand]==91) {
+        if(stream[startCommand]==91) {
                 isMultiple = true;
-            }
-            
-            startCommand++;
+                startCommand++;
         }
+
+        startCommand= StreamReaderUtils.skipSpaces(stream, startCommand);
         
         /*set character size */
         glyphData.setDefaultCharSize(currentFontData);
         
         charSpacing = currentTextState.getCharacterSpacing() / TFS;
         final float wordSpacing = currentTextState.getWordSpacing() / TFS;
-        
-        if(multipleTJs){ //allow for consecutive TJ commands
-            Trm[2][0]=currentTextState.Tm[2][0];
-            Trm[2][1]=currentTextState.Tm[2][1];
-        }
-        
-        /*define matrix used for converting to correctly scaled matrix and multiply to set Trm*/
-        float[][] temp = new float[3][3];
-        temp[0][0] = rawTFS * currentTextState.getHorizontalScaling();
-        temp[1][1] = rawTFS;
-        temp[2][1] = currentTextState.getTextRise();
-        temp[2][2] =1;
-        Trm = Matrix.multiply(temp, Trm);
-        
-        if(currentFontData.isFontVertical()){
-            Trm[2][0] -= (Trm[0][0]/2);
-            Trm[2][1] -= (Trm[1][1]);
-        }
+
+        initTrm(multipleTJs);
         
         //check for leading before text and adjust position to include
         if(isMultiple && stream[startCommand]!=60 && stream[startCommand]!=40 && stream[startCommand]!=93){
-            
-            float offset=0;
-            while(stream[startCommand]!=40 && stream[startCommand]!=60 && stream[startCommand]!=93){
-                final StringBuilder kerning = new StringBuilder(10);
-                while(stream[startCommand]!=60 && stream[startCommand]!=40 && stream[startCommand]!=93 && stream[startCommand]!=32){
-                    kerning.append((char)stream[startCommand]);
-                    startCommand++;
-                }
-                offset += Float.parseFloat(kerning.toString());
-                
-                while(stream[startCommand]==32) {
-                    startCommand++;
-                }
-            }
-            
-            //new condition as we did not cover case where text rotated by matrix so
-            //we were adding 0 * offset which is zero! Fixed for just the case found
-            //where Trm[0][1]>0 && Trm[1][0]<0
-            
-            if(Trm[0][0]==0 && Trm[1][1]==0 && Trm[0][1]!=0 && Trm[1][0]!=0){
-                
-                offset=Trm[0][1]*offset/ Leading.THOUSAND;
-                
-                Trm[2][1] -= offset;
-                
-            }else{
-                offset=Trm[0][0]*offset/ Leading.THOUSAND;
-                
-                Trm[2][0] -= offset;
-            }
+            startCommand = getOffset(stream, Trm,startCommand);
         }
         
         /*
          * workout fontScale, direction
          */
         final int fontSize=calcFontSize(glyphData,currentTextState,Trm);
-        
+
         /*
          * text printing mode to get around problems with PCL printers
          */
-        Font javaFont=null;
-        
         final int textPrint=parserOptions.getTextPrint();
-        
-        if(textPrint== PdfDecoderInt.STANDARDTEXTSTRINGPRINT && StandardFonts.isStandardFont(currentFontData.getFontName(), true) && parserOptions.isPrinting()){
-            javaFont= currentFontData.getJavaFontX(fontSize);
-        }else if(currentFontData.isFontEmbedded && !currentFontData.isFontSubstituted()){
-            javaFont=null;
-        }else if((PdfStreamDecoder.useTextPrintingForNonEmbeddedFonts || textPrint!=PdfDecoderInt.NOTEXTPRINT)&& parserOptions.isPrinting()) {
-            javaFont = currentFontData.getJavaFontX(fontSize);
-        }
+
+        final Font javaFont = getJavaFont(fontSize, textPrint);
         
         /*extract starting x and y values (we update Trm as we work through text)*/
         final float x= Trm[2][0];
@@ -444,76 +390,19 @@ public class Tj extends BaseDecoder {
            
             /*either handle glyph, process leading or handle a deliminator*/
             if (glyphData.isText()) { //process if still in text
-            
-                lastTextChar = glyphData.getRawChar(); //remember last char so we can avoid a rollon at end if its a space
-                
-                //convert escape or turn index into correct glyph allow for stream
-                if (glyphData.getOpenChar() == 60) {
-                   
-                    //check /PDFdata/test_data/baseline_screens/14jan/ASTA invoice - $275.pdf  if you alter this code
-                    if (isCID && !currentFontData.isFontSubstituted()  && currentFontData.isFontEmbedded && ( stream[i]!='0')){
-                        i=HexTextUtils.getHexCIDValue(stream, i,glyphData, currentFontData, parserOptions);
-                    }else{
-                        i = HexTextUtils.getHexValue(stream, i,glyphData, currentFontData, parserOptions);
-                    }
-                    
-                }else if (lastTextChar == 92 && !isCID) {
-                    i = EscapedTextUtils.getEscapedValue(i, stream,glyphData, currentFontData,streamLength,parserOptions, current);
-                } else if (isCID){  //could be nonCID cid
-                    i=CIDTextUtils.getCIDCharValues(i,stream, streamLength,glyphData,currentFontData, parserOptions);
-                }else{
-                    lastTextChar = getValue(lastTextChar,glyphData, currentFontData, current);
-                }
-                
-                //Handle extracting CID Identity fonts
-                if (isHTML && !currentFontData.hasToUnicode() &&
-                        currentFontData.getFontType() == StandardFonts.CIDTYPE0 &&
-                        currentFontData.getGlyphData().isIdentity()){
-                    
-                    //Check if proper char has been stored instead
-                    int charToUse=glyphData.getRawChar();
-                    final int valueForHTML=glyphData.getValueForHTML();
-                    if(valueForHTML!=-1){
-                        charToUse=valueForHTML;
-                        glyphData.setValueForHTML(-1);
-                    }
-                    
-                    final int rawC = StandardFonts.mapCIDToValidUnicode(currentFontData.getBaseFontName(), charToUse);
-                    glyphData.setUnicodeValue(String.valueOf((char) (rawC)));
-                }
-                
-                //Itext likes to use Tabs!
-                if(!isTabRemapped && glyphData.getRawInt()==9 && currentFontData.isFontSubstituted()){
-                    glyphData.setRawInt(32);
-                    glyphData.set(" ");
-                }
-                
-                //MOVE pointer to next location by updating matrix
-                temp[0][0] = 1;
-                temp[0][1] = 0;
-                temp[0][2] = 0;
-                temp[1][0] = 0;
-                temp[1][1] = 1;
-                temp[1][2] = 0;
-                
-                if(currentFontData.isFontVertical()){
-                    temp[2][1] = -(currentWidth - glyphData.getLeading()); //tx;
-                    temp[2][0] = 0; //ty;
-                }else{
-                    temp[2][0] = (currentWidth +  glyphData.getLeading()); //tx;
-                    temp[2][1] = 0; //ty;
-                }
-                temp[2][2] = 1;
-                Trm = Matrix.multiply(temp, Trm); //multiply to get new Tm
-                
+
+                i = getNextValue(stream, i, isCID);
+
+                Trm=updateTrm(Trm, currentFontData, currentWidth,glyphData);
+
                 /*save pointer in case its just multiple spaces at end*/
                 if (glyphData.getRawChar() == ' ' && glyphData.getLastChar() != ' '){
                     TrmBeforeSpace = Trm;
                 }
-                
+
                 glyphData.setLeading(0); //reset leading
                 
-                float actualWidth=glyphData.getActualWidth();
+                final float actualWidth=glyphData.getActualWidth();
 
                 int idx=glyphData.getRawInt();
                 boolean  isInvalid=false;
@@ -726,17 +615,160 @@ public class Tj extends BaseDecoder {
          */
         if(parserOptions.isTextExtracted()){
             
-            return setExtractedText(lastTextChar, x, textData, hasContent);
+            return setExtractedText(glyphData.getLastTextChar(), x, textData, hasContent);
         }else {
             return null;
         }       
     }
-    
-    static float[][] updateMatrixPosition(boolean widthIsVertical, float[][] Trm, float leading, float currentWidth, TextState currentTextState) {
+
+    private void initTrm(final boolean multipleTJs) {
+        if(multipleTJs){ //allow for consecutive TJ commands
+            Trm[2][0]=currentTextState.Tm[2][0];
+            Trm[2][1]=currentTextState.Tm[2][1];
+        }
+
+        /*define matrix used for converting to correctly scaled matrix and multiply to set Trm*/
+        final float[][] temp = new float[3][3];
+        temp[0][0] = currentTextState.getTfs() * currentTextState.getHorizontalScaling();
+        temp[1][1] = currentTextState.getTfs();
+        temp[2][1] = currentTextState.getTextRise();
+        temp[2][2] =1;
+        Trm = Matrix.multiply(temp, Trm);
+
+        if(currentFontData.isFontVertical()){
+            Trm[2][0] -= (Trm[0][0]/2);
+            Trm[2][1] -= (Trm[1][1]);
+        }
+    }
+
+    static float[][] updateTrm(float[][] Trm, final PdfFont currentFontData, final float currentWidth, final GlyphData glyphData) {
+
+        final float[][] temp = new float[3][3];
+
+        //MOVE pointer to next location by updating matrix
+        temp[0][0] = 1;
+        temp[0][1] = 0;
+        temp[0][2] = 0;
+        temp[1][0] = 0;
+        temp[1][1] = 1;
+        temp[1][2] = 0;
+
+        if(currentFontData.isFontVertical()){
+            temp[2][1] = -(currentWidth - glyphData.getLeading()); //tx;
+            temp[2][0] = 0; //ty;
+        }else{
+            temp[2][0] = (currentWidth + glyphData.getLeading()); //tx;
+            temp[2][1] = 0; //ty;
+        }
+        temp[2][2] = 1;
+        Trm = Matrix.multiply(temp, Trm); //multiply to get new Tm
+
+        return Trm;
+    }
+
+    private int getNextValue(final byte[] stream, int i, final boolean isCID) {
+
+        char lastTextChar = glyphData.getRawChar(); //remember last char so we can avoid a rollon at end if its a space
+
+        //convert escape or turn index into correct glyph allow for stream
+        if (glyphData.getOpenChar() == 60) {
+
+            //check /PDFdata/test_data/baseline_screens/14jan/ASTA invoice - $275.pdf  if you alter this code
+            if (isCID && !currentFontData.isFontSubstituted()  && currentFontData.isFontEmbedded && ( stream[i]!='0')){
+                i= HexTextUtils.getHexCIDValue(stream, i,glyphData, currentFontData, parserOptions);
+            }else{
+                i = HexTextUtils.getHexValue(stream, i,glyphData, currentFontData, parserOptions);
+            }
+
+        }else if (lastTextChar == 92 && !isCID) {
+            i = EscapedTextUtils.getEscapedValue(i, stream,glyphData, currentFontData,streamLength,parserOptions, current);
+        } else if (isCID){  //could be nonCID cid
+            i= CIDTextUtils.getCIDCharValues(i,stream, streamLength,glyphData,currentFontData, parserOptions);
+        }else{
+            lastTextChar = getValue(lastTextChar,glyphData, currentFontData, current);
+        }
+
+        glyphData.setLastTextChar(lastTextChar);
+
+        //Handle extracting CID Identity fonts
+        if (isHTML && !currentFontData.hasToUnicode() &&
+                currentFontData.getFontType() == StandardFonts.CIDTYPE0 &&
+                currentFontData.getGlyphData().isIdentity()){
+            setHTMLValue();
+        }
+
+        //Itext likes to use Tabs!
+        if(!isTabRemapped && glyphData.getRawInt()==9 && currentFontData.isFontSubstituted()){
+            glyphData.setRawInt(32);
+            glyphData.set(" ");
+        }
+        return i;
+    }
+
+    private void setHTMLValue() {
+        //Check if proper char has been stored instead
+        int charToUse=glyphData.getRawChar();
+        final int valueForHTML=glyphData.getValueForHTML();
+        if(valueForHTML!=-1){
+            charToUse=valueForHTML;
+            glyphData.setValueForHTML(-1);
+        }
+
+        final int rawC = StandardFonts.mapCIDToValidUnicode(currentFontData.getBaseFontName(), charToUse);
+        glyphData.setUnicodeValue(String.valueOf((char) (rawC)));
+    }
+
+    private Font getJavaFont(final int fontSize, final int textPrint) {
+        Font javaFont=null;
+
+        if(textPrint== PdfDecoderInt.STANDARDTEXTSTRINGPRINT && StandardFonts.isStandardFont(currentFontData.getFontName(), true) && parserOptions.isPrinting()){
+            javaFont= currentFontData.getJavaFontX(fontSize);
+        }else if(currentFontData.isFontEmbedded && !currentFontData.isFontSubstituted()){
+            javaFont=null;
+        }else if((PdfStreamDecoder.useTextPrintingForNonEmbeddedFonts || textPrint!=PdfDecoderInt.NOTEXTPRINT)&& parserOptions.isPrinting()) {
+            javaFont = currentFontData.getJavaFontX(fontSize);
+        }
+        return javaFont;
+    }
+
+    static int getOffset(final byte[] stream, final float[][] Trm, int startCommand) {
+
+        float offset=0;
+        while(stream[startCommand] !=40 && stream[startCommand] !=60 && stream[startCommand] !=93){
+            final StringBuilder kerning = new StringBuilder(10);
+            while(stream[startCommand] !=60 && stream[startCommand] !=40 && stream[startCommand] !=93 && stream[startCommand] !=32){
+                kerning.append((char) stream[startCommand]);
+                startCommand++;
+            }
+            offset += Float.parseFloat(kerning.toString());
+
+            while(stream[startCommand] ==32) {
+                startCommand++;
+            }
+        }
+
+        //new condition as we did not cover case where text rotated by matrix so
+        //we were adding 0 * offset which is zero! Fixed for just the case found
+        //where Trm[0][1]>0 && Trm[1][0]<0
+        if(Trm[0][0]==0 && Trm[1][1]==0 && Trm[0][1]!=0 && Trm[1][0]!=0){
+
+            offset=Trm[0][1]*offset/ Leading.THOUSAND;
+
+            Trm[2][1] -= offset;
+
+        }else{
+            offset=Trm[0][0]*offset/ Leading.THOUSAND;
+
+            Trm[2][0] -= offset;
+        }
+        return startCommand;
+    }
+
+    static float[][] updateMatrixPosition(final boolean widthIsVertical, float[][] Trm, final float leading, final float currentWidth, final TextState currentTextState) {
         /*all text is now drawn (if required) and text has been decoded*/
         
         //final move to get end of shape
-        float[][] temp = new float[3][3];
+        final float[][] temp = new float[3][3];
         temp[0][0] = 1;
         temp[0][1] = 0;
         temp[0][2] = 0;
@@ -754,7 +786,7 @@ public class Tj extends BaseDecoder {
         temp[2][1] = 0; //ty;
 
         if(widthIsVertical){  //switch x and y
-            float tmp=temp[2][0];
+            final float tmp=temp[2][0];
             temp[2][0]=temp[2][1];
             temp[2][1]=tmp;
         }
@@ -996,7 +1028,7 @@ public class Tj extends BaseDecoder {
         }
     }
     
-    static char getValue(char lastTextChar, GlyphData glyphData, PdfFont currentFontData, DynamicVectorRenderer current) {
+    static char getValue(char lastTextChar, final GlyphData glyphData, final PdfFont currentFontData, final DynamicVectorRenderer current) {
         
         final String newValue=currentFontData.getGlyphValue(glyphData.getRawInt());
         glyphData.setDisplayValue(newValue);
@@ -1022,7 +1054,7 @@ public class Tj extends BaseDecoder {
         return lastTextChar;
     }
     
-    static int calcFontSize(GlyphData glyphData, TextState currentTextState, float[][] Trm) throws RuntimeException {
+    static int calcFontSize(final GlyphData glyphData, final TextState currentTextState, final float[][] Trm) throws RuntimeException {
         
         int fontSize;
         
@@ -1102,7 +1134,7 @@ public class Tj extends BaseDecoder {
      * @param spaces
      * @return
      */
-    static boolean writeOutText(GlyphData glyphData, float[][] Trm,boolean hasContent, final float currentWidth, final StringBuffer textData, final String spaces) {
+    static boolean writeOutText(final GlyphData glyphData, final float[][] Trm, boolean hasContent, final float currentWidth, final StringBuffer textData, final String spaces) {
         
         final String unicodeValue=glyphData.getUnicodeValue();
         final float fontScale=glyphData.getFontScale();
@@ -1143,7 +1175,7 @@ public class Tj extends BaseDecoder {
             //turn chars less than 32 into escape
             final int length=unicodeValue.length();
             char next;
-            boolean isXMLExtraction=glyphData.isXMLExtraction();
+            final boolean isXMLExtraction=glyphData.isXMLExtraction();
             for (int ii = 0; ii < length; ii++) {
                 next = unicodeValue.charAt(ii);
                 
@@ -1291,7 +1323,7 @@ public class Tj extends BaseDecoder {
         this.returnText=returnText;
     }
     
-    public void setActualText(String actualText) {
+    public void setActualText(final String actualText) {
        this.actualText=actualText;
     }
     

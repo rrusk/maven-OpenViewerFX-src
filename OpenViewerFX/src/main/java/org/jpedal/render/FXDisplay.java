@@ -95,7 +95,7 @@ public class FXDisplay extends GUIDisplay {
 
     }
     
-    public void setInset(DynamicVectorRenderer currentDisplay, final int x, final int y) {
+    public void setInset(final DynamicVectorRenderer currentDisplay, final int x, final int y) {
             ((FXDisplay)currentDisplay).setInset(x, y);   
     }
     
@@ -175,7 +175,7 @@ public class FXDisplay extends GUIDisplay {
     final boolean alreadyCached, final String name, final int previousUse) {
 
         this.rawPageNumber =pageNumber;
-        float CTM[][]=currentGraphicsState.CTM;
+        final float[][] CTM=currentGraphicsState.CTM;
 
         final WritableImage fxImage = SwingFXUtils.toFXImage(image, null);
         
@@ -185,7 +185,7 @@ public class FXDisplay extends GUIDisplay {
         final ImageView im1View = new ImageView(fxImage);
         
         // Stores the affine used on the image to use on the clip later
-        float[] affine = {CTM[0][0]/imageW,CTM[0][1]/imageW,
+        final float[] affine = {CTM[0][0]/imageW,CTM[0][1]/imageW,
                 -CTM[1][0]/imageH,-CTM[1][1]/imageH,
                 CTM[2][0]+CTM[1][0],CTM[2][1]+CTM[1][1]};
             
@@ -288,9 +288,9 @@ public class FXDisplay extends GUIDisplay {
     
     private void drawPatternedShape(final GraphicsState currentGraphicsState, final Path currentShape){
         final PatternColorSpace patternCS=(PatternColorSpace)currentGraphicsState.nonstrokeColorSpace;
-        Bounds bounds = currentShape.getBoundsInParent();
+        final Bounds bounds = currentShape.getBoundsInParent();
         
-        PatternObject patternObj = patternCS.getPatternObj();
+        final PatternObject patternObj = patternCS.getPatternObj();
         final int patternType = patternObj.getInt(PdfDictionary.PatternType);
         if (patternType == 1) { //tiling pattern
             //get Image as BufferedImage and convert to javafx WritableImage
@@ -298,14 +298,14 @@ public class FXDisplay extends GUIDisplay {
             if (imageForPattern == null) {
                 return;
             }
-            Image fxImage = SwingFXUtils.toFXImage(imageForPattern, null);
-            double iw = fxImage.getWidth();
-            double ih = fxImage.getHeight();
+            final Image fxImage = SwingFXUtils.toFXImage(imageForPattern, null);
+            final double iw = fxImage.getWidth();
+            final double ih = fxImage.getHeight();
 //        final double xPos=currentShape.getBoundsInParent().getMinX();
 //        final double yPos=currentShape.getBoundsInParent().getMinY();
 //        double pw = currentShape.getBoundsInLocal().getWidth();
 //        double ph = currentShape.getBoundsInLocal().getHeight();  
-            ImagePattern pattern = new ImagePattern(fxImage, 0, 0, iw, ih,false);
+            final ImagePattern pattern = new ImagePattern(fxImage, 0, 0, iw, ih,false);
             currentShape.setStroke(new Color(0, 0, 0, 0));
             currentShape.setFill(pattern);
             
@@ -333,7 +333,7 @@ public class FXDisplay extends GUIDisplay {
         //addToScene(patternView, currentShape);
     }
     
-    private static Paint getShadingPaint(PatternObject patternObj, PatternColorSpace patternCS, Bounds bounds) {
+    private static Paint getShadingPaint(final PatternObject patternObj, final PatternColorSpace patternCS, final Bounds bounds) {
        
         final PdfObjectReader currentPdfFile = patternCS.getObjectReader();
         final PdfObject shading=patternObj.getDictionary(PdfDictionary.Shading);
@@ -384,7 +384,7 @@ public class FXDisplay extends GUIDisplay {
 
     }
 
-    private static Paint getAxialPaint(GenericColorSpace shadingColorSpace, float[] background, PdfObject shadingObject, float[][] mm, PDFFunction[] function, Bounds bounds) {
+    private static Paint getAxialPaint(final GenericColorSpace shadingColorSpace, final float[] background, final PdfObject shadingObject, final float[][] mm, final PDFFunction[] function, final Bounds bounds) {
         
         float[] domain = shadingObject.getFloatArray(PdfDictionary.Domain);
         if (domain == null) {
@@ -400,15 +400,15 @@ public class FXDisplay extends GUIDisplay {
         if(background != null){
             shadingColorSpace.setColor(background, 4);
             shadingColorSpace.getColor();
-            PdfPaint pp = shadingColorSpace.getColor();
-            int rgb = pp.getRGB();
+            final PdfPaint pp = shadingColorSpace.getColor();
+            final int rgb = pp.getRGB();
             bgColor = new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
         }
         
         Color colorE0 = bgColor;
         Color colorE1 = bgColor;
                         
-        float[] coords = shadingObject.getFloatArray(PdfDictionary.Coords);
+        final float[] coords = shadingObject.getFloatArray(PdfDictionary.Coords);
 
         float x0 = coords[0];
         float y0 = coords[1];
@@ -423,38 +423,38 @@ public class FXDisplay extends GUIDisplay {
         x1 = temp[0];
         y1 = temp[1];
        
-        float t0 = domain[0];
-        float t1 = domain[1];
+        final float t0 = domain[0];
+        final float t1 = domain[1];
        
-        Color colorT0 = calculateColor(t0, shadingColorSpace, function);
-        Color colorT1 = calculateColor(t1, shadingColorSpace, function);
+        final Color colorT0 = calculateColor(t0, shadingColorSpace, function);
+        final Color colorT1 = calculateColor(t1, shadingColorSpace, function);
         
         colorE0 = extension[0] ? colorT0 : colorE0;
         colorE1 = extension[1] ? colorT1 : colorE1;
         
-        Stop[] stops = {new Stop(0,colorE0),new Stop(0.01, colorT0), new Stop(0.99, colorT1), new Stop(1,colorE1)};
+        final Stop[] stops = {new Stop(0,colorE0),new Stop(0.01, colorT0), new Stop(0.99, colorT1), new Stop(1,colorE1)};
 //        Stop[] stops = new Stop[]{new Stop(0.1, colorT0), new Stop(0.9, colorT1)};
         if(1==2){
             Matrix.show(mm);
-            double bx = bounds.getMinX();
-            double by = bounds.getMinY();
-            double mx = bounds.getMaxX();
-            double my = bounds.getMaxY();
+            final double bx = bounds.getMinX();
+            final double by = bounds.getMinY();
+            final double mx = bounds.getMaxX();
+            final double my = bounds.getMaxY();
 
             System.out.println(bx+by+mx+my);
         }
         return new LinearGradient(x0, y0, x1, y1, false, CycleMethod.NO_CYCLE, stops);
     }
     
-    private static Color calculateColor(final float val, GenericColorSpace shadingColorSpace, PDFFunction[] function) {
+    private static Color calculateColor(final float val, final GenericColorSpace shadingColorSpace, final PDFFunction[] function) {
         final float[] colValues = ShadingFactory.applyFunctions(function, new float[]{val});
         shadingColorSpace.setColor(colValues, colValues.length);
-        PdfPaint pp = shadingColorSpace.getColor();
-        int rgb = pp.getRGB();
+        final PdfPaint pp = shadingColorSpace.getColor();
+        final int rgb = pp.getRGB();
         return new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
     }    
 
-    protected void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, boolean allowColorChange){
+    protected void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, final boolean allowColorChange){
 
         // Removes the default black stroke on shapes
         currentShape.setStroke(null);
@@ -765,7 +765,7 @@ public class FXDisplay extends GUIDisplay {
         
         if (addBackground) {
              
-            Path background = new Path();
+            final Path background = new Path();
             
             background.getElements().add(new MoveTo(xx, yy));
             background.getElements().add(new LineTo(xx, yy+(int) (h * scaling)));

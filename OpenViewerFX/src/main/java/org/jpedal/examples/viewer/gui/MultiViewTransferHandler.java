@@ -117,7 +117,7 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
 		final int noOfAllowedFiles = allowedFiles.size();
 		
 		if(noOfDisAllowedFiles > 0) {
-			StringBuilder unOpenableFiles = new StringBuilder();
+			final StringBuilder unOpenableFiles = new StringBuilder();
             for (final Object disAllowedFile : disAllowedFiles) {
                 final String file = (String) disAllowedFile;
                 final String fileName = new File(file).getName();

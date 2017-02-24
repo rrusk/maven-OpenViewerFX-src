@@ -934,7 +934,7 @@ public class FileAccess {
                 pageData.setPageCount(pageCount);
             }
 
-            ActionHandler handler = externalHandlers.getFormActionHandler();
+            final ActionHandler handler = externalHandlers.getFormActionHandler();
             if(handler!=null){
                 handler.init(null, externalHandlers.getJavaScript(), formRenderer);
             }

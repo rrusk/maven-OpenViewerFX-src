@@ -48,7 +48,7 @@ public class NumberValue {
     
     public static int setNumberValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         
-        int keyStart=i;
+        final int keyStart=i;
         final int rawLength=raw.length;
 
         //move cursor to end of text
@@ -57,7 +57,7 @@ public class NumberValue {
         }
         
         //actual value or first part of ref
-        int number= NumberUtils.parseInt(keyStart, i, raw);
+        final int number= NumberUtils.parseInt(keyStart, i, raw);
         
         final int jj = StreamReaderUtils.skipSpaces(raw, i);
 
@@ -88,9 +88,9 @@ public class NumberValue {
         return i-1;
     }
 
-    static int readNumberFromIndirectObj(final int PDFkeyInt, final PdfObject pdfObject, int i, final byte[] raw, final PdfFileReader objectReader, int rawLength, int number) {
+    static int readNumberFromIndirectObj(final int PDFkeyInt, final PdfObject pdfObject, int i, final byte[] raw, final PdfFileReader objectReader, final int rawLength, int number) {
 
-        int keyStart;
+        final int keyStart;
         i = StreamReaderUtils.skipSpaces(raw, i);
 
         keyStart=i;

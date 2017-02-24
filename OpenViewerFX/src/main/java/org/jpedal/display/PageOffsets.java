@@ -205,7 +205,7 @@ public class PageOffsets {
     /**
      * @param totalSingleWidth the totalSingleWidth to set
      */
-    public void setTotalSingleWidth(int totalSingleWidth) {
+    public void setTotalSingleWidth(final int totalSingleWidth) {
         this.totalSingleWidth = totalSingleWidth;
     }
 
@@ -219,7 +219,7 @@ public class PageOffsets {
     /**
      * @param gaps the gaps to set
      */
-    public void setGaps(int gaps) {
+    public void setGaps(final int gaps) {
         this.gaps = gaps;
     }
 
@@ -233,28 +233,28 @@ public class PageOffsets {
     /**
      * @param doubleGaps the doubleGaps to set
      */
-    public void setDoubleGaps(int doubleGaps) {
+    public void setDoubleGaps(final int doubleGaps) {
         this.doubleGaps = doubleGaps;
     }
 
     /**
      * @param totalDoubleWidth the totalDoubleWidth to set
      */
-    public void setTotalDoubleWidth(int totalDoubleWidth) {
+    public void setTotalDoubleWidth(final int totalDoubleWidth) {
         this.totalDoubleWidth = totalDoubleWidth;
     }
     
     /**
      * @param totalSingleHeight the totalSingleHeight to set
      */
-    public void setTotalSingleHeight(int totalSingleHeight) {
+    public void setTotalSingleHeight(final int totalSingleHeight) {
         this.totalSingleHeight = totalSingleHeight;
     }
     
     /**
      * @param totalDoubleHeight the totalDoubleHeight to set
      */
-    public void setTotalDoubleHeight(int totalDoubleHeight) {
+    public void setTotalDoubleHeight(final int totalDoubleHeight) {
         this.totalDoubleHeight = totalDoubleHeight;
     }
 
@@ -268,7 +268,7 @@ public class PageOffsets {
     /**
      * @param doublePageWidth the doublePageWidth to set
      */
-    public void setDoublePageWidth(int doublePageWidth) {
+    public void setDoublePageWidth(final int doublePageWidth) {
         this.doublePageWidth = doublePageWidth;
     }
 
@@ -282,7 +282,7 @@ public class PageOffsets {
     /**
      * @param doublePageHeight the doublePageHeight to set
      */
-    public void setDoublePageHeight(int doublePageHeight) {
+    public void setDoublePageHeight(final int doublePageHeight) {
         this.doublePageHeight = doublePageHeight;
     }
 
@@ -296,7 +296,7 @@ public class PageOffsets {
     /**
      * @param biggestWidth the biggestWidth to set
      */
-    public void setBiggestWidth(int biggestWidth) {
+    public void setBiggestWidth(final int biggestWidth) {
         this.biggestWidth = biggestWidth;
     }
 
@@ -310,25 +310,25 @@ public class PageOffsets {
     /**
      * @param biggestHeight the biggestHeight to set
      */
-    public void setBiggestHeight(int biggestHeight) {
+    public void setBiggestHeight(final int biggestHeight) {
         this.biggestHeight = biggestHeight;
     }
 
     /**
      * @param widestPageNR the widestPageNR to set
      */
-    public void setWidestPageNR(int widestPageNR) {
+    public void setWidestPageNR(final int widestPageNR) {
         this.widestPageNR = widestPageNR;
     }
 
     /**
      * @param widestPageR the widestPageR to set
      */
-    public void setWidestPageR(int widestPageR) {
+    public void setWidestPageR(final int widestPageR) {
         this.widestPageR = widestPageR;
     }
 
-    public void calculateCombinedPageSizes(int displayView,int pageNumber,int displayRotation, MultiDisplayOptions multiDisplayOptions, PdfPageData pageData, float scaling, int insetW, int insetH ) {
+    public void calculateCombinedPageSizes(final int displayView, final int pageNumber, final int displayRotation, final MultiDisplayOptions multiDisplayOptions, final PdfPageData pageData, final float scaling, final int insetW, final int insetH ) {
         
         //height for facing pages
         int biggestFacingHeight=0;

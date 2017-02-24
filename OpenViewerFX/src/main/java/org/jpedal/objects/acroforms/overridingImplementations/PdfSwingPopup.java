@@ -68,13 +68,13 @@ public class PdfSwingPopup extends JInternalFrame{
 	final FormObject formObject;
 	
     @SuppressWarnings("UnusedParameters")
-    public PdfSwingPopup(final FormObject popupObj, final int cropBoxWidth, SwingListener listener) {
+    public PdfSwingPopup(final FormObject popupObj, final int cropBoxWidth, final SwingListener listener) {
 
         formObject = popupObj;
         //float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
         
         float[] col;
-        String titleString;
+        final String titleString;
         String contentString;
         /*
          * all the popup data is in the Parent not the popup object
@@ -101,7 +101,7 @@ public class PdfSwingPopup extends JInternalFrame{
             }
             
             
-            StringBuilder titleBuilder = new StringBuilder();
+            final StringBuilder titleBuilder = new StringBuilder();
             
             final String subject = parentObj.getTextStreamValue(PdfDictionary.Subj);
             if (subject != null) {
@@ -112,7 +112,7 @@ public class PdfSwingPopup extends JInternalFrame{
             //read in date for title bar
             final String modifiedDate = parentObj.getTextStreamValue(PdfDictionary.M);
             if (modifiedDate != null) {
-                StringBuilder date = new StringBuilder(modifiedDate);
+                final StringBuilder date = new StringBuilder(modifiedDate);
                 date.delete(0, 2);//delete D:
                 date.insert(10, ':');
                 date.insert(13, ':');
@@ -133,7 +133,7 @@ public class PdfSwingPopup extends JInternalFrame{
             
             //setup title text for popup
             
-            String autherName = popupObj.getTextStreamValue(PdfDictionary.T);
+            final String autherName = popupObj.getTextStreamValue(PdfDictionary.T);
             if (autherName != null) {
                 titleBuilder.append('\n');
                 titleBuilder.append(autherName);
@@ -226,7 +226,7 @@ public class PdfSwingPopup extends JInternalFrame{
         ((javax.swing.plaf.basic.BasicInternalFrameUI) this.getUI()).setNorthPane(null);
     }
     
-    public void setColor(float[] col){
+    public void setColor(final float[] col){
         //setup background color
         Color bgColor = null;
         if (col != null) {
@@ -247,10 +247,10 @@ public class PdfSwingPopup extends JInternalFrame{
     //Done this way so our listener to immediately tell if popup and drag accordingly
     private class PopupTitleBar extends JTextArea {
         
-        public PopupTitleBar(String title){
+        public PopupTitleBar(final String title){
             super(title);
             
-            PopupDragListener listener = new PopupDragListener();
+            final PopupDragListener listener = new PopupDragListener();
             //add our drag listener so it acts like an internal frame
             addMouseMotionListener(listener);
             addMouseListener(listener);
@@ -260,10 +260,10 @@ public class PdfSwingPopup extends JInternalFrame{
         //Done this way so our listener to immediately tell if popup and drag accordingly
     private class PopupContentArea extends JTextArea {
         
-        public PopupContentArea(String contents){
+        public PopupContentArea(final String contents){
             super(contents);
             
-            PopupContentsUpdater listener = new PopupContentsUpdater();
+            final PopupContentsUpdater listener = new PopupContentsUpdater();
             //add our drag listener so it acts like an internal frame
             addKeyListener(listener);
         }
@@ -273,19 +273,19 @@ public class PdfSwingPopup extends JInternalFrame{
         Point clickStart;
         
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(final MouseEvent e) {
             if(clickStart==null){
                 clickStart = e.getPoint();
             }
             //move the popup as the user drags the mouse
             final Point pt = e.getPoint();
             final Point curLoc = getLocation();
-            int x = pt.x-clickStart.x;
-            int y = pt.y-clickStart.y;
+            final int x = pt.x-clickStart.x;
+            final int y = pt.y-clickStart.y;
             curLoc.translate(x, y);
             setLocation(curLoc);
             
-            float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
+            final float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
             rect[0] += (x / formObject.getCurrentScaling());
             rect[2] += (x / formObject.getCurrentScaling());
             rect[1] -= (y / formObject.getCurrentScaling());
@@ -294,12 +294,12 @@ public class PdfSwingPopup extends JInternalFrame{
         }
         
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             clickStart = e.getPoint();
         }
         
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             clickStart = null;
         }
     }
@@ -307,7 +307,7 @@ public class PdfSwingPopup extends JInternalFrame{
     private class PopupContentsUpdater extends KeyAdapter{
         
         @Override
-        public void keyReleased(KeyEvent e){
+        public void keyReleased(final KeyEvent e){
             PdfObject parentObj = formObject.getParentPdfObj();
 
             if (parentObj == null) {

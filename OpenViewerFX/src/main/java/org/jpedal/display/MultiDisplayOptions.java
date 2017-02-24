@@ -68,7 +68,7 @@ public class MultiDisplayOptions {
     /**
      * @param turnoverOn the turnoverOn to set
      */
-    public void setTurnoverOn(boolean turnoverOn) {
+    public void setTurnoverOn(final boolean turnoverOn) {
         this.turnoverOn = turnoverOn;
     }
 
@@ -82,11 +82,11 @@ public class MultiDisplayOptions {
     /**
      * @param separateCover the separateCover to set
      */
-    public void setSeparateCover(boolean separateCover) {
+    public void setSeparateCover(final boolean separateCover) {
         this.separateCover = separateCover;
     }
 
-    void resetValues(int pageCount) {
+    void resetValues(final int pageCount) {
         setxReached(new int[pageCount+1]);
         setyReached(new int[pageCount+1]);
         setPageW(new int[pageCount+1]);
@@ -109,14 +109,14 @@ public class MultiDisplayOptions {
         return pageH;
     }
     
-    public int getPageH(int i) {
+    public int getPageH(final int i) {
         return pageH[i];
     }
     
     /**
      * @param pageH the pageH to set
      */
-    public void setPageH(int[] pageH) {
+    public void setPageH(final int[] pageH) {
         this.pageH = pageH;
     }
 
@@ -127,14 +127,14 @@ public class MultiDisplayOptions {
         return pageW;
     }
     
-    public int getPageW(int i) {
+    public int getPageW(final int i) {
         return pageW[i];
     }
 
     /**
      * @param pageW the pageW to set
      */
-    public void setPageW(int[] pageW) {
+    public void setPageW(final int[] pageW) {
         this.pageW = pageW;
     }
 
@@ -145,14 +145,14 @@ public class MultiDisplayOptions {
         return yReached;
     }
     
-    public int getyReached(int i) {
+    public int getyReached(final int i) {
         return yReached[i];
     }
 
     /**
      * @param yReached the yReached to set
      */
-    public void setyReached(int[] yReached) {
+    public void setyReached(final int[] yReached) {
         this.yReached = yReached;
     }
 
@@ -163,14 +163,14 @@ public class MultiDisplayOptions {
         return xReached;
     }
     
-    public int getxReached(int i) {
+    public int getxReached(final int i) {
         return xReached[i];
     }
 
     /**
      * @param xReached the xReached to set
      */
-    public void setxReached(int[] xReached) {
+    public void setxReached(final int[] xReached) {
         this.xReached = xReached;
     }
 
@@ -184,7 +184,7 @@ public class MultiDisplayOptions {
     /**
      * @param isGeneratingOtherPages the isGeneratingOtherPages to set
      */
-    public void setIsGeneratingOtherPages(boolean isGeneratingOtherPages) {
+    public void setIsGeneratingOtherPages(final boolean isGeneratingOtherPages) {
         this.isGeneratingOtherPages = isGeneratingOtherPages;
     }
 
@@ -198,7 +198,7 @@ public class MultiDisplayOptions {
     /**
      * @param running the running to set
      */
-    public void setRunning(boolean running) {
+    public void setRunning(final boolean running) {
         this.running = running;
     }
 
@@ -212,7 +212,7 @@ public class MultiDisplayOptions {
     /**
      * @param startViewPage the startViewPage to set
      */
-    public void setStartViewPage(int startViewPage) {
+    public void setStartViewPage(final int startViewPage) {
         this.startViewPage = startViewPage;
     }
 
@@ -226,12 +226,12 @@ public class MultiDisplayOptions {
     /**
      * @param endViewPage the endViewPage to set
      */
-    public void setEndViewPage(int endViewPage) {
+    public void setEndViewPage(final int endViewPage) {
         this.endViewPage = endViewPage;
     }
     public void calcDisplayRangeForFacing(){
 
-        int pageCount=pageData.getPageCount();
+        final int pageCount=pageData.getPageCount();
 
         if (separateCover) {
                 if(pageCount==2){ //special case
@@ -266,7 +266,7 @@ public class MultiDisplayOptions {
     /**
      * @param pageNumber the pageNumber to set
      */
-    public void setPageNumber(int pageNumber) {
+    public void setPageNumber(final int pageNumber) {
         this.pageNumber = pageNumber;
     }
     public void waitToDieThred(){

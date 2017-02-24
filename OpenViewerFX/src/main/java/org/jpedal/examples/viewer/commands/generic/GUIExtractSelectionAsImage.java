@@ -84,12 +84,12 @@ public class GUIExtractSelectionAsImage {
 
         Image image;
 
-        public ClipboardImage(Image i) {
+        public ClipboardImage(final Image i) {
             this.image = i;
         }
 
         @Override
-        public Object getTransferData(DataFlavor flavor) throws IOException, UnsupportedFlavorException {
+        public Object getTransferData(final DataFlavor flavor) throws IOException, UnsupportedFlavorException {
             if (image != null && flavor.equals(DataFlavor.imageFlavor)) {
                 return image;
             } else {
@@ -103,9 +103,9 @@ public class GUIExtractSelectionAsImage {
         }
 
         @Override
-        public boolean isDataFlavorSupported(DataFlavor flavor) {
-            DataFlavor[] flavors = getTransferDataFlavors();
-            for (DataFlavor flavor1 : flavors) {
+        public boolean isDataFlavorSupported(final DataFlavor flavor) {
+            final DataFlavor[] flavors = getTransferDataFlavors();
+            for (final DataFlavor flavor1 : flavors) {
                 if (flavor.equals(flavor1)) {
                     return true;
                 }

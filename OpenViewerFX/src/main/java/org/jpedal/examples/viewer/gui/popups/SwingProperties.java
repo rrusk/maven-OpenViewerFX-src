@@ -238,8 +238,8 @@ public class SwingProperties extends JPanel {
      * @param comp JTextfield to show the data.
      * @param elementName Property name to be loaded.
      */
-    private void loadStringValue(JTextField comp, final String elementName) {
-        String propValue = properties.getValue(elementName);
+    private void loadStringValue(final JTextField comp, final String elementName) {
+        final String propValue = properties.getValue(elementName);
         if (propValue != null && !propValue.isEmpty()) {
             comp.setText(propValue);
         }
@@ -253,8 +253,8 @@ public class SwingProperties extends JPanel {
      * @param defaultText Default text to be used if property value not found or
      * empty.
      */
-    private void loadStringValue(JTextField comp, final String elementName, final String defaultText) {
-        String propValue = properties.getValue(elementName);
+    private void loadStringValue(final JTextField comp, final String elementName, final String defaultText) {
+        final String propValue = properties.getValue(elementName);
         if (propValue != null && !propValue.isEmpty()) {
             comp.setText(propValue);
         } else {
@@ -477,14 +477,14 @@ public class SwingProperties extends JPanel {
         
         newIconSet.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 iconLocation.setText(newIconLocation);
             }
         });
         
         classicIconSet.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 iconLocation.setText(classicIconLocation);
             }
         });
@@ -492,10 +492,10 @@ public class SwingProperties extends JPanel {
         iconLocation.addFocusListener(new FocusListener() {
 
             @Override
-            public void focusGained(FocusEvent e) {}
+            public void focusGained(final FocusEvent e) {}
 
             @Override
-            public void focusLost(FocusEvent e) {
+            public void focusLost(final FocusEvent e) {
                 if(iconLocation.getText().equals(newIconLocation)){
                     newIconSet.setSelected(true);
                 }
@@ -941,88 +941,53 @@ public class SwingProperties extends JPanel {
             pane.setLayout(new GridBagLayout());
             final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
-            c.gridy = 0;
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,0,0,5));
             final JLabel label = new JLabel(Messages.getMessage("PdfPreferences.GeneralSection"));
             label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label.setFont(label.getFont().deriveFont(Font.BOLD));
             pane.add(label, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(10,0,0,5);
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 1, 1, 1, 0, 0, new Insets(10,0,0,5));
             final JLabel label2 = new JLabel(Messages.getMessage("PdfViewerViewMenu.Resolution"));
             label2.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(label2, c);
-            
-            c.insets = new Insets(10,0,0,0);
-            c.weightx = 1;
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 1, 1, 1, 1, 0, new Insets(10,0,0,0));
             pane.add(resolution, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 2, 2, 1, 1, 0, new Insets(10,0,0,0));
             useHinting.setMargin(new Insets(0,0,0,0));
             useHinting.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(useHinting, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 3, 2, 1, 1, 0, new Insets(10,0,0,0));
             autoScroll.setMargin(new Insets(0,0,0,0));
             autoScroll.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(autoScroll, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 4, 2, 1, 1, 0, new Insets(10,0,0,0));
             confirmClose.setMargin(new Insets(0,0,0,0));
             confirmClose.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(confirmClose, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(15,0,0,5);
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 5, 2, 1, 0, 0, new Insets(15,0,0,0));
             final JLabel label3 = new JLabel(Messages.getMessage("PdfPreferences.StartUp"));
             label3.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label3.setFont(label3.getFont().deriveFont(Font.BOLD));
             pane.add(label3, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(10,0,0,0);
-            c.weighty = 0;
-            c.weightx = 1;
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 6, 2, 1, 1, 0, new Insets(10,0,0,0));
             update.setMargin(new Insets(0,0,0,0));
             update.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(update, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 7, 2, 1, 1, 0, new Insets(10,0,0,0));
             openLastDoc.setMargin(new Insets(0,0,0,0));
             openLastDoc.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(openLastDoc, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 8, 2, 1, 1, 0, new Insets(10,0,0,0));
             final JPanel clearHistoryPanel = new JPanel();
             clearHistoryPanel.setLayout(new BoxLayout(clearHistoryPanel, BoxLayout.X_AXIS));
             clearHistoryPanel.add(clearHistory);
@@ -1031,11 +996,8 @@ public class SwingProperties extends JPanel {
             clearHistoryPanel.add(historyClearedLabel);
             clearHistoryPanel.add(Box.createHorizontalGlue());
             pane.add(clearHistoryPanel, c);
-            
-            c.gridy++;
-            
-            c.weighty = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 9, 2, 1, 1, 1, new Insets(10,0,0,0));
             pane.add(Box.createVerticalGlue(), c);
             
             panel.add(scroll, BorderLayout.CENTER);
@@ -1078,99 +1040,59 @@ public class SwingProperties extends JPanel {
             pane.setLayout(new GridBagLayout());
             final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
-            c.gridy = 0;
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,0,0,5));
             final JLabel label = new JLabel(Messages.getMessage("PdfPreferences.GeneralSection"));
             label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label.setFont(label.getFont().deriveFont(Font.BOLD));
             pane.add(label, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 1, 2, 1, 0, 0, new Insets(5,0,0,0));
             enhancedViewer.setMargin(new Insets(0,0,0,0));
             enhancedViewer.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(enhancedViewer, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 2, 2, 1, 0, 0, new Insets(5,0,0,0));
             enhanceFractionalLines.setMargin(new Insets(0,0,0,0));
             enhanceFractionalLines.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(enhanceFractionalLines, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 3, 2, 1, 0, 0, new Insets(5,0,0,0));
             border.setMargin(new Insets(0,0,0,0));
             border.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(border, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 4, 2, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(pageInsetsText, c);
-            c.gridwidth = 2;
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 4, 2, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(pageInsets, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(15,0,0,5);
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 5, 2, 1, 0, 0, new Insets(15,0,0,5));
             final JLabel label2 = new JLabel(Messages.getMessage("PdfPreferences.DisplayModes"));
             label2.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label2.setFont(label2.getFont().deriveFont(Font.BOLD));
             pane.add(label2, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 6, 2, 1, 0, 0, new Insets(5,0,0,5));
             final JLabel label1 = new JLabel(Messages.getMessage("PageLayoutViewMenu.PageLayout"));
             label1.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(label1, c);
-            
-            c.insets = new Insets(5,0,0,0);
-            c.weightx = 1;
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 6, 2, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(pageLayout, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 7, 2, 1, 1, 0, new Insets(5,0,0,0));
             enhancedFacing.setMargin(new Insets(0,0,0,0));
             enhancedFacing.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(enhancedFacing, c);
-            
-            c.gridy++;
-            
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 8, 2, 1, 1, 0, new Insets(5,0,0,0));
             thumbnailScroll.setMargin(new Insets(0,0,0,0));
             thumbnailScroll.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             pane.add(thumbnailScroll, c);
-            
-            c.gridy++;
-            
-            c.weighty = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 9, 2, 1, 1, 1, new Insets(5,0,0,0));
             pane.add(Box.createVerticalGlue(), c);
             panel.add(scroll, BorderLayout.CENTER);
             
@@ -1210,131 +1132,108 @@ public class SwingProperties extends JPanel {
             
         }
     
-        private void setLayoutConstraints(GridBagConstraints constraints, Insets insets, int gridX, int gridY, int gridW, int gridH, int weightX, int weightY){
-            constraints.insets = insets;
-            constraints.gridx = gridX;
-            constraints.gridy = gridY;
-            constraints.gridwidth = gridW;
-            constraints.gridheight = gridH;
-            constraints.weightx = weightX;
-            constraints.weighty = weightY;
-        }
+//        private void setLayoutConstraints(final GridBagConstraints constraints, final Insets insets, final int gridX, final int gridY, final int gridW, final int gridH, final int weightX, final int weightY){
+//        }
         
         private JScrollPane createAppearanceTab(){
             final JPanel contentPane = new JPanel();
             final JScrollPane scrollPane = new JScrollPane(contentPane);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
             contentPane.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
+            final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            int gridY = 0;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,5,5,5));
             final JLabel label = new JLabel(Messages.getMessage("PdfPreferences.GeneralTitle"));
             label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label.setFont(label.getFont().deriveFont(Font.BOLD));
             contentPane.add(label, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(3,5,0,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 1, 1, 1, 0, 0, new Insets(3,5,0,5));
             contentPane.add(windowTitleText, c);
-            setLayoutConstraints(c, new Insets(3,5,0,5), 1, gridY, 1, 1, 0, 0);
+            setGridBagConstraints(c, 1, 1, 1, 1, 0, 0, new Insets(3,5,0,5));
             contentPane.add(windowTitle, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 2, 1, 1, 0, 0, new Insets(5,5,5,5));
             contentPane.add(newIconSet, c);
-            setLayoutConstraints(c, new Insets(5,5,5,5), 1, gridY, 1, 1, 0, 0);
+            setGridBagConstraints(c, 1, 2, 1, 1, 0, 0, new Insets(5,5,5,5));
             contentPane.add(classicIconSet, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 3, 1, 1, 0, 0, new Insets(5,5,5,5));
             contentPane.add(iconLocationText, c);
-            setLayoutConstraints(c, new Insets(5,5,5,5), 1, gridY, 1, 1, 0, 0);
+            setGridBagConstraints(c, 1, 3, 1, 1, 0, 0, new Insets(5,5,5,5));
             contentPane.add(iconLocation, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 4, 1, 1, 0, 0, new Insets(5,5,5,5));
             final JLabel label5 = new JLabel(Messages.getMessage("PageLayoutViewMenu.SearchLayout"));
             label5.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(label5, c);
-            setLayoutConstraints(c, new Insets(5,5,5,5), 1, gridY, 1, 1, 1, 0);
+            setGridBagConstraints(c, 1, 4, 1, 1, 1, 0, new Insets(5,5,5,5));
             contentPane.add(searchStyle, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,0,0,5), 0, gridY, 1, 1, 1, 0);
+
+            setGridBagConstraints(c, 0, 5, 1, 1, 1, 0, new Insets(5,0,0,5));
             contentPane.add(liveSearchResuts, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(10,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 6, 1, 1, 0, 0, new Insets(10,5,5,5));
             final JLabel label4 = new JLabel(Messages.getMessage("PdfPreferences.MaxMultiViewers"));
             label4.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(label4, c);
-            setLayoutConstraints(c, new Insets(5,5,5,5), 1, gridY, 1, 1, 1, 0);
+            setGridBagConstraints(c, 1, 6, 1, 1, 1, 0, new Insets(5,5,5,5));
             contentPane.add(maxMultiViewers, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(15,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 7, 1, 1, 0, 0, new Insets(15,5,5,5));
             final JLabel label1 = new JLabel(Messages.getMessage("PdfPreferences.SideTab"));
             label1.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label1.setFont(label1.getFont().deriveFont(Font.BOLD));
             contentPane.add(label1, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 8, 1, 1, 0, 0, new Insets(5,5,5,5));
             sideTabLengthText.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(sideTabLengthText, c);
-            setLayoutConstraints(c, new Insets(5,5,5,5), 1, gridY, 1, 1, 1, 0);
+            setGridBagConstraints(c, 1, 8, 1, 1, 1, 0, new Insets(5,5,5,5));
             contentPane.add(sideTabLength, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 2, 1, 1, 0);
+
+            setGridBagConstraints(c, 0, 9, 2, 1, 1, 0, new Insets(5,5,5,5));
             constantTabs.setMargin(new Insets(0,0,0,0));
             constantTabs.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(constantTabs, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 2, 1, 1, 1);
+
+            setGridBagConstraints(c, 0, 10, 2, 1, 1, 1, new Insets(5,5,5,5));
             contentPane.add(Box.createVerticalGlue(), c);
             
             return scrollPane;
         }
-        
+
         private JScrollPane createMouseTab(){
             final JPanel contentPane = new JPanel();
             final JScrollPane scrollPane = new JScrollPane(contentPane);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
             contentPane.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
+            final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            int gridY = 0;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,5,5,5));
             final JLabel label3 = new JLabel(Messages.getMessage("PdfPreferences.GeneralTitle"));
             label3.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label3.setFont(label3.getFont().deriveFont(Font.BOLD));
             contentPane.add(label3, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 2, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 1, 2, 1, 0, 0, new Insets(5,5,5,5));
             rightClick.setMargin(new Insets(0,0,0,0));
             rightClick.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(rightClick, c);
-            
-            gridY++;
-            setLayoutConstraints(c, new Insets(5,5,5,5), 0, gridY, 2, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 2, 2, 1, 0, 0, new Insets(5,5,5,5));
             scrollwheelZoom.setMargin(new Insets(0,0,0,0));
             scrollwheelZoom.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(scrollwheelZoom, c);
-            
-            gridY++;            
-            setLayoutConstraints(c, new Insets(0,0,0,5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 3, 1, 1, 0, 0, new Insets(0,0,0,5));
             contentPane.add(showMouseSelectionBox, c);
-            
-            gridY++;            
-            setLayoutConstraints(c, new Insets(0,0,0,5), 0, gridY, 1, 1, 1, 0);
+
+            setGridBagConstraints(c, 0, 4, 1, 1, 1, 0, new Insets(0,0,0,5));
             contentPane.add(Box.createVerticalGlue(), c);
-            
+
             return scrollPane;
         }
         
@@ -1344,28 +1243,27 @@ public class SwingProperties extends JPanel {
             final JScrollPane scrollPane = new JScrollPane(contentPane);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
             contentPane.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
+            final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            int gridY = 0;
-            setLayoutConstraints(c, new Insets(5, 0, 0, 5), 0, gridY, 1, 1, 0, 0);
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,0,0,5));
             final JLabel label6 = new JLabel(Messages.getMessage("PdfPreferences.GeneralTitle"));
             label6.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label6.setFont(label6.getFont().deriveFont(Font.BOLD));
             contentPane.add(label6, c);
             
-            gridY++;
+
+            setGridBagConstraints(c, 0, 1, 1, 1, 0, 0, new Insets(5,0,0,5));
             voiceSelect = new JComboBox<String>(speech.listVoices());
-            setLayoutConstraints(c, new Insets(5, 0, 0, 5), 0, gridY, 1, 1, 0, 0);
             final JLabel label7 = new JLabel(Messages.getMessage("PdfPreferences.Voice"));
             label7.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             contentPane.add(label7, c);
+
+            setGridBagConstraints(c, 1, 1, 1, 1, 1, 0, new Insets(5,0,0,0));
             voiceSelect.setSelectedItem(properties.getValue("voice"));
-            setLayoutConstraints(c, new Insets(5, 0, 0, 0), 1, gridY, 1, 1, 1, 0);
             contentPane.add(voiceSelect, c);
 
-            gridY++;
-            setLayoutConstraints(c, new Insets(5, 0, 0, 0), 0, gridY, 1, 1, 1, 1);
+            setGridBagConstraints(c, 0, 2, 1, 1, 1, 1, new Insets(5,0,0,0));
             contentPane.add(Box.createVerticalGlue(), c);
             
             return scrollPane;
@@ -1433,59 +1331,38 @@ public class SwingProperties extends JPanel {
             pane.setLayout(new GridBagLayout());
             final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
-            c.gridy = 0;
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,0,0,5));
             final JLabel label = new JLabel(Messages.getMessage("PdfPreferences.GeneralSection"));
             label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label.setFont(label.getFont().deriveFont(Font.BOLD));
             pane.add(label, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 1, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(defaultPrinterText, c);
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 1, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(defaultPrinter, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 2, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(defaultPagesizeText, c);
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 2, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(defaultPagesize, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 3, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(defaultDPIText, c);
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 3, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(defaultDPI, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 4, 1, 1, 0, 0, new Insets(5,0,0,0));
             pane.add(printerBlacklistText, c);
-            c.gridx = 1;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 1, 4, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(printerBlacklist, c);
-            c.weightx = 0;
-            
-            c.gridy++;
-            
-            c.weighty = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 5, 1, 1, 0, 1, new Insets(5,0,0,0));
             pane.add(Box.createVerticalGlue(), c);
             
             panel.add(scroll);
@@ -1493,15 +1370,14 @@ public class SwingProperties extends JPanel {
             return panel;
         }
         
-        private JPanel createColorSettings(){
+        private JPanel createColorSettings() {
             final JPanel panel = makePanel(Messages.getMessage("PdfPreferences.MenuTitle"));
 
             final JPanel pane = new JPanel();
             final JScrollPane scroll = new JScrollPane(pane);
             scroll.setBorder(BorderFactory.createEmptyBorder());
             pane.setLayout(new GridBagLayout());
-            
-            
+
             String propValue = properties.getValue("highlightBoxColor");
             final int hBoxColor;
             if(!propValue.isEmpty()){
@@ -1668,143 +1544,95 @@ public class SwingProperties extends JPanel {
                     }
                 }
             });
-            
-            
-            
+
+
             final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.BOTH;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.gridwidth = 1;
-            c.gridy = 0;
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
-            
+
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(5,0,0,5));
+
             final JLabel label2 = new JLabel("Highlights");
             label2.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label2.setFont(label2.getFont().deriveFont(Font.BOLD));
             pane.add(label2, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 1, 1, 1, 0, 0, new Insets(5,0,0,5));
             highlightBoxColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             pane.add(highlightBoxColor, c);
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 1;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 1, 1, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(hBoxButton, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 2, 1, 1, 1, 0, new Insets(5,0,0,5));
             pane.add(highlightComposite, c);
-            c.insets = new Insets(5,25,0,0);
-            c.gridwidth = 1;
-            c.gridx = 1;
+
+            setGridBagConstraints(c, 1, 2, 1, 1, 1, 0, new Insets(5,25,0,0));
             pane.add(hCompLabel, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(0,0,0,5);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 3, 1, 1, 1, 0, new Insets(0,0,0,5));
             pane.add(invertHighlight, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(15,0,0,5);
-            c.gridwidth = 1;
-            c.weighty = 0;
-            c.weightx = 0;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 4, 1, 1, 0, 0, new Insets(15,0,0,5));
             final JLabel label3 = new JLabel("Display Colors");
             label3.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
             label3.setFont(label3.getFont().deriveFont(Font.BOLD));
             pane.add(label3, c);
-            
-            c.gridy++;
-            
+
             //New colors here
-            c.insets = new Insets(5,0,0,5);
-            c.gridx = 0;
+            setGridBagConstraints(c, 0, 5, 1, 1, 0, 0, new Insets(5,0,0,5));
             viewBGColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             pane.add(viewBGColor, c);
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 1;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 1, 5, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(viewerBackgroundButton, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 0;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 0, 6, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(replaceDocTextCol, c);
-            
-            c.gridy++;
-            c.insets = new Insets(5,0,0,5);
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 7, 1, 1, 1, 0, new Insets(5,0,0,5));
             foreGroundColor.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             pane.add(foreGroundColor, c);
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 1;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 1, 7, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(FGButton, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,5);
-            c.gridwidth = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 8, 1, 1, 1, 0, new Insets(5,0,0,5));
             pane.add(changeTextAndLineArt, c);
-            
-            c.gridy++;
-            
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 0;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 0, 9, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(replaceDisplayBGCol, c);
-            
-            c.gridy++;
-            c.insets = new Insets(5,0,0,5);
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 10, 1, 1, 1, 0, new Insets(5,0,0,5));
             pdfDecoderBackground.setBorder(BorderFactory.createLineBorder(Color.BLACK));
             pane.add(pdfDecoderBackground, c);
-            c.insets = new Insets(5,0,0,0);
-            c.gridwidth = 1;
-            c.gridx = 1;
-            c.weightx = 1;
+
+            setGridBagConstraints(c, 1, 10, 1, 1, 1, 0, new Insets(5,0,0,0));
             pane.add(PDBButton, c);
-            
-            c.gridy++;        
-            c.gridwidth = 2;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 11, 2, 1, 1, 0, new Insets(5,0,0,0));
             final JPanel clearHistoryPanel = new JPanel();
             clearHistoryPanel.setLayout(new BoxLayout(clearHistoryPanel, BoxLayout.X_AXIS));
             clearHistoryPanel.add(Box.createHorizontalGlue());
-       
             clearHistoryPanel.add(Box.createHorizontalGlue());
             pane.add(clearHistoryPanel, c);
-            
-            c.gridy++;  
-            c.weighty = 1;
-            c.gridx = 0;
+
+            setGridBagConstraints(c, 0, 12, 2, 1, 1, 1, new Insets(5,0,0,0));
             pane.add(Box.createVerticalGlue(), c);
             
             panel.add(scroll, BorderLayout.CENTER); 
             
             return panel;
-            
+        }
+
+        // Accepts a GridBagConstraints object and the values to apply to it. Used to reduce repeated code setting up UI
+        private void setGridBagConstraints(final GridBagConstraints c, final int gridX, final int gridY, final int gridWidth, final int gridHeight, final double weightX, final double weightY, final Insets insets) {
+            c.gridx = gridX;
+            c.gridy = gridY;
+            c.gridwidth = gridWidth;
+            c.gridheight = gridHeight;
+            c.weightx = weightX;
+            c.weighty = weightY;
+            c.insets = insets;
         }
         
         private JPanel createMenuSettings(){
@@ -1961,7 +1789,7 @@ public class SwingProperties extends JPanel {
                 }
             }
         }
-        
+
         /**
          * Creates a contentPane showing which extensions are enabled
          * @return contentPane
@@ -1974,26 +1802,21 @@ public class SwingProperties extends JPanel {
             
             final GridBagConstraints c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
-            c.gridy = 0;
-            c.insets = new Insets(12,2,5,2);
-            
+
             final JLabel title = new JLabel(Messages.getMessage("PdfPreferences.ExtensionName"));
             final Font titleFont = title.getFont().deriveFont(Font.BOLD, title.getFont().getSize2D());
             title.setFont(titleFont);
-            c.weightx = 0.0;
-            c.gridx = 0;
+            setGridBagConstraints(c, 0, 0, 1, 1, 0, 0, new Insets(12,2,5,2));
             pane.add(title, c);
-            
+
             final JLabel title2 = new JLabel(Messages.getMessage("PdfPreferences.ExtensionDescription"));
             title2.setFont(titleFont);
-            c.weightx = 1.0;
-            c.gridx = 1;
+            setGridBagConstraints(c, 1, 0, 1, 1, 1, 0, new Insets(12,2,5,2));
             pane.add(title2, c);
             
             final JLabel title3 = new JLabel(Messages.getMessage("PdfPreferences.ExtensionVersion"));
             title3.setFont(titleFont);
-            c.weightx = 0.0;
-            c.gridx = 2;
+            setGridBagConstraints(c, 2, 0, 1, 1, 0, 0, new Insets(12,2,5,2));
             pane.add(title3, c);
             
             class Link extends MouseAdapter {
@@ -2022,19 +1845,17 @@ public class SwingProperties extends JPanel {
                     }
                 }
             }
-            
-            c.insets = new Insets(2,2,2,2);
+
             String details = "java: "+System.getProperty("java.vendor")+ ' ' +System.getProperty("java.version")+ '\n';
             details += "os: "+System.getProperty("os.name")+ ' ' +System.getProperty("os.version")+ ' ' +System.getProperty("os.arch")+ '\n';
             details += "jpedal: "+PdfDecoderInt.version+ '\n';
             
             //CID
-            c.gridy++;
-            c.gridx=0;
+            setGridBagConstraints(c, 0, 1, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("CID"), c);
-            c.gridx=1;
+            setGridBagConstraints(c, 1, 1, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("<html>"+Messages.getMessage("PdfExtensions.CID.text")), c);
-            c.gridx=2;
+            setGridBagConstraints(c, 2, 1, 1, 1, 0, 0, new Insets(2,2,2,2));
             final JLabel cid;
             try{
                 if (SwingProperties.class.getResourceAsStream("/org/jpedal/res/cid/00_ReadMe.pdf")!=null) {
@@ -2049,16 +1870,21 @@ public class SwingProperties extends JPanel {
             }catch(final Exception ee){
                 ee.printStackTrace();
             }
-            
+
+            // Because of the following if statement, we store gridY in a variable as it is not always the same
+            int gridy = 1;
+
             //iText
             //noinspection PointlessBooleanExpression
             if (!ItextFunctions.IS_DUMMY) {
-                c.gridy++;
-                c.gridx=0;
+                gridy++;
+                setGridBagConstraints(c, 0, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
                 pane.add(new JLabel("iText"), c);
-                c.gridx=1;
+
+                setGridBagConstraints(c, 1, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
                 pane.add(new JLabel("<html>"+Messages.getMessage("PdfExtensions.iText.text")), c);
-                c.gridx=2;
+
+                setGridBagConstraints(c, 2, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
                 @SuppressWarnings("UnusedAssignment") final JLabel iText;
                 if (getClass().getResource("/com/itextpdf") != null) {
                     String vers = ItextFunctions.getVersion();
@@ -2075,12 +1901,14 @@ public class SwingProperties extends JPanel {
             
             //Java FX
             String version;
-            c.gridy++;
-            c.gridx=0;
+            gridy++;
+            setGridBagConstraints(c, 0, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("JavaFX"), c);
-            c.gridx=1;
+
+            setGridBagConstraints(c, 1, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("<html>"+Messages.getMessage("PdfExtensions.JavaFX.text")), c);
-            c.gridx=2;
+
+            setGridBagConstraints(c, 2, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             final JLabel javaFX;
             if (JavaFXHelper.isJavaFXAvailable()) {
                 version= JavaFXHelper.getVersion();
@@ -2094,12 +1922,14 @@ public class SwingProperties extends JPanel {
             pane.add(javaFX, c);
             
             //JCE
-            c.gridy++;
-            c.gridx=0;
+            gridy++;
+            setGridBagConstraints(c, 0, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("JCE"), c);
-            c.gridx=1;
+
+            setGridBagConstraints(c, 1, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("<html>"+Messages.getMessage("PdfExtensions.JCE.text")), c);
-            c.gridx=2;
+
+            setGridBagConstraints(c, 2, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             JLabel jce;
             version = "Unknown version";
             try {
@@ -2126,12 +1956,14 @@ public class SwingProperties extends JPanel {
             pane.add(jce, c);
             
             //Rhino
-            c.gridy++;
-            c.gridx=0;
+            gridy++;
+            setGridBagConstraints(c, 0, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("Rhino"), c);
-            c.gridx=1;
+
+            setGridBagConstraints(c, 1, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             pane.add(new JLabel("<html>"+Messages.getMessage("PdfExtensions.Rhino.text")), c);
-            c.gridx=2;
+
+            setGridBagConstraints(c, 2, gridy, 1, 1, 0, 0, new Insets(2,2,2,2));
             final JLabel rhino;
             final java.io.InputStream in = DefaultParser.class.getClassLoader().getResourceAsStream("org/mozilla/javascript/Context.class");
             if (in != null) {
@@ -2156,16 +1988,14 @@ public class SwingProperties extends JPanel {
             pane.add(rhino, c);
             
             //Add gap between table and button
-            c.gridy++;
-            c.weighty=1.0;
+            gridy++;
+            setGridBagConstraints(c, 2, gridy, 1, 1, 0, 1, new Insets(2,2,2,2));
             pane.add(Box.createVerticalGlue(),c);
             
             //Add button
-            c.gridy++;
-            c.gridx=0;
-            c.gridwidth=3;
+            gridy++;
+            setGridBagConstraints(c, 0, gridy, 3, 1, 0, 0, new Insets(2,2,2,2));
             c.anchor=GridBagConstraints.LAST_LINE_END;
-            c.weighty=0;
             c.fill=GridBagConstraints.EAST;
             final JButton copy = new JButton(Messages.getMessage("PdfPreferences.CopyToClipboard"));
             

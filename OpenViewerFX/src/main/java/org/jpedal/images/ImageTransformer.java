@@ -147,7 +147,7 @@ public class ImageTransformer {
 
             //Create the affine operation.
             //ColorSpaces.hints causes single lines to vanish);
-            AffineTransformOp invert;
+            final AffineTransformOp invert;
 
 
             if(w>1 && h>1){
@@ -203,7 +203,7 @@ public class ImageTransformer {
         }
     }
 
-    private void scaleImage(int h, AffineTransform image_at, Area r, AffineTransformOp invert) {
+    private void scaleImage(final int h, final AffineTransform image_at, final Area r, AffineTransformOp invert) {
 
         final BufferedImage destImage;
 

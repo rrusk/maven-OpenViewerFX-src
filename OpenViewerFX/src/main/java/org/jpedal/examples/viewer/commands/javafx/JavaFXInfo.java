@@ -74,10 +74,10 @@ public class JavaFXInfo {
         final Text title = new Text ("JavaFX Viewer Information");
         title.setTextAlignment(TextAlignment.CENTER);
         title.setFont(Font.font("SansSerif", FontWeight.BOLD, 14));
-        ImageView imageView;
-        Hyperlink link;
+        final ImageView imageView;
+        final Hyperlink link;
          
-        Text info ;
+        final Text info ;
    
         if (OpenViewerFX.isOpenFX) {
             info = new Text("OpenViewerFX is a JavaFX PDF Viewer written in JavaFX and released without any warranty or support under an LGPL license.\n"
@@ -151,7 +151,7 @@ public class JavaFXInfo {
          okButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
-            public void handle(ActionEvent event) {
+            public void handle(final ActionEvent event) {
                 newDialog.close();
             }
         });

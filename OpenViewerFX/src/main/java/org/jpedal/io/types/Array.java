@@ -197,7 +197,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         //may need to add method to PdfObject is others as well as Mask (last test to  allow for /Contents null
         //0 never occurs but we set as flag if called from gotoDest/DefaultActionHandler
-        boolean isIndirect=raw[i]!=91  && raw[i]!='(' && raw[0]!=0 && !StreamReaderUtils.isNull(raw,i) && StreamReaderUtils.handleIndirect(raw, i); 
+        final boolean isIndirect=raw[i]!=91  && raw[i]!='(' && raw[0]!=0 && !StreamReaderUtils.isNull(raw,i) && StreamReaderUtils.handleIndirect(raw, i);
         boolean singleKey=isFirstKeySingle();
          
         //single value ie /Filter /FlateDecode or (text)
@@ -354,7 +354,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
             System.out.println(padding + "----array");
         }
         
-        int keyStart=j2;
+        final int keyStart=j2;
         while(arrayData[j2]!=']' || depth>0) {   
             
             if(arrayData[j2]=='['){
@@ -381,7 +381,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
             System.out.println(padding + "----string");
         }
         
-        int keyStart=j2+1;
+        final int keyStart=j2+1;
         while(true){
             if(arrayData[j2]==')' && !ObjectUtils.isEscaped(arrayData, j2)) {
                 break;
@@ -461,7 +461,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         }
         
         j2=StreamReaderUtils.skipSpaces(arrayData,j2);
-        int keyStart=j2;
+        final int keyStart=j2;
         
         while(arrayData[j2]>='0' && arrayData[j2]<='9'){          
             j2++;
@@ -518,7 +518,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         if(debugFastCode){
             System.out.println(padding + "----null");
         }
-        int keyStart=j2;
+        final int keyStart=j2;
         j2 += 4;
         
         return  ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
@@ -534,7 +534,7 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         
         boolean hexString =true;
         
-        int keyStart=j2+1;
+        final int keyStart=j2+1;
         
         while(true){
             if(arrayData[j2]=='>') {
@@ -565,9 +565,9 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
     }
 
     
-    void fillArray(final int elementCount, PdfObject pdfObject) {
+    void fillArray(final int elementCount, final PdfObject pdfObject) {
         
-        byte[][] finalByteValues = new byte[elementCount][];
+        final byte[][] finalByteValues = new byte[elementCount][];
         for(int a=0;a<elementCount;a++){
             finalByteValues[a]=valuesRead.get(a);
         }

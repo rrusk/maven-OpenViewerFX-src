@@ -60,7 +60,7 @@ public class PDFtoImageConvertorSwing extends PDFtoImageConvertor{
     }
 
     @Override
-    public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore,boolean isTransparent) {
+    public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, final boolean isTransparent) {
        
         return imageDisplay = new ImageDisplay(pageIndex,!isTransparent, 5000, localStore); //note !isTransparent as actually addBackground
         
@@ -186,7 +186,7 @@ public class PDFtoImageConvertorSwing extends PDFtoImageConvertor{
         imageDisplay.setG2(g2);
         currentImageDecoder.decodePageContent(pdfObject);
         
-        AffineTransform old = g2.getTransform();
+        final AffineTransform old = g2.getTransform();
         g2.scale(1, -1);
         g2.translate(0, -((cry/scaling)+(crh/scaling)));
         SwingHelper.scaleDisplay(g2, 0, 0, (int)(crw/scaling), (int)(crh/scaling));

@@ -57,16 +57,16 @@ public class ID extends ImageDecoder {
     @Override
     public int processImage(int dataPointer, final int startInlineStream, final byte[] stream, final int tokenNumber) throws Exception{
 
-        PdfObject XObject=convertDataToObject(dataPointer, startInlineStream, stream, currentPdfFile.getObjectReader());
+        final PdfObject XObject=convertDataToObject(dataPointer, startInlineStream, stream, currentPdfFile.getObjectReader());
  
         final boolean inline_imageMask=XObject.getBoolean(PdfDictionary.ImageMask);
-        int inline_start_pointer = dataPointer + 1;
+        final int inline_start_pointer = dataPointer + 1;
         final int i_w=XObject.getInt(PdfDictionary.Width);
         final int i_h=XObject.getInt(PdfDictionary.Height);
         final int i_bpc=XObject.getInt(PdfDictionary.BitsPerComponent);
         
         //find end of stream
-        int i = getEndOfImageData(inline_start_pointer, stream);
+        final int i = getEndOfImageData(inline_start_pointer, stream);
         
         if(parserOptions.imagesNeeded()){
 
@@ -108,7 +108,7 @@ public class ID extends ImageDecoder {
 
     }
 
-    private void renderImage(BufferedImage image, final String image_name) {
+    private void renderImage(final BufferedImage image, final String image_name) {
         
         if(current.isHTMLorSVG()){
             current.drawImage(parserOptions.getPageNumber(),image,gs,false,image_name, -2);
@@ -126,7 +126,7 @@ public class ID extends ImageDecoder {
         }
     }
 
-    private BufferedImage convertDataToImage(final int i_w, final int i_h, final int i_bpc, byte[] i_data, final GenericColorSpace decodeColorData, BufferedImage image, final boolean inline_imageMask, PdfObject XObject, final String image_name) throws PdfException {
+    private BufferedImage convertDataToImage(final int i_w, final int i_h, final int i_bpc, final byte[] i_data, final GenericColorSpace decodeColorData, BufferedImage image, final boolean inline_imageMask, final PdfObject XObject, final String image_name) throws PdfException {
         final ImageData imageData=new ImageData(ImageCommands.ID);
         imageData.setWidth(i_w);
         imageData.setHeight(i_h);
@@ -143,7 +143,7 @@ public class ID extends ImageDecoder {
         return image;
     }
 
-    private static GenericColorSpace setColorSpace(PdfObject XObject, PdfObjectReader currentPdfFile, PdfObjectCache cache) {
+    private static GenericColorSpace setColorSpace(final PdfObject XObject, final PdfObjectReader currentPdfFile, final PdfObjectCache cache) {
         
         //handle colour information
         GenericColorSpace decodeColorData=new DeviceRGBColorSpace();
@@ -168,7 +168,7 @@ public class ID extends ImageDecoder {
         return decodeColorData;
     }
 
-    private static PdfObject convertDataToObject(int dataPointer, final int startInlineStream, final byte[] stream, final PdfFileReader pdfFileReader) {
+    private static PdfObject convertDataToObject(final int dataPointer, final int startInlineStream, final byte[] stream, final PdfFileReader pdfFileReader) {
         
         final PdfObject XObject=new org.jpedal.objects.raw.XObject(PdfDictionary.ID);
         final IDObjectDecoder objectDecoder=new IDObjectDecoder(pdfFileReader);
@@ -213,7 +213,7 @@ public class ID extends ImageDecoder {
         return i_data;
     }
 
-    private static byte[] setImageData(int i, final byte[] stream, int inline_start_pointer, final PdfObject XObject) {
+    private static byte[] setImageData(final int i, final byte[] stream, int inline_start_pointer, final PdfObject XObject) {
         
         int endPtr=i;
         
@@ -228,7 +228,7 @@ public class ID extends ImageDecoder {
         /*
         * put image data in array
         */
-        byte[] i_data = new byte[endPtr - inline_start_pointer];
+        final byte[] i_data = new byte[endPtr - inline_start_pointer];
         System.arraycopy(
                 stream,
                 inline_start_pointer,

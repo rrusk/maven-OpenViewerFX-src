@@ -145,7 +145,7 @@ public class PreviousResult {
                             //Ensure page has been processed else highlight may be incorrect
                             try {
                                 Thread.sleep(5000);
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 LogWriter.writeLog("Attempting to set propeties values " + e);
                             }
                         }

@@ -53,13 +53,15 @@ import org.jpedal.parser.DecoderOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.render.FXDisplay;
 
-/**
- * JavaFX version
- */
-public class SingleDisplayFX extends GUIDisplay implements Display {
+public class SingleDisplayFX extends GUIDisplay {
     
     final PdfDecoderFX pdf;
     
+    // Rectangle drawn on screen by user
+    private int[] cursorBoxOnScreen;
+    
+    final Pane cursorBoxPane = new Pane();
+
     public SingleDisplayFX(int pageNumber, final DynamicVectorRenderer currentDisplay, final PdfDecoderFX pdf, final DecoderOptions options) {
 
         if(pageNumber<1) {
@@ -101,7 +103,7 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
                 paintPage(pdf.highlightsPane, pdf.getFormRenderer());
             }
         }else{
-            //Ensure dialog is handled on FX thread
+            // Ensure dialog is handled on FX thread
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -118,43 +120,20 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
         }
     }
     
-
-    
     /**
      * initialise panel and set size to display during updates and update the AffineTransform to new values<br>
+     * @param newRotation int value to specify the rotation for the page
      */
     @Override
     public void setPageRotation(final int newRotation) {
             
         super.setPageRotation(newRotation);
         
-        //force redraw if screen being cached
+        // force redraw if screen being cached
         refreshDisplay();
     }
     
-//    private Path getBorder() {
-//
-//        Path border=null;
-//        
-//        if(pdf.isBorderPresent() && crw >0 && crh >0){
-//            
-//            border=getBorder(crw,crh);
-//            
-//           // if(!FXDisplay.useCanvas){
-//          //      border.setFill(Color.WHITE);
-//          //  }
-//            
-//            //Border myBorder=pdf.getBorder();
-//            
-////            if((crw >0)&&(crh >0)&&(myBorder!=null)){
-////                myBorder.paintBorder(pdf,g2,crx-myBorder.getBorderInsets(pdf).left, cry-myBorder.getBorderInsets(pdf).bottom, crw+myBorder.getBorderInsets(pdf).left+myBorder.getBorderInsets(pdf).right, crh+myBorder.getBorderInsets(pdf).bottom+myBorder.getBorderInsets(pdf).top);
-////            }
-//        }
-//        
-//        return border;
-//    }
-
-    static Path getBorder(int crw, int crh) {
+    static Path getBorder(final int crw, final int crh) {
         
         final Path border=new Path();
         
@@ -167,7 +146,6 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
         
         return border;
         
-        //  myBorder.paintBorder(pdf,g2,crx-myBorder.getBorderInsets(pdf).left, cry-myBorder.getBorderInsets(pdf).bottom, crw+myBorder.getBorderInsets(pdf).left+myBorder.getBorderInsets(pdf).right, crh+myBorder.getBorderInsets(pdf).bottom+myBorder.getBorderInsets(pdf).top);
     }
     
     /**
@@ -196,23 +174,24 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
         final Pane box=(Pane)rawBox;
         
         final Group fxPane=((FXDisplay)currentDisplay).getFXPane();
-        String pageNumberStr = String.valueOf(pageNumber);
+        final String pageNumberStr = String.valueOf(pageNumber);
         
         final Rectangle clip = new Rectangle(crx,cry,crw,crh);
         clip.setFill(Color.WHITE);
 
-// Remove box from the current node it belongs to - avoids duplication errors
+        // Remove box from the current node it belongs to - avoids duplication errors
         if(box != null && box.getParent() != null) {
             ((Group) box.getParent()).getChildren().remove(box);
         }
         fxPane.getChildren().addAll(box);
+        
         pdf.setPrefSize(crw, crh);
         
         if(displayView==SINGLE_PAGE){
             pdf.getChildren().clear();
             
             if(formRenderer.isXFA()){
-                //draw wihte background border on xfa contents
+                // Draw wihte background border on xfa contents
                 final Path border = getBorder(crw, crh);
                 border.setFill(Color.WHITE);
                 pdf.getChildren().addAll(border);
@@ -230,7 +209,7 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
                                     
             Node pagePath = null;
             
-            for (Node child : pdf.getChildren()) {
+            for (final Node child : pdf.getChildren()) {
                 if(child.getId()!=null && child.getId().equals(pageNumberStr)){
                     if(child instanceof Path){
                         pagePath = child;
@@ -247,18 +226,17 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
                 pdf.getChildren().addAll(fxPane);
             }
             
-            
             final int[] xReached= multiDisplayOptions.getxReached();
             final int[] yReached= multiDisplayOptions.getyReached();
-            //final int[] pageW=multiDisplayOptions.getPageW();
-            //final int[] pageH=multiDisplayOptions.getPageH();
             
-            int cx,cy,j=pageNumber;
-            
+            int cx;
+            final int cy;
+            final int j=pageNumber;
+
             cx=(int)(xReached[j]/scaling);
             cy=(int)(yReached[j]/scaling);
             
-            //code works differently in Swing and FX so needs reversing
+            // Code works differently in Swing and FX so needs reversing
             if(displayView==CONTINUOUS_FACING){
                 cx=currentOffset.getWidestPageR()-cx;
             }
@@ -272,7 +250,7 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
             clip.setFill(Color.WHITE);
             fxPane.setClip(clip);
         }else{
-            //Debug Different GUI Display Panes
+            // Debug Different GUI Display Panes
             clip.setFill(Color.BLUE);
             clip.setOpacity(0.5);
             fxPane.getChildren().add(clip);
@@ -289,7 +267,7 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
     
     private void addForms(final AcroRenderer formRenderer) {
         int start=pageNumber,end=pageNumber;
-        //control if we display forms on multiple pages
+        // Control if we display forms on multiple pages
         if(displayView!=Display.SINGLE_PAGE){
             start= getStartPage();
             end= getEndPage();
@@ -305,15 +283,15 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
 
                 formRenderer.displayComponentsOnscreen(start,end);
 
-                //switch off if forms for this page found
+                // Switch off if forms for this page found
                 if(formRenderer.getCompData().hasformsOnPageDecoded(pageNumber)) {
                     lastFormPage = pageNumber; //ensure not called too early
                 }
         }
         // Add the forms to the Pane
-        if(formRenderer!=null && currentOffset !=null){ //if all forms flattened, we can get a null value for currentOffset so avoid this case
+        if(formRenderer!=null && currentOffset !=null){ // If all forms flattened, we can get a null value for currentOffset so avoid this case
             formRenderer.getCompData().setPageValues(scaling,displayRotation,(int)indent,displayOffsets.getUserOffsetX(), displayOffsets.getUserOffsetY(),displayView,currentOffset.getWidestPageNR(), currentOffset.getWidestPageR());
-            formRenderer.getCompData().resetScaledLocation(scaling,displayRotation,(int)indent);//indent here does nothing.
+            formRenderer.getCompData().resetScaledLocation(scaling,displayRotation,(int)indent); // Indent here does nothing.
         }
     }
     
@@ -327,21 +305,20 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
         setPageSize(pageNumber, scaling);
 
         lastFormPage = -1;
-//        if(displayView==SINGLE_PAGE){
-//            
-//            int[] singlePageSize=pdf.getMaximumSize();
-//            pdf.setMinSize(singlePageSize[0], singlePageSize[1]);
-//        
-//        }
+        
     }   
     
     /**
-     * Overridden here as we don't need to scale/rotate as that is done using FX transforms
+     * Set the page size for the given page and scaling.
+     * The scaling is not actually applied here. It is instead passed along to
+     * used by FX transformations.
+     * @param pageNumber int value representing the page number
+     * @param scaling float value representing the scaling for the page
      */
     @Override
     public void setPageSize(final int pageNumber, final float scaling) {
          
-        //handle clip - crop box values
+        // Handle clip - crop box values
         pageData.setScalingValue(scaling); //ensure aligned
         topW=pageData.getCropBoxWidth(pageNumber);
         topH=pageData.getCropBoxHeight(pageNumber);
@@ -349,12 +326,10 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
 
         cropX=pageData.getCropBoxX(pageNumber);
         cropY=pageData.getCropBoxY(pageNumber);
-//        int mediaX = pageData.getMediaBoxX(pageNumber);
-        //int mediaY = pageData.getMediaBoxY(pageNumber);
         cropW=topW;
         cropH=topH;
         
-        //actual clip values - for flipped page
+        // Actual clip values - for flipped page
         if(displayView==Display.SINGLE_PAGE){
             crx =(int)(insetW+cropX);
             cry =(int)(insetH-cropY);
@@ -363,7 +338,7 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
             cry =insetH;
         }
 
-        //amount needed to move cropped page into correct position
+        // Amount needed to move cropped page into correct position
         int offsetY=(int) (mediaH-cropH);
         // Adjust the offset more in cases like costena
         if(!pageData.getMediaValue(pageNumber).isEmpty()){
@@ -376,21 +351,11 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
         cry += offsetY;
     }
     
-    /**
-     * rectangle drawn on screen by user
-     */
-    private int[] cursorBoxOnScreen;
-    //private Rectangle lastCursorBoxOnScreen;
-        
     @Override
     public int[] getCursorBoxOnScreenAsArray(){
         return cursorBoxOnScreen;
     }
     
-    
-    Rectangle cursorRect;
-    final Pane cursorBoxPane = new Pane();
-
     @Override
     public void updateCursorBoxOnScreen(final int[] newOutlineRectangle, final int outlineColor, final int pageNumber, final int x_size, final int y_size) {
                         
@@ -400,47 +365,16 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
         
         if (newOutlineRectangle != null) {
 
-            int x = newOutlineRectangle[0];
-            int y = newOutlineRectangle[1];
-            int w = newOutlineRectangle[2];
-            int h = newOutlineRectangle[3];
-
-            final int cropX = pageData.getCropBoxX(pageNumber);
-            final int cropY = pageData.getCropBoxY(pageNumber);
-           // final int cropW = pageData.getCropBoxWidth(pageNumber);
-            //final int cropH = pageData.getCropBoxHeight(pageNumber);
-
-            //allow for odd crops and correct
-//            if (y > 0 && y < (cropY)) {
-//                y += cropY;
-//            }
-//
-//            if (x < cropX) {
-//                final int diff = cropX - x;
-//                w -= diff;
-//                x = cropX;
-//            }
-//
-//            if (y < cropY) {
-//                final int diff = cropY - y;
-//                h -= diff;
-//                y += diff;
-//            }
-//            if ((x + w) > cropW + cropX) {
-//                w = cropX + cropW - x;
-//            }
-//            if ((y + h) > (cropY + cropH)) {
-//                h = cropY + cropH - y;
-//            }
+            final int x = newOutlineRectangle[0] - pageData.getCropBoxX(pageNumber);
+            final int y = newOutlineRectangle[1] - pageData.getCropBoxY(pageNumber);
+            final int w = newOutlineRectangle[2];
+            final int h = newOutlineRectangle[3];
             
-            
-            y -= cropY;
-            x -= cropX;
             cursorBoxOnScreen = new int[]{x, y, w, h};
             
             if(DecoderOptions.showMouseBox){
                 //Setup Cursor box.
-                cursorRect = new Rectangle(x, y, w, h);
+                final Rectangle cursorRect = new Rectangle(x, y, w, h);
                 cursorRect.setStroke(JavaFXPreferences.shiftColorSpaceToFX(outlineColor));
                 cursorRect.setFill(Color.TRANSPARENT);
 
@@ -470,7 +404,7 @@ public class SingleDisplayFX extends GUIDisplay implements Display {
             return new java.awt.Rectangle(0,0,0,0);
         }
         
-        Bounds bounds = customFXHandle.getViewportBounds();
+        final Bounds bounds = customFXHandle.getViewportBounds();
        
         return getDisplayedRectangle(true,new java.awt.Rectangle((int)bounds.getMinX(),(int)-bounds.getMinY(),(int)bounds.getWidth(),(int)bounds.getHeight()));
     }

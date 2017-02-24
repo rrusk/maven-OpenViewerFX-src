@@ -2,7 +2,7 @@
  * ===========================================
  * Java Pdf Extraction Decoding Access Library
  * ===========================================
- *
+ *    
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/support/
  *

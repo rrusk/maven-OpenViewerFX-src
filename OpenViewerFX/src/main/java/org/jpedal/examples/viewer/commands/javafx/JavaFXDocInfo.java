@@ -176,7 +176,7 @@ public class JavaFXDocInfo {
             final Text generalTitle = new Text(lb + Messages.getMessage("PdfViewerGeneral"));
             generalTitle.setFont(headerFont);
 
-            StringBuffer pdfVersion = new StringBuffer("PDF"); //store PDF version
+            final StringBuffer pdfVersion = new StringBuffer("PDF"); //store PDF version
             pdfVersion.append(decode_pdf.getPDFVersion());
             //Check if PDF is Linearized
             if (decode_pdf.getJPedalObject(PdfDictionary.Linearized) != null) {
@@ -246,7 +246,7 @@ public class JavaFXDocInfo {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         //List of Fonts.
-        StringBuilder xmlText = new StringBuilder( "Font Substitution Mode: ");
+        final StringBuilder xmlText = new StringBuilder( "Font Substitution Mode: ");
 
         switch (FontMappings.getFontSubstitutionMode()) {
             case (1):
@@ -403,7 +403,7 @@ public class JavaFXDocInfo {
                         FormObject formObj = null;
 
                         //extract list of actual PDF references to display and get FormObject
-                        StringBuilder PDFrefs = new StringBuilder("PDF ref=");
+                        final StringBuilder PDFrefs = new StringBuilder("PDF ref=");
 
                         //actual data read from PDF
                         final Object[] rawFormData = formRenderer.getFormComponents(formName, ReturnValues.FORMOBJECTS_FROM_NAME, -1);
@@ -530,7 +530,7 @@ public class JavaFXDocInfo {
     /**
      * list of all fonts properties in sorted order
      */
-    private static TreeItem<String> populateAvailableFonts(final TreeItem<String> top, String filter, final boolean sortFontsByDir) {
+    private static TreeItem<String> populateAvailableFonts(final TreeItem<String> top, final String filter, final boolean sortFontsByDir) {
 
         //get list
         if (FontMappings.fontSubstitutionTable != null) {
@@ -558,7 +558,7 @@ public class JavaFXDocInfo {
             }
             
             //build display
-            for (String nextFont :fontNames) {
+            for (final String nextFont :fontNames) {
                 
                 current = (FontMappings.fontSubstitutionLocation.get(nextFont));
 

@@ -74,7 +74,7 @@ public class DeviceNColorSpace extends SeparationColorSpace {
     @Override
     public void setColor(final float[] raw, final int opCount) {
         if (opCount == 1) {
-            int key = (int) (raw[0] * 255);
+            final int key = (int) (raw[0] * 255);
             if (lookup[key] != 0) {
                 final int rawValue = lookup[key];
                 final int r = ((rawValue >> 16) & 255);
@@ -88,10 +88,10 @@ public class DeviceNColorSpace extends SeparationColorSpace {
             }
         } else {
             long key = 0;
-            for (float n : raw) {
+            for (final float n : raw) {
                 key = key << 8 | (int) (n * 255);
             }
-            Long lv = lim.get(key);
+            final Long lv = lim.get(key);
             if (lv != null) {
                 final int rawValue = (int) (long) lv;
                 final int r = ((rawValue >> 16) & 255);

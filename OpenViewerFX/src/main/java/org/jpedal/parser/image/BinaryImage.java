@@ -43,7 +43,7 @@ import org.jpedal.color.GenericColorSpace;
  */
 public class BinaryImage {
     
-    public static BufferedImage make(int w, int h, byte[] data, final GenericColorSpace decodeColorData, int d) {
+    public static BufferedImage make(final int w, final int h, final byte[] data, final GenericColorSpace decodeColorData, final int d) {
         
         final BufferedImage image =new BufferedImage(w,h,BufferedImage.TYPE_BYTE_BINARY);
         

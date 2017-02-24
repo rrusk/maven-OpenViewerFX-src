@@ -69,7 +69,7 @@ public final class PrintUtils
      * @param scalingMode The print scaling option
      * @return Page transform for the given options
      */
-    public static AffineTransform getPageTransform(final int cropBoxX, final int cropBoxY, final int width, final int height, final int pageRotation, final PageFormat format, boolean autoRotate, boolean centerOnScaling, boolean chooseSourceByPDFSize, int scalingMode){
+    public static AffineTransform getPageTransform(final int cropBoxX, final int cropBoxY, final int width, final int height, final int pageRotation, final PageFormat format, final boolean autoRotate, final boolean centerOnScaling, final boolean chooseSourceByPDFSize, final int scalingMode){
         return getPageTransform(new Rectangle(cropBoxX, cropBoxY, width, height), pageRotation, format, autoRotate, centerOnScaling, chooseSourceByPDFSize, scalingMode);
     }
     
@@ -86,7 +86,7 @@ public final class PrintUtils
      * @param scalingMode The print scaling option
      * @return Page transform for the given options
      */
-    public static AffineTransform getPageTransform(final Rectangle crop, int pageRotation, final PageFormat format, boolean autoRotate, boolean centerOnScaling, boolean chooseSourceByPDFSize, int scalingMode){
+    public static AffineTransform getPageTransform(final Rectangle crop, int pageRotation, final PageFormat format, final boolean autoRotate, final boolean centerOnScaling, final boolean chooseSourceByPDFSize, final int scalingMode){
         
         final AffineTransform result = new AffineTransform();
         double scalingFactor = 1; //Reset scaling factor
@@ -170,7 +170,7 @@ public final class PrintUtils
     }
     
     //Add the rotation of the page to the transform so page can appear in the imageable area
-    private static void applyRotation(final AffineTransform result, final int rotation, Rectangle crop, double scalingFactor){
+    private static void applyRotation(final AffineTransform result, final int rotation, final Rectangle crop, final double scalingFactor){
         final int factor = rotation / 90;
         
         //Perform rotation
@@ -194,7 +194,7 @@ public final class PrintUtils
     }
     
     //Add the crop of the page to the transform so page can appear in the imageable area
-    private static void applyCrop(final AffineTransform result, final int rotation, Rectangle crop, double scalingFactor){
+    private static void applyCrop(final AffineTransform result, final int rotation, final Rectangle crop, final double scalingFactor){
         
         /*
          * Annoyingly I do not understand why the code below works.
@@ -223,7 +223,7 @@ public final class PrintUtils
     }
     
     //Add the offset of the imageable area
-    private static void applyOffset(final AffineTransform result, final int rotation, PageFormat format){
+    private static void applyOffset(final AffineTransform result, final int rotation, final PageFormat format){
         switch(rotation){
             case 0 :
                 result.translate(format.getImageableX(), format.getImageableY());
@@ -242,7 +242,7 @@ public final class PrintUtils
     }
     
     //Add an offset so page will be centered in the iamgeable area
-    private static void applyCentering(final AffineTransform result, final int rotation, PageFormat format, Rectangle crop, double scalingFactor){
+    private static void applyCentering(final AffineTransform result, final int rotation, final PageFormat format, final Rectangle crop, final double scalingFactor){
         
         double centerOnX = 0;
         double centerOnY = 0;
@@ -271,8 +271,8 @@ public final class PrintUtils
     }
     
     public static void refreshPrinterList() {
-        Class<?>[] classes = PrintServiceLookup.class.getDeclaredClasses();
-        for (Class<?> classe : classes) {
+        final Class<?>[] classes = PrintServiceLookup.class.getDeclaredClasses();
+        for (final Class<?> classe : classes) {
             if (classe.getName().equals("javax.print.PrintServiceLookup$Services")) {
                 sun.awt.AppContext.getAppContext().remove(classe);
                 break;

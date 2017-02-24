@@ -51,12 +51,12 @@ public class ClipUtils {
         if (clip != null) {
         //Increase clips size by 1 pixel in all direction as pdf clip includes bounds,
             //java only handles inside of bounds
-            double sx = (clip.getBounds2D().getWidth() + 2) / clip.getBounds2D().getWidth();
-            double sy = (clip.getBounds2D().getHeight() + 2) / clip.getBounds2D().getHeight();
-            double posX = clip.getBounds2D().getX();
-            double posY = clip.getBounds2D().getY();
+            final double sx = (clip.getBounds2D().getWidth() + 2) / clip.getBounds2D().getWidth();
+            final double sy = (clip.getBounds2D().getHeight() + 2) / clip.getBounds2D().getHeight();
+            final double posX = clip.getBounds2D().getX();
+            final double posY = clip.getBounds2D().getY();
 
-            Area a = (Area) clip.clone();
+            final Area a = (Area) clip.clone();
             a.transform(AffineTransform.getTranslateInstance(-posX, -posY));
             a.transform(AffineTransform.getScaleInstance(sx, sy));
             a.transform(AffineTransform.getTranslateInstance(posX - 1, posY - 1));

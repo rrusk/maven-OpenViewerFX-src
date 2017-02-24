@@ -492,7 +492,7 @@ public class PdfGroupingAlgorithms {
 			final int mode=pdf_data.f_writingMode[i];
 
 			boolean accepted = false;
-			float height;
+			final float height;
             
             switch (mode) {
                 case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
@@ -535,7 +535,7 @@ public class PdfGroupingAlgorithms {
 				spaceWidth[currentPoint] = pdf_data.space_width[i];
 				textLength[currentPoint] = pdf_data.text_length[i];
 				
-				StringBuilder startTags = new StringBuilder(content[currentPoint].toString().substring(0, content[currentPoint].toString().indexOf(MARKER)));
+				final StringBuilder startTags = new StringBuilder(content[currentPoint].toString().substring(0, content[currentPoint].toString().indexOf(MARKER)));
 				final String contentText = content[currentPoint].toString().substring(content[currentPoint].toString().indexOf(MARKER), content[currentPoint].toString().indexOf('<', content[currentPoint].toString().lastIndexOf(MARKER)));
 				String endTags = content[currentPoint].toString().substring(content[currentPoint].toString().lastIndexOf(MARKER));
 				//Skips last section of text
@@ -1232,7 +1232,7 @@ public class PdfGroupingAlgorithms {
 
     }
 
-    private void completeLine(boolean keepFont, boolean isWordlist, StringBuilder text, Fragment fragment, int i) {
+    private void completeLine(final boolean keepFont, final boolean isWordlist, final StringBuilder text, final Fragment fragment, final int i) {
         if (fragment.getWritingMode() == PdfData.HORIZONTAL_LEFT_TO_RIGHT || fragment.getWritingMode() == PdfData.HORIZONTAL_RIGHT_TO_LEFT) {
             if (fragment.getX1() < fragment.getX2()) {
                 addFragment(i, text, fragment.getX1(), fragment.getX2(), fragment.getY1(), fragment.getY2(),  keepFont, fragment, isWordlist);
@@ -1244,7 +1244,7 @@ public class PdfGroupingAlgorithms {
             }
         }
 
-    private StringBuilder writeOnVerticalLineBreak(boolean keepFont, boolean isWordlist, float linePos, StringBuilder text, Fragment fragment, int i, String value) {
+    private StringBuilder writeOnVerticalLineBreak(final boolean keepFont, final boolean isWordlist, final float linePos, StringBuilder text, final Fragment fragment, final int i, final String value) {
         switch (fragment.getWritingMode()) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
                 addFragment(i, text, fragment.getX1(), linePos, fragment.getY1(), fragment.getY2(),  keepFont, fragment, isWordlist);
@@ -1269,7 +1269,7 @@ public class PdfGroupingAlgorithms {
         return text;
     }
 
-    private float writeOut(boolean keepFont, boolean isWordlist, boolean debugSplit, float pt, String char_width, StringBuilder text, Fragment fragment, int i, String value, String textValue, boolean endsWithPunctuation) {
+    private float writeOut(final boolean keepFont, final boolean isWordlist, final boolean debugSplit, float pt, final String char_width, final StringBuilder text, final Fragment fragment, final int i, final String value, final String textValue, final boolean endsWithPunctuation) {
         //Remove final bit of the below if to fix issue in case 11542
         if (textValue.length() > 1 && textValue.indexOf(' ') != -1) {// && fragment.getX1()==pt){ //add in space values to start of next shape
             //count the spaces
@@ -1323,12 +1323,12 @@ public class PdfGroupingAlgorithms {
         return pt;
     }
 
-    private StringBuilder writeOutFragment(boolean keepFont, boolean isWordlist, boolean debugSplit, float last_pt, float pt, String char_width, StringBuilder text, Fragment fragment, int i, int end, String value) {
+    private StringBuilder writeOutFragment(final boolean keepFont, final boolean isWordlist, final boolean debugSplit, final float last_pt, final float pt, final String char_width, StringBuilder text, final Fragment fragment, final int i, final int end, final String value) {
         if (debugSplit) {
             System.out.println("Break 1 is_broken");
         }
 
-        Fragment temp = new Fragment(pdf_data, end);
+        final Fragment temp = new Fragment(pdf_data, end);
         temp.setX1(fragment.getX1());
         temp.setY1(fragment.getY1());
         temp.setX2(fragment.getX2());
@@ -1343,7 +1343,7 @@ public class PdfGroupingAlgorithms {
         return text;
     }
 
-    private void setFragmentCoord(Fragment fragment, float min, float max, float pt) {
+    private void setFragmentCoord(final Fragment fragment, final float min, final float max, final float pt) {
         if (fragment.getWritingMode() == PdfData.HORIZONTAL_LEFT_TO_RIGHT) {
             if ((fragment.getX1() < min || fragment.getX1() > max) && pt >= min) {
                 fragment.setX1(pt);
@@ -1362,7 +1362,7 @@ public class PdfGroupingAlgorithms {
         }
     }
     
-    static void alterCoordsBasedOnWritingMode(Fragment fragment, float value){
+    static void alterCoordsBasedOnWritingMode(final Fragment fragment, final float value){
 
         switch (fragment.getWritingMode()) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
@@ -1381,7 +1381,7 @@ public class PdfGroupingAlgorithms {
                 break;
         }
     }
-	private void initArrays(int count) {
+	private void initArrays(final int count) {
 		f_x1 = new float[count];
 		f_colorTag=new String[count];
 		hadSpace=new boolean[count];
@@ -2631,7 +2631,7 @@ public class PdfGroupingAlgorithms {
 	 */
     private int getWritingMode(final int[] items, final int count) {
 
-        int[] counts = new int[4];
+        final int[] counts = new int[4];
         for (int j = 0; j < count; j++) {
             final int c=items[j];
 
@@ -3043,13 +3043,13 @@ public class PdfGroupingAlgorithms {
                     if (!isUsed[i] && c != i && this.writingMode[c] == this.writingMode[i] && f_x1[i] != f_x2[i]) {
 
                         //Get central points
-                        float mx = f_x1[c] + ((f_x2[c] - f_x1[c]) / 2);
-                        float my = f_y2[c] + ((f_y1[c] - f_y2[c]) / 2);
-                        float cx = f_x1[i] + ((f_x2[i] - f_x1[i]) / 2);
-                        float cy = f_y2[i] + ((f_y1[i] - f_y2[i]) / 2);
+                        final float mx = f_x1[c] + ((f_x2[c] - f_x1[c]) / 2);
+                        final float my = f_y2[c] + ((f_y1[c] - f_y2[c]) / 2);
+                        final float cx = f_x1[i] + ((f_x2[i] - f_x1[i]) / 2);
+                        final float cy = f_y2[i] + ((f_y1[i] - f_y2[i]) / 2);
 
                         float smallestHeight = (f_y1[c] - f_y2[c]);
-                        float fontDifference = (f_y1[i] - f_y2[i]) - smallestHeight;
+                        final float fontDifference = (f_y1[i] - f_y2[i]) - smallestHeight;
                         if (fontDifference < 0) {
                             smallestHeight = (f_y1[i] - f_y2[i]);
                         }
@@ -3060,7 +3060,7 @@ public class PdfGroupingAlgorithms {
                             //child is within master area
                             if (Math.abs(my - cy) < (smallestHeight * 0.5)) {
                                 if (mx < cx) {//Child on right
-                                    float distance = f_x1[i] - f_x2[c];
+                                    final float distance = f_x1[i] - f_x2[c];
                                     if (distance <= smallestHeight / 2) {
                                         id = i;
                                     }
@@ -3339,7 +3339,7 @@ public class PdfGroupingAlgorithms {
 		final SortedMap<Object , String> highlightsWithTeasers = new TreeMap<Object , String>(new PdfTextExtractionUtils.ResultsComparatorRectangle(rotation));
 		
         if(searcher!=null){
-            String[] teasers = searcher.getTeasers();
+            final String[] teasers = searcher.getTeasers();
             for (int i = 0; i < highlights.size(); i++) {
                 //highlights.get(i) is a rectangle or a rectangle[]
                 highlightsWithTeasers.put(highlights.get(i),  teasers[i]);
@@ -3398,7 +3398,7 @@ public class PdfGroupingAlgorithms {
 		final SortedMap<Object , String> highlightsWithTeasers = new TreeMap<Object , String>(new PdfTextExtractionUtils.ResultsComparator(rotation));
 		
         if(searcher!=null){
-            String[] teasers = searcher.getTeasers();
+            final String[] teasers = searcher.getTeasers();
             for (int i = 0; i < highlights.size(); i++) {
                 //highlights.get(i) is a rectangle or a rectangle[]
                 highlightsWithTeasers.put(highlights.get(i),  teasers[i]);
@@ -3728,7 +3728,7 @@ public class PdfGroupingAlgorithms {
 		includeTease=true;
 	}
     
-    private static int loadSearcherOptions(int searchType) {
+    private static int loadSearcherOptions(final int searchType) {
         //Bitwise flags for regular expressions engine, options always required 
         int options = 0;
 
@@ -3745,7 +3745,7 @@ public class PdfGroupingAlgorithms {
         return options;
     }
     
-    private int[] getWritingModeCounts(int[] items){
+    private int[] getWritingModeCounts(final int[] items){
         
 		//check orientation and get preferred. Items not correct will be ignored
 		int l2r = 0;
@@ -3765,7 +3765,7 @@ public class PdfGroupingAlgorithms {
 		return new int[]{l2r, r2l, t2b, b2t};
     }
     
-    private static int[] getWritingModeOrder(int[] unsorted){
+    private static int[] getWritingModeOrder(final int[] unsorted){
         final int[] sorted = {unsorted[0], unsorted[1], unsorted[2], unsorted[3]};
 
 		//Set all to -1 so we can tell if it's been set yet
@@ -3792,7 +3792,7 @@ public class PdfGroupingAlgorithms {
         return writingModes;
     }
     
-    private static String alterStringTooDisplayOrder(String testTerm) {
+    private static String alterStringTooDisplayOrder(final String testTerm) {
 
         String currentBlock = "";
         String searchValue = "";
@@ -3837,7 +3837,7 @@ public class PdfGroupingAlgorithms {
         return searchValue;
     }
     
-    private void searchWritingMode(int[] items, int mode, int searchType, String[] terms, Vector_Float resultCoords, Vector_String resultTeasers) throws PdfException {
+    private void searchWritingMode(final int[] items, final int mode, final int searchType, final String[] terms, final Vector_Float resultCoords, final Vector_String resultTeasers) throws PdfException {
 
         //Flags to control the different search options
         boolean firstOccuranceOnly = false;
@@ -3849,7 +3849,7 @@ public class PdfGroupingAlgorithms {
         createLinesForSearch(items.length, items, mode, true, false, true);
         
         //Bitwise flags for regular expressions engine, options always required 
-        int options = loadSearcherOptions(searchType);
+        final int options = loadSearcherOptions(searchType);
 
         //Only find first occurance of each search term
         if ((searchType & SearchType.FIND_FIRST_OCCURANCE_ONLY) == SearchType.FIND_FIRST_OCCURANCE_ONLY) {
@@ -3867,11 +3867,11 @@ public class PdfGroupingAlgorithms {
         }
         
         //Check if coords need swapping
-        boolean valuesSwapped = (mode == PdfData.VERTICAL_BOTTOM_TO_TOP || mode == PdfData.VERTICAL_TOP_TO_BOTTOM);
+        final boolean valuesSwapped = (mode == PdfData.VERTICAL_BOTTOM_TO_TOP || mode == PdfData.VERTICAL_TOP_TO_BOTTOM);
 
         //Portions of text to perform the search on and find teasers
-        String searchText = buildSearchText(false, mode);
-        String coordsText = buildSearchText(true, mode);
+        final String searchText = buildSearchText(false, mode);
+        final String coordsText = buildSearchText(true, mode);
 
         //Allow the use of regular expressions symbols
 //        if ((searchType & SearchType.IGNORE_SPACE_CHARACTERS) == SearchType.IGNORE_SPACE_CHARACTERS) {
@@ -3932,14 +3932,14 @@ public class PdfGroupingAlgorithms {
                 //Create two matchers for finding search term and teaser
                 final Matcher termFinder = searchTerm.matcher(searchText);
                 final Matcher teaserFinder = teaserTerm.matcher(searchText);
-                boolean needToFindTeaser = true;
+                final boolean needToFindTeaser = true;
 
                 //Keep looping till no result is returned
                 while (termFinder.find()) {
                     resultStart = null;
                     //Make note of the text found and index in the text
                     String foundTerm = termFinder.group();
-                    int termStarts = termFinder.start();
+                    final int termStarts = termFinder.start();
                     final int termEnds = termFinder.end() - 1;
 
                     //If storing teasers
@@ -3982,13 +3982,13 @@ public class PdfGroupingAlgorithms {
                 
     }
     
-    private String buildSearchText(boolean includeCoords, int mode){
+    private String buildSearchText(final boolean includeCoords, final int mode){
         //Portions of text to perform the search on and find teasers
         String searchText;
 
 		//Merge all text into one with \n line separators
         //This will allow checking for multi line split results
-        StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder();
         for (int i = 0; i != content.length; i++) {
             if (content[i] != null && mode == this.writingMode[i]) {
                     str.append(content[i]).append('\n');
@@ -4008,7 +4008,7 @@ public class PdfGroupingAlgorithms {
         return searchText;
     }
     
-    private void getResultCoords(String coordText, int mode, int[] resultStart, int termStarts, int termEnds, boolean valuesSwapped, Vector_Float resultCoords){
+    private void getResultCoords(final String coordText, final int mode, int[] resultStart, int termStarts, final int termEnds, final boolean valuesSwapped, final Vector_Float resultCoords){
         
         //Get coords of found text for highlights
         float currentX;
@@ -4131,7 +4131,7 @@ public class PdfGroupingAlgorithms {
         }
     }
     
-    private void storeTeasers(Vector_String resultTeasers){
+    private void storeTeasers(final Vector_String resultTeasers){
         
         //Remove any trailing empty values
         resultTeasers.trim();
@@ -4152,7 +4152,7 @@ public class PdfGroupingAlgorithms {
         }
     }
     
-    private static void storeResultsCoords(boolean valuesSwapped, int mode, Vector_Float resultCoords, float x1, float y1, float x2, float y2, float connected){
+    private static void storeResultsCoords(final boolean valuesSwapped, final int mode, final Vector_Float resultCoords, final float x1, final float y1, final float x2, final float y2, final float connected){
         //Set ends coords      
         if (valuesSwapped) {
             if (mode == PdfData.VERTICAL_BOTTOM_TO_TOP) {
@@ -4179,7 +4179,7 @@ public class PdfGroupingAlgorithms {
         }
     }
     
-    private void findTeaser(String teaser, Matcher teaserFinder, int termStarts, int termEnds, Vector_String resultTeasers){
+    private void findTeaser(String teaser, final Matcher teaserFinder, final int termStarts, final int termEnds, final Vector_String resultTeasers){
         
         if (teaserFinder.find()) {
             //Get a teaser if found and set the search term to bold is allowed
@@ -4212,11 +4212,11 @@ public class PdfGroupingAlgorithms {
         String raw, currentColor;
         int text_length, mode;
         
-        Fragment(PdfData pdf_data, int index){
+        Fragment(final PdfData pdf_data, final int index){
             loadData(pdf_data, index);
         }
         
-        public void loadData(PdfData pdf_data, int index){
+        public void loadData(final PdfData pdf_data, final int index){
             //extract values
             character_spacing = pdf_data.f_character_spacing[index];
             x1 = pdf_data.f_x1[index];
@@ -4241,9 +4241,9 @@ public class PdfGroupingAlgorithms {
         public int getWritingMode(){return mode;}
         public int getTextLength(){return text_length;}
         
-        public void setX1(float value){x1=value;}
-        public void setY1(float value){y1=value;}
-        public void setX2(float value){x2=value;}
-        public void setY2(float value){y2=value;}
+        public void setX1(final float value){x1=value;}
+        public void setY1(final float value){y1=value;}
+        public void setX2(final float value){x2=value;}
+        public void setY2(final float value){y2=value;}
     }
 }

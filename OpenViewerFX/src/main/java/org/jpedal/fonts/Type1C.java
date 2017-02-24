@@ -1173,16 +1173,16 @@ public class Type1C extends Type1{
                     final byte[] stream=currentPdfFile.readStream(FontFile,true,true,false, false,false, FontFile.getCacheName(currentPdfFile.getObjectReader()));
                     if(stream!=null) {
                         
-                        int length1 = FontFile.getInt(PdfDictionary.Length1);
-                        int length2 = FontFile.getInt(PdfDictionary.Length2);
+                        final int length1 = FontFile.getInt(PdfDictionary.Length1);
+                        final int length2 = FontFile.getInt(PdfDictionary.Length2);
                 
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                         bos.write(stream, 0, length1);
 
                         byte[] encData = new byte[length2];
                         System.arraycopy(stream, length1, encData, 0, length2);
 
-                        boolean isBinary = !(isHexDigit(stream[0]) && isHexDigit(stream[1])
+                        final boolean isBinary = !(isHexDigit(stream[0]) && isHexDigit(stream[1])
                                 && isHexDigit(stream[2]) && isHexDigit(stream[3]));
 
                         if (isBinary) {
@@ -1286,7 +1286,6 @@ public class Type1C extends Type1{
     
     
     /** Handle encoding for type1C fonts. Also used for CIDFontType0C */
-    @SuppressWarnings("PointlessBooleanExpression")
     private void readType1CFontFile(final byte[] fontDataAsArray, final FontData fontDataAsObject) throws Exception{
         
         LogWriter.writeLog("Embedded Type1C font used");
@@ -1371,7 +1370,8 @@ public class Type1C extends Type1{
         top += (size+1); //update pointer
         start = top + (count + 1) * offsize - 1;
         
-        int dicStart,dicEnd;
+        final int dicStart;
+        final int dicEnd;
         if(isByteArray){
             dicStart = start + getWord(fontDataAsArray, top, offsize);
             dicEnd = start + getWord(fontDataAsArray, top + offsize, offsize);
@@ -1399,115 +1399,7 @@ public class Type1C extends Type1{
          * allow  for subdictionaries in CID  font
          */
         if(FDSelect!=-1 ){
-            
-            
-            if(debugDictionary) {
-                System.out.println("=============FDSelect===================="+getBaseFontName());
-            }
-            
-            
-            //Read FDSelect
-            int nextDic = FDSelect;
-            
-            final int format;
-            if (isByteArray) {
-                format = getWord(fontDataAsArray, nextDic, 1);
-            } else {
-                format = getWord(fontDataAsObject, nextDic, 1);
-            }
-            
-            final int glyphCount;
-            if (isByteArray) {
-                glyphCount = getWord(fontDataAsArray, charstrings, 2);
-            } else {
-                glyphCount = getWord(fontDataAsObject, charstrings, 2);
-            }
-            
-            fdSelect = new int[glyphCount];
-            if (format == 0) {
-                //Format 0 is just an array of which to use for each glyph
-                for (int i=0; i<glyphCount; i++) {
-                    if (isByteArray) {
-                        fdSelect[i] = getWord(fontDataAsArray, nextDic + 1 + i, 1);
-                    } else {
-                        fdSelect[i] = getWord(fontDataAsObject, nextDic + 1 + i, 1);
-                    }
-                }
-            } else if (format == 3) {
-                final int nRanges;
-                if (isByteArray) {
-                    nRanges = getWord(fontDataAsArray, nextDic+1, 2);
-                } else {
-                    nRanges = getWord(fontDataAsObject, nextDic+1, 2);
-                }
-                
-                final int[] rangeStarts= new int[nRanges+1];
-                final int[] fDicts = new int[nRanges];
-
-                //Find ranges of glyphs with their DICT index
-                for (int i=0; i<nRanges; i++) {
-                    if (isByteArray) {
-                        rangeStarts[i] = getWord(fontDataAsArray, nextDic+3+(3*i), 2);
-                        fDicts[i] = getWord(fontDataAsArray, nextDic+5+(3*i), 1);
-                    } else {
-                        rangeStarts[i] = getWord(fontDataAsObject, nextDic+3+(3*i), 2);
-                        fDicts[i] = getWord(fontDataAsObject, nextDic+5+(3*i), 1);
-                    }
-                }
-                rangeStarts[rangeStarts.length-1] = glyphCount;
-                
-                //Fill fdSelect array
-                for (int i=0; i<nRanges; i++) {
-                    for (int j=rangeStarts[i]; j<rangeStarts[i+1]; j++) {
-                        fdSelect[j] = fDicts[i];
-                    }
-                }
-            }
-            ((T1Glyphs)glyphs).setFDSelect(fdSelect);
-            
-            
-            //Read FDArray
-            nextDic=FDArray;
-            
-            if(isByteArray){
-                count = getWord(fontDataAsArray, nextDic, size);
-                offsize = fontDataAsArray[nextDic + size];
-            }else{
-                count = getWord(fontDataAsObject, nextDic, size);
-                offsize = fontDataAsObject.getByte(nextDic + size);
-            }
-            
-            nextDic += (size+1); //update pointer
-            start = nextDic + (count + 1) * offsize - 1;
-            
-            privateDictOffset = new int[count];
-            privateDictLength = new int[count];
-            subrs = new int[count];
-            defaultWidthX = new int[count];
-            nominalWidthX = new int[count];
-            
-            for (int i=0; i<count; i++) {
-                currentFD = i;
-                privateDictOffset[i] = -1;
-                privateDictLength[i] = -1;
-                subrs[i] = -1;
-                
-                if(isByteArray){
-                    dicStart = start+getWord(fontDataAsArray, nextDic+(i*offsize), offsize);
-                    dicEnd =start+getWord(fontDataAsArray, nextDic+((i+1)*offsize), offsize);
-                }else{
-                    dicStart = start+getWord(fontDataAsObject, nextDic+(i*offsize), offsize);
-                    dicEnd =start+getWord(fontDataAsObject, nextDic+((i+1)*offsize), offsize);
-                }
-                
-                decodeDictionary(fontDataAsArray, fontDataAsObject, dicStart, dicEnd, strings);
-                
-            }
-            currentFD = -1;
-            if(debugDictionary) {
-                System.out.println("================================="+getBaseFontName());
-            }
-            
+            handleSubDictionaries(fontDataAsArray, fontDataAsObject, isByteArray, size, strings);
         }
         
         /*
@@ -1597,7 +1489,123 @@ public class Type1C extends Type1{
         glyphs.setFontEmbedded(true);
         
     }
-    
+
+    private void handleSubDictionaries(final byte[] fontDataAsArray, final FontData fontDataAsObject, final boolean isByteArray, final int size, final String[] strings) {
+
+        final int count;
+        final int offsize;
+        final int start;
+        int dicStart;
+        int dicEnd;
+
+        if(debugDictionary) {
+            System.out.println("=============FDSelect===================="+getBaseFontName());
+        }
+
+
+        //Read FDSelect
+        int nextDic = FDSelect;
+
+        final int format;
+        if (isByteArray) {
+            format = getWord(fontDataAsArray, nextDic, 1);
+        } else {
+            format = getWord(fontDataAsObject, nextDic, 1);
+        }
+
+        final int glyphCount;
+        if (isByteArray) {
+            glyphCount = getWord(fontDataAsArray, charstrings, 2);
+        } else {
+            glyphCount = getWord(fontDataAsObject, charstrings, 2);
+        }
+
+        fdSelect = new int[glyphCount];
+        if (format == 0) {
+            //Format 0 is just an array of which to use for each glyph
+            for (int i=0; i<glyphCount; i++) {
+                if (isByteArray) {
+                    fdSelect[i] = getWord(fontDataAsArray, nextDic + 1 + i, 1);
+                } else {
+                    fdSelect[i] = getWord(fontDataAsObject, nextDic + 1 + i, 1);
+                }
+            }
+        } else if (format == 3) {
+            final int nRanges;
+            if (isByteArray) {
+                nRanges = getWord(fontDataAsArray, nextDic+1, 2);
+            } else {
+                nRanges = getWord(fontDataAsObject, nextDic+1, 2);
+            }
+
+            final int[] rangeStarts= new int[nRanges+1];
+            final int[] fDicts = new int[nRanges];
+
+            //Find ranges of glyphs with their DICT index
+            for (int i=0; i<nRanges; i++) {
+                if (isByteArray) {
+                    rangeStarts[i] = getWord(fontDataAsArray, nextDic+3+(3*i), 2);
+                    fDicts[i] = getWord(fontDataAsArray, nextDic+5+(3*i), 1);
+                } else {
+                    rangeStarts[i] = getWord(fontDataAsObject, nextDic+3+(3*i), 2);
+                    fDicts[i] = getWord(fontDataAsObject, nextDic+5+(3*i), 1);
+                }
+            }
+            rangeStarts[rangeStarts.length-1] = glyphCount;
+
+            //Fill fdSelect array
+            for (int i=0; i<nRanges; i++) {
+                for (int j=rangeStarts[i]; j<rangeStarts[i+1]; j++) {
+                    fdSelect[j] = fDicts[i];
+                }
+            }
+        }
+        ((T1Glyphs)glyphs).setFDSelect(fdSelect);
+
+
+        //Read FDArray
+        nextDic=FDArray;
+
+        if(isByteArray){
+            count = getWord(fontDataAsArray, nextDic, size);
+            offsize = fontDataAsArray[nextDic + size];
+        }else{
+            count = getWord(fontDataAsObject, nextDic, size);
+            offsize = fontDataAsObject.getByte(nextDic + size);
+        }
+
+        nextDic += (size+1); //update pointer
+        start = nextDic + (count + 1) * offsize - 1;
+
+        privateDictOffset = new int[count];
+        privateDictLength = new int[count];
+        subrs = new int[count];
+        defaultWidthX = new int[count];
+        nominalWidthX = new int[count];
+
+        for (int i=0; i<count; i++) {
+            currentFD = i;
+            privateDictOffset[i] = -1;
+            privateDictLength[i] = -1;
+            subrs[i] = -1;
+
+            if(isByteArray){
+                dicStart = start+getWord(fontDataAsArray, nextDic+(i*offsize), offsize);
+                dicEnd =start+getWord(fontDataAsArray, nextDic+((i+1)*offsize), offsize);
+            }else{
+                dicStart = start+getWord(fontDataAsObject, nextDic+(i*offsize), offsize);
+                dicEnd =start+getWord(fontDataAsObject, nextDic+((i+1)*offsize), offsize);
+            }
+
+            decodeDictionary(fontDataAsArray, fontDataAsObject, dicStart, dicEnd, strings);
+
+        }
+        currentFD = -1;
+        if(debugDictionary) {
+            System.out.println("================================="+getBaseFontName());
+        }
+    }
+
     /**pick up encoding from embedded font*/
     private void setEncoding(final byte[] fontDataAsArray, final FontData fontDataAsObject, final int nGlyphs, final int[] names){
         
@@ -2632,15 +2640,15 @@ public class Type1C extends Type1{
         }
     }
     
-    private static byte[] decryptBinary(byte[] data, int key, int discard) {
-        int c1 = 52845;
-        int c2 = 22719;
+    private static byte[] decryptBinary(final byte[] data, final int key, final int discard) {
+        final int c1 = 52845;
+        final int c2 = 22719;
         int r = key;
-        int count = data.length;
-        byte[] decrypted = new byte[count-discard];
+        final int count = data.length;
+        final byte[] decrypted = new byte[count-discard];
         int p = 0;
         for (int i = 0; i < count; i++) {
-            int value = data[i] & 0xff;
+            final int value = data[i] & 0xff;
             if(i>=discard){
                 decrypted[p++] = (byte) (value ^ (r >> 8));
             }
@@ -2650,17 +2658,17 @@ public class Type1C extends Type1{
         return decrypted;
     }
     
-    private static byte[] decryptASCII(byte[] data, int key) {
-        int c1 = 52845;
-        int c2 = 22719;
+    private static byte[] decryptASCII(final byte[] data, final int key) {
+        final int c1 = 52845;
+        final int c2 = 22719;
         int r = key;
-        int count = data.length;
-        int maybeLength = count >>> 1;
-        byte[] decrypted = new byte[maybeLength];
+        final int count = data.length;
+        final int maybeLength = count >>> 1;
+        final byte[] decrypted = new byte[maybeLength];
 
         int i, j;
         for (i = 0, j = 0; i < count; i++) {
-            int digit1 = data[i] & 0xff;
+            final int digit1 = data[i] & 0xff;
             if (!isHexDigit(digit1)) {
                 continue;
             }
@@ -2670,7 +2678,7 @@ public class Type1C extends Type1{
                 i++;
             }
             if (i < count) {
-                int value = Integer.parseInt(Character.toString((char) digit1)+Character.toString((char) digit2), 16);
+                final int value = Integer.parseInt(Character.toString((char) digit1)+Character.toString((char) digit2), 16);
                 decrypted[j++] = (byte) (value ^ (r >> 8));
                 r = ((value + r) * c1 + c2) & ((1 << 16) - 1);
             }
@@ -2678,7 +2686,7 @@ public class Type1C extends Type1{
         return decrypted;
     }
     
-    private static boolean isHexDigit(int code) {
+    private static boolean isHexDigit(final int code) {
         return (code >= 48 && code <= 57) || (code >= 65 && code <= 70) || (code >= 97 && code <= 102);
     }
 

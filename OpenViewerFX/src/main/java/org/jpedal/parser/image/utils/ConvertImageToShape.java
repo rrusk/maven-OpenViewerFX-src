@@ -42,7 +42,7 @@ import org.jpedal.render.DynamicVectorRenderer;
 public class ConvertImageToShape {
 
 
-    public static void convert(final byte[] data, int h, final GraphicsState gs, final DynamicVectorRenderer current, final ParserOptions parserOptions) {
+    public static void convert(final byte[] data, final int h, final GraphicsState gs, final DynamicVectorRenderer current, final ParserOptions parserOptions) {
 
 
     /* Takes ac count of ef1603e.pdf.  A thin horizontal dotted line is not scaled properly, therefore its converted to a shape.

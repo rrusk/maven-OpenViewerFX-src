@@ -33,6 +33,8 @@
 package org.jpedal.parser;
 
 import java.util.ArrayList;
+
+import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.utils.NumberUtils;
 
 public class CommandParser {
@@ -79,78 +81,28 @@ public class CommandParser {
     int getCommandValues(int dataPointer, final int tokenNumber) {
 
         final int count=prefixes.length;
-        int nextChar=characterStream[dataPointer],start,end=0;
+        int start,end=0;
 
         commandID=-1;
         final int sLen=characterStream.length;
 
-        int current=nextChar;
-
-        if(nextChar==13 || nextChar==10 || nextChar==32 || nextChar==9 || nextChar==0){
-
-            dataPointer++;
-
-            while(true){ //read next valid char
-
-                if(dataPointer==streamSize) //allow for end of stream
-                {
-                    break;
-                }
-
-                current =characterStream[dataPointer];
-
-                if(current!=13 && current!=10 && current!=32 && current!=9 && current!=0) {
-                    break;
-                }
-
-                dataPointer++;
-
-            }
-        }
-
-        //lose any comments in stream which start %
-        while(current==37){
-
-            dataPointer++;
-            while(true){ //read next valid char
-
-                if(dataPointer==streamSize) //allow for end of stream
-                {
-                    break;
-                }
-
-                current =characterStream[dataPointer];
-
-                if(current==13 || current==10){
-
-                    //exit at end of comment (shown by line ending)
-                    //loop need as can get double spacing (ie debug2/hpbrokenFIle)
-                    while(dataPointer+1 <streamSize && characterStream[dataPointer+1]==10){
-                        dataPointer++;
-                        current =characterStream[dataPointer];
-                    }
-
-                    break;
-                }
-
-                dataPointer++;
-
-            }
-
-            dataPointer++;
-
-            if(dataPointer>=streamSize) //allow for end of stream
-            {
-                break;
-            }
-
-            current =characterStream[dataPointer];
-        }
-
-        if(dataPointer>=streamSize) //allow for end of stream
+        dataPointer=StreamReaderUtils.skipSpacesOrOtherCharacter(characterStream, dataPointer, 0);
+        
+        if(dataPointer==streamSize) //allow for end of stream
         {
             return dataPointer;
         }
+
+        //lose any comments in stream which start %
+        while(dataPointer<streamSize && characterStream[dataPointer]==37){
+            dataPointer=StreamReaderUtils.skipComment(characterStream,dataPointer);
+        }
+
+        if(dataPointer>=streamSize){ //allow for end of stream
+            return dataPointer;
+        }
+
+        int current =characterStream[dataPointer];
 
         // read in value (note several options)
         boolean matchFound=false;
@@ -210,7 +162,7 @@ public class CommandParser {
                 if(PdfStreamDecoder.showCommands) {
                     System.out.println(PdfStreamDecoder.indent + generateOpAsString(currentOp, false) + " (value) " + tokenNumber);
                 }
-                
+
                 currentOp++;
                 if (currentOp == MAXOPS) {
                     currentOp = 0;
@@ -218,12 +170,10 @@ public class CommandParser {
                 operandCount++;
             }else{
 
-
                 //showCommands=(tokenNumber>6300);
                 //this makes rest of page disappear
                // if(tokenNumber>22)
                	//return streamSize;
-
 
                 if(PdfStreamDecoder.showCommands) {
                     System.out.println(PdfStreamDecoder.indent + Cmd.getCommandAsString(commandID) + " (Command) " + tokenNumber);
@@ -231,35 +181,7 @@ public class CommandParser {
                 
                 //reorder values so work
                 if(operandCount>0){
-
-                    final int[] orderedOpStart=new int[MAXOPS];
-                    final int[] orderedOpEnd=new int[MAXOPS];
-                    int opid=0;
-                    for(int jj=this.currentOp-1;jj>-1;jj--){
-
-                        orderedOpStart[opid]=opStart[jj];
-                        orderedOpEnd[opid]=opEnd[jj];
-                        if(opid==operandCount) {
-                            jj = -1;
-                        }
-                        opid++;
-                    }
-                    if(opid==operandCount){
-                        currentOp--; //decrease to make loop comparison faster
-                        for(int jj= MAXOPS-1;jj>currentOp;jj--){
-
-                            orderedOpStart[opid]=opStart[jj];
-                            orderedOpEnd[opid]=opEnd[jj];
-                            if(opid==operandCount) {
-                                jj = currentOp;
-                            }
-                            opid++;
-                        }
-                        currentOp++;
-                    }
-
-                    opStart=orderedOpStart;
-                    opEnd=orderedOpEnd;
+                    reverseOperands();
                 }
 
                 //use negative to flag values found
@@ -437,13 +359,44 @@ public class CommandParser {
         //increment pointer
         if(dataPointer < streamSize){
 
-            nextChar=characterStream[dataPointer];
+            final int nextChar=characterStream[dataPointer];
             if(nextChar != 47 && nextChar != 40 && nextChar!= 91  && nextChar!= '<'){
                 dataPointer++;
             }
         }
 
         return dataPointer;
+    }
+
+    private void reverseOperands() {
+        final int[] orderedOpStart=new int[MAXOPS];
+        final int[] orderedOpEnd=new int[MAXOPS];
+        int opid=0;
+        for(int jj=this.currentOp-1;jj>-1;jj--){
+
+            orderedOpStart[opid]=opStart[jj];
+            orderedOpEnd[opid]=opEnd[jj];
+            if(opid==operandCount) {
+                jj = -1;
+            }
+            opid++;
+        }
+        if(opid==operandCount){
+            currentOp--; //decrease to make loop comparison faster
+            for(int jj= MAXOPS-1;jj>currentOp;jj--){
+
+                orderedOpStart[opid]=opStart[jj];
+                orderedOpEnd[opid]=opEnd[jj];
+                if(opid==operandCount) {
+                    jj = currentOp;
+                }
+                opid++;
+            }
+            currentOp++;
+        }
+
+        opStart=orderedOpStart;
+        opEnd=orderedOpEnd;
     }
 
     public int getCommandID() {
@@ -619,7 +572,7 @@ public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
         final int end = this.opEnd[0];
         int count = 0;
         int startPtr, endPtr;
-        ArrayList<Float> values = new ArrayList<Float>();
+        final ArrayList<Float> values = new ArrayList<Float>();
         for (int chars = start + 1; chars < end; chars++) {
             
             char c = (char) characterStream[chars];

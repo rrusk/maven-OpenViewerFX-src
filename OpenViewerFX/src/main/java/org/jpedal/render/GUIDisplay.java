@@ -52,7 +52,7 @@ import org.jpedal.utils.LogWriter;
  *
  * functions shared by Swing and FX but not lower level Display implementations
  */
-abstract class GUIDisplay extends G2Display implements DynamicVectorRenderer{
+abstract class GUIDisplay extends G2Display {
 
     
     private boolean needsHorizontalInvert;
@@ -85,7 +85,7 @@ abstract class GUIDisplay extends G2Display implements DynamicVectorRenderer{
 
             try {
                 DefaultImageHelper.write(image, type, des);
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 LogWriter.writeLog("Exception in writing image "+ex);
             }
         }

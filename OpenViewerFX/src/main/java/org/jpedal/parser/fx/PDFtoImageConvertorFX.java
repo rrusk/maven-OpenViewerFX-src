@@ -66,7 +66,7 @@ public class PDFtoImageConvertorFX extends PDFtoImageConvertor{
     }
    
     @Override
-    public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, boolean isTransparent) {
+    public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, final boolean isTransparent) {
         this.pageIndex=pageIndex;
         return imageDisplay = new FXDisplayForRasterizing(pageIndex,!isTransparent, 5000, localStore); //note !isTransparent as actually addBackground
        
@@ -104,7 +104,7 @@ public class PDFtoImageConvertorFX extends PDFtoImageConvertor{
     private void snapshot(final PdfStreamDecoder currentImageDecoder, final float scaling, final PdfObject pdfObject, 
             final CountDownLatch latch, final SimpleObjectProperty<BufferedImage> imageProperty,final AcroRenderer formRenderer){
         
-        Pane g=new Pane();
+        final Pane g=new Pane();
         
         try {
             formRenderer.getCompData().setRootDisplayComponent(g);
@@ -120,7 +120,7 @@ public class PDFtoImageConvertorFX extends PDFtoImageConvertor{
             ex.printStackTrace();
         }
         
-        Group group;
+        final Group group;
         group=((FXDisplay)imageDisplay).getFXPane();
        
         group.getChildren().addAll(g.getChildren());

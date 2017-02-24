@@ -82,7 +82,7 @@ public abstract class SharedActionHandler implements ActionHandler {
     
     final GUIFactory gui;
     
-    public SharedActionHandler(GUIFactory viewerGUI){
+    public SharedActionHandler(final GUIFactory viewerGUI){
         this.gui=viewerGUI;
     }
     
@@ -275,7 +275,7 @@ public abstract class SharedActionHandler implements ActionHandler {
         }
     }
 
-    private void launch(PdfObject aData) {
+    private void launch(final PdfObject aData) {
         try {
             //get the F dictionary
             final PdfObject dict = aData.getDictionary(PdfDictionary.F);
@@ -328,7 +328,7 @@ public abstract class SharedActionHandler implements ActionHandler {
         }
     }
 
-    private void playSound(PdfObject aData) {
+    private void playSound(final PdfObject aData) {
         final PdfObject soundObj = aData.getDictionary(PdfDictionary.Sound);
         
         // read now as lazy initialisation
@@ -714,7 +714,7 @@ public abstract class SharedActionHandler implements ActionHandler {
      * @return 
      */
     @Override
-    public int gotoDest(PdfObject aData, final int eventType, int command) {
+    public int gotoDest(final PdfObject aData, final int eventType, int command) {
         
         final boolean debugDest=false;
         
@@ -726,7 +726,7 @@ public abstract class SharedActionHandler implements ActionHandler {
         }
         
         //Can be a direct Dest on Annot -  we collapse together for our viewer
-        PdfArrayIterator Dest = DestHandler.getDestFromObject(aData,currentPdfFile);
+        final PdfArrayIterator Dest = DestHandler.getDestFromObject(aData,currentPdfFile);
         
         if (Dest!=null && Dest.hasMoreTokens()) {
             
@@ -1024,7 +1024,7 @@ public abstract class SharedActionHandler implements ActionHandler {
         }else{
             if (eventType == MOUSECLICKED) {
                 
-                PdfObject data = aData.getDictionary(PdfDictionary.A);
+                final PdfObject data = aData.getDictionary(PdfDictionary.A);
 
                 if (data != null) {
                     //Add code here
@@ -1134,7 +1134,7 @@ public abstract class SharedActionHandler implements ActionHandler {
      * @param type - the type of action
      */
     @Override
-    public void changeTo(final String file, int page, Object location, final Integer type, final boolean storeView) {
+    public void changeTo(final String file, int page, final Object location, final Integer type, final boolean storeView) {
         
         if (showMethods) {
             System.out.println("DefaultActionHandler.changeTo()" + file);
@@ -1715,7 +1715,7 @@ public abstract class SharedActionHandler implements ActionHandler {
             }
             
             
-            StringBuilder text = new StringBuilder();
+            final StringBuilder text = new StringBuilder();
             if(compsToSubmit != null && compsToSubmit.length > 0) {
                 for (final Component aCompsToSubmit : compsToSubmit) {
                     if (aCompsToSubmit instanceof JTextComponent) {
@@ -1784,11 +1784,11 @@ public abstract class SharedActionHandler implements ActionHandler {
         
     }
 
-    protected void showSig(PdfObject sigObject) {
+    protected void showSig(final PdfObject sigObject) {
         throw new UnsupportedOperationException("showSig Not supported yet "+sigObject);
     }
 
-    protected void additionalAction_OCState(int eventType, PdfObject aData) {
+    protected void additionalAction_OCState(final int eventType, final PdfObject aData) {
         throw new UnsupportedOperationException("additionalAction_OCState Not supported yet "+eventType+' '+aData);
     }
 
@@ -1800,15 +1800,15 @@ public abstract class SharedActionHandler implements ActionHandler {
         throw new UnsupportedOperationException("print Not supported yet."); 
     }
 
-    protected void scrollOnPage(int page, Object location, final boolean storeView, final int type) {
+    protected void scrollOnPage(final int page, final Object location, final boolean storeView, final int type) {
         throw new UnsupportedOperationException("scrollOnPage Not supported yet "+page+' '+location+' '+storeView+' '+type); 
     }
 
-    protected void setCursor(int eventType) {
+    protected void setCursor(final int eventType) {
         throw new UnsupportedOperationException("setCursor Not supported yet "+eventType); 
     }
     
-    protected void openNewViewer(String target) {
+    protected void openNewViewer(final String target) {
         throw new UnsupportedOperationException("openNewViewer Not supported yet "+target); 
     }
     

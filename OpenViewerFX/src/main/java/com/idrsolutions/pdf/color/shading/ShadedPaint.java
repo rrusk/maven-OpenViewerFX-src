@@ -32,7 +32,6 @@
  */
 package com.idrsolutions.pdf.color.shading;
 
-import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -56,7 +55,7 @@ import org.jpedal.utils.Matrix;
 /**
  * template for all shading operations
  */
-public class ShadedPaint implements PdfPaint, Paint, Serializable {
+public class ShadedPaint implements PdfPaint, Serializable {
 
     public static final int FUNCTION = 1;
     public static final int AXIAL = 2;
@@ -136,7 +135,7 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
 
         background = Shading.getFloatArray(PdfDictionary.Background);
 
-        PdfArrayIterator keys = Shading.getMixedArray(PdfDictionary.Function);
+        final PdfArrayIterator keys = Shading.getMixedArray(PdfDictionary.Function);
 
         final int functionCount = keys.getTokenCount();
             
@@ -145,7 +144,7 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
             final PdfObject[] subFunction = new PdfObject[functionCount];
 
             for (int i = 0; i < functionCount; i++) {
-                byte[] nextValue=keys.getNextValueAsByte(true);
+                final byte[] nextValue=keys.getNextValueAsByte(true);
                 subFunction[i] =ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, nextValue);
             }
 
@@ -175,16 +174,16 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
                     Matrix.show(matrix);
                 }
 
-                float a = matrix[0][0];
-                float b = matrix[0][1];
+                final float a = matrix[0][0];
+                final float b = matrix[0][1];
                 final float c = matrix[1][0];
                 final float d = matrix[1][1];
-                float tx = matrix[2][0];
-                float ty = matrix[2][1];
+                final float tx = matrix[2][0];
+                final float ty = matrix[2][1];
 
                 final float x;
                 final float y;
-                float x1;
+                final float x1;
                 final float y1;
 
                 if (type == AXIAL) { //axial
@@ -228,10 +227,14 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
             offY = (int) xform.getTranslateY();
             scaling = (float) xform.getScaleY();
         }
-
+		
         switch (type) {
             case FUNCTION:
-                pt = new FunctionContext(cropH, (float) (1f / xform.getScaleX()), shadingColorSpace, colorsReversed, function);
+				if (textX == 0 && textY == 0) {
+					pt = new FunctionShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
+				} else {
+					pt = new FunctionContext(cropH, (float) (1f / xform.getScaleX()), shadingColorSpace, colorsReversed, function);
+				}
                 break;
 
             case AXIAL:
@@ -247,18 +250,26 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
                 break;
 
             case FREEFORM:
-                pt = new FreeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
+				if (textX == 0 && textY==0){
+					pt = new FreeFormShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
+				} else {
+					pt = new FreeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
+				}
                 break;
 
             case LATTICEFORM:
-                pt = new LatticeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
+				if (textX == 0 && textY == 0) {
+					pt = new LatticeFormShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
+				} else {
+					pt = new LatticeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
+				}
                 break;
 
             case COONS:
                 if (!shapesList.isEmpty()) {
                     pt = new CoonsContext(xform, shadingColorSpace, shapesList, background, matrix, function);
                 } else {
-                    CoonsContext ct = new CoonsContext(xform, shadingColorSpace, background, Shading, matrix, function);
+                    final CoonsContext ct = new CoonsContext(xform, shadingColorSpace, background, Shading, matrix, function);
                     shapesList = ct.getShapes();
                     pt = ct;
                 }
@@ -270,7 +281,7 @@ public class ShadedPaint implements PdfPaint, Paint, Serializable {
                 if (!shapesList.isEmpty()) {
                     pt = new TensorContext(xform, shadingColorSpace, shapesList, background, matrix, function);
                 } else {
-                    TensorContext tt = new TensorContext(xform, shadingColorSpace, background, Shading, matrix, function);
+                    final TensorContext tt = new TensorContext(xform, shadingColorSpace, background, Shading, matrix, function);
                     shapesList = tt.getShapes();
                     pt = tt;
                 }

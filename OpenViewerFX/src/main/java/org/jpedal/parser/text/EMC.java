@@ -46,10 +46,11 @@ public class EMC {
             current.drawClip(gs,null,true);
         }
 
+        parserOptions.getLayerVisibility().remove(parserOptions.getLayerLevel());
         parserOptions.setLayerLevel(parserOptions.getLayerLevel()-1);
 
         //reset flag
-        boolean flag=(parserOptions.layers == null || parserOptions.getLayerLevel() == 0 || parserOptions.getLayerVisibility().contains(parserOptions.getLayerLevel()));
+        final boolean flag=(parserOptions.layers == null || parserOptions.getLayerLevel() == 0 || parserOptions.getLayerVisibility().contains(parserOptions.getLayerLevel()));
 
         parserOptions.setIsLayerVisible(flag);
     }

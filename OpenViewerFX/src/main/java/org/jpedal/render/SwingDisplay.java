@@ -727,45 +727,47 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             break;
                             
                         case DynamicVectorRenderer.TYPE1C:
-                            
-                            if(debug) {
+
+                        {
+                            if (debug) {
                                 System.out.println("Type1c");
                             }
-                            
-                            if(newClip){
-                                RenderUtils.renderClip(clipToUse, dirtyRegion,defaultClip,g2);
-                                newClip=false;
+
+                            if (newClip) {
+                                RenderUtils.renderClip(clipToUse, dirtyRegion, defaultClip, g2);
+                                newClip = false;
                             }
 
-                            AffineTransform aff=new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
+                            final AffineTransform aff = new AffineTransform(afValues1[afCount], afValues2[afCount], afValues3[afCount], afValues4[afCount], x, y);
 
-                            if(!invertHighlight) {
+                            if (!invertHighlight) {
                                 highlight = setHighlightForGlyph(currentArea, highlights);
                             }
 
-                            renderEmbeddedText(currentTR,currentObject,DynamicVectorRenderer.TYPE1C,aff,highlight,textStrokeCol,textFillCol,strokeOpacity,fillOpacity,lineWidth);
-
+                            renderEmbeddedText(currentTR, currentObject, DynamicVectorRenderer.TYPE1C, aff, highlight, textStrokeCol, textFillCol, strokeOpacity, fillOpacity, lineWidth);
+                        }
                             break;
                             
                         case DynamicVectorRenderer.TYPE3:
-                            
-                            if(debug) {
+
+                        {
+                            if (debug) {
                                 System.out.println("Type3");
                             }
-                            
-                            if(newClip){
-                                RenderUtils.renderClip(clipToUse, dirtyRegion,defaultClip,g2);
-                                newClip=false;
+
+                            if (newClip) {
+                                RenderUtils.renderClip(clipToUse, dirtyRegion, defaultClip, g2);
+                                newClip = false;
                             }
 
-                            aff=new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],x,y);
-                            
-                            if(!invertHighlight) {
+                            final AffineTransform aff = new AffineTransform(afValues1[afCount], afValues2[afCount], afValues3[afCount], afValues4[afCount], x, y);
+
+                            if (!invertHighlight) {
                                 highlight = setHighlightForGlyph(currentArea, highlights);
                             }
-                            
-                            renderEmbeddedText(currentTR,currentObject,DynamicVectorRenderer.TYPE3,aff,highlight, textStrokeCol,textFillCol,strokeOpacity,fillOpacity,lineWidth);
-                            
+
+                            renderEmbeddedText(currentTR, currentObject, DynamicVectorRenderer.TYPE3, aff, highlight, textStrokeCol, textFillCol, strokeOpacity, fillOpacity, lineWidth);
+                        }
                             break;
                             
                         case DynamicVectorRenderer.IMAGE:
@@ -953,7 +955,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
                             }
                             
                             //Potential fix for ignoring transform
-                            AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],0,0);
+                            final AffineTransform affine = new AffineTransform(afValues1[afCount],afValues2[afCount],afValues3[afCount],afValues4[afCount],0,0);
                             
                             double scaleFactorX = 1d/affine.getScaleX();
                             double scaleFactorY = 1d/affine.getScaleY();
@@ -1086,7 +1088,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
     }
 
-    static boolean testIfAnnotVisible(Rectangle currentArea, final Rectangle userAnnot, boolean ignoreItem) {
+    static boolean testIfAnnotVisible(final Rectangle currentArea, final Rectangle userAnnot, boolean ignoreItem) {
         
         //Allow for testing components with 0 width or 0 height
         final Rectangle testRect = currentArea.getBounds();
@@ -1106,12 +1108,12 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     }
 
 
-    private void paintTrueType(Rectangle[] highlights, double[] afValues1, double[] afValues2, double[] afValues3, double[] afValues4, Object currentObject, int currentTR, int lineWidth, float fillOpacity, float strokeOpacity, float x, float y, int afCount, PdfPaint textStrokeCol, PdfPaint textFillCol, Rectangle currentArea, Rectangle highlight) {
+    private void paintTrueType(final Rectangle[] highlights, final double[] afValues1, final double[] afValues2, final double[] afValues3, final double[] afValues4, final Object currentObject, final int currentTR, final int lineWidth, final float fillOpacity, final float strokeOpacity, final float x, final float y, final int afCount, final PdfPaint textStrokeCol, final PdfPaint textFillCol, final Rectangle currentArea, Rectangle highlight) {
 
         //hack to fix exceptions in a PDF using this code to create ReadOnly image
         if(afCount!=-1) {
 
-            AffineTransform aff = new AffineTransform(afValues1[afCount], afValues2[afCount], afValues3[afCount], afValues4[afCount], x, y);
+            final AffineTransform aff = new AffineTransform(afValues1[afCount], afValues2[afCount], afValues3[afCount], afValues4[afCount], x, y);
 
             if (!invertHighlight) {
                 highlight = setHighlightForGlyph(currentArea, highlights);
@@ -1121,7 +1123,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         }
     }
 
-    private void paintShape(int fillType, Shape defaultClip, Object currentObject, float fillOpacity, float strokeOpacity, PdfPaint fillCol, PdfPaint strokeCol, Stroke currentStroke, int i) {
+    private void paintShape(final int fillType, final Shape defaultClip, final Object currentObject, final float fillOpacity, final float strokeOpacity, final PdfPaint fillCol, final PdfPaint strokeCol, final Stroke currentStroke, final int i) {
         Shape s=null;
         if(endItem!=-1 && endItem<i){
             s = g2.getClip();
@@ -1135,7 +1137,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         }
     }
 
-    private void paintText(Rectangle[] highlights, double[] afValues1, double[] afValues2, double[] afValues3, double[] afValues4, Area currentObject, int currentTR, float fillOpacity, float strokeOpacity, float x, float y, int afCount, PdfPaint textStrokeCol, PdfPaint textFillCol, Rectangle currentArea, Rectangle highlight) {
+    private void paintText(final Rectangle[] highlights, final double[] afValues1, final double[] afValues2, final double[] afValues3, final double[] afValues4, final Area currentObject, final int currentTR, final float fillOpacity, final float strokeOpacity, final float x, final float y, final int afCount, final PdfPaint textStrokeCol, final PdfPaint textFillCol, final Rectangle currentArea, Rectangle highlight) {
         if(!invertHighlight) {
             highlight = setHighlightForGlyph(currentArea, highlights);
         }
@@ -1240,7 +1242,9 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
     
     private Object getResampledImage(final String key, final Object[] pageObjects1, final int i, Object currentObject) {
         
-        int sampling=1,w1,pY;
+        int sampling=1;
+        final int w1;
+        final int pY;
         float  scalingToUse=scaling;
         //fix for rescaling on Enkelt-Scanning_-_Bank-10.10.115.166_-_12-12-2007_-_15-27-57jpg50-300.pdf
         if(scaling<1) {
@@ -1307,7 +1311,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             if((scaling>1f || lastScaling>1f)&& sampling>=1 && (lastScaling!=scaling)){
                 try{
                     image=resampleImageData(sampling, w1, h1, bpc,maskCol,key);
-                }catch(Exception e){
+                }catch(final Exception e){
                     //tell user and log
                     LogWriter.writeLog("Exception rescaling image: " + e.getMessage());
                 }
@@ -1326,12 +1330,12 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         return currentObject;
     }
     
-    private BufferedImage resampleImageData(final int sampling, final int w1, final int h1, int bpc,final byte[] maskCol, final String key) {
+    private BufferedImage resampleImageData(final int sampling, final int w1, final int h1, final int bpc, final byte[] maskCol, final String key) {
         
         //get data
         final byte[] data= objectStoreRef.getRawImageData(key);
         
-        ImageData imageData=new ImageData(data);
+        final ImageData imageData=new ImageData(data);
         imageData.setWidth(w1);
         imageData.setHeight(h1);
         imageData.setCompCount(4);
@@ -1362,6 +1366,8 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         if(testSampling){
             System.out.println("image now="+image.getWidth()+" "+image.getHeight());
         }
+        
+       // image=ImageDataToJavaImage.sharpen(image);
         
         return image;
     }
@@ -1540,19 +1546,19 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
     /* save image in array to draw */
     @Override
-    public int drawImage(final int pageNumber,BufferedImage image,
-    final GraphicsState currentGraphicsState,
-    final boolean alreadyCached, final String name, final int previousUse) {
+    public int drawImage(final int pageNumber, final BufferedImage image,
+                         final GraphicsState currentGraphicsState,
+                         final boolean alreadyCached, final String name, final int previousUse) {
         
         if(previousUse!=-1) {
             return redrawImage(pageNumber, currentGraphicsState, name, previousUse);
         }
         
         this.rawPageNumber =pageNumber;
-        float CTM[][]=currentGraphicsState.CTM;
+        final float[][] CTM=currentGraphicsState.CTM;
         
         final float x=currentGraphicsState.x;
-        float y=currentGraphicsState.y;
+        final float y=currentGraphicsState.y;
         
         final double[] nextAf=new double[6];
         
@@ -1622,8 +1628,8 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         y_coord[currentItem]=y;
         
         objectType.addElement(DynamicVectorRenderer.IMAGE);
-        float WidthModifier = 1;
-        float HeightModifier = 1;
+        final float WidthModifier = 1;
+        final float HeightModifier = 1;
         
         //ignore in this case /PDFdata/baseline_screens/customers3/1773_A2.pdf
         if(CTM[0][0]>0 && CTM[0][0]<0.05 && CTM[0][1]!=0 && CTM[1][0]!=0 && CTM[1][1]!=0){
@@ -1822,7 +1828,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             }
         }
         
-        Stroke newStroke=currentGraphicsState.getStroke();
+        final Stroke newStroke=currentGraphicsState.getStroke();
         if((lastStroke!=null)&&(lastStroke.equals(newStroke))){
             
         }else{
@@ -2268,7 +2274,22 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
             if(clip==null){
                 clips.addElement(null);
             }else{
-                clips.addElement(ClipUtils.convertPDFClipToJavaClip(clip));
+                if(clip.isSingular() && clip.isRectangular()){
+                    clips.addElement(ClipUtils.convertPDFClipToJavaClip(clip));
+                }else{
+                    if(clip.getBounds2D().getHeight()>0.5f){
+                        final Area a = (Area) clip.clone();
+                        Stroke stroke = new BasicStroke(0.5f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10f);
+
+                        Area strokeShape = new Area(stroke.createStrokedShape(a));
+
+                        a.add(strokeShape);
+
+                        clips.addElement(a);
+                    }else{
+                        clips.addElement(clip);
+                    }
+                }
             }
             
             x_coord=RenderUtils.checkSize(x_coord,currentItem);
@@ -2715,7 +2736,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         //new fonts
         RenderUtils.writeToStream(bos, fontCount);
 
-        for (String key : newFontsToSend) {
+        for (final String key : newFontsToSend) {
             
             RenderUtils.writeToStream(bos,key);
             RenderUtils.writeToStream(bos,fonts.get(key));
@@ -2726,7 +2747,7 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
         //new data on existing fonts
         RenderUtils.writeToStream(bos, updateCount);
 
-        for (String key : fontsAlreadySent) {
+        for (final String key : fontsAlreadySent) {
             
             RenderUtils.writeToStream(bos,key);
             final PdfJavaGlyphs aa = (PdfJavaGlyphs) fonts.get(key);

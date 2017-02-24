@@ -43,7 +43,7 @@ public class CalGrayColorSpace extends GenericColorSpace {
 
 		componentCount=1;
 
-		setCIEValues(whitepoint,null,null,null,gamma);
+		setCIEValues(whitepoint,null,null,gamma);
 		setType(ColorSpaces.CalGray);
 
 	}

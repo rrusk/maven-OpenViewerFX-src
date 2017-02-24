@@ -91,35 +91,32 @@ public class BaseViewerFX extends Application {
 
     PluginHandler customPluginHandle;
     
-    /**
-     * Enum to control how we fit the content to the page.
-     * 
-     * AUTO will automatically fit the content to the stage depending on its orientation
-     * WIDTH will fit the content to the stage width depending on its orientation
-     * HEIGHT will fit the content to the stage height depending on its orientation
-     */
-    public enum FitToPage{
-        AUTO, WIDTH, HEIGHT, NONE
+    public enum FitToPage{ // control how we fit the content to the page
+        AUTO,   // AUTO will automatically fit the content to the stage depending on its orientation
+        WIDTH,  // WIDTH will fit the content to the stage width depending on its orientation
+        HEIGHT, // HEIGHT will fit the content to the stage height depending on its orientation
+        NONE
     }
     
     String PDFfile;
     
-    //Variable to hold the current file/directory
+    // Variable to hold the current file/directory
     File file;
     
-    //These two variables are todo with PDF encryption & passwords
-    private String password; //Holds the password from the JVM or from User input
-    private boolean closePasswordPrompt; //boolean controls whether or not we should close the prompt box
+    // These two variables are to do with PDF encryption & passwords
+    private String password; // Holds the password from the JVM or from User input
+    private boolean closePasswordPrompt; // Controls whether or not we should close the prompt box
     
     
     // Layout panes
     private VBox top;
     private HBox bottom;
     private ScrollPane center;
-    //Group is a container which holds the decoded PDF content
+    
+    // Group is a container which holds the decoded PDF content
     private Group group;
     
-    // for the location of the pdf file
+    // For the location of the pdf file
     private Text fileLoc;
     
     private float scale = 1.0f;
@@ -138,23 +135,29 @@ public class BaseViewerFX extends Application {
     
     Scene scene;
     
-    //Controls size of the stage, in theory setting this to a higher value will
-    //increase image quality as there's more pixels due to higher image resolutions
-    static final int FXscaling=1;
+    /*
+     * Controls size of the stage, in theory setting this to a higher value will
+     * increase image quality as there's more pixels due to higher image 
+     * resolutions
+     */
+    static final int FXscaling = 1;
     
     FitToPage zoomMode = FitToPage.AUTO;
     
     private TransitionType transitionType = TransitionType.None;
     
-    public static void main(final String[] args){
-         DecoderOptions.javaVersion = Float.parseFloat(System.getProperty("java.specification.version"));
-         System.out.println("JAVA VERSION : "+ DecoderOptions.javaVersion);
-            if (DecoderOptions.javaVersion < 1.8f) {
-                throw new RuntimeException("You need to Run Java 1.8+");
-            }
+    public static void main(final String[] args) {
+
+        DecoderOptions.javaVersion = Float.parseFloat(System.getProperty("java.specification.version"));
+
+        System.out.println("JAVA VERSION : " + DecoderOptions.javaVersion);
+
+        if (DecoderOptions.javaVersion < 1.8f) {
+            throw new RuntimeException("You need to Run Java 1.8+");
+        }
         launch(args);
     }
-    
+
     /**
      * launches BaseViewerFX viewer using supplied stage for displaying PDF files
      * @param stage is of type final Stage
@@ -169,7 +172,7 @@ public class BaseViewerFX extends Application {
             // Ensure correct lettering 
             trans = trans.substring(0, 1).toUpperCase() + trans.substring(1).toLowerCase();
           
-                transitionType = TransitionType.valueOf(trans);
+            transitionType = TransitionType.valueOf(trans);
          
         }
         
@@ -177,7 +180,7 @@ public class BaseViewerFX extends Application {
         final String pageNum = System.getProperty("org.jpedal.page");
         if(pageNum != null){
 
-                currentPage = Integer.parseInt(pageNum);
+            currentPage = Integer.parseInt(pageNum);
       
         }
         
@@ -195,8 +198,6 @@ public class BaseViewerFX extends Application {
         stage.setScene(scene);
         stage.show();
         
-        // this.getParameters().getUnamed() will never be null according to FX Javadoc, so no null check needed
-        // http://docs.oracle.com/javafx/2/api/javafx/application/Application.Parameters.html#getUnnamed%28%29
         if(args.size() == 1){
             final String input = args.get(0);
             file = new File(input);
@@ -225,9 +226,7 @@ public class BaseViewerFX extends Application {
      */
     public Scene setupViewer(final int w, final int h){
     
-        /* 
-         * Setting up layout panes and assigning them to the appropiate locations
-         */
+        // Setting up layout panes and assigning them to the appropiate locations
         final BorderPane root = new BorderPane();
         
         top = new VBox();
@@ -245,7 +244,7 @@ public class BaseViewerFX extends Application {
         center.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         center.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         
-        //needs to be added via group so resizes (see http://pixelduke.wordpress.com/2012/09/16/zooming-inside-a-scrollpane/)
+        // Needs to be added via group so resizes
         group=new Group();
         group.getChildren().add(pdf);
         center.setContent(group);
@@ -258,7 +257,7 @@ public class BaseViewerFX extends Application {
             }
         });
         
-        /*Sets the text to be displayed at the bottom of the FX Viewer**/
+        // Sets the text to be displayed at the bottom of the FX Viewer
         fileLoc = new Text("No PDF Selected");
         fileLoc.setId("file_location");
         bottom.getChildren().add(fileLoc);
@@ -271,9 +270,7 @@ public class BaseViewerFX extends Application {
     public void addListeners(){
         
              
-        /*
-         * auto adjust so dynamically resized as viewer width alters
-         */
+        // Auto adjust so dynamically resized as viewer width alters
         scene.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(final ObservableValue<? extends Number> observableValue, final Number oldSceneWidth, final Number newSceneWidth) {
@@ -335,7 +332,7 @@ public class BaseViewerFX extends Application {
     /**
      * Sets up a MenuBar to be used at the top of the window.
      * It contains one Menu - navMenu - which allows the user to open and navigate pdf files
-     * @return 
+     * @return ToolBar object used at the top of the user interface
      */
     private ToolBar setupToolBar() {
 
@@ -365,49 +362,47 @@ public class BaseViewerFX extends Application {
         fitHeight.setId("fitHeight");
         fitPage.setId("fitPage");
         
-        /*
-         * Open the PDF File
-         */
         open.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent t) {
                 final FileChooser chooser = new FileChooser();
                 chooser.setTitle("Open PDF file");
-                
+
                 //Open directory from existing directory
-                if(file != null){
+                if (file != null) {
                     final File existDirectory = file.getParentFile();
-                    if(existDirectory.exists()) {
+                    if (existDirectory.exists()) {
                         chooser.setInitialDirectory(existDirectory);
                     }
                 }
- 
+
                 //Set extension filter
                 final FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PDF files (*.pdf)", "*.pdf");
                 chooser.getExtensionFilters().add(extFilter);
-                
+
                 file = chooser.showOpenDialog(null);
-                
-                if(file != null){
+
+                if (file != null) {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
                             loadPDF(file);
                         }
-                    });                  
-                }              
+                    });
+                }
             }
         });
-        
+
         pages.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override public void changed(final ObservableValue<? extends Number> ov, final Number oldVal, final Number newVal) {
-                if(newVal.intValue() != -1 && newVal.intValue()+1 != currentPage){
+            @Override
+            public void changed(final ObservableValue<? extends Number> ov, final Number oldVal, final Number newVal) {
+                if (newVal.intValue() != -1 && newVal.intValue() + 1 != currentPage) {
                     final int newPage = newVal.intValue() + 1;
                     goToPage(newPage);
                 }
-            }});
-        
-        // Navigate backward
+            }
+        });
+
         back.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -415,11 +410,10 @@ public class BaseViewerFX extends Application {
                 if (currentPage > 1) {
                     goToPage(currentPage - 1);
                 }
-                
+
             }
         });
-        
-        // Navigate forward
+
         forward.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent t) {
@@ -429,14 +423,13 @@ public class BaseViewerFX extends Application {
 
             }
         });
-        
-        // Zoom in
+
         zoomIn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(final ActionEvent t) {
                 zoomMode = FitToPage.NONE;
-                
+
                 if (currentScaling < scalings.length - 1) {
 
                     currentScaling = findClosestIndex(scale, scalings);
@@ -456,7 +449,6 @@ public class BaseViewerFX extends Application {
             }
         });
 
-        // Zoom out
         zoomOut.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -482,18 +474,16 @@ public class BaseViewerFX extends Application {
             }
         });
 
-        // Fit to width
         fitWidth.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(final ActionEvent t) {
                 zoomMode = FitToPage.WIDTH;
-                fitToX(FitToPage.WIDTH);    
+                fitToX(FitToPage.WIDTH);
 
             }
         });
 
-        // Fit to height
         fitHeight.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -504,7 +494,6 @@ public class BaseViewerFX extends Application {
             }
         });
 
-        // Fit to Page
         fitPage.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -512,18 +501,14 @@ public class BaseViewerFX extends Application {
                 zoomMode = FitToPage.AUTO;
                 fitToX(FitToPage.AUTO);
 
-
             }
         });
-        
         
         final Region spacerLeft = new Region();
         final Region spacerRight = new Region();
         HBox.setHgrow(spacerLeft, Priority.ALWAYS);
         HBox.setHgrow(spacerRight, Priority.ALWAYS);
         
-        
-
         // Set up the ComboBox for transitions
         final ObservableList<String> options = FXCollections.observableArrayList();
         
@@ -548,7 +533,7 @@ public class BaseViewerFX extends Application {
     }
     
     /**
-     * take a File handle to PDF file on local filesystem and displays in PDF viewer
+     * Take a File handle to PDF file on local file system and displays in PDF viewer
      * @param input  The PDF file to load in the viewer 
      */
     public void loadPDF(final File input){
@@ -557,7 +542,7 @@ public class BaseViewerFX extends Application {
             return;
         }
         
-        scale = 1; //reset to default for new page
+        scale = 1; // Reset to default for new page
 
         PDFfile=input.getAbsolutePath();
         fileLoc.setText(PDFfile);
@@ -567,7 +552,7 @@ public class BaseViewerFX extends Application {
     }
     
     /**
-     * take a File handle to PDF file on local filesystem and displays in PDF viewer
+     * Take a File handle to PDF file on local file system and displays in PDF viewer
      * @param input The PDF file to load in the viewer  
      */
     public void loadPDF(final String input){
@@ -576,7 +561,7 @@ public class BaseViewerFX extends Application {
             return;
         }
         
-        scale = 1; //reset to default for new page
+        scale = 1; // Reset to default for new page
         PDFfile=input;
         fileLoc.setText(PDFfile);
            
@@ -588,9 +573,9 @@ public class BaseViewerFX extends Application {
         
     }
 
-    private void openFile(final File input,String url, boolean isURL) {
+    private void openFile(final File input, final String url, final boolean isURL) {
         try {
-            //Open the pdf file so we can check for encryption
+            // Open the pdf file so we can check for encryption
             if(isURL){
                 pdf.openPdfFileFromURL(url,false);
             }else{
@@ -611,15 +596,14 @@ public class BaseViewerFX extends Application {
             }else{
                 currentPage = 1;
             }
-            /*
-             * This code block deals with user input and JVM passwords in Encrypted PDF documents.
-             */
+            
+            // This code block deals with user input and JVM passwords in Encrypted PDF documents.
             if(pdf.isEncrypted()){
                 
-                int passwordCount = 0;        //Monitors how many attempts there have been to the password
-                closePasswordPrompt = false;  //Do not close the prompt box
+                int passwordCount = 0;        // Monitors how many attempts there have been to the password
+                closePasswordPrompt = false;  // Do not close the prompt box
                 
-                //While the PDF content is not viewable, repeat until the correct password is found
+                // While the PDF content is not viewable, repeat until the correct password is found
                 while(!pdf.isFileViewable() && !closePasswordPrompt) {
                     
                     /*
@@ -632,7 +616,7 @@ public class BaseViewerFX extends Application {
                         showPasswordPrompt(passwordCount);
                     }
                     
-                    //If we have a password, try and open the PdfFile again with the password
+                    // If we have a password, try and open the PdfFile again with the password
                     if (password != null) {
                         
                         if(isURL){
@@ -640,10 +624,9 @@ public class BaseViewerFX extends Application {
                         }else{
                             pdf.openPdfFile(input.getAbsolutePath());
                         }
-                        //pdf.setEncryptionPassword(password);
                         
                     }
-                    passwordCount += 1; //Increment he password attempt
+                    passwordCount += 1; // Increment he password attempt
                     
                 }
                 
@@ -674,11 +657,11 @@ public class BaseViewerFX extends Application {
      */
     private void showPasswordPrompt(final int passwordCount){
         
-        //Setup password prompt content
+        // Setup password prompt content
         final Text titleText = new Text("Password Request");
         final TextField inputPasswordField = new TextField("Please Enter Password");
         
-        //If the user has attempted to enter the password more than once, change the text
+        // If the user has attempted to enter the password more than once, change the text
         if(passwordCount >= 1){
             titleText.setText("Incorrect Password");
             inputPasswordField.setText("Please Try Again");
@@ -706,17 +689,16 @@ public class BaseViewerFX extends Application {
         final float pageH=pdf.getPdfPageData().getCropBoxHeight2D(currentPage);
         final int rotation = pdf.getPdfPageData().getRotation(currentPage);
         
-        //Handle how we auto fit the content to the page
+        // Handle how we auto fit the content to the page
         if(fitToPage == FitToPage.AUTO && (pageW < pageH)){
                 if(pdf.getPDFWidth()<pdf.getPDFHeight()) {
                     fitToX(FitToPage.HEIGHT);
-                }
-                else {
+                }else{
                     fitToX(FitToPage.WIDTH);
                 }
         }        
             
-        //Handle how we fit the content to the page width or height
+        // Handle how we fit the content to the page width or height
         if(fitToPage == FitToPage.WIDTH){
             final float width=(float) (scene.getWidth());
             if(rotation==90 || rotation==270){
@@ -739,9 +721,9 @@ public class BaseViewerFX extends Application {
     
     /**
      * Locate scaling value closest to current scaling setting
-     * @param scale
-     * @param scalings
-     * @return int
+     * @param scale float value of the scale value to check
+     * @param scalings float array holding scaling values
+     * @return int value of the index from scalings closest to the value of scale
      */
     private static int findClosestIndex(final float scale, final float[] scalings) {
         float currentMinDiff = Float.MAX_VALUE;
@@ -766,8 +748,10 @@ public class BaseViewerFX extends Application {
             final PdfPageData pageData = pdf.getPdfPageData();
             final int rotation = pageData.getRotation(currentPage); //rotation angle of current page
 
-            //Only call this when the page is displayed vertically, otherwise
-            //it will mess up the document cropping on side-ways documents.
+            /*
+             * Only call this when the page is displayed vertically, otherwise
+             * it will mess up the document cropping on side-ways documents.
+            */
             if (rotation == 0 || rotation == 180) {
                 pdf.setPageParameters(scale, currentPage);
             }
@@ -778,6 +762,7 @@ public class BaseViewerFX extends Application {
         } catch (final Exception e) {
             e.printStackTrace();
         }
+        
         fitToX(FitToPage.AUTO);
         updateNavButtons();
         setBorder();
@@ -874,8 +859,9 @@ public class BaseViewerFX extends Application {
     }
     
     private void adjustPagePosition(final Bounds nb){
-        // (new scrollbar width / 2) - (page width / 2)
+        
         double adjustment = ((nb.getWidth() / 2) - (group.getBoundsInLocal().getWidth() /2));
+        
         // Keep the group within the viewport of the scrollpane
         if(adjustment < 0) {
             adjustment = 0;
@@ -885,6 +871,7 @@ public class BaseViewerFX extends Application {
     
     // Set a space between the top toolbar and the page
     private void setBorder() {
+        
         // Why it's easier to use a dropshadow for this is beyond me, but here it is...
         final int rotation = pdf.getPdfPageData().getRotation(currentPage);
         final double x = (rotation == 90 || rotation == 270) ? 40 : 0;
@@ -893,7 +880,7 @@ public class BaseViewerFX extends Application {
         pdf.setEffect(pdfBorder); 
     }
     
-    public void addExternalHandler(PluginHandler customPluginHandle){
+    public void addExternalHandler(final PluginHandler customPluginHandle){
         this.customPluginHandle=customPluginHandle;
     }
 }

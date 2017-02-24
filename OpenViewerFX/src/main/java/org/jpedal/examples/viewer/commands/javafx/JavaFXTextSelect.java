@@ -41,25 +41,25 @@ import org.jpedal.examples.viewer.MouseMode;
 import org.jpedal.gui.GUIFactory;
 
 /**
- * This Class Enables TextSelectionMode when activated via the top drop-down menu, When
- * TextSelectionMode is enabled, PanMode functionality is disabled.
+ * This Class Enables TextSelectionMode when activated via the top drop-down menu, 
+ * When TextSelectionMode is enabled, PanMode functionality is disabled.
  */
 public class JavaFXTextSelect {
 
     public static void execute(final Object[] args, final GUIFactory currentGUI, final MouseMode mouseMode, final PdfDecoderInt decode_pdf) {
         if (args == null) {
 
-            //Disable Pan Mode
+            // Disable Pan Mode
             currentGUI.getMenuItems().setCheckMenuItemSelected(Commands.PANMODE, false);
             currentGUI.getMenuItems().setCheckMenuItemSelected(Commands.TEXTSELECT, true);
             currentGUI.getButtons().getButton(Commands.SNAPSHOT).setEnabled(true);
             
             currentGUI.setPannable(false);
 
-            //Set mouse mode
+            // Set mouse mode
             mouseMode.setMouseMode(MouseMode.MOUSE_MODE_TEXT_SELECT);
 
-            //Update buttons
+            // Update buttons
             final URL url = currentGUI.getGUICursor().getURLForImage("mouse_select.png");
             if (url != null) {
                 currentGUI.getButtons().getButton(Commands.MOUSEMODE).setIcon(url);

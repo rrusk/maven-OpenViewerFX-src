@@ -71,7 +71,7 @@ import org.jpedal.utils.Messages;
  * <p>We recommend you look at the full viewer as it is totally configurable and does everything for you.</p>
  * 
  */
-public class OpenViewerFX extends SharedViewer implements ViewerInt{
+public class OpenViewerFX extends SharedViewer {
 
     //flag if OS or commerical - DO NOT remove quotes as will break code
     public static boolean isOpenFX = OpenViewerFX.class.getResourceAsStream("/org/jpedal/examples/viewer/Open"+"Viewer"+"FX.class")!= null;

@@ -37,7 +37,7 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
 /**handle case with mix of CCITT1D and 2D*/
-public class CCITTMix extends CCITT2D implements CCITTDecoder {
+public class CCITTMix extends CCITT2D {
 
     private int fillBits;
 

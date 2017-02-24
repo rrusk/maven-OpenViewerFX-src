@@ -57,7 +57,7 @@ public abstract class PdfGlyph {
     public static final int FontBB_HEIGHT=4;
 
     /**draw the glyph*/
-	public void render(int text_fill_type, Graphics2D g2, float scaling, boolean isFormGlyph){
+	public void render(final int text_fill_type, final Graphics2D g2, final float scaling, final boolean isFormGlyph){
         
     }
 
@@ -71,7 +71,7 @@ public abstract class PdfGlyph {
 	/**
 	 * used by type3 glyphs to set colour if required
 	 */
-	public void setT3Colors(PdfPaint strokeColor, PdfPaint nonstrokeColor, boolean lockColours){
+	public void setT3Colors(final PdfPaint strokeColor, final PdfPaint nonstrokeColor, final boolean lockColours){
         
     }
 
@@ -86,7 +86,7 @@ public abstract class PdfGlyph {
         return null;
     }
 
-	public void setWidth(float width){
+	public void setWidth(final float width){
         
     }
 
@@ -95,11 +95,11 @@ public abstract class PdfGlyph {
      * @param type
      * @return
      */
-    int getFontBB(int type){
+    int getFontBB(final int type){
         return 0;
     }
 
-    public void setStrokedOnly(boolean b){
+    public void setStrokedOnly(final boolean b){
         
     }
 

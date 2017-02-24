@@ -99,8 +99,8 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
     }
     
     private Button createAnntoationHighlight(final FormObject form) {
-        Button but = setupAnnotationButton(form);
-        Color color = getAnnotationColor(form);
+        final Button but = setupAnnotationButton(form);
+        final Color color = getAnnotationColor(form);
 
         float[] quad = form.getFloatArray(PdfDictionary.QuadPoints);
         if (quad == null) {
@@ -135,15 +135,15 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
     }
     
     private Button createAnnotationFreeText(final FormObject form){
-        Button but = setupAnnotationButton(form);
+        final Button but = setupAnnotationButton(form);
         but.setText(form.getTextStreamValue(PdfDictionary.Contents));
         return but;
     }
                     
     private Button createAnnotationText(final FormObject form){
-        Button but = setupAnnotationButton(form);
-        String name = form.getName(PdfDictionary.Name);
-        BufferedImage commentIcon = getAnnotationTextIcon(form, name);
+        final Button but = setupAnnotationButton(form);
+        final String name = form.getName(PdfDictionary.Name);
+        final BufferedImage commentIcon = getAnnotationTextIcon(form, name);
         
         //Ensure sized correctly
         final float[] rect = form.getFloatArray(PdfDictionary.Rect);
@@ -158,7 +158,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
     
     private Pane createAnnotationPopup(final FormObject form) {
         
-        Pane comp = getPopupComponent(form, pageData.getCropBoxWidth(form.getPageNumber()));
+        final Pane comp = getPopupComponent(form, pageData.getCropBoxWidth(form.getPageNumber()));
         form.setGUIComponent(comp, FormFactory.JAVAFX);
         comp.setVisible(form.getBoolean(PdfDictionary.Open));
         
@@ -167,8 +167,8 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
     }
     
     private Button createAnnotationUnderline(final FormObject form) {
-        Button but = setupAnnotationButton(form);
-        Color color = getAnnotationColor(form);
+        final Button but = setupAnnotationButton(form);
+        final Color color = getAnnotationColor(form);
 
         float[] quad = form.getFloatArray(PdfDictionary.QuadPoints);
         if (quad == null) {
@@ -206,7 +206,7 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
     }
     
     private Button createAnnotationInk(final FormObject form) {
-        Button but = setupAnnotationButton(form);
+        final Button but = setupAnnotationButton(form);
 
         //we need this bit
         but.setTooltip(new Tooltip(form.getTextStreamValue(PdfDictionary.Contents)));
@@ -231,9 +231,9 @@ public class JavaFXFormFactory extends GenericFormFactory implements FormFactory
     }
     
     private Button createAnnotationStrikeOut(final FormObject form) {
-        Button but = setupAnnotationButton(form);
+        final Button but = setupAnnotationButton(form);
         
-        Color color = getAnnotationColor(form);
+        final Color color = getAnnotationColor(form);
 
         float[] quad = form.getFloatArray(PdfDictionary.QuadPoints);
         if (quad == null) {

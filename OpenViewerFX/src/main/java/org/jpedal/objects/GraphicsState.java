@@ -975,7 +975,7 @@ public class GraphicsState
     public void updateClip(final Object fxPath) {
         // Initialise when needed
         if(current_clip == null){
-             JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
+             final JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
             if(fxSupport!=null){
                 current_clip = fxSupport.getFXClip();
             }
@@ -996,13 +996,13 @@ public class GraphicsState
         return BMvalue;
     }
     
-    public void setBMValue(int bm){
+    public void setBMValue(final int bm){
         BMvalue = bm;
     }
 
     @Override
     public String toString() {
-        String str = "GraphicsState : BM:" + BMvalue + " op:" + op + " OP:" + OP
+        final String str = "GraphicsState : BM:" + BMvalue + " op:" + op + " OP:" + OP
                 + " opm:" + OPM + " sAlpha:" + strokeAlpha + " nsAlpha:" + nonstrokeAlpha
                 + " msAlpha:" + maxStrokeAlpha + " mnsAlpha:"+maxNonstrokeAlpha+" smask:"+SMask;
         return str;

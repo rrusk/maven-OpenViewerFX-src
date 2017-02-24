@@ -51,7 +51,7 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.StringUtils;
 
 
-public class RhinoParser extends DefaultParser implements ExpressionEngine{
+public class RhinoParser extends DefaultParser {
 
     /** version details of our library, so javascript knows what it can do,
      * also adds static adobe methods to javascript for execution if called
@@ -428,7 +428,7 @@ public class RhinoParser extends DefaultParser implements ExpressionEngine{
     private static String checkAndReplaceCode(final String searchFor, final String replaceWith,String script) {
         final int index = script.indexOf(searchFor);
         if(index!=-1){
-            String buf = script.substring(0, index) +
+            final String buf = script.substring(0, index) +
                     replaceWith +
                     checkAndReplaceCode(searchFor, replaceWith, script.substring(index + searchFor.length(), script.length()));
 

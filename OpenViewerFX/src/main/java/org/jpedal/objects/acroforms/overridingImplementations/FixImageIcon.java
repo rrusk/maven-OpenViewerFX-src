@@ -34,14 +34,13 @@ package org.jpedal.objects.acroforms.overridingImplementations;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import javax.swing.Icon;
 import javax.swing.SwingConstants;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.FormStream;
 import org.jpedal.objects.raw.PdfObject;
 
-public class FixImageIcon extends CustomImageIcon implements Icon, SwingConstants {
+public class FixImageIcon extends CustomImageIcon implements SwingConstants {
 
     private static final long serialVersionUID = 8946195842453749725L;
     

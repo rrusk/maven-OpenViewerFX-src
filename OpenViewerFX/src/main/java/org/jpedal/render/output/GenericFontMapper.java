@@ -379,7 +379,7 @@ public class GenericFontMapper implements org.jpedal.render.output.FontMapper {
     }
 
     @Override
-    public boolean equals(FontMapper fontMapper) {
+    public boolean equals(final FontMapper fontMapper) {
         return this.getStyle().equals(fontMapper.getStyle()) &&
                 this.getFont().equals(fontMapper.getFont()) &&
                 this.getWeight().equals(fontMapper.getWeight()) &&

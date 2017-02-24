@@ -75,9 +75,9 @@ public class BrokenRefTable {
         return root_id;
     }
 
-	private static String readRootObject(final RandomAccessBuffer pdf_datafile, final Offsets offset, String line, int i, String root_id) throws PdfSecurityException {
+	private static String readRootObject(final RandomAccessBuffer pdf_datafile, final Offsets offset, final String line, final int i, String root_id) throws PdfSecurityException {
 
-		int pointer;
+		final int pointer;
 
     	if (line.contains(" obj")) {
 
@@ -86,7 +86,7 @@ public class BrokenRefTable {
                 if (pointer > 0) {
                     offset.storeObjectOffset(Integer.parseInt(line.substring(0, pointer)), i, 1, false, true);
                 }
-            }catch(Exception e){
+            }catch(final Exception e){
                 LogWriter.writeLog("[PDF] Exception "+e+" Unable to manually read line "+line);
             }
         } else if (line.contains("/Root")) {
@@ -98,7 +98,7 @@ public class BrokenRefTable {
 		return root_id;
 	}
 
-	private static String readRootID(String line, RandomAccessBuffer pdf_datafile) {
+	private static String readRootID(String line, final RandomAccessBuffer pdf_datafile) {
 
     	int start = line.indexOf("/Root") + 5;
 
@@ -118,23 +118,23 @@ public class BrokenRefTable {
 	}
 
 	public static byte[] findFirstRootDict(final RandomAccessBuffer buffer) {		
-		long len;
+		final long len;
         try {
             buffer.seek(0);
 			len = buffer.length();
 			while (true) {
-				int p = (int) buffer.getFilePointer();
-				int x1 = buffer.read();
-				int x2 = buffer.read();
-				int x3 = buffer.read();
-				int x4 = buffer.read();
-				int x5 = buffer.read();
+				final int p = (int) buffer.getFilePointer();
+				final int x1 = buffer.read();
+				final int x2 = buffer.read();
+				final int x3 = buffer.read();
+				final int x4 = buffer.read();
+				final int x5 = buffer.read();
 				long ps = -1; // start of << 
 				long pe = -1;
 				if(x1 == 47 && x2 == 82 && x3 == 111 && x4 == 111 && x5 == 116){ //check for /Root
 					buffer.seek(p-5);
 					while(buffer.getFilePointer() > 0){
-						long ss = buffer.getFilePointer();
+						final long ss = buffer.getFilePointer();
 						int neg = 2;
 						if(buffer.read() == 60){
 							if(buffer.read() == 60){
@@ -148,9 +148,9 @@ public class BrokenRefTable {
 					buffer.seek(p+5);
 					int braces = 0;
 					while(buffer.getFilePointer() < len){
-						int pp = (int)buffer.getFilePointer();
-						int j1 = buffer.read();
-						int j2 = buffer.read();						
+						final int pp = (int)buffer.getFilePointer();
+						final int j1 = buffer.read();
+						final int j2 = buffer.read();
 						if(j1==60 && j2 == 60){
 							braces++;
 						}						
@@ -164,7 +164,7 @@ public class BrokenRefTable {
 						buffer.seek(pp+1);
 					}
 					if(pe >-1 && ps >-1){
-						byte[] bb = new byte[(int)(pe - ps)];
+						final byte[] bb = new byte[(int)(pe - ps)];
 						buffer.seek(ps);
 						buffer.read(bb);
 						return bb;

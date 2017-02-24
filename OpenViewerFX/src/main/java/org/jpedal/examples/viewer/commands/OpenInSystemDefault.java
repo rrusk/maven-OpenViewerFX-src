@@ -59,7 +59,7 @@ public class OpenInSystemDefault {
                         if (Desktop.isDesktopSupported()) {
                             try {
                                 Desktop.getDesktop().open(new File(commonValues.getSelectedFile()));
-                            } catch (IOException ex) {
+                            } catch (final IOException ex) {
                                 currentGUI.showMessageDialog(Messages.getMessage("PdfSystemDefault.error"));
                                 LogWriter.writeLog(Messages.getMessage("PdfSystemDefault.exception") + ex.getMessage());
                             }
@@ -68,7 +68,7 @@ public class OpenInSystemDefault {
                         }
                     }
                 }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfSystemDefault.error"));
                 LogWriter.writeLog(Messages.getMessage("PdfSystemDefault.exception") + ex.getMessage());
             }

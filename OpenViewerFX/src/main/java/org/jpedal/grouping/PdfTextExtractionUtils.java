@@ -120,7 +120,7 @@ public class PdfTextExtractionUtils {
      * @param pdf_data PdfData from the pdf to search
      * @param isXMLExtraction Boolean flag to specify if output should be xml
      */
-	public PdfTextExtractionUtils(final PdfData pdf_data, final boolean isXMLExtraction) {
+	protected PdfTextExtractionUtils(final PdfData pdf_data, final boolean isXMLExtraction) {
 		this.pdf_data = pdf_data;
         this.isXMLExtraction=isXMLExtraction;
 		colorExtracted=pdf_data.isColorExtracted();
@@ -966,7 +966,7 @@ public class PdfTextExtractionUtils {
 
     }
 
-    private void completeLine(boolean keepFont, boolean isWordlist, StringBuilder text, Fragment fragment, int i) {
+    private void completeLine(final boolean keepFont, final boolean isWordlist, final StringBuilder text, final Fragment fragment, final int i) {
         if (fragment.getWritingMode() == PdfData.HORIZONTAL_LEFT_TO_RIGHT || fragment.getWritingMode() == PdfData.HORIZONTAL_RIGHT_TO_LEFT) {
             if (fragment.getX1() < fragment.getX2()) {
                 addFragment(i, text, fragment.getX1(), fragment.getX2(), fragment.getY1(), fragment.getY2(),  keepFont, fragment, isWordlist);
@@ -978,7 +978,7 @@ public class PdfTextExtractionUtils {
             }
         }
 
-    private StringBuilder writeOnVerticalLineBreak(boolean keepFont, boolean isWordlist, float linePos, StringBuilder text, Fragment fragment, int i, String value) {
+    private StringBuilder writeOnVerticalLineBreak(final boolean keepFont, final boolean isWordlist, final float linePos, StringBuilder text, final Fragment fragment, final int i, final String value) {
         switch (fragment.getWritingMode()) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
                 addFragment(i, text, fragment.getX1(), linePos, fragment.getY1(), fragment.getY2(),  keepFont, fragment, isWordlist);
@@ -1003,7 +1003,7 @@ public class PdfTextExtractionUtils {
         return text;
     }
 
-    private float writeOut(boolean keepFont, boolean isWordlist, boolean debugSplit, float pt, String char_width, StringBuilder text, Fragment fragment, int i, String value, String textValue, boolean endsWithPunctuation) {
+    private float writeOut(final boolean keepFont, final boolean isWordlist, final boolean debugSplit, float pt, final String char_width, final StringBuilder text, final Fragment fragment, final int i, final String value, final String textValue, final boolean endsWithPunctuation) {
         //Remove final bit of the below if to fix issue in case 11542
         if (textValue.length() > 1 && textValue.indexOf(' ') != -1) {// && fragment.getX1()==pt){ //add in space values to start of next shape
             //count the spaces
@@ -1057,12 +1057,12 @@ public class PdfTextExtractionUtils {
         return pt;
     }
 
-    private StringBuilder writeOutFragment(boolean keepFont, boolean isWordlist, boolean debugSplit, float last_pt, float pt, String char_width, StringBuilder text, Fragment fragment, int i, int end, String value) {
+    private StringBuilder writeOutFragment(final boolean keepFont, final boolean isWordlist, final boolean debugSplit, final float last_pt, final float pt, final String char_width, StringBuilder text, final Fragment fragment, final int i, final int end, final String value) {
         if (debugSplit) {
             System.out.println("Break 1 is_broken");
         }
 
-        Fragment temp = new Fragment(pdf_data, end);
+        final Fragment temp = new Fragment(pdf_data, end);
         temp.setX1(fragment.getX1());
         temp.setY1(fragment.getY1());
         temp.setX2(fragment.getX2());
@@ -1077,7 +1077,7 @@ public class PdfTextExtractionUtils {
         return text;
     }
 
-    private void setFragmentCoord(Fragment fragment, float min, float max, float pt) {
+    private void setFragmentCoord(final Fragment fragment, final float min, final float max, final float pt) {
         if (fragment.getWritingMode() == PdfData.HORIZONTAL_LEFT_TO_RIGHT) {
             if ((fragment.getX1() < min || fragment.getX1() > max) && pt >= min) {
                 fragment.setX1(pt);
@@ -1096,7 +1096,7 @@ public class PdfTextExtractionUtils {
         }
     }
     
-    private static void alterCoordsBasedOnWritingMode(Fragment fragment, float value){
+    private static void alterCoordsBasedOnWritingMode(final Fragment fragment, final float value){
 
         switch (fragment.getWritingMode()) {
             case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
@@ -1115,7 +1115,7 @@ public class PdfTextExtractionUtils {
                 break;
         }
     }
-	private void initArrays(int count) {
+	private void initArrays(final int count) {
 		f_x1 = new float[count];
 		f_colorTag=new String[count];
 		hadSpace=new boolean[count];
@@ -1487,13 +1487,7 @@ public class PdfTextExtractionUtils {
             default:
                 throw new PdfException("Illegal value "+currentWritingMode+"for currentWritingMode");
         }
-
-		int item, i;
-
-		int itemsInTable = 0, items_added = 0;
-		//pointer to current element on each row
-		final int[] currentItem = new int[max_rows];
-
+        
 		final Vector_Int[] rowContents = new Vector_Int[max_rows];
 		final Vector_String alignments = new Vector_String(); //text alignment
 		final Vector_Float widths = new Vector_Float(); //cell widths
@@ -1505,7 +1499,104 @@ public class PdfTextExtractionUtils {
 			empty_cell = "";
 		}
 
-		//set number of items on each line, column count and populate empty rows
+        final int[] itemCount = loadTableItemData(rowContents, alignments, widths, cell_x1, l_x1, l_x2);
+        
+		//now assemble rows
+		for (int row = 0; row < max_rows; row++) {
+            final StringBuilder line_content = new StringBuilder(100);
+			
+			int count = rowContents[row].size() - 1;
+			master = ((Vector_Int) lines.elementAt(row)).elementAt(0);
+
+			for (int i = 0; i < count; i++) {
+				final int item = rowContents[row].elementAt(i);
+
+				if (isXHTML) {
+
+					//get width
+					float current_width = widths.elementAt(i);
+					final String current_alignment = alignments.elementAt(i);
+					int test, colspan = 1, pointer = i + 1;
+
+					if (item != -1) {
+
+						//look for colspan
+						while (true) {
+							test = rowContents[row].elementAt(i + 1);
+							if ((test != -1) | (count == i + 1)) {
+                                break;
+                            }
+
+							//break if over another col - roll up single value on line
+							if (itemCount[row] > 1 && (cell_x1.elementAt(i + 1) > l_x2[item])) {
+                                break;
+                            }
+
+							count--;
+							rowContents[row].removeElementAt(i + 1);
+							colspan++;
+
+							//update width
+							current_width += widths.elementAt(pointer);
+							pointer++;
+						}
+					}
+					line_content.append("<td");
+
+					if (keep_alignment_information) {
+						line_content.append(" align='");
+						line_content.append(current_alignment);
+						line_content.append('\'');
+						if (colspan > 1) {
+                            line_content.append(" colspan='").append(colspan).append('\'');
+                        }
+					}
+
+					if (keep_width_information) {
+                        line_content.append(" width='").append((int) current_width).append('\'');
+                    }
+
+					line_content.append(" nowrap>");
+					if (item == -1) {
+                        line_content.append(empty_cell);
+                    } else {
+                        line_content.append(content[item]);
+                    }
+					line_content.append("</td>");
+
+				} else { //csv
+					if (item == -1) { //empty col
+                        line_content.append("\"\",");
+                    } else{ //value
+						line_content.append('\"');
+						line_content.append(content[item]);
+						line_content.append("\",");
+					}
+				}
+
+				//merge to update other values
+				if ((item != -1) && (master != item)) { //merge tracks the shape
+                    merge(master,item,separator,false);
+                }
+
+			}
+			//substitute our 'hand coded' value
+			content[master] = line_content;
+
+		}
+	}
+
+    /**
+     * Split any overlap in items and return the item count
+     */
+    private int[] loadTableItemData(final Vector_Int[] rowContents, final Vector_String alignments, final Vector_Float widths, final Vector_Float cell_x1, final float[] l_x1, final float[] l_x2){
+        
+		int itemsInTable = 0, items_added = 0, item, i;
+		
+        //pointer to current element on each row
+		final int[] currentItem = new int[max_rows];
+
+        //set number of items on each line, column count and populate empty rows
 		final int[] itemCount = new int[max_rows];
 		for (i = 0; i < max_rows; i++) {
 			itemCount[i] = ((Vector_Int) lines.elementAt(i)).size() - 1;
@@ -1517,8 +1608,8 @@ public class PdfTextExtractionUtils {
 			currentItem[i] = 0;
 			rowContents[i] = new Vector_Int(20);
 		}
-
-		//now work through and split any overlapping items until all done
+        
+        //now work through and split any overlapping items until all done
 		while (true) {
 
 			//size of column and pointers
@@ -1663,92 +1754,9 @@ public class PdfTextExtractionUtils {
                 break;
             }
 		}
-
-		//now assemble rows
-		for (int row = 0; row < max_rows; row++) {
-            final StringBuilder line_content = new StringBuilder(100);
-			
-			int count = rowContents[row].size() - 1;
-			master = ((Vector_Int) lines.elementAt(row)).elementAt(0);
-
-			for (i = 0; i < count; i++) {
-				item = rowContents[row].elementAt(i);
-
-				if (isXHTML) {
-
-					//get width
-					float current_width = widths.elementAt(i);
-					final String current_alignment = alignments.elementAt(i);
-					int test, colspan = 1, pointer = i + 1;
-
-					if (item != -1) {
-
-						//look for colspan
-						while (true) {
-							test = rowContents[row].elementAt(i + 1);
-							if ((test != -1) | (count == i + 1)) {
-                                break;
-                            }
-
-							//break if over another col - roll up single value on line
-							if (itemCount[row] > 1 && (cell_x1.elementAt(i + 1) > l_x2[item])) {
-                                break;
-                            }
-
-							count--;
-							rowContents[row].removeElementAt(i + 1);
-							colspan++;
-
-							//update width
-							current_width += widths.elementAt(pointer);
-							pointer++;
-						}
-					}
-					line_content.append("<td");
-
-					if (keep_alignment_information) {
-						line_content.append(" align='");
-						line_content.append(current_alignment);
-						line_content.append('\'');
-						if (colspan > 1) {
-                            line_content.append(" colspan='").append(colspan).append('\'');
-                        }
-					}
-
-					if (keep_width_information) {
-                        line_content.append(" width='").append((int) current_width).append('\'');
-                    }
-
-					line_content.append(" nowrap>");
-					if (item == -1) {
-                        line_content.append(empty_cell);
-                    } else {
-                        line_content.append(content[item]);
-                    }
-					line_content.append("</td>");
-
-				} else { //csv
-					if (item == -1) { //empty col
-                        line_content.append("\"\",");
-                    } else{ //value
-						line_content.append('\"');
-						line_content.append(content[item]);
-						line_content.append("\",");
-					}
-				}
-
-				//merge to update other values
-				if ((item != -1) && (master != item)) { //merge tracks the shape
-                    merge(master,item,separator,false);
-                }
-
-			}
-			//substitute our 'hand coded' value
-			content[master] = line_content;
-
-		}
-	}
-
+        return itemCount;
+    }
+    
 	/**
 	 * work through data and create a set of rows and return an object with
 	 * refs for each line
@@ -2351,7 +2359,7 @@ public class PdfTextExtractionUtils {
 	 */
     private int getWritingMode(final int[] items, final int count) {
 
-        int[] counts = new int[4];
+        final int[] counts = new int[4];
         for (int j = 0; j < count; j++) {
             final int c=items[j];
 
@@ -3030,11 +3038,11 @@ public class PdfTextExtractionUtils {
         String raw, currentColor;
         int text_length, mode;
         
-        Fragment(PdfData pdf_data, int index){
+        Fragment(final PdfData pdf_data, final int index){
             loadData(pdf_data, index);
         }
         
-        private void loadData(PdfData pdf_data, int index){
+        private void loadData(final PdfData pdf_data, final int index){
             //extract values
             character_spacing = pdf_data.f_character_spacing[index];
             x1 = pdf_data.f_x1[index];
@@ -3059,9 +3067,9 @@ public class PdfTextExtractionUtils {
         public int getWritingMode(){return mode;}
         public int getTextLength(){return text_length;}
         
-        public void setX1(float value){x1=value;}
-        public void setY1(float value){y1=value;}
-        public void setX2(float value){x2=value;}
-        public void setY2(float value){y2=value;}
+        public void setX1(final float value){x1=value;}
+        public void setY1(final float value){y1=value;}
+        public void setX2(final float value){x2=value;}
+        public void setY2(final float value){y2=value;}
     }
 }

@@ -42,18 +42,15 @@ import java.awt.geom.Point2D;
  */
 public class ShadingUtils {
 
-    public static Point2D findIntersect(Point2D p1, Point2D p2, Point2D p3, Point2D p4) {
-        double xD1, yD1, xD2, yD2, xD3, yD3;
-        //double dot, deg, len1, len2;
-        double ua, div;
+    public static Point2D findIntersect(final Point2D p1, final Point2D p2, final Point2D p3, final Point2D p4) {
 
         // calculate differences  
-        xD1 = p2.getX() - p1.getX();
-        xD2 = p4.getX() - p3.getX();
-        yD1 = p2.getY() - p1.getY();
-        yD2 = p4.getY() - p3.getY();
-        xD3 = p1.getX() - p3.getX();
-        yD3 = p1.getY() - p3.getY();
+        final double xD1 = p2.getX() - p1.getX();
+        final double xD2 = p4.getX() - p3.getX();
+        final double yD1 = p2.getY() - p1.getY();
+        final double yD2 = p4.getY() - p3.getY();
+        final double xD3 = p1.getX() - p3.getX();
+        final double yD3 = p1.getY() - p3.getY();
 
         //len1 = Math.sqrt(xD1 * xD1 + yD1 * yD1);
         //len2 = Math.sqrt(xD2 * xD2 + yD2 * yD2);
@@ -61,9 +58,10 @@ public class ShadingUtils {
         //deg = dot / (len1 * len2);
         // find intersection Pt between two lines  
         //Point pt = new Point(0, 0);
-        div = yD2 * xD1 - xD2 * yD1;
-        ua = (xD2 * yD3 - yD2 * xD3) / div;
+        final double div = yD2 * xD1 - xD2 * yD1;
+        final double ua = (xD2 * yD3 - yD2 * xD3) / div;
         //ub = (xD1 * yD3 - yD1 * xD3) / div;
+        
         return new Point2D.Double((p1.getX() + ua * xD1), (p1.getY() + ua * yD1));
     }
 
@@ -120,18 +118,18 @@ public class ShadingUtils {
      * @param ep end point
      * @return
      */
-    public static Point2D findDistancedPoint(double t, Point2D sp, Point2D c1, Point2D c2, Point2D ep) {
+    public static Point2D findDistancedPoint(final double t, final Point2D sp, final Point2D c1, final Point2D c2, final Point2D ep) {
         //dont use Math.pow;
-        double d = 1 - t;
-        double dCube = d * d * d;
-        double dSqr = d * d;
-        double tCube = t * t * t;
-        double tSqr = t * t;
-        double xCoord = (dCube * sp.getX())
+        final double d = 1 - t;
+        final double dCube = d * d * d;
+        final double dSqr = d * d;
+        final double tCube = t * t * t;
+        final double tSqr = t * t;
+        final double xCoord = (dCube * sp.getX())
                 + (3 * t * dSqr * c1.getX())
                 + (3 * tSqr * d * c2.getX())
                 + (tCube * ep.getX());
-        double yCoord = (dCube * sp.getY())
+        final double yCoord = (dCube * sp.getY())
                 + (3 * t * dSqr * c1.getY())
                 + (3 * tSqr * d * c2.getY())
                 + (tCube * ep.getY());
@@ -139,13 +137,13 @@ public class ShadingUtils {
 
     }
 
-    public static int getRotationFromAffine(AffineTransform affine) {
+    public static int getRotationFromAffine(final AffineTransform affine) {
         return (int) Math.toDegrees(Math.atan2(affine.getShearX(), affine.getScaleX()));
     }
 
-    public static final float[] getPixelPDF(boolean isPrinting, int rotation, 
-            float x, float y, int xStart, int yStart, float offX, float offY, 
-            float minX, float pageHeight, float scaling) {
+    public static final float[] getPixelPDF(final boolean isPrinting, final int rotation,
+                                            final float x, final float y, final int xStart, final int yStart, final float offX, final float offY,
+                                            final float minX, final float pageHeight, final float scaling) {
 
         final float pdfX;
         final float pdfY;
@@ -177,8 +175,8 @@ public class ShadingUtils {
         return new float[]{0, 0};
     }
     
-    public static GeneralPath getPathFromBBox(float[] rawBBox){
-        GeneralPath rawPath = new GeneralPath();
+    public static GeneralPath getPathFromBBox(final float[] rawBBox){
+        final GeneralPath rawPath = new GeneralPath();
         rawPath.moveTo(rawBBox[0], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[3]);
@@ -188,8 +186,8 @@ public class ShadingUtils {
         return rawPath;
     }
     
-    public static float[] getPdfCoords(AffineTransform inversedAffine, int x, int y, int xStart, int yStart) {
-        float[] ff = new float[2];
+    public static float[] getPdfCoords(final AffineTransform inversedAffine, final int x, final int y, final int xStart, final int yStart) {
+        final float[] ff = new float[2];
         ff[0] = x + xStart;
         ff[1] = y + yStart;
         inversedAffine.transform(ff, 0, ff, 0, 1);

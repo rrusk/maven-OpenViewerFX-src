@@ -37,10 +37,8 @@ import java.awt.image.BufferedImage;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.render.T3Display;
-import org.jpedal.render.T3Renderer;
 
-public class PatternDisplay extends T3Display implements T3Renderer
-{
+public class PatternDisplay extends T3Display {
     
     
     private BufferedImage lastImg;

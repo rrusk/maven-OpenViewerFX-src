@@ -59,12 +59,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.ThumbnailDecoder;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.objects.PdfPageData;
+import org.jpedal.utils.Messages;
 
 /**
  * Used in GUI example code.
@@ -429,9 +431,24 @@ public class JavaFXThumbnailPanel extends Tab implements GUIThumbnailPanel {
         gc.setFill(Color.WHITE);
         gc.fillRect(0.2, 0.2, w-.5, h-.5);
         gc.setFill(Color.BLACK);
-        gc.strokeRect(0.2, 0.2, w-.5, h-.5);
-        gc.strokeLine(0, 0, w, h);
-        gc.strokeLine(0, h, w, 0);
+        
+        final Text line1 = new Text(Messages.getMessage("PdfDefaultThumbnail.line1"));
+        final Text line2 = new Text(Messages.getMessage("PdfDefaultThumbnail.line2"));
+        final Text line3 = new Text(Messages.getMessage("PdfDefaultThumbnail.line3"));
+        final Text line4 = new Text(Messages.getMessage("PdfDefaultThumbnail.line4"));
+        
+        final int line1Inset = (int)(w/2 - (line1.getBoundsInLocal().getWidth()/2));
+        final int line2Inset = (int)(w/2 - (line2.getBoundsInLocal().getWidth()/2));
+        final int line3Inset = (int)(w/2 - (line3.getBoundsInLocal().getWidth()/2));
+        final int line4Inset = (int)(w/2 - (line4.getBoundsInLocal().getWidth()/2));
+        
+        final double fontHeight = line1.getBoundsInLocal().getHeight();
+        final double inset = (h-(fontHeight*4))/2;
+        
+        gc.fillText(line1.getText(), line1Inset, inset+fontHeight);
+        gc.fillText(line2.getText(), line2Inset, inset+(fontHeight*2));
+        gc.fillText(line3.getText(), line3Inset, inset+(fontHeight*3));
+        gc.fillText(line4.getText(), line4Inset, inset+(fontHeight*4));
         
         return canvas.snapshot(null, null);
 	}

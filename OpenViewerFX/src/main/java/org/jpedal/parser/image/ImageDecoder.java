@@ -180,7 +180,7 @@ public class ImageDecoder extends BaseDecoder{
         return decodeColorData;
     }
     
-    public BufferedImage processImageXObject(PdfObject XObject, String image_name, byte[] objectData, final String details) throws PdfException {
+    public BufferedImage processImageXObject(final PdfObject XObject, String image_name, byte[] objectData, final String details) throws PdfException {
         
         BufferedImage image=null;
         
@@ -202,7 +202,7 @@ public class ImageDecoder extends BaseDecoder{
          * New code to apply SMask and Mask to data
          * (note old isMask)
          */
-        byte[] convertedData=XObject.getConvertedData();
+        final byte[] convertedData=XObject.getConvertedData();
         
         if(convertedData!=null){ //reuse converted mask data
             objectData=convertedData;
@@ -236,9 +236,9 @@ public class ImageDecoder extends BaseDecoder{
                 
                 if(newSMask!=null){
                     ///WE NEED TO CONVERT JPG to raw DATA in smask as well
-                    ImageData smaskImageData=new ImageData(newSMask, null);
+                    final ImageData smaskImageData=new ImageData(newSMask, null);
                     smaskImageData.getFilter(newSMask);
-                    GenericColorSpace maskColorSpace = setupXObjectColorspace(newSMask, smaskImageData);
+                    final GenericColorSpace maskColorSpace = setupXObjectColorspace(newSMask, smaskImageData);
                     byte[] maskData =currentPdfFile.readStream(newSMask,true,true,false, false,false, newSMask.getCacheName(currentPdfFile.getObjectReader()));
                     
                               
@@ -270,7 +270,7 @@ public class ImageDecoder extends BaseDecoder{
                       //  imageData.setDepth(8);
                     }
                     ///WE NEED TO CONVERT JPG to raw DATA in mask as well
-                    ImageData maskImageData;
+                    final ImageData maskImageData;
                     if(newMask==null){
                         maskImageData=new ImageData(XObject, objectData);
                     }else{
@@ -342,16 +342,16 @@ public class ImageDecoder extends BaseDecoder{
         
     }
     
-    private static BufferedImage getIndexedMaskImage(byte[] index, ImageData imageData, int[] maskArray) {
-        int d = imageData.getDepth();
+    private static BufferedImage getIndexedMaskImage(final byte[] index, final ImageData imageData, final int[] maskArray) {
+        final int d = imageData.getDepth();
         int p = 0;
         int c = 0;
 
-        boolean[] invisible = new boolean[1 << d];       
+        final boolean[] invisible = new boolean[1 << d];
         
         for (int i = 0; i < maskArray.length; i+=2) {
-            int start = maskArray[i];
-            int end = maskArray[i+1];
+            final int start = maskArray[i];
+            final int end = maskArray[i+1];
             
             if(start==end){
                 invisible[start] = true;
@@ -362,22 +362,22 @@ public class ImageDecoder extends BaseDecoder{
             }
         }       
 
-        int[] indexColors = new int[index.length / 3];
+        final int[] indexColors = new int[index.length / 3];
 
         for (int i = 0; i < indexColors.length; i++) {
             indexColors[i] = (255 << 24) | ((index[c++] & 0xff) << 16) | ((index[c++] & 0xff) << 8) | (index[c++] & 0xff);
         }
 
-        BitReader reader = new BitReader(imageData.getObjectData(), d < 8);
+        final BitReader reader = new BitReader(imageData.getObjectData(), d < 8);
 
-        BufferedImage img = new BufferedImage(imageData.getWidth(), imageData.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        int output[] = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+        final BufferedImage img = new BufferedImage(imageData.getWidth(), imageData.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        final int[] output = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
 
-        int imageDim = imageData.getWidth() * imageData.getHeight();
-        int w = imageData.getWidth();
+        final int imageDim = imageData.getWidth() * imageData.getHeight();
+        final int w = imageData.getWidth();
         int wc = 0;
         for (int i = 0; i < imageDim; i++) {
-            int v = reader.getPositive(d);
+            final int v = reader.getPositive(d);
             if(!invisible[v]){
                 output[p++] =  indexColors[v];
             }else{
@@ -385,7 +385,7 @@ public class ImageDecoder extends BaseDecoder{
             }
             wc++;
             if (wc == w) {
-                int balance = 8 - (reader.getPointer() % 8);
+                final int balance = 8 - (reader.getPointer() % 8);
                 wc = 0;
                 if (balance != 8) {
                     reader.getPositive(balance);
@@ -395,7 +395,7 @@ public class ImageDecoder extends BaseDecoder{
         return img;
     } 
 
-    private void setImageInfo(final ImageData imageData, final String details, GenericColorSpace decodeColorData, BufferedImage image) {
+    private void setImageInfo(final ImageData imageData, final String details, final GenericColorSpace decodeColorData, final BufferedImage image) {
         
         final int width=imageData.getWidth();
         final int height=imageData.getHeight();
@@ -511,10 +511,10 @@ public class ImageDecoder extends BaseDecoder{
             if(parserOptions.imagesNeeded()){
                 
                 //get initial values
-                float x = image_transformation.getImageX();
-                float y = image_transformation.getImageY();
-                float w = image_transformation.getImageW();
-                float h = image_transformation.getImageH();
+                final float x = image_transformation.getImageX();
+                final float y = image_transformation.getImageY();
+                final float w = image_transformation.getImageW();
+                final float h = image_transformation.getImageH();
 
                 pdfImages.setImageInfo(currentImage, parserOptions.getPageNumber(), x, y, w, h);
             }
@@ -635,7 +635,7 @@ public class ImageDecoder extends BaseDecoder{
         } else if(imageData.isDCT()) {
                 
             int adobeColorTransform = 1;
-            PdfObject decodeParms=XObject.getDictionary(PdfDictionary.DecodeParms);
+            final PdfObject decodeParms=XObject.getDictionary(PdfDictionary.DecodeParms);
             if(decodeParms!=null){
                 adobeColorTransform = decodeParms.getInt(PdfDictionary.ColorTransform);
             }
@@ -649,7 +649,7 @@ public class ImageDecoder extends BaseDecoder{
                     imageData.setCompCount(3);
                     imageData.setDecodeArray(null);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
 
                 LogWriter.writeLog("[PDF] Exception " + e + " Processing JPEG data in ImageDecoder");
 
@@ -718,8 +718,8 @@ public class ImageDecoder extends BaseDecoder{
         //get sampling and exit from this code as we don't need to go further
         if(getSamplingOnly){
 
-            int w=imageData.getWidth();
-            int h=imageData.getHeight();
+            final int w=imageData.getWidth();
+            final int h=imageData.getHeight();
 
             if(imageData.getpX()>0 && imageData.getpY()>0){
                 final float scaleX=(((float)w)/imageData.getpX());
@@ -788,44 +788,50 @@ public class ImageDecoder extends BaseDecoder{
         }
 
         if (maskCol!=null && gs.nonstrokeColorSpace.getColor().isTexture()) {  //case 19095 vistair
-
-            float mm[][] = gs.CTM;
-            int w=imageData.getWidth();
-            int h=imageData.getHeight();
-
-            AffineTransform affine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
-
-            BufferedImage temp = ((PatternColorSpace)gs.nonstrokeColorSpace).getRawImage(affine);
-            BufferedImage scrap = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-            if(temp!=null){
-                TexturePaint tp = new TexturePaint(temp, new Rectangle(0,0,temp.getWidth(),temp.getHeight()));
-                Graphics2D g2 = scrap.createGraphics();
-                g2.setPaint(tp);
-                Rectangle rect = new Rectangle(0,0,w,h);
-                g2.fill(rect);
-            }
-
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    if (image.getRGB(x, y) == -16777216) { //255 0 0 0
-                        int pRGB = scrap.getRGB(x, y);
-                        image.setRGB(x, y, pRGB);
-                    }
-                }
-            }
+            convertTextureToImage(imageData, image);
         }
+        
+        //image=ImageDataToJavaImage.sharpen(image);
         
         return image;
     }
 
-    private int setSampling(final ImageData imageData, GenericColorSpace decodeColorData) {
+    private void convertTextureToImage(final ImageData imageData, final BufferedImage image) {
+        
+        final float[][] mm = gs.CTM;
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
+        
+        final AffineTransform affine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
+        
+        final BufferedImage temp = ((PatternColorSpace)gs.nonstrokeColorSpace).getRawImage(affine);
+        final BufferedImage scrap = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        
+        if(temp!=null){
+            final TexturePaint tp = new TexturePaint(temp, new Rectangle(0,0,temp.getWidth(),temp.getHeight()));
+            final Graphics2D g2 = scrap.createGraphics();
+            g2.setPaint(tp);
+            final Rectangle rect = new Rectangle(0,0,w,h);
+            g2.fill(rect);
+        }
+        
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                if (image.getRGB(x, y) == -16777216) { //255 0 0 0
+                    final int pRGB = scrap.getRGB(x, y);
+                    image.setRGB(x, y, pRGB);
+                }
+            }
+        }
+    }
+
+    private int setSampling(final ImageData imageData, final GenericColorSpace decodeColorData) {
         
         //see what we could reduce to and still be big enough for page
         int sampling=1;
         
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
         
         int newW=w;
         int newH=h;
@@ -875,8 +881,8 @@ public class ImageDecoder extends BaseDecoder{
     
     private void setDownsampledImageSize(final ImageData imageData, final PdfObject XObject, final float multiplyer, final GenericColorSpace decodeColorData) {
         
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
         
         if(parserOptions.isPrinting() && SamplingFactory.isPrintDownsampleEnabled && w<4000){
             imageData.setpX(pageData.getCropBoxWidth(parserOptions.getPageNumber())*4);
@@ -947,6 +953,7 @@ public class ImageDecoder extends BaseDecoder{
             imageData.setpX(0);
             imageData.setpY(0);
         }
+       
     } 
     
     

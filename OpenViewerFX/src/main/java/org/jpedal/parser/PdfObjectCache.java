@@ -260,11 +260,11 @@ public class PdfObjectCache {
         }
     }
 
-    private boolean cannotFullyLoadObjectAndChildren(final String id, byte[] data, final int type, final PdfFileReader objectReader, final PdfObject resObj) {
+    private boolean cannotFullyLoadObjectAndChildren(final String id, final byte[] data, final int type, final PdfFileReader objectReader, final PdfObject resObj) {
         
         //System.out.println(id+" "+" "+new String(data));
         
-        PdfObject pdfObject=ObjectFactory.createObject(type, 0, 0, type);
+        final PdfObject pdfObject=ObjectFactory.createObject(type, 0, 0, type);
         pdfObject.setStatus(PdfObject.UNDECODED_DIRECT);
         pdfObject.setUnresolvedData(data, type);
         pdfObject.isDataExternal(true);

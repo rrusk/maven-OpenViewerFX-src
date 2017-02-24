@@ -324,7 +324,7 @@ public class JavaFXShape implements Serializable, PdfShape
     }
 
     @Override
-    public void setShape(Shape currentShape) {
+    public void setShape(final Shape currentShape) {
         throw new UnsupportedOperationException("setShape Not supported yet."); 
     }
 

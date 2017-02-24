@@ -37,7 +37,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.StringTokenizer;
-import javax.swing.Icon;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import org.jpedal.io.PdfObjectReader;
@@ -47,7 +46,7 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.StringUtils;
 
 /** this class is used to display the text fields in the defined font, but is used for readonly fields only. */
-public class ReadOnlyTextIcon extends CustomImageIcon implements Icon, SwingConstants {
+public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants {
     
     /** used to tell the paint method that we need to scale up the image for printing */
     private boolean currentlyPrinting;
@@ -359,7 +358,7 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements Icon, SwingCons
                     }
                 }
                 //Construction alignment string
-                String textAlignment = alignmentX+" "+alignmentY+" Td ";
+                final String textAlignment = alignmentX+" "+alignmentY+" Td ";
                 
                 this.fullCommandString = preFontStream+fontName+fontSize+fontCommand+
                         betweenFontAndTextStream+ textAlignment+'(' +text+")Tj "+afterTextStream;

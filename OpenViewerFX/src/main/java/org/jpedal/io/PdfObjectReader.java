@@ -77,6 +77,9 @@ public class PdfObjectReader {
     
     RandomAccessBuffer pdf_datafile;
     
+    /**Collection object*/
+//    private PdfObject collectionObj;
+    
     PdfObject pageObj;
     
     public PdfObjectReader() {}
@@ -141,10 +144,16 @@ public class PdfObjectReader {
      */
     public PdfObject getPDFObject(final int key) {
         
-        if(key==PdfDictionary.Encrypt){
-            return objectReader.encyptionObj;
-        }else {
-            throw new RuntimeException("Access to " + key + " not supported");
+        switch(key){
+            
+            case PdfDictionary.Encrypt:
+                return objectReader.encyptionObj;
+                
+//            case PdfDictionary.Collection:
+//                return collectionObj;
+                
+            default:
+                throw new RuntimeException("Access to " + key + " not supported");
         }
     }
     
@@ -214,6 +223,8 @@ public class PdfObjectReader {
         
         //this.objData=null;
         //this.lastRef=null;
+        
+//        collectionObj = null;
         
         pageLabels=null;
         
@@ -490,7 +501,7 @@ public class PdfObjectReader {
         
     }
 
-    public void readDocumentMetaData(PdfObject pdfObject, Javascript jsHandler) {
+    public void readDocumentMetaData(final PdfObject pdfObject, final Javascript jsHandler) {
 
         //check read as may be used for Dest
         PdfObject nameObj = pdfObject.getDictionary(PdfDictionary.Names);
@@ -508,16 +519,19 @@ public class PdfObjectReader {
         
         //any PageLabels
         pageObj = pdfObject.getDictionary(PdfDictionary.PageLabels);
+        
+        //any collection
+//        collectionObj = pdfObject.getDictionary(PdfDictionary.Collection);
        
     }
     
-    public void readPageLabels(int pageCount) {
+    public void readPageLabels(final int pageCount) {
         
         if(pageObj!=null){            
             pageLabels=new PageLabels(this.objectReader,pageCount);
             try{
                 pageLabels.readLabels(pageObj);
-            }catch(Exception e){
+            }catch(final Exception e){
                 //issue with values so use raw logical sequence
                 pageLabels=null;
                 LogWriter.writeLog(e.toString());

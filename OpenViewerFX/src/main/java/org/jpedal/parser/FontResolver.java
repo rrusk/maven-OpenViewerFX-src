@@ -67,7 +67,7 @@ public class FontResolver {
         if(restoredFont==null){
 
             PdfObject newFont=null;
-            byte[] newFontData= cache.unresolvedFonts.get(fontID);
+            final byte[] newFontData= cache.unresolvedFonts.get(fontID);
             if(newFontData==null){ //once decoded remove from this list of stub font objects 
                 cache.directFonts.remove(fontID);
             }else{
@@ -91,7 +91,7 @@ public class FontResolver {
 
                 try {
                     
-                    org.jpedal.render.DynamicVectorRenderer current= pdfStreamDecoder.current;
+                    final org.jpedal.render.DynamicVectorRenderer current= pdfStreamDecoder.current;
                     
                     boolean fallbackToArial=false;
                     
@@ -128,7 +128,7 @@ public class FontResolver {
         return restoredFont;
     }
 
-    private static String resolveFlattenedFont(String fontID, PdfObject newFont) {
+    private static String resolveFlattenedFont(String fontID, final PdfObject newFont) {
         String name= StandardFonts.expandName(fontID.replace(",", "-"));
         //if font not present then use a replacement
         if(FontMappings.fontSubstitutionAliasTable.get(name)==null && FontMappings.fontSubstitutionTable!=null && FontMappings.fontSubstitutionTable.get(name)==null){

@@ -56,9 +56,9 @@ public class FormObject extends PdfObject{
     private static Color FieldsHightlightColor;
 
     static{
-        String cs = System.getProperty("org.jpedal.FieldsHighlightColor");
+        final String cs = System.getProperty("org.jpedal.FieldsHighlightColor");
         if(cs != null){
-            float[] ff = generateFloatFromString(cs);                    
+            final float[] ff = generateFloatFromString(cs);
             FieldsHightlightColor = new Color((int)ff[0],(int)ff[1],(int)ff[2]);
         }
     }
@@ -1847,6 +1847,7 @@ public class FormObject extends PdfObject{
     	return isXFAObject;
     }
 
+    @SuppressWarnings("OverlyLongMethod")
     @Override
     public PdfObject duplicate() {
         final FormObject newObject = new FormObject();
@@ -2490,7 +2491,7 @@ public class FormObject extends PdfObject{
         return flags;
     }
     
-    public void setFieldFlags(int pos, boolean value){
+    public void setFieldFlags(final int pos, final boolean value){
         if(flags==null) {
             flags = new boolean[32];
         }
@@ -2783,7 +2784,7 @@ public class FormObject extends PdfObject{
         return Farray;
 	}
         
-        public void setCharactersitics(int pos, boolean value){
+        public void setCharactersitics(final int pos, final boolean value){
             getCharacteristics();
             Farray[pos] = value;
         }

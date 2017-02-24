@@ -185,7 +185,7 @@ public class JavaFXExtractText extends GUIExtractText {
     }
 
     private static String updateSelection(final Toggle selected, final boolean isXML, final PdfDecoderInt decode_pdf, final Values commonValues, final GUIFactory currentGUI) {
-        StringBuilder finalValue = new StringBuilder(""); // Total data extracted so far
+        final StringBuilder finalValue = new StringBuilder(""); // Total data extracted so far
         try {
 
             final PdfPageData page_data = decode_pdf.getPdfPageData();

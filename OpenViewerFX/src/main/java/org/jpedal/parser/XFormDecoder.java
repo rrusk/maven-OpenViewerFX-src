@@ -185,8 +185,8 @@ public class XFormDecoder {
                 }
 
                 //preserve colors
-                int mainStrokeColorData =  pdfStreamDecoder.gs.strokeColorSpace.getColor().getRGB();
-                int mainnonStrokeColorData = pdfStreamDecoder.gs.nonstrokeColorSpace.getColor().getRGB();
+                final int mainStrokeColorData =  pdfStreamDecoder.gs.strokeColorSpace.getColor().getRGB();
+                final int mainnonStrokeColorData = pdfStreamDecoder.gs.nonstrokeColorSpace.getColor().getRGB();
 
                 //set form line width if appropriate
                 if(lineWidthInForm>0) {
@@ -220,7 +220,7 @@ public class XFormDecoder {
                 /*
                  * see if bounding box and set
                  */
-                float[] BBox= XObject.getFloatArray(PdfDictionary.BBox);
+                final float[] BBox= XObject.getFloatArray(PdfDictionary.BBox);
                 Area clip=null;
                 boolean clipChanged=false;
                 
@@ -400,7 +400,7 @@ public class XFormDecoder {
     }
 
     static void processXFormAsImage(final PdfObject XObject, final PdfStreamDecoder pdfStreamDecoder) {
-        float[] BBox;
+        final float[] BBox;
         BBox= XObject.getFloatArray(PdfDictionary.BBox);
 
         //int fx=(int)BBox[0];

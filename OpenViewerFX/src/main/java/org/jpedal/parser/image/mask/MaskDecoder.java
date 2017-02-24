@@ -55,7 +55,7 @@ public class MaskDecoder {
      * @param decodeColorData
      * @return
      */
-    public static byte[] applyMask(final ImageData imageData,final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, byte[] maskDataSream) {
+    public static byte[] applyMask(final ImageData imageData, final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, final byte[] maskDataSream) {
         
         
         int[] maskArray=XObject.getIntArray(PdfDictionary.Mask);
@@ -69,8 +69,8 @@ public class MaskDecoder {
         /*
         * Image data
         */
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
         int d=imageData.getDepth();
         
         if(objectData == null && d == 8){
@@ -105,12 +105,12 @@ public class MaskDecoder {
      
      private static byte[] applyMaskArray(final int w, final int h, final byte[] objectData, final int[] maskArray) {
          
-         int pixels=w*h*4;
+         final int pixels=w*h*4;
          int rgbPtr=0;
-         byte[] combinedData=new byte[w*h*4];
+         final byte[] combinedData=new byte[w*h*4];
          final int rawDataSize=objectData.length;
          
-         float[] diff=new float[3];
+         final float[] diff=new float[3];
          
          if(maskArray!=null){
              for(int a=0;a<3;a++){
@@ -154,7 +154,7 @@ public class MaskDecoder {
                      combinedData[i+3]=(byte)255;                    
                  }
              }
-         }catch(Exception e){
+         }catch(final Exception e){
              e.printStackTrace();
          }
          
@@ -178,8 +178,8 @@ public class MaskDecoder {
         /*
         * Image data
         */
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
         //int d=imageData.getDepth();
         
         /*
@@ -201,7 +201,7 @@ public class MaskDecoder {
         
         final float[] maskDecodeArray=newMask.getFloatArray(PdfDictionary.Decode);
         if(maskDecodeArray!=null){
-            float diff=maskDecodeArray[1]-maskDecodeArray[0];
+            final float diff=maskDecodeArray[1]-maskDecodeArray[0];
             if(diff==-1){
                 for(int i=0;i<maskData.length;i++){
                     maskData[i]=(byte) (maskData[i]^255);
@@ -305,9 +305,9 @@ public class MaskDecoder {
      
     private static byte[] buildUnscaledByteArray(final int w, final int h, final byte[] objectData, final byte[] maskData) {
         
-        int pixels=w*h*4;
+        final int pixels=w*h*4;
         int rgbPtr=0, aPtr=0;
-        byte[] combinedData=new byte[w*h*4];
+        final byte[] combinedData=new byte[w*h*4];
         final int rawDataSize=objectData.length;
         
         try{
@@ -340,7 +340,7 @@ public class MaskDecoder {
                 aPtr++;
                 
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         
@@ -353,9 +353,9 @@ public class MaskDecoder {
         
         int rgbPtr=0, aPtr;
         int i=0;
-        float ratioW=maskW/(float)w;
-        float ratioH=maskH/(float)h;
-        byte[] combinedData=new byte[w*h*4];
+        final float ratioW=maskW/(float)w;
+        final float ratioH=maskH/(float)h;
+        final byte[] combinedData=new byte[w*h*4];
         
         final int rawDataSize=objectData.length;
         
@@ -395,7 +395,7 @@ public class MaskDecoder {
                     
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         return combinedData;
@@ -406,9 +406,9 @@ public class MaskDecoder {
         
         int rgbPtr, aPtr=0;
         int i=0;
-        float ratioW=w/(float)maskW;
-        float ratioH=h/(float)maskH;
-        byte[] combinedData=new byte[maskW*maskH*4];
+        final float ratioW=w/(float)maskW;
+        final float ratioH=h/(float)maskH;
+        final byte[] combinedData=new byte[maskW*maskH*4];
         final int rawDataSize=objectData.length;
         
         try{
@@ -447,14 +447,14 @@ public class MaskDecoder {
                     
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         
         return combinedData;
     }
 
-    private static int[] convertToRGB(int[] intArray, GenericColorSpace decodeColorData) {
+    private static int[] convertToRGB(int[] intArray, final GenericColorSpace decodeColorData) {
         
         byte[] index = decodeColorData.getIndexedMap();
         if(index!=null){
@@ -462,7 +462,7 @@ public class MaskDecoder {
             int ptr;
             index=decodeColorData.convertIndexToRGB(index);
             
-            int[] indexedArray=intArray;
+            final int[] indexedArray=intArray;
             intArray=new int[6];
             
             for(int values=0;values<2;values++){
@@ -474,11 +474,11 @@ public class MaskDecoder {
                 intArray[2+(3*values)]=(byte) (index[2+(3*ptr)] & 0xFF);               
             }           
         }
-        int comps=intArray.length/2;
+        final int comps=intArray.length/2;
         
-        int[] rgbArray=new int[6];
+        final int[] rgbArray=new int[6];
         
-        float[] rawColorData=new float[comps];
+        final float[] rawColorData=new float[comps];
         for(int values=0;values<2;values++){
             for(int a=0;a<comps;a++){
                 rawColorData[a]=intArray[a*2];
@@ -489,7 +489,7 @@ public class MaskDecoder {
                 decodeColorData.setColor(rawColorData, comps);
             }
             
-            int foreground=decodeColorData.getColor().getRGB();
+            final int foreground=decodeColorData.getColor().getRGB();
             
             for(int a=0;a<comps;a++){
                 rgbArray[0+(3*values)]=(byte) ((foreground>>16) & 0xFF);

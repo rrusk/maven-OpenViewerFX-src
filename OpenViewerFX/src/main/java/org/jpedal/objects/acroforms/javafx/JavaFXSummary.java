@@ -227,7 +227,7 @@ public class JavaFXSummary extends javafx.scene.layout.Pane{
     * @return
     */
    private static String byteToHex(final byte[] bytes) {
-       StringBuilder hex = new StringBuilder();
+       final StringBuilder hex = new StringBuilder();
        for (final byte aByte : bytes) {
            String singleByte = Integer.toHexString(aByte);
            if (singleByte.startsWith("ffffff")) {

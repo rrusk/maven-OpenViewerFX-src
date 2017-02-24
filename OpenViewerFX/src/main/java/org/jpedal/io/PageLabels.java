@@ -55,14 +55,14 @@ public class PageLabels extends HashMap<Integer, String>{
                                                 "O", "P", "Q", "R", "S", "T", "U", "V", "X", "W", "Y", "Z"};
     private static final int[] power={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
 
-    PageLabels(PdfFileReader objectReader, int pageCount) {
+    PageLabels(final PdfFileReader objectReader, final int pageCount) {
         this.objectReader=objectReader;
         this.pageCount=pageCount;
     }
     
-    void readLabels(PdfObject pageObj) {
+    void readLabels(final PdfObject pageObj) {
       
-        PdfArrayIterator numList =pageObj.getMixedArray(PdfDictionary.Nums);
+        final PdfArrayIterator numList =pageObj.getMixedArray(PdfDictionary.Nums);
         
         if(numList!=null && objectReader!=null && numList.hasMoreTokens()){
             
@@ -123,7 +123,7 @@ public class PageLabels extends HashMap<Integer, String>{
         }
     }
 
-    private PageLabelObject getObject(byte[] data) {
+    private PageLabelObject getObject(final byte[] data) {
         
         final PageLabelObject labelObj  = new PageLabelObject(new String(data));
 
@@ -140,9 +140,9 @@ public class PageLabels extends HashMap<Integer, String>{
         return labelObj;
     }
 
-    private static String getNumberValue(int numbType, int page) {
+    private static String getNumberValue(final int numbType, final int page) {
         
-        String convertedPage;
+        final String convertedPage;
     
         switch(numbType){
             case PdfDictionary.a:
@@ -188,11 +188,11 @@ public class PageLabels extends HashMap<Integer, String>{
         return romanNumeral.toString();
     }
     
-    private static String convertLetterToNumber(int page, final String[] letters) {
+    private static String convertLetterToNumber(final int page, final String[] letters) {
        
         final StringBuilder finalLetters=new StringBuilder();
-        int repeat = page/26;               
-        int remainder = page%26;
+        final int repeat = page/26;
+        final int remainder = page%26;
         
         if (repeat>0) {
             for (int x=0; x<repeat; x++) {

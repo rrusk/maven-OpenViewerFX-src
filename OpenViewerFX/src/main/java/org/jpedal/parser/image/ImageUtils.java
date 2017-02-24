@@ -81,9 +81,9 @@ public class ImageUtils {
         final BufferedImage invertedImage;
 
        
-        AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
+        final AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
         tx.translate(0, -savedImage.getHeight(null));
-        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        final AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
         invertedImage = op.filter(savedImage, null);
 
         return invertedImage;

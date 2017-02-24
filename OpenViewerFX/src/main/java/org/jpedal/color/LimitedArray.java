@@ -45,7 +45,7 @@ public class LimitedArray {
         }
     }
 
-    public Long get(long k) {
+    public Long get(final long k) {
         if (lk == k) {
             return lv;
         }
@@ -57,7 +57,7 @@ public class LimitedArray {
         return null;
     }
 
-    public void put(long k, long v) {
+    public void put(final long k, final long v) {
         iter &= 0xff;
         list[iter << 1] = k;
         list[(iter << 1) + 1] = v;

@@ -45,7 +45,7 @@ import static org.jpedal.render.BaseDisplay.textColor;
  *
  * @author markee
  */
-public class G2Display extends BaseDisplay implements DynamicVectorRenderer {
+public class G2Display extends BaseDisplay {
 
     final void renderText(final float x, final float y, final int type, final Area transformedGlyph2,
             final Rectangle textHighlight, PdfPaint strokePaint,

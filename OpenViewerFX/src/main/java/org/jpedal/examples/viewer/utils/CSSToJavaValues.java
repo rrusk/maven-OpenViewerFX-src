@@ -43,7 +43,7 @@ public class CSSToJavaValues {
      * @param cssValue A string representation of a valid CSS1 color string
      * @return A color object or null if string was null, empty or not valid css
      */
-    public static Color convertToColor(String cssValue){
+    public static Color convertToColor(final String cssValue){
         Color col = null;
 
         if (cssValue != null && !cssValue.isEmpty()) {
@@ -63,13 +63,15 @@ public class CSSToJavaValues {
         return col;
     }
     
-    private static Color handleRGBColor(String cssValue){
+    private static Color handleRGBColor(final String cssValue){
 
         //Handle rgb values
-        String rgbValues = cssValue.substring(cssValue.indexOf('(') + 1, cssValue.indexOf(')'));
-        StringTokenizer rgbTokens = new StringTokenizer(rgbValues, " ,");
+        final String rgbValues = cssValue.substring(cssValue.indexOf('(') + 1, cssValue.indexOf(')'));
+        final StringTokenizer rgbTokens = new StringTokenizer(rgbValues, " ,");
 
-        int r, g, b;
+        final int r;
+        final int g;
+        final int b;
         int a = 255;
         if (rgbValues.contains("%")) {
             r = (int) (255 * (Float.parseFloat(rgbTokens.nextToken().replace("%", "")) / 100));
@@ -90,7 +92,7 @@ public class CSSToJavaValues {
         }
     }
     
-    private static Color handleNamedColor(String cssValue) {
+    private static Color handleNamedColor(final String cssValue) {
         
         switch (cssValue.charAt(0)) {
             case 'a':

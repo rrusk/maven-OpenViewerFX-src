@@ -495,7 +495,7 @@ public class AnnotationFactory {
             if(bounds.width>0 && bounds.height>0){
                 final BufferedImage icon = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
                 final Graphics2D g = (Graphics2D)icon.getGraphics();
-                int width = setStroke(form, g, scaling);
+                final int width = setStroke(form, g, scaling);
                 g.setColor(ic);
                 g.fillRect(0, 0, bounds.width, bounds.height);
                 g.setColor(c);
@@ -592,8 +592,8 @@ public class AnnotationFactory {
         final Color c = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.C));
         final Color ic = convertFloatArrayToColor(form.getFloatArray(PdfDictionary.IC));
         
-        float[] quad = form.getFloatArray(PdfDictionary.Rect);
-        float[] vertices = form.getFloatArray(PdfDictionary.Vertices);
+        final float[] quad = form.getFloatArray(PdfDictionary.Rect);
+        final float[] vertices = form.getFloatArray(PdfDictionary.Vertices);
         
         if (quad != null && vertices!=null) {
             
@@ -706,8 +706,8 @@ public class AnnotationFactory {
                 }
             }
             
-            int scaledWidth = (int)(bounds.width*scaling);
-            int scaledHeight = (int)(bounds.height*scaling);
+            final int scaledWidth = (int)(bounds.width*scaling);
+            final int scaledHeight = (int)(bounds.height*scaling);
             if(scaledWidth>0 && scaledHeight*scaling>0){
                 final BufferedImage icon = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_4BYTE_ABGR);
                 final Graphics g = icon.getGraphics();

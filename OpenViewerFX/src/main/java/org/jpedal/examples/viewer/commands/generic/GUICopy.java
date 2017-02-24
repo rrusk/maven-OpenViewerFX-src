@@ -60,7 +60,7 @@ public class GUICopy {
             return "";
         }
 
-        StringBuilder returnValue = new StringBuilder("");
+        final StringBuilder returnValue = new StringBuilder("");
 
         final int[][] highlights = decode_pdf.getTextLines().getHighlightedAreasAs2DArray(commonValues.getCurrentPage());
 

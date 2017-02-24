@@ -171,10 +171,10 @@ public class PatternColorSpace extends GenericColorSpace{
         return colObj;
     }
     
-    public BufferedImage getImageForPatternedShape(GraphicsState gs){
+    public BufferedImage getImageForPatternedShape(final GraphicsState gs){
         
         float mm[][] = gs.CTM;
-        AffineTransform gsAffine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
+        final AffineTransform gsAffine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
         
         final byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
         final int patternType= PatternObj.getInt(PdfDictionary.PatternType);
@@ -185,7 +185,7 @@ public class PatternColorSpace extends GenericColorSpace{
         
         AffineTransform affine = new AffineTransform();
 
-        float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
+        final float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
         if (inputs != null) {
             mm = new float[][]{{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
             affine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
@@ -194,7 +194,7 @@ public class PatternColorSpace extends GenericColorSpace{
         affine.concatenate(gsAffine);
         mm = getMatrix(affine);
         
-        boolean isRotated = affine.getShearX()!=0 || affine.getShearY()!=0;
+        final boolean isRotated = affine.getShearX()!=0 || affine.getShearY()!=0;
         
         if(isRotated){
             affine = new AffineTransform();
@@ -206,22 +206,22 @@ public class PatternColorSpace extends GenericColorSpace{
         final float xGap = Math.abs(rawBBox[2] - rawBBox[0]);
         final float yGap = Math.abs(rawBBox[1] - rawBBox[3]);
 
-        GeneralPath rawPath = new GeneralPath();
+        final GeneralPath rawPath = new GeneralPath();
         rawPath.moveTo(rawBBox[0], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[3]);
         rawPath.lineTo(rawBBox[0], rawBBox[3]);
         rawPath.lineTo(rawBBox[0], rawBBox[1]);
         rawPath.closePath();
-        Shape rawShape = rawPath.createTransformedShape(affine);
-        Rectangle2D rawRect = rawShape.getBounds2D();
+        final Shape rawShape = rawPath.createTransformedShape(affine);
+        final Rectangle2D rawRect = rawShape.getBounds2D();
 
         float rawXStep = PatternObj.getFloatNumber(PdfDictionary.XStep);
         rawXStep = (30000 > Short.MAX_VALUE || rawXStep < -30000) ? 0f : rawXStep;
         float rawYStep = PatternObj.getFloatNumber(PdfDictionary.YStep);
         rawYStep = (30000 > Short.MAX_VALUE || rawYStep < -30000) ? 0f : rawYStep;
 
-        float[] bbox = new float[4];
+        final float[] bbox = new float[4];
 
         if (rawXStep < 0) {
             bbox[2] = xGap - rawXStep;
@@ -234,15 +234,15 @@ public class PatternColorSpace extends GenericColorSpace{
             bbox[3] = rawYStep;
         }
 
-        GeneralPath boxPath = new GeneralPath();
+        final GeneralPath boxPath = new GeneralPath();
         boxPath.moveTo(bbox[0], bbox[1]);
         boxPath.lineTo(bbox[2], bbox[1]);
         boxPath.lineTo(bbox[2], bbox[3]);
         boxPath.lineTo(bbox[0], bbox[3]);
         boxPath.lineTo(bbox[0], bbox[1]);
         boxPath.closePath();
-        Shape boxShape = boxPath.createTransformedShape(affine);
-        Rectangle2D boxRect = boxShape.getBounds2D();
+        final Shape boxShape = boxPath.createTransformedShape(affine);
+        final Rectangle2D boxRect = boxShape.getBounds2D();
 
         double imageW = (Math.abs(boxRect.getX()) + boxRect.getWidth()) - (Math.abs(rawRect.getX()));
         double imageH = (Math.abs(boxRect.getY()) + boxRect.getHeight()) - (Math.abs(rawRect.getY()));
@@ -263,7 +263,7 @@ public class PatternColorSpace extends GenericColorSpace{
         }
 
         final ObjectStore localStore = new ObjectStore();
-        BufferedImage image;
+        final BufferedImage image;
         final DynamicVectorRenderer glyphDisplay;
         
 //        iw = 1000;
@@ -274,17 +274,17 @@ public class PatternColorSpace extends GenericColorSpace{
             image = new BufferedImage(iw, ih, BufferedImage.TYPE_INT_ARGB);
             final Graphics2D g2 = image.createGraphics();
             glyphDisplay.setG2(g2);
-            AffineTransform moveAffine = new AffineTransform();
+            final AffineTransform moveAffine = new AffineTransform();
             moveAffine.setToTranslation(-rawRect.getX(), -rawRect.getY());
             glyphDisplay.paint(null, moveAffine, null);
 
         } else {
             glyphDisplay = decodePatternContent(PatternObj, null, streamData, localStore);
-            double[] rd = new double[6];
+            final double[] rd = new double[6];
             affine.getMatrix(rd);
             rd[4] -= rawRect.getX();
             rd[5] -= rawRect.getY();
-            AffineTransform rdAffine = new AffineTransform(rd);
+            final AffineTransform rdAffine = new AffineTransform(rd);
             image = new BufferedImage(iw, ih, BufferedImage.TYPE_INT_ARGB);
             final Graphics2D g2 = image.createGraphics();
             glyphDisplay.setG2(g2);
@@ -325,15 +325,15 @@ public class PatternColorSpace extends GenericColorSpace{
         
     }
 
-    private static float[][] getMatrix(AffineTransform af){
+    private static float[][] getMatrix(final AffineTransform af){
         return new float[][]{{(float)af.getScaleX(), (float)af.getShearX(), 0f}, {(float)af.getShearY(), (float)af.getScaleY(), 0f}, {(float)af.getTranslateX(), (float)af.getTranslateY(), 1f}};
     }
     
-    public BufferedImage getRawImage(AffineTransform callerAffine){
-        byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
+    public BufferedImage getRawImage(final AffineTransform callerAffine){
+        final byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
         final ObjectStore localStore = new ObjectStore();
         //float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
-        AffineTransform pattern = new AffineTransform();        
+        final AffineTransform pattern = new AffineTransform();
         pattern.concatenate(callerAffine);
         final PatternDisplay glyphDisplay = decodePatternContent(PatternObj, getMatrix(pattern), streamData, localStore);
         return glyphDisplay.getSingleImagePattern();        
@@ -344,7 +344,7 @@ public class PatternColorSpace extends GenericColorSpace{
         float[][] mm;
         AffineTransform affine = new AffineTransform();
         AffineTransform rotatedAffine = new AffineTransform();
-        float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
+        final float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
         if (inputs != null) {
             mm = new float[][]{{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
             affine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
@@ -353,10 +353,10 @@ public class PatternColorSpace extends GenericColorSpace{
         }
                 
         final ObjectStore localStore = new ObjectStore();
-        BufferedImage image;
+        final BufferedImage image;
         PatternDisplay glyphDisplay;
         
-        boolean isRotated = affine.getShearX()!=0 || affine.getShearY()!=0;
+        final boolean isRotated = affine.getShearX()!=0 || affine.getShearY()!=0;
         
         if(isRotated){
             rotatedAffine = affine;
@@ -373,22 +373,22 @@ public class PatternColorSpace extends GenericColorSpace{
         final float xGap = Math.abs(rawBBox[2] - rawBBox[0]);
         final float yGap = Math.abs(rawBBox[1] - rawBBox[3]);
 
-        GeneralPath rawPath = new GeneralPath();
+        final GeneralPath rawPath = new GeneralPath();
         rawPath.moveTo(rawBBox[0], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[3]);
         rawPath.lineTo(rawBBox[0], rawBBox[3]);
         rawPath.lineTo(rawBBox[0], rawBBox[1]);
         rawPath.closePath();
-        Shape rawShape = rawPath.createTransformedShape(affine);
-        Rectangle2D rawRect = rawShape.getBounds2D();
+        final Shape rawShape = rawPath.createTransformedShape(affine);
+        final Rectangle2D rawRect = rawShape.getBounds2D();
 
         float rawXStep = PatternObj.getFloatNumber(PdfDictionary.XStep);
         rawXStep = (30000 < rawXStep || rawXStep < -30000) ? 0f : rawXStep;
         float rawYStep = PatternObj.getFloatNumber(PdfDictionary.YStep);
         rawYStep = (30000 < rawYStep || rawYStep < -30000) ? 0f : rawYStep;
 
-        float[] bbox = new float[4];
+        final float[] bbox = new float[4];
 
         if (rawXStep < 0) {
             bbox[2] = xGap - rawXStep;
@@ -401,15 +401,15 @@ public class PatternColorSpace extends GenericColorSpace{
             bbox[3] = rawYStep;
         }
 
-        GeneralPath boxPath = new GeneralPath();
+        final GeneralPath boxPath = new GeneralPath();
         boxPath.moveTo(bbox[0], bbox[1]);
         boxPath.lineTo(bbox[2], bbox[1]);
         boxPath.lineTo(bbox[2], bbox[3]);
         boxPath.lineTo(bbox[0], bbox[3]);
         boxPath.lineTo(bbox[0], bbox[1]);
         boxPath.closePath();
-        Shape boxShape = boxPath.createTransformedShape(affine);
-        Rectangle2D boxRect = boxShape.getBounds2D();
+        final Shape boxShape = boxPath.createTransformedShape(affine);
+        final Rectangle2D boxRect = boxShape.getBounds2D();
 
         double imageW = (Math.abs(boxRect.getX()) + boxRect.getWidth()) - (Math.abs(rawRect.getX()));
         double imageH = (Math.abs(boxRect.getY()) + boxRect.getHeight()) - (Math.abs(rawRect.getY()));
@@ -430,7 +430,7 @@ public class PatternColorSpace extends GenericColorSpace{
             iw = 1;
         }
         
-        Rectangle2D fRect = new Rectangle2D.Double(rawRect.getX(), rawRect.getY(), imageW, imageH);
+        final Rectangle2D fRect = new Rectangle2D.Double(rawRect.getX(), rawRect.getY(), imageW, imageH);
         image = new BufferedImage(iw, ih, BufferedImage.TYPE_INT_ARGB);
 
         if (isRotated) {
@@ -445,7 +445,7 @@ public class PatternColorSpace extends GenericColorSpace{
                 mm[2][0] = (float) (mm[2][0] - rawRect.getX());
                 mm[2][1] = (float) (mm[2][1] - rawRect.getY());
                 glyphDisplay = decodePatternContent(PatternObj, mm, streamData, localStore);
-                Graphics2D g2 = image.createGraphics();
+                final Graphics2D g2 = image.createGraphics();
                 glyphDisplay.setG2(g2);
                 glyphDisplay.paint(null, null, null);
                 return new ShearedTexturePaint(image, fRect, rotatedAffine);
@@ -456,7 +456,7 @@ public class PatternColorSpace extends GenericColorSpace{
             mm[2][0] = (float) (mm[2][0] - rawRect.getX());
             mm[2][1] = (float) (mm[2][1] - rawRect.getY());
             glyphDisplay = decodePatternContent(PatternObj, mm, streamData, localStore);
-            Graphics2D g2 = image.createGraphics();
+            final Graphics2D g2 = image.createGraphics();
             glyphDisplay.setG2(g2);
             glyphDisplay.paint(null, null, null);
             //System.out.println("texture "+fRect+" ");

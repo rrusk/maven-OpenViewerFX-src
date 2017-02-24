@@ -164,7 +164,7 @@ public class ImageCommands {
 
                 //imageData.setObjectData(data);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace(System.out);
         }
     }
@@ -274,7 +274,7 @@ public class ImageCommands {
             }
         }else if (d == 8 && maxValue == 1 && type == ColorSpaces.DeviceCMYK) {
 
-            int tempDecode[] = new int[decodeArray.length];
+            final int[] tempDecode = new int[decodeArray.length];
             for (int i = 0; i < decodeArray.length; i++) {
                 tempDecode[i] = (int) (decodeArray[i] * 255);
             }

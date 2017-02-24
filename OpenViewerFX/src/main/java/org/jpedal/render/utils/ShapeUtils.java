@@ -46,11 +46,11 @@ public class ShapeUtils {
 
         int count = 0;
         final PathIterator i = path.getPathIterator(null);
-        float[] values = new float[6];
+        final float[] values = new float[6];
 
         while (!i.isDone() && count < 6) { //see if rectangle or complex clip
             //Get value before next called otherwise issues with pathIterator ending breaks everything
-            int value = i.currentSegment(values);
+            final int value = i.currentSegment(values);
 
             i.next();
 

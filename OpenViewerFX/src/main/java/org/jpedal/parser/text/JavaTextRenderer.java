@@ -55,7 +55,7 @@ import org.jpedal.render.SwingDisplay;
 class JavaTextRenderer {
 
        
-    static void renderTextWithJavaFonts(GraphicsState gs, DynamicVectorRenderer current, int streamType, ParserOptions parserOptions, PdfFont currentFontData, GlyphData glyphData,final int Tmode, final float currentWidth, final boolean isTextShifted,final PdfJavaGlyphs glyphs,final float[][] Trm) {
+    static void renderTextWithJavaFonts(final GraphicsState gs, final DynamicVectorRenderer current, final int streamType, final ParserOptions parserOptions, final PdfFont currentFontData, final GlyphData glyphData, final int Tmode, final float currentWidth, final boolean isTextShifted, final PdfJavaGlyphs glyphs, final float[][] Trm) {
         
         final float actualWidth=glyphData.getActualWidth();
         
@@ -114,7 +114,7 @@ class JavaTextRenderer {
                 }else {
                     
                     //remap font if needed
-                    String xx=glyphData.getDisplayValue();
+                    final String xx=glyphData.getDisplayValue();
                     
                     GlyphVector gv1 =null;
                     

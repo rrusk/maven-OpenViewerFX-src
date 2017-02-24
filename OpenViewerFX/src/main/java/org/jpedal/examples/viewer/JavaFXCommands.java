@@ -57,6 +57,7 @@ public class JavaFXCommands extends Commands {
         super(commonValues, currentGUI, decode_pdf, thumbnails, properties, searchFrame, null);
     }
 
+    @SuppressWarnings("OverlyLongMethod")
     @Override
     public Object executeCommand(final int ID, Object[] args) {
 

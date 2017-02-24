@@ -190,7 +190,7 @@ public class JavaFXPageNavigator {
                 //Wait while pdf is loading
                 try {
                     Thread.sleep(5000);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LogWriter.writeLog("Attempting to set propeties values " + e);
                 }
             }
@@ -212,7 +212,7 @@ public class JavaFXPageNavigator {
                 //Wait while pdf is loading
                 try {
                     Thread.sleep(5000);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LogWriter.writeLog("Attempting to set propeties values " + e);
                 }
             }

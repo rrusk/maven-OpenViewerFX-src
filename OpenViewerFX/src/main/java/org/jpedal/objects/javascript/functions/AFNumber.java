@@ -223,7 +223,7 @@ public class AFNumber extends JSFunction{
 						
 						//setup mask
 						//we dont use defined decimal and separator as this is for the mask only
-						StringBuilder mask =new StringBuilder("###");
+						final StringBuilder mask =new StringBuilder("###");
 						//add the thousand separator only if we have a decimal separator
 						if(!sep.isEmpty()) {
                             mask.append(',');

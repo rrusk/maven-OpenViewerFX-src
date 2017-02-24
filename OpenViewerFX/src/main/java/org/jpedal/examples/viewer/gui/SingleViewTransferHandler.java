@@ -85,11 +85,13 @@ public class SingleViewTransferHandler extends BaseTransferHandler{
 		final String testFile = file.toLowerCase();
 		
 		final boolean isValid = ((testFile.endsWith(".pdf"))
-                                || (testFile.endsWith(".dcm")) || (testFile.endsWith(".psd"))
-				|| (testFile.endsWith(".fdf")) || (testFile.endsWith(".tif"))
-				|| (testFile.endsWith(".tiff")) || (testFile.endsWith(".png"))
+                || (testFile.endsWith(".dcm")) || (testFile.endsWith(".psd"))
+                || (testFile.endsWith(".sgi")) || (testFile.endsWith(".rgb"))
+				|| (testFile.endsWith(".fdf")) || (testFile.endsWith(".tiff"))
+				|| (testFile.endsWith(".tif")) || (testFile.endsWith(".png"))
 				|| (testFile.endsWith(".jpg")) || (testFile.endsWith(".jpeg"))
-                                || (testFile.endsWith(".jpx")) || (testFile.endsWith(".jp2")) || (testFile.endsWith(".j2k")));
+                || (testFile.endsWith(".jpx")) || (testFile.endsWith(".jp2")) 
+                || (testFile.endsWith(".j2k")));
 	
 		if (isValid) {
 			currentCommands.handleTransferedFile(file);

@@ -1040,7 +1040,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
                 //Wait for search to end
                 try {
                     Thread.sleep(5000);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LogWriter.writeLog("Attempting to set propeties values " + e);
                 }
             }
@@ -1179,7 +1179,7 @@ public class JavaFXSearchWindow extends Stage implements GUISearchWindow {
     }
     
     @Override
-    public void selectSearchOptions(int options){
+    public void selectSearchOptions(final int options){
         searchAll.setSelected(!((options & SearchType.FIND_FIRST_OCCURANCE_ONLY) == SearchType.FIND_FIRST_OCCURANCE_ONLY));
         wholeWordsOnlyBox.setSelected((options & SearchType.WHOLE_WORDS_ONLY) == SearchType.WHOLE_WORDS_ONLY);
         caseSensitiveBox.setSelected((options & SearchType.CASE_SENSITIVE) == SearchType.CASE_SENSITIVE);

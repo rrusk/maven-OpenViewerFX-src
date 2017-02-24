@@ -43,14 +43,14 @@ import org.jpedal.utils.NumberUtils;
  */
 public class DoubleArray extends Array {
     
-    public DoubleArray(final PdfFileReader pdfFileReader, int i,final byte[] raw) {
+    public DoubleArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
         super(pdfFileReader, i, PdfDictionary.VALUE_IS_DOUBLE_ARRAY, raw);
     }
     
     @Override
-    void fillArray(final int elementCount, PdfObject pdfObject) {
+    void fillArray(final int elementCount, final PdfObject pdfObject) {
         
-        double[] finalByteValues = new double[elementCount];
+        final double[] finalByteValues = new double[elementCount];
         byte[] data;
         
         for(int a=0;a<elementCount;a++){

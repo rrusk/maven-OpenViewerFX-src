@@ -150,7 +150,7 @@ public class Values {
      * Set to show a search is being performed
      * @param isSearching 
      */
-    public void setIsSearching(boolean isSearching){
+    public void setIsSearching(final boolean isSearching){
         this.isSearching = isSearching;
     }
     

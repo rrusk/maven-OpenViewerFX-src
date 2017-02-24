@@ -43,7 +43,7 @@ import org.jpedal.io.ColorSpaceConvertor;
  */
 public class SMask {
         
-    public static BufferedImage applyLuminosityMask(BufferedImage image, BufferedImage smask, int [] tr, boolean hasBC, int bc){
+    public static BufferedImage applyLuminosityMask(BufferedImage image, BufferedImage smask, final int [] tr, final boolean hasBC, final int bc){
 		
         if(smask==null){
             return image;
@@ -56,13 +56,13 @@ public class SMask {
             image = ColorSpaceConvertor.convertToARGB(image);
         }
         
-        int iw = image.getWidth();
-        int ih = image.getHeight();
-        int imageDim = iw * ih;
+        final int iw = image.getWidth();
+        final int ih = image.getHeight();
+        final int imageDim = iw * ih;
         
-        int sw = smask.getWidth();
-        int sh = smask.getHeight();
-        int smaskDim = sw * sh;
+        final int sw = smask.getWidth();
+        final int sh = smask.getHeight();
+        final int smaskDim = sw * sh;
         
         if(imageDim <smaskDim){
             image = scaleImage(image, sw, sh, BufferedImage.TYPE_INT_ARGB);
@@ -70,13 +70,13 @@ public class SMask {
             smask = scaleImage(smask, iw, ih, BufferedImage.TYPE_INT_ARGB);
         }
         
-        int [] imagePixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        int [] maskPixels = ((DataBufferInt) smask.getRaster().getDataBuffer()).getData();
+        final int [] imagePixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        final int [] maskPixels = ((DataBufferInt) smask.getRaster().getDataBuffer()).getData();
         
         int ip,mp,r,g,b,resA,y,a;
-		int r0 = (bc >> 16) & 0xff;
-		int g0 = (bc >> 8) & 0xff;
-		int b0 = bc & 0xff;
+		final int r0 = (bc >> 16) & 0xff;
+		final int g0 = (bc >> 8) & 0xff;
+		final int b0 = bc & 0xff;
         for (int i = 0; i < imagePixels.length; i++) {
             mp = maskPixels[i];
 			a = mp >>> 24;
@@ -89,7 +89,7 @@ public class SMask {
 					g = g0;
 					b = b0;
 				} else if (a < 255) {
-					int a_ = 255 - a;
+					final int a_ = 255 - a;
 					r = (r * a + r0 * a_) >> 8;
 					g = (g * a + g0 * a_) >> 8;
 					b = (b * a + b0 * a_) >> 8;
@@ -122,13 +122,13 @@ public class SMask {
             image = ColorSpaceConvertor.convertToARGB(image);
         }
         
-        int iw = image.getWidth();
-        int ih = image.getHeight();
-        int imageDim = iw * ih;
+        final int iw = image.getWidth();
+        final int ih = image.getHeight();
+        final int imageDim = iw * ih;
         
-        int sw = smask.getWidth();
-        int sh = smask.getHeight();
-        int smaskDim = sw * sh;
+        final int sw = smask.getWidth();
+        final int sh = smask.getHeight();
+        final int smaskDim = sw * sh;
         
         if(imageDim <smaskDim){
             image = scaleImage(image, sw, sh, BufferedImage.TYPE_INT_ARGB);
@@ -136,11 +136,11 @@ public class SMask {
             smask = scaleImage(smask, iw, ih, BufferedImage.TYPE_INT_ARGB);
         }
         
-        int [] imagePixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        int [] maskPixels = ((DataBufferInt) smask.getRaster().getDataBuffer()).getData();
+        final int [] imagePixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        final int [] maskPixels = ((DataBufferInt) smask.getRaster().getDataBuffer()).getData();
         
         int ip,mp,ia,ma,a;
-        float sc = 1/255f;
+        final float sc = 1/255f;
         for (int i = 0; i < imagePixels.length; i++) {
             mp = maskPixels[i];
             ip = imagePixels[i];
@@ -152,9 +152,9 @@ public class SMask {
         return image;
     }
     
-    private static BufferedImage scaleImage(BufferedImage src, int w, int h, int imageType){
-        BufferedImage dimg = new BufferedImage(w, h, imageType);
-        Graphics2D g = dimg.createGraphics();
+    private static BufferedImage scaleImage(final BufferedImage src, final int w, final int h, final int imageType){
+        final BufferedImage dimg = new BufferedImage(w, h, imageType);
+        final Graphics2D g = dimg.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g.drawImage(src, 0, 0, w, h, null);
         g.dispose();

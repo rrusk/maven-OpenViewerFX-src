@@ -37,121 +37,145 @@ package com.idrsolutions.pdf.color.shading;
  */
 public class BitReader {
 
-    private int p; //pointer
-    private int pos;
-    private final byte[] data;
-    private final boolean hasSmallBits;
-    private int bufferSize;
-    private int buffer;
-    private final int totalBitLen;
+	private int p; //pointer
+	private int pos;
+	private final byte[] data;
+	private final boolean hasSmallBits;
+	private int bufferSize;
+	private int buffer;
+	private long bufferL;
+	private final int totalBitLen;
 
-    public BitReader(final byte[] data, final boolean hasSmallBits) {
-        this.hasSmallBits = hasSmallBits;
-        this.data = data;
-        this.totalBitLen = this.data.length * 8;
-    }
+	public BitReader(final byte[] data, final boolean hasSmallBits) {
+		this.hasSmallBits = hasSmallBits;
+		this.data = data;
+		this.totalBitLen = this.data.length * 8;
+	}
 
-    /**
-     * @param lenToRead
-     * @return this return value is not actual int and it is a data
-     * representation in 32 bits
-     */
-    private int readBits(int lenToRead) {
-        if (hasSmallBits) {
-            while (bufferSize < lenToRead) {
-                int b = data[pos] & 0xff;
-                pos++;
-                buffer = (buffer << 8) | b;
-                bufferSize += 8;
-            }
-            bufferSize -= lenToRead;
-            p += lenToRead;
-            return (buffer >>> bufferSize) & ((1 << lenToRead) - 1);
-        } else {
-            int retVal = 0;
-            int len = lenToRead / 8;
-            for (int i = 0; i < len; i++) {
-                retVal = (retVal << 8);
-                retVal |= ((data[p / 8] & 0xff));
-                p += 8;
-            }
-            return retVal;
-        }
-    }
+	/**
+	 * @param lenToRead
+	 * @return this return value is not actual int and it is a data
+	 * representation in 32 bits
+	 */
+	private int readBits(final int lenToRead) {
+		if (hasSmallBits) {
+			while (bufferSize < lenToRead) {
+				final int b = data[pos] & 0xff;
+				pos++;
+				buffer = (buffer << 8) | b;
+				bufferSize += 8;
+			}
+			bufferSize -= lenToRead;
+			p += lenToRead;
+			return (buffer >>> bufferSize) & ((1 << lenToRead) - 1);
+		} else {
+			int retVal = 0;
+			final int len = lenToRead / 8;
+			for (int i = 0; i < len; i++) {
+				retVal = (retVal << 8);
+				retVal |= ((data[p / 8] & 0xff));
+				p += 8;
+			}
+			return retVal;
+		}
+	}
 
-    /**
-     * return positive integer only
-     *
-     * @param bitLen
-     * @return
-     */
-    public int getPositive(int bitLen) {
-        return readBits(bitLen);
-    }
+	public long readBitsAsLong(final int len) {
+		if (hasSmallBits) {
+			while (bufferSize < len) {
+				final int b = data[pos] & 0xff;
+				pos++;
+				bufferL = (bufferL << 8) | b;
+				bufferSize += 8;
+			}
+			bufferSize -= len;
+			p += len;
+			return (bufferL >>> bufferSize) & ((1L << len) - 1);
+		} else {
+			long retVal = 0L;
+			final int len2 = len >> 3;
+			for (int i = 0; i < len2; i++) {
+				retVal = (retVal << 8);
+				retVal |= ((data[p / 8] & 0xff));
+				p += 8;
+			}
+			return retVal;
+		}
+	}
 
-    /**
-     * return floating point;
-     *
-     * @param bitLen
-     * @return
-     */
-    public float getFloat(int bitLen) {
-        int value = readBits(bitLen);
-        byte[] temp = {(byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value};
-        float number = 0.0f;
-        switch (bitLen) {
-            case 1:
-            case 2:
-            case 4:
-                number = temp[3] / 15f;
-                break;
-            case 8:
-                number = (temp[3] & 255) / 256f;
-                break;
-            case 16:
-                number = (temp[2] & 255) / 256f;
-                number += (temp[3] & 255) / 65536f;
-                break;
-            case 24:
-                number = (temp[1] & 255) / 256f;
-                number += (temp[2] & 255) / 65536f;
-                number += (temp[3] & 255) / 16777216f;
-                break;
-            case 32:
-                number = (temp[0] & 255) / 256f;
-                number += (temp[1] & 255) / 65536f;
-                number += (temp[2] & 255) / 16777216f;
-                number += (temp[3] & 255) / 4294967296f;
-                break;
-        }
-        return number;
-    }
+	/**
+	 * return positive integer only
+	 *
+	 * @param bitLen
+	 * @return
+	 */
+	public int getPositive(final int bitLen) {
+		return readBits(bitLen);
+	}
 
-    public int getPointer() {
-        return p;
-    }
+	/**
+	 * return floating point;
+	 *
+	 * @param bitLen
+	 * @return
+	 */
+	public float getFloat(final int bitLen) {
+		final int value = readBits(bitLen);
+		final byte[] temp = {(byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value};
+		float number = 0.0f;
+		switch (bitLen) {
+			case 1:
+			case 2:
+			case 4:
+				number = temp[3] / 15f;
+				break;
+			case 8:
+				number = (temp[3] & 255) / 256f;
+				break;
+			case 16:
+				number = (temp[2] & 255) / 256f;
+				number += (temp[3] & 255) / 65536f;
+				break;
+			case 24:
+				number = (temp[1] & 255) / 256f;
+				number += (temp[2] & 255) / 65536f;
+				number += (temp[3] & 255) / 16777216f;
+				break;
+			case 32:
+				number = (temp[0] & 255) / 256f;
+				number += (temp[1] & 255) / 65536f;
+				number += (temp[2] & 255) / 16777216f;
+				number += (temp[3] & 255) / 4294967296f;
+				break;
+		}
+		return number;
+	}
 
-    public int getTotalBitLen() {
-        return totalBitLen;
-    }
+	public int getPointer() {
+		return p;
+	}
+
+	public int getTotalBitLen() {
+		return totalBitLen;
+	}
 
 //    public static void main(String[] args) {
-    //        byte[] data = new byte[]{-128, 72, 0};
-    //        BitSet bitset = new BitSet(data.length * 8);
-    //        int c = 0;
-    //        for (int i = 0; i < data.length; i++) {
-    //            byte b = data[i];
-    //            System.out.println(" "+Integer.toBinaryString(b));
-    //            for (int j = 7; j >= 0; j--) {
-    //                boolean isOn = ((b >> j) & 1) == 1;
-    //                bitset.set(c, isOn);
-    //                c++;//                
-    //            }
-    //        }//        
-    //        BitReader bit = new BitReader(data);
-    //       
-    //        for (int i = 0; i < 24; i++) {
-    //            System.out.println(" -- "+bit.readBits(3));
-    //        }
+	//        byte[] data = new byte[]{-128, 72, 0};
+	//        BitSet bitset = new BitSet(data.length * 8);
+	//        int c = 0;
+	//        for (int i = 0; i < data.length; i++) {
+	//            byte b = data[i];
+	//            System.out.println(" "+Integer.toBinaryString(b));
+	//            for (int j = 7; j >= 0; j--) {
+	//                boolean isOn = ((b >> j) & 1) == 1;
+	//                bitset.set(c, isOn);
+	//                c++;//                
+	//            }
+	//        }//        
+	//        BitReader bit = new BitReader(data);
+	//       
+	//        for (int i = 0; i < 24; i++) {
+	//            System.out.println(" -- "+bit.readBits(3));
+	//        }
 //    }
 }

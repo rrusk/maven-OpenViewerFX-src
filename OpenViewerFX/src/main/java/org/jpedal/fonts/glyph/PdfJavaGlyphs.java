@@ -810,11 +810,11 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
         return hasGIDtoCID;
     }
 
-    public void setObjID(int objID) {
+    public void setObjID(final int objID) {
         this.objID = objID;
     }
 
-    public void setRemappedCFFFont(boolean remappedCFFFont) {
+    public void setRemappedCFFFont(final boolean remappedCFFFont) {
         this.remappedCFFFont=remappedCFFFont;
     }
 

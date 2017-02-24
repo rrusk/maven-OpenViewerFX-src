@@ -62,14 +62,14 @@ public class ImageData {
         this.objectData=objectData;
     }
     
-    public ImageData(PdfObject XObject,byte[] objectData) {
+    public ImageData(final PdfObject XObject, final byte[] objectData) {
 
         this.objectData=objectData;
 
         width = XObject.getInt(PdfDictionary.Width);
         height = XObject.getInt(PdfDictionary.Height);
 
-        int newDepth = XObject.getInt(PdfDictionary.BitsPerComponent);
+        final int newDepth = XObject.getInt(PdfDictionary.BitsPerComponent);
         if (newDepth != PdfDictionary.Unknown) {
             depth = newDepth;
             rawDepth=depth;
@@ -81,11 +81,11 @@ public class ImageData {
        
     }
 
-    public ImageData(int mode) {
+    public ImageData(final int mode) {
         this.mode=mode;
     }
     
-    public void setIsDownsampled(boolean isDownsampled) {
+    public void setIsDownsampled(final boolean isDownsampled) {
         this.isDownsampled = isDownsampled;
     }
 
@@ -113,15 +113,15 @@ public class ImageData {
         return imageMask;
     }
 
-    public void setDepth(int depth) {
+    public void setDepth(final int depth) {
         this.depth = depth;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(final int width) {
         this.width = width;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(final int height) {
         this.height = height;
     }
 
@@ -129,15 +129,15 @@ public class ImageData {
         return objectData;
     }
 
-    public void setObjectData(byte[] objectData) {
+    public void setObjectData(final byte[] objectData) {
         this.objectData = objectData;
     }
 
-    public void setpX(int pX) {
+    public void setpX(final int pX) {
         this.pX=pX;
     }
     
-    public void setpY(int pY) {
+    public void setpY(final int pY) {
         this.pY=pY;
     }
     
@@ -150,7 +150,7 @@ public class ImageData {
     }
     
     public void swapValues() {
-        int temp = pX;
+        final int temp = pX;
         pX=pY;
         pY=temp;
     }
@@ -159,7 +159,7 @@ public class ImageData {
         return isJPX;
     }
     
-    public void setDCT(boolean isDCT){
+    public void setDCT(final boolean isDCT){
         this.isDCT = isDCT;
     }
     
@@ -171,7 +171,7 @@ public class ImageData {
         return isJBIG;
     }
     
-    public PdfArrayIterator getFilter(PdfObject XObject) {
+    public PdfArrayIterator getFilter(final PdfObject XObject) {
         
         PdfArrayIterator Filters = XObject.getMixedArray(PdfDictionary.Filter);
         
@@ -194,7 +194,7 @@ public class ImageData {
         return Filters;
     }
 
-    public void setCompCount(int numComponents) {
+    public void setCompCount(final int numComponents) {
         this.numComponents=numComponents;
     }
     
@@ -211,7 +211,7 @@ public class ImageData {
 
     /**
      */
-    public void setRemoved(boolean removed) {
+    public void setRemoved(final boolean removed) {
         this.removed = removed;
     }
 
@@ -219,11 +219,11 @@ public class ImageData {
        return rawDepth;
     }
 
-    public void setIsJPX(boolean b) {
+    public void setIsJPX(final boolean b) {
         isJPX=b;
     }
 
-    public void setIsDCT(boolean b) {
+    public void setIsDCT(final boolean b) {
          isDCT=b;
     }
 
@@ -231,11 +231,11 @@ public class ImageData {
         return wasDCT;
     }
     
-    public void wasDCT(boolean b) {
+    public void wasDCT(final boolean b) {
         wasDCT=b;
     }
 
-    public void setDecodeArray(float[] value) {
+    public void setDecodeArray(final float[] value) {
         decodeArray=value;
     }
 

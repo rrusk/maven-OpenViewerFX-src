@@ -42,14 +42,14 @@ public class FastColorSpaceCMYK extends ColorSpace {
     }
 
     @Override
-    public float[] toRGB(float[] cv) {
-        int c = (int) (cv[0] * 255);
-        int m = (int) (cv[1] * 255);
-        int y = (int) (cv[2] * 255);
-        int k = (int) (cv[3] * 255);
-        int[] rgb = JDeliHelper.convertCMYKtoRGB(c, m, y, k);
+    public float[] toRGB(final float[] cv) {
+        final int c = (int) (cv[0] * 255);
+        final int m = (int) (cv[1] * 255);
+        final int y = (int) (cv[2] * 255);
+        final int k = (int) (cv[3] * 255);
+        final int[] rgb = JDeliHelper.convertCMYKtoRGB(c, m, y, k);
         if(rgb == null){
-            float[] out = new float[4];
+            final float[] out = new float[4];
             out[0] = (1 - cv[0]) * (1 - cv[3]);
             out[1] = (1 - cv[1]) * (1 - cv[3]);
             out[2] = (1 - cv[2]) * (1 - cv[3]);
@@ -59,17 +59,17 @@ public class FastColorSpaceCMYK extends ColorSpace {
     }
 
     @Override
-    public float[] fromRGB(float[] rgbvalue) {
+    public float[] fromRGB(final float[] rgbvalue) {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
-    public float[] toCIEXYZ(float[] colorvalue) {
+    public float[] toCIEXYZ(final float[] colorvalue) {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
-    public float[] fromCIEXYZ(float[] colorvalue) {
+    public float[] fromCIEXYZ(final float[] colorvalue) {
         throw new UnsupportedOperationException("Not supported yet."); 
 
     }

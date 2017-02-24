@@ -63,7 +63,7 @@ public class SH {
             shadingData= (byte[]) cache.get(PdfObjectCache.GlobalShadings, shadingObject);
         }
         
-        PdfObject Shading=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject("1 0 R"), currentPdfFile.getObjectReader(),shadingData, PdfDictionary.Shading);
+        final PdfObject Shading=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject("1 0 R"), currentPdfFile.getObjectReader(),shadingData, PdfDictionary.Shading);
         
         //workout shape
         Shape shadeShape=null;

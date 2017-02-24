@@ -95,21 +95,21 @@ public class XForm {
     
     public static Area setClip(final Shape defaultClip, final float[] BBox, final GraphicsState gs, final DynamicVectorRenderer current) {
         
-        Rectangle rect = new Rectangle();
+        final Rectangle rect = new Rectangle();
         rect.setFrameFromDiagonal(BBox[0],BBox[1],BBox[2],BBox[3]);
         
-        float minX = (float)rect.getMinX();
-        float minY = (float)rect.getMinY();
+        final float minX = (float)rect.getMinX();
+        final float minY = (float)rect.getMinY();
         
-        float maxX = (float)rect.getMaxX();
-        float maxY = (float)rect.getMaxY();
+        final float maxX = (float)rect.getMaxX();
+        final float maxY = (float)rect.getMaxY();
         
-        float[] p1 = Matrix.transformPoint(gs.CTM, minX, minY);
-        float[] p2 = Matrix.transformPoint(gs.CTM, maxX, minY);
-        float[] p3 = Matrix.transformPoint(gs.CTM, maxX, maxY);
-        float[] p4 = Matrix.transformPoint(gs.CTM, minX, maxY);
+        final float[] p1 = Matrix.transformPoint(gs.CTM, minX, minY);
+        final float[] p2 = Matrix.transformPoint(gs.CTM, maxX, minY);
+        final float[] p3 = Matrix.transformPoint(gs.CTM, maxX, maxY);
+        final float[] p4 = Matrix.transformPoint(gs.CTM, minX, maxY);
         
-        GeneralPath gp = new GeneralPath();
+        final GeneralPath gp = new GeneralPath();
         gp.moveTo(p1[0], p1[1]);
         gp.lineTo(p2[0], p2[1]);
         gp.lineTo(p3[0], p3[1]);

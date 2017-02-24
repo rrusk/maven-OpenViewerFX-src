@@ -59,7 +59,7 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
     }
     
     @Override
-    public void invalidateCaching(int color){
+    public void invalidateCaching(final int color){
         
         super.invalidateCaching(color);
         
@@ -176,10 +176,10 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
             lastY = y;
             lastK = k;
 
-            int cc = (int) (c * 255);
-            int mm = (int) (m * 255);
-            int yy = (int) (y * 255);
-            int kk = (int) (k * 255);
+            final int cc = (int) (c * 255);
+            final int mm = (int) (m * 255);
+            final int yy = (int) (y * 255);
+            final int kk = (int) (k * 255);
 
             int[] bb = JDeliHelper.convertCMYKtoRGB(cc, mm, yy, kk);
             if (bb == null) {
@@ -238,8 +238,8 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
         }
     }
 
-    public static byte[] convertCMYK2RGBWithSimple(final int w, final int h, int pixelCount, final byte[] data) {
-        byte[] output = new byte[w * h * 3];
+    public static byte[] convertCMYK2RGBWithSimple(final int w, final int h, final int pixelCount, final byte[] data) {
+        final byte[] output = new byte[w * h * 3];
         float cc, mm, yy, kk;
         int pp = 0;
 
@@ -262,9 +262,9 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
      * @throws PdfException
      */
     @Override
-    public BufferedImage JPEG2000ToRGBImage(final byte[] data, int w, int h, final int pX, final int pY, final int d) throws PdfException {
+    public BufferedImage JPEG2000ToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY, final int d) throws PdfException {
 
-        BufferedImage image = DefaultImageHelper.JPEG2000ToRGBImage(data, w, h, pX, pY);
+        final BufferedImage image = DefaultImageHelper.JPEG2000ToRGBImage(data, w, h, pX, pY);
 
         if (image != null) {
             return image;

@@ -42,7 +42,7 @@ public class D {
     public static void execute(final CommandParser parser, final GraphicsState gs) {
 
 
-        String values; //used to combine values
+        final String values; //used to combine values
 
         //and the dash array
         final int items = parser.getOperandCount();
@@ -51,7 +51,7 @@ public class D {
             values = parser.generateOpAsString(0, false);
         } else{
             //concat values
-            StringBuilder list = new StringBuilder(15);
+            final StringBuilder list = new StringBuilder(15);
             for (int i = items - 1; i > -1; i--){
                 list.append(parser.generateOpAsString(i, false));
                 list.append(' ');

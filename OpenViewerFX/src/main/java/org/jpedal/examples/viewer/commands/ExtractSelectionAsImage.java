@@ -83,13 +83,13 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
             //decode_pdf.useNewGraphicsMode = false;
             propValue = currentGUI.getProperties().getValue("pdfDisplayBackground");
 
-            int col = Integer.parseInt(propValue);
+            final int col = Integer.parseInt(propValue);
             image_display.setBackground(new Color(col));
 
         } else {
 
             if (decode_pdf.getDecoderOptions().getDisplayBackgroundColor() != null) {
-                int col = decode_pdf.getDecoderOptions().getDisplayBackgroundColor().getRGB();
+                final int col = decode_pdf.getDecoderOptions().getDisplayBackgroundColor().getRGB();
                 image_display.setBackground(new Color(col));
             } else if (decode_pdf.useNewGraphicsMode()) {
                 image_display.setBackground(new Color(55, 55, 65));
@@ -116,8 +116,8 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
 
                 displayFrame.setVisible(false);
 
-                ClipboardImage clipboardImage = new ClipboardImage(snapShot);
-                Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+                final ClipboardImage clipboardImage = new ClipboardImage(snapShot);
+                final Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
                 c.setContents(clipboardImage, null);
             }
         });
@@ -183,7 +183,7 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
 
                             try {
                                 DefaultImageHelper.write(snapShot, format, fileToSave.toString());
-                            } catch (IOException ex) {
+                            } catch (final IOException ex) {
                                 LogWriter.writeLog("Exception in writing image " + ex);
                             }
                         }

@@ -310,7 +310,7 @@ public class RefTable {
                     rootObj = readLegacyReferenceTable(rootObj, pointer, eof, currentPdfFile);
                     isInvalid = false;
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LogWriter.writeLog("[PDF] Exception reading reg table " + e + " - trying to manually find startref");
             }
         }
@@ -321,7 +321,7 @@ public class RefTable {
             try {
 				rootObj = new PageObject(BrokenRefTable.findOffsets(pdf_datafile, offset));
 				
-				byte[] rootDictBytes = BrokenRefTable.findFirstRootDict(pdf_datafile); //fix for 28184				
+				final byte[] rootDictBytes = BrokenRefTable.findFirstRootDict(pdf_datafile); //fix for 28184
 				if (rootDictBytes != null) {
 					final PdfObject pdfObject = new CompressedObject("0 0 R");	
 					Dictionary.readDictionary(pdfObject, 0, rootDictBytes, -1, currentPdfFile);
@@ -336,7 +336,7 @@ public class RefTable {
 					}
 					infoObject = pdfObject.getDictionary(PdfDictionary.Info);
 				}						
-            } catch (Error err) {
+            } catch (final Error err) {
                 throw new PdfException(err.getMessage() + " attempting to manually scan file for objects");
             }
 
@@ -501,8 +501,8 @@ public class RefTable {
     private static PdfObject handleBrokenFile(PdfObject rootObj, final PdfFileReader currentPdfFile) {
         int type = -1;
 
-        int status = rootObj.getStatus();
-        byte[] data = rootObj.getUnresolvedData();
+        final int status = rootObj.getStatus();
+        final byte[] data = rootObj.getUnresolvedData();
 
         try {
 
@@ -511,7 +511,7 @@ public class RefTable {
 
             type = rootObj.getParameterConstant(PdfDictionary.Type);
 
-        } catch (Exception e) { //we need to ignore so just catch, put back as was and log
+        } catch (final Exception e) { //we need to ignore so just catch, put back as was and log
 
             rootObj.setStatus(status);
             rootObj.setUnresolvedData(data, status);
@@ -526,7 +526,7 @@ public class RefTable {
         return rootObj;
     }
 
-    private int getPointer(int pointer, byte[] bytes, int i, int maxLen) {
+    private int getPointer(int pointer, final byte[] bytes, int i, final int maxLen) {
         boolean hasRef = true;
 
         i = StreamReaderUtils.skipSpaces(bytes, i);
@@ -673,7 +673,7 @@ public class RefTable {
         return pdfObject;
     }
 
-    private PdfObject processTrailer(PdfObject rootObj, PdfObject pdfObject) {
+    private PdfObject processTrailer(PdfObject rootObj, final PdfObject pdfObject) {
         if (rootObj == null) {
 
             rootObj = pdfObject.getDictionary(PdfDictionary.Root);

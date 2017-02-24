@@ -309,7 +309,7 @@ public class Summary extends javax.swing.JPanel {
      * @return
      */
     private static String byteToHex(final byte[] bytes) {
-        StringBuilder hex = new StringBuilder();
+        final StringBuilder hex = new StringBuilder();
         for (final byte aByte : bytes) {
             String singleByte = Integer.toHexString(aByte);
             if (singleByte.startsWith("ffffff")) {

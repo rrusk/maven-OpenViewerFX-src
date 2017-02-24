@@ -330,10 +330,10 @@ public class ObjectStore {
         return isSuccessful;
     }/*/
 
-    public final boolean saveStoredImageAsBytes(String currentImage, BufferedImage image, final boolean file_name_is_path) {
+    public final boolean saveStoredImageAsBytes(final String currentImage, final BufferedImage image, final boolean file_name_is_path) {
         FileOutputStream fos = null;
         try {
-            String current_image = removeIllegalFileNameCharacters(currentImage);
+            final String current_image = removeIllegalFileNameCharacters(currentImage);
             final File checkDir = new File(temp_dir);
             if (!checkDir.exists()) {
                 checkDir.mkdirs();
@@ -347,7 +347,7 @@ public class ObjectStore {
             byte[] data = TempStoreImage.getBytes(image);
 //        encryption goes here
             if(encHash != null){
-                CryptoAES aes = new CryptoAES();
+                final CryptoAES aes = new CryptoAES();
                 data = aes.encrypt(encHash, data);
             }           
             fos = new FileOutputStream(fileName);
@@ -355,12 +355,12 @@ public class ObjectStore {
             fos.close();
             tempFileNames.put(fileName,"#");
             return false;
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 fos.close();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -378,7 +378,7 @@ public class ObjectStore {
      */
     public final boolean saveStoredImage(
             String current_image,
-            BufferedImage image,
+            final BufferedImage image,
             final boolean file_name_is_path,
             final String type) {
 
@@ -701,7 +701,7 @@ public class ObjectStore {
         final String file_name = temp_dir + key + current_image + ending;
                 
         if(ending.equals(".jpl")){
-            File file = new File(file_name);
+            final File file = new File(file_name);
             if(!file.exists()){
                 return null;
             }
@@ -711,17 +711,17 @@ public class ObjectStore {
                 fis = new FileInputStream(file_name);
                 fis.read(data);                
                 if(encHash != null){
-                    CryptoAES aes = new CryptoAES();
+                    final CryptoAES aes = new CryptoAES();
                     data = aes.decrypt(encHash, data);
                 }
-                BufferedImage img = TempStoreImage.getImage(data);
+                final BufferedImage img = TempStoreImage.getImage(data);
                 return img;
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     fis.close();
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     Logger.getLogger(ObjectStore.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -850,7 +850,7 @@ public class ObjectStore {
             final String ending1,
             final String ending2,
             String current_image,
-            BufferedImage image,
+            final BufferedImage image,
             final boolean file_name_is_path) {
         boolean was_error = false;
 
@@ -980,7 +980,7 @@ public class ObjectStore {
                 from.read(data);
                 from.close();
                 
-                CryptoAES aes = new CryptoAES();
+                final CryptoAES aes = new CryptoAES();
                 data = aes.decrypt(key.getBytes(), data);
                 
                 //
@@ -1009,7 +1009,7 @@ public class ObjectStore {
 
             final BufferedOutputStream to = new BufferedOutputStream(new FileOutputStream(ff));
             
-            CryptoAES aes = new CryptoAES();
+            final CryptoAES aes = new CryptoAES();
             bytes = aes.encrypt(key.getBytes(), bytes);
             
             to.write(bytes);
@@ -1039,7 +1039,7 @@ public class ObjectStore {
 
             final BufferedOutputStream to = new BufferedOutputStream(new FileOutputStream(ff));
             if (encHash != null) {
-                CryptoAES aes = new CryptoAES();
+                final CryptoAES aes = new CryptoAES();
                 to.write(aes.encrypt(encHash, bytes));
             } else {
                 to.write(bytes);
@@ -1108,7 +1108,7 @@ public class ObjectStore {
                 data=new byte[(int)fis.length()];
                 from.read(data);
                 if(encHash != null){
-                    CryptoAES aes = new CryptoAES();
+                    final CryptoAES aes = new CryptoAES();
                     data = aes.decrypt(encHash, data);
                 }
                 from.close();
@@ -1158,7 +1158,7 @@ public class ObjectStore {
         final File tempURLFile;
         String suffix;
 
-        StringBuilder prefix=new StringBuilder(filename.substring(0, filename.lastIndexOf('.')));
+        final StringBuilder prefix=new StringBuilder(filename.substring(0, filename.lastIndexOf('.')));
         while(prefix.length()<3) {
             prefix.append('a');
         }
@@ -1214,7 +1214,7 @@ public class ObjectStore {
         return key;
     }
 
-    public void setEncHash(byte[] pass) {
+    public void setEncHash(final byte[] pass) {
         this.encHash = pass;
     }
 }

@@ -240,7 +240,7 @@ public class Javascript {
      * @return JavaScript as a String
      */
     public String getJavaScript(final String key) {
-    	String str;
+    	final String str;
     	if(key == null) {
 	        final Collection<String> c = javascriptNamesObjects.values();
 	        
@@ -248,7 +248,7 @@ public class Javascript {
 	        final Iterator<String> itr = c.iterator();
 	       
 	        //iterate through HashMap values iterator
-            StringBuilder s=new StringBuilder();
+            final StringBuilder s=new StringBuilder();
 	        while(itr.hasNext()) {
 	        	s.append(itr.next());
 	        }

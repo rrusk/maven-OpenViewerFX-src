@@ -39,7 +39,7 @@ public class DeviceRGBColorSpace extends  GenericColorSpace{
     
     private static final long serialVersionUID = -7269417965203263694L;
     
-    public DeviceRGBColorSpace(boolean isARGB){
+    public DeviceRGBColorSpace(final boolean isARGB){
         setType(ColorSpaces.DeviceRGB);
         
         if(isARGB){

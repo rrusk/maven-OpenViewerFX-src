@@ -45,7 +45,7 @@ public class HTMLStructuredContentHandler extends StructuredContentHandler {
 
    
 
-    public HTMLStructuredContentHandler(Object markedContent, DynamicVectorRenderer current) {
+    public HTMLStructuredContentHandler(final Object markedContent, final DynamicVectorRenderer current) {
 
             super(markedContent);
             
@@ -65,12 +65,12 @@ public class HTMLStructuredContentHandler extends StructuredContentHandler {
         }
     }
 
-    private void setHTMLTag(final PdfObject BDCobj, boolean isOpenTag) {
+    private void setHTMLTag(final PdfObject BDCobj, final boolean isOpenTag) {
         
 
         final int MCID=BDCobj.getInt(PdfDictionary.MCID);
         
-        String param=values.get(String.valueOf(MCID));
+        final String param=values.get(String.valueOf(MCID));
         
         if(isOpenTag){
             current.writeCustom(DynamicVectorRenderer.TEXT_STRUCTURE_OPEN, param);
@@ -108,7 +108,7 @@ public class HTMLStructuredContentHandler extends StructuredContentHandler {
 
         setBMCvalues(op);
 
-        PdfObject BDCobj= dictionaries.get(String.valueOf(markedContentLevel));
+        final PdfObject BDCobj= dictionaries.get(String.valueOf(markedContentLevel));
     	
         if(BDCobj!=null){
             setHTMLTag(BDCobj,true);
@@ -120,7 +120,7 @@ public class HTMLStructuredContentHandler extends StructuredContentHandler {
 
         setEMCValues();
         
-    	PdfObject BDCobj= dictionaries.get(String.valueOf(markedContentLevel));
+    	final PdfObject BDCobj= dictionaries.get(String.valueOf(markedContentLevel));
     	
         if(BDCobj!=null){
             setHTMLTag(BDCobj,false);

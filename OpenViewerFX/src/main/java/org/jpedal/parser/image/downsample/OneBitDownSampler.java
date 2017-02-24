@@ -44,32 +44,74 @@ import org.jpedal.parser.image.data.ImageData;
  */
 class OneBitDownSampler {
     
-    static GenericColorSpace resetSeparationColorSpace(final byte[] index,final ImageData imageData,final byte[] data) {
-        
-        //needs to have these settings if 1 bit not indexed
-        if(index==null && imageData.getDepth()==1){
-            imageData.setCompCount(1);
-            
-            invertBytes(data);
-        }
-        
-        return new DeviceRGBColorSpace();
-    }
-    
-       
-    public static GenericColorSpace downSample(int sampling, final ImageData imageData, GenericColorSpace decodeColorData) {
+    public static GenericColorSpace downSample(final int sampling, final ImageData imageData, GenericColorSpace decodeColorData) {
 
         final byte[] data=imageData.getObjectData();
         
-        int newW=imageData.getWidth()/sampling;
-        int newH=imageData.getHeight()/sampling;
-        
-        int size=newW*newH;
-        
-        final byte[] newData=new byte[size];
-        
         final int[] flag={1,2,4,8,16,32,64,128};
         
+        /* if(sampling>2){
+            
+            System.out.println("downSample ="+sampling);
+        
+            int newW=imageData.getWidth()>>1;
+            int newH=imageData.getHeight()>>1;
+        
+            final int origLineLength= (imageData.getWidth()+7)>>3;
+            final int newLineLength= (newW+7)>>3;
+
+            int size=(newLineLength*newH);
+        
+            byte[] newData=new byte[size];
+         
+            //scan all pixels and down-sample
+            for(int y=0;y<newH;y++){
+                for(int x=0;x<newW;x++){
+
+                    //allow for edges in number of pixels left
+                    int wCount=2,hCount=2;
+                    final int wGapLeft=imageData.getWidth()-x;
+                    final int hGapLeft=imageData.getHeight()-y;
+                    if(wCount>wGapLeft) {
+                        wCount = wGapLeft;
+                    }
+                    if(hCount>hGapLeft) {
+                        hCount = hGapLeft;
+                    }
+
+                    //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
+                    final int bytes = getPixelSetCount(2, false, data, flag, origLineLength, y, x, wCount, hCount);
+
+                    final int inputByte=(x>>2)+(origLineLength*(y<<2));
+                    final int outputByte=(x>>3)+(newLineLength*y);
+
+                    if(bytes>3){
+                        //set value as white or average of pixels
+                     //   final int outputByte=((x>>1) )+(newLineLength*(y>>2));
+                       
+                        newData[outputByte] = (byte) (newData[outputByte] | (flag[7-((x & 7))]));
+                       
+                    }
+                }
+            }
+            
+            imageData.setWidth(newW);
+            imageData.setHeight(newH);
+            data=newData;
+            
+            sampling=sampling>>1;
+        }
+        
+        System.out.println("downSample ="+sampling);
+        /**/
+        
+        final int newW=imageData.getWidth()/sampling;
+        final int newH=imageData.getHeight()/sampling;
+        
+        final int size=newW*newH;
+        
+        final byte[] newData=new byte[size];
+
         final int origLineLength= (imageData.getWidth()+7)>>3;
 
         //scan all pixels and down-sample
@@ -96,18 +138,20 @@ class OneBitDownSampler {
                 final int offset=x+(newW*y);
                 
                 if(count>0){
-                    newData[offset] = (byte) ((255 * bytes) / count);
-                    
+                    newData[offset] = (byte) ((255 * bytes) / count);    
                 }else{                   
-                    newData[offset] = (byte) 255;
-                    
+                    newData[offset] = (byte) 255;                   
                 }
             }
         }
        
         imageData.setWidth(newW);
         imageData.setHeight(newH);
-        decodeColorData.setIndex(null, 0);
+        imageData.setCompCount(1);
+        
+        //suggest you add kernel sharpening here
+        //@bethan
+        //imageData=KernelUtils.sharpenGrayScale(imageData,w,h);
         
         //remap Separation as already converted here
         if(decodeColorData.getID()==ColorSpaces.Separation || decodeColorData.getID()==ColorSpaces.DeviceN){
@@ -131,15 +175,15 @@ class OneBitDownSampler {
         }
     }
    
-    public static GenericColorSpace downSampleMask(int sampling, final ImageData imageData,
-            final byte[] maskCol, GenericColorSpace decodeColorData) {
+    public static GenericColorSpace downSampleMask(final int sampling, final ImageData imageData,
+                                                   final byte[] maskCol, GenericColorSpace decodeColorData) {
 
         final byte[] data=imageData.getObjectData();
         
-        int newW=imageData.getWidth()/sampling;
-        int newH=imageData.getHeight()/sampling;
+        final int newW=imageData.getWidth()/sampling;
+        final int newH=imageData.getHeight()/sampling;
         
-        int size=newW*newH*4;
+        final int size=newW*newH*4;
         
         maskCol[3]=(byte)255;
         
@@ -204,15 +248,15 @@ class OneBitDownSampler {
     }
 
     
-    public static GenericColorSpace downSampleIndexed(int sampling, final ImageData imageData,
-            final byte[] index, GenericColorSpace decodeColorData) {
+    public static GenericColorSpace downSampleIndexed(final int sampling, final ImageData imageData,
+                                                      final byte[] index, GenericColorSpace decodeColorData) {
 
-        byte[] data=imageData.getObjectData();
+        final byte[] data=imageData.getObjectData();
         
-        int newW=imageData.getWidth()/sampling;
-        int newH=imageData.getHeight()/sampling;
+        final int newW=imageData.getWidth()/sampling;
+        final int newH=imageData.getHeight()/sampling;
         
-        int size=newW*newH*3;
+        final int size=newW*newH*3;
         
         final byte[] newData=new byte[size];
         
@@ -286,7 +330,7 @@ class OneBitDownSampler {
         return decodeColorData;
     }
 
-    private static int getPixelSetCount(final int sampling, boolean imageMask, final byte[] data, final int[] flag, final int origLineLength,
+    private static int getPixelSetCount(final int sampling, final boolean imageMask, final byte[] data, final int[] flag, final int origLineLength,
                                         final int y, final int x, final int wCount, final int hCount) {
 
         byte currentByte;

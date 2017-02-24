@@ -117,7 +117,7 @@ public class Offsets extends Vector_Int {
         return calcLengths(offsets, id, xrefs, xrefID, objectCount, eof);
     }
 
-    static int skipEmptyValues(final int[] offsets, int[] id) {
+    static int skipEmptyValues(final int[] offsets, final int[] id) {
         int i = 0;
         //ignore empty values
         while (true) {

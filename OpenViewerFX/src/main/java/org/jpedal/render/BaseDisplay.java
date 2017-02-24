@@ -436,13 +436,13 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
         final Composite c = g2.getComposite();
         renderComposite(alpha);
 
-        AffineTransform upside_down;
+        final AffineTransform upside_down;
 
         float CTM[][] = new float[3][3];
         if (currentGraphicsState != null) {
             CTM = currentGraphicsState.CTM;
         } else {
-            double[] values = new double[6];
+            final double[] values = new double[6];
             imageAf.getMatrix(values);
             CTM[0][0] = (float) values[0];
             CTM[0][1] = (float) values[1];
@@ -685,7 +685,7 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     /*save shape in array to draw*/
 	@Override
-    public void eliminateHiddenText(final Shape currentShape, final GraphicsState gs, final int count, boolean ignoreScaling) {
+    public void eliminateHiddenText(final Shape currentShape, final GraphicsState gs, final int count, final boolean ignoreScaling) {
     }
 
     protected void renderComposite(final float alpha) {

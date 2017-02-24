@@ -50,11 +50,11 @@ import org.jpedal.parser.image.data.ImageData;
  */
 public class SMaskDecoder {
     
-    public static byte[] applyJPX_JBIG_Smask(final ImageData imageData, final ImageData smaskData, byte[] maskData,PdfObject imageObject, PdfObject maskObject, GenericColorSpace colorSpace, GenericColorSpace maskCS){
+    public static byte[] applyJPX_JBIG_Smask(final ImageData imageData, final ImageData smaskData, byte[] maskData, final PdfObject imageObject, final PdfObject maskObject, final GenericColorSpace colorSpace, final GenericColorSpace maskCS){
         byte[] objectData = imageData.getObjectData();
         int iw=imageData.getWidth();
         int ih=imageData.getHeight();
-        int id=imageData.getDepth();
+        final int id=imageData.getDepth();
         
         float[] matte = maskObject.getFloatArray(PdfDictionary.Matte);
         
@@ -71,11 +71,11 @@ public class SMaskDecoder {
             objectData = ColorSpaceConvertor.normaliseTo8Bit(id, iw, ih, objectData);
         }
                 
-        int sw=smaskData.getWidth();
-        int sh=smaskData.getHeight();
-        int sd=smaskData.getDepth();
+        final int sw=smaskData.getWidth();
+        final int sh=smaskData.getHeight();
+        final int sd=smaskData.getDepth();
         
-        float [] decodeArr = maskObject.getFloatArray(PdfDictionary.Decode);
+        final float [] decodeArr = maskObject.getFloatArray(PdfDictionary.Decode);
                 
         if(decodeArr!=null && decodeArr[0]==1 && decodeArr[1]==0){ // data inverted refer to dec2011/example.pdf
             for (int i = 0; i < maskData.length; i++) {
@@ -106,7 +106,7 @@ public class SMaskDecoder {
         maskData = ColorSpaceConvertor.normaliseTo8Bit(sd,sw, sh, maskData);
         
         int imageDim = iw*ih;
-        int maskDim = sw*sh;
+        final int maskDim = sw*sh;
         if(imageDim>maskDim){
             maskData  = getScaledBytes(maskData, sw, sh, iw, ih);            
         }else if(maskDim>imageDim){
@@ -119,12 +119,12 @@ public class SMaskDecoder {
         }
         int p = 0;
                
-        ByteBuffer buffer = ByteBuffer.allocate(iw*ih*4);
+        final ByteBuffer buffer = ByteBuffer.allocate(iw*ih*4);
                         
         if (imageDim == objectData.length) {
             int aa = 0;
             for (int i = 0; i < imageDim; i++) {
-                byte r = objectData[i] ;
+                final byte r = objectData[i] ;
                 for (int j = 0; j < 3; j++) {
                     buffer.put(r);
                 }
@@ -133,13 +133,13 @@ public class SMaskDecoder {
         } else {
             if(matte!=null){
                 for (int i = 0; i < maskData.length; i++) {
-                    int a = maskData[i] & 0xff;
+                    final int a = maskData[i] & 0xff;
                     int r = objectData[p++] & 0xff;
                     int g = objectData[p++] & 0xff;
                     int b = objectData[p++] & 0xff;
                     
                     if(a!=0){
-                        double k = 255.0/a;
+                        final double k = 255.0/a;
                         r = (int) ((r-matte[0])*k+matte[0]);
                         g = (int) ((g-matte[1])*k+matte[1]);
                         b = (int) ((b-matte[2])*k+matte[2]);
@@ -148,18 +148,18 @@ public class SMaskDecoder {
                         g = g < 0 ? 0 : g > 255 ? 255 : g;
                         b = b < 0 ? 0 : b > 255 ? 255 : b;
                     }
-                    byte[] bb = {(byte)r,(byte)g,(byte)b,(byte)a};
+                    final byte[] bb = {(byte)r,(byte)g,(byte)b,(byte)a};
                     buffer.put(bb);
                     
                 }
             }else{
-                int expected = imageDim*3;
+                final int expected = imageDim*3;
                 if(objectData.length<expected){//odd cases where datastream is not enough
-                    byte temp[] = new byte[expected];
+                    final byte[] temp = new byte[expected];
                     System.arraycopy(objectData, 0, temp, 0, objectData.length);
                     objectData = temp;
                 }
-                int iter = Math.min(maskData.length, iw*ih);
+                final int iter = Math.min(maskData.length, iw*ih);
                 
                 for (int i = 0; i < iter; i++) {
                     buffer.put(new byte[]{objectData[p++],objectData[p++],objectData[p++], maskData[i]});
@@ -175,14 +175,14 @@ public class SMaskDecoder {
         return buffer.array();
     }
     
-    private static byte[] getScaledBytes(byte[] data, int sw, int sh, int dw, int dh){
+    private static byte[] getScaledBytes(final byte[] data, final int sw, final int sh, final int dw, final int dh){
         if(data.length == (sw*sh)){ //gray scale image
             return rescaleComponent(data, sw, sh, dw, dh);
         }else{//rgb image
             int dim = sw*sh;
             
             //sanity check
-            int maxSize=data.length/3;
+            final int maxSize=data.length/3;
             if(dim>maxSize){
                 dim=maxSize;
             }
@@ -201,7 +201,7 @@ public class SMaskDecoder {
             
             p=0;
             dim = dw*dh;
-            byte[] temp = new byte[dim*3];
+            final byte[] temp = new byte[dim*3];
             for (int i = 0; i < dim; i++) {
                 temp[p++] = rr[i];
                 temp[p++] = gg[i];
@@ -211,37 +211,37 @@ public class SMaskDecoder {
         }
     }
     
-    private static byte[] rescaleComponent(byte[] data, int sw, int sh, int dw, int dh){
+    private static byte[] rescaleComponent(byte[] data, final int sw, int sh, final int dw, final int dh){
         if(data.length==1){
-            byte a = data[0];
+            final byte a = data[0];
             data = new byte[dw*dh];
             Arrays.fill(data, a);
             return data;
         }else if(sh==1){
-            byte[] temp = new byte[2*sw];
+            final byte[] temp = new byte[2*sw];
             System.arraycopy(data, 0, temp, 0, sw);
             System.arraycopy(data, 0, temp, sw, sw);
             sh = 2;
             data = temp;
         }
         
-        float ratioW=sw/(float)dw;
-        float ratioH=sh/(float)dh;
-        byte[] combinedData=new byte[dw*dh];
+        final float ratioW=sw/(float)dw;
+        final float ratioH=sh/(float)dh;
+        final byte[] combinedData=new byte[dw*dh];
         final int rawDataSize=data.length;
         int i = 0;
         
         try{
             for(int mY=0;mY<dh;mY++){
                 for(int mX=0;mX<dw;mX++){
-                    int rgbPtr=(((int)(mX*ratioW)))+(((int)(mY*ratioH))*sw);
+                    final int rgbPtr=(((int)(mX*ratioW)))+(((int)(mY*ratioH))*sw);
                     if(rgbPtr<rawDataSize){
                         combinedData[i]=data[rgbPtr];
                     }
                     i++;
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         
@@ -291,9 +291,9 @@ public class SMaskDecoder {
         /*
         * Image data
         */
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
-        int d=imageData.getDepth();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
+        final int d=imageData.getDepth();
         
         /*
         * Smask data (ASSUME single component at moment)
@@ -342,7 +342,7 @@ public class SMaskDecoder {
         
         boolean is4Bit=true;
         
-        for(byte b:objectData){
+        for(final byte b:objectData){
             if(b<0 || b>15){
                 is4Bit=false;
                 break;
@@ -361,9 +361,9 @@ public class SMaskDecoder {
         
         int rgbPtr=0, aPtr;
         int i=0;
-        float ratioW=maskW/(float)w;
-        float ratioH=maskH/(float)h;
-        byte[] combinedData=new byte[w*h*4];
+        final float ratioW=maskW/(float)w;
+        final float ratioH=maskH/(float)h;
+        final byte[] combinedData=new byte[w*h*4];
         
         final int rawDataSize=objectData.length;
         
@@ -387,7 +387,7 @@ public class SMaskDecoder {
                     
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         return combinedData;
@@ -398,9 +398,9 @@ public class SMaskDecoder {
         
         int rgbPtr, aPtr=0;
         int i=0;
-        float ratioW=w/(float)maskW;
-        float ratioH=h/(float)maskH;
-        byte[] combinedData=new byte[maskW*maskH*4];
+        final float ratioW=w/(float)maskW;
+        final float ratioH=h/(float)maskH;
+        final byte[] combinedData=new byte[maskW*maskH*4];
         final int rawDataSize=objectData.length;
         final int maskSize=maskData.length;
         
@@ -428,14 +428,14 @@ public class SMaskDecoder {
                     
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         
         return combinedData;
     }
     
-     public static byte[] getSMaskData(byte[] maskData,ImageData smaskData, PdfObject newSMask,GenericColorSpace maskColorData) {
+     public static byte[] getSMaskData(byte[] maskData, final ImageData smaskData, final PdfObject newSMask, final GenericColorSpace maskColorData) {
         smaskData.getFilter(newSMask);
        
         if(smaskData.isDCT()){
@@ -452,9 +452,9 @@ public class SMaskDecoder {
      
     private static byte[] buildUnscaledByteArray(final int w, final int h, final byte[] objectData, final byte[] maskData) {
         
-        int pixels=w*h*4;
+        final int pixels=w*h*4;
         int rgbPtr=0, aPtr=0;
-        byte[] combinedData=new byte[w*h*4];
+        final byte[] combinedData=new byte[w*h*4];
         final int rawDataSize=objectData.length;
         final int maskSize=maskData.length;
         
@@ -476,7 +476,7 @@ public class SMaskDecoder {
                 }
                 
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         

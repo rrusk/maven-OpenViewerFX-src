@@ -46,7 +46,7 @@ public class CommandListenerFX implements CommandListener {
     
 	public CommandListenerFX(final Commands currentCommands) {
        
-        JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
+        final JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
         if(fxSupport!=null){
             commandListener =  (CommandListenerImpl) fxSupport.getCommandHandler(currentCommands);
         }

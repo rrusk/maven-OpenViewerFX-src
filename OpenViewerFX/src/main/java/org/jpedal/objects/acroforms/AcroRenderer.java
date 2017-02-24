@@ -532,7 +532,7 @@ public class AcroRenderer{
                             if(!isAnnotation(formObject)){
                                 continue;
                             }
-                        }catch(Exception e){
+                        }catch(final Exception e){
                             LogWriter.writeLog("Exception "+e+" with "+objRef);
                             continue;
                         }
@@ -1231,7 +1231,7 @@ public class AcroRenderer{
     
     private int createInteractiveField(final boolean[] flags, final int formType) {
 
-        int widgetType;
+        final int widgetType;
 
         switch (formType) {
             case PdfDictionary.Tx:
@@ -1295,7 +1295,7 @@ public class AcroRenderer{
     }
     
     private int createButtonField(final boolean[] flags){
-            int widgetType;
+            final int widgetType;
             //flags used for button types
             //20100212 (ms) Unused ones commented out
             boolean isPushButton = false, isRadio = false;// hasNoToggleToOff = false, radioinUnison = false;
@@ -1580,7 +1580,7 @@ public class AcroRenderer{
         return alwaysUseXFA;
     }
 
-    public void init(SwingFormCreator formCreator) {
+    public void init(final SwingFormCreator formCreator) {
 
         this.formCreator=formCreator;
         
@@ -1612,7 +1612,7 @@ public class AcroRenderer{
         return warnOnceOnForms;
     }
 
-    FormObject[] createXFADisplayComponentsForPage(FormObject[] xfaFormList, int page) {
+    FormObject[] createXFADisplayComponentsForPage(final FormObject[] xfaFormList, final int page) {
         throw new UnsupportedOperationException("createXFADisplayComponentsForPage should never be called");
     }
 
@@ -1620,19 +1620,19 @@ public class AcroRenderer{
         throw new UnsupportedOperationException("getPageMapXFA should never be called");
     }
     
-    public byte[] getXMLContentAsBytes(int dataType) {
+    public byte[] getXMLContentAsBytes(final int dataType) {
         return null;
     }
 
-    public void outputJavascriptXFA(String path, String name) {
+    public void outputJavascriptXFA(final String path, final String name) {
         throw new UnsupportedOperationException("outputJavascriptXFA should never be called");
     }
 
-    public PrintStreamDecoder getStreamDecoderForPrinting(PdfObjectReader currentPdfFile,PdfLayerList pdfLayerList) {
+    public PrintStreamDecoder getStreamDecoderForPrinting(final PdfObjectReader currentPdfFile, final PdfLayerList pdfLayerList) {
         return new PdfStreamDecoderForPrinting(currentPdfFile, pdfLayerList);
     }
 
-    public BufferedImage decode(PdfObject pdfObject, PdfObjectReader currentPdfFile, PdfObject XObject, int subtype, int width, int height, int offsetImage, float pageScaling) {
+    public BufferedImage decode(final PdfObject pdfObject, final PdfObjectReader currentPdfFile, final PdfObject XObject, final int subtype, final int width, final int height, final int offsetImage, final float pageScaling) {
         LogWriter.writeLog("called decode("+pdfObject+", "+ currentPdfFile+", "+ XObject+", "+subtype+", "+width+", "+height+", "+offsetImage+", "+pageScaling);
 
         return null;

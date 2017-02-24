@@ -1050,15 +1050,15 @@ public abstract class GUI implements GUIFactory {
          * if page has transition we will have stored values earlier and now need to use and remove
          */
         if(isJavaFX){
-            FXAdditionalData additionaValuesforPage=(FXAdditionalData) decode_pdf.getExternalHandler(Options.JavaFX_ADDITIONAL_OBJECTS);
+            final FXAdditionalData additionaValuesforPage=(FXAdditionalData) decode_pdf.getExternalHandler(Options.JavaFX_ADDITIONAL_OBJECTS);
             
             if(additionaValuesforPage!=null){
                 
-               DynamicVectorRenderer fxDisplay= decode_pdf.getDynamicRenderer();
+               final DynamicVectorRenderer fxDisplay= decode_pdf.getDynamicRenderer();
                 
                 try {
                     fxDisplay.drawAdditionalObjectsOverPage(additionaValuesforPage.getType(), null,additionaValuesforPage.getObj());
-                } catch (PdfException ex) {
+                } catch (final PdfException ex) {
                     org.jpedal.utils.LogWriter.writeLog("Exception attempting to draw additional objects " + ex);
                 }
                 
@@ -1078,7 +1078,7 @@ public abstract class GUI implements GUIFactory {
         
     }
 
-    void setCursor(int type) {
+    void setCursor(final int type) {
         //only used in Swing implementation
     }
 
@@ -1241,9 +1241,9 @@ public abstract class GUI implements GUIFactory {
      * @return String value representing the page label for the page.
      */
     @Override
-    public String getPageLabel(int pageNumber) {
+    public String getPageLabel(final int pageNumber) {
         if(commonValues.isPDF()){ //Only check labels if pdf
-            String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
+            final String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
             if (value != null) {
                 return value;
             }
@@ -1257,8 +1257,8 @@ public abstract class GUI implements GUIFactory {
      * @param pageNumber int value representing the page number
      * @return true if the page label differs, false otherwise
      */
-    public boolean pageLabelDiffers(int pageNumber){
-        String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
+    public boolean pageLabelDiffers(final int pageNumber){
+        final String value = decode_pdf.getIO().convertPageNumberToLabel(pageNumber);
         if (value != null) {
             return !value.equals(String.valueOf(pageNumber));
         }

@@ -56,7 +56,7 @@ public class JavaFXSupportImpl extends JavaFXSupport {
     @Override
     public PdfGlyph getGlyph(final Glyf currentGlyf, final FontFile2 fontTable, final Hmtx currentHmtx, final int idx, final float unitsPerEm, final TTVM vm, final String baseFontName) {
 
-        PdfGlyph currentGlyph;
+        final PdfGlyph currentGlyph;
 
         if (TTGlyph.useHinting) {
             currentGlyph = new TTGlyphFX(currentGlyf, fontTable, currentHmtx, idx, unitsPerEm, vm);
@@ -74,7 +74,7 @@ public class JavaFXSupportImpl extends JavaFXSupport {
     }
     
     @Override
-    public Object getCommandHandler(Object currentCommands) {
+    public Object getCommandHandler(final Object currentCommands) {
         return new JavaFXCommandListener((Commands)currentCommands);
     }
                 

@@ -75,7 +75,7 @@ public class CoonsContext implements PaintContext {
      * @param shapes
      * @param background
      */
-    CoonsContext(final AffineTransform xform,final GenericColorSpace shadingColorSpace, final ArrayList<Shape67> shapes, final float[] background, float[][] mm, PDFFunction[] function) {
+    CoonsContext(final AffineTransform xform, final GenericColorSpace shadingColorSpace, final ArrayList<Shape67> shapes, final float[] background, final float[][] mm, final PDFFunction[] function) {
 
         this.shapes = shapes;
         this.background = background;
@@ -88,17 +88,17 @@ public class CoonsContext implements PaintContext {
         }
 
         try {
-            AffineTransform invXF = xform.createInverse();
-            AffineTransform invSH = shadeAffine.createInverse();
+            final AffineTransform invXF = xform.createInverse();
+            final AffineTransform invSH = shadeAffine.createInverse();
             invSH.concatenate(invXF);
             invAffine = (AffineTransform) invSH.clone();
-        } catch (NoninvertibleTransformException ex) {
+        } catch (final NoninvertibleTransformException ex) {
             LogWriter.writeLog("Exception " + ex + ' ');
         }
         this.function = function;
     }
 
-    CoonsContext(final AffineTransform xform, final GenericColorSpace shadingColorSpace, final float[] background, final PdfObject shadingObject, float[][] mm, PDFFunction[] function) {
+    CoonsContext(final AffineTransform xform, final GenericColorSpace shadingColorSpace, final float[] background, final PdfObject shadingObject, final float[][] mm, final PDFFunction[] function) {
 
         this.shadingColorSpace = shadingColorSpace;
         this.background = background;
@@ -106,7 +106,7 @@ public class CoonsContext implements PaintContext {
         bitsPerFlag = shadingObject.getInt(PdfDictionary.BitsPerFlag);
         bitsPerCoordinate = shadingObject.getInt(PdfDictionary.BitsPerCoordinate);
         decodeArr = shadingObject.getFloatArray(PdfDictionary.Decode);
-        boolean hasSmallBits = bitsPerFlag < 8 || bitsPerComponent < 8 || bitsPerCoordinate < 8;
+        final boolean hasSmallBits = bitsPerFlag < 8 || bitsPerComponent < 8 || bitsPerCoordinate < 8;
         reader = new BitReader(shadingObject.getDecodedStream(), hasSmallBits);
         colCompCount = shadingColorSpace.getColorComponentCount();
         if (decodeArr != null) {
@@ -119,11 +119,11 @@ public class CoonsContext implements PaintContext {
         }
         
         try {
-            AffineTransform invXF = xform.createInverse();
-            AffineTransform invSH = shadeAffine.createInverse();
+            final AffineTransform invXF = xform.createInverse();
+            final AffineTransform invSH = shadeAffine.createInverse();
             invSH.concatenate(invXF);
             invAffine = (AffineTransform)invSH.clone();
-        } catch (NoninvertibleTransformException ex) {
+        } catch (final NoninvertibleTransformException ex) {
             LogWriter.writeLog("Exception "+ex+ ' ');
         }
 
@@ -145,14 +145,14 @@ public class CoonsContext implements PaintContext {
      */
     private void process() {
         while (reader.getPointer() < reader.getTotalBitLen()) {
-            int flag = reader.getPositive(bitsPerFlag);
-            Point2D a4[] = new Point2D[4];
-            Color a2[] = new Color[2];
-            float[] cc = new float[colCompCount];
+            final int flag = reader.getPositive(bitsPerFlag);
+            final Point2D[] a4 = new Point2D[4];
+            final Color[] a2 = new Color[2];
+            final float[] cc = new float[colCompCount];
             switch (flag) {
                 case 0:
                     for (int i = 0; i < 12; i++) {
-                        Point2D p = getPointCoords();
+                        final Point2D p = getPointCoords();
                         pp.add(p);
                     }
 
@@ -160,7 +160,7 @@ public class CoonsContext implements PaintContext {
                         for (int z = 0; z < colCompCount; z++) {
                             cc[z] = reader.getFloat(bitsPerComponent);
                         }
-                        Color color = calculateColor(cc);
+                        final Color color = calculateColor(cc);
                         pc.add(color);
                     }
                     break;
@@ -172,7 +172,7 @@ public class CoonsContext implements PaintContext {
 
                     pp.addAll(Arrays.asList(a4).subList(0, 4));
                     for (int i = 0; i < 8; i++) {
-                        Point2D p = getPointCoords();
+                        final Point2D p = getPointCoords();
                         pp.add(p);
                     }
                     a2[0] = pc.get(pc.size() - 3);
@@ -184,7 +184,7 @@ public class CoonsContext implements PaintContext {
                         for (int z = 0; z < colCompCount; z++) {
                             cc[z] = reader.getFloat(bitsPerComponent);
                         }
-                        Color color = calculateColor(cc);
+                        final Color color = calculateColor(cc);
                         pc.add(color);
                     }
 
@@ -198,7 +198,7 @@ public class CoonsContext implements PaintContext {
 
                     pp.addAll(Arrays.asList(a4).subList(0, 4));
                     for (int i = 0; i < 8; i++) {
-                        Point2D p = getPointCoords();
+                        final Point2D p = getPointCoords();
                         pp.add(p);
                     }
 
@@ -211,7 +211,7 @@ public class CoonsContext implements PaintContext {
                         for (int z = 0; z < colCompCount; z++) {
                             cc[z] = reader.getFloat(bitsPerComponent);
                         }
-                        Color color = calculateColor(cc);
+                        final Color color = calculateColor(cc);
                         pc.add(color);
                     }
                     // do color mapping                    
@@ -225,7 +225,7 @@ public class CoonsContext implements PaintContext {
 
                     pp.addAll(Arrays.asList(a4).subList(0, 4));
                     for (int i = 0; i < 8; i++) {
-                        Point2D p = getPointCoords();
+                        final Point2D p = getPointCoords();
                         pp.add(p);
                     }
 
@@ -238,7 +238,7 @@ public class CoonsContext implements PaintContext {
                         for (int z = 0; z < colCompCount; z++) {
                             cc[z] = reader.getFloat(bitsPerComponent);
                         }
-                        Color color = calculateColor(cc);
+                        final Color color = calculateColor(cc);
                         pc.add(color);
                     }
                     break;
@@ -252,16 +252,16 @@ public class CoonsContext implements PaintContext {
     private void adjustPoints() {
 
         if (decodeArr != null) { //some odd files have decode array as null
-            float xMin = decodeArr[0];
-            float xMax = decodeArr[1];
-            float yMin = decodeArr[2];
-            float yMax = decodeArr[3];
+            final float xMin = decodeArr[0];
+            final float xMax = decodeArr[1];
+            final float yMin = decodeArr[2];
+            final float yMax = decodeArr[3];
 
-            float xw = xMax - xMin;
-            float yw = yMax - yMin;
+            final float xw = xMax - xMin;
+            final float yw = yMax - yMin;
 
-            ArrayList<Point2D> tempPoints = new ArrayList<Point2D>();
-            for (Point2D p : pp) {
+            final ArrayList<Point2D> tempPoints = new ArrayList<Point2D>();
+            for (final Point2D p : pp) {
                 float xx = (float) p.getX();
                 float yy = (float) p.getY();
                 xx = (xw * xx) + xMin;
@@ -269,22 +269,22 @@ public class CoonsContext implements PaintContext {
                 tempPoints.add(new Point2D.Float(xx, yy));
             }
             pp.clear();
-            for (Point2D t : tempPoints) {
+            for (final Point2D t : tempPoints) {
                 pp.add(t);
             }
         }
 
-        Point2D[] pArr = new Point2D[pp.size()];
+        final Point2D[] pArr = new Point2D[pp.size()];
         for (int i = 0; i < pArr.length; i++) {
             pArr[i] = pp.get(i);
         }
-        int totalPatches = pp.size() / 12;
+        final int totalPatches = pp.size() / 12;
         int offset = 0;
         for (int i = 0; i < totalPatches; i++) {
-            Point2D[] pointArr = new Point2D[12];
-            Color[] colors = {pc.get(i * 4), pc.get(i * 4 + 1), pc.get(i * 4 + 2), pc.get(i * 4 + 3)};
+            final Point2D[] pointArr = new Point2D[12];
+            final Color[] colors = {pc.get(i * 4), pc.get(i * 4 + 1), pc.get(i * 4 + 2), pc.get(i * 4 + 3)};
             System.arraycopy(pArr, offset, pointArr, 0, 12);
-            Shape67 sh = new Shape67(pointArr, colors);
+            final Shape67 sh = new Shape67(pointArr, colors);
             shapes.add(sh);
             offset += 12;
         }
@@ -319,10 +319,10 @@ public class CoonsContext implements PaintContext {
     }
 
     @Override
-    public Raster getRaster(int xStart, int yStart, int w, int h) {
+    public Raster getRaster(final int xStart, final int yStart, final int w, final int h) {
 
         final WritableRaster raster = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB).getRaster();
-        int[] data = ((DataBufferInt) raster.getDataBuffer()).getData();
+        final int[] data = ((DataBufferInt) raster.getDataBuffer()).getData();
 
         if (background != null) {
             int pos = 0;
@@ -335,12 +335,12 @@ public class CoonsContext implements PaintContext {
             }
         }
 
-        Rectangle rect = new Rectangle(xStart, yStart, w, h);
-        Shape rr = invAffine.createTransformedShape(rect);
-        Rectangle2D rect2D = rr.getBounds2D();
+        final Rectangle rect = new Rectangle(xStart, yStart, w, h);
+        final Shape rr = invAffine.createTransformedShape(rect);
+        final Rectangle2D rect2D = rr.getBounds2D();
 
-        List<Shape67> foundList = new ArrayList<Shape67>();
-        for (Shape67 sh : shapes) {
+        final List<Shape67> foundList = new ArrayList<Shape67>();
+        for (final Shape67 sh : shapes) {
             if (sh.getMinX()<rect2D.getMaxX() 
                     && sh.getMinY()<rect2D.getMaxY() 
                     && sh.getShape().intersects(rect2D)) {
@@ -349,21 +349,21 @@ public class CoonsContext implements PaintContext {
         }
         
         float xx,yy;
-        for (Shape67 sh : foundList) {
-            GeneralPath path = sh.getShape();
+        for (final Shape67 sh : foundList) {
+            final GeneralPath path = sh.getShape();
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     //float[] xy = PixelFactory.convertPhysicalToPDF(false, x, y, offX, offY, 1 / scaling, xStart, yStart, 0, pageHeight);
 //                    float[] xy = ShadingUtils.getPixelPDF(false, rotation, x, y, xStart,yStart, offX, offY, 0, pageHeight, scaling);
 //                    float[] xy = ShadingUtils.getPdfCoords(inversed, x, y, xStart, yStart);
-                    float[] src = {x+xStart, y+yStart};
+                    final float[] src = {x+xStart, y+yStart};
                     invAffine.transform(src, 0, src, 0, 1);
                     xx = src[0];
                     yy = src[1];
                     // check with bounds first before going to shape to speedup execution
                     if (path.contains(xx, yy)) {
-                        Point2D p = new Point2D.Float(xx, yy);
-                        Color result = sh.findPointColor(p, isRecursive);
+                        final Point2D p = new Point2D.Float(xx, yy);
+                        final Color result = sh.findPointColor(p, isRecursive);
                         if (result != null) {
                             final int base = (y * w + x);
                             data[base] = 255 << 24 | result.getRGB();

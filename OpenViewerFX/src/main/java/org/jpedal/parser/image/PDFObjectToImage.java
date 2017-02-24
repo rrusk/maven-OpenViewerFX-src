@@ -132,7 +132,7 @@ public class PDFObjectToImage {
 
                     if(ColorSpace!=null && ColorSpace.getTokenCount()>0){
 
-                        GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+                        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
                         
                         //System.out.println(group.getDictionary(PdfDictionary.ColorSpace) +" "+group.getObjectRefAsString()+" "+group.getBoolean(PdfDictionary.I)+" "+group.getBoolean(PdfDictionary.K)+" ");
                         if(group.getBoolean(PdfDictionary.I)==false && group.getBoolean(PdfDictionary.K)==false && newColorSpace!=null && newColorSpace.getID()==ColorSpaces.DeviceCMYK){

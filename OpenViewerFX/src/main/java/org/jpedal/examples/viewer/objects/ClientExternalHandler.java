@@ -55,7 +55,7 @@ public abstract class ClientExternalHandler implements AdditonalHandler{
     private Speech speech; 
     
     @Override
-    public Object getExternalHandler(int type) {
+    public Object getExternalHandler(final int type) {
         
         switch (type) {
             
@@ -76,7 +76,7 @@ public abstract class ClientExternalHandler implements AdditonalHandler{
     }
     
     @Override
-    public void addExternalHandler(Object newHandler, int type) {
+    public void addExternalHandler(final Object newHandler, final int type) {
         
         switch (type) {
             

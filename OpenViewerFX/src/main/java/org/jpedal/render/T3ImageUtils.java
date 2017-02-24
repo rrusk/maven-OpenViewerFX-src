@@ -43,7 +43,7 @@ import org.jpedal.color.PdfPaint;
 class T3ImageUtils {
  
     
-    public static BufferedImage handleType3Image(BufferedImage image,PdfPaint fillCol) {
+    public static BufferedImage handleType3Image(BufferedImage image, final PdfPaint fillCol) {
         
         final int[] maskCol = new int[4];
         final int foreground = fillCol.getRGB();

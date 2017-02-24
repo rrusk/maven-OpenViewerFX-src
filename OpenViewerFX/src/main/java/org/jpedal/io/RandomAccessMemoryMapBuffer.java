@@ -176,7 +176,7 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     private int peek() throws IOException {
         if (checkPos(this.pointer)) {
             buf.seek(pointer++);
-            int returnInt= b2i(buf.readByte());
+            final int returnInt= b2i(buf.readByte());
             pointer--; //needs to roll bakc - peek should not increment as it stops readLine working
             return returnInt;
         } else {

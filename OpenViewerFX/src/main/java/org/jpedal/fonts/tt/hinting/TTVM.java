@@ -694,7 +694,7 @@ public class TTVM implements Serializable {
     private int process(int code, int currentPointer, final int[] program, final TTGraphicsState gs) {
 
         //Warning supressed as originalPointer is used by debug code
-        @SuppressWarnings("UnusedAssignment")
+        @SuppressWarnings("UnusedAssignment") final
         int originalPointer = currentPointer;
 
         //If it's reading data find how much to read & redirect to first command
@@ -3904,7 +3904,7 @@ public class TTVM implements Serializable {
                 test = 0xE0;
             }
 
-            for (Field declaredField : TTVM.class.getDeclaredFields()) {
+            for (final Field declaredField : TTVM.class.getDeclaredFields()) {
                 if (found) {
                     break;
                 }
@@ -4003,7 +4003,7 @@ public class TTVM implements Serializable {
                 test = 0xE0;
             }
 
-            for (Field declaredField : TTVM.class.getDeclaredFields()) {
+            for (final Field declaredField : TTVM.class.getDeclaredFields()) {
                 if (found) {
                     break;
                 }

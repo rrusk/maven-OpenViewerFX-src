@@ -412,13 +412,13 @@ public class PdfFileReader
                         stream =filter.decodeFilters(ObjectUtils.setupDecodeParms(pdfObject,this), stream, filters ,width,height, cacheName);
 
                         if(cacheName != null && encryptionPassword != null){
-                            File f = new File(cacheName);
-                            FileInputStream fis = new FileInputStream(f);                            
+                            final File f = new File(cacheName);
+                            final FileInputStream fis = new FileInputStream(f);
                             byte[] temp = new byte[(int)f.length()];
                             fis.read(temp);
-                            CryptoAES aes = new CryptoAES();
+                            final CryptoAES aes = new CryptoAES();
                             temp = aes.encrypt(encryptionPassword, temp);
-                            FileOutputStream fos = new FileOutputStream(f);
+                            final FileOutputStream fos = new FileOutputStream(f);
                             fos.write(temp);
                             fos.close();
                         }
@@ -465,7 +465,7 @@ public class PdfFileReader
                     new BufferedInputStream(new FileInputStream(cacheName)).read(bytes);
                     
                     if (encryptionPassword != null) {
-                        CryptoAES aes = new CryptoAES();
+                        final CryptoAES aes = new CryptoAES();
                         bytes = aes.decrypt(encryptionPassword, bytes);
                     }
                     

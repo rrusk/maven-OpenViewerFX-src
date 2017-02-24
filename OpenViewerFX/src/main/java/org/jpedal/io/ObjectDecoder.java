@@ -393,7 +393,7 @@ public class ObjectDecoder implements Serializable {
         return i;
     }
 
-    static int setArray(PdfObject pdfObject, int i, byte[] raw, int PDFkeyInt, PdfFileReader objectReader) {
+    static int setArray(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
         switch (PDFkeyInt) {
             
             case PdfDictionary.D:
@@ -539,7 +539,7 @@ public class ObjectDecoder implements Serializable {
         
         if(pdfObject!=null && pdfObject.getStatus()!=PdfObject.DECODED){
             
-            byte[] raw=pdfObject.getUnresolvedData();
+            final byte[] raw=pdfObject.getUnresolvedData();
 
             //flag now done and flush raw data
             pdfObject.setStatus(PdfObject.DECODED);
@@ -571,9 +571,9 @@ public class ObjectDecoder implements Serializable {
     /**
      * see case 23155 (encrypted annot needs obj ref appended so we can decrypt string later)
      */
-    private static void extractRefFromEnd(byte[] raw, final PdfObject pdfObject, PdfFileReader objectReader) {
+    private static void extractRefFromEnd(byte[] raw, final PdfObject pdfObject, final PdfFileReader objectReader) {
         
-        String objectRef;
+        final String objectRef;
         
         //scan along to find number
         int ptr=0;
@@ -593,8 +593,8 @@ public class ObjectDecoder implements Serializable {
         //and store if it is a ref
         if(raw[end]=='o' && raw[end+1]=='b' && raw[end+2]=='j') {
             objectRef=new String(raw, 0, end)+ 'R';
-            int newArrayLen=raw.length-end-4;
-            byte[] newArray=new byte[newArrayLen];
+            final int newArrayLen=raw.length-end-4;
+            final byte[] newArray=new byte[newArrayLen];
             System.arraycopy(raw, end+4, newArray, 0, newArrayLen);
             raw=newArray;
             pdfObject.setRef(objectRef);

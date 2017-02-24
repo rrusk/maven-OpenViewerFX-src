@@ -313,7 +313,7 @@ public class JSFunction {
         while(tokens.hasMoreTokens()){
 
             //get value
-            StringBuilder nextValueStr=new StringBuilder(tokens.nextToken());
+            final StringBuilder nextValueStr=new StringBuilder(tokens.nextToken());
 
             //allow for comma in brackets
             while(tokens.hasMoreTokens() && nextValueStr.toString().startsWith("\"") && !nextValueStr.toString().endsWith("\"")) {

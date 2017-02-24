@@ -131,11 +131,11 @@ public class StreamReaderUtils {
      * @param newValues
      * @return
      */
-    static byte[] handleHexString(byte[] newValues,DecryptionFactory decryptor, String ref) {
+    static byte[] handleHexString(byte[] newValues, final DecryptionFactory decryptor, final String ref) {
         
         //convert to byte values
         String nextValue;
-        String str=new String(newValues);
+        final String str=new String(newValues);
      //   System.out.println("---------------\n"+str+"\n---------------");
    //     str=str.replace(" ", "");
     //    str=str.replace("\n", "");
@@ -173,7 +173,7 @@ public class StreamReaderUtils {
                 
                 decryptedValue = decryptor.decryptString(IDbytes, ref);
                 
-            } catch (PdfSecurityException ex) {
+            } catch (final PdfSecurityException ex) {
                 LogWriter.writeLog("Exception: " + ex.getMessage());
             }
             newValues= (decryptedValue==null) ? IDbytes:decryptedValue;
@@ -194,7 +194,7 @@ public class StreamReaderUtils {
         return start;
     }
     
-    public static int skipSpacesOrOtherCharacter(final byte[] data, int start, int character) {
+    public static int skipSpacesOrOtherCharacter(final byte[] data, int start, final int character) {
         final int length = data.length;
         
         while (start < length && (data[start]==10 || data[start]==13 || data[start]==32 || data[start]==9 || data[start]==character)) {
@@ -204,7 +204,7 @@ public class StreamReaderUtils {
     }
     
     public static int skipToEndOfKey(final byte[] data, int start) {
-        int len=data.length;
+        final int len=data.length;
         
         while (start < len && !(data[start] == '/' || data[start] == '[' || 
                 data[start] == ' ' || data[start] == 10 || data[start] == ']' 
@@ -220,11 +220,11 @@ public class StreamReaderUtils {
     }
     
     
-    static boolean isNumber(byte[] arrayData, int j2) {
+    static boolean isNumber(final byte[] arrayData, int j2) {
         
         boolean isNumber=true;
         
-        int count=arrayData.length;
+        final int count=arrayData.length;
         int chars=0;
         
         j2=skipSpaces(arrayData,j2);
@@ -246,12 +246,13 @@ public class StreamReaderUtils {
         return isNumber;      
     }
 
-    public static boolean isRef(byte[] arrayData, int j2) {
+    public static boolean isRef(final byte[] arrayData, int j2) {
         
         boolean isRef=true;
         
-        int count=arrayData.length, elementCount=0;
-        
+        final int count=arrayData.length;
+        int elementCount=0;
+
         j2=skipSpaces(arrayData,j2);
         
         while(isRef && j2<count && arrayData[j2]!='R'){
@@ -324,7 +325,7 @@ public class StreamReaderUtils {
         ptr=StreamReaderUtils.skipSpaces(raw, ptr);
 
         // get generation number
-        int keyStart = ptr;
+        final int keyStart = ptr;
 
         //move cursor to end of reference
         ptr = StreamReaderUtils.skipToEndOfRef(raw,ptr);

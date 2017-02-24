@@ -43,8 +43,8 @@ import org.jpedal.parser.image.data.ImageData;
 public class DownSampler {
     
     
-    public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData, 
-            final ImageData imageData, byte[] maskCol, final int sampling) {
+    public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData,
+                                                    final ImageData imageData, final byte[] maskCol, final int sampling) {
         
         if(sampling>1){ //safety check
             

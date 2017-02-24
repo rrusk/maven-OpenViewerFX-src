@@ -48,7 +48,7 @@ import org.jpedal.utils.StringUtils;
 public class DestHandler {
 
     
-    public static PdfArrayIterator getDestFromObject(PdfObject formObj, PdfObjectReader currentPdfFile) {
+    public static PdfArrayIterator getDestFromObject(PdfObject formObj, final PdfObjectReader currentPdfFile) {
 
         PdfArrayIterator Dest = formObj.getMixedArray(PdfDictionary.Dest);
 
@@ -74,7 +74,7 @@ public class DestHandler {
             Dest = formObj.getMixedArray(PdfDictionary.D);
         }
 
-        String DestString = formObj.getTextStreamValue(PdfDictionary.D);
+        final String DestString = formObj.getTextStreamValue(PdfDictionary.D);
 
         //its nameString name (name) linking to obj so read that
         if (DestString != null) {
@@ -93,7 +93,7 @@ public class DestHandler {
      * @param currentPdfFile
      * @return page number
      */
-    public static int getPageNumberFromLink(PdfArrayIterator dest, final PdfObjectReader currentPdfFile){
+    public static int getPageNumberFromLink(final PdfArrayIterator dest, final PdfObjectReader currentPdfFile){
 
         int page=-1;
         
@@ -107,7 +107,7 @@ public class DestHandler {
 
                 //get pageRef as number of ref
                 if(dest.hasMoreTokens()){
-                    int possiblePage=dest.getNextValueAsInteger(false)+1;
+                    final int possiblePage=dest.getNextValueAsInteger(false)+1;
                 
                     if(possiblePage>0){ //can also be a number (cant check range as not yet open)
                         page=possiblePage;
@@ -118,7 +118,7 @@ public class DestHandler {
             //allow for number
             if (page == -1 && dest.isNextValueNumber()) {
                 
-                int possiblePage = dest.getNextValueAsInteger(false) + 1;
+                final int possiblePage = dest.getNextValueAsInteger(false) + 1;
 
                 if (possiblePage > 0) { //can also be a number (cant check range as not yet open)
                     page = possiblePage;
@@ -174,9 +174,9 @@ public class DestHandler {
                 final int ref2=values[0];
                 final int generation=values[1];
                 
-                OutlineObject obj=new OutlineObject(new String(rawRef));
+                final OutlineObject obj=new OutlineObject(new String(rawRef));
                 
-                PdfFileReader objectReader=currentPdfFile.getObjectReader();
+                final PdfFileReader objectReader=currentPdfFile.getObjectReader();
                 
                 //read the Dictionary data
                 rawRef = objectReader.readObjectAsByteArray(obj, objectReader.isCompressed(ref2, generation), ref2, generation);
@@ -187,19 +187,19 @@ public class DestHandler {
                 }
                 
                 if(rawRef[startArray]=='['){
-                    int length=rawRef.length;
-                    int newLength=length-startArray;
+                    final int length=rawRef.length;
+                    final int newLength=length-startArray;
                     
-                    byte[] strippedData=new byte[length];
+                    final byte[] strippedData=new byte[length];
                     
                     System.arraycopy(rawRef, startArray, strippedData, 0, newLength);
                     nameString=new String(strippedData);
                 }else{
-                    OutlineObject Aobj=new OutlineObject(nameString);
+                    final OutlineObject Aobj=new OutlineObject(nameString);
                     currentPdfFile.readObject(Aobj);
                     DestObj=Aobj.getMixedArray(PdfDictionary.D);
                     
-                    String DestString=Aobj.getTextStreamValue(PdfDictionary.D);
+                    final String DestString=Aobj.getTextStreamValue(PdfDictionary.D);
                     if(DestString!=null){
                         nameString=DestString;
                     }
@@ -246,7 +246,7 @@ public class DestHandler {
         }
     }
 
-    public static Object[] getZoomFromDest(PdfArrayIterator dest) {
+    public static Object[] getZoomFromDest(final PdfArrayIterator dest) {
         
         while (dest.hasMoreTokens()) {
             final Object[] action;

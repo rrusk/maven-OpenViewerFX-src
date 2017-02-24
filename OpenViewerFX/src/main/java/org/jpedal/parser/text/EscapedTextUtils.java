@@ -43,8 +43,8 @@ import org.jpedal.render.DynamicVectorRenderer;
  */
 class EscapedTextUtils {
 
-    static int getEscapedValue(int i, final byte[] stream,final GlyphData glyphData, final PdfFont currentFontData, 
-            final int streamLength, final ParserOptions parserOptions, DynamicVectorRenderer current) {
+    static int getEscapedValue(int i, final byte[] stream, final GlyphData glyphData, final PdfFont currentFontData,
+                               final int streamLength, final ParserOptions parserOptions, final DynamicVectorRenderer current) {
         // any escape chars '\\'=92
         i++;
         
@@ -101,7 +101,7 @@ class EscapedTextUtils {
                 
             } else {
                 
-                char testChar=glyphData.getRawChar();
+                final char testChar=glyphData.getRawChar();
                 switch (testChar) {
                     case 'n':
                         rawInt='\n';

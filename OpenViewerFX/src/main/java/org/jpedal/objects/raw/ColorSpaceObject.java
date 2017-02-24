@@ -120,7 +120,7 @@ public class ColorSpaceObject extends PdfObject {
     @Override
     public int setConstant(final int pdfKeyType, final int keyStart, final int keyLength, final byte[] raw) {
 
-        int PDFvalue;
+        final int PDFvalue;
 
         final int id = PdfObject.getId(keyStart, keyLength, raw);
 

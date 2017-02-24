@@ -132,8 +132,8 @@ public class PostScriptCompiler {
         cTypes = new int[cValues.length];
     }
 
-    private void parseStream(byte[] stream) {
-        int len = stream.length;
+    private void parseStream(final byte[] stream) {
+        final int len = stream.length;
         while (sp < len && dp < dValues.length) {
             int cc = stream[sp++] & 0xff;
             if (cc == T_SBRACE) {
@@ -147,7 +147,7 @@ public class PostScriptCompiler {
                     pushDefault(T_EBRACE, T_EBRACE);
                 }
             } else if (isDigit(cc) || isFullStop(cc) || cc == 43 || cc == 45) {
-                StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder();
                 while (sp < len) {
                     if (isWhiteSpace(cc) || isDelimiter(cc)) {
                         sp--;
@@ -159,7 +159,7 @@ public class PostScriptCompiler {
                 }
                 pushDefault(Double.parseDouble(sb.toString()), T_NUMBER);
             } else if (cc > 96 && cc < 123) {
-                StringBuilder sb = new StringBuilder();
+                final StringBuilder sb = new StringBuilder();
                 while (sp < len) {
                     if (isWhiteSpace(cc) || isDelimiter(cc)) {
                         sp--;
@@ -169,7 +169,7 @@ public class PostScriptCompiler {
                         cc = stream[sp++] & 0xff;
                     }
                 }
-                int com = getCommand(sb.toString());
+                final int com = getCommand(sb.toString());
                 if (com != -1) {
                     pushDefault(com, T_COMMAND);
                 }
@@ -178,7 +178,7 @@ public class PostScriptCompiler {
        
     }
 
-    private static int getCommand(String s) {
+    private static int getCommand(final String s) {
         switch (s.hashCode()) {
             case C_ABS:
                 return C_ABS;
@@ -268,29 +268,29 @@ public class PostScriptCompiler {
         return -1;
     }
 
-    private void pushDefault(double value, int type) {
+    private void pushDefault(final double value, final int type) {
         dValues[dp] = value;
         dTypes[dp] = type;
         dp++;
     }
 
-    private static boolean isWhiteSpace(int ch) {
+    private static boolean isWhiteSpace(final int ch) {
         return CHAR256[ch] == 1;
     }
 
-    private static boolean isDigit(int ch) {
+    private static boolean isDigit(final int ch) {
         return CHAR256[ch] == 4;
     }
 
-    private static boolean isFullStop(int ch) {
+    private static boolean isFullStop(final int ch) {
         return ch == 46;
     }
 
-    public static boolean isDelimiter(int ch) {
+    public static boolean isDelimiter(final int ch) {
         return CHAR256[ch] == 2;
     }
 
-    private void executeCommand(int cmd) {
+    private void executeCommand(final int cmd) {
         switch (cmd) {
             case C_ABS:
                 C_ABS();
@@ -437,13 +437,13 @@ public class PostScriptCompiler {
         if (first[0] >= 0 && second[0] >= 0) {
             tt = Math.toDegrees(Math.atan(tangent));
         } else if (first[0] > 0 && second[0] <= 0) {
-            double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
+            final double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
             tt = tmp + 90;
         } else if (first[0] <= 0 && second[0] <= 0) {
-            double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
+            final double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
             tt = tmp + 180;
         } else if (first[0] <= 0 && second[0] >= 0) {
-            double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
+            final double tmp = Math.abs(Math.toDegrees(Math.atan(tangent)));
             tt = tmp + 270;
         }
         cValues[cp] = tt;
@@ -723,7 +723,7 @@ public class PostScriptCompiler {
         if (first[0] == 1) {
             int br = 0;
             while(dp > 0){
-                int cdp = dTypes[dp--];
+                final int cdp = dTypes[dp--];
                 if(cdp == T_SBRACE){
                     br++;
                 }else if(cdp == T_EBRACE){
@@ -733,10 +733,10 @@ public class PostScriptCompiler {
                     break;
                 }
             }
-            int end = dp;
+            final int end = dp;
             br = 0;
             while(dp > 0){
-                int cdp = dTypes[dp--];
+                final int cdp = dTypes[dp--];
                 if(cdp == T_SBRACE){
                     br++;
                 }else if(cdp == T_EBRACE){
@@ -751,7 +751,7 @@ public class PostScriptCompiler {
         } else {
             int br = 0;
             while(dp > 0){
-                int cdp = dTypes[dp--];
+                final int cdp = dTypes[dp--];
                 if(cdp == T_SBRACE){
                     br++;
                 }else if(cdp == T_EBRACE){
@@ -772,8 +772,8 @@ public class PostScriptCompiler {
         final int n;
         if (first[0] > 0) {
             n = (int) first[0];
-            double[] values = new double[n];
-            int[] types = new int[n];
+            final double[] values = new double[n];
+            final int[] types = new int[n];
             System.arraycopy(cValues, cValues.length - n, values, 0, n);
             System.arraycopy(cTypes, cValues.length - n, types, 0, n);
             for (int i = 0; i < n; i++) {
@@ -820,27 +820,27 @@ public class PostScriptCompiler {
             //should not roll in these cases
             return;
         }
-        LinkedList<Double> listV = new LinkedList<Double>();
-        LinkedList<Integer> listT = new LinkedList<Integer>();
+        final LinkedList<Double> listV = new LinkedList<Double>();
+        final LinkedList<Integer> listT = new LinkedList<Integer>();
         
         for (int i = 0; i < n; i++) {
-            double[] dd = popItem();
+            final double[] dd = popItem();
             listV.add(dd[0]);
             listT.add((int)dd[1]);
         }
         
         if (j > 0) {
             for (int i = 0; i < j; i++) {
-                double v = listV.removeFirst();
-                int t = listT.removeFirst();
+                final double v = listV.removeFirst();
+                final int t = listT.removeFirst();
                 listV.addLast(v);
                 listT.addLast(t);
             }
         } else {
             j *= -1;
             for (int i = 0; i < j; i++) {
-                double v = listV.removeLast();
-                int t = listT.removeLast();
+                final double v = listV.removeLast();
+                final int t = listT.removeLast();
                 listV.addFirst(v);
                 listT.addFirst(t);
             }
@@ -857,10 +857,10 @@ public class PostScriptCompiler {
         return new double[]{cValues[cp], cTypes[cp]};
     }
 
-    public double[] executeScript(float[] inp) {
+    public double[] executeScript(final float[] inp) {
         Arrays.fill(cValues, 0);
         cp = inp.length;
-        int dLen = dValues.length;
+        final int dLen = dValues.length;
         dp = 0;
 
         for (int i = 0; i < inp.length; i++) {
@@ -874,7 +874,7 @@ public class PostScriptCompiler {
 
     }
     
-    private void executeInterval(int maxDP){
+    private void executeInterval(final int maxDP){
         int type;
         double value;
         while (dp < maxDP) {
@@ -895,7 +895,7 @@ public class PostScriptCompiler {
                     int buff = 1;
                     while (buff != 0 && dp < maxDP) {
                         dp++;
-                        int t = dTypes[dp];
+                        final int t = dTypes[dp];
                         if(t == T_SBRACE){
                             buff++;
                         }else if(t == T_EBRACE){

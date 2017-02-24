@@ -80,6 +80,15 @@ public class ObjectFactory {
             case PdfDictionary.CIDToGIDMap:
                 return new FontObject(ref);
 
+            case PdfDictionary.Collection:
+                return new CollectionObject(ref);
+
+            case PdfDictionary.CollectionField:
+                return new CollectionObject(ref);
+
+            case PdfDictionary.Colors:
+                return new CollectionObject(ref);
+
             case PdfDictionary.ColorSpace:
                 return new ColorSpaceObject(ref);
 
@@ -137,6 +146,9 @@ public class ObjectFactory {
             case PdfDictionary.Fo:
                 return new FormObject(ref);
 
+            case PdfDictionary.Folders:
+                return new CollectionObject(ref);
+
             case PdfDictionary.Font:
                 return new FontObject(ref);
 
@@ -173,6 +185,9 @@ public class ObjectFactory {
             case PdfDictionary.Info:
                 return new InfoObject(ref);
 
+            case PdfDictionary.InitialFields:
+                return new CollectionObject(ref);
+
             case PdfDictionary.IRT:
                 return new FormObject(ref);
 
@@ -205,6 +220,9 @@ public class ObjectFactory {
 
             case PdfDictionary.N:
                 return new FormObject(ref, parentID);
+
+            case PdfDictionary.Navigator:
+                return new NavigatorObject(ref);
 
             case PdfDictionary.Names:
                 return new NamesObject(ref);
@@ -286,6 +304,12 @@ public class ObjectFactory {
             case PdfDictionary.SMask:
                 return new MaskObject(ref);
 
+            case PdfDictionary.Sort:
+                if(parentID==PdfDictionary.Collection){
+                    return new CollectionObject(ref);
+                }
+                break;
+                
             case PdfDictionary.Sound:
                 return new SoundObject(ref);
 
@@ -342,7 +366,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getNextPdfObject(String ref, int parentType) {
+    private static PdfObject getNextPdfObject(final String ref, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref);
         } else {
@@ -350,7 +374,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getKPdfObject(String ref, int parentType) {
+    private static PdfObject getKPdfObject(final String ref, final int parentType) {
         if (parentType == PdfDictionary.MCID) {
             return new MCObject(ref);
         } else {
@@ -358,7 +382,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getJSPdfObject(String ref, int parentType) {
+    private static PdfObject getJSPdfObject(final String ref, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref);
         } else {
@@ -366,7 +390,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getPdfObject(String ref, int parentType, int parentID) {
+    private static PdfObject getPdfObject(final String ref, final int parentType, final int parentID) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref, parentID);
         } else {
@@ -374,7 +398,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getPdfObject(String ref, int parentType) {
+    private static PdfObject getPdfObject(final String ref, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref);
 
@@ -425,6 +449,15 @@ public class ObjectFactory {
 
             case PdfDictionary.CIDToGIDMap:
                 return new FontObject(ref, gen);
+
+            case PdfDictionary.Collection:
+                return new CollectionObject(ref, gen);
+
+            case PdfDictionary.CollectionField:
+                return new CollectionObject(ref, gen);
+
+            case PdfDictionary.Colors:
+                return new CollectionObject(ref, gen);
 
             case PdfDictionary.ColorSpace:
                 return new ColorSpaceObject(ref, gen);
@@ -483,6 +516,9 @@ public class ObjectFactory {
             case PdfDictionary.Fo:
                 return new FormObject(ref, gen);
 
+            case PdfDictionary.Folders:
+                return new CollectionObject(ref, gen);
+
             case PdfDictionary.FontDescriptor:
                 return new FontObject(ref, gen);
 
@@ -515,6 +551,9 @@ public class ObjectFactory {
 
             case PdfDictionary.Info:
                 return new InfoObject(ref, gen);
+
+            case PdfDictionary.InitialFields:
+                return new CollectionObject(ref, gen);
 
             case PdfDictionary.IRT:
                 return new FormObject(ref, gen);
@@ -551,6 +590,9 @@ public class ObjectFactory {
 
             case PdfDictionary.Names:
                 return new NamesObject(ref, gen);
+
+            case PdfDictionary.Navigator:
+                return new NavigatorObject(ref, gen);
 
             case PdfDictionary.Next:
                 return getNextObject(ref, gen, parentType);
@@ -629,6 +671,12 @@ public class ObjectFactory {
             case PdfDictionary.SMask:
                 return new MaskObject(ref, gen);
 
+            case PdfDictionary.Sort:
+                if(parentType==PdfDictionary.Collection){
+                    return new CollectionObject(ref, gen);
+                }
+                break;
+                
             case PdfDictionary.Sound:
                 return new SoundObject(ref, gen);
 
@@ -680,7 +728,7 @@ public class ObjectFactory {
         return new PdfObject(ref, gen);
     }
 
-    private static PdfObject getNextObject(int ref, int gen, int parentType) {
+    private static PdfObject getNextObject(final int ref, final int gen, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref, gen);
         } else {
@@ -688,7 +736,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getKObject(int ref, int gen, int parentType) {
+    private static PdfObject getKObject(final int ref, final int gen, final int parentType) {
         if (parentType == PdfDictionary.MCID) {
             return new MCObject(ref, gen);
         } else {
@@ -696,7 +744,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getJSObject(int ref, int gen, int parentType) {
+    private static PdfObject getJSObject(final int ref, final int gen, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref, gen);
         } else {
@@ -704,7 +752,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getDObject(int ref, int gen, int parentType) {
+    private static PdfObject getDObject(final int ref, final int gen, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref, gen);
         } else {
@@ -712,7 +760,7 @@ public class ObjectFactory {
         }
     }
 
-    private static PdfObject getAObject(int ref, int gen, int parentType) {
+    private static PdfObject getAObject(final int ref, final int gen, final int parentType) {
         if (parentType == PdfDictionary.Form) {
             return new FormObject(ref, gen);
         } else if (parentType == PdfDictionary.MCID) {

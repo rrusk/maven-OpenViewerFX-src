@@ -486,8 +486,8 @@ public class JavaFXOpenFile {
     
     
     public static void open(final String file, final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
+                            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                            final GUIThumbnailPanel thumbnails) {
 
 //        currentGUI.resetNavBar();
 
@@ -714,7 +714,7 @@ public class JavaFXOpenFile {
                             final PdfObject linearObj = (PdfObject) decode_pdf.getJPedalObject(PdfDictionary.Linearized);
                             int linearfileLength = linearObj.getInt(PdfDictionary.L);
 
-                            StringBuilder message = new StringBuilder("Downloading ");
+                            final StringBuilder message = new StringBuilder("Downloading ");
                             linearfileLength /= 1024;
                             if (linearfileLength < 1024) {
                                 message.append(linearfileLength).append(" kB");

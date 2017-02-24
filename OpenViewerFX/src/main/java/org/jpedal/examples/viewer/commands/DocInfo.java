@@ -207,7 +207,7 @@ public class DocInfo {
             g5.setFont(textFont);
             details.add(g5);
 
-            StringBuilder g6Text = new StringBuilder ("PDF " );
+            final StringBuilder g6Text = new StringBuilder ("PDF " );
             g6Text.append(decode_pdf.getPDFVersion());
 
             //add in if Linearized
@@ -305,7 +305,7 @@ public class DocInfo {
         /*
          * list of fonts
          */
-        StringBuilder xmlText = new StringBuilder("Font Substitution mode: ");
+        final StringBuilder xmlText = new StringBuilder("Font Substitution mode: ");
 
         switch (FontMappings.getFontSubstitutionMode()) {
             case (1):
@@ -440,7 +440,7 @@ public class DocInfo {
             final java.util.List<DefaultMutableTreeNode> locationNode = new ArrayList<DefaultMutableTreeNode>();
 
             //build display
-            for (String nextFont : fontNames) {
+            for (final String nextFont : fontNames) {
 
                 String current = FontMappings.fontSubstitutionLocation.get(nextFont);
 
@@ -623,7 +623,7 @@ public class DocInfo {
         });
 
         //Start tree here
-        DefaultMutableTreeNode top
+        final DefaultMutableTreeNode top
                 = new DefaultMutableTreeNode("Fonts");
 
         //Populate font list and build tree
@@ -695,7 +695,7 @@ public class DocInfo {
                         FormObject formObj = null;
 
                         //extract list of actual PDF references to display and get FormObject
-                        StringBuilder PDFrefs = new StringBuilder("PDF ref=");
+                        final StringBuilder PDFrefs = new StringBuilder("PDF ref=");
 
                         //actual data read from PDF
                         final Object[] rawFormData = formRenderer.getFormComponents(formName, ReturnValues.FORMOBJECTS_FROM_NAME, -1);
@@ -780,7 +780,7 @@ public class DocInfo {
 
     }
 
-    private static void addDetailsToCurrentNode(DefaultMutableTreeNode currentFontNode, String nextFont) {
+    private static void addDetailsToCurrentNode(final DefaultMutableTreeNode currentFontNode, final String nextFont) {
         final String loc = FontMappings.fontPropertiesTablePath.get(nextFont);
         final Integer type = FontMappings.fontPropertiesTableType.get(nextFont);
 

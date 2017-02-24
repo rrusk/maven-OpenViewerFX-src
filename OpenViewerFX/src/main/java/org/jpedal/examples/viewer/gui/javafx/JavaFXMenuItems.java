@@ -327,10 +327,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
     
 	protected void addMenuItem(final Menu parentMenu, final String text, final int ID) {
 
-        boolean isCheckBox = false; //default value
-        if (ID == Commands.SEPARATECOVER || ID == Commands.PANMODE || ID == Commands.TEXTSELECT) {
-            isCheckBox = true;
-        }
+        final boolean isCheckBox = (ID == Commands.SEPARATECOVER || ID == Commands.PANMODE || ID == Commands.TEXTSELECT);
 
         final JavaFXID menuItem;
         if (isCheckBox) {
@@ -425,9 +422,8 @@ public class JavaFXMenuItems extends GUIMenuItems {
                                 break;
                         case Commands.SEPARATECOVER :
                                 separateCover = (CheckMenuItem)menuItem;
-                                final boolean separateCoverOn = properties.getValue("separateCoverOn").equalsIgnoreCase("true");
+                                GUIDisplay.default_separateCover = properties.getValue("separateCoverOn").equalsIgnoreCase("true");
                                 separateCover.setSelected(true);
-                                GUIDisplay.default_separateCover = separateCoverOn;
                                 break;
                         case Commands.CASCADE :
                                 cascade = (MenuItem)menuItem;
@@ -490,8 +486,6 @@ public class JavaFXMenuItems extends GUIMenuItems {
                         case Commands.HELP :
                                 helpForum = (MenuItem)menuItem;
                                 break;
-                        
-                        default :
                 }
         
         disableUnimplementedItems(ID, false);
@@ -501,7 +495,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
     /**
      * sets up layout menu (controls page views - Multiple, facing,etc)
      */
-    protected void initLayoutMenus(final Menu pageLayout, final String[] descriptions, final int[] value, final GUIButtons buttons, final Commands currentCommands, final boolean isSingle) {
+    protected void initLayoutMenus(final Menu pageLayout, final String[] descriptions, final int[] value, final GUIButtons buttons, final Commands currentCommands) {
 
         final int count=value.length;
         for(int i=0;i<count;i++){
@@ -543,11 +537,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
             }
             disableUnimplementedItems(value[i], true);
         }
-
-        if(!isSingle) {
-            return;
-        }
-
+        
         //default is off
         buttons.setPageLayoutButtonsEnabled(false);
     }
@@ -728,18 +718,16 @@ public class JavaFXMenuItems extends GUIMenuItems {
 		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.NextDoucment"), Commands.NEXTDOCUMENT);
 
 		//add page layout
-		if(isSingle){
-			pageLayoutMenu = new Menu(Messages.getMessage("PageLayoutViewMenu.PageLayout"));
-			//pageLayoutMenu.getPopupMenu().setLightWeightPopupEnabled(!JavaFXHelper.isJavaFXAvailable());
-			viewMenu.getItems().add(pageLayoutMenu);
-		}
+        pageLayoutMenu = new Menu(Messages.getMessage("PageLayoutViewMenu.PageLayout"));
+        //pageLayoutMenu.getPopupMenu().setLightWeightPopupEnabled(!JavaFXHelper.isJavaFXAvailable());
+        viewMenu.getItems().add(pageLayoutMenu);
+		
 		
 		final String[] descriptions={Messages.getMessage("PageLayoutViewMenu.SinglePage"),Messages.getMessage("PageLayoutViewMenu.PageFlow")};
         final int[] value={Display.SINGLE_PAGE, Display.PAGEFLOW};
 
-		if(isSingle) {
-            initLayoutMenus(pageLayoutMenu, descriptions, value, buttons, currentCommands, isSingle);
-        }
+        initLayoutMenus(pageLayoutMenu, descriptions, value, buttons, currentCommands);
+        
 
         if(properties.getValue("separateCover").equals("true")) {
             addMenuItem(viewMenu, Messages.getMessage("PdfViewerViewMenuSeparateCover.text"), Commands.SEPARATECOVER);
@@ -765,16 +753,6 @@ public class JavaFXMenuItems extends GUIMenuItems {
 
 		//full page mode
 		addMenuItem(viewMenu,Messages.getMessage("PdfViewerViewMenuFullScreenMode.text"), Commands.FULLSCREEN);
-
-		if (!isSingle) {
-			windowMenu = new Menu(Messages.getMessage("PdfViewerWindowMenu.text"));
-			addToMainMenu(windowMenu);
-
-			addMenuItem(windowMenu, Messages.getMessage("PdfViewerWindowMenuCascade.text"), Commands.CASCADE);
-
-			addMenuItem(windowMenu, Messages.getMessage("PdfViewerWindowMenuTile.text"), Commands.TILE);
-
-		}
 
 		//add export menus
         
@@ -941,7 +919,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
     }
     
     @Override
-    public void ensureNoSeperators(int type) {
+    public void ensureNoSeperators(final int type) {
         for (int k = 0; k != ((Menu) getMenuItem(type)).getItems().size(); k++) {
             if (((Menu) getMenuItem(type)).getItems().get(k).isVisible()) {
                 if (((Menu) getMenuItem(type)).getItems().get(k) instanceof SeparatorMenuItem) {

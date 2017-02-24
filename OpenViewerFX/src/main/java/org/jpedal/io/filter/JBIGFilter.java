@@ -56,7 +56,7 @@ public class JBIGFilter extends BaseFilter implements PdfFilter {
 
     @Override
     public byte[] decode(final byte[] data) throws Exception {
-      byte [] dataBytes;
+      final byte [] dataBytes;
       
       dataBytes=JBIG2.JBIGDecode(data, globalData, ObjectStore.temp_dir);
 

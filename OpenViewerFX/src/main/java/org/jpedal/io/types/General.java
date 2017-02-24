@@ -240,7 +240,7 @@ public class General {
         return jj;
     }
 
-    private static int getKeyCount(int jj, byte[] data) {
+    private static int getKeyCount(final int jj, final byte[] data) {
         //check if name by counting /
         int count=0;
         for(int aa=jj+1;aa<data.length;aa++){

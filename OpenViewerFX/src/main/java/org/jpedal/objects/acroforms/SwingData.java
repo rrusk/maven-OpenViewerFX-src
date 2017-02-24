@@ -418,7 +418,7 @@ public class SwingData extends GUIData {
 
         
         if (AcroRenderer.isAnnotation(formObject) && formObject.getParameterConstant(PdfDictionary.Subtype) != PdfDictionary.Widget) {
-            BufferedImage bi = AnnotationFactory.getIcon(formObject);
+            final BufferedImage bi = AnnotationFactory.getIcon(formObject);
             g2.drawImage(bi, formObject.getBoundingRectangle().x, pageData.getCropBoxHeight(page)-(formObject.getBoundingRectangle().y+formObject.getBoundingRectangle().height), null);
         } else {
 
@@ -433,7 +433,7 @@ public class SwingData extends GUIData {
              * off - 1=off 2=on 3=on 4=on 5=on 6=off 7=off 8=off 9=off etc...
              *
              */
-            int borderWidth = FormRenderUtilsG2.renderBorder(g2, formObject, pageData.getCropBoxHeight(page));
+            final int borderWidth = FormRenderUtilsG2.renderBorder(g2, formObject, pageData.getCropBoxHeight(page));
 
             //Revert back stroke before continuing
             g2.setStroke(st);
@@ -441,12 +441,12 @@ public class SwingData extends GUIData {
             final String textValue = formObject.getValue();
             if (textValue != null) {
 
-                FontMetrics metrics = FormRenderUtilsG2.renderFont(g2, formObject, textValue, borderWidth);
+                final FontMetrics metrics = FormRenderUtilsG2.renderFont(g2, formObject, textValue, borderWidth);
 
             //Text is drawn from the baseline so inorder to draw the highlights 
                 //correctly we need to add te fonts decent
                 int justification = formObject.getAlignment();
-                Rectangle2D r = metrics.getStringBounds(textValue, g2);
+                final Rectangle2D r = metrics.getStringBounds(textValue, g2);
 
                 //Always center button output
                 if (formObject.getFieldFlags()[FormObject.PUSHBUTTON_ID]) {

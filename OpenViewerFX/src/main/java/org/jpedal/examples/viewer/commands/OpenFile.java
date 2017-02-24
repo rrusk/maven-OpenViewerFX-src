@@ -242,24 +242,23 @@ public class OpenFile {
 
                             String password = System.getProperty("org.jpedal.password");
 
-                            if (password == null) {
-                                password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
-                            }
-                            
-                            //try and reopen with new password
-                            if (password != null) {
-                                decode_pdf.setEncryptionPassword(password);
-                                // decode_pdf.verifyAccess();
-
-                                if (decode_pdf.isFileViewable()) {
-                                    fileCanBeOpened = true;
+                                if (password == null) {
+                                    password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
                                 }
-                            }
 
-                            if (!fileCanBeOpened) {
-                                currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPasswordRequired.message"));
-                            }
+                                //try and reopen with new password
+                                if (password != null) {
+                                    decode_pdf.setEncryptionPassword(password);
+                                    // decode_pdf.verifyAccess();
 
+                                    if (decode_pdf.isFileViewable()) {
+                                        fileCanBeOpened = true;
+                                    }
+                                }
+
+                                if (!fileCanBeOpened) {
+                                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPasswordRequired.message"));
+                                }
                         }
                         if (fileCanBeOpened) {
 
@@ -620,7 +619,7 @@ public class OpenFile {
                             if (linearObj != null) {
                                 int linearfileLength = linearObj.getInt(PdfDictionary.L);
 
-                                StringBuilder message = new StringBuilder("Downloading ");
+                                final StringBuilder message = new StringBuilder("Downloading ");
                                 linearfileLength /= 1024;
                                 if (linearfileLength < 1024) {
                                     message.append(linearfileLength).append(" kB");
@@ -758,59 +757,59 @@ public class OpenFile {
                         LogWriter.writeLog("Exception " + e + Messages.getMessage("PdfViewerError.Loading") + commonValues.getSelectedFile());
                     }
                 } else {
-                    String fName = selectedFile.toLowerCase();
+                    final String fName = selectedFile.toLowerCase();
                     if (fName.endsWith(".jpx") || fName.endsWith(".jp2") || fName.endsWith(".j2k")) {
                         
-                        File f = new File(selectedFile);
-                        byte[] jpxRawData = new byte[(int) f.length()];
-                        FileInputStream fis;
+                        final File f = new File(selectedFile);
+                        final byte[] jpxRawData = new byte[(int) f.length()];
+                        final FileInputStream fis;
                         try {
                             fis = new FileInputStream(f);
                             fis.read(jpxRawData);
-                            java.awt.image.BufferedImage img = JDeliHelper.JPEG2000ToRGBImage(jpxRawData);
+                            final java.awt.image.BufferedImage img = JDeliHelper.JPEG2000ToRGBImage(jpxRawData);
                             commonValues.setBufferedImg(img);
-                        } catch (Exception ex) {
+                        } catch (final Exception ex) {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
 
                     }else if(fName.endsWith(".psd")){
                         try{
-                            java.awt.image.BufferedImage img = JDeliHelper.getPsdImage(fName);
+                            final java.awt.image.BufferedImage img = JDeliHelper.getPsdImage(fName);
                             commonValues.setBufferedImg(img);                            
-                        }catch(Exception ex){
+                        }catch(final Exception ex){
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
                     }else if(fName.endsWith(".dcm")){
-                        File f = new File(selectedFile);
-                        byte[] rawData = new byte[(int) f.length()];
-                        FileInputStream fis;
+                        final File f = new File(selectedFile);
+                        final byte[] rawData = new byte[(int) f.length()];
+                        final FileInputStream fis;
                         try {
                             fis = new FileInputStream(f);
                             fis.read(rawData);
-                            java.awt.image.BufferedImage img = JDeliHelper.getDicomImage(rawData);
+                            final java.awt.image.BufferedImage img = JDeliHelper.getDicomImage(rawData);
                             commonValues.setBufferedImg(img);
-                        } catch (Exception ex) {
+                        } catch (final Exception ex) {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
                     
                     }else if (fName.endsWith(".rgb")){
-                        File f = new File(selectedFile);
-                        byte[] rawData = new byte[(int) f.length()];
-                        FileInputStream fis;
+                        final File f = new File(selectedFile);
+                        final byte[] rawData = new byte[(int) f.length()];
+                        final FileInputStream fis;
                         try {
                             fis = new FileInputStream(f);
                             fis.read(rawData);
-                            java.awt.image.BufferedImage img = JDeliHelper.getSGIImage(rawData);
+                            final java.awt.image.BufferedImage img = JDeliHelper.getSGIImage(rawData);
                             commonValues.setBufferedImg(img);
-                        } catch (Exception ex) {
+                        } catch (final Exception ex) {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());
                         }
                     }else if (fName.endsWith(".sgi")) {
-                        File f = new File(selectedFile);
+                        final File f = new File(selectedFile);
                         try {
-                            java.awt.image.BufferedImage img = JDeliHelper.getSGIImage(f);
+                            final java.awt.image.BufferedImage img = JDeliHelper.getSGIImage(f);
                             commonValues.setBufferedImg(img);
-                        } catch (Exception ex) {
+                        } catch (final Exception ex) {
                             LogWriter.writeLog("Exception " + ex + "loading " + commonValues.getSelectedFile());                            
                         }
                     }else {
@@ -836,23 +835,28 @@ public class OpenFile {
                 fileCanBeOpened = false;
 
                 String password = System.getProperty("org.jpedal.password");
-                if (password == null) {
-                    password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); //$NON-NLS-1$
-                }
-                
-                //try and reopen with new password
-                if (password != null) {
-                    decode_pdf.setEncryptionPassword(password);
-                    //decode_pdf.verifyAccess();
-
-                    if (decode_pdf.isFileViewable()) {
-                        fileCanBeOpened = true;
+                boolean cancel = false; // Has the user clicked cancel
+                while (!fileCanBeOpened && !cancel) { // Continuously ask for password until correct or cancelled
+                    if (password == null) {
+                        password = currentGUI.showInputDialog(Messages.getMessage("PdfViewerPassword.message")); // $NON-NLS-1$
+                        cancel = password == null; // Cancel button clicked => password is still null
                     }
 
-                }
+                    //try and reopen with new password
+                    if (password != null) {
+                        decode_pdf.setEncryptionPassword(password);
+                        //decode_pdf.verifyAccess();
 
-                if (!fileCanBeOpened) {
-                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPasswordRequired.message"));
+                        if (decode_pdf.isFileViewable()) {
+                            fileCanBeOpened = true;
+                        }
+
+                    }
+
+                    if (!fileCanBeOpened) {
+                        currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPasswordRequired.message"));
+                        password = null;
+                    }
                 }
 
             }

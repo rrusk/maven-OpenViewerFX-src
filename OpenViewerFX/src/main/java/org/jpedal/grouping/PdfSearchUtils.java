@@ -70,8 +70,7 @@ public class PdfSearchUtils {
     protected PdfSearchUtils(final PdfData pdf_data) {
 		this.pdf_data = pdf_data;
     }
-    
-    
+        
 	/**
 	 * Search a particular area with in pdf page currently loaded and return the areas
      * of the results found as an array of float values.
@@ -124,7 +123,7 @@ public class PdfSearchUtils {
 		cleanupShadowsAndDrownedObjects(false);
 
 		//Get unused text objects and sort them for correct searching
-        Line[] localLines = fragments.clone();
+        final Line[] localLines = fragments.clone();
         
 		final int[] unsorted = getWritingModeCounts(localLines);
 		final int[] writingModes = getWritingModeOrder(unsorted);
@@ -161,56 +160,21 @@ public class PdfSearchUtils {
         
 		final int count = pdf_data.getRawTextElementCount();
 
-        Line[] localFragments = new Line[count];
+        final Line[] localFragments = new Line[count];
         
-        float x1,x2,y1,y2;
-
 		int currentPoint = 0;
 		
 		//set values
 		for (int i = 0; i < count; i++) {
             
-			//extract values
-			x1 = pdf_data.f_x1[i];
-			x2 = pdf_data.f_x2[i];
-			y1 = pdf_data.f_y1[i];
-			y2 = pdf_data.f_y2[i];
-			final int mode=pdf_data.f_writingMode[i];
-
-			boolean accepted = false;
-			float height;
-            
-            switch (mode) {
-                case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
-                case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
-                    height = y1-y2;
-                    if ((((minX < x1 && x1 < maxX) || (minX < x2 && x2 < maxX)) || //Area contains the x1 or x2 coords
-                            ((x1 < minX && minX < x2) || (x1 < maxX && maxX < x2)) //Area is within the x1 and x2 coords
-                            )
-                            && (minY < y2 + (height / 4) && y2 + (height * 0.75) < maxY) //Area also contains atleast 3/4 of the text y coords
-                            ) {
-                        accepted = true;
-                    }
-                    break;
-                case PdfData.VERTICAL_BOTTOM_TO_TOP:
-                case PdfData.VERTICAL_TOP_TO_BOTTOM:
-                    height = x2-x1;
-                    if ((((minY < y1 && y1 < maxY) || (minY < y2 && y2 < maxY)) || //Area contains the x1 or x2 coords
-                            ((y2 < minY && minY < y1) || (y2 < maxY && maxY < y1)) //Area is within the x1 and x2 coords
-                            )
-                            && (minX < x1 + (height / 4) && x1 + (height * 0.75) < maxX) //Area also contains atleast 3/4 of the text y coords
-                            ) {
-                        accepted = true;
-                    }
-                    break;
-            }
-            
 			//if at least partly in the area, process
-			if(accepted){
+			if(isFragmentWithinArea(pdf_data, i, minX, minY, maxX, maxY)){
                 
+                final int mode=pdf_data.f_writingMode[i];
+            
                 localFragments[currentPoint] = new Line(pdf_data, i);
                 
-				StringBuilder startTags = new StringBuilder(localFragments[currentPoint].getRawData().substring(0, localFragments[currentPoint].getRawData().indexOf(MARKER)));
+				final StringBuilder startTags = new StringBuilder(localFragments[currentPoint].getRawData().substring(0, localFragments[currentPoint].getRawData().indexOf(MARKER)));
 				final String contentText = localFragments[currentPoint].getRawData().substring(localFragments[currentPoint].getRawData().indexOf(MARKER), localFragments[currentPoint].getRawData().indexOf('<', localFragments[currentPoint].getRawData().lastIndexOf(MARKER)));
 				String endTags = localFragments[currentPoint].getRawData().substring(localFragments[currentPoint].getRawData().lastIndexOf(MARKER));
 				//Skips last section of text
@@ -290,6 +254,43 @@ public class PdfSearchUtils {
 		}
 	}
 	
+    private static boolean isFragmentWithinArea(final PdfData pdf_data, final int i, final int minX, final int minY, final int maxX, final int maxY){
+        
+			//extract values
+			final float x1 = pdf_data.f_x1[i];
+			final float x2 = pdf_data.f_x2[i];
+			final float y1 = pdf_data.f_y1[i];
+			final float y2 = pdf_data.f_y2[i];
+			final int mode=pdf_data.f_writingMode[i];
+            
+			final float height;
+            
+            switch (mode) {
+                case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
+                case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
+                    height = y1-y2;
+                    if ((((minX < x1 && x1 < maxX) || (minX < x2 && x2 < maxX)) || //Area contains the x1 or x2 coords
+                            ((x1 < minX && minX < x2) || (x1 < maxX && maxX < x2)) //Area is within the x1 and x2 coords
+                            )
+                            && (minY < y2 + (height / 4) && y2 + (height * 0.75) < maxY) //Area also contains atleast 3/4 of the text y coords
+                            ) {
+                        return true;
+                    }
+                    break;
+                case PdfData.VERTICAL_BOTTOM_TO_TOP:
+                case PdfData.VERTICAL_TOP_TO_BOTTOM:
+                    height = x2-x1;
+                    if ((((minY < y1 && y1 < maxY) || (minY < y2 && y2 < maxY)) || //Area contains the x1 or x2 coords
+                            ((y2 < minY && minY < y1) || (y2 < maxY && maxY < y1)) //Area is within the x1 and x2 coords
+                            )
+                            && (minX < x1 + (height / 4) && x1 + (height * 0.75) < maxX) //Area also contains atleast 3/4 of the text y coords
+                            ) {
+                        return true;
+                    }
+                    break;
+            }
+            return false;
+    }
     
 	/** make sure co-ords valid and throw exception if not */
 	private static int[] validateCoordinates(int x1, int y1, int x2, int y2) {
@@ -350,7 +351,7 @@ public class PdfSearchUtils {
 
 		//Get unused text objects and sort them for correct searching
 //		final int[] items = getsortedUnusedFragments(true, false);
-        Line[] localLines = fragments.clone();
+        final Line[] localLines = fragments.clone();
 
 		final int[] unsorted = getWritingModeCounts(localLines);
 		final int[] writingModes = getWritingModeOrder(unsorted);
@@ -369,7 +370,7 @@ public class PdfSearchUtils {
 	}
     
     
-    private void searchWritingMode(int mode, int searchType, String[] terms, boolean includeTease, Vector_Float resultCoords, Vector_String resultTeasers) throws PdfException {
+    private void searchWritingMode(final int mode, final int searchType, final String[] terms, final boolean includeTease, final Vector_Float resultCoords, final Vector_String resultTeasers) throws PdfException {
 
         //Flags to control the different search options
         boolean firstOccuranceOnly = false;
@@ -381,7 +382,7 @@ public class PdfSearchUtils {
         createLinesForSearch(mode, false, false, true);
         
         //Bitwise flags for regular expressions engine, options always required 
-        int options = loadSearcherOptions(searchType);
+        final int options = loadSearcherOptions(searchType);
 
         //Only find first occurance of each search term
         if ((searchType & SearchType.FIND_FIRST_OCCURANCE_ONLY) == SearchType.FIND_FIRST_OCCURANCE_ONLY) {
@@ -399,11 +400,11 @@ public class PdfSearchUtils {
         }
         
         //Check if coords need swapping
-        boolean valuesSwapped = (mode == PdfData.VERTICAL_BOTTOM_TO_TOP || mode == PdfData.VERTICAL_TOP_TO_BOTTOM);
+        final boolean valuesSwapped = (mode == PdfData.VERTICAL_BOTTOM_TO_TOP || mode == PdfData.VERTICAL_TOP_TO_BOTTOM);
         
         //Portions of text to perform the search on and find teasers
-        String searchText = buildSearchText(false, mode);
-        String coordsText = buildSearchText(true, mode);
+        final String searchText = buildSearchText(false, mode);
+        final String coordsText = buildSearchText(true, mode);
         
         //Hold starting point data at page rotation
         int[] resultStart;
@@ -449,14 +450,14 @@ public class PdfSearchUtils {
                 //Create two matchers for finding search term and teaser
                 final Matcher termFinder = searchTerm.matcher(searchText);
                 final Matcher teaserFinder = teaserTerm.matcher(searchText);
-                boolean needToFindTeaser = true;
+                final boolean needToFindTeaser = true;
 
                 //Keep looping till no result is returned
                 while (termFinder.find()) {
                     resultStart = null;
                     //Make note of the text found and index in the text
                     String foundTerm = termFinder.group();
-                    int termStarts = termFinder.start();
+                    final int termStarts = termFinder.start();
                     final int termEnds = termFinder.end() - 1;
 
                     //If storing teasers
@@ -500,7 +501,7 @@ public class PdfSearchUtils {
     }
     
     
-    private void getResultCoords(String coordText, int mode, int[] resultStart, int termStarts, int termEnds, boolean valuesSwapped, Vector_Float resultCoords){
+    private void getResultCoords(final String coordText, final int mode, int[] resultStart, int termStarts, final int termEnds, final boolean valuesSwapped, final Vector_Float resultCoords){
         
         //Get coords of found text for highlights
         float currentX;
@@ -627,11 +628,11 @@ public class PdfSearchUtils {
         multipleTermTeasers.clear();
     }
     
-    private void storeTeasers(Vector_String resultTeasers){
+    private void storeTeasers(final Vector_String resultTeasers){
         
         //Remove any trailing empty values
         resultTeasers.trim();
-        String[] results = resultTeasers.get();
+        final String[] results = resultTeasers.get();
         for (int i = 0; i != results.length; i++) {
             multipleTermTeasers.add(results[i]);
         }
@@ -642,7 +643,7 @@ public class PdfSearchUtils {
     }
     
     
-    private static void storeResultsCoords(boolean valuesSwapped, int mode, Vector_Float resultCoords, float x1, float y1, float x2, float y2, float connected){
+    private static void storeResultsCoords(final boolean valuesSwapped, final int mode, final Vector_Float resultCoords, final float x1, final float y1, final float x2, final float y2, final float connected){
 
         //Set ends coords      
         if (valuesSwapped) {
@@ -671,7 +672,7 @@ public class PdfSearchUtils {
     }
     
     
-    private void findTeaser(String teaser, Matcher teaserFinder, int termStarts, int termEnds, Vector_String resultTeasers){
+    private void findTeaser(String teaser, final Matcher teaserFinder, final int termStarts, final int termEnds, final Vector_String resultTeasers){
         
         if (teaserFinder.find()) {
             //Get a teaser if found and set the search term to bold is allowed
@@ -699,7 +700,7 @@ public class PdfSearchUtils {
     }
     
     
-    private static String alterStringTooDisplayOrder(String testTerm) {
+    private static String alterStringTooDisplayOrder(final String testTerm) {
 
         String currentBlock = "";
         String searchValue = "";
@@ -745,13 +746,13 @@ public class PdfSearchUtils {
     }
     
     
-    private String buildSearchText(boolean includeCoords, int mode){
+    private String buildSearchText(final boolean includeCoords, final int mode){
         //Portions of text to perform the search on and find teasers
         String searchText;
 
 		//Merge all text into one with \n line separators
         //This will allow checking for multi line split results
-        StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder();
         for (int i = 0; i != lines.length; i++) {
             if (lines[i].getRawData() != null && mode == lines[i].getWritingMode()) {
                 str.append(lines[i].getRawData()).append('\n');
@@ -782,7 +783,7 @@ public class PdfSearchUtils {
 		return textValue;
 	}
     
-    private static int loadSearcherOptions(int searchType) {
+    private static int loadSearcherOptions(final int searchType) {
         //Bitwise flags for regular expressions engine, options always required 
         int options = 0;
 
@@ -799,7 +800,7 @@ public class PdfSearchUtils {
         return options;
     }
     
-    private static int[] getWritingModeOrder(int[] unsorted){
+    private static int[] getWritingModeOrder(final int[] unsorted){
         final int[] sorted = {unsorted[0], unsorted[1], unsorted[2], unsorted[3]};
 
 		//Set all to -1 so we can tell if it's been set yet
@@ -826,7 +827,7 @@ public class PdfSearchUtils {
         return writingModes;
     }
     
-    private int[] getWritingModeCounts(Line[] items){
+    private int[] getWritingModeCounts(final Line[] items){
         
 		//check orientation and get preferred. Items not correct will be ignored
 		int l2r = 0;
@@ -1043,7 +1044,7 @@ public class PdfSearchUtils {
 		final boolean debug=false;
 
 		//create local copies of arrays
-        Line[] localLines = fragments.clone();
+        final Line[] localLines = fragments.clone();
         
 //        final boolean[] isUsed = new boolean[lines.length];
         int finalCount = localLines.length;
@@ -1074,91 +1075,28 @@ public class PdfSearchUtils {
 
                 for (int child = 0; child < localLines.length && id == -1; child++) {
 
-                    float m_x1;
-                    float m_x2;
-                    float m_y1;
-                    float m_y2;
-
-                    float c_x1;
-                    float c_x2;
-                    float c_y1;
-                    float c_y2;
-
-                    //set pointers so left to right text
-                    switch (mode) {
-                        case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
-                            m_x1=localLines[master].getX1();
-                            m_x2=localLines[master].getX2();
-                            m_y1=localLines[master].getY1();
-                            m_y2=localLines[master].getY2();
-                            break;                            
-                        case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
-                            m_x2=localLines[master].getX1();
-                            m_x1=localLines[master].getX2();
-                            m_y1=localLines[master].getY1();
-                            m_y2=localLines[master].getY2();
-                            break;
-                        case PdfData.VERTICAL_BOTTOM_TO_TOP:
-                            m_x1=localLines[master].getY2();
-                            m_x2=localLines[master].getY1();
-                            m_y1=localLines[master].getX2();
-                            m_y2=localLines[master].getX1();
-                            break;
-                        case PdfData.VERTICAL_TOP_TO_BOTTOM:
-                            m_x1=localLines[master].getY2();
-                            m_x2=localLines[master].getY1();
-                            m_y2=localLines[master].getX1();
-                            m_y1=localLines[master].getX2();
-                            break;
-                        default:
-                            throw new PdfException("Illegal value "+mode+" for currentWritingMode");
-                    }
+                    /*
+                     * Coordinates altered so x axis positive follows line direction 
+                     * and y axis negative follows paragraph direction. 
+                     * Coordinates in the order x1, y1, x2, y2
+                    */
+                    final float[] masterCoords = getCoordsForWritingMode(localLines[master], mode);
+                    final float[] childCoords = getCoordsForWritingMode(localLines[child], mode);
                     
-                    //set pointers so left to right text
-                    switch (mode) {
-                        case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
-                            c_x1=localLines[child].getX1();
-                            c_x2=localLines[child].getX2();
-                            c_y1=localLines[child].getY1();
-                            c_y2=localLines[child].getY2();
-                            break;
-                        case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
-                            c_x2=localLines[child].getX1();
-                            c_x1=localLines[child].getX2();
-                            c_y1=localLines[child].getY1();
-                            c_y2=localLines[child].getY2();
-                            break;
-                        case PdfData.VERTICAL_BOTTOM_TO_TOP:
-                            c_x1=localLines[child].getY2();
-                            c_x2=localLines[child].getY1();
-                            c_y1=localLines[child].getX2();
-                            c_y2=localLines[child].getX1();
-                            break;
-                        case PdfData.VERTICAL_TOP_TO_BOTTOM:
-                            c_x1=localLines[child].getY2();
-                            c_x2=localLines[child].getY1();
-                            c_y2=localLines[child].getX1();
-                            c_y1=localLines[child].getX2();
-                            break;
-                        default:
-                            throw new PdfException("Illegal value "+mode+" for currentWritingMode");
-                    }
-
-
-                    if (!localLines[child].hasMerged() && master != child && localLines[master].getWritingMode() == localLines[child].getWritingMode() && c_x1 != c_x2) {
+                    if (!localLines[child].hasMerged() && master != child && localLines[master].getWritingMode() == localLines[child].getWritingMode() && childCoords[0] != childCoords[2]) {
                         if (debug) {
                             System.out.println("Checking " + removeHiddenMarkers(localLines[child].getRawData()));
                         }
                         //Get central points
-                        float mx = m_x1 + ((m_x2 - m_x1) / 2);
-                        float my = m_y2 + ((m_y1 - m_y2) / 2);
-                        float cx = c_x1 + ((c_x2 - c_x1) / 2);
-                        float cy = c_y2 + ((c_y1 - c_y2) / 2);
+                        final float mx = masterCoords[0] + ((masterCoords[2] - masterCoords[0]) / 2);
+                        final float my = masterCoords[3] + ((masterCoords[1] - masterCoords[3]) / 2);
+                        final float cx = childCoords[0] + ((childCoords[2] - childCoords[0]) / 2);
+                        final float cy = childCoords[3] + ((childCoords[1] - childCoords[3]) / 2);
 
-                        float smallestHeight = (m_y1 - m_y2);
-                        float fontDifference = (c_y1 - c_y2) - smallestHeight;
+                        float smallestHeight = (masterCoords[1] - masterCoords[3]);
+                        final float fontDifference = (childCoords[1] - childCoords[3]) - smallestHeight;
                         if (fontDifference < 0) {
-                            smallestHeight = (c_y1 - c_y2);
+                            smallestHeight = (childCoords[1] - childCoords[3]);
                         }
 
                         //Don't merge is font of 1 is twice the size
@@ -1167,7 +1105,7 @@ public class PdfSearchUtils {
                             //child is within master area
                             if (Math.abs(my - cy) < (smallestHeight * 0.5)) {
                                 if (mx < cx) {//Child on right
-                                    float distance = c_x1 - m_x2;
+                                    final float distance = childCoords[0] - masterCoords[2];
                                     if (distance <= smallestHeight / 2) {
                                         id = child;
                                     }
@@ -1176,7 +1114,7 @@ public class PdfSearchUtils {
                         }
                         //Match has been found
                         if (id != -1) {
-                            float possSpace = c_x1 - m_x2;
+                            float possSpace = childCoords[0] - masterCoords[2];
                             if (mode == PdfData.HORIZONTAL_RIGHT_TO_LEFT || mode == PdfData.VERTICAL_TOP_TO_BOTTOM) {
                                 possSpace = -possSpace;
                             }
@@ -1197,11 +1135,11 @@ public class PdfSearchUtils {
                             }
 
                             if ((isSearch && (child != master
-                                    && ((c_x1 > m_x1 && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
-                                    || (c_x1 < m_x1 && mode == PdfData.VERTICAL_TOP_TO_BOTTOM)
+                                    && ((childCoords[0] > masterCoords[0] && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
+                                    || (childCoords[0] < masterCoords[0] && mode == PdfData.VERTICAL_TOP_TO_BOTTOM)
                                     && localLines[master].getWritingMode() == mode)))
-                                    || (!isSearch && (child != master && ((c_x1 > m_x1 && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
-                                    || c_x1 < m_x1 && mode == PdfData.VERTICAL_TOP_TO_BOTTOM && localLines[master].getWritingMode() == mode)))) { //see if on right
+                                    || (!isSearch && (child != master && ((childCoords[0] > masterCoords[0] && mode != PdfData.VERTICAL_TOP_TO_BOTTOM)
+                                    || childCoords[0] < masterCoords[0] && mode == PdfData.VERTICAL_TOP_TO_BOTTOM && localLines[master].getWritingMode() == mode)))) { //see if on right
                                 
                                 merge(localLines[master], localLines[id], separator);
                                 finalCount--;
@@ -1225,6 +1163,40 @@ public class PdfSearchUtils {
         }
 	}
     
+    private float[] getCoordsForWritingMode(final Line line, final int mode) throws PdfException{
+        final float[] results = new float[4];
+        //set pointers so left to right text
+        switch (mode) {
+            case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
+                results[0]=line.getX1();
+                results[2]=line.getX2();
+                results[1]=line.getY1();
+                results[3]=line.getY2();
+                break;
+            case PdfData.HORIZONTAL_RIGHT_TO_LEFT:
+                results[2]=line.getX1();
+                results[0]=line.getX2();
+                results[1]=line.getY1();
+                results[3]=line.getY2();
+                break;
+            case PdfData.VERTICAL_BOTTOM_TO_TOP:
+                results[0]=line.getY2();
+                results[2]=line.getY1();
+                results[1]=line.getX2();
+                results[3]=line.getX1();
+                break;
+            case PdfData.VERTICAL_TOP_TO_BOTTOM:
+                results[0]=line.getY2();
+                results[2]=line.getY1();
+                results[3]=line.getX1();
+                results[1]=line.getX2();
+                break;
+            default:
+                throw new PdfException("Illegal value "+mode+" for currentWritingMode");
+        }
+        
+        return results;
+    }
     /**
 	 * merge 2 text localFragments together and update co-ordinates
 	 */
@@ -1244,9 +1216,9 @@ public class PdfSearchUtils {
                 master.setY2(child.getY2());
             }
 
-            String test=Fonts.fe;
+            final String test=Fonts.fe;
             StringBuilder masterString = new StringBuilder(master.getRawData());
-            StringBuilder childString = new StringBuilder(child.getRawData());
+            final StringBuilder childString = new StringBuilder(child.getRawData());
             
 				//move </Font> if needed and add separator
 				if ((masterString.toString().lastIndexOf(test)!=-1)) {
@@ -1331,7 +1303,7 @@ public class PdfSearchUtils {
 	 * Flag if teasers should be generated whilst searching
      * @param value True to generate teasers, otherwise false
 	 */
-	public void generateTeasers(boolean value) {
+	protected void generateTeasers(final boolean value) {
 		includeTease=value;
 	}
     
@@ -1339,7 +1311,7 @@ public class PdfSearchUtils {
      * Return flag to control teaser generation
      * @return True if teasers are being generated, otherwise false
      */
-    public boolean isGeneratingTeasers(){
+    protected boolean isGeneratingTeasers(){
         return includeTease;
     }
     
@@ -1349,11 +1321,11 @@ public class PdfSearchUtils {
         private int text_length, mode, fontSize;
         private boolean hasMerged;
         
-        Line(PdfData pdf_data, int index){
+        Line(final PdfData pdf_data, final int index){
             loadData(pdf_data, index);
         }
         
-        private void loadData(PdfData pdf_data, int index){
+        private void loadData(final PdfData pdf_data, final int index){
             //extract values
             character_spacing = pdf_data.f_character_spacing[index];
             x1 = pdf_data.f_x1[index];
@@ -1385,17 +1357,17 @@ public class PdfSearchUtils {
         
         protected boolean hasMerged(){return hasMerged;}
         
-        protected void setX1(float value){x1=value;}
-        protected void setY1(float value){y1=value;}
-        protected void setX2(float value){x2=value;}
-        protected void setY2(float value){y2=value;}
-        protected void setFontSize(int value){fontSize=value;}
-        protected void setRawData(String value){raw=value;}
-        protected void setTextLength(int value){text_length=value;}
-        protected void setMerged(boolean value){hasMerged=value;}
+        protected void setX1(final float value){x1=value;}
+        protected void setY1(final float value){y1=value;}
+        protected void setX2(final float value){x2=value;}
+        protected void setY2(final float value){y2=value;}
+        protected void setFontSize(final int value){fontSize=value;}
+        protected void setRawData(final String value){raw=value;}
+        protected void setTextLength(final int value){text_length=value;}
+        protected void setMerged(final boolean value){hasMerged=value;}
 
         @Override
-        public int compareTo(Line o) {
+        public int compareTo(final Line o) {
             switch(mode){
                 case PdfData.HORIZONTAL_LEFT_TO_RIGHT :
                 case PdfData.HORIZONTAL_RIGHT_TO_LEFT :

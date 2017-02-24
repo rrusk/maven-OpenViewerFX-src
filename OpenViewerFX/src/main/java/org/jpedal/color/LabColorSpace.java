@@ -66,7 +66,7 @@ public class LabColorSpace extends GenericColorSpace {
     public LabColorSpace(final float[] whitepoint, final float[] range) {
         
         setType(ColorSpaces.Lab);
-        setCIEValues(whitepoint, null, range, null, null);
+        setCIEValues(whitepoint, range, null, null);
         
     }
     

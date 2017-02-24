@@ -116,10 +116,10 @@ public class ObjectArray extends Array {
         
     }
 
-    private Object getIndirectRef(PdfObject pdfObject, int keyStart) {
+    private Object getIndirectRef(final PdfObject pdfObject, final int keyStart) {
 
         final byte[] ref=writeObject(keyStart);
-        PdfObject obj=new PdfObject(new String(ref));
+        final PdfObject obj=new PdfObject(new String(ref));
 
         final byte[] bytes = objectReader.readObjectData(obj);
 
@@ -185,9 +185,9 @@ public class ObjectArray extends Array {
     }
 
     @Override
-    void fillArray(final int elementCount, PdfObject pdfObject) {
+    void fillArray(final int elementCount, final PdfObject pdfObject) {
      
-        Object[] finalByteValues = new Object[elementCount];
+        final Object[] finalByteValues = new Object[elementCount];
         for(int a=0;a<elementCount;a++){
             finalByteValues[a]=objectArray.get(a);
         }

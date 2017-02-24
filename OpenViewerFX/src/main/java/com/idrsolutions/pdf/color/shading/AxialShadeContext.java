@@ -64,7 +64,7 @@ public class AxialShadeContext implements PaintContext {
     private final float[][] toUserSpace;
     private final float[][] toShadeSpace;
 
-    public AxialShadeContext(AffineTransform xform, GenericColorSpace shadingColorSpace, float[] background, PdfObject shadingObject, float[][] mm, PDFFunction[] function) {
+    public AxialShadeContext(final AffineTransform xform, final GenericColorSpace shadingColorSpace, final float[] background, final PdfObject shadingObject, final float[][] mm, final PDFFunction[] function) {
 
         this.shadingColorSpace = shadingColorSpace;
         this.function = function;
@@ -82,20 +82,30 @@ public class AxialShadeContext implements PaintContext {
         t0 = domain[0];
         t1 = domain[1];
 
-        float[][] shadeMatrix = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-        if (mm != null) {
-            shadeMatrix = mm;
-        }
+       	
+		float[][] caller = {{1,0,0},{0,1,0},{0,0,1}};
+		float[][] shadeMatrix = {{1,0,0},{0,1,0},{0,0,1}};
+				
+		if (mm != null) {
+			caller = mm;			
+		}
+				
+		final float [] inputs = shadingObject.getFloatArray(PdfDictionary.Matrix);
+		if(inputs != null){
+			shadeMatrix = new float[][]{{inputs[0],inputs[1],0},{inputs[2],inputs[3],0},{inputs[4],inputs[5],1}};
+		}
+		
+		final float[][] shader = Matrix.concatenate(caller, shadeMatrix);
 
-        float[][] xformMatrix = {
+        final float[][] xformMatrix = {
             {(float) xform.getScaleX(), (float) xform.getShearX(), 0},
             {(float) xform.getShearY(), (float) xform.getScaleY(), 0},
             {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}
         };
         toUserSpace = Matrix.inverse(xformMatrix);
-        toShadeSpace = Matrix.inverse(shadeMatrix);
+        toShadeSpace = Matrix.inverse(shader);
 
-        float[] coords = shadingObject.getFloatArray(PdfDictionary.Coords);
+        final float[] coords = shadingObject.getFloatArray(PdfDictionary.Coords);
 
         x0 = coords[0];
         y0 = coords[1];
@@ -119,7 +129,7 @@ public class AxialShadeContext implements PaintContext {
     }
 
     @Override
-    public Raster getRaster(int startX, int startY, int w, int h) {
+    public Raster getRaster(final int startX, final int startY, final int w, final int h) {
 
         final int rastSize = (w * h * 4);
         final int[] data = new int[rastSize];
@@ -161,7 +171,7 @@ public class AxialShadeContext implements PaintContext {
                     render = false;
                 }
                 if (render) {
-                    Color c = calculateColor(t);
+                    final Color c = calculateColor(t);
                     final int base = (i * w + j) * 4;
                     data[base] = c.getRed();
                     data[base + 1] = c.getGreen();

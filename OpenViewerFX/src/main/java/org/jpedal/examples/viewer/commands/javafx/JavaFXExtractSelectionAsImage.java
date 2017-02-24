@@ -75,7 +75,7 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
         final FXDialog dialog = new FXDialog((Stage)currentGUI.getFrame(), Modality.APPLICATION_MODAL, pane);
         dialog.setTitle(Messages.getMessage("PdfViewerMessage.SaveImage"));
         dialog.setResizeable(false);
-        String style;
+        final String style;
         
         //wrap image so we can display
         if (snapShot != null) {
@@ -89,7 +89,7 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                 //decode_pdf.useNewGraphicsMode = false;
                 propValue = currentGUI.getProperties().getValue("pdfDisplayBackground");
 
-                int col = Integer.parseInt(propValue);
+                final int col = Integer.parseInt(propValue);
                 final int r = ((col >> 16) & 255);
                 final int g = ((col >> 8) & 255);
                 final int b = ((col) & 255);
@@ -98,7 +98,7 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
             } else {
 
                 if (decode_pdf.getDecoderOptions().getDisplayBackgroundColor() != null) {
-                    int col = decode_pdf.getDecoderOptions().getDisplayBackgroundColor().getRGB();
+                    final int col = decode_pdf.getDecoderOptions().getDisplayBackgroundColor().getRGB();
                     final int r = ((col >> 16) & 255);
                     final int g = ((col >> 8) & 255);
                     final int b = ((col) & 255);
@@ -155,8 +155,8 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                 
             dialog.getDialog().hide();
 
-            ClipboardImage clipboardImage = new ClipboardImage(snapShot);
-            Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+            final ClipboardImage clipboardImage = new ClipboardImage(snapShot);
+            final Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
             c.setContents(clipboardImage, null);
             }
         });
@@ -175,12 +175,12 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                 final FileChooser.ExtensionFilter extFilter2 = new FileChooser.ExtensionFilter("JPEG (*.jpg)", "*.jpg", "*.jpeg");
                 chooser.getExtensionFilters().add(extFilter2);
 
-                File outputFile = chooser.showSaveDialog(dialog.getDialog());
+                final File outputFile = chooser.showSaveDialog(dialog.getDialog());
                 
                     if (outputFile != null) {
-                        StringBuilder outName = new StringBuilder(outputFile.getAbsolutePath());
+                        final StringBuilder outName = new StringBuilder(outputFile.getAbsolutePath());
 
-                        FileChooser.ExtensionFilter filter = chooser.getSelectedExtensionFilter();
+                        final FileChooser.ExtensionFilter filter = chooser.getSelectedExtensionFilter();
 
                         String format = "tif";
                         if (filter.getDescription().toLowerCase().contains("jp")) {
@@ -196,7 +196,7 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
 
                             try {
                                 DefaultImageHelper.write(snapShot, format, outName.toString());
-                            } catch (IOException ex) {
+                            } catch (final IOException ex) {
                                 LogWriter.writeLog("Exception in writing image " + ex);
                             }
                         }

@@ -135,7 +135,7 @@ public abstract class MultiPageDecoder {
     }
     
     /**used to decode multiple pages on views*/
-    public void decodeOtherPages(int pageNumber, final int pageCount, int displayView) {
+    public void decodeOtherPages(int pageNumber, final int pageCount, final int displayView) {
         
         this.displayView=displayView;
         
@@ -207,7 +207,7 @@ public abstract class MultiPageDecoder {
 
                     try {
                         semaphore.acquire();
-                    } catch (InterruptedException ex) {
+                    } catch (final InterruptedException ex) {
                         LogWriter.writeLog("Exception: " + ex.getMessage());
                     }
 
@@ -356,8 +356,8 @@ public abstract class MultiPageDecoder {
                         ref -= 2;
                     }
                     
-                    int[] pageW=multiDisplayOptions.getPageW();
-                    int[] pageH=multiDisplayOptions.getPageH();
+                    final int[] pageW=multiDisplayOptions.getPageW();
+                    final int[] pageH=multiDisplayOptions.getPageH();
 //                    System.out.println("page + \" \" + ref = " + page + " " + ref);
                     if(ref < 4 && ref > -1 && facingDragCachedImages[ref]==null) {
 
@@ -408,7 +408,7 @@ public abstract class MultiPageDecoder {
         }
     }
 
-    public void decodeMorePages(int page, int originalStart, int originalEnd) {
+    public void decodeMorePages(final int page, final int originalStart, final int originalEnd) {
 
         if(currentPageViews.get(page)==null){
 
@@ -419,7 +419,7 @@ public abstract class MultiPageDecoder {
         
     }
     
-    public void decodePage(int page,int originalStart, int originalEnd) {
+    public void decodePage(final int page, final int originalStart, final int originalEnd) {
         
         final AcroRenderer formRenderer =pdf.getFormRenderer();
         //Create form objects
@@ -663,7 +663,7 @@ public abstract class MultiPageDecoder {
         
     }
 
-    public DynamicVectorRenderer getCurrentPageView(int i) {
+    public DynamicVectorRenderer getCurrentPageView(final int i) {
         return currentPageViews.get(i);
     }
 
@@ -689,9 +689,9 @@ public abstract class MultiPageDecoder {
         int lastVisiblePage = 0;
         for (int i = 1; i <= pageCount; i += 1) {
             
-            int pageTop=yReached[i];
-            int pageBottom=yReached[i]+pageH[i];
-            int viewBottom=ry+rh;
+            final int pageTop=yReached[i];
+            final int pageBottom=yReached[i]+pageH[i];
+            final int viewBottom=ry+rh;
             if(debug){
                 System.out.println(display.getInsetH()+" "+i+ ' ' +" pageTop="+pageTop+" pageBottom="+pageBottom+" viewTop="+ ry +" viewBottom="+ viewBottom);
             }
@@ -713,7 +713,7 @@ public abstract class MultiPageDecoder {
             }
             lastVisiblePage = i;
             
-            int midPt=ry+(rh/2);
+            final int midPt=ry+(rh/2);
             int gap=midPt-yReached[i];
             if(debug){
                 System.out.println("gap="+gap);
@@ -799,7 +799,7 @@ public abstract class MultiPageDecoder {
         return facingDragTempRightNo;
     }
 
-    public void setCustomRenderChangeListener(RenderChangeListener customRenderChangeListener) {
+    public void setCustomRenderChangeListener(final RenderChangeListener customRenderChangeListener) {
         this.customRenderChangeListener=customRenderChangeListener;
     }
 
@@ -807,7 +807,7 @@ public abstract class MultiPageDecoder {
         throw new UnsupportedOperationException("repaint Not supported yet.");
     }
 
-    public DynamicVectorRenderer getNewDisplay(int pageNumber) {
+    public DynamicVectorRenderer getNewDisplay(final int pageNumber) {
         throw new UnsupportedOperationException(this+ "Not supported yet."); 
     }
 }

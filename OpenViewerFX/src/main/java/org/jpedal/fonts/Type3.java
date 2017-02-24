@@ -133,7 +133,7 @@ public class Type3 extends PdfFont {
             String glyphKey;
             byte[] data;
             
-            PdfKeyPairsIterator keyPairs=CharProcs.getKeyPairsIterator();
+            final PdfKeyPairsIterator keyPairs=CharProcs.getKeyPairsIterator();
             
             while(keyPairs.hasMorePairs()){
                 
@@ -151,12 +151,12 @@ public class Type3 extends PdfFont {
         }
     }
 
-    private void decodeT3GlyphData(byte[] data, final ObjectStore objectStore, String glyphKey, final T3StreamDecoder glyphDecoder, final PdfObject pdfObject) {
+    private void decodeT3GlyphData(final byte[] data, final ObjectStore objectStore, final String glyphKey, final T3StreamDecoder glyphDecoder, final PdfObject pdfObject) {
         
-        int otherKey;
-        int key;
+        final int otherKey;
+        final int key;
         
-        PdfObject glyphObj=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FontObject("1 0 R"), currentPdfFile.getObjectReader(),data, PdfDictionary.CharProcs);
+        final PdfObject glyphObj=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new FontObject("1 0 R"), currentPdfFile.getObjectReader(),data, PdfDictionary.CharProcs);
         //decode and create graphic of glyph
         final T3Renderer glyphDisplay=new T3Display(0,false,20,objectStore);
         glyphDisplay.setType3Glyph(glyphKey);

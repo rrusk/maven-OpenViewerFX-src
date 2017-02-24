@@ -48,9 +48,9 @@ import org.jpedal.utils.LogWriter;
 class ThreeComponentImage {
     
     
-    public static BufferedImage make(int d, byte[] data, byte[] index, int w, int h) {
+    public static BufferedImage make(int d, byte[] data, final byte[] index, final int w, final int h) {
         
-        BufferedImage image;
+        final BufferedImage image;
         
         //some odd files with 16 bit need to be down-sampled to work with 8 bit (fogbugz 15839)
         // baseline_screens/14jan/fatt18SKYspeseOND13.pdf
@@ -84,14 +84,14 @@ class ThreeComponentImage {
         return image;
     }
 
-    static BufferedImage makeImage(int d, byte[] data, int w, int h) {
+    static BufferedImage makeImage(final int d, byte[] data, final int w, final int h) {
        
         //expand out 4 bit raster as does not appear to be easy way
         if(d==4){
             data=expand4bitData(data, w, h);
         }
         
-        BufferedImage image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
+        final BufferedImage image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
         data=checkSize(data,w,h,3);
         final Raster raster = ColorSpaceConvertor.createInterleavedRaster(data, w, h);
         image.setData(raster);
@@ -99,7 +99,7 @@ class ThreeComponentImage {
         return image;
     }
 
-    static byte[] expand4bitData(byte[] data, int w, int h) {
+    static byte[] expand4bitData(byte[] data, final int w, final int h) {
         
         final int origSize=data.length;
         final int newSize=w*h*3;
@@ -141,9 +141,9 @@ class ThreeComponentImage {
         return data;
     }
 
-    static BufferedImage makeIndexImage(int d, byte[] index, int w, int h, byte[] data) {
+    static BufferedImage makeIndexImage(final int d, final byte[] index, final int w, final int h, final byte[] data) {
         
-        BufferedImage image;
+        final BufferedImage image;
         
         if (d == 8 && index!=null){
             image = ColorSpaceConvertor.convertIndexedToFlat(d,w, h, data, index, false,false);

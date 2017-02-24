@@ -198,11 +198,11 @@ public final class FontMappings {
             final String type= "/TrueType";
             final String fontName=family+fontNames[i];
         
-            String rawPath="org/jpedal/res/"+path+"/"+fontName+".ttf";
-            String outPath= ObjectStore.temp_dir+fontName+".ttf";
+            final String rawPath="org/jpedal/res/"+path+"/"+fontName+".ttf";
+            final String outPath= ObjectStore.temp_dir+fontName+".ttf";
 
-            InputStream url = FontMappings.class.getClassLoader().getResourceAsStream(rawPath);
-            BufferedOutputStream to=new BufferedOutputStream(new FileOutputStream(outPath));
+            final InputStream url = FontMappings.class.getClassLoader().getResourceAsStream(rawPath);
+            final BufferedOutputStream to=new BufferedOutputStream(new FileOutputStream(outPath));
             
             ObjectStore.copy(url, to);
             to.close();
@@ -940,7 +940,7 @@ public final class FontMappings {
                     // is how you can match
                     // to find your fonts.
                     // System.out.println("Found a match!");
-                    String fontName = entry.getName();
+                    final String fontName = entry.getName();
                     final int i = fontName.lastIndexOf('/');
                     
                     retValue.add(fontName.substring(i + 1));

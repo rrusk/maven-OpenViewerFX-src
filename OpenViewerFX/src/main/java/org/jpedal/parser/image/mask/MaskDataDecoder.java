@@ -58,7 +58,7 @@ public class MaskDataDecoder {
      * @param decodeColorData
      * @return
      */
-    static byte[] applyMask(final ImageData imageData,final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, byte[] maskDataSream) {
+    static byte[] applyMask(final ImageData imageData, final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, final byte[] maskDataSream) {
         
         final int[] maskArray=XObject.getIntArray(PdfDictionary.Mask);
     
@@ -67,9 +67,9 @@ public class MaskDataDecoder {
         /*
         * Image data
         */
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
-        int d=imageData.getDepth();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
+        final int d=imageData.getDepth();
         
         
         objectData = convertData(decodeColorData, objectData, w, h, imageData, d, 1, null);
@@ -92,15 +92,15 @@ public class MaskDataDecoder {
         return objectData;
     }
     
-    public static BufferedImage applyMaskArray(ImageData imageData, int[] maskArray){
-        int bitDepth = imageData.getDepth();
+    public static BufferedImage applyMaskArray(final ImageData imageData, final int[] maskArray){
+        final int bitDepth = imageData.getDepth();
 //        int negate = 8-bitDepth;
-        int nComp = maskArray.length/2;
-        int dim = imageData.getWidth()*imageData.getHeight();
+        final int nComp = maskArray.length/2;
+        final int dim = imageData.getWidth()*imageData.getHeight();
         
-        BufferedImage img = new BufferedImage(imageData.getWidth(), imageData.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        int output[] = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
-        byte [] data = imageData.getObjectData();
+        final BufferedImage img = new BufferedImage(imageData.getWidth(), imageData.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        final int[] output = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+        final byte [] data = imageData.getObjectData();
         int r,g,b,t;
         boolean isMask;
         
@@ -108,7 +108,7 @@ public class MaskDataDecoder {
             case 1:
             case 2:
             case 4:
-                BitReader reader = new BitReader(data, true);
+                final BitReader reader = new BitReader(data, true);
                 for (int i = 0; i < dim; i++) {
                     
                     if(nComp == 1){
@@ -178,9 +178,9 @@ public class MaskDataDecoder {
         /*
         * Image data
         */
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
-        int d=imageData.getDepth();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
+        final int d=imageData.getDepth();
         
         /*
         * Smask data (ASSUME single component at moment)
@@ -239,8 +239,8 @@ public class MaskDataDecoder {
         /*
         * Image data
         */
-        int w=imageData.getWidth();
-        int h=imageData.getHeight();
+        final int w=imageData.getWidth();
+        final int h=imageData.getHeight();
 
         /*
         * mask data (ASSUME single component at moment)
@@ -283,7 +283,7 @@ public class MaskDataDecoder {
         return objectData;
     }
 
-    static byte[] convertSmaskData(final GenericColorSpace decodeColorData, byte[] objectData, int w, int h, final ImageData imageData, int d, final int maskD, byte[] maskData, PdfObject smask) {
+    static byte[] convertSmaskData(final GenericColorSpace decodeColorData, byte[] objectData, final int w, final int h, final ImageData imageData, final int d, final int maskD, final byte[] maskData, final PdfObject smask) {
         
         byte[] index=decodeColorData.getIndexedMap();
        
@@ -297,7 +297,7 @@ public class MaskDataDecoder {
                 check4BitData(objectData);
             }
             
-            float [] decodeArr = smask.getFloatArray(PdfDictionary.Decode);
+            final float [] decodeArr = smask.getFloatArray(PdfDictionary.Decode);
         
             if(decodeArr!=null && decodeArr[0]==1 && decodeArr[1]==0){ // data inverted refer to dec2011/example.pdf
                 for (int i = 0; i < maskData.length; i++) {
@@ -322,7 +322,7 @@ public class MaskDataDecoder {
         return objectData;
     }
     
-    static byte[] convertData(final GenericColorSpace decodeColorData, byte[] objectData, int w, int h, final ImageData imageData, int d, final int maskD, byte[] maskData) {
+    static byte[] convertData(final GenericColorSpace decodeColorData, byte[] objectData, final int w, final int h, final ImageData imageData, final int d, final int maskD, final byte[] maskData) {
         
         byte[] index=decodeColorData.getIndexedMap();
        
@@ -364,7 +364,7 @@ public class MaskDataDecoder {
         
         boolean is4Bit=true;
         
-        for(byte b:objectData){
+        for(final byte b:objectData){
             if(b<0 || b>15){
                 is4Bit=false;
                 break;
@@ -383,9 +383,9 @@ public class MaskDataDecoder {
         
         int rgbPtr=0, aPtr;
         int i=0;
-        float ratioW=maskW/(float)w;
-        float ratioH=maskH/(float)h;
-        byte[] combinedData=new byte[w*h*4];
+        final float ratioW=maskW/(float)w;
+        final float ratioH=maskH/(float)h;
+        final byte[] combinedData=new byte[w*h*4];
         
         final int rawDataSize=objectData.length;
         
@@ -409,7 +409,7 @@ public class MaskDataDecoder {
                     
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         return combinedData;
@@ -420,9 +420,9 @@ public class MaskDataDecoder {
         
         int rgbPtr, aPtr=0;
         int i=0;
-        float ratioW=w/(float)maskW;
-        float ratioH=h/(float)maskH;
-        byte[] combinedData=new byte[maskW*maskH*4];
+        final float ratioW=w/(float)maskW;
+        final float ratioH=h/(float)maskH;
+        final byte[] combinedData=new byte[maskW*maskH*4];
         final int rawDataSize=objectData.length;
         final int maskSize=maskData.length;
         
@@ -450,14 +450,14 @@ public class MaskDataDecoder {
                     
                 }
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         
         return combinedData;
     }
     
-     public static byte[] getSMaskData(byte[] maskData,ImageData smaskData, PdfObject newSMask,GenericColorSpace maskColorData) {
+     public static byte[] getSMaskData(byte[] maskData, final ImageData smaskData, final PdfObject newSMask, final GenericColorSpace maskColorData) {
         smaskData.getFilter(newSMask);     
 		
         if(smaskData.isDCT()){
@@ -471,9 +471,9 @@ public class MaskDataDecoder {
      
      private static byte[] applyMaskArray(final int w, final int h, final byte[] objectData, final int[] maskArray) {
          
-         int pixels=w*h*4;
+         final int pixels=w*h*4;
          int rgbPtr=0;
-         byte[] combinedData=new byte[w*h*4];
+         final byte[] combinedData=new byte[w*h*4];
          final int rawDataSize=objectData.length;
          
          float diff=0;
@@ -504,7 +504,7 @@ public class MaskDataDecoder {
                  combinedData[i+3]=(byte)255;
                  
              }
-         }catch(Exception e){
+         }catch(final Exception e){
              e.printStackTrace();
          }
         
@@ -514,9 +514,9 @@ public class MaskDataDecoder {
     
     private static byte[] buildUnscaledByteArray(final int w, final int h, final byte[] objectData, final byte[] maskData) {
         
-        int pixels=w*h*4;
+        final int pixels=w*h*4;
         int rgbPtr=0, aPtr=0;
-        byte[] combinedData=new byte[w*h*4];
+        final byte[] combinedData=new byte[w*h*4];
         final int rawDataSize=objectData.length;
         final int maskSize=maskData.length;
         
@@ -538,7 +538,7 @@ public class MaskDataDecoder {
                 }
                 
             }
-        }catch(Exception e){
+        }catch(final Exception e){
             e.printStackTrace();
         }
         

@@ -49,7 +49,7 @@ public class HTMLFontHandler {
     public HTMLFontHandler() {
     }
     
-   public static void processFont(PdfFont restoredFont, DynamicVectorRenderer current, PdfObject newFont, PdfObjectReader currentPdfFile) {
+   public static void processFont(final PdfFont restoredFont, final DynamicVectorRenderer current, final PdfObject newFont, final PdfObjectReader currentPdfFile) {
 
         final String fontName = restoredFont.getFontName();
 
@@ -69,7 +69,7 @@ public class HTMLFontHandler {
 
     }
 
-    private static void handleFontInHTML(PdfObject newFont, org.jpedal.render.DynamicVectorRenderer current, PdfFont restoredFont, PdfObjectReader currentPdfFile) {
+    private static void handleFontInHTML(final PdfObject newFont, final org.jpedal.render.DynamicVectorRenderer current, final PdfFont restoredFont, final PdfObjectReader currentPdfFile) {
         //check for base fonts (explict Arial test for ArialMT)
 
         PdfObject pdfFontDescriptor = newFont.getDictionary(PdfDictionary.FontDescriptor);

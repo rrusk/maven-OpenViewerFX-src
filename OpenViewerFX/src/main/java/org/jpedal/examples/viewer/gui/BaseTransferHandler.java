@@ -119,7 +119,7 @@ public class BaseTransferHandler extends TransferHandler {
 	}
 	
 	private static String removeChar(final String s, final char c) {
-        StringBuilder r = new StringBuilder();
+        final StringBuilder r = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) != c) {
                 r.append(s.charAt(i));
@@ -160,7 +160,7 @@ public class BaseTransferHandler extends TransferHandler {
 	private static String readTextDate(final Reader r) throws IOException {
 		final BufferedReader br = new BufferedReader(r);
 		
-		StringBuilder textData = new StringBuilder();
+		final StringBuilder textData = new StringBuilder();
 		String line = br.readLine();
 		while (line != null) {
 			textData.append(line);

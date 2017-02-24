@@ -41,7 +41,7 @@ public class TiffLZW {
     private int putBuffer, putBits;
 
 
-    public void decompress(byte[] output, byte[] input) {
+    public void decompress(final byte[] output, final byte[] input) {
 
         init();
 
@@ -102,15 +102,15 @@ public class TiffLZW {
         bitsToGet = 9;
     }
 
-    private void addCodes(byte[] codes) {
+    private void addCodes(final byte[] codes) {
         for (int i = 0; i < codes.length; i++) {
             output[op++] = codes[i];
         }
     }
 
-    private void addCodeToCodes(byte[] oldCodes, byte code) {
-        int length = oldCodes.length;
-        byte string[] = new byte[length + 1];
+    private void addCodeToCodes(final byte[] oldCodes, final byte code) {
+        final int length = oldCodes.length;
+        final byte[] string = new byte[length + 1];
         System.arraycopy(oldCodes, 0, string, 0, length);
         string[length] = code;
         codes[tp++] = string;
@@ -123,7 +123,7 @@ public class TiffLZW {
         }
     }
 
-    private void addCodeArrToCodes(byte[] codeArr) {
+    private void addCodeArrToCodes(final byte[] codeArr) {
         codes[tp++] = codeArr;
         if (tp == 511) {
             bitsToGet = 10;
@@ -134,16 +134,16 @@ public class TiffLZW {
         }
     }
 
-    private static byte[] generateCodeArray(byte oldString[], byte newString) {
-        int length = oldString.length;
-        byte string[] = new byte[length + 1];
+    private static byte[] generateCodeArray(final byte[] oldString, final byte newString) {
+        final int length = oldString.length;
+        final byte[] string = new byte[length + 1];
         System.arraycopy(oldString, 0, string, 0, length);
         string[length] = newString;
         return string;
     }
 
     private int findNext() {
-        int[] combinator = {511, 1023, 2047, 4095};
+        final int[] combinator = {511, 1023, 2047, 4095};
         try {
             putBuffer = (putBuffer << 8) | (input[bp++] & 0xff);
             putBits += 8;
@@ -151,10 +151,10 @@ public class TiffLZW {
                 putBuffer = (putBuffer << 8) | (input[bp++] & 0xff);
                 putBits += 8;
             }
-            int code = (putBuffer >> (putBits - bitsToGet)) & combinator[bitsToGet - 9];
+            final int code = (putBuffer >> (putBits - bitsToGet)) & combinator[bitsToGet - 9];
             putBits -= bitsToGet;
             return code;
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (final ArrayIndexOutOfBoundsException e) {
 
             System.err.println("Exception in findNext "+e);
             return 257;

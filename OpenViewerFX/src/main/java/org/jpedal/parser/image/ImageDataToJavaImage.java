@@ -33,6 +33,9 @@
 package org.jpedal.parser.image;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.io.ColorSpaceConvertor;
@@ -135,7 +138,7 @@ public class ImageDataToJavaImage {
         return image;
     }
    
-    public static BufferedImage makeMaskImage(final ParserOptions parserOptions, final GraphicsState gs, final DynamicVectorRenderer current, final ImageData imageData, GenericColorSpace decodeColorData, final byte[] maskCol) {
+    public static BufferedImage makeMaskImage(final ParserOptions parserOptions, final GraphicsState gs, final DynamicVectorRenderer current, final ImageData imageData, final GenericColorSpace decodeColorData, final byte[] maskCol) {
         
         final int w=imageData.getWidth();
         final int h=imageData.getHeight();
@@ -159,6 +162,31 @@ public class ImageDataToJavaImage {
         }else {
             image = MaskDecoder.createMaskImage((parserOptions.isPrinting() && !ImageDecoder.allowPrintTransparency), parserOptions.isType3Font(), data, w, h, imageData, d, decodeColorData, maskCol);
         }
+        return image;
+    }
+
+    //lash up to 
+    public static BufferedImage sharpen(BufferedImage image) {
+       // A 3x3 kernel that sharpens an image
+        Kernel kernel = new Kernel(3, 3,
+                new float[]{
+                    -1, -1, -1,
+                    -1, 9, -1,
+                    -1, -1, -1});
+
+         float[] sharpKernel = {
+            0.0f, -1.0f, 0.0f,
+            -1.0f, 5.0f, -1.0f,
+            0.0f, -1.0f, 0.0f
+        };
+         
+        BufferedImageOp sharpen = new ConvolveOp(new Kernel(3, 3, sharpKernel),ConvolveOp.EDGE_NO_OP, null);
+ 
+        BufferedImageOp op = new ConvolveOp(kernel);
+
+       // image = op.filter(image, null);
+        image = sharpen.filter(image, null);
+
         return image;
     }
 }

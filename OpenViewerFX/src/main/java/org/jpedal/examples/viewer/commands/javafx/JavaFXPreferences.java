@@ -1056,7 +1056,7 @@ public class JavaFXPreferences {
         return contentScrollPane;
     }
     
-    private static Button createCopyDetailsButton(String details){
+    private static Button createCopyDetailsButton(final String details){
         //Setup Copy Details Buttons.
         final Button copyBtn = new Button(Messages.getMessage("PdfPreferences.CopyToClipboard"));
 
@@ -1167,7 +1167,7 @@ public class JavaFXPreferences {
         return details;
     }
 
-    private static void addLineToExtensionGrid(GridPane contentGridPane, Node name, Node desc, Node value, int y){
+    private static void addLineToExtensionGrid(final GridPane contentGridPane, final Node name, final Node desc, final Node value, final int y){
         contentGridPane.add(name, 0, y);
         contentGridPane.add(desc, 1, y);
         contentGridPane.add(value, 2, y);

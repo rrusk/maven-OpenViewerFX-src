@@ -1618,7 +1618,7 @@ public class PostscriptFactory {
 	private byte[] getNextValue() {
 
             final int start;
-            int end;
+            final int end;
             int next;
             byte[] returnValue=null;
 

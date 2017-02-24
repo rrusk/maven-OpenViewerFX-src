@@ -34,7 +34,6 @@ package org.jpedal.examples.viewer.commands.javafx;
 
 import javafx.scene.layout.Pane;
 import org.jpedal.PdfDecoderInt;
-import org.jpedal.display.Display;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.gui.GUIFactory;
 
@@ -51,26 +50,18 @@ public class JavaFXScaling {
         if (args == null) {
             if (!Values.isProcessing() && commonValues.getSelectedFile() != null) {
                 
-                int mode=decode_pdf.getDisplayView();
-                int alignment=decode_pdf.getPageAlignment();
+                final int mode=decode_pdf.getDisplayView();
+                final int alignment=decode_pdf.getPageAlignment();
                 ((Pane)decode_pdf).getChildren().clear();
-               // final int pageNumber=commonValues.getCurrentPage();
+                
                 currentGUI.scaleAndRotate();
                 currentGUI.setDisplayView(mode,alignment);
-                //if the mode is not single page then set display needs to be called twice 
-                //this is a hack fix need to be fixed properly
-                if(mode!=Display.SINGLE_PAGE){
-                    currentGUI.setDisplayView(mode,alignment);
-                }
-//                currentGUI.scrollToPage(pageNumber);
-                
-                
             }
         } else {
             currentGUI.setScalingFromExternal((String) args[0]);
             currentGUI.scaleAndRotate();
             while (Values.isProcessing()) {
-                // wait while we scale your document
+                // Wait while we scale your document
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException e) {

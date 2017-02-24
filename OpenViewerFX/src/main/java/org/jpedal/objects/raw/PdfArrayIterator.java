@@ -480,7 +480,7 @@ public class PdfArrayIterator {
             isNumber = true;
             final byte[] raw = rawData[currentToken];
             int ptr = 0;
-            for (byte r : raw) {
+            for (final byte r : raw) {
                 if ((r >= '0' && r <= '9') || (r == '/' && ptr == 0)) {
                     //note we can get /1
                 } else {

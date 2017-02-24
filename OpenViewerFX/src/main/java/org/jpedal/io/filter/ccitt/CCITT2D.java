@@ -34,7 +34,7 @@ package org.jpedal.io.filter.ccitt;
 
 import org.jpedal.objects.raw.PdfObject;
 
-public class CCITT2D extends CCITT1D implements CCITTDecoder {
+public class CCITT2D extends CCITT1D {
 
     int changingElemSize;
     boolean is2D =true;

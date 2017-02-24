@@ -61,7 +61,7 @@ public class StandardImageIO implements ImageHelper {
      * @throws IOException
      */
     @Override
-    public void write(BufferedImage image, final String type, final String file_name) throws IOException {
+    public void write(final BufferedImage image, final String type, final String file_name) throws IOException {
        
         JDeliHelper.write(image, type, file_name,GenericColorSpace.fasterPNG);
         

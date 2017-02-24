@@ -250,11 +250,11 @@ public class NameLookup extends HashMap<String, Object> {
      */
     public Object[] getEmbeddedFiles() {
 
-        Object[] returnValues=new Object[embeddedFiles.keySet().size()*2];
+        final Object[] returnValues=new Object[embeddedFiles.keySet().size()*2];
         int ptr=0;
 
         String name, value;
-        Iterator<String> embeddedFileNames=embeddedFiles.keySet().iterator();
+        final Iterator<String> embeddedFileNames=embeddedFiles.keySet().iterator();
 
         final ObjectDecoder objectDecoder=new ObjectDecoder(objectReader);
 

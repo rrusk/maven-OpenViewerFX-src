@@ -73,7 +73,7 @@ class Leading {
     }
     
      
-     static int readLeading(int i, final byte[] stream, GlyphData glyphData) {
+     static int readLeading(int i, final byte[] stream, final GlyphData glyphData) {
         
 // ')'=41 '>'=62 '<'=60
         //handle leading between text ie -100 in  (The)-100(text)

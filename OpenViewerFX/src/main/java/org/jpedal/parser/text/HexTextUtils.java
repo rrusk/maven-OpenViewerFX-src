@@ -44,7 +44,7 @@ import org.jpedal.parser.ParserOptions;
  */
 class HexTextUtils {
    
-    static int getHexValue(final byte[] stream, int i, GlyphData glyphData, PdfFont currentFontData, ParserOptions parserOptions ) {
+    static int getHexValue(final byte[] stream, int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions ) {
         //'<'=60
         
         int chars=0,nextInt, start=i;
@@ -71,12 +71,13 @@ class HexTextUtils {
         return setValue(glyphData, glyphData.getPossibleValue(), i, currentFontData, parserOptions);
     }
 
-    static int getHexCIDValue(final byte[] stream, int i, GlyphData glyphData, PdfFont currentFontData, ParserOptions parserOptions ) {
+    static int getHexCIDValue(final byte[] stream, final int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions ) {
         
         //'<'=60
         
-        int oneByteEndPtr, twoByteEndPtr=0;
-        
+        final int oneByteEndPtr;
+        int twoByteEndPtr=0;
+
         //single value
         
         oneByteEndPtr=getValue(1, stream, i,glyphData);
@@ -140,7 +141,7 @@ class HexTextUtils {
         }
     }
     
-    private static int setValue(GlyphData glyphData, int val, int i, PdfFont currentFontData, ParserOptions parserOptions) {
+    private static int setValue(final GlyphData glyphData, final int val, final int i, final PdfFont currentFontData, final ParserOptions parserOptions) {
         
         //System.out.println("setValue="+val+" "+i+" "+charSize);
         
@@ -159,7 +160,7 @@ class HexTextUtils {
         return i;
     }
 
-    private static int getValue(int chars, final byte[] stream, int i,GlyphData glyphData) {
+    private static int getValue(final int chars, final byte[] stream, int i, final GlyphData glyphData) {
 
         int topHex,val = 0, charsToFind = chars;
 

@@ -42,21 +42,21 @@ import java.awt.image.DataBufferInt;
  */
 public class TempStoreImage {
 
-    public static byte[] getBytes(BufferedImage img) {
-        byte[] data = new byte[img.getWidth() * img.getHeight() * 4 + 8];
-        byte[] w = numToBytes(img.getWidth());
+    public static byte[] getBytes(final BufferedImage img) {
+        final byte[] data = new byte[img.getWidth() * img.getHeight() * 4 + 8];
+        final byte[] w = numToBytes(img.getWidth());
         System.arraycopy(w, 0, data, 0, 4);
-        byte[] h = numToBytes(img.getHeight());
+        final byte[] h = numToBytes(img.getHeight());
         System.arraycopy(h, 0, data, 4, 4);
         int p = 8;
         int pp = 0;
 
-        int[] pixels;
-        byte[] pixBytes;
+        final int[] pixels;
+        final byte[] pixBytes;
         int v;
         
-        int xx = img.getRaster().getSampleModelTranslateX();
-        int yy = img.getRaster().getSampleModelTranslateY();
+        final int xx = img.getRaster().getSampleModelTranslateX();
+        final int yy = img.getRaster().getSampleModelTranslateY();
         if(xx != 0 || yy!= 0){
             for (int y = 0; y < img.getHeight(); y++) {
                 for (int x = 0; x < img.getWidth(); x++) {
@@ -125,7 +125,7 @@ public class TempStoreImage {
                 }
                 break;
             default:
-                BufferedImage img2 = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                final BufferedImage img2 = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 img2.getGraphics().drawImage(img, 0, 0, null);
                 pixels = ((DataBufferInt) img2.getRaster().getDataBuffer()).getData();
                 for (int i = 0, ii = img.getWidth() * img.getHeight(); i < ii; i++) {
@@ -140,11 +140,11 @@ public class TempStoreImage {
 
     }
 
-    public static BufferedImage getImage(byte[] data) {
-        int w = ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
-        int h = ((data[4] & 0xff) << 24) | ((data[5] & 0xff) << 16) | ((data[6] & 0xff) << 8) | (data[7] & 0xff);
-        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        int[] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+    public static BufferedImage getImage(final byte[] data) {
+        final int w = ((data[0] & 0xff) << 24) | ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
+        final int h = ((data[4] & 0xff) << 24) | ((data[5] & 0xff) << 16) | ((data[6] & 0xff) << 8) | (data[7] & 0xff);
+        final BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        final int[] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
         int p = 0;
         int pp = 8;
         for (int i = 0, ii = w * h; i < ii; i++) {
@@ -153,7 +153,7 @@ public class TempStoreImage {
         return img;
     }
 
-    private static byte[] numToBytes(int num) {
+    private static byte[] numToBytes(final int num) {
         return new byte[]{(byte) (num >> 24), (byte) ((num >> 16) & 0xff), (byte) ((num >> 8) & 0xff), (byte) (num & 0xff)};
     }
     

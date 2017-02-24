@@ -944,7 +944,7 @@ public class StandardFonts {
         if (!isStandard && excludeWeights) {
 
             final char[] valuesToTest = {'-', ','};
-            for (char valueToTest : valuesToTest) {
+            for (final char valueToTest : valuesToTest) {
 
                 isStandard = checkSubFontName(fontName, valueToTest);
                 if (isStandard) {
@@ -1225,7 +1225,7 @@ public class StandardFonts {
         if (glyphName != null) {
             try {
                 if (base10 && glyphName.matches("[0-9]+")) {
-                    int num = Integer.parseInt(glyphName, 10);
+                    final int num = Integer.parseInt(glyphName, 10);
                     return mapCIDToValidUnicode(fontName, num);
                 } else if (glyphName.matches("[0-9A-F]+")) {
                     return Integer.parseInt(glyphName, 16);

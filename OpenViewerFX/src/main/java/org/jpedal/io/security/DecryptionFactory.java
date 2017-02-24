@@ -184,7 +184,7 @@ public class DecryptionFactory {
         } else if(rev>=3) {
 
             //use StmF values in preference
-            int keyLength=this.keyLength;
+            final int keyLength=this.keyLength;
 
 //            if(rev==4 && StmFObj!=null){
 //                final int lenKey=StmFObj.getInt(PdfDictionary.Length);
@@ -797,7 +797,7 @@ public class DecryptionFactory {
             }
 
             //default values for rsa
-            int keyLength=this.keyLength;
+            final int keyLength=this.keyLength;
             String algorithm="RC4",keyType="RC4";
             //SecOP java ME - removed to remove additional package secop1_0.jar in java ME
             IvParameterSpec ivSpec = null;

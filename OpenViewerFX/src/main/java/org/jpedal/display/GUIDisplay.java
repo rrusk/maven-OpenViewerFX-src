@@ -428,7 +428,7 @@ public class GUIDisplay implements Display{
     
     @Override
     public int getYCordForPage(final int page){
-        int[] yReached=multiDisplayOptions.getyReached();
+        final int[] yReached=multiDisplayOptions.getyReached();
         //int[] pageH=multiDisplayOptions.getPageH();
         
         if (yReached != null) {
@@ -480,7 +480,7 @@ public class GUIDisplay implements Display{
     @Override
     public int getXCordForPage(final int page){
         
-        int[] xReached=multiDisplayOptions.getxReached();
+        final int[] xReached=multiDisplayOptions.getxReached();
         
         if (xReached != null) {
             return xReached[page] + insetW;
@@ -521,8 +521,8 @@ public class GUIDisplay implements Display{
         int RmaxWidth=0;
         int RmaxHeight=0;
         
-        int[] pageW=multiDisplayOptions.getPageW();
-        int[] pageH=multiDisplayOptions.getPageH();
+        final int[] pageW=multiDisplayOptions.getPageW();
+        final int[] pageH=multiDisplayOptions.getPageH();
         /*work out page sizes - need to do it first as we can look ahead*/
         for(int i=1;i<pageCount+1;i++){
 
@@ -560,8 +560,8 @@ public class GUIDisplay implements Display{
             }
         }
 
-        int[] xReached=multiDisplayOptions.getxReached();
-        int[] yReached=multiDisplayOptions.getyReached();
+        final int[] xReached=multiDisplayOptions.getxReached();
+        final int[] yReached=multiDisplayOptions.getyReached();
          
         //loop through all pages and work out positions
         for(int i=1;i<pageCount+1;i++){

@@ -564,7 +564,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
         }
     }
 
-    void setPoint(int[] pX, int[] pY, boolean[] onCurve, int start, int firstPt, int ii) {
+    void setPoint(final int[] pX, final int[] pY, final boolean[] onCurve, final int start, final int firstPt, final int ii) {
         final int diff=firstPt-start;
         int newPos;
 

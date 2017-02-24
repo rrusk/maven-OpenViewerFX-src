@@ -45,7 +45,7 @@ public class HtmlPageData {
         return sharedFontData;
     }
 
-    public void setSharedFontData(Object sharedFontData) {
+    public void setSharedFontData(final Object sharedFontData) {
         this.sharedFontData = sharedFontData;
     }
 }

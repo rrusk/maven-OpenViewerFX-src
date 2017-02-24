@@ -58,7 +58,7 @@ public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements Pri
     public void print(final Graphics2D g2, final AffineTransform scaling, final int currentPrintPage,
                       final Rectangle userAnnot, final CustomPrintHintingHandler customPrintHintingHandler, final PdfDecoderInt pdf){
 
-        SwingDisplay swingDisplay=(SwingDisplay) current;
+        final SwingDisplay swingDisplay=(SwingDisplay) current;
         
         if(customPrintHintingHandler!=null){
             swingDisplay.stopG2HintSetting(true);

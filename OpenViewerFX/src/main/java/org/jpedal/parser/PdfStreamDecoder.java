@@ -561,7 +561,7 @@ public class PdfStreamDecoder extends BaseDecoder{
         PdfShape currentDrawShape = null;
         
         if(parserOptions.useJavaFX()) {
-            JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
+            final JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
             if(fxSupport!=null){
                 currentDrawShape = fxSupport.getFXShape();
             }
@@ -621,7 +621,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                         
                         case Cmd.TEXT_COMMAND:
                             
-                            if((commandID ==Cmd.EMC || parserOptions.isLayerVisible()) && !getSamplingOnly &&(renderText || textExtracted)){
+                            if((commandID ==Cmd.EMC || commandID ==Cmd.BDC || parserOptions.isLayerVisible()) && !getSamplingOnly &&(renderText || textExtracted)){
                                 
                                 dataPointer =processTextToken(textDecoder, parser, commandID, startCommand, dataPointer);
                                 
@@ -673,62 +673,7 @@ public class PdfStreamDecoder extends BaseDecoder{
                         case Cmd.COLOR_COMMAND:
                             
                             if(!getSamplingOnly){
-                                if(commandID!=Cmd.SCN && commandID!=Cmd.scn && commandID!=Cmd.SC && commandID!=Cmd.sc) {
-                                    current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
-                                }
-                                
-                                switch(commandID){
-                                    
-                                    case Cmd.cs :                                   
-                                        CS.execute(true, parser.generateOpAsString(0, true), gs, cache, currentPdfFile, isPrinting);
-                                        break;
-                                    
-                                    case Cmd.CS :                                       
-                                        CS.execute(false, parser.generateOpAsString(0, true), gs, cache, currentPdfFile, isPrinting);
-                                        break;
-                                        
-                                    case Cmd.rg :
-                                        RG.execute(true, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.RG :
-                                        RG.execute(false, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.SCN :
-                                        SCN.execute(false, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.scn :
-                                        SCN.execute(true, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.SC :
-                                        SCN.execute(false, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.sc :
-                                        SCN.execute(true, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.g :
-                                        G.execute(true, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.G :
-                                        G.execute(false, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.k :
-                                        K.execute(true, gs, parser, cache);
-                                        break;
-                                        
-                                    case Cmd.K :
-                                        K.execute(false, gs, parser, cache);
-                                        break;
-                                        
-                                }
-                                
+                                processColor(parser, commandID);
                             }
                             
                             break;
@@ -902,7 +847,66 @@ public class PdfStreamDecoder extends BaseDecoder{
             return "";
         }
     }
-    
+
+    void processColor(final CommandParser parser, final int commandID) {
+
+        if(commandID!= Cmd.SCN && commandID!=Cmd.scn && commandID!=Cmd.SC && commandID!=Cmd.sc) {
+            current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
+        }
+
+        switch(commandID){
+
+            case Cmd.cs :
+                CS.execute(true, parser.generateOpAsString(0, true), gs, cache, currentPdfFile, isPrinting);
+                break;
+
+            case Cmd.CS :
+                CS.execute(false, parser.generateOpAsString(0, true), gs, cache, currentPdfFile, isPrinting);
+                break;
+
+            case Cmd.rg :
+                RG.execute(true, gs, parser, cache);
+                break;
+
+            case Cmd.RG :
+                RG.execute(false, gs, parser, cache);
+                break;
+
+            case Cmd.SCN :
+                SCN.execute(false, gs, parser, cache);
+                break;
+
+            case Cmd.scn :
+                SCN.execute(true, gs, parser, cache);
+                break;
+
+            case Cmd.SC :
+                SCN.execute(false, gs, parser, cache);
+                break;
+
+            case Cmd.sc :
+                SCN.execute(true, gs, parser, cache);
+                break;
+
+            case Cmd.g :
+                G.execute(true, gs, parser, cache);
+                break;
+
+            case Cmd.G :
+                G.execute(false, gs, parser, cache);
+                break;
+
+            case Cmd.k :
+                K.execute(true, gs, parser, cache);
+                break;
+
+            case Cmd.K :
+                K.execute(false, gs, parser, cache);
+                break;
+
+        }
+    }
+
     private void processGScommands(final CommandParser parser, final int commandID) {
         
         switch(commandID){

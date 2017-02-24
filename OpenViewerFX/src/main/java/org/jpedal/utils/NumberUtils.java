@@ -70,10 +70,10 @@ public class NumberUtils {
         }
     }
 
-    public static double convertStreamFromDouble(byte[] stream, int intStart, int decStart, int intNumbers, int decNumbers) {
-        double dec;
-        double num;
-        double d;
+    public static double convertStreamFromDouble(final byte[] stream, int intStart, int decStart, final int intNumbers, final int decNumbers) {
+        final double dec;
+        final double num;
+        final double d;
         double thous=0f,units=0f,tens=0f,hundreds=0f,tenths=0f,hundredths=0f, thousands=0f, tenthousands=0f,hunthousands=0f,millis=0f;
 
 
@@ -201,11 +201,11 @@ public class NumberUtils {
         }
     }
 
-    public static float convertFloatFromStream(byte[] stream, int intStart, int decStart, int intNumbers, int decNumbers) {
+    public static float convertFloatFromStream(final byte[] stream, int intStart, int decStart, final int intNumbers, final int decNumbers) {
 
-        float dec;
-        float num;
-        float d;
+        final float dec;
+        final float num;
+        final float d;
         float thous=0f,units=0f,tens=0f,hundreds=0f,tenths=0f,hundredths=0f, thousands=0f, tenthousands=0f,hunthousands=0f,millis=0f;
 
         //thousands

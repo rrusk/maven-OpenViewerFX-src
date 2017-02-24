@@ -58,7 +58,7 @@ public class S {
             
             Object fxPath=null;
             
-            float realLineWidth=-1;
+            final float realLineWidth=-1;
 
             if(useJavaFX){
                 fxPath=currentDrawShape.getPath();

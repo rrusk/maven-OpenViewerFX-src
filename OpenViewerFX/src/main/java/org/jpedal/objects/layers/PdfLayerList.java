@@ -219,7 +219,7 @@ public class PdfLayerList {
         final byte[][] keyValues=layerDict.getKeyArray(key);
         if(keyValues!=null) {
 
-            StringBuilder values=new StringBuilder(s);
+            final StringBuilder values=new StringBuilder(s);
             for (final byte[] keyValue : keyValues) {
                 if (keyValue == null) {
                     values.append("null ");
@@ -266,7 +266,7 @@ public class PdfLayerList {
 
             if(isLayerName(layers[ii])){
 
-                StringBuilder effectedLayers=new StringBuilder();
+                final StringBuilder effectedLayers=new StringBuilder();
                 for(int ii2=0;ii2< layerCount;ii2++){
 
                     if(ii==ii2) {

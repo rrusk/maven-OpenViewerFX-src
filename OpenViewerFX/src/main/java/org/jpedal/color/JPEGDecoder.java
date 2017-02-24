@@ -169,7 +169,7 @@ public class JPEGDecoder {
         return image;
     }
    
-    public static byte[] getBytesFromJPEGWithImageIO(final byte[] data, GenericColorSpace decodeColorData,final PdfObject XObject) {
+    public static byte[] getBytesFromJPEGWithImageIO(final byte[] data, final GenericColorSpace decodeColorData, final PdfObject XObject) {
         
         byte[] db=null;
         Raster ras=null;
@@ -205,7 +205,7 @@ public class JPEGDecoder {
                 db=((DataBufferByte)ras.getDataBuffer()).getData();
             }
             
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception "+e+" with JPeg Image ");
         }
         
@@ -214,19 +214,19 @@ public class JPEGDecoder {
     }
     
     //our version
-    public static byte[] getBytesFromJPEG(final byte[] data, GenericColorSpace decodeColorData,final PdfObject XObject) {
+    public static byte[] getBytesFromJPEG(final byte[] data, final GenericColorSpace decodeColorData, final PdfObject XObject) {
         
         byte[] db=null;
         try {
             
-            boolean isInverted = ArrayUtils.isArrayInverted(XObject.getFloatArray(PdfDictionary.Decode));
-            boolean isMask=XObject instanceof MaskObject;
-            boolean isDeviceN = decodeColorData.getType()==ColorSpaces.DeviceN;
+            final boolean isInverted = ArrayUtils.isArrayInverted(XObject.getFloatArray(PdfDictionary.Decode));
+            final boolean isMask=XObject instanceof MaskObject;
+            final boolean isDeviceN = decodeColorData.getType()==ColorSpaces.DeviceN;
            
             if(!isDeviceN){
                 try{
                     db = JDeliHelper.getBytesFromJPEG(isInverted, data, isMask);
-                }catch(Exception e){ //case 24799 try to fix the file in jdeli if time permits
+                }catch(final Exception e){ //case 24799 try to fix the file in jdeli if time permits
                     LogWriter.writeLog("Jpeg Data Corrupted Switching to Old Compression "+e);
                     db=getBytesFromJPEGWithImageIO(data, decodeColorData, XObject);   
                 }
@@ -235,7 +235,7 @@ public class JPEGDecoder {
                 db=getBytesFromJPEGWithImageIO(data, decodeColorData, XObject);   
             }
            
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception with JPeg Image "+e);
         }
         
@@ -243,7 +243,7 @@ public class JPEGDecoder {
         
     }
     
-    public static byte[] getUnconvertedBytesFromJPEG(byte [] data, int  adobeColorTransform) throws Exception{
+    public static byte[] getUnconvertedBytesFromJPEG(final byte [] data, final int  adobeColorTransform) throws Exception{
         return JDeliHelper.getUnconvertedBytesFromJPEG(data, adobeColorTransform);     
     }
 }

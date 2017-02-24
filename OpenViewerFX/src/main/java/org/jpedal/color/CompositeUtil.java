@@ -34,45 +34,45 @@ package org.jpedal.color;
 
 public class CompositeUtil {
 
-    public static float composite(float aS, float aB, float aR, float cS, float cB, float blendRes) {
-        float ratioA = aS / aR;
+    public static float composite(final float aS, final float aB, final float aR, final float cS, final float cB, final float blendRes) {
+        final float ratioA = aS / aR;
         return (1 - ratioA) * cB + ratioA * ((1 - aB) * cS + aB * blendRes);
     }
 
-    public static float unionBS(float s, float b) {
+    public static float unionBS(final float s, final float b) {
         return b + s - (b * s);
     }
 
-    public static float findFR(float fs, float fb) {
+    public static float findFR(final float fs, final float fb) {
         return unionBS(fs, fb);
     }
 
-    public static float findQR(float fs, float fb, float qs, float qb) {
+    public static float findQR(final float fs, final float fb, final float qs, final float qb) {
         return unionBS(fb * qb, fs * qs) / unionBS(fs, fb);
     }
 
-    public static float blendMultiply(float cS, float cB) {
+    public static float blendMultiply(final float cS, final float cB) {
         return cB * cS;
     }
 
-    public static float blendScreen(float cS, float cB) {
-        float kk = cB + cS - (cB * cS);
+    public static float blendScreen(final float cS, final float cB) {
+        final float kk = cB + cS - (cB * cS);
         return kk;
     }
 
-    public static float blendOverLay(float cS, float cB) {
+    public static float blendOverLay(final float cS, final float cB) {
         return blendHardLight(cB, cS);
     }
 
-    public static float blendDarken(float cS, float cB) {
+    public static float blendDarken(final float cS, final float cB) {
         return Math.min(cS, cB);
     }
 
-    public static float blendLighten(float cS, float cB) {
+    public static float blendLighten(final float cS, final float cB) {
         return Math.max(cS, cB);
     }
 
-    public static float blendColorDodge(float cS, float cB) {
+    public static float blendColorDodge(final float cS, final float cB) {
         if (cS == 1) {
             return 1;
         } else {
@@ -80,7 +80,7 @@ public class CompositeUtil {
         }
     }
 
-    public static float blendColorBurn(float cS, float cB) {
+    public static float blendColorBurn(final float cS, final float cB) {
         if (cS == 0) {
             return 0;
         } else {
@@ -88,7 +88,7 @@ public class CompositeUtil {
         }
     }
 
-    public static float blendHardLight(float cS, float cB) {
+    public static float blendHardLight(final float cS, final float cB) {
         if (cS <= 0.5f) {
             return blendMultiply(cB, 2 * cS);
         } else {
@@ -96,7 +96,7 @@ public class CompositeUtil {
         }
     }
 
-    public static float blendSoftLight(float cS, float cB) {
+    public static float blendSoftLight(final float cS, final float cB) {
         if (cS <= 0.5f) {
             return cB - (1 - 2 * cS) * cB * (1 - cB);
         } else {
@@ -104,7 +104,7 @@ public class CompositeUtil {
         }
     }
 
-    private static float blendDX(float x) {
+    private static float blendDX(final float x) {
         if (x <= 0.25f) {
             return ((16 * x - 12) * x + 4) * x;
         } else {
@@ -112,11 +112,11 @@ public class CompositeUtil {
         }
     }
 
-    public static float blendDifference(float cS, float cB) {
+    public static float blendDifference(final float cS, final float cB) {
         return Math.abs(cB - cS);
     }
 
-    public static float blendExclusion(float cS, float cB) {
+    public static float blendExclusion(final float cS, final float cB) {
         return cB + cS - 2 * cB * cS;
     }
 

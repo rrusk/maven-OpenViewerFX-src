@@ -92,7 +92,7 @@ public class MarkedContentGenerator {
      */
     public Document getMarkedContentTree(final PdfResources res, final PdfPageData pdfPageData, final PdfObjectReader currentPdfFile) {
         
-        PdfObject structTreeRootObj=res.getPdfObject(PdfResources.StructTreeRootObj);
+        final PdfObject structTreeRootObj=res.getPdfObject(PdfResources.StructTreeRootObj);
 
         //PdfObject markInfoObj=res.getPdfObject(PdfResources.MarkInfoObj);  //not used at present
         
@@ -165,7 +165,7 @@ public class MarkedContentGenerator {
     /**
      * scan down PDF struct object, creating XML tree
      */
-    private void buildTree(PdfObject structTreeRootObj) {
+    private void buildTree(final PdfObject structTreeRootObj) {
 
         final PdfObject RoleMap=structTreeRootObj.getDictionary(PdfDictionary.RoleMap);
 
@@ -183,7 +183,7 @@ public class MarkedContentGenerator {
 
         String key, value;
 
-        PdfKeyPairsIterator keyPairs=roleMap.getKeyPairsIterator();
+        final PdfKeyPairsIterator keyPairs=roleMap.getKeyPairsIterator();
 
         while(keyPairs.hasMorePairs()){
             key=keyPairs.getNextKeyAsString();
@@ -193,7 +193,7 @@ public class MarkedContentGenerator {
         }
     }
 
-    public void traverseContentTree(PdfObject structTreeRootObj) {
+    public void traverseContentTree(final PdfObject structTreeRootObj) {
         /*
          * read struct K value and decide what type
          * (can be dictionary or Array so we check both options)
@@ -357,14 +357,14 @@ public class MarkedContentGenerator {
         return text;
     }
     
-    private void readKarray(final PdfArrayIterator Karray, final Element root, final Map pageStream, String fullS) {
+    private void readKarray(final PdfArrayIterator Karray, final Element root, final Map pageStream, final String fullS) {
         
         final int count=Karray.getTokenCount();
         PdfObject kidObj;
         String KValue;
         
         for(int i=0;i<count;i++){
-            byte[] Kbyte = Karray.getNextValueAsByte(true);
+            final byte[] Kbyte = Karray.getNextValueAsByte(true);
             KValue=new String(Kbyte);
 
             if(debug) {

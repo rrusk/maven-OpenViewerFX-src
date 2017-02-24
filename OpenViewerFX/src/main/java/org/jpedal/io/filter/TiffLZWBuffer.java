@@ -46,7 +46,7 @@ public class TiffLZWBuffer {
     private int putBuffer, putBits;
 
 
-    public void decompress(BufferedOutputStream output, BufferedInputStream input) throws IOException {
+    public void decompress(final BufferedOutputStream output, final BufferedInputStream input) throws IOException {
 
         init();
 
@@ -103,13 +103,13 @@ public class TiffLZWBuffer {
         bitsToGet = 9;
     }
 
-    private void addCodes(byte[] codes) throws IOException {
+    private void addCodes(final byte[] codes) throws IOException {
         output.write(codes);       
     }
 
-    private void addCodeToCodes(byte[] oldCodes, byte code) {
-        int length = oldCodes.length;
-        byte string[] = new byte[length + 1];
+    private void addCodeToCodes(final byte[] oldCodes, final byte code) {
+        final int length = oldCodes.length;
+        final byte[] string = new byte[length + 1];
         System.arraycopy(oldCodes, 0, string, 0, length);
         string[length] = code;
         codes[tp++] = string;
@@ -122,7 +122,7 @@ public class TiffLZWBuffer {
         }
     }
 
-    private void addCodeArrToCodes(byte[] codeArr) {
+    private void addCodeArrToCodes(final byte[] codeArr) {
         codes[tp++] = codeArr;
         if (tp == 511) {
             bitsToGet = 10;
@@ -133,16 +133,16 @@ public class TiffLZWBuffer {
         }
     }
 
-    private static byte[] generateCodeArray(byte oldString[], byte newString) {
-        int length = oldString.length;
-        byte string[] = new byte[length + 1];
+    private static byte[] generateCodeArray(final byte[] oldString, final byte newString) {
+        final int length = oldString.length;
+        final byte[] string = new byte[length + 1];
         System.arraycopy(oldString, 0, string, 0, length);
         string[length] = newString;
         return string;
     }
 
     private int findNext() {
-        int[] combinator = {511, 1023, 2047, 4095};
+        final int[] combinator = {511, 1023, 2047, 4095};
         try {
             putBuffer = (putBuffer << 8) | input.read();
             putBits += 8;
@@ -150,10 +150,10 @@ public class TiffLZWBuffer {
                 putBuffer = (putBuffer << 8) | input.read();
                 putBits += 8;
             }
-            int code = (putBuffer >> (putBits - bitsToGet)) & combinator[bitsToGet - 9];
+            final int code = (putBuffer >> (putBits - bitsToGet)) & combinator[bitsToGet - 9];
             putBits -= bitsToGet;
             return code;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             System.err.println("Exception in findNext "+e);
             return 257;
         }

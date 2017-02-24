@@ -33,13 +33,12 @@
 package org.jpedal.color;
 
 import java.awt.Color;
-import java.awt.Paint;
 
 
 /**
  * template for all shading operations
  */
-public class PdfColor extends Color implements PdfPaint,Paint{
+public class PdfColor extends Color implements PdfPaint {
 	
 	public PdfColor(final float r, final float g, final float b) {
 		super(r, g, b);
@@ -56,7 +55,7 @@ public class PdfColor extends Color implements PdfPaint,Paint{
 
 	protected boolean isPattern;
 
-	public PdfColor(int raw) {
+	public PdfColor(final int raw) {
 		super(((raw >> 16) & 255),((raw >> 8) & 255),((raw) & 255));
 	}
 

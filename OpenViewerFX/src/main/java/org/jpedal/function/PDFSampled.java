@@ -65,7 +65,7 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
         int pos = 0;
         int buffer = 0;
 
-        double sampleMul = 1.0 / (Math.pow(2, bits) - 1);
+        final double sampleMul = 1.0 / (Math.pow(2, bits) - 1);
 
         int index = 0;
         for (int i = 0; i < sampleLen; i++) {
@@ -119,7 +119,7 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
         return compute(subinput);
     }
     
-    private static boolean isSame(float[] arr0, float[] arr1){
+    private static boolean isSame(final float[] arr0, final float[] arr1){
         for (int i = 0; i < arr0.length; i++) {
             if(arr0[i]!=arr1[i]){
                 return false;
@@ -129,7 +129,7 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
     }
 
     @Override
-    public float[] compute(float[] input) {
+    public float[] compute(final float[] input) {
         if(isSame(input,prevInputs)){
             return outputs;
         }
@@ -143,20 +143,20 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
 
         int k = n, pos = 1;
         for (int i = 0; i < m; ++i) {
-            int first = 2 * i;
-            int next = first + 1;
+            final int first = 2 * i;
+            final int next = first + 1;
 
-            double xi = Math.min(Math.max(input[i], domain[first]), domain[next]);
+            final double xi = Math.min(Math.max(input[i], domain[first]), domain[next]);
             double e = interpolateDouble(xi, domain[first], domain[next], encode[first], encode[next]);
 
-            int cur = size[i];
+            final int cur = size[i];
             e = Math.min(Math.max(e, 0), cur - 1);
 
-            double e0 = e < cur - 1 ? ((int)e) : (e - 1.0);
-            double n0 = e0 + 1 - e;
-            double n1 = e - e0; 
-            double offset0 = e0 * k;
-            double offset1 = offset0 + k; 
+            final double e0 = e < cur - 1 ? ((int)e) : (e - 1.0);
+            final double n0 = e0 + 1 - e;
+            final double n1 = e - e0;
+            final double offset0 = e0 * k;
+            final double offset1 = offset0 + k;
             for (int j = 0; j < cubeVertices; j++) {
                 if ((j & pos) != 0) {
                     cubeN[j] *= n1;

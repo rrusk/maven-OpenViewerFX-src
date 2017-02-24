@@ -133,7 +133,7 @@ public class JavaFXExit {
                 System.exit(0);
             } else {
 
-                Stage stage = (Stage) currentGUI.getFrame();
+                final Stage stage = (Stage) currentGUI.getFrame();
                 if (stage == null) {
                     decode_pdf.dispose();
                     //currentGUI.dispose();

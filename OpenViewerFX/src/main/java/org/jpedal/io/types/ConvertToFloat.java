@@ -147,7 +147,7 @@ public class ConvertToFloat {
         }
     }
 
-    private static float getHundredThousandths(int c) {
+    private static float getHundredThousandths(final int c) {
 
         float hunthousands=0;
 
@@ -183,7 +183,7 @@ public class ConvertToFloat {
         return hunthousands;
     }
 
-    private static float getTenThousandths(int c) {
+    private static float getTenThousandths(final int c) {
 
         float tenthousands=0;
 
@@ -219,7 +219,7 @@ public class ConvertToFloat {
         return tenthousands;
     }
 
-    private static float getThousandths(int c) {
+    private static float getThousandths(final int c) {
 
         float thousands=0;
 
@@ -255,7 +255,7 @@ public class ConvertToFloat {
         return thousands;
     }
 
-    private static float getHundredths(int c) {
+    private static float getHundredths(final int c) {
 
         float hundredths=0;
 
@@ -291,7 +291,7 @@ public class ConvertToFloat {
         return hundredths;
     }
 
-    private static float getTenths(int c) {
+    private static float getTenths(final int c) {
 
         float tenths=0;
 
@@ -327,7 +327,7 @@ public class ConvertToFloat {
         return tenths;
     }
 
-    private static float getUnits(int c) {
+    private static float getUnits(final int c) {
 
         float units=0;
 
@@ -363,7 +363,7 @@ public class ConvertToFloat {
         return units;
     }
 
-    private static float getTens(int c) {
+    private static float getTens(final int c) {
 
         float tens=0;
 
@@ -399,7 +399,7 @@ public class ConvertToFloat {
         return tens;
     }
 
-    private static float getHundreds(int c) {
+    private static float getHundreds(final int c) {
 
         float hundreds=0;
 
@@ -435,7 +435,7 @@ public class ConvertToFloat {
         return hundreds;
     }
 
-    private static float getThousands(int c) {
+    private static float getThousands(final int c) {
 
         float thous=0;
 

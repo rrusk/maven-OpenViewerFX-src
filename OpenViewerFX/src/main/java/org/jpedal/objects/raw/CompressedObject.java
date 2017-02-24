@@ -161,7 +161,7 @@ public class CompressedObject extends PdfObject {
 
         final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-        int PDFvalue = super.setConstant(pdfKeyType, id);
+        final int PDFvalue = super.setConstant(pdfKeyType, id);
 
         switch (pdfKeyType) {
 

@@ -110,11 +110,9 @@ import org.w3c.dom.Node;
  * <br>Description: GUI functions in Viewer implemented in JavaFX
  */
 @SuppressWarnings("MagicConstant")
-public class JavaFxGUI extends GUI implements GUIFactory {
+public class JavaFxGUI extends GUI {
 
     private RefreshLayout viewListener;
-
-    private static final int bottomPaneHeight = 40;
 
     protected final JavaFXButtons fxButtons;
 
@@ -133,7 +131,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
     private String startSelectedTab = "Pages";
 
     //use new GUI layout
-    public static String windowTitle;
+//    public static String windowTitle;
 
     private boolean hasListener;
     private boolean isSetup;
@@ -165,9 +163,6 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 
     //tell user on first form change it can be saved
     private static final boolean firstTimeFormMessage = true;
-
-    //flag to disable functions
-    private boolean isSingle = true;
 
     private Label pageCounter1;
 
@@ -234,7 +229,6 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         this.stage = stage;
 
         root = new BorderPane();
-
         topPane = new VBox();
         pageCounter2 = new TextField();
         navButtons = new HBox();
@@ -296,7 +290,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             System.out.println("setLookAndFeel - Not yet implemented in JavaFX");
         }
         /*
-         * JavaFX has not look and feel option, 2.2 has a theme called Caspian
+         * JavaFX has no look and feel option, 2.2 has a theme called Caspian
          * (the default theme) only. FX8 has Moderna and Caspian, which can be
          * set in the class which overrides Application with
          * setUserAgentStylesheet(url)
@@ -312,11 +306,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
     }
 
     private void setupDisplay() {
-
-        if (debugFX) {
-            System.out.println("setupDisplay - Not yet implemented in JavaFX");
-        }
-
+        
         setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
 
         //pass in SwingGUI so we can call via callback
@@ -337,8 +327,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         if (debugFX) {
             System.out.println("getMultiViewerFrames");
         }
-
-        //return desktopPane;
+        
         return null;
     }
 
@@ -375,11 +364,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
 
         if (properties.getValue("ShowSidetabbar").equalsIgnoreCase("true")) {
-
-            if (!isSingle) {
-                return;
-            }
-
+            
             if (!showVisible && !properties.getValue("consistentTabBar").equalsIgnoreCase("true")) {
                 if (sideTabBarOpenByDefault) {
                     setSplitDividerLocation(expandedSize);
@@ -402,61 +387,30 @@ public class JavaFxGUI extends GUI implements GUIFactory {
                 if (!decode_pdf.hasOutline()) {
 
                     int outlineTab = -1;
-                    if (DecoderOptions.isRunningOnMac) {
-                        //String tabName="";
-                        //see if there is an outlines tab
-                        for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                            if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
-                                outlineTab = jj;
-                            }
-                        }
-                    } else {
-                        //String tabName="";
-                        //see if there is an outlines tab
-                        for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                            //@Simon recode to use VTextIcon
-                            if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
-                                outlineTab = jj;
-                            }
+                    
+                    //see if there is an outlines tab
+                    for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
+                        if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
+                            outlineTab = jj;
                         }
                     }
-
+                    
                     if (outlineTab != -1) {
                         navOptionsPanel.getTabs().remove(outlineTab);
                     }
 
                 } else if (properties.getValue("Bookmarkstab").equalsIgnoreCase("true")) {
                     int outlineTab = -1;
-                    if (DecoderOptions.isRunningOnMac) {
-                        //String tabName="";
-                        //see if there is an outlines tab
-                        for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                            if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
-                                outlineTab = jj;
-                            }
+                    
+                    //see if there is an outlines tab
+                    for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
+                        if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
+                            outlineTab = jj;
                         }
+                    }
 
-                        if (outlineTab == -1) //							navOptionsPanel.addTab(bookmarksTitle,(SwingOutline) tree);
-                        //@Simon Change to add JavaFXOutline tab
-                        {
-                            navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, (Tab) tree);
-                        }
-                    } else {
-                        //String tabName="";
-                        //see if there is an outlines tab
-                        for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                            //@Simon recode to use VTextIcon
-                            if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
-                                outlineTab = jj;
-                            }
-                        }
-
-                        if (outlineTab == -1) {
-                            //@Simon Recode
-//							VTextIcon textIcon2 = new VTextIcon(navOptionsPanel, bookmarksTitle, VTextIcon.ROTATE_LEFT);
-//							navOptionsPanel.addTab(null, textIcon2, (SwingOutline) tree);
-                            navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, (Tab) tree);
-                        }
+                    if (outlineTab == -1){
+                        navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, (Tab) tree);
                     }
                 }
 
@@ -498,19 +452,12 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             }
 
             if (tabsNotInitialised) {
-                //@Simon selected index
                 for (int i = 0; i != navOptionsPanel.getTabs().size(); i++) {
-                    if (DecoderOptions.isRunningOnMac) {
-                        if (navOptionsPanel.getTabs().get(i).getText().equals(startSelectedTab)) {
-                            navOptionsPanel.getSelectionModel().select(i);
-                            break;
-                        }
-                    } else {
-                        if (navOptionsPanel.getTabs().get(i).getGraphic().toString().equals(startSelectedTab)) {
-                            navOptionsPanel.getSelectionModel().select(i);
-                            break;
-                        }
+                    if (navOptionsPanel.getTabs().get(i).getText().equals(startSelectedTab)) {
+                        navOptionsPanel.getSelectionModel().select(i);
+                        break;
                     }
+                    
                 }
             }
         }
@@ -523,42 +470,20 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
 
         int outlineTab = -1;
-        if (DecoderOptions.isRunningOnMac) {
-
-            //see if there is an outlines tab
-            for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
-                    outlineTab = jj;
-                }
+        
+        //see if there is an outlines tab
+        for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
+            if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
+                outlineTab = jj;
             }
+        }
 
-            if (outlineTab == -1) {
-                if (title.equals(signaturesTitle) && properties.getValue("Signaturestab").equalsIgnoreCase("true")) {
-                    navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, signaturesPanel);
+        if (outlineTab == -1) {
 
-                } else if (title.equals(layersTitle) && properties.getValue("Layerstab").equalsIgnoreCase("true")) {
-                    navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, layersPanel);
-
-                }
-            }
-
-        } else {
-            //see if there is an outlines tab
-            for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                //@Simon to getIcon
-                if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
-                    outlineTab = jj;
-                }
-            }
-
-            if (outlineTab == -1) {
-
-                if (title.equals(signaturesTitle) && properties.getValue("Signaturestab").equalsIgnoreCase("true")) {  //stop spurious display of Sig tab
-                    //@Simon Signatures panel
-                    navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, signaturesPanel);
-                } else if (title.equals(layersTitle) && properties.getValue("Layerstab").equalsIgnoreCase("true")) {
-                    navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, layersPanel);
-                }
+            if (title.equals(signaturesTitle) && properties.getValue("Signaturestab").equalsIgnoreCase("true")) {  //stop spurious display of Sig tab
+                navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, signaturesPanel);
+            } else if (title.equals(layersTitle) && properties.getValue("Layerstab").equalsIgnoreCase("true")) {
+                navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, layersPanel);
             }
         }
     }
@@ -570,42 +495,29 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
 
         int outlineTab = -1;
-
-        if (DecoderOptions.isRunningOnMac) {
-            //String tabName="";
-            //see if there is an outlines tab
-            for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
-                    outlineTab = jj;
-                }
-            }
-        } else {
-            //String tabName="";
-            //see if there is an outlines tab
-            // @Simon to getIcon
-            for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
-                if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
-                    outlineTab = jj;
-                }
+        
+        //see if there is an outlines tab
+        for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
+            if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
+                outlineTab = jj;
             }
         }
+        
 
-        if (outlineTab != -1) //			navOptionsPanel.remove(outlineTab);
-        {
+        if (outlineTab != -1){
             navOptionsPanel.getTabs().remove(outlineTab);
         }
 
     }
 
+    /**
+     * Stop thumbnail generation in the pages thumbnail tab
+     */
     @Override
     public void stopThumbnails() {
 
         if (debugFX) {
             System.out.println("stopThumbnails");
-        }
-
-        if (!isSingle) {
-            return;
         }
 
         if (thumbnails.isShownOnscreen()) {
@@ -616,6 +528,9 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
     }
 
+    /**
+     * Flags the pages thumbnail tab as requiring reinitialisation
+     */
     @Override
     public void reinitThumbnails() {
 
@@ -636,18 +551,13 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         if (debugFX) {
             System.out.println("resetNavBar");
         }
-
-        if (!isSingle) {
-            return;
-        }
+        
         if (!properties.getValue("consistentTabBar").equalsIgnoreCase("true")) {
             setSplitDividerLocation(collapsedSize);
             tabsExpanded = false;
             tabsNotInitialised = true;
         }
-
-        //also reset layers
-//        layersPanel.resetLayers();
+        
         //disable page view buttons until we know we have multiple pages
         fxButtons.setPageLayoutButtonsEnabled(false);
 
@@ -675,11 +585,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
     public void setDisplayMode(final Integer mode) {
 
         if (debugFX) {
-            System.out.println("setDisplayMode");
-        }
-
-        if (mode.equals(GUIFactory.MULTIPAGE)) {
-            isSingle = false;
+            System.out.println("setDisplayMode not implemented for JavaFX in JavaFxGUI");
         }
 
     }
@@ -691,7 +597,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             System.out.println("isSingle");
         }
 
-        return isSingle;
+        return true;
     }
 
     @Override
@@ -731,10 +637,10 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             return null;
         }
     }
+    
     /*
-     *Allows user to embed viewer into own applicationÃƒï¿½
+     *Allows user to embed viewer into own application
      */
-
     @Override
     public void setRootContainer(final Object rawValue) {
 
@@ -775,18 +681,10 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         if (customWindowSize != null) {
 
             final StringTokenizer values = new StringTokenizer(customWindowSize, "x");
-
-            System.out.println(values.countTokens());
+            
             if (values.countTokens() != 2) {
                 throw new RuntimeException("Unable to use value for org.jpedal.startWindowSize=" + customWindowSize + "\nValue should be in format org.jpedal.startWindowSize=200x300");
             }
-
-            //try {
-            //width = Integer.parseInt(values.nextToken().trim());
-            //height = Integer.parseInt(values.nextToken().trim());
-//            } catch (Exception ee) {
-//                throw new RuntimeException("Unable to use value for org.jpedal.startWindowSize=" + customWindowSize + "\nValue should be in format org.jpedal.startWindowSize=200x300");
-//            }
         }
     }
 
@@ -802,12 +700,9 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 
         final PdfPageData currentPageData = decode_pdf.getPdfPageData();
 
-        //>>> DON'T UNCOMMENT THIS LINE, causes major rotation issues, only useful for debuging <<<
         if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
             rotation = currentPageData.getRotation(commonValues.getCurrentPage());
         }
-        //else
-        //rotation=0;
 
         if (getSelectedComboIndex(Commands.ROTATION) != (rotation / 90)) {
             setSelectedComboIndex(Commands.ROTATION, (rotation / 90));
@@ -839,17 +734,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         this.searchFrame = searchFrame;
 
         this.searchFrame.init(decode_pdf, commonValues);
-
-        if (DecoderOptions.isRunningOnMac) {
-            if (thumbnails.isShownOnscreen()) {
-                //@Simon Search tab
-//				navOptionsPanel.addTab("Search",searchFrame.getContentPanel());
-            }
-        } else {
-            //@Simon search tab
-//			VTextIcon textIcon2 = new VTextIcon(navOptionsPanel, "Search", VTextIcon.ROTATE_LEFT);
-//			navOptionsPanel.addTab(null, textIcon2, searchFrame.getContentPanel());
-        }
+        
     }
 
     /**
@@ -959,7 +844,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         try {
             //Set whether to use hinting
             String propValue = properties.getValue("useHinting");
-            String propValue2 = System.getProperty("org.jpedal.useTTFontHinting");
+            final String propValue2 = System.getProperty("org.jpedal.useTTFontHinting");
 
             //check JVM flag first
             if (propValue2 != null) {
@@ -994,7 +879,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
 
         //Initialise the Swing Buttons *
-        fxButtons.init(isSingle);
+        fxButtons.init(true);
 
         //create a menu bar and add to display
         createTopMenuBar();
@@ -1008,7 +893,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         //sets up all the toolbar items
         fxButtons.addButton(GUIFactory.BUTTONBAR, Messages.getMessage("PdfViewerToolbarTooltip.openFile"), "open.gif", Commands.OPENFILE, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
 
-        if (searchFrame != null && (searchFrame.getViewStyle() == GUISearchWindow.SEARCH_EXTERNAL_WINDOW || (searchFrame.getViewStyle() == GUISearchWindow.SEARCH_MENU_BAR && !isSingle))) {
+        if (searchFrame != null && searchFrame.getViewStyle() == GUISearchWindow.SEARCH_EXTERNAL_WINDOW) {
             searchFrame.setViewStyle(GUISearchWindow.SEARCH_EXTERNAL_WINDOW);
             fxButtons.addButton(GUIFactory.BUTTONBAR, Messages.getMessage("PdfViewerToolbarTooltip.search"), "find.gif", Commands.FIND, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
         }
@@ -1053,7 +938,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         //navigation toolbar for moving between pages
         createNavbar();
 
-        if (searchFrame != null && searchFrame.getViewStyle() == GUISearchWindow.SEARCH_MENU_BAR && isSingle) {
+        if (searchFrame != null && searchFrame.getViewStyle() == GUISearchWindow.SEARCH_MENU_BAR) {
             searchInMenu(searchFrame);
         }
 
@@ -1176,7 +1061,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
 
         //This is where we setup the top most menu
-        menuItems.createMainMenu(true, currentCommandListener, isSingle, commonValues, currentCommands, fxButtons);
+        menuItems.createMainMenu(true, currentCommandListener, true, commonValues, currentCommands, fxButtons);
         topPane.getChildren().add(((JavaFXMenuItems) menuItems).getCurrentMenuFX());
 
         //This is where we add the Buttons for the top ToolBar
@@ -1205,11 +1090,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 
             //workout selected tab
             final String tabName = navOptionsPanel.getTabs().get(tabSelected).getText();
-//			if(DecoderOptions.isRunningOnMac){
-//                tabName=navOptionsPanelFX.getTabs().get(tabSelected).getText();
-//			} else
-//                tabName=navOptionsPanelFX.getTabs().get(tabSelected).getGraphic().toString();
-
+            
             if (tabName != null && tabName.equals(pageTitle)) {
                 thumbnails.setIsDisplayedOnscreen(true);
             } else {
@@ -1235,62 +1116,6 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         initCoordBox();
         initMemoryBar();
         initDownloadBar();
-
-        // Temp code to demonstrate functionality - move to JavaFXMouseListener when implmented
-        // Show coords
-//        ((PdfDecoderFX)decode_pdf).setOnMouseEntered(new EventHandler<javafx.scene.input.MouseEvent>(){
-//            @Override
-//            public void handle(javafx.scene.input.MouseEvent t) {
-//                System.out.println(t.getX() + " " + t.getY());
-//                if(t.getX() < 0){
-//                    t.consume();
-//                    return;
-//                }
-//                cursorOverPage = true;
-//                memoryBarFX.setVisible(false);
-//                coordsFX.setVisible(true);
-//                setMultibox(new int[]{});
-//            }
-//        });
-        // Show memory bar
-//        ((PdfDecoderFX)decode_pdf).setOnMouseExited(new EventHandler<javafx.scene.input.MouseEvent>(){
-//            @Override
-//            public void handle(javafx.scene.input.MouseEvent t) {
-//                cursorOverPage = false;
-//                memoryBarFX.setVisible(true);
-//                coordsFX.setVisible(false);
-//                setMultibox(new int[]{});
-//            }
-//        });
-//        ((PdfDecoderFX)decode_pdf).setOnMouseMoved(new EventHandler<javafx.scene.input.MouseEvent>() {
-//            @Override
-//            public void handle(javafx.scene.input.MouseEvent t) {
-//                double maxX = (((PdfDecoderFX)decode_pdf).getBoundsInLocal().getMaxX()) + (dropshadowDepth /2);
-//                double maxY = (((PdfDecoderFX)decode_pdf).getBoundsInLocal().getMaxY()) + (dropshadowDepth /2);
-//                double minX = ((PdfDecoderFX)decode_pdf).getBoundsInLocal().getMinX() + (dropshadowDepth /2);
-//                double minY = ((PdfDecoderFX)decode_pdf).getBoundsInLocal().getMinY() + (dropshadowDepth /2);
-//
-//                if(!cursorOverPage){
-//                    if((t.getX() > minX && t.getX() <= maxX)
-//                            && (t.getY() > minY && t.getY() <= maxY)){
-//                        cursorOverPage = true;
-//                        memoryBarFX.setVisible(false);
-//                        coordsFX.setVisible(true);
-//                        setMultibox(new int[]{});
-//                    }
-//                }else{
-//                    if((t.getX() < minX || t.getX() > maxX)
-//                            || (t.getY() < minY || t.getY() >= maxY)){
-//                        cursorOverPage = false;
-//                        memoryBarFX.setVisible(true);
-//                        coordsFX.setVisible(false);
-//                        setMultibox(new int[]{});
-//                    }
-//                }
-//                //(String.format("X: %d Y: %d", (int)(t.getX() - minX), (int)(t.getY() - minY)));
-//            }
-//        });
-//        multiboxfx.getChildren().add(memoryBarFX);
     }
 
     @Override
@@ -1417,12 +1242,12 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 
     private boolean setDisplayView2(final int displayView, final int orientation) {
 
-        DecoderOptions options = decode_pdf.getDecoderOptions();
+        final DecoderOptions options = decode_pdf.getDecoderOptions();
         Display pages = decode_pdf.getPages();
-        int lastDisplayView = decode_pdf.getDisplayView();
-        FileAccess fileAccess = (FileAccess) decode_pdf.getExternalHandler(Options.FileAccess);
-        int pageNumber = decode_pdf.getPageNumber();
-        ExternalHandlers externalHandlers = decode_pdf.getExternalHandler();
+        final int lastDisplayView = decode_pdf.getDisplayView();
+        final FileAccess fileAccess = (FileAccess) decode_pdf.getExternalHandler(Options.FileAccess);
+        final int pageNumber = decode_pdf.getPageNumber();
+        final ExternalHandlers externalHandlers = decode_pdf.getExternalHandler();
 
         final PdfDecoderFX comp = (PdfDecoderFX) decode_pdf;
 
@@ -1535,7 +1360,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             viewListener = null;
         }
 
-        boolean hasChanged = setDisplayView2(displayView, orientation);
+        final boolean hasChanged = setDisplayView2(displayView, orientation);
 
         //move to correct page
         final int pageNumber = decode_pdf.getPageNumber();
@@ -1557,7 +1382,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
                     decode_pdf.setPageParameters(scaling, pageNumber, decode_pdf.getDisplayRotation());
                     decode_pdf.decodePage(pageNumber);
                     scrollToPage(pageNumber);
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -1687,12 +1512,12 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             if (index != -1) {
                 //always check in facing mode with turnover on
                 int tw = 0, th = 0;//temp width and temp hegiht;
-                double sw;
-                double sh;
+                final double sw;
+                final double sh;
                 
-                PdfPageData pData = decode_pdf.getPdfPageData();
-                int curPW = pData.getCropBoxWidth(page); //current page width
-                int curPH = pData.getCropBoxHeight(page); //current page height
+                final PdfPageData pData = decode_pdf.getPdfPageData();
+                final int curPW = pData.getCropBoxWidth(page); //current page width
+                final int curPH = pData.getCropBoxHeight(page); //current page height
 
                 switch (rotation) {
                     case 0:
@@ -2008,7 +1833,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         if (commonValues.getCurrentPage() > 0) {
 
             //int xCord = 0;
-            int pageCount = decode_pdf.getPageCount();
+            final int pageCount = decode_pdf.getPageCount();
             double yCord;// = decode_pdf.getPages().getYCordForPage(page, scaling);
                         
             //$$$$$$$$$$$$$ call it and ignore please dont delete as it has affect in continuous mode               
@@ -2034,7 +1859,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             //double viewH = pageContainer.getViewportBounds().getHeight();
             //double viewW = pageContainer.getViewportBounds().getWidth();
             
-            double vv;
+            final double vv;
             switch (decode_pdf.getDisplayView()) {
                 case Display.SINGLE_PAGE:
 
@@ -2339,13 +2164,10 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         fxButtons.addButton(NAVBAR, Messages.getMessage("PdfViewerNavBar.ForwardLast"), "end.gif", Commands.LASTPAGE, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
 
         //add buttons but not in Content Extractor
-        if (isSingle) {
-            fxButtons.addButton(PAGES, Messages.getMessage("PageLayoutButton.SinglePage"), "single.gif", Commands.SINGLE, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
+        fxButtons.addButton(PAGES, Messages.getMessage("PageLayoutButton.SinglePage"), "single.gif", Commands.SINGLE, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
 
-            fxButtons.addButton(PAGES, Messages.getMessage("PageLayoutButton.PageFlow"), "pageflow.gif", Commands.PAGEFLOW, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
-            
-        }
-
+        fxButtons.addButton(PAGES, Messages.getMessage("PageLayoutButton.PageFlow"), "pageflow.gif", Commands.PAGEFLOW, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
+        
         //on top in plugin
         if (commonValues.getModeOfOperation() == Values.RUNNING_PLUGIN) {
             fxButtons.getTopButtons().getItems().add(pagesToolBar);
@@ -3117,7 +2939,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             System.out.println("decodePage");
         }
 
-        Transition exitTransition = null;
+        final Transition exitTransition = null;
 
         //only in singlePage mode
         if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
@@ -3216,7 +3038,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             if (!propValue.isEmpty()) {
                 currentCommands.executeCommand(Commands.SETDISPLAYBACKGROUND, new Object[]{Integer.parseInt(propValue)});
             }
-            int col = Integer.parseInt(propValue);
+            final int col = Integer.parseInt(propValue);
             final int r = ((col >> 16) & 255);
             final int g = ((col >> 8) & 255);
             final int b = ((col) & 255);
@@ -3225,7 +3047,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         } else {
 
             if (decode_pdf.getDecoderOptions().getDisplayBackgroundColor() != null) {
-                int col = decode_pdf.getDecoderOptions().getDisplayBackgroundColor().getRGB();
+                final int col = decode_pdf.getDecoderOptions().getDisplayBackgroundColor().getRGB();
                 final int r = ((col >> 16) & 255);
                 final int g = ((col >> 8) & 255);
                 final int b = ((col) & 255);
@@ -3397,79 +3219,52 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             System.out.println("setupPDFDisplayPane not implemented for JavaFX in JavaFxGUI class");
         }
 
-        if (isSingle) {
-            previewOnSingleScroll = properties.getValue("previewOnSingleScroll").equalsIgnoreCase("true");
+        previewOnSingleScroll = properties.getValue("previewOnSingleScroll").equalsIgnoreCase("true");
 
-            
-            if (previewOnSingleScroll && 1==2) { //currently disable as some bugs in pageflow to normal modes
-                pageScroll = new ScrollBar();
-                pageScroll.setOrientation(Orientation.VERTICAL);
-                pageScroll.setValue(0);
-                pageScroll.setVisibleAmount(1);
-                pageScroll.setMin(0);
-                pageScroll.setMax(1);
-                pageScroll.setUnitIncrement(1);
-                pageScroll.valueProperty().addListener(new JavaFXScrollListener(this, pageScroll));
-            }
-            
-            //Sets up the ScrollPane
-            pageContainer = new ScrollPane();
-            pageContainer.setCacheHint(CacheHint.QUALITY);
-            pageContainer.setPannable(true);
-            pageContainer.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
-            pageContainer.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
-//            pageContainer.setPannable(false);
 
-//            pageContainer.setOnScroll(new EventHandler<ScrollEvent>() {
-//                @Override public void handle(ScrollEvent event) {
-//                    if(pageScroll.isVisible()){
-//                        double dy = event.getDeltaY();
-//                        if(dy > 0){
-//                            pageScroll.decrement();
-//                        }else if (dy < 0){
-//                            pageScroll.increment();
-//                        }
-//                    }
-//                }
-//            });
-            decode_pdf.setInset(0, 0); //Not sure if this may cause bugs further down the line.
-
-            /*
-             * Sets up the Group object which holds our PdfDecoderInt Object
-             * Code to be removed and replaced with decode_pdf once bugs fixed.
-             */
-            group = new Group();
-            group.getChildren().add((javafx.scene.Node) decode_pdf);
-            pageContainer.setContent(group);
-
-            //Apply the group object as the Scroll Panes contents
-            fxChangeListener = new ChangeListener<Bounds>() {
-                @Override
-                public void changed(final ObservableValue<? extends Bounds> ov, final Bounds ob, final Bounds nb) {
-
-                    if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
-                        scaleAndRotate();
-                    }
-
-//                    if(decode_pdf.getDisplayView()==Display.SINGLE_PAGE){
-//                        //Resize the content when resize pageContainer event is detected.
-//                        if (((PdfDecoderFX) decode_pdf).getParent() != null
-//                                && (getSelectedComboIndex(Commands.SCALING) < 3 || decode_pdf.getDisplayView() == Display.FACING)) //always rezoom in facing mode for turnover
-//                        {
-//                            scaleAndRotate();
-//                        }else{
-//                            adjustGroupToCenter();
-//                        }
-//                    }
-                }
-            };
-
-            pageContainer.viewportBoundsProperty().addListener(fxChangeListener);
-
-            //Keyboard control of next/previous page gets implemented here...
-            setupKeyboardControl();
-
+        if (previewOnSingleScroll && 1==2) { //currently disable as some bugs in pageflow to normal modes
+            pageScroll = new ScrollBar();
+            pageScroll.setOrientation(Orientation.VERTICAL);
+            pageScroll.setValue(0);
+            pageScroll.setVisibleAmount(1);
+            pageScroll.setMin(0);
+            pageScroll.setMax(1);
+            pageScroll.setUnitIncrement(1);
+            pageScroll.valueProperty().addListener(new JavaFXScrollListener(this, pageScroll));
         }
+
+        //Sets up the ScrollPane
+        pageContainer = new ScrollPane();
+        pageContainer.setCacheHint(CacheHint.QUALITY);
+        pageContainer.setPannable(true);
+        pageContainer.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        pageContainer.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+
+        decode_pdf.setInset(0, 0); //Not sure if this may cause bugs further down the line.
+
+        /*
+         * Sets up the Group object which holds our PdfDecoderInt Object
+         * Code to be removed and replaced with decode_pdf once bugs fixed.
+         */
+        group = new Group();
+        group.getChildren().add((javafx.scene.Node) decode_pdf);
+        pageContainer.setContent(group);
+
+        //Apply the group object as the Scroll Panes contents
+        fxChangeListener = new ChangeListener<Bounds>() {
+            @Override
+            public void changed(final ObservableValue<? extends Bounds> ov, final Bounds ob, final Bounds nb) {
+
+                if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
+                    scaleAndRotate();
+                }
+            }
+        };
+
+        pageContainer.viewportBoundsProperty().addListener(fxChangeListener);
+
+        //Keyboard control of next/previous page gets implemented here...
+        setupKeyboardControl();
 
     }
 
@@ -3483,87 +3278,50 @@ public class JavaFxGUI extends GUI implements GUIFactory {
             System.out.println("setupBorderPanes not implemented for JavaFX in JavaFxGUI class");
         }
         //Swing dependant code, needs FX implementation.
-        if (isSingle) {
-//            //Create a left-right split pane with tabs and add to main display
-//            navOptionsPanel.setTabPlacement(JTabbedPane.LEFT);
-//            navOptionsPanel.setOpaque(true);
-//            //Use start size as min width to keep divider from covering tabs
-//            navOptionsPanel.setMinimumSize(new Dimension(startSize, 100));
-//            navOptionsPanel.setName("NavPanel");
-//            navOptionsPanel.setFocusable(false);
-//
+        setupSidebarTitles();
 
-            setupSidebarTitles();
+        center = new SplitPane();
+        setupTabPane();
 
-            center = new SplitPane();
-            setupTabPane();
+        center.getItems().addAll(navOptionsPanel, pageContainer);
+        if (pageScroll != null) {
+            center.getItems().add(pageScroll);
+        }
 
-            center.getItems().addAll(navOptionsPanel, pageContainer);
-            if (pageScroll != null) {
-                center.getItems().add(pageScroll);
+        setSplitDividerLocation(collapsedSize);
+        tabsExpanded = false;
+
+        //update scaling when divider moved
+        center.getDividers().get(0).positionProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(final ObservableValue<? extends Number> ov, final Number oldN, final Number newN) {
+                if (tabsExpanded) {
+                    expandedSize = (int) navOptionsPanel.getWidth();
+                }
             }
-            
-            setSplitDividerLocation(collapsedSize);
-            tabsExpanded = false;
+        });
+        
+        String propValue = properties.getValue("startSideTabOpen");
+        if (!propValue.isEmpty()) {
+            sideTabBarOpenByDefault = propValue.equalsIgnoreCase("true");
+        }
 
-            //update scaling when divider moved
-            center.getDividers().get(0).positionProperty().addListener(new ChangeListener<Number>() {
+        propValue = properties.getValue("startSelectedSideTab");
+        if (!propValue.isEmpty()) {
+            startSelectedTab = propValue;
+        }
+
+        if (!hasListener) {
+            navOptionsPanel.setOnMouseClicked(new EventHandler<MouseEvent>() {
                 @Override
-                public void changed(final ObservableValue<? extends Number> ov, final Number oldN, final Number newN) {
-                    if (tabsExpanded) {
-                        expandedSize = (int) navOptionsPanel.getWidth();
+                public void handle(final MouseEvent t) {
+                    // Don't handle unless the click is on the tab bar
+                    if (t.getX() < 30) {
+                        handleTabbedPanes();
                     }
                 }
             });
-
-//            if (DecoderOptions.isRunningOnMac) {
-//                navOptionsPanel.addTab(pageTitle, (Component) thumbnails);
-//                navOptionsPanel.setTitleAt(navOptionsPanel.getTabCount() - 1, pageTitle);
-//
-//                if (thumbnails.isShownOnscreen()) {
-//                    navOptionsPanel.addTab(bookmarksTitle, (SwingOutline) tree);
-//                    navOptionsPanel.setTitleAt(navOptionsPanel.getTabCount() - 1, bookmarksTitle);
-//                }
-//
-//            } else {
-//                if (thumbnails.isShownOnscreen()) {
-//                    VTextIcon textIcon1 = new VTextIcon(navOptionsPanel, pageTitle, VTextIcon.ROTATE_LEFT);
-//                    navOptionsPanel.addTab(null, textIcon1, (Component) thumbnails);
-//
-//                    //navOptionsPanel.setTitleAt(navOptionsPanel.getTabCount()-1, pageTitle);
-//                }
-//
-//                VTextIcon textIcon2 = new VTextIcon(navOptionsPanel, bookmarksTitle, VTextIcon.ROTATE_LEFT);
-//                navOptionsPanel.addTab(null, textIcon2, (SwingOutline) tree);
-//                //navOptionsPanel.setTitleAt(navOptionsPanel.getTabCount()-1, bookmarksTitle);
-//
-//            }
-//
-//            //				p.setTabDefaults(defaultValues);
-//            displayPane.setDividerLocation(startSize);
-            String propValue = properties.getValue("startSideTabOpen");
-            if (!propValue.isEmpty()) {
-                sideTabBarOpenByDefault = propValue.equalsIgnoreCase("true");
-            }
-
-            propValue = properties.getValue("startSelectedSideTab");
-            if (!propValue.isEmpty()) {
-                startSelectedTab = propValue;
-            }
-
-            if (!hasListener) {
-                navOptionsPanel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(final MouseEvent t) {
-                        // Don't handle unless the click is on the tab bar
-                        if (t.getX() < 30) {
-                            handleTabbedPanes();
-                        }
-                    }
-                });
-                hasListener = true;
-            }
-
+            hasListener = true;
         }
     }
 
@@ -3599,8 +3357,8 @@ public class JavaFxGUI extends GUI implements GUIFactory {
                 //Check if mapped and if so set the actual page number
                 //This is updated later to the correct page label
                 if (decode_pdf.getIO().getPageLabels()!=null && decode_pdf.getIO().getPageLabels().containsValue(value)) {
-                    Set<Map.Entry<Integer, String>> entries = decode_pdf.getIO().getPageLabels().entrySet();
-                    for (Map.Entry<Integer, String> e : entries) {
+                    final Set<Map.Entry<Integer, String>> entries = decode_pdf.getIO().getPageLabels().entrySet();
+                    for (final Map.Entry<Integer, String> e : entries) {
                         if (e.getValue().equals(value)) {
                             value = e.getKey().toString();
                             break;
@@ -4017,7 +3775,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         // System.out.println("enableStatusBar not yet implemented for JavaFX");
     }
 
-    private void removeComponentListener(RefreshLayout viewListener) {
+    private void removeComponentListener(final RefreshLayout viewListener) {
 
         final ScrollPane customFXHandle = pageContainer;
 
@@ -4028,7 +3786,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         customFXHandle.hvalueProperty().removeListener(viewListener);
     }
 
-    private void addComponentListener(RefreshLayout viewListener) {
+    private void addComponentListener(final RefreshLayout viewListener) {
 
         final ScrollPane customFXHandle = pageContainer;
 
@@ -4060,7 +3818,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
 
         final PdfDecoderInt decode_pdf;
 
-        RefreshLayout(PdfDecoderInt pdf) {
+        RefreshLayout(final PdfDecoderInt pdf) {
             this.decode_pdf = pdf;
         }
 
@@ -4070,7 +3828,7 @@ public class JavaFxGUI extends GUI implements GUIFactory {
         }
 
         @Override
-        public void changed(ObservableValue ov, Object t, Object t1) {
+        public void changed(final ObservableValue ov, final Object t, final Object t1) {
 
             // System.out.println("XXXXXXX"+ov);//+" "+t+" "+t1);
             //  final ScrollPane customFXHandle= ((JavaFxGUI)getExternalHandler(Options.MultiPageUpdate)).getPageContainer();
@@ -4082,13 +3840,13 @@ public class JavaFxGUI extends GUI implements GUIFactory {
     }
 
     @Override
-    public PdfDecoderInt openNewMultiplePage(String selectedFile, Values commonValues) {
+    public PdfDecoderInt openNewMultiplePage(final String selectedFile, final Values commonValues) {
         throw new RuntimeException("Not implemented in JavaFX");
 
     }
 
     @Override
-    public void triggerPageTurnAnimation(PdfDecoderInt decode_pdf, Values commonValues, int updatedTotal, boolean rightTurn) {
+    public void triggerPageTurnAnimation(final PdfDecoderInt decode_pdf, final Values commonValues, final int updatedTotal, final boolean rightTurn) {
 
     }
 

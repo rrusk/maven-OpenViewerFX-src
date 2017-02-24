@@ -286,8 +286,8 @@ public class Dictionary {
         }
 
         final int size=keys.size();
-        byte[][] returnKeys=new byte[size][];
-        byte[][] returnValues=new byte[size][];
+        final byte[][] returnKeys=new byte[size][];
+        final byte[][] returnValues=new byte[size][];
 
         for(int a=0;a<size;a++){
             returnKeys[a]=keys.get(a);
@@ -624,7 +624,7 @@ public class Dictionary {
         }
     }
 
-    static int handlePairs(PdfObject pdfObject, String objectRef, int i, byte[] raw, int PDFkeyInt) {
+    static int handlePairs(final PdfObject pdfObject, final String objectRef, int i, final byte[] raw, final int PDFkeyInt) {
 
         boolean isPairs=false;
 
@@ -640,7 +640,7 @@ public class Dictionary {
         }
 
         if(isPairs){
-            FormObject APobj=new FormObject(objectRef);
+            final FormObject APobj=new FormObject(objectRef);
             pdfObject.setDictionary(PDFkeyInt, APobj);
 
             i=-readKeyPairs(raw,  i,  APobj);
@@ -649,7 +649,7 @@ public class Dictionary {
         return i;
     }
 
-    private static int readObj(int j, byte[] data, final byte[] raw, int ref, int generation, int i, final PdfObject pdfObject, final int PDFkeyInt, final PdfFileReader objectReader) {
+    private static int readObj(int j, final byte[] data, final byte[] raw, int ref, int generation, int i, final PdfObject pdfObject, final int PDFkeyInt, final PdfFileReader objectReader) {
 
         /*
         * get id from stream
@@ -861,7 +861,7 @@ public class Dictionary {
      * @param raw
      * @return 
      */
-    private static boolean isDictionaryPairs(int i, final byte[] raw) {
+    private static boolean isDictionaryPairs(final int i, final byte[] raw) {
         
         final int length=raw.length;
         int level=-1;

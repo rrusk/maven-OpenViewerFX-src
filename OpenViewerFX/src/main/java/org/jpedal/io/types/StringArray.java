@@ -42,7 +42,7 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class StringArray extends Array {
     
-    public StringArray(final PdfFileReader pdfFileReader, int i,final byte[] raw) {
+    public StringArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
         super(pdfFileReader, i, PdfDictionary.VALUE_IS_STRING_ARRAY, raw);
     }
 

@@ -213,13 +213,13 @@ public class FormFlattener {
         
         if (pageRotation == 0) {
             if (BBox[1] > BBox[3]) {
-                float t = BBox[1];
+                final float t = BBox[1];
                 BBox[1] = BBox[3];
                 BBox[3] = t;
             }
 
             if (BBox[0] > BBox[2]) {
-                float t = BBox[0];
+                final float t = BBox[0];
                 BBox[0] = BBox[2];
                 BBox[2] = t;
             }
@@ -249,13 +249,13 @@ public class FormFlattener {
 
                 final float[] BoundingBox = imgObj.getFloatArray(PdfDictionary.BBox);
                 if (BoundingBox[1] > BoundingBox[3]) {
-                    float t = BoundingBox[1];
+                    final float t = BoundingBox[1];
                     BoundingBox[1] = BoundingBox[3];
                     BoundingBox[3] = t;
                 }
 
                 if (BoundingBox[0] > BoundingBox[2]) {
-                    float t = BoundingBox[0];
+                    final float t = BoundingBox[0];
                     BoundingBox[0] = BoundingBox[2];
                     BoundingBox[2] = t;
                 }
@@ -367,34 +367,7 @@ public class FormFlattener {
                 pdfStreamDecoder.gs.CTM = new float[][]{{matrix[0] * yScale, matrix[1] * yScale, 0}, {matrix[2] * yScale, matrix[3] * yScale, 0}, {x, y, 1}};
             }
         }else{
-            //If using AP, is a widget and not a signature there is a chance of incorrect AP scaling.
-            //Set CTM based on different between Form bounds and AP bounds
-            if (imgObj != null &&
-                    form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Widget &&
-                    form.getNameAsConstant(PdfDictionary.FT) != PdfDictionary.Sig) {
-                float[] values2 = imgObj.getFloatArray(PdfDictionary.BBox);
-                if (values2 != null) {
-                    float xScale = (BBox[2] - BBox[0]) / (values2[2] - values2[0]);
-                    if (xScale < 0) {
-                        xScale = -xScale;
-                    }
-                    float yScale = (BBox[3] - BBox[1]) / (values2[3] - values2[1]);
-                    if (yScale < 0) {
-                        yScale = -yScale;
-                    }
-                    pdfStreamDecoder.gs.CTM = new float[][]{{xScale, 0, 0}, {0, yScale, 0}, {x, y, 1}};
-                } else {
-                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
-                }
-                newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
-            } else {
-                if(form.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Ink){
-                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x-BBox[0], y-BBox[1], 1}};
-                }else{
-                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
-                }
-                newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
-            }
+            newClip = setClipAndCTM(pdfStreamDecoder, form, imgObj, BBox, x, y);
         }
         
         //Convert clip here
@@ -403,8 +376,41 @@ public class FormFlattener {
         drawForm(imgObj, form, pdfStreamDecoder, newClip, isHTML, BBox, x, y, formData, APobjN, oldGS);
       
     }
-    
-    void drawForm(PdfObject imgObj, final PdfObject form, final PdfStreamDecoder pdfStreamDecoder, Area newClip, final boolean isHTML, float[] BBox, float x, float y, byte[] formData, final PdfObject APobjN, final GraphicsState oldGS) throws PdfException {
+
+    Area setClipAndCTM(final PdfStreamDecoder pdfStreamDecoder, final PdfObject form, final PdfObject imgObj, final float[] BBox, final float x, final float y) {
+        final Area newClip;//If using AP, is a widget and not a signature there is a chance of incorrect AP scaling.
+        //Set CTM based on different between Form bounds and AP bounds
+        if (imgObj != null &&
+                form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Widget &&
+                form.getNameAsConstant(PdfDictionary.FT) != PdfDictionary.Sig) {
+
+            final float[] values2 = imgObj.getFloatArray(PdfDictionary.BBox);
+            if (values2 != null) {
+                float xScale = (BBox[2] - BBox[0]) / (values2[2] - values2[0]);
+                if (xScale < 0) {
+                    xScale = -xScale;
+                }
+                float yScale = (BBox[3] - BBox[1]) / (values2[3] - values2[1]);
+                if (yScale < 0) {
+                    yScale = -yScale;
+                }
+                pdfStreamDecoder.gs.CTM = new float[][]{{xScale, 0, 0}, {0, yScale, 0}, {x, y, 1}};
+            } else {
+                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
+            }
+            newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
+        } else {
+            if(form.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Ink){
+                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x-BBox[0], y-BBox[1], 1}};
+            }else{
+                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
+            }
+            newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
+        }
+        return newClip;
+    }
+
+    void drawForm(final PdfObject imgObj, final PdfObject form, final PdfStreamDecoder pdfStreamDecoder, final Area newClip, final boolean isHTML, final float[] BBox, final float x, final float y, final byte[] formData, final PdfObject APobjN, final GraphicsState oldGS) throws PdfException {
         
         //set clip to match bounds on form
         if(newClip!=null) {
@@ -472,7 +478,7 @@ public class FormFlattener {
     private static FormExclusion exclusionOption = FormExclusion.ExcludeNone;
     
     static {
-        String value = System.getProperty("org.jpedal.removeForms");
+        final String value = System.getProperty("org.jpedal.removeForms");
         if (value != null && !value.isEmpty()) {
             exclusionOption = FormExclusion.valueOf(value);
 

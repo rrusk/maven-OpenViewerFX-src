@@ -181,7 +181,7 @@ class UnicodeReader {
             int byteAccessed=0;
             while(count>0){
 
-                int nextVal = getNextVal(ptr, count);
+                final int nextVal = getNextVal(ptr, count);
 
                 value[vals][byteAccessed] = nextVal;
 
@@ -204,7 +204,7 @@ class UnicodeReader {
         return ptr;
     }
 
-    private int getNextVal(int ptr, int count) {
+    private int getNextVal(final int ptr, int count) {
 
         int disp=0;
         if(count>4){
@@ -273,7 +273,7 @@ class UnicodeReader {
                         hasDoubleBytes=true;
                     }
 
-                    int disp=i-value[0][0];
+                    final int disp=i-value[0][0];
                     val=value[2][0] + disp;
                     if(val>0){ //ignore  0 to fix issue in Dalim files
                         if(unicodeMappings[i]==null) {
@@ -306,7 +306,7 @@ class UnicodeReader {
         }
     }
 
-    static void setValue(int i, int j, final int[][] value, final String[] unicodeMappings, int offset) {
+    static void setValue(final int i, final int j, final int[][] value, final String[] unicodeMappings, final int offset) {
 
         int val;
 

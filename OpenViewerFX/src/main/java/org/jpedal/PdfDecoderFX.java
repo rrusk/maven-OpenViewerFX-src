@@ -197,7 +197,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     private void drawPreviewImage() {
 
         if(previewImage!=null){
-            GraphicsContext context = previewThumbnail.getGraphicsContext2D();
+            final GraphicsContext context = previewThumbnail.getGraphicsContext2D();
             
             context.setFill(new javafx.scene.paint.Color(0.25, 0.25, 0.25, 1));
             context.fillRect(0, 0, previewThumbnail.getWidth(), previewThumbnail.getHeight());
@@ -205,16 +205,16 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
             context.drawImage(previewImage, 10, 10);
             context.setStroke(new javafx.scene.paint.Color(1.0, 1.0, 1.0, 1.0));
             context.strokeText(previewText, 10, (previewThumbnail.getHeight())-10);
-            ScrollPane pane = (ScrollPane) (getParent().getParent().getParent().getParent());
-            Group group = (Group)getParent();
-            double groupX = group.getBoundsInParent().getMinX();
-            double viewW = pane.getViewportBounds().getWidth();
-            double viewH = pane.getViewportBounds().getHeight();
-            double pdfW = getBoundsInParent().getWidth();
-            double thumW = previewThumbnail.getBoundsInLocal().getWidth();
-            double thumH = previewThumbnail.getBoundsInLocal().getHeight();
-            double x = pdfW+(viewW-groupX-pdfW-thumW-10); //use 10 for left padding fix;
-            double y = (viewH-thumH)/ getPageCount()* (curThumbPage-1);
+            final ScrollPane pane = (ScrollPane) (getParent().getParent().getParent().getParent());
+            final Group group = (Group)getParent();
+            final double groupX = group.getBoundsInParent().getMinX();
+            final double viewW = pane.getViewportBounds().getWidth();
+            final double viewH = pane.getViewportBounds().getHeight();
+            final double pdfW = getBoundsInParent().getWidth();
+            final double thumW = previewThumbnail.getBoundsInLocal().getWidth();
+            final double thumH = previewThumbnail.getBoundsInLocal().getHeight();
+            final double x = pdfW+(viewW-groupX-pdfW-thumW-10); //use 10 for left padding fix;
+            final double y = (viewH-thumH)/ getPageCount()* (curThumbPage-1);
             previewThumbnail.setLayoutX(x);
             previewThumbnail.setLayoutY(y);
         }
@@ -329,15 +329,15 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         return specialMode;
     }
     
-    public void scrollRectToVisible(Rectangle rectangle) {
+    public void scrollRectToVisible(final Rectangle rectangle) {
         
         final ScrollPane customFXHandle= ((JavaFxGUI)getExternalHandler(Options.MultiPageUpdate)).getPageContainer();
         
         //final int ch = (int)(pageData.getCropBoxHeight(commonValues.getCurrentPage())*scaling);
 		//	final int cw = (int)(pageData.getCropBoxWidth(commonValues.getCurrentPage())*scaling);
 
-        double width=this.getWidth();
-        double height=this.getHeight();
+        final double width=this.getWidth();
+        final double height=this.getHeight();
         
         customFXHandle.setVvalue((rectangle.y)/height);
         
@@ -1123,7 +1123,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         
         if (page == getPageNumber()) {
             
-            FXAdditionalData additionaValuesforPage=(FXAdditionalData) externalHandlers.getExternalHandler(Options.JavaFX_ADDITIONAL_OBJECTS);
+            final FXAdditionalData additionaValuesforPage=(FXAdditionalData) externalHandlers.getExternalHandler(Options.JavaFX_ADDITIONAL_OBJECTS);
             if(additionaValuesforPage!=null){ //transition so store data to pickup later
                 additionaValuesforPage.setType(type);
                 additionaValuesforPage.setObj(obj);
@@ -1515,12 +1515,12 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
             options.setDisplayView(options.getPageMode());
         }
         
-        ActionHandler handler = externalHandlers.getFormActionHandler();
+        final ActionHandler handler = externalHandlers.getFormActionHandler();
         if(handler!=null){
             handler.init(this, externalHandlers.getJavaScript(), this.getFormRenderer());
         }
         
-        PluginHandler customPluginHandle=(PluginHandler) externalHandlers.getExternalHandler(Options.PluginHandler);
+        final PluginHandler customPluginHandle=(PluginHandler) externalHandlers.getExternalHandler(Options.PluginHandler);
             
         if(customPluginHandle!=null){
             customPluginHandle.setFileName(fileAccess.getFilename());
@@ -1730,7 +1730,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
      */
     @Override
     public BufferedImage getSelectedRectangleOnscreen(float t_x1, float t_y1,
-            float t_x2, float t_y2, float scaling){
+                                                      float t_x2, float t_y2, final float scaling){
        
         final int pagenumber = getPageNumber();
         final int height = getPdfPageData().getCropBoxHeight(pagenumber);
@@ -1748,18 +1748,18 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         t_y2=height-t_y2;
         
         //Get border offset values
-        double borderInset = -getBoundsInParent().getMinX();
+        final double borderInset = -getBoundsInParent().getMinX();
         
         final float scalingFactor = scaling / 100;
         //Get Snapshot
-        SnapshotParameters para = new SnapshotParameters();
-        Rectangle2D r = new Rectangle2D(
+        final SnapshotParameters para = new SnapshotParameters();
+        final Rectangle2D r = new Rectangle2D(
                 getBoundsInParent().getMinX()+(scalingFactor * t_x1)+borderInset, 
                 getBoundsInParent().getMinY()+(scalingFactor * t_y1)+borderInset, 
                 scalingFactor * (t_x2 - t_x1),
                 scalingFactor * (t_y2 - t_y1));
         para.setViewport(r);
-        WritableImage image = snapshot(para, null);
+        final WritableImage image = snapshot(para, null);
 //        System.out.println("Insets : "+getInsetW()+" , "+getInsetH());
 //        System.out.println("Local : "+getBoundsInLocal());
 //        System.out.println("Parent : "+getBoundsInParent());
@@ -2347,7 +2347,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
 //        previewThumbnail.setScaleY(-(1.0f / scaling));
 //        previewThumbnail.setScaleZ(1.0f / scaling);
         
-        Group group = (Group)getParent();
+        final Group group = (Group)getParent();
 
         //Make sure preview is actually displayed
         if (!group.getChildren().contains(previewThumbnail)) {

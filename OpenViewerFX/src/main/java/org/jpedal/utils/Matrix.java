@@ -90,7 +90,7 @@ public class Matrix {
         return output_matrix;
     }
     
-    public static final float[][] concatenate(float[][] m1, float [][] m2){
+    public static final float[][] concatenate(final float[][] m1, final float [][] m2){
         return multiply(m2, m1);
     }
     
@@ -100,7 +100,7 @@ public class Matrix {
      * @param xform
      * @return 
      */
-    public static float[][] toMatrix(AffineTransform xform){
+    public static float[][] toMatrix(final AffineTransform xform){
         return new float[][]{{(float)xform.getScaleX(),(float)xform.getShearX(),0},
             {(float)xform.getShearY(),(float)xform.getScaleY(),0},
             {(float)xform.getTranslateX(),(float)xform.getTranslateY(),1}};
@@ -113,9 +113,9 @@ public class Matrix {
      * @param y
      * @return 
      */
-    public static float[] transformPoint(float[][] mm, float x, float y) {
-        float x_ = mm[0][0] * x + mm[1][0] * y + mm[2][0];
-        float y_ = mm[0][1] * x + mm[1][1] * y + mm[2][1];
+    public static float[] transformPoint(final float[][] mm, final float x, final float y) {
+        final float x_ = mm[0][0] * x + mm[1][0] * y + mm[2][0];
+        final float y_ = mm[0][1] * x + mm[1][1] * y + mm[2][1];
         return new float[]{x_, y_};
     }
     
@@ -129,7 +129,10 @@ public class Matrix {
            // System.out.println( row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )" );
         }
     }
-    
+	
+	public static final void showBBox(final float [] BBox){
+		System.out.println("BBox: "+BBox[0]+" "+BBox[1]+" "+BBox[2]+" "+BBox[3]);
+	}
     
     /**show matrix (used to debug)*/
     public static final void show(final int[][] matrix1) {
@@ -141,15 +144,15 @@ public class Matrix {
         }
     }
     
-    public static float[][] multiplyAny(float[][] m1, float[][] m2) {
-        int c0 = m1[0].length; 
-        int r1 = m2.length;    
+    public static float[][] multiplyAny(final float[][] m1, final float[][] m2) {
+        final int c0 = m1[0].length;
+        final int r1 = m2.length;
         if(c0 != r1) {
             return null; 
         }
-        int r0 = m1.length;   
-        int c1 = m2[0].length; 
-        float[][] mResult = new float[r0][c1];
+        final int r0 = m1.length;
+        final int c1 = m2[0].length;
+        final float[][] mResult = new float[r0][c1];
         for(int i = 0; i < r0; i++) {
             for(int j = 0; j < c1; j++) {
                 for(int k = 0; k < c0; k++) {

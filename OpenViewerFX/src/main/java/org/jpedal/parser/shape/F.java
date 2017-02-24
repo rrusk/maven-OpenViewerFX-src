@@ -104,21 +104,21 @@ public class F {
             }
             
             currentDrawShape.closeShape();
-            Shape currentShape =currentDrawShape.generateShapeFromPath(gs.CTM,gs.getLineWidth(), Cmd.F);
+            final Shape currentShape =currentDrawShape.generateShapeFromPath(gs.CTM,gs.getLineWidth(), Cmd.F);
             
             if(currentShape == null){
                 createSMaskFill(gs,currentPdfFile, current, parserOptions,formLevel, multiplyer);
             }else{
-                BufferedImage result = getSmaskAppliedImage(gs, currentPdfFile, parserOptions, formLevel, multiplyer);
+                final BufferedImage result = getSmaskAppliedImage(gs, currentPdfFile, parserOptions, formLevel, multiplyer);
                 final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
                 currentPdfFile.checkResolved(maskObj);
                 final float[] BBox= maskObj.getFloatArray(PdfDictionary.BBox);
-                int fx=(int)(BBox[0]+0.5f);
-                int fy=(int)(BBox[1]+0.5f);
+                final int fx=(int)(BBox[0]+0.5f);
+                final int fy=(int)(BBox[1]+0.5f);
                 
-                Rectangle rect = new Rectangle(fx, fy, result.getWidth(), result.getHeight());
+                final Rectangle rect = new Rectangle(fx, fy, result.getWidth(), result.getHeight());
                 
-                GraphicsState gs1 = gs.deepCopy();                
+                final GraphicsState gs1 = gs.deepCopy();
                 gs1.setNonstrokeColor(new ShearedTexturePaint(result, rect, new AffineTransform(gs.CTM[0][0], gs.CTM[0][1], gs.CTM[1][0], gs.CTM[1][1], gs.CTM[2][0], gs.CTM[2][1])));
                 gs1.setFillType(GraphicsState.FILL);               
                 gs1.setStrokeColor(gs.strokeColorSpace.getColor());
@@ -235,17 +235,17 @@ public class F {
          final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
         currentPdfFile.checkResolved(maskObj);
         final float[] BBox= maskObj.getFloatArray(PdfDictionary.BBox);
-        int fx=(int)(BBox[0]+0.5f);
-        int fy=(int)(BBox[1]+0.5f);
-        int fw=(int)(BBox[2]+0.5f);
-        int fh=(int)(BBox[3]+0.5f);
+        final int fx=(int)(BBox[0]+0.5f);
+        final int fy=(int)(BBox[1]+0.5f);
+        final int fw=(int)(BBox[2]+0.5f);
+        final int fh=(int)(BBox[3]+0.5f);
         
         final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions,formLevel, multiplyer,false,1f);
         
-        PdfPaint prev = gs.nonstrokeColorSpace.getColor();
-        int prevInt = prev.getRGB();
+        final PdfPaint prev = gs.nonstrokeColorSpace.getColor();
+        final int prevInt = prev.getRGB();
         		
-        float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
+        final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
         int brgb = 0;
 		boolean hasBC = false;
         if(BC!=null){
@@ -254,18 +254,18 @@ public class F {
             gs.nonstrokeColorSpace.setColor(prev);			
 			hasBC = true;
         }       
-        int pa = (prevInt >>> 24);
+        final int pa = (prevInt >>> 24);
 //		int ba = ((brgb >> 24) & 0xff);
-        int br = ((brgb >> 16) & 0xff);
-        int bg = ((brgb >> 8) & 0xff);
-        int bb = (brgb & 0xff);
+        final int br = ((brgb >> 16) & 0xff);
+        final int bg = ((brgb >> 8) & 0xff);
+        final int bb = (brgb & 0xff);
 		
-        BufferedImage result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
-        int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
+        final BufferedImage result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        final int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
+        final int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < sPixels.length; i++) {
-            int sargb = sPixels[i];
-            int sa = ((sargb >>> 24) & 0xff);
+            final int sargb = sPixels[i];
+            final int sa = ((sargb >>> 24) & 0xff);
             int sr = ((sargb >> 16) & 0xff);
             int sg = ((sargb >> 8) & 0xff);
             int sb = (sargb & 0xff);            
@@ -275,7 +275,7 @@ public class F {
 					sg = bg;
 					sb = bb;
 				} else if (sa < 255) {
-					int alpha_ = 255 - sa;
+					final int alpha_ = 255 - sa;
 					sr = (sr * sa + br * alpha_) >> 8;
 					sg = (sg * sa + bg * alpha_) >> 8;
 					sb = (sb * sa + bb * alpha_) >> 8;
@@ -341,12 +341,12 @@ public class F {
         }
 
         //now do the smasking in image
-        BufferedImage result;
+        final BufferedImage result;
         
-        PdfPaint prev = gs.nonstrokeColorSpace.getColor();
-        int prevInt = prev.getRGB();
+        final PdfPaint prev = gs.nonstrokeColorSpace.getColor();
+        final int prevInt = prev.getRGB();
         
-        float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
+        final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
         int brgb = 0;
         if(BC!=null){
             gs.nonstrokeColorSpace.setColor(BC, BC.length);
@@ -354,15 +354,15 @@ public class F {
             gs.nonstrokeColorSpace.setColor(prev);
         }       
             
-        int br = ((brgb >> 16) & 0xff);
-        int bg = ((brgb >> 8) & 0xff);
-        int bb = (brgb & 0xff);
+        final int br = ((brgb >> 16) & 0xff);
+        final int bg = ((brgb >> 8) & 0xff);
+        final int bb = (brgb & 0xff);
 
         result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
-        int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
+        final int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
+        final int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < sPixels.length; i++) {
-            int sargb = sPixels[i];
+            final int sargb = sPixels[i];
             int sa = ((sargb >>> 24) & 0xff);
             int sr = ((sargb >> 16) & 0xff);
             int sg = ((sargb >> 8) & 0xff);
@@ -372,12 +372,12 @@ public class F {
                 sg = bg;
                 sb = bb;
             } else if (sa < 255) {
-                int alpha_ = 255 - sa;
+                final int alpha_ = 255 - sa;
                 sr = (sr * sa + br * alpha_) >> 8;
                 sg = (sg * sa + bg * alpha_) >> 8;
                 sb = (sb * sa + bb * alpha_) >> 8;
             }
-            int y = (sr * 77) + (sg * 152) + (sb * 28);
+            final int y = (sr * 77) + (sg * 152) + (sb * 28);
             sa = (sa * y) >> 16;
             dPixels[i] = (sa << 24) | (prevInt & 0xffffff);
         }        

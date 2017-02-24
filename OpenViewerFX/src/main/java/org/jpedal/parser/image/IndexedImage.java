@@ -48,7 +48,7 @@ import org.jpedal.utils.LogWriter;
 public class IndexedImage {
     
     
-    public static BufferedImage make(int w, int h, final GenericColorSpace decodeColorData, byte[] index, int d, byte[] data) {
+    public static BufferedImage make(final int w, final int h, final GenericColorSpace decodeColorData, byte[] index, final int d, final byte[] data) {
         
         
         BufferedImage image=null;

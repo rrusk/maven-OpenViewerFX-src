@@ -123,7 +123,7 @@ public class ShowGUIMessage
 	{
 
 		//check for user mode just in case
-        StringBuilder output_string = new StringBuilder("<HTML><BODY><CENTER><FONT COLOR=black>");
+        final StringBuilder output_string = new StringBuilder("<HTML><BODY><CENTER><FONT COLOR=black>");
         final StringTokenizer lines = new StringTokenizer( message_string, "\n" );
         while( lines.hasMoreTokens() ) {
             output_string.append(lines.nextToken()).append("</FONT></CENTER><CENTER><FONT COLOR=black>");

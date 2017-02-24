@@ -181,7 +181,7 @@ public class EncryptPDFDocument extends Save
 	}
 	
 	public String getPermissions(){
-		StringBuilder permissions = new StringBuilder("");
+		final StringBuilder permissions = new StringBuilder("");
 		
 		if(printing.isSelected()) {
             permissions.append('1');

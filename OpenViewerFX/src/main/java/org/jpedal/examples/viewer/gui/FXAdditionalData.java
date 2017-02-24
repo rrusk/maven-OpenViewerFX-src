@@ -46,7 +46,7 @@ public class FXAdditionalData {
         return type;
     }
     
-    public void setType(int[] type) {
+    public void setType(final int[] type) {
         this.type = type;
     }
     
@@ -54,7 +54,7 @@ public class FXAdditionalData {
         return obj;
     }
     
-    public void setObj(Object[] obj) {
+    public void setObj(final Object[] obj) {
         this.obj = obj;
     }
     

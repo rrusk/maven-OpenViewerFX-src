@@ -438,7 +438,7 @@ public class Commands {
         return isLinear;
     }
 
-     Object executeSwingCommand(int ID, Object[] args, Object status) {
+     Object executeSwingCommand(final int ID, final Object[] args, final Object status) {
          throw new UnsupportedOperationException("executeSwingCommand should not be called");
      }
 }

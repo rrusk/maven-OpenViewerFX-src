@@ -70,7 +70,7 @@ public class FormStream {
      */
     public static final boolean exitOnError=false;
 
-    public static Object[] getRolloverKeyValues(PdfObject form, PdfFileReader pdfFileReader) {
+    public static Object[] getRolloverKeyValues(final PdfObject form, final PdfFileReader pdfFileReader) {
         
         final PdfObject APobjR = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.R);
 
@@ -83,8 +83,8 @@ public class FormStream {
         if (APkeys != null && APkeys.getTokenCount() > 0) {
             
             while (APkeys.hasMorePairs()) {
-                String glyphKey = APkeys.getNextKeyAsString();
-                byte[] data = APkeys.getNextValueAsBytes();
+                final String glyphKey = APkeys.getNextKeyAsString();
+                final byte[] data = APkeys.getNextValueAsBytes();
                 
                 if (data != null) {
                     if (glyphKey.equals("Off")) {
@@ -112,7 +112,7 @@ public class FormStream {
         return new Object[] {key, val, rollOffDic};
     }
     
-    public static Object[] getNormalKeyValues(PdfObject form, PdfFileReader pdfFileReader) {
+    public static Object[] getNormalKeyValues(final PdfObject form, final PdfFileReader pdfFileReader) {
 
         final PdfObject APobjN = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
 
@@ -129,8 +129,8 @@ public class FormStream {
 
             while(APkeys.hasMorePairs()){
 
-                String glyphKey=APkeys.getNextKeyAsString();
-                byte[] data=APkeys.getNextValueAsBytes();
+                final String glyphKey=APkeys.getNextKeyAsString();
+                final byte[] data=APkeys.getNextValueAsBytes();
 
                 if(data!=null){
                     if(glyphKey.equals("Off")){
@@ -170,7 +170,7 @@ public class FormStream {
         return new Object[]{key,val,normalOffDic};
     }
 
-        public static Object[] getDownKeyValues(PdfObject form, PdfFileReader pdfFileReader){
+        public static Object[] getDownKeyValues(final PdfObject form, final PdfFileReader pdfFileReader){
         
             final PdfObject APobjD = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.D);
 
@@ -184,8 +184,8 @@ public class FormStream {
                 
                 while(APkeys.hasMorePairs()) {
                     
-                    String glyphKey=APkeys.getNextKeyAsString();
-                    byte[] data=APkeys.getNextValueAsBytes();
+                    final String glyphKey=APkeys.getNextKeyAsString();
+                    final byte[] data=APkeys.getNextValueAsBytes();
                     
                     if (data != null) {
                         if (glyphKey.equals("Off")) {
@@ -324,7 +324,7 @@ public class FormStream {
     }
 
     /** set correct flags for AP images */
-    private static void setupAPimages(final FormObject formObject, PdfFileReader pdfFileReader) {
+    private static void setupAPimages(final FormObject formObject, final PdfFileReader pdfFileReader) {
 
         final PdfObject APobjN = formObject.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
         //if valid AP, setup flags to show we use images
@@ -406,7 +406,7 @@ public class FormStream {
     	try{
             
     		//create renderer object
-    		org.jpedal.fonts.glyph.T3Glyph form = decodeStream(currentPdfFile, XObject);
+    		final org.jpedal.fonts.glyph.T3Glyph form = decodeStream(currentPdfFile, XObject);
             
             final float[] matrix=XObject.getFloatArray(PdfDictionary.Matrix);
             final float[] BBox=XObject.getFloatArray(PdfDictionary.BBox);
@@ -561,7 +561,7 @@ public class FormStream {
     	}
     }
     
-    private static Graphics2D createGaphics(BufferedImage aa, PdfObject formObj, float[] matrix, float[] BBox, float pageScaling, float scaling, float transformOffsetX, float transformOffsetY, int width, int height) {
+    private static Graphics2D createGaphics(final BufferedImage aa, final PdfObject formObj, float[] matrix, final float[] BBox, final float pageScaling, final float scaling, final float transformOffsetX, final float transformOffsetY, final int width, final int height) {
         
         final Graphics2D g2;
         int offset = height;
@@ -758,7 +758,7 @@ public class FormStream {
      * @return the rotated image
      */
     public static BufferedImage rotate(final BufferedImage src, final int rotation) {
-        BufferedImage dst;
+        final BufferedImage dst;
 
         if(src == null) {
             return null;

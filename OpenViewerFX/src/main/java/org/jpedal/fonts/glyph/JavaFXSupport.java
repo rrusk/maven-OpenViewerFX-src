@@ -50,15 +50,15 @@ import org.jpedal.objects.acroforms.creation.GenericFormFactory;
  */
 public class JavaFXSupport {
 
-    public PdfGlyph getGlyph(Glyf currentGlyf, FontFile2 fontTable, Hmtx currentHmtx, int idx, float f, TTVM vm, String baseFontName) {
+    public PdfGlyph getGlyph(final Glyf currentGlyf, final FontFile2 fontTable, final Hmtx currentHmtx, final int idx, final float f, final TTVM vm, final String baseFontName) {
         throw new UnsupportedOperationException("getGlyph Not supported yet."); 
     }
 
-    public PdfGlyph getGlyph(float[] x, float[] y, float[] x2, float[] y2, float[] x3, float[] y3, float ymin, int end, int[] commands) {
+    public PdfGlyph getGlyph(final float[] x, final float[] y, final float[] x2, final float[] y2, final float[] x3, final float[] y3, final float ymin, final int end, final int[] commands) {
        throw new UnsupportedOperationException("getGlyph Not supported yet."); 
     }
 
-    public Object getCommandHandler(Object currentCommands) {
+    public Object getCommandHandler(final Object currentCommands) {
         throw new UnsupportedOperationException("getCommandHandler Not supported yet.");
     }
 
@@ -99,11 +99,11 @@ public class JavaFXSupport {
         }
     }
 
-    public static void setVisible(Object guiComp, boolean isVisible) {
+    public static void setVisible(final Object guiComp, final boolean isVisible) {
         ((Node) guiComp).setVisible(isVisible);
     }
 
-    public static void select(Object guiComp, String selectedItem, int formType) {
+    public static void select(final Object guiComp, final String selectedItem, final int formType) {
         if (formType == FormFactory.combobox) {
             ((ComboBox<String>) guiComp).getSelectionModel().select(selectedItem);
         } else {
@@ -111,7 +111,7 @@ public class JavaFXSupport {
         }
     }
 
-    public static String getSelectedItem(Object guiComp, int formType) {
+    public static String getSelectedItem(final Object guiComp, final int formType) {
         if (formType == FormFactory.combobox) {
             return (String) ((ComboBox) guiComp).getSelectionModel().getSelectedItem();
         } else {

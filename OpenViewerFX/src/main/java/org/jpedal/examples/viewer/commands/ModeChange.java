@@ -102,7 +102,7 @@ class ModeChange {
             
             currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
             ((GUI)currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
-           Stage stage = (Stage) currentGUI.getFrame();
+           final Stage stage = (Stage) currentGUI.getFrame();
             if (stage != null) {
                 ((Stage) currentGUI.getFrame()).setMinWidth(0);
                 ((Stage) currentGUI.getFrame()).setMinHeight(0);

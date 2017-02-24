@@ -72,8 +72,8 @@ public class LatticeFormContext implements PaintContext {
     private final BitReader reader;
 
     LatticeFormContext(final GenericColorSpace shadingColorSpace,
-            final float[] background, PdfObject shadingObject,
-            float[][] matrix, int pageHeight, float scaling, int offX, int offY) {
+                       final float[] background, final PdfObject shadingObject,
+                       final float[][] matrix, final int pageHeight, final float scaling, final int offX, final int offY) {
 
         //this.shadingColorSpace = shadingColorSpace;
         //this.background = background;
@@ -83,7 +83,7 @@ public class LatticeFormContext implements PaintContext {
         verticesPerRow = shadingObject.getInt(PdfDictionary.VerticesPerRow);
         decodeArr = shadingObject.getFloatArray(PdfDictionary.Decode);
         colCompCount = shadingColorSpace.getColorComponentCount();
-        boolean hasSmallBits = bitsPerComponent<8 || bitsPerCoordinate<8;
+        final boolean hasSmallBits = bitsPerComponent<8 || bitsPerCoordinate<8;
         reader = new BitReader(shadingObject.getDecodedStream(),hasSmallBits);
         
         this.background = background;
@@ -105,26 +105,26 @@ public class LatticeFormContext implements PaintContext {
      * process the datastream and update the variables
      */
     private void process() {
-        ArrayList<Point2D> pList = new ArrayList<Point2D>();
-        ArrayList<Color> cList = new ArrayList<Color>();
+        final ArrayList<Point2D> pList = new ArrayList<Point2D>();
+        final ArrayList<Color> cList = new ArrayList<Color>();
         while (reader.getPointer() < reader.getTotalBitLen()) {
-            Point2D p = getPointCoords();
+            final Point2D p = getPointCoords();
             pList.add(p);
-            float[] cc = {1f, 1f, 1f, 1f};
+            final float[] cc = {1f, 1f, 1f, 1f};
             for (int z = 0; z < colCompCount; z++) {
                 cc[z] =  reader.getFloat(bitsPerComponent);
             }
-            Color c = new Color(cc[0], cc[1], cc[2], cc[3]);
+            final Color c = new Color(cc[0], cc[1], cc[2], cc[3]);
             cList.add(c);
         }
-        int totalRows = pList.size() / verticesPerRow;
+        final int totalRows = pList.size() / verticesPerRow;
 
         //populate triangles : please refer to the pdf spec for understanding
         for (int mm = 0; mm < (totalRows - 1); mm++) {
-            int mRows = mm * totalRows;
+            final int mRows = mm * totalRows;
             for (int nn = 0; nn < (verticesPerRow - 1); nn++) {
-                int nm = nn + mRows;
-                int[] t = new int[6];
+                final int nm = nn + mRows;
+                final int[] t = new int[6];
                 t[0] = nm;
                 t[1] = t[3] = nm + 1;
                 t[2] = t[4] = nm + verticesPerRow;
@@ -142,16 +142,16 @@ public class LatticeFormContext implements PaintContext {
      */
     private void adjustPoints() {
 
-        float xMin = decodeArr[0];
-        float xMax = decodeArr[1];
-        float yMin = decodeArr[2];
-        float yMax = decodeArr[3];
+        final float xMin = decodeArr[0];
+        final float xMax = decodeArr[1];
+        final float yMin = decodeArr[2];
+        final float yMax = decodeArr[3];
 
-        float xw = xMax - xMin;
-        float yw = yMax - yMin;
+        final float xw = xMax - xMin;
+        final float yw = yMax - yMin;
 
-        ArrayList<Point2D> triPoints = new ArrayList<Point2D>();
-        for (Point2D p : triangles) {
+        final ArrayList<Point2D> triPoints = new ArrayList<Point2D>();
+        for (final Point2D p : triangles) {
             double xx = p.getX();
             double yy = p.getY();
             xx = (xw * xx) + xMin;
@@ -161,16 +161,16 @@ public class LatticeFormContext implements PaintContext {
         triangles.clear();
 
         //bring back to normal matrix;
-        float scaleX = 1 / (matrix[0][0]);
-        float scaleY = 1 / (matrix[1][1]);
-        float tx = matrix[2][0] * scaleX;
-        float ty = matrix[2][1] * scaleY;
+        final float scaleX = 1 / (matrix[0][0]);
+        final float scaleY = 1 / (matrix[1][1]);
+        final float tx = matrix[2][0] * scaleX;
+        final float ty = matrix[2][1] * scaleY;
 
-        for (Point2D t : triPoints) {
-            double x = t.getX();
-            double y = t.getY();
-            float b = 0;
-            float c = 0;
+        for (final Point2D t : triPoints) {
+            final double x = t.getX();
+            final double y = t.getY();
+            final float b = 0;
+            final float c = 0;
             double xx = (x) + (c * y) + tx ;
             double yy = (b * x) + y + ty;
             // convert the points to integer for better performance
@@ -181,7 +181,7 @@ public class LatticeFormContext implements PaintContext {
         }
 
         for (int t = 0; t < triangles.size(); t += 3) {
-            GeneralPath sh = new GeneralPath();
+            final GeneralPath sh = new GeneralPath();
             sh.moveTo(triangles.get(t).getX(), triangles.get(t).getY());
             sh.lineTo(triangles.get(t + 1).getX(), triangles.get(t + 1).getY());
             sh.lineTo(triangles.get(t + 2).getX(), triangles.get(t + 2).getY());
@@ -253,7 +253,7 @@ public class LatticeFormContext implements PaintContext {
     }
 
     @Override
-    public Raster getRaster(int xStart, int yStart, int w, int h) {
+    public Raster getRaster(final int xStart, final int yStart, final int w, final int h) {
 
         final int rastSize = (w * h * 4);
         final int[] data = new int[rastSize];
@@ -277,88 +277,88 @@ public class LatticeFormContext implements PaintContext {
             for (int x = 0; x < w; x++) {
 //                float pdfX = xStart + x;
 //                float pdfY = pageHeight - (yStart + y);
-                float[] xy = PixelFactory.convertPhysicalToPDF(false, x, y, offX, offY, 1/scaling, xStart, yStart, 0, pageHeight);
-                float pdfX = xy[0];
-                float pdfY = xy[1];
+                final float[] xy = PixelFactory.convertPhysicalToPDF(false, x, y, offX, offY, 1/scaling, xStart, yStart, 0, pageHeight);
+                final float pdfX = xy[0];
+                final float pdfY = xy[1];
                 int sc = 0; //shape counts
-                for (GeneralPath sh : shapes) {
-                    Point2D pdfPoint = new Point2D.Double(pdfX, pdfY);
+                for (final GeneralPath sh : shapes) {
+                    final Point2D pdfPoint = new Point2D.Double(pdfX, pdfY);
                     if (sh.contains(pdfPoint)) {
-                        Rectangle2D rect = sh.getBounds2D();
-                        Point2D scanStart = new Point2D.Double(-1024, pdfY);
-                        Point2D scanEnd = new Point2D.Double(rect.getX() + rect.getWidth(), pdfY);
-                        Line2D scanLine = new Line2D.Double(scanStart, scanEnd);
+                        final Rectangle2D rect = sh.getBounds2D();
+                        final Point2D scanStart = new Point2D.Double(-1024, pdfY);
+                        final Point2D scanEnd = new Point2D.Double(rect.getX() + rect.getWidth(), pdfY);
+                        final Line2D scanLine = new Line2D.Double(scanStart, scanEnd);
 
-                        Point2D a = triangles.get(sc + 0);
-                        Color aCol = triColors.get(sc + 0);
-                        Point2D b = triangles.get(sc + 1);
-                        Color bCol = triColors.get(sc + 1);
-                        Point2D c = triangles.get(sc + 2);
-                        Color cCol = triColors.get(sc + 2);
+                        final Point2D a = triangles.get(sc + 0);
+                        final Color aCol = triColors.get(sc + 0);
+                        final Point2D b = triangles.get(sc + 1);
+                        final Color bCol = triColors.get(sc + 1);
+                        final Point2D c = triangles.get(sc + 2);
+                        final Color cCol = triColors.get(sc + 2);
 
-                        Line2D ab = new Line2D.Double(a, b);
-                        Line2D bc = new Line2D.Double(b, c);
-                        Line2D ac = new Line2D.Double(a, c);
+                        final Line2D ab = new Line2D.Double(a, b);
+                        final Line2D bc = new Line2D.Double(b, c);
+                        final Line2D ac = new Line2D.Double(a, c);
 
-                        Color result;
+                        final Color result;
 
-                        ArrayList<Color> colPoints = new ArrayList<Color>();
-                        ArrayList<Point2D> interPoints = new ArrayList<Point2D>();
+                        final ArrayList<Color> colPoints = new ArrayList<Color>();
+                        final ArrayList<Point2D> interPoints = new ArrayList<Point2D>();
 
                         if (ab.intersectsLine(scanLine)) {
-                            Point2D inter = ShadingUtils.findIntersect(scanStart, scanEnd, a, b);
-                            double ai = a.distance(inter);
-                            double bi = b.distance(inter);
-                            float fraction = (float) (ai / (ai + bi));
-                            Color col = ShadingUtils.interpolate2Color(aCol, bCol, fraction);
+                            final Point2D inter = ShadingUtils.findIntersect(scanStart, scanEnd, a, b);
+                            final double ai = a.distance(inter);
+                            final double bi = b.distance(inter);
+                            final float fraction = (float) (ai / (ai + bi));
+                            final Color col = ShadingUtils.interpolate2Color(aCol, bCol, fraction);
                             colPoints.add(col);
                             interPoints.add(inter);
                         }
                         if (bc.intersectsLine(scanLine)) {
-                            Point2D inter = ShadingUtils.findIntersect(scanStart, scanEnd, b, c);
-                            double bi = b.distance(inter);
-                            double ci = c.distance(inter);
-                            float fraction = (float) (bi / (bi + ci));
-                            Color col = ShadingUtils.interpolate2Color(bCol, cCol, fraction);
+                            final Point2D inter = ShadingUtils.findIntersect(scanStart, scanEnd, b, c);
+                            final double bi = b.distance(inter);
+                            final double ci = c.distance(inter);
+                            final float fraction = (float) (bi / (bi + ci));
+                            final Color col = ShadingUtils.interpolate2Color(bCol, cCol, fraction);
                             colPoints.add(col);
                             interPoints.add(inter);
                         }
                         if (ac.intersectsLine(scanLine)) {
-                            Point2D inter = ShadingUtils.findIntersect(scanStart, scanEnd, a, c);
-                            double ai = a.distance(inter);
-                            double ci = c.distance(inter);
-                            float fraction = (float) (ai / (ai + ci));
-                            Color col = ShadingUtils.interpolate2Color(aCol, cCol, fraction);
+                            final Point2D inter = ShadingUtils.findIntersect(scanStart, scanEnd, a, c);
+                            final double ai = a.distance(inter);
+                            final double ci = c.distance(inter);
+                            final float fraction = (float) (ai / (ai + ci));
+                            final Color col = ShadingUtils.interpolate2Color(aCol, cCol, fraction);
                             colPoints.add(col);
                             interPoints.add(inter);
                         }
 
                         if (interPoints.size() == 2) {
-                            double first = interPoints.get(0).distance(pdfPoint);
-                            double second = interPoints.get(1).distance(pdfPoint);
-                            Color firstColor = colPoints.get(0);
-                            Color secondColor = colPoints.get(1);
-                            float fraction = (float) (first / (first + second));
+                            final double first = interPoints.get(0).distance(pdfPoint);
+                            final double second = interPoints.get(1).distance(pdfPoint);
+                            final Color firstColor = colPoints.get(0);
+                            final Color secondColor = colPoints.get(1);
+                            final float fraction = (float) (first / (first + second));
                             result = ShadingUtils.interpolate2Color(firstColor, secondColor, fraction);
 
                         } else {
                             if (a.getY() == pdfPoint.getY()) {
-                                double first = interPoints.get(1).distance(pdfPoint);
-                                double second = a.distance(pdfPoint);
-                                Color firstColor = colPoints.get(1);
-                                float fraction = (float) (first / (first + second));
+                                final double first = interPoints.get(1).distance(pdfPoint);
+                                final double second = a.distance(pdfPoint);
+                                final Color firstColor = colPoints.get(1);
+                                final float fraction = (float) (first / (first + second));
                                 result = ShadingUtils.interpolate2Color(firstColor, aCol, fraction);
                             } else if (b.getY() == pdfPoint.getY()) {
-                                double first = interPoints.get(2).distance(pdfPoint);
-                                double second = b.distance(pdfPoint);
-                                Color firstColor = colPoints.get(2);
-                                float fraction = (float) (first / (first + second));
+                                final double first = interPoints.get(2).distance(pdfPoint);
+                                final double second = b.distance(pdfPoint);
+                                final Color firstColor = colPoints.get(2);
+                                final float fraction = (float) (first / (first + second));
                                 result = ShadingUtils.interpolate2Color(firstColor, bCol, fraction);
                             } else {
-                                double first = interPoints.get(0).distance(pdfPoint);
-                                double second = c.distance(pdfPoint);
-                                Color firstColor = colPoints.get(0);
-                                float fraction = (float) (first / (first + second));
+                                final double first = interPoints.get(0).distance(pdfPoint);
+                                final double second = c.distance(pdfPoint);
+                                final Color firstColor = colPoints.get(0);
+                                final float fraction = (float) (first / (first + second));
                                 result = ShadingUtils.interpolate2Color(firstColor, cCol, fraction);
                             }
                         }

@@ -95,7 +95,7 @@ public final class ColorspaceFactory {
         final byte[] colValue=colorSpace.getNextValueAsByte(false);
         
         if (StreamReaderUtils.isRef(colValue, 0) || StreamReaderUtils.isArray(colValue, 0)) {
-            PdfArrayIterator it=convertColValueToMixedArray(currentPdfFile, colorSpace.getNextValueAsByte(true));
+            final PdfArrayIterator it=convertColValueToMixedArray(currentPdfFile, colorSpace.getNextValueAsByte(true));
             
             return getColorspace(it.getNextValueAsKey(), it, currentPdfFile);          
         } else {
@@ -151,7 +151,7 @@ public final class ColorspaceFactory {
     private static GenericColorSpace getColorspace(final int ID, final PdfArrayIterator colorSpace, final PdfObjectReader currentPdfFile) {
         
         //no DeviceRGB as set as default
-        GenericColorSpace currentColorData;
+        final GenericColorSpace currentColorData;
          
         switch(ID){
             case ColorSpaces.Separation:
@@ -200,7 +200,7 @@ public final class ColorspaceFactory {
 
     private static GenericColorSpace getPatternColorspace(final PdfArrayIterator colorSpace, final PdfObjectReader currentPdfFile) {
         
-        GenericColorSpace currentColorData;
+        final GenericColorSpace currentColorData;
         if(colorSpace.hasMoreTokens()){
             final GenericColorSpace patternColorSpace = getColorSpace(colorSpace, currentPdfFile);
             currentColorData=new PatternColorSpace(currentPdfFile,patternColorSpace);
@@ -210,7 +210,7 @@ public final class ColorspaceFactory {
         return currentColorData;
     }
     
-    private static byte[][] convertColValueToKeyArray(final PdfObjectReader currentPdfFile, byte[] alt) {
+    private static byte[][] convertColValueToKeyArray(final PdfObjectReader currentPdfFile, final byte[] alt) {
         
         int ptr=0;
         if(alt[0]=='['){
@@ -322,21 +322,17 @@ public final class ColorspaceFactory {
     private static GenericColorSpace getCalRGBColorspace(final PdfObject colorSpace) {
         
         float[] W = { 1.0f, 1.0f, 1.0f };
-        float[] B = { 0.0f, 0.0f, 0.0f };
+//        float[] B = { 0.0f, 0.0f, 0.0f };
         float[] G = { 1.0f, 1.0f, 1.0f };
         float[] Ma = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
         
         final float[] gammaArray=colorSpace.getFloatArray(PdfDictionary.Gamma);
         final float[] whitepointArray=colorSpace.getFloatArray(PdfDictionary.WhitePoint);
-        final float[] blackpointArray=colorSpace.getFloatArray(PdfDictionary.BlackPoint);
+//        final float[] blackpointArray=colorSpace.getFloatArray(PdfDictionary.BlackPoint);
         final float[] matrixArray=colorSpace.getFloatArray(PdfDictionary.Matrix);
         
         if (whitepointArray != null) {
             W=whitepointArray;
-        }
-        
-        if (blackpointArray != null) {
-            B=blackpointArray;
         }
         
         if (gammaArray != null) {
@@ -347,7 +343,7 @@ public final class ColorspaceFactory {
             Ma = matrixArray;
         }
         
-        return new CalRGBColorSpace(W,B,Ma,G);        
+        return new CalRGBColorSpace(W,Ma,G);        
     }
     
     private static GenericColorSpace getCalGrayColorspace(final PdfObject colorSpace) {
@@ -379,9 +375,9 @@ public final class ColorspaceFactory {
         
         final byte[] name=colorSpace.getNextValueAsByte(true);
         
-        GenericColorSpace altCS = getColorSpace(colorSpace, currentPdfFile);
+        final GenericColorSpace altCS = getColorSpace(colorSpace, currentPdfFile);
        
-        PdfObject functionObj=getFunctionObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true));
+        final PdfObject functionObj=getFunctionObjectFromRefOrDirect(currentPdfFile, colorSpace.getNextValueAsByte(true));
        
         //name of color if separation or Components if device and component count
         if(ID!=ColorSpaces.Separation){
@@ -390,7 +386,7 @@ public final class ColorspaceFactory {
         }
 
         final ColorMapping colorMapper=new ColorMapping(currentPdfFile,functionObj);
-        float[] domain=functionObj.getFloatArray(PdfDictionary.Domain);
+        final float[] domain=functionObj.getFloatArray(PdfDictionary.Domain);
         
         if(ID==ColorSpaces.Separation){
             return new SeparationColorSpace(colorMapper,domain, altCS);

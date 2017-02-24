@@ -326,7 +326,7 @@ public class CMAP extends Table {
         }
     }
 
-    private void readFormatZeroTable(final FontFile2 currentFontFile, int j) {
+    private void readFormatZeroTable(final FontFile2 currentFontFile, final int j) {
         hasFormatZero=true;
         
         for(int glyphNum=0;glyphNum<256;glyphNum++){
@@ -712,7 +712,7 @@ public class CMAP extends Table {
         return glyfValues;
     }
 
-    public int getGlyphToIndex(int rawInt) {
+    public int getGlyphToIndex(final int rawInt) {
 
         return glyphToIndex[rawInt];
     }

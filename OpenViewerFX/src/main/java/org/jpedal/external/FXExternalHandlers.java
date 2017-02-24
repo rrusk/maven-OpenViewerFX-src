@@ -47,7 +47,7 @@ import org.jpedal.render.FXDisplay;
  */
 public class FXExternalHandlers extends ExternalHandlers {
 
-    public FXExternalHandlers(GUIModes guiModes) {
+    public FXExternalHandlers(final GUIModes guiModes) {
         super(guiModes);
     }
     
@@ -57,12 +57,12 @@ public class FXExternalHandlers extends ExternalHandlers {
     }
     
     @Override
-    public void setDVR(FileAccess fileAccess) {
+    public void setDVR(final FileAccess fileAccess) {
         fileAccess.setDVR(new FXDisplay(1,fileAccess.getObjectStore(),false));
     }
     
     @Override
-    public PDFtoImageConvertor getConverter(float multiplyer, DecoderOptions options) {
+    public PDFtoImageConvertor getConverter(final float multiplyer, final DecoderOptions options) {
         return new PDFtoImageConvertorFX(multiplyer, options);
     }
     

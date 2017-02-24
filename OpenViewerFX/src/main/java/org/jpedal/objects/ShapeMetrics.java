@@ -40,7 +40,7 @@ public class ShapeMetrics {
         return rectangleCount;
     }
 
-    public void setRectangleCount(int rectangleCount) {
+    public void setRectangleCount(final int rectangleCount) {
         this.rectangleCount = rectangleCount;
     }
     

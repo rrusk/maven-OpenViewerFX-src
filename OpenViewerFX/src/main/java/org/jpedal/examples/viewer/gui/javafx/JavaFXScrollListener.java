@@ -147,7 +147,7 @@ public class JavaFXScrollListener implements ChangeListener<Number>, EventHandle
     }
 
     @Override
-    public void handle(MouseEvent event) {
+    public void handle(final MouseEvent event) {
         if (!requestMade) {
             requestMade = true;
             if (nextPage > 0) {

@@ -218,7 +218,7 @@ public class ParserOptions {
         return renderText;
     }
 
-    public void isPrinting(boolean printing){
+    public void isPrinting(final boolean printing){
         isPrinting=printing;
     }
     
@@ -357,7 +357,7 @@ public class ParserOptions {
     /**
      * @param layerLevel the layerLevel to set
      */
-    public void setLayerLevel(int layerLevel) {
+    public void setLayerLevel(final int layerLevel) {
         this.layerLevel = layerLevel;
     }
 
@@ -371,18 +371,18 @@ public class ParserOptions {
     /**
      * @param layerVisibility the layerVisibility to set
      */
-    public void setLayerVisibility(Set<Integer> layerVisibility) {
+    public void setLayerVisibility(final Set<Integer> layerVisibility) {
         this.layerVisibility = layerVisibility;
     }
 
     /**
      * @param isLayerVisible the isLayerVisible to set
      */
-    public void setIsLayerVisible(boolean isLayerVisible) {
+    public void setIsLayerVisible(final boolean isLayerVisible) {
         this.isLayerVisible = isLayerVisible;
     }
 
-    public void isType3Font(boolean isType3Font) {
+    public void isType3Font(final boolean isType3Font) {
        this.isType3Font=isType3Font;
     }
     

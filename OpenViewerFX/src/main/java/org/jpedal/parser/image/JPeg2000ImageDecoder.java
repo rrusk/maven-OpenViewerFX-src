@@ -47,7 +47,7 @@ import org.jpedal.utils.LogWriter;
 public class JPeg2000ImageDecoder {
     
     
-    public static BufferedImage decode(final int w, final int h, final GenericColorSpace decodeColorData, final byte[] data, final ImageData imageData, int d) throws RuntimeException, PdfException {
+    public static BufferedImage decode(final int w, final int h, final GenericColorSpace decodeColorData, final byte[] data, final ImageData imageData, final int d) throws RuntimeException, PdfException {
 
         LogWriter.writeLog("JPeg 2000 Image " + w + "W * " + h + 'H');
 
@@ -59,7 +59,7 @@ public class JPeg2000ImageDecoder {
         
         try {
             return JDeliHelper.getBytesFromJPEG(data);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             LogWriter.writeLog("Exception with JPeg Image " + ex);
         }
         return null;
@@ -69,7 +69,7 @@ public class JPeg2000ImageDecoder {
     public static byte[] getUnconvertedBytesFromJPEG2000(final byte[] data) {
         try {
             return JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             LogWriter.writeLog("Exception with JPeg Image " + ex);
         }
         return null;

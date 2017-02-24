@@ -68,7 +68,7 @@ public class GUIModifier {
     
     private static void setButtonEnabledAndVisible(final GUIButtons buttons, final int type, final boolean set) {
         
-        GUIButton button = buttons.getButton(type);
+        final GUIButton button = buttons.getButton(type);
         
         if(button!=null){
             button.setEnabled(set);
@@ -88,11 +88,11 @@ public class GUIModifier {
     
     private static void loadNodeList(final NodeList tags, final GUIFactory currentGUI){
         for(int i=0; i!=tags.getLength(); i++){
-            Node node = tags.item(i);
-            String name = tags.item(i).getNodeName();
+            final Node node = tags.item(i);
+            final String name = tags.item(i).getNodeName();
             if (!name.startsWith("#")) { //Actual node
                 if (node.hasAttributes()) { //With attributes
-                    Node value = node.getAttributes().getNamedItem("value");
+                    final Node value = node.getAttributes().getNamedItem("value");
                     if (value != null) { //Has attribute called value
                         if (value.getNodeValue().equalsIgnoreCase("true")) {
                             alterProperty(name, true, currentGUI);
@@ -119,7 +119,7 @@ public class GUIModifier {
 
         String value = properties.getValue("sideTabBarCollapseLength");
         if (value != null && !value.isEmpty()) {
-            int iValue = Integer.parseInt(value);
+            final int iValue = Integer.parseInt(value);
             currentGUI.setStartSize(iValue);
         }
 
@@ -129,13 +129,13 @@ public class GUIModifier {
             currentGUI.reinitialiseTabs(false);
         }
 
-        NodeList tags = properties.getChildren("*");
+        final NodeList tags = properties.getChildren("*");
         loadNodeList(tags, currentGUI);
     }
 
     private static boolean alterSectionProperties(final String value, final boolean set, final GUIFactory currentGUI, final boolean isSingle){
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
 
         //Disable entire section
@@ -169,7 +169,7 @@ public class GUIModifier {
     
     private static boolean alterNavButtonProperties(final String value, final boolean set, final GUIFactory currentGUI){
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         //Disable entire section
         switch (propertyCode) {
@@ -204,7 +204,7 @@ public class GUIModifier {
     
     private static boolean alterDisplayButtonProperties(final String value, final boolean set, final GUIFactory currentGUI){
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         //Disable entire section
         switch (propertyCode) {
@@ -236,7 +236,7 @@ public class GUIModifier {
     
     private static boolean alterOptionPaneProperties(final String value, final boolean set, final GUIFactory currentGUI) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -263,7 +263,7 @@ public class GUIModifier {
     
     private static boolean alterButtonBarProperties(final String value, final boolean set, final GUIFactory currentGUI) {
     
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -324,10 +324,10 @@ public class GUIModifier {
     
     private static boolean alterSideBarProperties(final String value, final boolean set, final GUIFactory currentGUI) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
-        int tabCount = currentGUI.getSidebarTabCount();
+        final int tabCount = currentGUI.getSidebarTabCount();
         if (tabCount != 0) {
             switch (propertyCode) {
                 case PropertyTags.PAGETAB:
@@ -377,7 +377,7 @@ public class GUIModifier {
      
     private static boolean alterEditMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -421,7 +421,7 @@ public class GUIModifier {
     
     private static boolean alterPageNavMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -462,7 +462,7 @@ public class GUIModifier {
     
     private static boolean alterPageDisplayMenuItemProperties(final String value, final boolean set, final boolean isSingle, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -506,7 +506,7 @@ public class GUIModifier {
     
     private static boolean alterDisplayOptionMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -538,7 +538,7 @@ public class GUIModifier {
     
     private static boolean alterWindowMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -567,7 +567,7 @@ public class GUIModifier {
     
     private static boolean alterExportMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -632,7 +632,7 @@ public class GUIModifier {
     
     private static boolean alterHelpMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {
@@ -661,7 +661,7 @@ public class GUIModifier {
     
     private static boolean alterFileMenuItemProperties(final String value, final boolean set, final GUIFactory currentGUI, final GUIMenuItems menuItems) {
         
-        int propertyCode = value.hashCode();
+        final int propertyCode = value.hashCode();
         boolean used = true;
         
         switch (propertyCode) {

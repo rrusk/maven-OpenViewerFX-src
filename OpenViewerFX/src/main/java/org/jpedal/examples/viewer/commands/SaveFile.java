@@ -117,7 +117,7 @@ public class SaveFile {
         }
     }
    
-    private static void saveAsImage(File file, final GUIFactory currentGUI, final String ext) {
+    private static void saveAsImage(final File file, final GUIFactory currentGUI, final String ext) {
         
         if (ext.equals("png") || ext.equals("jpg") || ext.equals("tif")) {
             
@@ -135,7 +135,7 @@ public class SaveFile {
 
                     decoder.getObjectStore().saveStoredImage(filename, imageToSave, true, ext);
 
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     LogWriter.writeLog("Exception attempting to Save as image: " + ex);
                 }
             }
@@ -176,14 +176,14 @@ public class SaveFile {
         try {
             tempFile = File.createTempFile(file.getName().substring(0, file.getName().lastIndexOf('.')) + "SaveTemp", file.getName().substring(file.getName().lastIndexOf('.')));
             copyFile(commonValues.getSelectedFile(), tempFile.getAbsolutePath(), currentGUI);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             LogWriter.writeLog("Exception attempting to create temp file: " + ex);
         }
         
         if (tempFile != null) {
             
             if (currentGUI.getValues().isFormsChanged()) {
-                Object[] objArr = currentGUI.getPdfDecoder().getFormRenderer().getFormComponents(null, ReturnValues.FORMOBJECTS_FROM_REF, -1);
+                final Object[] objArr = currentGUI.getPdfDecoder().getFormRenderer().getFormComponents(null, ReturnValues.FORMOBJECTS_FROM_REF, -1);
 
                 if (objArr != null) {
                     currentGUI.getAnnotationPanel().saveForms(commonValues.getSelectedFile(), tempFile.getAbsolutePath(), objArr);
@@ -210,7 +210,7 @@ public class SaveFile {
     }
     
     
-    private static void copyFile(String input, String output, GUIFactory currentGUI){
+    private static void copyFile(final String input, final String output, final GUIFactory currentGUI){
         
         /*
          * reset flag and graphical clue
