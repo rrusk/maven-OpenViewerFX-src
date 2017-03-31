@@ -33,8 +33,8 @@
 package org.jpedal.objects.acroforms;
 
 /**
- * return options for Forms methods 
+ * return options for Forms methods
  */
 public enum ReturnValues {
-    GUI_FORMS_FROM_NAME, FORM_NAMES, FORMOBJECTS_FROM_NAME,FORMOBJECTS_FROM_REF, EMBEDDED_FILES
+    GUI_FORMS_FROM_NAME, FORM_NAMES, FORMOBJECTS_FROM_NAME, FORMOBJECTS_FROM_REF, EMBEDDED_FILES
 }

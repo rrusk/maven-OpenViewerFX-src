@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -46,11 +47,11 @@ import org.jpedal.objects.PdfPageData;
 import org.jpedal.utils.Messages;
 
 /**
- * This class allows you to add a page to your 
- * PDF document, using itext function .add(). 
+ * This class allows you to add a page to your
+ * PDF document, using itext function .add().
  * It first closes the document, adds a page and then re-opens it
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class Add {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
@@ -62,7 +63,7 @@ public class Add {
             } else {
                 //get values from user
                 final InsertBlankPDFPage addPage = new InsertBlankPDFPage(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int positionToAdd = addPage.display((Component)currentGUI.getFrame(), Messages.getMessage("PdfViewer.BlankPage"));
+                final int positionToAdd = addPage.display((Component) currentGUI.getFrame(), Messages.getMessage("PdfViewer.BlankPage"));
 
                 //get parameters and call if YES
                 if (positionToAdd == JOptionPane.OK_OPTION) {

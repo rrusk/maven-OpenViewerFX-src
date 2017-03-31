@@ -40,7 +40,7 @@ import org.jpedal.utils.Matrix;
  *
  */
 public class CM {
-   
+
     public static void execute(final GraphicsState gs, final CommandParser parser) {
 
         //create temp Trm matrix to update Tm
@@ -59,7 +59,7 @@ public class CM {
 
 
         //copy last CM
-        for(int i=0;i<3;i++) {
+        for (int i = 0; i < 3; i++) {
             System.arraycopy(gs.CTM, 0, gs.lastCTM, 0, 3);
         }
 
@@ -71,27 +71,27 @@ public class CM {
         //if(gs.CTM[0][0]>0 && gs.CTM[1][1]>0 && gs.CTM[1][0]>0 && ((gs.CTM[1][0]<0.01 && gs.CTM[0][1]<0) || (gs.CTM[0][0]>100 && gs.CTM[0][1]<2))){
 
         //added for odd case with file upsidedownlogo.pdf
-        if(gs.CTM[0][0]>0 && gs.CTM[1][1]>0 && Math.abs(gs.CTM[0][1])<0.001 && gs.CTM[1][0]==0){
-            gs.CTM[0][1]=0;
+        if (gs.CTM[0][0] > 0 && gs.CTM[1][1] > 0 && Math.abs(gs.CTM[0][1]) < 0.001 && gs.CTM[1][0] == 0) {
+            gs.CTM[0][1] = 0;
         }
-        
-        if(gs.CTM[0][0]>0 && gs.CTM[1][1]>0 && gs.CTM[1][0]>0 && ((gs.CTM[1][0]<0.01 && gs.CTM[0][1]<0) || (gs.CTM[0][0]>100 && gs.CTM[0][1]==gs.CTM[1][0] && gs.CTM[0][1]==1))){
-        
-            gs.CTM[0][1]=0;
-            gs.CTM[1][0]=0;
+
+        if (gs.CTM[0][0] > 0 && gs.CTM[1][1] > 0 && gs.CTM[1][0] > 0 && ((gs.CTM[1][0] < 0.01 && gs.CTM[0][1] < 0) || (gs.CTM[0][0] > 100 && gs.CTM[0][1] == gs.CTM[1][0] && gs.CTM[0][1] == 1))) {
+
+            gs.CTM[0][1] = 0;
+            gs.CTM[1][0] = 0;
         }
-        
+
         //Ignore very minor skew
 //        if(Math.abs(gs.CTM[0][1]/gs.CTM[0][0])<0.006 && Math.abs(gs.CTM[1][0]/gs.CTM[1][1])<0.006){
 //            gs.CTM[0][1]=0;
 //            gs.CTM[1][0]=0;
 //        }
-        
+
         //deal with very minor rotation on page in 17780
-        if(gs.CTM[1][0]>100 && gs.CTM[0][1]>100 && gs.CTM[0][0]<0.001 && Math.abs(gs.CTM[1][1])<0.001){
-        
-            gs.CTM[0][0]=0;
-            gs.CTM[1][1]=0;
+        if (gs.CTM[1][0] > 100 && gs.CTM[0][1] > 100 && gs.CTM[0][0] < 0.001 && Math.abs(gs.CTM[1][1]) < 0.001) {
+
+            gs.CTM[0][0] = 0;
+            gs.CTM[1][1] = 0;
         }
     }
 

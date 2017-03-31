@@ -34,33 +34,37 @@
 package org.jpedal.io;
 
 public interface Speech {
-    
+
     /**
      * Set the voice you wish to use when speaking text
      * If the voice does not exist in the available list
      * the default boice should be used.
+     *
      * @param voiceName A string representing the name of the voice
      */
     void setVoice(String voiceName);
-    
+
     /**
      * A flag to specify if we can currently speak text.
      * This should be used to determine is all required libraries
      * and files are present.
+     *
      * @return True is text to speach will be possible.
      */
     boolean speechAvailible();
-    
+
     /**
      * Method to get a complete list of the voices this functionality
      * can use.
+     *
      * @return String array containing the names of all voices
      */
     String[] listVoices();
-    
+
     /**
      * Method to actually speak the text passed in.
      * This method is called internal to work with jPedals example viewer.
+     *
      * @param text String of text to be spoken.
      */
     void speakText(final String text);

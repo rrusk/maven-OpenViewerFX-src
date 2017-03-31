@@ -43,13 +43,13 @@ import org.jpedal.utils.StringUtils;
  */
 public class Form {
 
-    
+
     public static void setFieldNames(final PdfObject pdfObject, final PdfFileReader objectReader) {
-        
-        String fieldName =pdfObject.getTextStreamValue(PdfDictionary.T);
-        
-        if(fieldName!=null ){
-            
+
+        String fieldName = pdfObject.getTextStreamValue(PdfDictionary.T);
+
+        if (fieldName != null) {
+
             //at this point newString is the raw byte value (99% of the time this is the
             //string but it can be encode in some other ways (like a set of hex values)
             //so we need to use PdfObjectReader.getTextString(newString, false) rather than new String(newString)
@@ -59,36 +59,36 @@ public class Form {
             //
             //Except here where we are manipulating the bytes directly...
             String parent = pdfObject.getStringKey(PdfDictionary.Parent);
-            
+
             // if no name, or parent has one recursively scan tree for one in Parent
-            boolean isMultiple=false;
-            
+            boolean isMultiple = false;
+
             while (parent != null) {
-                
-                final FormObject parentObj =new FormObject(parent,false);
+
+                final FormObject parentObj = new FormObject(parent, false);
                 objectReader.readObject(parentObj);
-                
+
                 final String newName = parentObj.getTextStreamValue(PdfDictionary.T);
-                if (newName != null){
+                if (newName != null) {
                     //we pass in kids data so stop name.name
-                    if(!fieldName.equals(newName) || !parent.equals(pdfObject.getObjectRefAsString())) {
+                    if (!fieldName.equals(newName) || !parent.equals(pdfObject.getObjectRefAsString())) {
                         fieldName = newName + '.' + fieldName;
-                        isMultiple=true;
+                        isMultiple = true;
                     }
-                }else{
+                } else {
                     break;
                 }
-                
+
                 parent = parentObj.getParentRef();
             }
-            
+
             //set the field name to be the Fully Qualified Name
-            if(isMultiple) {
+            if (isMultiple) {
                 pdfObject.setTextStreamValue(PdfDictionary.T, StringUtils.toBytes(fieldName));
             }
         }
     }
-    
+
 }
 
 

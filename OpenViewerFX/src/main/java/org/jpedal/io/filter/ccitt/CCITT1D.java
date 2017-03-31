@@ -33,6 +33,7 @@
 package org.jpedal.io.filter.ccitt;
 
 import java.util.BitSet;
+
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -40,13 +41,13 @@ import org.jpedal.utils.LogWriter;
 /**
  * implement 1D CCITT decoding
  */
-public class CCITT1D implements CCITTDecoder{
+public class CCITT1D implements CCITTDecoder {
 
 
     /**
      * values set in PdfObject
      */
-    boolean BlackIs1,isByteAligned;
+    boolean BlackIs1, isByteAligned;
     int columns = 1728;
 
     byte[] data;
@@ -67,7 +68,7 @@ public class CCITT1D implements CCITTDecoder{
     int width;
     int height;
     private int line;
-    
+
 
     BitSet out;
     private BitSet inputBits;
@@ -80,8 +81,8 @@ public class CCITT1D implements CCITTDecoder{
     // ---------- BLACK --------------
 
     private static final int[][][] b = {
-            {{3, 2, 0},{2, 3, 0}},
-            {{2, 1, 0},{3, 4, 0}},
+            {{3, 2, 0}, {2, 3, 0}},
+            {{2, 1, 0}, {3, 4, 0}},
 
 
             { //b4
@@ -360,25 +361,25 @@ public class CCITT1D implements CCITTDecoder{
             }};
 
 
-    public CCITT1D(final byte[] rawData, final int width, int height, final PdfObject DecodeParms){
+    public CCITT1D(final byte[] rawData, final int width, int height, final PdfObject DecodeParms) {
 
-        this.data=rawData;
+        this.data = rawData;
         this.bitReached = 0;
 
-        columns=width; //default if not set (in theory should be the same if set)
+        columns = width; //default if not set (in theory should be the same if set)
 
         //and any values from PDFobject
-        if(DecodeParms!=null){
+        if (DecodeParms != null) {
 
             BlackIs1 = DecodeParms.getBoolean(PdfDictionary.BlackIs1);
 
             final int columnsSet = DecodeParms.getInt(PdfDictionary.Columns);
-            if(columnsSet!=-1) {
+            if (columnsSet != -1) {
                 columns = columnsSet;
             }
 
             final int rowsSet = DecodeParms.getInt(PdfDictionary.Rows);
-            if(rowsSet>0) //allow for value set to 0 which is impossible! (see abacus/aba_Dossier)
+            if (rowsSet > 0) //allow for value set to 0 which is impossible! (see abacus/aba_Dossier)
             {
                 height = rowsSet;
             }
@@ -386,33 +387,34 @@ public class CCITT1D implements CCITTDecoder{
 
             isByteAligned = DecodeParms.getBoolean(PdfDictionary.EncodedByteAlign);
 
-            if(debug) {
+            if (debug) {
                 System.out.println("BlackIs1=" + BlackIs1 + "\ncolumnsSet=" + columnsSet + "\nisByteAligned=" + isByteAligned + "\nrowsSet=" + rowsSet);
             }
         }
 
         //and other values which might use defaults set from PdfObject
         this.width = columns;
-        this.height=height;
+        this.height = height;
 
-        scanlineStride=(columns + 7) >> 3;
+        scanlineStride = (columns + 7) >> 3;
 
-        bytesNeeded= (height * scanlineStride);
+        bytesNeeded = (height * scanlineStride);
 
-        out=new BitSet(bytesNeeded<<3);
+        out = new BitSet(bytesNeeded << 3);
 
         //number of bits in raw compressed data
-        inputBitCount=data.length<<3;
+        inputBitCount = data.length << 3;
 
         //raw data bits to read for codewords
-        inputBits =fromByteArray(data, inputBitCount);
+        inputBits = fromByteArray(data, inputBitCount);
 
     }
 
-    CCITT1D() {}
+    CCITT1D() {
+    }
 
     @Override
-    public byte[] decode(){
+    public byte[] decode() {
 
         moveToEOLMarker();
 
@@ -421,7 +423,7 @@ public class CCITT1D implements CCITTDecoder{
 
         //put output bits together into byte[] we return
         //put it all together
-        final byte[] buffer= createOutputFromBitset();
+        final byte[] buffer = createOutputFromBitset();
 
         //by default blackIs1 is false so black pixels do not need to be set
         // invert image if needed -
@@ -442,26 +444,26 @@ public class CCITT1D implements CCITTDecoder{
         final byte[] output = new byte[bytesNeeded];
 
         //assemble all tokens into a decompressed output data block
-        int bytePtr = 0,bitPtr = 7,mask;
+        int bytePtr = 0, bitPtr = 7, mask;
         byte entry = 0;
 
-        for(int j=0;j<outPtr;j++){
+        for (int j = 0; j < outPtr; j++) {
 
-            if(out.get(j)){
+            if (out.get(j)) {
                 mask = 1 << bitPtr;
 
                 entry |= mask;
                 bitPtr--;
-            }else{
+            } else {
                 bitPtr--;
             }
 
-            if(((j+1)%(width))==0 && j!=0){
+            if (((j + 1) % (width)) == 0 && j != 0) {
                 bitPtr = -1;
             }
 
-            if(bitPtr < 0 && bytePtr<output.length){
-                output[bytePtr]=entry;
+            if (bitPtr < 0 && bytePtr < output.length) {
+                output[bytePtr] = entry;
                 bytePtr++;
                 bitPtr = 7;
                 entry = 0;
@@ -474,31 +476,31 @@ public class CCITT1D implements CCITTDecoder{
     /**
      * work through a 1D block reading code words and creating uncompressed data
      */
-    private void decode1DRun(){
+    private void decode1DRun() {
 
-        while(!EOS){ //repeat until we hit the end of the data
+        while (!EOS) { //repeat until we hit the end of the data
 
             //set flags for codeword
-            if(isTerminating){
+            if (isTerminating) {
 
                 isTerminating = false;
                 isWhite = !isWhite;
 
-                if(isEndOfLine){
+                if (isEndOfLine) {
                     isEndOfLine = false;
                     isWhite = true;
                 }
             }
 
             //remember state as getPixelCount will alter
-            final boolean pixelIsWhite=isWhite;
+            final boolean pixelIsWhite = isWhite;
 
             //decode the next codeword and get how many pixels written out
             final int pixelCount = getCodeWord();
 
             //set bits
-            if(pixelCount>0){
-                if(pixelIsWhite){
+            if (pixelCount > 0) {
+                if (pixelIsWhite) {
                     out.set(outPtr, (outPtr + pixelCount), true);
                 }
                 outPtr += pixelCount;
@@ -508,7 +510,7 @@ public class CCITT1D implements CCITTDecoder{
 
     private int getCodeWord() {
 
-        int pixelCount=0,itemFound = -1,maskAdj = 0;
+        int pixelCount = 0, itemFound = -1, maskAdj = 0;
 
         /*
          * look for valid value starting at 2 bits
@@ -516,34 +518,34 @@ public class CCITT1D implements CCITTDecoder{
          * starting with 2 bits (4 for white)
          * look at next pixels until we find a valid value for next codeword
          */
-        int startBitLength=2,endBit=14,code=0,bits=0;
-        if(isWhite){ //no values for 2,3 in this case
-            startBitLength=4;
-            endBit=13;
+        int startBitLength = 2, endBit = 14, code = 0, bits = 0;
+        if (isWhite) { //no values for 2,3 in this case
+            startBitLength = 4;
+            endBit = 13;
         }
 
         //loop to find the valid keys by checking next bit value against tables
-        for(int bitLength =startBitLength; bitLength <endBit; bitLength++){
-            code = get1DBits(bitLength, true)&255; //next n bits as possible key
-            itemFound=checkTables(code, bitLength,isWhite); //see if it is a key
+        for (int bitLength = startBitLength; bitLength < endBit; bitLength++) {
+            code = get1DBits(bitLength, true) & 255; //next n bits as possible key
+            itemFound = checkTables(code, bitLength, isWhite); //see if it is a key
 
             //if it is we exit
-            if(itemFound!=-1){
-                bits=bitLength;
-                bitLength=endBit;
-            }else if(bitLength ==8){
+            if (itemFound != -1) {
+                bits = bitLength;
+                bitLength = endBit;
+            } else if (bitLength == 8) {
                 maskAdj++;
                 bitReached++;
             }
         }
 
         //we have a match so process the codeword  and move on pointer
-        if(itemFound!=-1){
+        if (itemFound != -1) {
             //update count of bits
-            bitReached = bitReached +bits-maskAdj;
+            bitReached = bitReached + bits - maskAdj;
 
             pixelCount = processCodeWord(itemFound, code, bits);
-        }else if(bitReached > inputBitCount){
+        } else if (bitReached > inputBitCount) {
             EOS = true;
         }
 
@@ -556,22 +558,22 @@ public class CCITT1D implements CCITTDecoder{
         final boolean isT;
 
         //values in the table
-        if(isWhite){
-            pixelCount=w[bits-4][itemFound][1];
-            isT=w[bits-4][itemFound][2]==0;
-        }else{
-            pixelCount=b[bits-2][itemFound][1];
-            isT=b[bits-2][itemFound][2]==0;
+        if (isWhite) {
+            pixelCount = w[bits - 4][itemFound][1];
+            isT = w[bits - 4][itemFound][2] == 0;
+        } else {
+            pixelCount = b[bits - 2][itemFound][1];
+            isT = b[bits - 2][itemFound][2] == 0;
         }
 
-        if(isT) {
+        if (isT) {
             isTerminating = true;
         }
 
-        if(pixelCount ==-1){
-            if(line != 0){
+        if (pixelCount == -1) {
+            if (line != 0) {
                 LogWriter.writeLog("EOF marker encountered but not EOL yet!");
-               
+
 //                pixelCount = width - line;
             }
 
@@ -583,33 +585,33 @@ public class CCITT1D implements CCITTDecoder{
         if (pixelCount != -1) {
             line += pixelCount;
 
-            if(line==width){
-                if(isT){
+            if (line == width) {
+                if (isT) {
                     line = 0;
                     isEndOfLine = true;
                 }
 
-            }else if(line>width){
+            } else if (line > width) {
                 line = 0;
                 isEndOfLine = true;
             }
         }
 
-        if(bits ==12 && code ==1){
+        if (bits == 12 && code == 1) {
             cRTC++;
-            if(cRTC==6){
+            if (cRTC == 6) {
                 EOS = true;
             }
-        }else{
+        } else {
             cRTC = 0;
         }
 
-        if(cRTC!=6 && isEndOfLine && isByteAligned){
+        if (cRTC != 6 && isEndOfLine && isByteAligned) {
 
             //get bits over 8 and align to byte boundary
-            final int iPart = (bitReached)%8;
-            final int iDrop = 8-(iPart);
-            if(iPart>0){
+            final int iPart = (bitReached) % 8;
+            final int iDrop = 8 - (iPart);
+            if (iPart > 0) {
                 bitReached += iDrop;
             }
         }
@@ -619,22 +621,22 @@ public class CCITT1D implements CCITTDecoder{
 
     //2D version
     int get1DBits(final int bitsToGet) {
-        return get1DBits(bitsToGet,false);
+        return get1DBits(bitsToGet, false);
     }
 
     private int get1DBits(final int bitsToGet, final boolean is1D) {
 
         int tmp = 0;
 
-        int maskAdj=0;
-        if(is1D && bitsToGet>8) {
+        int maskAdj = 0;
+        if (is1D && bitsToGet > 8) {
             maskAdj++;
         }
 
         int mask;
-        for(int y=0;y< bitsToGet;y++){
-            if(inputBits.get(y+ bitReached)){
-                mask = 1 << (bitsToGet -y-1-maskAdj);
+        for (int y = 0; y < bitsToGet; y++) {
+            if (inputBits.get(y + bitReached)) {
+                mask = 1 << (bitsToGet - y - 1 - maskAdj);
 
                 tmp |= mask;
             }
@@ -645,21 +647,21 @@ public class CCITT1D implements CCITTDecoder{
 
     private static int checkTables(final int possCode, final int bitLength, final boolean isWhite) {
 
-        int itemFound=-1;
+        int itemFound = -1;
         final int[][] table;
 
-        if(isWhite){
-            table=w[bitLength-4];
-        }else{
-            table=b[bitLength-2];
+        if (isWhite) {
+            table = w[bitLength - 4];
+        } else {
+            table = b[bitLength - 2];
         }
 
-        final int size=table.length;
+        final int size = table.length;
 
-        for(int z=0; z< size;z++){
-            if(possCode== table[z][0]){
-                itemFound=z;
-                z=size;
+        for (int z = 0; z < size; z++) {
+            if (possCode == table[z][0]) {
+                itemFound = z;
+                z = size;
 
             }
         }
@@ -668,7 +670,7 @@ public class CCITT1D implements CCITTDecoder{
 
     private static BitSet fromByteArray(final byte[] bytes, final int bitsNeeded) {
 
-        int bitSetPtr = 0,value;
+        int bitSetPtr = 0, value;
         byte tmp;
 
         final BitSet bits = new BitSet(bitsNeeded);
@@ -690,22 +692,22 @@ public class CCITT1D implements CCITTDecoder{
 
     }
 
-    private void moveToEOLMarker(){
+    private void moveToEOLMarker() {
         boolean isEOL = false, bit;
         int i = 0;
 
-        while(!isEOL){
+        while (!isEOL) {
             isEOL = true;
-            for(i=0;i<12;i++){
+            for (i = 0; i < 12; i++) {
 
-                bit=inputBits.get(i + bitReached);
+                bit = inputBits.get(i + bitReached);
 
-                if(i==11){
-                    if(!bit){
+                if (i == 11) {
+                    if (!bit) {
                         isEOL = false;
                     }
-                }else{
-                    if(bit){
+                } else {
+                    if (bit) {
                         isEOL = false;
                     }
                 }
@@ -716,7 +718,7 @@ public class CCITT1D implements CCITTDecoder{
             // if EOL not found in the first 10 bits assume that
             // there is no EOL at the start od the line and start
             // at 0
-            if(bitReached > 26){
+            if (bitReached > 26) {
 
                 bitReached = 0;
                 return;
@@ -726,7 +728,6 @@ public class CCITT1D implements CCITTDecoder{
         bitReached = bitReached + i - 1;
 
     }
-
 
 
 }

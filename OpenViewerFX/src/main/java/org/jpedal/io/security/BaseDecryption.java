@@ -34,13 +34,14 @@ package org.jpedal.io.security;
 
 import java.security.Key;
 import java.security.cert.Certificate;
+
 import org.jpedal.exception.PdfSecurityException;
 
 public interface BaseDecryption {
- 
-    byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException; 
-    
+
+    byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException;
+
     byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData) throws Exception;
-    
+
     byte[] readCertificate(final byte[][] recipients, final Certificate certificate, final Key key);
 }

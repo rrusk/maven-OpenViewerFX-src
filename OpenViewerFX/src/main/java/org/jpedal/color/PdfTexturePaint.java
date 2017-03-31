@@ -59,7 +59,7 @@ public class PdfTexturePaint extends TexturePaint implements PdfPaint {
     public int getRGB() {
         return 0;
     }
-    
+
     @Override
     public boolean isTexture() {
         return true;

@@ -94,14 +94,14 @@ public class CertificateHolder extends javax.swing.JPanel {
         });
         add(jButton1);
         jButton1.setBounds(350, 390, 73, 23);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     @SuppressWarnings("UnusedParameters")
-    private void close(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close
+    private void close(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_close
         frame.setVisible(false);
 
         // TODO add your handling code here:
-    }//GEN-LAST:event_close
+    } //GEN-LAST:event_close
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

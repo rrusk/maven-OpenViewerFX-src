@@ -36,7 +36,6 @@ import java.io.Serializable;
 
 /**
  * holds data so we can draw glyph on first appearance
- *
  */
 public class UnrendererGlyph extends PdfGlyph implements Serializable {
 
@@ -44,13 +43,13 @@ public class UnrendererGlyph extends PdfGlyph implements Serializable {
     public final float y;
     public final int rawInt;
     public final float currentWidth;
-	
-	public UnrendererGlyph(final float x, final float y, final int rawInt, final float currentWidth) {
 
-		this.x=x;
-		this.y=y;
-		this.rawInt=rawInt;
-		this.currentWidth=currentWidth;
-		
-	}
+    public UnrendererGlyph(final float x, final float y, final int rawInt, final float currentWidth) {
+
+        this.x = x;
+        this.y = y;
+        this.rawInt = rawInt;
+        this.currentWidth = currentWidth;
+
+    }
 }

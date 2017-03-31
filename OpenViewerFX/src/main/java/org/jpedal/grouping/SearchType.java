@@ -40,50 +40,50 @@ package org.jpedal.grouping;
  */
 public class SearchType {
 
-	/**
-	 * The default parameter, this describes a search that will not be limited to finding
-	 * whole words only, is not case-sensitive, and will find all occurrences.
-	 */
-	public static final int DEFAULT = 0;
-	
-	/**
-	 * Used to describe a search that will find whole words only
-	 */
-	public static final int WHOLE_WORDS_ONLY = 1;
-	
-	/**
-	 * Used to describe a search that is case-sensitive
-	 */
-	public static final int CASE_SENSITIVE = 2;
-	
-	/**
-	 * Used to describe a search that will find first occurrences only
-	 */
-	public static final int FIND_FIRST_OCCURANCE_ONLY = 4;
-	
-	/**
-	 * Used to describe a search that will find results split across multiple lines
-	 */
-	public static final int MUTLI_LINE_RESULTS = 8;
+    /**
+     * The default parameter, this describes a search that will not be limited to finding
+     * whole words only, is not case-sensitive, and will find all occurrences.
+     */
+    public static final int DEFAULT = 0;
 
-	/**
-	 * Used to describe a search that results in all highlights on the page to be visible
-	 */
-	public static final int HIGHLIGHT_ALL_RESULTS = 16;
-	
-	/**
-	 * Used to describe a search that matches regular expressions with the search term
-	 */
-	public static final int USE_REGULAR_EXPRESSIONS = 32;
-    
     /**
-	 * Used to describe a search that will only search within highlighted areas
-	 */
-	public static final int SEARCH_HIGHLIGHTS_ONLY = 64;
-    
+     * Used to describe a search that will find whole words only
+     */
+    public static final int WHOLE_WORDS_ONLY = 1;
+
     /**
-	 * Used to ignore space characters from the search term and underlying text.
+     * Used to describe a search that is case-sensitive
+     */
+    public static final int CASE_SENSITIVE = 2;
+
+    /**
+     * Used to describe a search that will find first occurrences only
+     */
+    public static final int FIND_FIRST_OCCURANCE_ONLY = 4;
+
+    /**
+     * Used to describe a search that will find results split across multiple lines
+     */
+    public static final int MUTLI_LINE_RESULTS = 8;
+
+    /**
+     * Used to describe a search that results in all highlights on the page to be visible
+     */
+    public static final int HIGHLIGHT_ALL_RESULTS = 16;
+
+    /**
+     * Used to describe a search that matches regular expressions with the search term
+     */
+    public static final int USE_REGULAR_EXPRESSIONS = 32;
+
+    /**
+     * Used to describe a search that will only search within highlighted areas
+     */
+    public static final int SEARCH_HIGHLIGHTS_ONLY = 64;
+
+    /**
+     * Used to ignore space characters from the search term and underlying text.
      * Useful when number of spaces in gaps is unknown.
-	 */
-	public static final int IGNORE_SPACE_CHARACTERS = 128;
+     */
+    public static final int IGNORE_SPACE_CHARACTERS = 128;
 }

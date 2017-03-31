@@ -37,6 +37,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.external.ImageHandler;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.GraphicsState;
@@ -54,7 +55,9 @@ public class ExampleImageHandler implements ImageHandler {
         return true;  //always use this code
     }
 
-    /**tells JPedal not to scale image*/
+    /**
+     * tells JPedal not to scale image
+     */
     @Override
     public boolean imageHasBeenScaled() {
         return true;
@@ -62,7 +65,7 @@ public class ExampleImageHandler implements ImageHandler {
 
     @Override
     public boolean drawImageOnscreen(final BufferedImage image, final int optionsApplied, final AffineTransform upside_down, final String currentImageFile, final Graphics2D g2, final boolean renderDirect, final ObjectStore objectStore, final boolean isPrinting) {
-        return false;  
+        return false;
     }
 
     //pass in raw data for image handling - if valid image returned it will be used.
@@ -82,35 +85,35 @@ public class ExampleImageHandler implements ImageHandler {
         /*
          * workout final size from CTM  (assumes no scaling or rotation)
          */
-        int finalWidth=(int) gs.CTM[0][0];
-        int finalHeight=(int) gs.CTM[1][1];
+        int finalWidth = (int) gs.CTM[0][0];
+        int finalHeight = (int) gs.CTM[1][1];
 
         /*allow for image upside down or right to left*/
-        if(finalWidth<0) {
+        if (finalWidth < 0) {
             finalWidth = -finalWidth;
         }
-        if(finalHeight<0) {
+        if (finalHeight < 0) {
             finalHeight = -finalHeight;
         }
 
-        img =new BufferedImage(finalWidth,finalHeight, BufferedImage.TYPE_INT_ARGB);
+        img = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_ARGB);
 
-        final Graphics2D g2=(Graphics2D)img.getGraphics();
+        final Graphics2D g2 = (Graphics2D) img.getGraphics();
 
-        final AffineTransform aff=new AffineTransform();
-        aff.translate(0,-finalHeight);
-        aff.scale(1,-1);
+        final AffineTransform aff = new AffineTransform();
+        aff.translate(0, -finalHeight);
+        aff.scale(1, -1);
         g2.setTransform(aff);
 
-        final String message="Image removed";
+        final String message = "Image removed";
 
-        final int fontSize=finalWidth/message.length();
+        final int fontSize = finalWidth / message.length();
 
-        final Font font=new Font("serif",Font.PLAIN,fontSize);
-        final Rectangle2D messageBounds=font.getStringBounds(message,0,message.length(),g2.getFontRenderContext());
+        final Font font = new Font("serif", Font.PLAIN, fontSize);
+        final Rectangle2D messageBounds = font.getStringBounds(message, 0, message.length(), g2.getFontRenderContext());
 
         g2.setFont(font);
-        g2.drawString(message,(int) ((finalWidth-messageBounds.getWidth())/2),-finalHeight-((finalHeight)/2));
+        g2.drawString(message, (int) ((finalWidth - messageBounds.getWidth()) / 2), -finalHeight - ((finalHeight) / 2));
 
 
         //NOTE - IMAGE is expected to be UPSIDE DOWN!!!!!

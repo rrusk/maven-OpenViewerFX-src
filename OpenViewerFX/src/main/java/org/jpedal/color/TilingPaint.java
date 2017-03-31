@@ -41,6 +41,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.io.Serializable;
+
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -173,9 +174,9 @@ public class TilingPaint implements PdfPaint, Serializable {
         TilingContext(final int[][] imageArr, final AffineTransform xform, final Rectangle2D rectBBox) {
             this.imagePixels = imageArr;
             final float[][] xformMatrix = {
-                {(float) xform.getScaleX(), (float) xform.getShearY(), 0},
-                {(float) xform.getShearX(), (float) xform.getScaleY(), 0},
-                {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}
+                    {(float) xform.getScaleX(), (float) xform.getShearY(), 0},
+                    {(float) xform.getShearX(), (float) xform.getScaleY(), 0},
+                    {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}
             };
             toUserSpace = Matrix.inverse(xformMatrix);
             offX = (float) rectBBox.getMinX();

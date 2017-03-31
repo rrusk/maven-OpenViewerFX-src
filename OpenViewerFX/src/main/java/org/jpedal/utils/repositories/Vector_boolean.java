@@ -36,94 +36,91 @@ import java.io.Serializable;
 
 /**
  * Provides the functionality/convenience of a Vector for boolean
- *
+ * <p>
  * Much faster because not synchronized and no cast
  * Does not double in size each time
  */
 public class Vector_boolean implements Serializable {
-    
-    
+
+
     //how much we resize each time - will be doubled up to 160
-    int  increment_size = 1000;
-    
+    int increment_size = 1000;
+
     //current max size
-    int  max_size = 250;
-    
+    int max_size = 250;
+
     //holds the data
     private boolean[] items = new boolean[max_size];
-    
-    
-    protected static int incrementSize(int increment_size){
-        
-        if(increment_size<8000) {
+
+
+    protected static int incrementSize(int increment_size) {
+
+        if (increment_size < 8000) {
             increment_size *= 4;
-        } else if(increment_size<16000) {
+        } else if (increment_size < 16000) {
             increment_size *= 2;
         } else {
             increment_size += 2000;
         }
         return increment_size;
     }
-    
+
     //set size
-    public Vector_boolean( final int number )
-    {
+    public Vector_boolean(final int number) {
         max_size = number;
         items = new boolean[max_size];
     }
     ///////////////////////////////////
+
     /**
      * extract underlying data
      */
-    public final boolean[] get()
-    {
+    public final boolean[] get() {
         return items;
     }
     ///////////////////////////////////
+
     /**
      * set an element
      */
-    public final void setElementAt( final boolean new_name, final int id )
-    {
-        if( id >= max_size ) {
-            checkSize( id );
+    public final void setElementAt(final boolean new_name, final int id) {
+        if (id >= max_size) {
+            checkSize(id);
         }
         items[id] = new_name;
     }
-    
+
     /**
      * get element at
      */
-    public final boolean elementAt( final int id )
-    {
-        if( id >= max_size ) {
+    public final boolean elementAt(final int id) {
+        if (id >= max_size) {
             return false;
         } else {
             return items[id];
         }
     }
-    
+
     /**
      * check the size of the array and increase if needed
      */
-    private void checkSize( final int i )
-    {
-       if( i >= max_size ){
+    private void checkSize(final int i) {
+        if (i >= max_size) {
             final int old_size = max_size;
             max_size += increment_size;
-            
+
             //allow for it not creating space
-            if( max_size <= i ) {
-                max_size = i +increment_size+ 2;
+            if (max_size <= i) {
+                max_size = i + increment_size + 2;
             }
             final boolean[] temp = items;
             items = new boolean[max_size];
 
-            System.arraycopy( temp, 0, items, 0, old_size );
-            
-            increment_size=incrementSize(increment_size);
+            System.arraycopy(temp, 0, items, 0, old_size);
+
+            increment_size = incrementSize(increment_size);
 
         }
     }
-    
+
 }

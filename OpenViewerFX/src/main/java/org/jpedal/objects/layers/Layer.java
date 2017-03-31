@@ -45,39 +45,39 @@ public class Layer {
     private final PdfLayerList layerList;
 
     public final String name;
-    
-    Layer(final String  name, final PdfLayerList layerList) {
 
-        this.name=name;
-        this.layerList=layerList;
+    Layer(final String name, final PdfLayerList layerList) {
+
+        this.name = name;
+        this.layerList = layerList;
 
     }
 
-    public void  setAction(final String js){
-        layerList.addJScommand(name,js);
+    public void setAction(final String js) {
+        layerList.addJScommand(name, js);
     }
 
-    public boolean getState(){
+    public boolean getState() {
         return layerList.isVisible(name);
     }
 
-    public void setState(final boolean state){
+    public void setState(final boolean state) {
 
-        final boolean currentValue=layerList.isVisible(name);
+        final boolean currentValue = layerList.isVisible(name);
 
-        layerList.setVisiblity(name,state);
+        layerList.setVisiblity(name, state);
 
         //tell JPedal we need to update
-        if(currentValue!=state){
+        if (currentValue != state) {
 
-            if(debugLayer) {
+            if (debugLayer) {
                 System.out.println(name + ' ' + state);
             }
 
             layerList.setChangesMade(true);
 
         }
-        
+
     }
 
 }

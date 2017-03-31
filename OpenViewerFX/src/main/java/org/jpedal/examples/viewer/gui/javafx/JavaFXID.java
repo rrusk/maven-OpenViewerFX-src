@@ -37,21 +37,22 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 public interface JavaFXID {
-    
-   /**
-	 * @return the iD
-	 */
-   int getID();
 
-	/**
-	 * @param id the iD to set
-	 */
+    /**
+     * @return the iD
+     */
+    int getID();
+
+    /**
+     * @param id the iD to set
+     */
     void setID(int id);
 
     /**
      * Call this method instead of addActionListener for JavaFX
-     * @param eh 
+     *
+     * @param eh
      */
     void setOnAction(EventHandler<ActionEvent> eh);
-    
+
 }

@@ -44,16 +44,18 @@ import org.jpedal.utils.LogWriter;
 import org.w3c.dom.Document;
 
 public class PdfResources {
-	
-	public static final int AcroFormObj = 1;
-	public static final int GlobalResources = 2;
-	public static final int StructTreeRootObj = 3;
-	public static final int MarkInfoObj = 4;
+
+    public static final int AcroFormObj = 1;
+    public static final int GlobalResources = 2;
+    public static final int StructTreeRootObj = 3;
+    public static final int MarkInfoObj = 4;
 
     PdfLayerList layers;
 
-    /**objects read from root*/
-    private PdfObject metadataObj, acroFormObj, globalResources,PropertiesObj, structTreeRootObj, OCProperties,markInfoObj,OutlinesObj;
+    /**
+     * objects read from root
+     */
+    private PdfObject metadataObj, acroFormObj, globalResources, PropertiesObj, structTreeRootObj, OCProperties, markInfoObj, OutlinesObj;
 
     /**
      * store outline data extracted from pdf
@@ -62,27 +64,28 @@ public class PdfResources {
 
     /**
      * initialise OC Content and other items before Page decoded but after Resources read
+     *
      * @param current
      * @param currentPdfFile
      */
     public void setupResources(final PdfStreamDecoder current, final boolean alwaysCheck, final PdfObject Resources, final int pageNumber,
                                final PdfObjectReader currentPdfFile) throws PdfException {
 
-        if (globalResources != null){
-            current.readResources(globalResources,true);
+        if (globalResources != null) {
+            current.readResources(globalResources, true);
 
-            final PdfObject propObj=globalResources.getDictionary(PdfDictionary.Properties);
-            if(propObj!=null) {
+            final PdfObject propObj = globalResources.getDictionary(PdfDictionary.Properties);
+            if (propObj != null) {
                 PropertiesObj = propObj;
             }
         }
 
         /*read the resources for the page*/
-        if (Resources != null){
-            current.readResources(Resources,true);
+        if (Resources != null) {
+            current.readResources(Resources, true);
 
-            final PdfObject propObj=Resources.getDictionary(PdfDictionary.Properties);
-            if(propObj!=null) {
+            final PdfObject propObj = Resources.getDictionary(PdfDictionary.Properties);
+            if (propObj != null) {
                 PropertiesObj = propObj;
             }
         }
@@ -90,75 +93,75 @@ public class PdfResources {
         /*
          * layers
          */
-        if(OCProperties!=null && (layers==null || pageNumber!=layers.getOCpageNumber() || alwaysCheck)){
+        if (OCProperties != null && (layers == null || pageNumber != layers.getOCpageNumber() || alwaysCheck)) {
 
             currentPdfFile.checkResolved(OCProperties);
 
-            if(layers==null) {
+            if (layers == null) {
                 layers = new PdfLayerList();
             }
 
-            layers.init(OCProperties, PropertiesObj, currentPdfFile,pageNumber);
+            layers.init(OCProperties, PropertiesObj, currentPdfFile, pageNumber);
 
         }
 
-        current.setObjectValue(ValueTypes.PdfLayerList,layers);
+        current.setObjectValue(ValueTypes.PdfLayerList, layers);
     }
-	
-	public PdfObject getPdfObject(final int key) {
-		
-		PdfObject obj=null;
-		
-		switch(key){
+
+    public PdfObject getPdfObject(final int key) {
+
+        PdfObject obj = null;
+
+        switch (key) {
 
             case AcroFormObj:
-                obj=acroFormObj;
+                obj = acroFormObj;
                 break;
 
-		case GlobalResources:
-			obj=globalResources;
-			break;
+            case GlobalResources:
+                obj = globalResources;
+                break;
 
-        case MarkInfoObj:
-            obj=markInfoObj;
-            break;
+            case MarkInfoObj:
+                obj = markInfoObj;
+                break;
 
-        case StructTreeRootObj:
-            obj=structTreeRootObj;
-            break;
-		}
-		return obj;
-	}
-	
-	public void setPdfObject(final int key, final PdfObject obj) {
-		
-		switch(key){
-		case GlobalResources:
-			globalResources=obj;
-			break;
-		}
-		
-	}
+            case StructTreeRootObj:
+                obj = structTreeRootObj;
+                break;
+        }
+        return obj;
+    }
 
-	public void flush() {
-		globalResources=null;
-		
-	}
+    public void setPdfObject(final int key, final PdfObject obj) {
+
+        switch (key) {
+            case GlobalResources:
+                globalResources = obj;
+                break;
+        }
+
+    }
+
+    public void flush() {
+        globalResources = null;
+
+    }
 
     public void flushObjects() {
 
         //flush objects held
-        metadataObj=null;
-        acroFormObj=null;
+        metadataObj = null;
+        acroFormObj = null;
 
-        markInfoObj=null;
-        PropertiesObj=null;
-        OCProperties=null;
-        structTreeRootObj=null;
+        markInfoObj = null;
+        PropertiesObj = null;
+        OCProperties = null;
+        structTreeRootObj = null;
 
-        OutlinesObj=null;
+        OutlinesObj = null;
 
-        layers=null;
+        layers = null;
 
     }
 
@@ -173,18 +176,18 @@ public class PdfResources {
 
         currentPdfFile.checkResolved(pdfObject);
 
-        metadataObj=pdfObject.getDictionary(PdfDictionary.Metadata);
+        metadataObj = pdfObject.getDictionary(PdfDictionary.Metadata);
 
-        acroFormObj=pdfObject.getDictionary(PdfDictionary.AcroForm);
+        acroFormObj = pdfObject.getDictionary(PdfDictionary.AcroForm);
         currentPdfFile.checkResolved(acroFormObj);
 
-        markInfoObj=pdfObject.getDictionary(PdfDictionary.MarkInfo);
+        markInfoObj = pdfObject.getDictionary(PdfDictionary.MarkInfo);
 
-        structTreeRootObj=pdfObject.getDictionary(PdfDictionary.StructTreeRoot);
+        structTreeRootObj = pdfObject.getDictionary(PdfDictionary.StructTreeRoot);
 
-        OCProperties=pdfObject.getDictionary(PdfDictionary.OCProperties);
+        OCProperties = pdfObject.getDictionary(PdfDictionary.OCProperties);
 
-        OutlinesObj=pdfObject.getDictionary(PdfDictionary.Outlines);
+        OutlinesObj = pdfObject.getDictionary(PdfDictionary.Outlines);
 
         //set up outlines
         outlineData = null;
@@ -192,7 +195,8 @@ public class PdfResources {
 
     /**
      * provide direct access to outlineData object
-     * @return  OutlineData
+     *
+     * @return OutlineData
      */
     public OutlineData getOutlineData() {
         return outlineData;
@@ -209,7 +213,7 @@ public class PdfResources {
 
             } catch (final Exception e) {
                 LogWriter.writeLog("Exception " + e + " accessing outline ");
-                
+
                 outlineData = null;
             }
         }
@@ -220,17 +224,17 @@ public class PdfResources {
             return null;
         }
     }
-    
+
     public PdfFileInformation getMetaData(final PdfObjectReader currentPdfFile) {
-        if (currentPdfFile != null){
+        if (currentPdfFile != null) {
             return new PdfFileInformation().readPdfFileMetadata(metadataObj, currentPdfFile);
-        }else {
+        } else {
             return null;
         }
     }
 
     public boolean isForm() {
-        return acroFormObj!=null && acroFormObj.getMixedArray(PdfDictionary.Fields).getTokenCount()>0;
+        return acroFormObj != null && acroFormObj.getMixedArray(PdfDictionary.Fields).getTokenCount() > 0;
     }
 
     public PdfLayerList getPdfLayerList() {

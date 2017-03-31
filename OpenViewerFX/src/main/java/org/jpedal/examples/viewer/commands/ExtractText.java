@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.text.*;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.commands.generic.GUICopy;
@@ -52,7 +53,7 @@ import org.jpedal.objects.PdfPageData;
 import org.jpedal.utils.Messages;
 
 /**
- * Class to Handle the popup dialogs created when user right clicks 
+ * Class to Handle the popup dialogs created when user right clicks
  * highlighted text and chooses text extraction.
  */
 public class ExtractText extends GUIExtractText {
@@ -100,8 +101,8 @@ public class ExtractText extends GUIExtractText {
         final JLabel demoMessage = new JLabel("                         ");
         final ButtonGroup type = new ButtonGroup();
         final Object[] options = {Messages.getMessage("PdfViewerHelpMenu.text"),
-            Messages.getMessage("PdfViewerCancel.text"),
-            Messages.getMessage("PdfViewerextract.text")};
+                Messages.getMessage("PdfViewerCancel.text"),
+                Messages.getMessage("PdfViewerextract.text")};
         final JButton help = new JButton((String) options[0]);
         final JButton cancel = new JButton((String) options[1]);
         final JButton extract = new JButton((String) options[2]);
@@ -135,7 +136,7 @@ public class ExtractText extends GUIExtractText {
                                 final JLabel noExample = new JLabel("No Example Available");
 
                                 Font exampleFont = noExample.getFont();
-                                exampleFont = exampleFont.deriveFont(exampleFont.getStyle(), 20f);//change as ME has no deriveFont(size only)
+                                exampleFont = exampleFont.deriveFont(exampleFont.getStyle(), 20f); // Change as ME has no deriveFont(size only)
 
                                 noExample.setFont(exampleFont);
                                 noExample.setForeground(Color.RED);
@@ -373,7 +374,7 @@ public class ExtractText extends GUIExtractText {
                         final JDialog displayFrame = new JDialog((Frame) null, true);
                         displayFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
                         if (commonValues.getModeOfOperation() != Values.RUNNING_APPLET) {
-                            final Container frame = (Container)currentGUI.getFrame();
+                            final Container frame = (Container) currentGUI.getFrame();
                             displayFrame.setLocation(frame.getLocationOnScreen().x + 10, frame.getLocationOnScreen().y + 10);
                         }
                         displayFrame.setSize(450, 450);
@@ -432,7 +433,7 @@ public class ExtractText extends GUIExtractText {
         SwingUtilities.invokeLater(r);
 
         //Set location over window
-        extractionFrame.setLocationRelativeTo((Component)currentGUI.getFrame());
+        extractionFrame.setLocationRelativeTo((Component) currentGUI.getFrame());
         extractionFrame.setResizable(false);
 
         //Display

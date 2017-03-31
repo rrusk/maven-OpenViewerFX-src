@@ -42,90 +42,89 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This class will serialize and deserialize GeneralPath objects 
- *
+ * This class will serialize and deserialize GeneralPath objects
  */
 public class PathSerializer {
 
-	/**
-	 * method to serialize a path.  This method will iterate through the iterator passed
-	 * in, and write out the base components of the path to the ObjectOutput
-	 * 
-	 * @param os - ObjectOutput to write to
-	 * @param pi - PathIterator path components to iterate over
-	 * @throws IOException
-	 */
-	public static void serializePath(final ObjectOutput os, final PathIterator pi) throws IOException{
-		
-		os.writeObject(pi.getWindingRule());
-				
-		final List<java.io.Serializable> list = new ArrayList<java.io.Serializable>();
-		
-		while(!pi.isDone()){
-			final float[] array = new float[6];
-			final int type = pi.currentSegment(array);
-			
-			list.add(type);
-			list.add(array);
-			
-			pi.next();
-		}
-		
-		os.writeObject(list);
+    /**
+     * method to serialize a path.  This method will iterate through the iterator passed
+     * in, and write out the base components of the path to the ObjectOutput
+     *
+     * @param os - ObjectOutput to write to
+     * @param pi - PathIterator path components to iterate over
+     * @throws IOException
+     */
+    public static void serializePath(final ObjectOutput os, final PathIterator pi) throws IOException {
 
-	}
-	
-	/**
-	 * method to deserialize a path from an ObjectInput.
-	 * 
-	 * @param os - ObjectInput that contains the serilized path
-	 * @return - the deserialize GeneralPath
-	 * @throws ClassNotFoundException
-	 * @throws IOException
-	 */
-	public static GeneralPath deserializePath(final ObjectInput os) throws ClassNotFoundException, IOException{
-		
-		final Integer windingRule = (Integer) os.readObject();
-		if(windingRule == null) {
+        os.writeObject(pi.getWindingRule());
+
+        final List<java.io.Serializable> list = new ArrayList<java.io.Serializable>();
+
+        while (!pi.isDone()) {
+            final float[] array = new float[6];
+            final int type = pi.currentSegment(array);
+
+            list.add(type);
+            list.add(array);
+
+            pi.next();
+        }
+
+        os.writeObject(list);
+
+    }
+
+    /**
+     * method to deserialize a path from an ObjectInput.
+     *
+     * @param os - ObjectInput that contains the serilized path
+     * @return - the deserialize GeneralPath
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
+    public static GeneralPath deserializePath(final ObjectInput os) throws ClassNotFoundException, IOException {
+
+        final Integer windingRule = (Integer) os.readObject();
+        if (windingRule == null) {
             return null;
         }
-		
-		final List list = (List) os.readObject();
-		
-		final GeneralPath path = new GeneralPath();
-		path.setWindingRule(windingRule);
-		
+
+        final List list = (List) os.readObject();
+
+        final GeneralPath path = new GeneralPath();
+        path.setWindingRule(windingRule);
+
 		/*
 		 * iterate over the list, and rebuild the path from the
 		 * individual movements stored inside the list
 		 */
-		for (final Iterator iter = list.iterator(); iter.hasNext();) {
-			final int pathType = (Integer) iter.next();
-			final float[] array = (float[]) iter.next();
-			
-			switch (pathType) {
-			case PathIterator.SEG_LINETO:
-				path.lineTo(array[0], array[1]);
-				break;
-			case PathIterator.SEG_MOVETO:
-				path.moveTo(array[0], array[1]);
-				break;
-			case PathIterator.SEG_QUADTO:
-				path.quadTo(array[0], array[1], array[2], array[3]);
-				break;
-			case PathIterator.SEG_CUBICTO:
-				path.curveTo(array[0], array[1], array[2], array[3], array[4], array[5]);
-				break;
-			case PathIterator.SEG_CLOSE:
-				path.closePath();
-				break;
-			default:
-				System.out.println("unrecognized general path type");
-				
-				break;
-			}
-		}
-		
-		return path;
-	}
+        for (final Iterator iter = list.iterator(); iter.hasNext(); ) {
+            final int pathType = (Integer) iter.next();
+            final float[] array = (float[]) iter.next();
+
+            switch (pathType) {
+                case PathIterator.SEG_LINETO:
+                    path.lineTo(array[0], array[1]);
+                    break;
+                case PathIterator.SEG_MOVETO:
+                    path.moveTo(array[0], array[1]);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    path.quadTo(array[0], array[1], array[2], array[3]);
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    path.curveTo(array[0], array[1], array[2], array[3], array[4], array[5]);
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    path.closePath();
+                    break;
+                default:
+                    System.out.println("unrecognized general path type");
+
+                    break;
+            }
+        }
+
+        return path;
+    }
 }

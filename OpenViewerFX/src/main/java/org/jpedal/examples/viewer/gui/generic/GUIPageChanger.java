@@ -38,33 +38,33 @@ import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.gui.GUI;
 
 /**
- * Used 
- * 
+ * Used
+ *
  * @author Simon
  */
 public abstract class GUIPageChanger {
-    
+
     private final GUI gui;
     private final Values commonValues;
     private final int page;
-    
-    public GUIPageChanger(final GUI gui, final Values values, final int page){
+
+    public GUIPageChanger(final GUI gui, final Values values, final int page) {
         this.gui = gui;
         this.commonValues = values;
-        this.page = page+1;
+        this.page = page + 1;
     }
-    
-    protected void handlePageChange(){
-		if((!Values.isProcessing())&&(commonValues.getCurrentPage()!=page)){
+
+    protected void handlePageChange() {
+        if ((!Values.isProcessing()) && (commonValues.getCurrentPage() != page)) {
 
             //if loading on linearized thread, see if we can actually display
-            if(!gui.getPdfDecoder().isPageAvailable(page)){
-                gui.showMessageDialog("Page "+page+" is not yet loaded");
+            if (!gui.getPdfDecoder().isPageAvailable(page)) {
+                gui.showMessageDialog("Page " + page + " is not yet loaded");
                 return;
             }
             gui.resetStatusMessage("");
             gui.getCommand().executeCommand(Commands.GOTO, new Object[]{Integer.toString(page)});
-		}
-        
+        }
+
     }
 }

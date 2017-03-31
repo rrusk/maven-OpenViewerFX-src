@@ -34,6 +34,7 @@ package org.jpedal.parser.text;
 
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
+
 import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
@@ -46,34 +47,34 @@ import org.jpedal.render.DynamicVectorRenderer;
 public class BDC {
 
     public static PdfObject execute(int startCommand, final int dataPointer, final byte[] raw, final String op,
-                                final GraphicsState gs, final PdfObjectReader currentPdfFile, final DynamicVectorRenderer current, final ParserOptions parserOptions) {
+                                    final GraphicsState gs, final PdfObjectReader currentPdfFile, final DynamicVectorRenderer current, final ParserOptions parserOptions) {
 
-        final PdfObject BDCobj=new MCObject(op);
+        final PdfObject BDCobj = new MCObject(op);
         BDCobj.setID(PdfDictionary.BDC); //use an existing feature to add unknown tags
 
-        final int rawStart=startCommand;
+        final int rawStart = startCommand;
 
-        if(startCommand<1) {
+        if (startCommand < 1) {
             startCommand = 1;
         }
 
-        boolean hasDictionary=true;
-        while(startCommand<raw.length && raw[startCommand]!='<' && raw[startCommand-1]!='<'){
+        boolean hasDictionary = true;
+        while (startCommand < raw.length && raw[startCommand] != '<' && raw[startCommand - 1] != '<') {
             startCommand++;
 
-            if(raw[startCommand]=='B' && raw[startCommand+1]=='D' && raw[startCommand+2]=='C'){
-                hasDictionary=false;
+            if (raw[startCommand] == 'B' && raw[startCommand + 1] == 'D' && raw[startCommand + 2] == 'C') {
+                hasDictionary = false;
                 break;
             }
         }
 
-        if(hasDictionary){// &&(parserOptions.getPdfLayerList()!=null && parserOptions.isLayerVisible())){
+        if (hasDictionary) { // &&(parserOptions.getPdfLayerList()!=null && parserOptions.isLayerVisible())){
             //System.out.println(new String(raw));
-            final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+            final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
             objectDecoder.setEndPt(dataPointer);
             objectDecoder.readDictionaryAsObject(BDCobj, startCommand + 1, raw);
         }
-        
+
         handleCommand(BDCobj, gs, current, dataPointer, raw, hasDictionary, rawStart, parserOptions);
 
         return BDCobj;
@@ -83,22 +84,22 @@ public class BDC {
 
     private static void handleCommand(final PdfObject BDCobj, final GraphicsState gs, final DynamicVectorRenderer current, final int dataPointer, final byte[] raw, final boolean hasDictionary, final int rawStart, final ParserOptions parserOptions) {
 
-        parserOptions.setLayerLevel(parserOptions.getLayerLevel()+1);
+        parserOptions.setLayerLevel(parserOptions.getLayerLevel() + 1);
 
         //add in layer if visible
-        if(parserOptions.layers!=null && parserOptions.isLayerVisible()){
+        if (parserOptions.layers != null && parserOptions.isLayerVisible()) {
 
-            String name="";
+            String name = "";
 
-            if(hasDictionary){
+            if (hasDictionary) {
                 //see if name and if shown
                 name = BDCobj.getName(PdfDictionary.OC);
 
                 //see if Layer defined and get title if no Name as alternative
-                if(name==null){
+                if (name == null) {
 
-                    final PdfObject layerObj=BDCobj.getDictionary(PdfDictionary.Layer);
-                    if(layerObj!=null) {
+                    final PdfObject layerObj = BDCobj.getDictionary(PdfDictionary.Layer);
+                    if (layerObj != null) {
                         name = layerObj.getTextStreamValue(PdfDictionary.Title);
                     }
                 }
@@ -107,69 +108,69 @@ public class BDC {
                 parserOptions.layerClips.add(parserOptions.getLayerLevel());
 
                 //apply any clip, saving old to restore on EMC
-                final float[] BBox=BDCobj.getFloatArray(PdfDictionary.BBox);
-                if(BBox!=null){
-                   // Area currentClip=gs.getClippingShape();
+                final float[] BBox = BDCobj.getFloatArray(PdfDictionary.BBox);
+                if (BBox != null) {
+                    // Area currentClip=gs.getClippingShape();
 
                     //store so we restore in EMC
                     //if(currentClip!=null)
-                      //  parserOptions.layerClips.put(parserOptions.layerLevel,currentClip.clone());
+                    //  parserOptions.layerClips.put(parserOptions.layerLevel,currentClip.clone());
 
-                    final Area clip=new Area(new Rectangle2D.Float(BBox[0], BBox[1], -gs.CTM[2][0]+(BBox[2]-BBox[0]), -gs.CTM[2][1]+(BBox[3]-BBox[1])));
+                    final Area clip = new Area(new Rectangle2D.Float(BBox[0], BBox[1], -gs.CTM[2][0] + (BBox[2] - BBox[0]), -gs.CTM[2][1] + (BBox[3] - BBox[1])));
 
-                    if(clip.getBounds().getWidth()>0 && clip.getBounds().getHeight()>0){
+                    if (clip.getBounds().getWidth() > 0 && clip.getBounds().getHeight() > 0) {
                         gs.setClippingShape(clip);
 
-                        current.drawClip(gs,clip,true);
-                        
+                        current.drawClip(gs, clip, true);
+
                         BDCobj.setClip(clip);
                     }
 
                 }
-            }else{ //direct just /OC and /MCxx
+            } else { //direct just /OC and /MCxx
 
                 //find /OC
                 name = readOPName(dataPointer, raw, rawStart, name);
             }
 
-            if(name!=null && !name.isEmpty()) //name referring to Layer or Title
+            if (name != null && !name.isEmpty()) //name referring to Layer or Title
             {
                 parserOptions.setIsLayerVisible(parserOptions.layers.decodeLayer(name, true));
             }
 
             //flag so we can next values
-            if(parserOptions.isLayerVisible()) {
-                parserOptions.getLayerVisibility().add(parserOptions.getLayerLevel());           
+            if (parserOptions.isLayerVisible()) {
+                parserOptions.getLayerVisibility().add(parserOptions.getLayerLevel());
             }
 
         }
     }
 
     private static String readOPName(final int dataPointer, final byte[] raw, final int rawStart, String name) {
-        for(int ii=rawStart;ii<dataPointer;ii++){
-            if(raw[ii]=='/' && raw[ii+1]=='O' && raw[ii+2]=='C'){ //find oc
+        for (int ii = rawStart; ii < dataPointer; ii++) {
+            if (raw[ii] == '/' && raw[ii + 1] == 'O' && raw[ii + 2] == 'C') { //find oc
 
                 ii += 2;
                 //roll onto value
-                while(raw[ii]!='/') {
+                while (raw[ii] != '/') {
                     ii++;
                 }
 
                 ii++; //roll pass /
 
-                final int strStart=ii;
-                int charCount=0;
+                final int strStart = ii;
+                int charCount = 0;
 
-                while(ii<dataPointer){
+                while (ii < dataPointer) {
                     ii++;
                     charCount++;
 
-                    if(raw[ii]==13 || raw[ii]==10 || raw[ii]==32 || raw[ii]=='/') {
+                    if (raw[ii] == 13 || raw[ii] == 10 || raw[ii] == 32 || raw[ii] == '/') {
                         break;
                     }
                 }
 
-                name=new String(raw,strStart,charCount);
+                name = new String(raw, strStart, charCount);
 
             }
         }

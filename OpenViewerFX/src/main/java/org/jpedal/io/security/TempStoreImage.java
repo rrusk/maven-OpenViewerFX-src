@@ -37,7 +37,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 
 /**
- *
  * @author suda
  */
 public class TempStoreImage {
@@ -54,17 +53,17 @@ public class TempStoreImage {
         final int[] pixels;
         final byte[] pixBytes;
         int v;
-        
+
         final int xx = img.getRaster().getSampleModelTranslateX();
         final int yy = img.getRaster().getSampleModelTranslateY();
-        if(xx != 0 || yy!= 0){
+        if (xx != 0 || yy != 0) {
             for (int y = 0; y < img.getHeight(); y++) {
                 for (int x = 0; x < img.getWidth(); x++) {
                     v = img.getRGB(x, y);
                     data[p++] = (byte) ((v >> 24) & 0xff);
                     data[p++] = (byte) ((v >> 16) & 0xff);
                     data[p++] = (byte) ((v >> 8) & 0xff);
-                    data[p++] = (byte) (v & 0xff);                    
+                    data[p++] = (byte) (v & 0xff);
                 }
             }
             return data;
@@ -107,8 +106,8 @@ public class TempStoreImage {
                 pixBytes = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
                 for (int i = 0, ii = img.getWidth() * img.getHeight(); i < ii; i++) {
                     data[p++] = -1;
-                    data[p++] = pixBytes[pp+2];
-                    data[p++] = pixBytes[pp+1];
+                    data[p++] = pixBytes[pp + 2];
+                    data[p++] = pixBytes[pp + 1];
                     data[p++] = pixBytes[pp];
                     pp += 3;
                 }
@@ -118,9 +117,9 @@ public class TempStoreImage {
                 pixBytes = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
                 for (int i = 0, ii = img.getWidth() * img.getHeight(); i < ii; i++) {
                     data[p++] = pixBytes[pp];
-                    data[p++] = pixBytes[pp+3];
-                    data[p++] = pixBytes[pp+2];
-                    data[p++] = pixBytes[pp+1];
+                    data[p++] = pixBytes[pp + 3];
+                    data[p++] = pixBytes[pp + 2];
+                    data[p++] = pixBytes[pp + 1];
                     pp += 4;
                 }
                 break;
@@ -156,5 +155,5 @@ public class TempStoreImage {
     private static byte[] numToBytes(final int num) {
         return new byte[]{(byte) (num >> 24), (byte) ((num >> 16) & 0xff), (byte) ((num >> 8) & 0xff), (byte) (num & 0xff)};
     }
-    
+
 }

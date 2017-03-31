@@ -34,6 +34,7 @@ package org.jpedal.parser.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
+
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfShape;
 import org.jpedal.parser.Cmd;
@@ -41,33 +42,33 @@ import org.jpedal.parser.ParserOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 
 public class S {
-    
-    
+
+
     public static Shape execute(final boolean isLowerCase, final GraphicsState gs, final PdfShape currentDrawShape, final DynamicVectorRenderer current, final ParserOptions parserOptions) {
-        
-        final boolean useJavaFX=parserOptions.useJavaFX();
-        final boolean renderPage=parserOptions.isRenderPage();
-        
-        Shape currentShape=null;
-        if(parserOptions.isLayerVisible()){
-            
+
+        final boolean useJavaFX = parserOptions.useJavaFX();
+        final boolean renderPage = parserOptions.isRenderPage();
+
+        Shape currentShape = null;
+        if (parserOptions.isLayerVisible()) {
+
             //close for s command
             if (isLowerCase) {
                 currentDrawShape.closeShape();
             }
-            
-            Object fxPath=null;
-            
-            final float realLineWidth=-1;
 
-            if(useJavaFX){
-                fxPath=currentDrawShape.getPath();
-            }else {
+            Object fxPath = null;
+
+            final float realLineWidth = -1;
+
+            if (useJavaFX) {
+                fxPath = currentDrawShape.getPath();
+            } else {
                 currentShape = currentDrawShape.generateShapeFromPath(gs.CTM, gs.getLineWidth(), Cmd.S);
-                
+
                 if (currentShape != null) {
                     /*
-                    Rectangle bounds;//=currentShape.getBounds();
+                    Rectangle bounds; //=currentShape.getBounds();
                     
                     // System.out.println("S bounds="+bounds+" "+" "+gs.CTM[0][0]+" "+gs.CTM[0][1]+" "+gs.CTM[1][0]+" "+gs.CTM[1][1]);
                     
@@ -92,67 +93,67 @@ public class S {
                     }/**/
                 }
             }
-            
-            boolean hasShape=currentShape!=null || fxPath!=null;
-            
-            if(hasShape){ //allow for the odd combination of crop with zero size
-                final Area crop=gs.getClippingShape();
-                
-                if(crop!=null && (crop.getBounds().getWidth()==0 || crop.getBounds().getHeight()==0 )){
-                    currentShape=null;
-                    fxPath=null;
-                    hasShape=false;
-                    
-                     //temp code so we do not break current code functions
-                    currentDrawShape.setShape(currentShape);
-                }
-            }
-            
-            if(hasShape){ //allow for the odd combination of f then S
-                
-                //fix forSwing. (not required in HTML/SVG
-                //Alter to only check bounds <1 instead of <=1 for fedexLabelAM.pdf
-                if(currentShape!=null && currentShape.getBounds().getWidth()<1 && !current.isHTMLorSVG()) {// && currentGraphicsState.getLineWidth()<=1.0f){
-                    currentShape=currentShape.getBounds2D();
-                    
+
+            boolean hasShape = currentShape != null || fxPath != null;
+
+            if (hasShape) { //allow for the odd combination of crop with zero size
+                final Area crop = gs.getClippingShape();
+
+                if (crop != null && (crop.getBounds().getWidth() == 0 || crop.getBounds().getHeight() == 0)) {
+                    currentShape = null;
+                    fxPath = null;
+                    hasShape = false;
+
                     //temp code so we do not break current code functions
                     currentDrawShape.setShape(currentShape);
                 }
-                
+            }
+
+            if (hasShape) { //allow for the odd combination of f then S
+
+                //fix forSwing. (not required in HTML/SVG
+                //Alter to only check bounds <1 instead of <=1 for fedexLabelAM.pdf
+                if (currentShape != null && currentShape.getBounds().getWidth() < 1 && !current.isHTMLorSVG()) { // && currentGraphicsState.getLineWidth()<=1.0f){
+                    currentShape = currentShape.getBounds2D();
+
+                    //temp code so we do not break current code functions
+                    currentDrawShape.setShape(currentShape);
+                }
+
                 //save for later
-                if (renderPage){
-                    
-                    gs.setStrokeColor( gs.strokeColorSpace.getColor());
-                    gs.setNonstrokeColor( gs.nonstrokeColorSpace.getColor());
+                if (renderPage) {
+
+                    gs.setStrokeColor(gs.strokeColorSpace.getColor());
+                    gs.setNonstrokeColor(gs.nonstrokeColorSpace.getColor());
                     gs.setFillType(GraphicsState.STROKE);
-                    
-                    if(useJavaFX){
-                        current.drawShape(fxPath,gs);
-                    }else{
-                        current.drawShape(currentDrawShape,gs, Cmd.S);
+
+                    if (useJavaFX) {
+                        current.drawShape(fxPath, gs);
+                    } else {
+                        current.drawShape(currentDrawShape, gs, Cmd.S);
                     }
-                    
-                    if(realLineWidth!=-1){
+
+                    if (realLineWidth != -1) {
                         gs.setLineWidth(realLineWidth);
                     }
                 }
             }
-            
-            if(currentDrawShape.isClip()){
-                
-                if(useJavaFX) {
+
+            if (currentDrawShape.isClip()) {
+
+                if (useJavaFX) {
                     gs.updateClip(fxPath);
-                } else{
+                } else {
                     gs.updateClip(new Area(currentShape));
                 }
             }
         }
-        
+
         //always reset flag
         currentDrawShape.setClip(false);
         currentDrawShape.resetPath(); // flush all path ops stored
-        
+
         return currentShape;
     }
-    
+
 }

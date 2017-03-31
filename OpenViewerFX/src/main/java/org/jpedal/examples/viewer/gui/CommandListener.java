@@ -36,7 +36,7 @@ package org.jpedal.examples.viewer.gui;
  * single listener to execute all GUI commands and call Commands to execute
  */
 public interface CommandListener {
-	   
+
     CommandListenerImpl getCommandListener();
-    
+
 }

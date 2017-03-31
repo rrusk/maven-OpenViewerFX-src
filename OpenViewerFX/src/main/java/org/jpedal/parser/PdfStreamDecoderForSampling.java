@@ -39,45 +39,44 @@ import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
-public class PdfStreamDecoderForSampling extends PdfStreamDecoder{
+public class PdfStreamDecoderForSampling extends PdfStreamDecoder {
 
-    PdfStreamDecoderForSampling(final PdfObjectReader currentPdfFile){
+    PdfStreamDecoderForSampling(final PdfObjectReader currentPdfFile) {
 
         super(currentPdfFile);
 
     }
 
     /**
-     *
-     *  just scan for DO and CM to get image sizes so we can work out sampling used
+     * just scan for DO and CM to get image sizes so we can work out sampling used
      */
-    public final float decodePageContentForImageSampling(final PdfObject pdfObject) {/* take out min's%%*/
+    public final float decodePageContentForImageSampling(final PdfObject pdfObject) { /* take out min's%%*/
 
-        try{
+        try {
 
             parserOptions.setRenderDirectly(true);
 
             //check switched off
-            parserOptions.imagesProcessedFully=true;
+            parserOptions.imagesProcessedFully = true;
 
             //reset count
-            imageCount=0;
+            imageCount = 0;
 
 
-            gs = new GraphicsState(0,0);/* take out min's%%*/
+            gs = new GraphicsState(0, 0); /* take out min's%%*/
 
             //get the binary data from the file
             final byte[] b_data;
 
-            byte[][] pageContents= null;
-            if(pdfObject !=null){
-                pageContents= pdfObject.getKeyArray(PdfDictionary.Contents);
-                isDataValid= pdfObject.streamMayBeCorrupt();
+            byte[][] pageContents = null;
+            if (pdfObject != null) {
+                pageContents = pdfObject.getKeyArray(PdfDictionary.Contents);
+                isDataValid = pdfObject.streamMayBeCorrupt();
             }
 
-            if(pdfObject !=null && pageContents==null) {
+            if (pdfObject != null && pageContents == null) {
                 b_data = currentPdfFile.readStream(pdfObject, true, true, false, false, false, pdfObject.getCacheName(currentPdfFile.getObjectReader()));
-            } else if(pageStream!=null) {
+            } else if (pageStream != null) {
                 b_data = pageStream;
             } else {
                 b_data = currentPdfFile.getObjectReader().readPageIntoStream(pdfObject);
@@ -85,8 +84,8 @@ public class PdfStreamDecoderForSampling extends PdfStreamDecoder{
 
             //if page data found, turn it into a set of commands
             //and decode the stream of commands
-            if (b_data!=null && b_data.length > 0) {
-                getSamplingOnly=true;
+            if (b_data != null && b_data.length > 0) {
+                getSamplingOnly = true;
                 decodeStreamIntoObjects(b_data, false);
             }
 
@@ -95,9 +94,9 @@ public class PdfStreamDecoderForSampling extends PdfStreamDecoder{
 
             return parserOptions.getSamplingUsed();
 
-        }catch(final Error err){
+        } catch (final Error err) {
             errorTracker.addPageFailureMessage("Problem decoding page " + err);
-            if (ExternalHandlers.throwMissingCIDError && err.getMessage()!=null && err.getMessage().contains("kochi")) {
+            if (ExternalHandlers.throwMissingCIDError && err.getMessage() != null && err.getMessage().contains("kochi")) {
                 throw err;
             }
         }

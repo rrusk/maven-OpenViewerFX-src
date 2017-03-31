@@ -34,29 +34,30 @@
 package org.jpedal.examples.viewer;
 
 
-/** PDF viewer
- *
+/**
+ * PDF viewer
+ * <p>
  * If you are compiling, you will need to download all the examples source files from http://www.idrsolutions.com/how-to-view-pdf-files-in-java/
- *
+ * <p>
  * Run directly from jar with java -cp jpedal.jar org/jpedal/examples/viewer/Viewer
  * or java -jar jpedal.jar
- *
+ * <p>
  * Lots of tutorials on how to configure on our website
- * 
+ * <p>
  * There is also a JavaFX Viewer documented at
  * http://files.idrsolutions.com/samplecode/org/jpedal/examples/viewer/OpenViewerFX.java.html
- *
+ * <p>
  * If you want to implement your own
  * Very simple example at http://files.idrsolutions.com/samplecode/org/jpedal/examples/jpaneldemo/JPanelDemo.java.html
  * But we would recommend you look at the full viewer as it is totally configurable and does everything for you.
- *
+ * <p>
  * See also http://javadoc.idrsolutions.com/org/jpedal/constants/JPedalSettings.html for settings to customise
- *
+ * <p>
  * Fully featured GUI viewer and demonstration of JPedal's capabilities
- *
+ * <p>
  * <br>This class provides the framework for the Viewer and calls other classes which provide the following
  * functions:-
- *
+ * <p>
  * <br>Values commonValues - repository for general settings
  * Printer currentPrinter - All printing functions and access methods to see if printing active
  * PdfDecoder decode_pdf - PDF library and panel
@@ -68,25 +69,27 @@ package org.jpedal.examples.viewer;
  * SwingMouseHandler mouseHandler - handles all mouse and related activity
  */
 public interface ViewerInt {
-	
+
     /**
-     *
      * Allow user to open PDF file to display
-     * @param defaultFile The file that will be displayed 
+     *
+     * @param defaultFile The file that will be displayed
      */
     void openDefaultFile(String defaultFile);
 
     /**
-     *Allow user to open PDF file to display
-     * @param defaultFile The file that will be displayed 
-     * @param page The page number on with the displayed file will be open
+     * Allow user to open PDF file to display
+     *
+     * @param defaultFile The file that will be displayed
+     * @param page        The page number on with the displayed file will be open
      */
     void openDefaultFileAtPage(String defaultFile, int page);
-    
+
     void setRootContainer(Object rootContainer);
 
     /**
      * Should be called before setupViewer
+     *
      * @param props the set properties
      */
     void loadProperties(String props);
@@ -95,9 +98,10 @@ public interface ViewerInt {
      * initialise and run client (default as Application in own Frame)
      */
     void setupViewer();
-    
+
     /**
      * Have the viewer handle program arguments
+     *
      * @param args :: Program arguments passed into the Viewer.
      */
     void handleArguments(String[] args);
@@ -105,17 +109,16 @@ public interface ViewerInt {
     /**
      * Execute Jpedal functionality from outside of the library using this method.
      * EXAMPLES
-     *    commandID = Commands.OPENFILE, args = {"/PDFData/Hand_Test/crbtrader.pdf}"
-     *    commandID = Commands.OPENFILE, args = {byte[] = {0,1,1,0,1,1,1,0,0,1}, "/PDFData/Hand_Test/crbtrader.pdf}"
-     *    commandID = Commands.ROTATION, args = {"90"}
-     *    commandID = Commands.OPENURL,  args = {"http://www.cs.bham.ac.uk/~axj/pub/papers/handy1.pdf"}
-     *
+     * commandID = Commands.OPENFILE, args = {"/PDFData/Hand_Test/crbtrader.pdf}"
+     * commandID = Commands.OPENFILE, args = {byte[] = {0,1,1,0,1,1,1,0,0,1}, "/PDFData/Hand_Test/crbtrader.pdf}"
+     * commandID = Commands.ROTATION, args = {"90"}
+     * commandID = Commands.OPENURL,  args = {"http://www.cs.bham.ac.uk/~axj/pub/papers/handy1.pdf"}
+     * <p>
      * for full details see http://www.idrsolutions.com/access-pdf-viewer-features-from-your-code/
      *
      * @param commandID :: static int value from Commands to spedify which command is wanted
-     * @param args :: arguements for the desired command
+     * @param args      :: arguements for the desired command
      * @return command
-     *
      */
     @SuppressWarnings("UnusedReturnValue")
     Object executeCommand(int commandID, Object[] args);
@@ -133,7 +136,7 @@ public interface ViewerInt {
      * <b>http://www.jpedal.org/support.php</b>
      *
      * @param newHandler Implementation of interface provided by IDR solutions
-     * @param type Defined value into org.jpedal.external.Options class
+     * @param type       Defined value into org.jpedal.external.Options class
      */
     void addExternalHandler(java.util.Map<Integer, Object> newHandler, int type);
 
@@ -141,5 +144,5 @@ public interface ViewerInt {
      * run with caution and only at end of usage if you really need
      */
     void dispose();
-    
+
 }

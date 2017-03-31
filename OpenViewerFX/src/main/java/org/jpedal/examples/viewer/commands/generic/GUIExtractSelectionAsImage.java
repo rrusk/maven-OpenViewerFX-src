@@ -40,6 +40,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.gui.GUIFactory;
@@ -49,37 +50,37 @@ import org.jpedal.gui.GUIFactory;
  * Extracting the drawn CursorBox as an Image.
  */
 public class GUIExtractSelectionAsImage {
-    
+
     protected static BufferedImage snapShot;
-    
-    
+
+
     /**
-     * Generic method to extract selected area 
+     * Generic method to extract selected area
      * as a rectangle and show onscreen.
-     * 
+     * <p>
      * Swing needs extracting into ExtractSelectionAsImage.
      */
     protected static void extractSelectedScreenAsImage(final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
-        
-        int t_x1=commonValues.m_x1;
-        int t_x2=commonValues.m_x2;
-        int t_y1=commonValues.m_y1;
-        int t_y2=commonValues.m_y2;
-        
-        if(commonValues.m_y1<commonValues.m_y2){
-            t_y2=commonValues.m_y1;
-            t_y1=commonValues.m_y2;
+
+        int t_x1 = commonValues.m_x1;
+        int t_x2 = commonValues.m_x2;
+        int t_y1 = commonValues.m_y1;
+        int t_y2 = commonValues.m_y2;
+
+        if (commonValues.m_y1 < commonValues.m_y2) {
+            t_y2 = commonValues.m_y1;
+            t_y1 = commonValues.m_y2;
         }
-        
-        if(commonValues.m_x1>commonValues.m_x2){
-            t_x2=commonValues.m_x1;
-            t_x1=commonValues.m_x2;
+
+        if (commonValues.m_x1 > commonValues.m_x2) {
+            t_x2 = commonValues.m_x1;
+            t_x1 = commonValues.m_x2;
         }
-        
-        snapShot=decode_pdf.getSelectedRectangleOnscreen(t_x1,t_y1,t_x2,t_y2,100 * currentGUI.getScaling());
+
+        snapShot = decode_pdf.getSelectedRectangleOnscreen(t_x1, t_y1, t_x2, t_y2, 100 * currentGUI.getScaling());
     }
-    
-    
+
+
     protected static class ClipboardImage implements Transferable {
 
         Image image;

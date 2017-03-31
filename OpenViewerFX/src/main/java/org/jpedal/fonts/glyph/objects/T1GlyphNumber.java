@@ -69,20 +69,20 @@ public class T1GlyphNumber {
             } else {
                 //x=((content[pos + 1]& 127) << 24) + (content[pos + 2]<<16)+(content[pos + 3] << 8) + content[pos + 4];
                 x =
-                    ((fontDataAsArray[pos + 1] & 0xFF) << 24)
-                        + ((fontDataAsArray[pos + 2] & 0xFF) << 16)
-                        + ((fontDataAsArray[pos + 3] & 0xFF) << 8)
-                        + (fontDataAsArray[pos + 4] & 0xFF);
+                        ((fontDataAsArray[pos + 1] & 0xFF) << 24)
+                                + ((fontDataAsArray[pos + 2] & 0xFF) << 16)
+                                + ((fontDataAsArray[pos + 3] & 0xFF) << 8)
+                                + (fontDataAsArray[pos + 4] & 0xFF);
 
             }
 
             pos += 5;
         } else if (b0 == 29) { //4 byte signed number
             x =
-                ((fontDataAsArray[pos + 1] & 0xFF) << 24)
-                    + ((fontDataAsArray[pos + 2] & 0xFF) << 16)
-                    + ((fontDataAsArray[pos + 3] & 0xFF) << 8)
-                    + (fontDataAsArray[pos + 4] & 0xFF);
+                    ((fontDataAsArray[pos + 1] & 0xFF) << 24)
+                            + ((fontDataAsArray[pos + 2] & 0xFF) << 16)
+                            + ((fontDataAsArray[pos + 3] & 0xFF) << 8)
+                            + (fontDataAsArray[pos + 4] & 0xFF);
             pos += 5;
         } else if (b0 == 30) { //BCD values
 
@@ -172,20 +172,20 @@ public class T1GlyphNumber {
             } else {
                 //x=((content[pos + 1]& 127) << 24) + (content[pos + 2]<<16)+(content[pos + 3] << 8) + content[pos + 4];
                 x =
-                    ((fontDataAsObject.getByte(pos + 1) & 0xFF) << 24)
-                        + ((fontDataAsObject.getByte(pos + 2) & 0xFF) << 16)
-                        + ((fontDataAsObject.getByte(pos + 3) & 0xFF) << 8)
-                        + (fontDataAsObject.getByte(pos + 4) & 0xFF);
+                        ((fontDataAsObject.getByte(pos + 1) & 0xFF) << 24)
+                                + ((fontDataAsObject.getByte(pos + 2) & 0xFF) << 16)
+                                + ((fontDataAsObject.getByte(pos + 3) & 0xFF) << 8)
+                                + (fontDataAsObject.getByte(pos + 4) & 0xFF);
 
             }
 
             pos += 5;
         } else if (b0 == 29) { //4 byte signed number
             x =
-                ((fontDataAsObject.getByte(pos + 1) & 0xFF) << 24)
-                    + ((fontDataAsObject.getByte(pos + 2) & 0xFF) << 16)
-                    + ((fontDataAsObject.getByte(pos + 3) & 0xFF) << 8)
-                    + (fontDataAsObject.getByte(pos + 4) & 0xFF);
+                    ((fontDataAsObject.getByte(pos + 1) & 0xFF) << 24)
+                            + ((fontDataAsObject.getByte(pos + 2) & 0xFF) << 16)
+                            + ((fontDataAsObject.getByte(pos + 3) & 0xFF) << 8)
+                            + (fontDataAsObject.getByte(pos + 4) & 0xFF);
             pos += 5;
         } else if (b0 == 30) { //BCD values
 

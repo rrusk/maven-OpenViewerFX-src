@@ -34,6 +34,7 @@ package org.jpedal.io.types;
 
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
+
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.NumberUtils;
@@ -43,29 +44,29 @@ import org.jpedal.utils.NumberUtils;
  */
 public class FloatValue {
 
-    
+
     public static int setFloatValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
-        
+
         //roll on
         i++;
-        
+
         i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
-        
-        int keyStart=i;
+
+        int keyStart = i;
         i = StreamReaderUtils.skipToEndOfRef(raw, i);
-        
+
         //actual value or first part of ref
-        float number= NumberUtils.parseFloat(keyStart, i, raw);
-        
+        float number = NumberUtils.parseFloat(keyStart, i, raw);
+
         //roll onto next nonspace char and see if number
-        int jj=i;
+        int jj = i;
         jj = StreamReaderUtils.skipSpaces(raw, jj);
-        
+
         //check its not a ref (assumes it XX 0 R)
-        if(raw[jj]>= 48 && raw[jj]<=57){ //if next char is number 0-9 its a ref
-            
+        if (raw[jj] >= 48 && raw[jj] <= 57) { //if next char is number 0-9 its a ref
+
             //move cursor to start of generation
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
+            while (raw[i] == 10 || raw[i] == 13 || raw[i] == 32 || raw[i] == 47 || raw[i] == 60) {
                 i++;
             }
 
@@ -73,65 +74,65 @@ public class FloatValue {
             /*
              * get generation number
              */
-            keyStart=i;
+            keyStart = i;
             //move cursor to end of reference
             i = StreamReaderUtils.skipToEndOfRef(raw, i);
-            
-            final int generation= NumberUtils.parseInt(keyStart, i, raw);
-            
+
+            final int generation = NumberUtils.parseInt(keyStart, i, raw);
+
             //move cursor to start of R
-            while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
+            while (raw[i] == 10 || raw[i] == 13 || raw[i] == 32 || raw[i] == 47 || raw[i] == 60) {
                 i++;
             }
-            
-            if(raw[i]!=82){ //we are expecting R to end ref
+
+            if (raw[i] != 82) { //we are expecting R to end ref
                 throw new RuntimeException("3. Unexpected value in file - please send to IDRsolutions for analysis");
             }
-            
+
             //read the Dictionary data
-            final byte[] data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed((int) number, generation), (int) number, generation);
-            
+            final byte[] data = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed((int) number, generation), (int) number, generation);
+
             //allow for data in Linear object not yet loaded
-            if(data==null){
+            if (data == null) {
                 pdfObject.setFullyResolved(false);
-                
-                if(debugFastCode) {
+
+                if (debugFastCode) {
                     System.out.println(padding + "Data not yet loaded");
                 }
-                
+
                 return raw.length;
             }
-            
+
             //lose obj at start
-            int j=3;
-            while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111) {
+            int j = 3;
+            while (data[j - 1] != 106 && data[j - 2] != 98 && data[j - 3] != 111) {
                 j++;
             }
-            
+
             j = StreamReaderUtils.skipSpaces(data, j);
-            
-            int count=j;
-            
+
+            int count = j;
+
             //skip any spaces at end
-            while(data[count]!=10 && data[count]!=13 && data[count]!=32){// || data[j]==47 || data[j]==60)
+            while (data[count] != 10 && data[count] != 13 && data[count] != 32) { // || data[j]==47 || data[j]==60)
                 count++;
             }
-            
-            number= NumberUtils.parseFloat(j, count, data);
-            
+
+            number = NumberUtils.parseFloat(j, count, data);
+
         }
-        
+
         //store value
-        pdfObject.setFloatNumber(PDFkeyInt,number);
-        
-        if(debugFastCode) {
-            System.out.println(padding + "set key in numberValue=" + number);//+" in "+pdfObject);
+        pdfObject.setFloatNumber(PDFkeyInt, number);
+
+        if (debugFastCode) {
+            System.out.println(padding + "set key in numberValue=" + number); //+" in "+pdfObject);
         }
-        
-        i--;// move back so loop works
+
+        i--; // move back so loop works
         return i;
     }
-    
+
 }
 
 

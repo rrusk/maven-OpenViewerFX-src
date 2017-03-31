@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -49,19 +50,19 @@ import org.jpedal.utils.Messages;
  * Deleted selected pages from the Document, uses itext functions delete()
  * It then re-open the document excluding the deleted pages.
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class Delete {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
+                               final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                               final GUIThumbnailPanel thumbnails) {
         if (args == null) {
             if (commonValues.getSelectedFile() == null) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.NoFile"));
             } else {
                 //get values from user
                 final DeletePDFPages deletedPages = new DeletePDFPages(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int deletedPagesChoice = deletedPages.display((Component)currentGUI.getFrame(), Messages.getMessage("PdfViewerDelete.text"));
+                final int deletedPagesChoice = deletedPages.display((Component) currentGUI.getFrame(), Messages.getMessage("PdfViewerDelete.text"));
 
                 //get parameters and call if YES
                 if (deletedPagesChoice == JOptionPane.OK_OPTION) {

@@ -34,6 +34,7 @@ package org.jpedal.objects.acroforms;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.io.PdfObjectReader;
@@ -61,34 +62,34 @@ import org.jpedal.utils.StringUtils;
  * handle Javascript and Actions (Javascript and ActionHandler)
  * and support for Signature object
  */
-public class AcroRenderer{
-    
-    private static final boolean flattenForms,ignoreAllForms;
-    
-    static{
-      
+public class AcroRenderer {
+
+    private static final boolean flattenForms, ignoreAllForms;
+
+    static {
+
         String s = System.getProperty("org.jpedal.flattenForm");
-        
-        flattenForms=s!=null && s.equalsIgnoreCase("true");
-        
+
+        flattenForms = s != null && s.equalsIgnoreCase("true");
+
         s = System.getProperty("org.jpedal.ignoreAllForms");
-        
-        ignoreAllForms=s!=null && s.equalsIgnoreCase("true");
-        
+
+        ignoreAllForms = s != null && s.equalsIgnoreCase("true");
+
     }
 
     public static boolean FROM_JPDF2FORMS;
-    
+
     FormObject[] Fforms, Aforms;
-    
+
     private PdfObject AcroRes;
-    
-    private float dpi=72f;
-    
+
+    private float dpi = 72f;
+
     private Object[] CO;
     PdfArrayIterator fieldList;
     private PdfArrayIterator[] annotList;
-   
+
     /**
      * flag to show we ignore forms
      */
@@ -100,26 +101,30 @@ public class AcroRenderer{
      * creates all GUI components from raw data in PDF and stores in GUIData instance
      */
     public FormFactory formFactory;
-    
-    /**holder for all data (implementations to support Swing and ULC)*/
+
+    /**
+     * holder for all data (implementations to support Swing and ULC)
+     */
     public GUIData compData;
-    
-    /**holds sig object so we can easily retrieve*/
+
+    /**
+     * holds sig object so we can easily retrieve
+     */
     private Set<FormObject> sigObject;
     private Map<String, String> sigKeys; //and allow us to trap multiple if in both Annot and Form
-    
+
     /**
      * holds copy of object to access the mediaBox and cropBox values
      */
     private PdfPageData pageData;
-    
+
     /**
      * number of entries in acroFormDataList, each entry can have a button group of more that one button
      * 'A' annot and 'F' form - A is per page, F is total hence 3 variables
      */
     private int[] AfieldCount;
-    
-    private int ATotalCount,FfieldCount;
+
+    private int ATotalCount, FfieldCount;
 
     private int additionalOBjectRef;
 
@@ -129,31 +134,31 @@ public class AcroRenderer{
      * number of pages in current PDF document
      */
     int pageCount;
-    
+
     /**
      * handle on object reader for decoding objects
      */
     PdfObjectReader currentPdfFile;
-    
+
     /**
      * parses and decodes PDF data into generic data for converting to widgets
      */
     FormStream fDecoder;
-    
+
     /**
      * handles events like URLS, EMAILS
      */
     private ActionHandler formsActionHandler;
-    
+
     /**
      * handles Javascript events
      */
     private Javascript javascript;
-    
+
     /*flag to show if XFA or FDF*/
     boolean hasXFA;
     private boolean isContainXFAStream;
-    
+
     /**
      * flag to show if we use XFA
      */
@@ -163,90 +168,91 @@ public class AcroRenderer{
      * allow us to differentiate underlying PDF form type
      */
     Enum<FormTypes> PDFformType;
-    
+
     private SwingFormCreator formCreator;
 
     /**
      * used to create version without XFA support in XFA version.
      * Should not be used otherwise.
      */
-    public AcroRenderer(){}
-    
+    public AcroRenderer() {
+    }
+
     public void useXFAIfAvailable(final boolean useXFA) {
 
-        this.useXFA=useXFA;
-        
+        this.useXFA = useXFA;
+
     }
-    
+
     /**
      * reset handler (must be called Before page opened)
      * - null Object resets to default
      */
     public void resetHandler(final ActionHandler formsActionHandler, final float dpi, final Javascript javascript) {
-        
-        this.formsActionHandler=formsActionHandler;
-        
-        this.dpi=dpi;
-        
-        this.javascript=javascript;
-        
+
+        this.formsActionHandler = formsActionHandler;
+
+        this.dpi = dpi;
+
+        this.javascript = javascript;
+
         //pass values down
-        if (formFactory != null){
-            formFactory.reset(this.getFormResources(), formsActionHandler,pageData,currentPdfFile);
+        if (formFactory != null) {
+            formFactory.reset(this.getFormResources(), formsActionHandler, pageData, currentPdfFile);
         }
     }
-    
+
     /**
      * make all components invisible on all pages by removing from Display
      */
     public void removeDisplayComponentsFromScreen() {
-        
-        if(compData!=null) {
+
+        if (compData != null) {
             compData.removeAllComponentsFromScreen();
         }
-        
+
     }
-    
+
     /**
      * initialise holders and variables, data structures and get a handle on data object
      */
     public int openFile(final int pageCount, final int insetW, final int insetH, final PdfPageData pageData, final PdfObjectReader currentPdfFile, final PdfObject acroObj) {
-        
+
         this.pageCount = pageCount;
         this.currentPdfFile = currentPdfFile;
         this.pageData = pageData;
 
         compData.flushFormData();
-        
+
         //explicitly flush
-        sigObject=null;
-        sigKeys=null;
-        
+        sigObject = null;
+        sigKeys = null;
+
         //track inset on page
-        compData.setPageData(pageData,insetW,insetH);
-        
+        compData.setPageData(pageData, insetW, insetH);
+
         if (acroObj == null) {
-            
+
             FfieldCount = 0;
-            
-            fieldList=null;
-        } else{
-            
+
+            fieldList = null;
+        } else {
+
             //handle XFA
             final PdfObject XFAasStream;
             PdfArrayIterator XFAasArray = null;
-            
-            XFAasStream=acroObj.getDictionary(PdfDictionary.XFA);
-            if(XFAasStream==null){
-                XFAasArray=acroObj.getMixedArray(PdfDictionary.XFA);
-                
+
+            XFAasStream = acroObj.getDictionary(PdfDictionary.XFA);
+            if (XFAasStream == null) {
+                XFAasArray = acroObj.getMixedArray(PdfDictionary.XFA);
+
                 //empty array
-                if(XFAasArray!=null && XFAasArray.getTokenCount()==0) {
+                if (XFAasArray != null && XFAasArray.getTokenCount() == 0) {
                     XFAasArray = null;
                 }
             }
-            
-            hasXFA= XFAasStream!=null || XFAasArray!=null;
+
+            hasXFA = XFAasStream != null || XFAasArray != null;
             isContainXFAStream = hasXFA;
 
             /*
@@ -254,76 +260,76 @@ public class AcroRenderer{
              */
             fieldList = acroObj.getMixedArray(PdfDictionary.Fields);
             CO = acroObj.getObjectArray(PdfDictionary.CO);
-            
-            if(fieldList!=null){
+
+            if (fieldList != null) {
                 FfieldCount = fieldList.getTokenCount();
-                
-                AcroRes=acroObj.getDictionary(PdfDictionary.DR);
-                
-                if(AcroRes!=null) {
+
+                AcroRes = acroObj.getDictionary(PdfDictionary.DR);
+
+                if (AcroRes != null) {
                     currentPdfFile.checkResolved(AcroRes);
                 }
-                
-            }else{
-                FfieldCount=0;
-                AcroRes=null;
+
+            } else {
+                FfieldCount = 0;
+                AcroRes = null;
             }
             
             /*
              * choose correct decoder for form data
              */
-            if (hasXFA && useXFA){
+            if (hasXFA && useXFA) {
                 processXFAFields(acroObj, currentPdfFile, pageData);
-            }           
-            
+            }
+
             //we need to read list if FDF
             //or redo list if Legacy XFA
-            if(!hasXFA) {
+            if (!hasXFA) {
                 resolveIndirectFieldList(false);
             }
-           
+
         }
-        
+
         resetContainers(true);
-        
+
         return pageCount;
     }
 
     /**
      * empty implementation in non-XFA AcroRenderer
-     * 
+     *
      * @param acroObj1
      * @param currentPdfFile1
-     * @param pageData1 
+     * @param pageData1
      */
     void processXFAFields(final PdfObject acroObj1, final PdfObjectReader currentPdfFile1, final PdfPageData pageData1) {
         throw new RuntimeException("This code (processXFAFields) should never be called");
     }
-        
-    void resolveIndirectFieldList(final boolean resolveParents){
+
+    void resolveIndirectFieldList(final boolean resolveParents) {
 
         //allow for indirect
-        while(FfieldCount==1){
+        while (FfieldCount == 1) {
 
             //may have been read before so reset
             fieldList.resetToStart();
-            
-            final String key=fieldList.getNextValueAsString(false);
+
+            final String key = fieldList.getNextValueAsString(false);
 
             final FormObject kidObject = new FormObject(key);
             currentPdfFile.readObject(kidObject);
 
-            final byte[][] childList =getKid(kidObject, resolveParents);
+            final byte[][] childList = getKid(kidObject, resolveParents);
 
-            if(childList==null) {
+            if (childList == null) {
                 break;
             }
 
-            fieldList=new PdfArrayIterator(childList);
+            fieldList = new PdfArrayIterator(childList);
             FfieldCount = fieldList.getTokenCount();
         }
     }
-    
+
     /**
      * initialise holders and variables and get a handle on data object
      * <br>
@@ -331,55 +337,55 @@ public class AcroRenderer{
      * a file basis
      */
     public void resetAnnotData(final int insetW, final int insetH, final PdfPageData pageData, final int page,
-            final PdfObjectReader currentPdfFile, final byte[][] currentAnnotList) {
-        
+                               final PdfObjectReader currentPdfFile, final byte[][] currentAnnotList) {
+
         this.currentPdfFile = currentPdfFile;
         this.pageData = pageData;
-        
+
         boolean resetToEmpty = true;
         addedMissingPopup = false;
-        
+
         //track inset on page
-        compData.setPageData(pageData,insetW,insetH);
-        
-        if (currentAnnotList==null) {
-            
+        compData.setPageData(pageData, insetW, insetH);
+
+        if (currentAnnotList == null) {
+
             AfieldCount = null;
-            ATotalCount=0;
-            if(annotList!=null) {
+            ATotalCount = 0;
+            if (annotList != null) {
                 annotList[page] = null;
             }
-            
-            annotList=null;
-            
-        }else{
-            
-            int pageCount=pageData.getPageCount()+1;
-            if(pageCount<=page) {
+
+            annotList = null;
+
+        } else {
+
+            int pageCount = pageData.getPageCount() + 1;
+            if (pageCount <= page) {
                 pageCount = page + 1;
             }
-            if(annotList==null){
-                annotList=new PdfArrayIterator[pageCount];
-                AfieldCount=new int[pageCount];
-            }else if(page>=annotList.length){
-                
-                final PdfArrayIterator[] tempList=annotList;
-                final int[] tempCount=AfieldCount;
-                AfieldCount=new int[pageCount];
-                annotList=new PdfArrayIterator[pageCount];
-                
-                for(int ii=0;ii<tempList.length;ii++){
-                    AfieldCount[ii]=tempCount[ii];
-                    annotList[ii]=tempList[ii];
+            if (annotList == null) {
+                annotList = new PdfArrayIterator[pageCount];
+                AfieldCount = new int[pageCount];
+            } else if (page >= annotList.length) {
+
+                final PdfArrayIterator[] tempList = annotList;
+                final int[] tempCount = AfieldCount;
+                AfieldCount = new int[pageCount];
+                annotList = new PdfArrayIterator[pageCount];
+
+                for (int ii = 0; ii < tempList.length; ii++) {
+                    AfieldCount[ii] = tempCount[ii];
+                    annotList[ii] = tempList[ii];
                 }
-            }else if(AfieldCount==null) {
+            } else if (AfieldCount == null) {
                 AfieldCount = new int[pageCount];
             }
-            
-            annotList[page]=new PdfArrayIterator(currentAnnotList);
-            
-            final int size =annotList[page].getTokenCount();
-            
+
+            annotList[page] = new PdfArrayIterator(currentAnnotList);
+
+            final int size = annotList[page].getTokenCount();
+
             AfieldCount[page] = size;
             ATotalCount += size;
             resetToEmpty = false;
@@ -387,18 +393,18 @@ public class AcroRenderer{
             /*
              * choose correct decoder for form data
              */
-            if(fDecoder==null){
+            if (fDecoder == null) {
 
-                PDFformType=FormTypes.NON_XFA;
+                PDFformType = FormTypes.NON_XFA;
 
                 fDecoder = new FormStream();
-                
+
             }
         }
         resetContainers(resetToEmpty);
-        
+
     }
-    
+
     /**
      * flush or resize data containers
      */
@@ -406,36 +412,36 @@ public class AcroRenderer{
         
         /*form or reset Annots*/
         if (resetToEmpty) {
-            
-            compData.resetComponents(ATotalCount+FfieldCount, pageCount, false);
-        }else{
-            compData.resetComponents(ATotalCount+FfieldCount,pageCount,true);
+
+            compData.resetComponents(ATotalCount + FfieldCount, pageCount, false);
+        } else {
+            compData.resetComponents(ATotalCount + FfieldCount, pageCount, true);
         }
-        
+
         if (formFactory == null) {
-            formFactory=formCreator.createFormFactory();
-            formFactory.reset(this.getFormResources(), formsActionHandler, pageData,  currentPdfFile);
+            formFactory = formCreator.createFormFactory();
+            formFactory.reset(this.getFormResources(), formsActionHandler, pageData, currentPdfFile);
         } else {
             //to keep customers formfactory usable
-            formFactory.reset(this.getFormResources(), formsActionHandler, pageData,  currentPdfFile);
+            formFactory.reset(this.getFormResources(), formsActionHandler, pageData, currentPdfFile);
         }
     }
-    
+
     /**
      * build forms display using standard swing components
      */
     public void createDisplayComponentsForPage(final int page, final PdfStreamDecoder current) {
-        
+
         //check if we want to flatten forms
-        if(flattenForms){
+        if (flattenForms) {
             compData.setRasterizeForms(true);
         }
         
         /*see if already done*/
-        if (!ignoreAllForms && (!compData.hasformsOnPageDecoded(page) || (formsRasterizedForDisplay() && current!=null))) {
+        if (!ignoreAllForms && (!compData.hasformsOnPageDecoded(page) || (formsRasterizedForDisplay() && current != null))) {
         
             /* ensure space for all values*/
-            compData.initParametersForPage(pageData,page,formFactory,dpi);
+            compData.initParametersForPage(pageData, page, formFactory, dpi);
             
             /*
              * think this needs to be revised, and different approach maybe storing, and reuse if respecified in file,
@@ -446,180 +452,180 @@ public class AcroRenderer{
              *
              * maybe if its just reset on multipage files
              */
-            
+
             //list of forms done
-            final Map<String, String> formsProcessed=new HashMap<String, String>();
-            
-            int Acount=0;
-            if(AfieldCount!=null && AfieldCount.length>page) {
+            final Map<String, String> formsProcessed = new HashMap<String, String>();
+
+            int Acount = 0;
+            if (AfieldCount != null && AfieldCount.length > page) {
                 Acount = AfieldCount[page];
             }
-            
+
             Fforms = new FormObject[FfieldCount];
-            
+
             Aforms = new FormObject[Acount];
             FormObject formObject;
             String objRef;
             int i, count;
-            
+
             {
-            
+
                 //scan list for all relevant values and add to array if valid
                 //0  = forms, 1 = annots
                 final int decodeToForm = 2;
-                
-                for(int forms=0;forms<decodeToForm;forms++){
-                    
-                    i=0;
-                    
-                    if(forms==0){
-                        count=0;
-                        if(fieldList!=null){
+
+                for (int forms = 0; forms < decodeToForm; forms++) {
+
+                    i = 0;
+
+                    if (forms == 0) {
+                        count = 0;
+                        if (fieldList != null) {
                             fieldList.resetToStart();
-                            count=fieldList.getTokenCount()-1;
+                            count = fieldList.getTokenCount() - 1;
                         }
-                        
-                    }else{
-                        if(annotList!=null && annotList.length>page && annotList[page]!=null){
-                            
-                            if(!isContainXFAStream && formFactory.getType()==FormFactory.HTML){
+
+                    } else {
+                        if (annotList != null && annotList.length > page && annotList[page] != null) {
+
+                            if (!isContainXFAStream && formFactory.getType() == FormFactory.HTML) {
                                 annotList[page].resetToStart();
-                                
-                                final Map<String, String> annotOrder=new HashMap<String, String>();
-                                
-                                final int count2=annotList[page].getTokenCount();
+
+                                final Map<String, String> annotOrder = new HashMap<String, String>();
+
+                                final int count2 = annotList[page].getTokenCount();
                                 String val;
-                                for(int ii=0;ii<count2;ii++){
-                                    val=annotList[page].getNextValueAsString(true);
-                                    annotOrder.put(val,String.valueOf(ii+1));
+                                for (int ii = 0; ii < count2; ii++) {
+                                    val = annotList[page].getNextValueAsString(true);
+                                    annotOrder.put(val, String.valueOf(ii + 1));
                                 }
-                                
+
                                 formFactory.setAnnotOrder(annotOrder);
                             }
-                            
+
                             //We need to do this regardless
                             annotList[page].resetToStart();
                         }
-                        count=Acount-1;
+                        count = Acount - 1;
                     }
-                    
-                    for (int fieldNum =count; fieldNum >-1; fieldNum--) {
-                        
-                        objRef=null;
-                        
-                        if(forms==0){
-                            if(fieldList!=null) {
+
+                    for (int fieldNum = count; fieldNum > -1; fieldNum--) {
+
+                        objRef = null;
+
+                        if (forms == 0) {
+                            if (fieldList != null) {
                                 objRef = fieldList.getNextValueAsString(true);
                             }
-                        }else{
-                            if(addedMissingPopup && !annotList[page].hasMoreTokens()){
-                        		//Ignore this as we have added our own object that does not need reading
-                        		//with the PdfArrayIterator. Code positioned like this to explain.
+                        } else {
+                            if (addedMissingPopup && !annotList[page].hasMoreTokens()) {
+                                //Ignore this as we have added our own object that does not need reading
+                                //with the PdfArrayIterator. Code positioned like this to explain.
                                 //Test File : baseline_screens\cid2\SampleError.pdf
-                        	}else{
-                        		if(annotList.length>page && annotList[page]!=null) {
-                        			objRef = annotList[page].getNextValueAsString(true);
-                        		}
-                        	}
+                            } else {
+                                if (annotList.length > page && annotList[page] != null) {
+                                    objRef = annotList[page].getNextValueAsString(true);
+                                }
+                            }
                         }
-                        
-                        if(objRef==null || ((formsProcessed.get(objRef)!=null || objRef.isEmpty()))) {
+
+                        if (objRef == null || ((formsProcessed.get(objRef) != null || objRef.isEmpty()))) {
                             continue;
                         }
-                        
-                        try{
-                            formObject=convertRefToFormObject(objRef,page);
-                            if(!isAnnotation(formObject)){
+
+                        try {
+                            formObject = convertRefToFormObject(objRef, page);
+                            if (!isAnnotation(formObject)) {
                                 continue;
                             }
-                        }catch(final Exception e){
-                            LogWriter.writeLog("Exception "+e+" with "+objRef);
+                        } catch (final Exception e) {
+                            LogWriter.writeLog("Exception " + e + " with " + objRef);
                             continue;
                         }
                         
                         /*
                          * Only allows Annotations if in Annots page stream
                          */
-                        if(forms==0 && formObject!=null && formObject.getFormType()==-1){
+                        if (forms == 0 && formObject != null && formObject.getFormType() == -1) {
                             continue;
                         }
-                        
-                        if(allowsPopup(formObject) && formObject.getDictionary(PdfDictionary.Popup)==null){
-                        		
-                        		final FormObject po = new FormObject(PdfDictionary.Annot);
-                                additionalOBjectRef++;
-                                
-                                po.setRef((-additionalOBjectRef)+" 0 X");
-                        		po.setIntNumber(PdfDictionary.F, 24); //Bit Flag for bits 4+5 (No Zoom, No Rotate)
-                        		po.setBoolean(PdfDictionary.Open, formObject.getBoolean(PdfDictionary.Open));
-                        		po.setConstant(PdfDictionary.Subtype, PdfDictionary.Popup);
-                        		final float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
-                        		
-                        		if(pageData.getRotation(page)%180!=0) {
-                                    po.setFloatArray(PdfDictionary.Rect, new float[]{rect[2], pageData.getCropBoxHeight(page)-100, rect[2]+160, pageData.getCropBoxHeight(page)});
-                                } else {
-                                    po.setFloatArray(PdfDictionary.Rect, new float[]{pageData.getCropBoxWidth(page), rect[3] - 100, pageData.getCropBoxWidth(page) + 160, rect[3]});
-                                }
-                        		
-                        		po.setStringKey(PdfDictionary.Parent, formObject.getObjectRefAsString().getBytes());
-                        		po.setParentPdfObj(formObject);
-								
-                        		po.setPageNumber(page);
-                        		formObject.setDictionary(PdfDictionary.Popup, po);
-                        		
-                        		final FormObject[] newForms = new FormObject[Aforms.length+1];
-                        		for(int ii=0; ii!=Aforms.length; ii++){
-                        			newForms[ii] = Aforms[ii];
-                        		}
-                        		newForms[Aforms.length] = po;
-                        		
-                        		Aforms = newForms;
-                        		
-                                addedMissingPopup = true;
-                        	}
-                      
-                        final byte[][] kids=formObject.getKeyArray(PdfDictionary.Kids);
-                        if(kids!=null) //not 'proper' kids so process here
+
+                        if (allowsPopup(formObject) && formObject.getDictionary(PdfDictionary.Popup) == null) {
+
+                            final FormObject po = new FormObject(PdfDictionary.Annot);
+                            additionalOBjectRef++;
+
+                            po.setRef((-additionalOBjectRef) + " 0 X");
+                            po.setIntNumber(PdfDictionary.F, 24); //Bit Flag for bits 4+5 (No Zoom, No Rotate)
+                            po.setBoolean(PdfDictionary.Open, formObject.getBoolean(PdfDictionary.Open));
+                            po.setConstant(PdfDictionary.Subtype, PdfDictionary.Popup);
+                            final float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
+
+                            if (pageData.getRotation(page) % 180 != 0) {
+                                po.setFloatArray(PdfDictionary.Rect, new float[]{rect[2], pageData.getCropBoxHeight(page) - 100, rect[2] + 160, pageData.getCropBoxHeight(page)});
+                            } else {
+                                po.setFloatArray(PdfDictionary.Rect, new float[]{pageData.getCropBoxWidth(page), rect[3] - 100, pageData.getCropBoxWidth(page) + 160, rect[3]});
+                            }
+
+                            po.setStringKey(PdfDictionary.Parent, formObject.getObjectRefAsString().getBytes());
+                            po.setParentPdfObj(formObject);
+
+                            po.setPageNumber(page);
+                            formObject.setDictionary(PdfDictionary.Popup, po);
+
+                            final FormObject[] newForms = new FormObject[Aforms.length + 1];
+                            for (int ii = 0; ii != Aforms.length; ii++) {
+                                newForms[ii] = Aforms[ii];
+                            }
+                            newForms[Aforms.length] = po;
+
+                            Aforms = newForms;
+
+                            addedMissingPopup = true;
+                        }
+
+                        final byte[][] kids = formObject.getKeyArray(PdfDictionary.Kids);
+                        if (kids != null) //not 'proper' kids so process here
                         {
                             i = flattenKids(page, formsProcessed, formObject, i, forms);
                         } else {
                             i = processFormObject(page, formsProcessed, formObject, objRef, i, forms);
                         }
                     }
-                }             
+                }
             }
-            
-            final List<FormObject> unsortedForms= new ArrayList<FormObject>();
+
+            final List<FormObject> unsortedForms = new ArrayList<FormObject>();
             final List<FormObject> sortedForms = new ArrayList<FormObject>();
-            compData.setListForPage(page,unsortedForms,false);
+            compData.setListForPage(page, unsortedForms, false);
             compData.setListForPage(page, sortedForms, true);
-            
+
             final Map<String, String> formsCreated = createAndStoreFormComponents(current, unsortedForms, sortedForms, page);
-            
-            if(!formsRasterizedForDisplay()){
-                
+
+            if (!formsRasterizedForDisplay()) {
+
                 // Go through all forms created and run through javascript for initiation
-                try{
+                try {
                     //get current page object
                     final String ref = currentPdfFile.getReferenceforPage(page);
                     final PageObject pageObj = new PageObject(ref);
                     currentPdfFile.readObject(pageObj);
-                    
+
                     //call Page Level open commands
-                    if (javascript != null && formsActionHandler!=null) {
+                    if (javascript != null && formsActionHandler != null) {
                         //NOTE: moved here as the Runnable can be executed after forms have been created which is too late.
-                        formsActionHandler.O(pageObj,PdfDictionary.AA);
-                        formsActionHandler.O(pageObj,PdfDictionary.A);//just in case
-                        formsActionHandler.PO(pageObj,PdfDictionary.AA);
-                        formsActionHandler.PO(pageObj,PdfDictionary.A);//just in case
+                        formsActionHandler.O(pageObj, PdfDictionary.AA);
+                        formsActionHandler.O(pageObj, PdfDictionary.A); //just in case
+                        formsActionHandler.PO(pageObj, PdfDictionary.AA);
+                        formsActionHandler.PO(pageObj, PdfDictionary.A); //just in case
                     }
-                    
-                    if(formFactory.getType()!=FormFactory.HTML && formFactory.getType()!=FormFactory.SVG){
+
+                    if (formFactory.getType() != FormFactory.HTML && formFactory.getType() != FormFactory.SVG) {
                         //then initilise each field
                         initJSonFields(formsCreated);
                     }
-                    
-                }catch(final Exception e){
+
+                } catch (final Exception e) {
                     LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
@@ -627,13 +633,13 @@ public class AcroRenderer{
     }
 
     private Map<String, String> createAndStoreFormComponents(final PdfStreamDecoder current, final List<FormObject> unsortedForms, final List<FormObject> sortedForms, final int page) {
-        
-        final Map<String, String> formsCreated=new HashMap<String, String>();
-        
+
+        final Map<String, String> formsCreated = new HashMap<String, String>();
+
         FormObject[] xfaFormList = null;
         FormObject formObject;
         int count;
-        
+
         if (hasXFA && useXFA) {
             xfaFormList = createXFADisplayComponentsForPage(xfaFormList, page);
         }
@@ -744,7 +750,7 @@ public class AcroRenderer{
                     formObject = Aforms[k];
                 }
 
-                if (formObject != null && (formsCreated.get(formObject.getObjectRefAsString()) == null) && page == formObject.getPageNumber()) {// && !formObject.getObjectRefAsString().equals("216 0 R")){
+                if (formObject != null && (formsCreated.get(formObject.getObjectRefAsString()) == null) && page == formObject.getPageNumber()) { // && !formObject.getObjectRefAsString().equals("216 0 R")){
                     final int type = formFactory.getType();
 
                     //NOTE: if this custom form needs redrawing more changediff ReadOnlyTextIcon.MAXSCALEFACTOR to 1;
@@ -773,7 +779,7 @@ public class AcroRenderer{
                             //neede in display to fix position issues
                         } else if (formObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Popup) {
                             /*
-                            	 * To match examples the first popup is drawn over all
+                                 * To match examples the first popup is drawn over all
                             	 * then we draw all other popups in the pdf order from
                             	 * the bottom to the one before the top
                              */
@@ -793,25 +799,26 @@ public class AcroRenderer{
 
         return formsCreated;
     }
-    
+
     /**
      * Utility method to check if  formObject should have a popup
+     *
      * @return True if popup should exist
      */
-    static boolean allowsPopup(final FormObject formObject){
-        
-        switch(formObject.getParameterConstant(PdfDictionary.Subtype)){
-            case PdfDictionary.Text :
+    static boolean allowsPopup(final FormObject formObject) {
+
+        switch (formObject.getParameterConstant(PdfDictionary.Subtype)) {
+            case PdfDictionary.Text:
 //            case PdfDictionary.Line :
-            case PdfDictionary.Square :
+            case PdfDictionary.Square:
 //            case PdfDictionary.Circle :
 //            case PdfDictionary.Polygon :
 //            case PdfDictionary.PolyLine :
-            case PdfDictionary.Highlight :
-            case PdfDictionary.Underline :
+            case PdfDictionary.Highlight:
+            case PdfDictionary.Underline:
 //            case PdfDictionary.Squiggly :
-            case PdfDictionary.StrickOut :
-            case PdfDictionary.Stamp :
+            case PdfDictionary.StrickOut:
+            case PdfDictionary.Stamp:
 //            case PdfDictionary.Caret :
 //            case PdfDictionary.Ink :
 //            case PdfDictionary.FileAttachment :
@@ -825,137 +832,138 @@ public class AcroRenderer{
 //            case PdfDictionary.Watermark :
 //            case PdfDictionary.3D :
                 return true;
-            default :
+            default:
                 return false;
         }
     }
-    
+
     /**
      * Utility method to ensure formObject is actually an annotation before we continue
+     *
      * @return True if annotation
      */
-    public static boolean isAnnotation(final FormObject formObject){
-        
-        if(formObject.getParameterConstant(PdfDictionary.Type)==PdfDictionary.Annot){
+    public static boolean isAnnotation(final FormObject formObject) {
+
+        if (formObject.getParameterConstant(PdfDictionary.Type) == PdfDictionary.Annot) {
             return true;
         }
-        
-        switch(formObject.getParameterConstant(PdfDictionary.Subtype)){
-            case PdfDictionary.Text :
-            case PdfDictionary.Link :
-            case PdfDictionary.FreeText :
-            case PdfDictionary.Line :
-            case PdfDictionary.Square :
-            case PdfDictionary.Circle :
-            case PdfDictionary.Polygon :
-            case PdfDictionary.PolyLine :
-            case PdfDictionary.Highlight :
-            case PdfDictionary.Underline :
-            case PdfDictionary.Squiggly :
-            case PdfDictionary.StrickOut :
-            case PdfDictionary.Stamp :
-            case PdfDictionary.Caret :
-            case PdfDictionary.Ink :
-            case PdfDictionary.Popup :
-            case PdfDictionary.FileAttachment :
-            case PdfDictionary.Sound :
-            case PdfDictionary.Movie :
-            case PdfDictionary.Widget :
-            case PdfDictionary.Screen :
-            case PdfDictionary.PrinterMark :
-            case PdfDictionary.TrapNet :
-            case PdfDictionary.Watermark :
-            case PdfDictionary.THREE_D :
 
-             // From the Supplement to the PDF spec
+        switch (formObject.getParameterConstant(PdfDictionary.Subtype)) {
+            case PdfDictionary.Text:
+            case PdfDictionary.Link:
+            case PdfDictionary.FreeText:
+            case PdfDictionary.Line:
+            case PdfDictionary.Square:
+            case PdfDictionary.Circle:
+            case PdfDictionary.Polygon:
+            case PdfDictionary.PolyLine:
+            case PdfDictionary.Highlight:
+            case PdfDictionary.Underline:
+            case PdfDictionary.Squiggly:
+            case PdfDictionary.StrickOut:
+            case PdfDictionary.Stamp:
+            case PdfDictionary.Caret:
+            case PdfDictionary.Ink:
+            case PdfDictionary.Popup:
+            case PdfDictionary.FileAttachment:
+            case PdfDictionary.Sound:
+            case PdfDictionary.Movie:
+            case PdfDictionary.Widget:
+            case PdfDictionary.Screen:
+            case PdfDictionary.PrinterMark:
+            case PdfDictionary.TrapNet:
+            case PdfDictionary.Watermark:
+            case PdfDictionary.THREE_D:
+
+                // From the Supplement to the PDF spec
             case PdfDictionary.RichMedia:
-            case PdfDictionary.Projection :
+            case PdfDictionary.Projection:
 
                 return true;
-            default :
+            default:
                 return false;
         }
     }
-    
+
     private void storeSignatures(final FormObject formObject, final int formType) {
 
         //if sig object set global sig object so we can access later
-        if(formType == PdfDictionary.Sig){
+        if (formType == PdfDictionary.Sig) {
 
-            if(sigObject==null){ //ensure initialised
+            if (sigObject == null) { //ensure initialised
                 sigObject = new HashSet<FormObject>();
-                sigKeys=new HashMap<String, String>();
+                sigKeys = new HashMap<String, String>();
             }
 
-            if(!sigKeys.containsKey(formObject.getObjectRefAsString())) {  //avoid duplicates
+            if (!sigKeys.containsKey(formObject.getObjectRefAsString())) {  //avoid duplicates
                 sigObject.add(formObject);
-                sigKeys.put(formObject.getObjectRefAsString(),"x");
+                sigKeys.put(formObject.getObjectRefAsString(), "x");
             }
 
         }
     }
 
     private int flattenKids(final int page, final Map<String, String> formsProcessed, final FormObject formObject, int i, final int forms) {
-        
-        final byte[][] kidList=formObject.getKeyArray(PdfDictionary.Kids);
-        final int kidCount=kidList.length;
-        
+
+        final byte[][] kidList = formObject.getKeyArray(PdfDictionary.Kids);
+        final int kidCount = kidList.length;
+
         //resize to fit
-        if(forms==0){
-            final int oldCount=Fforms.length;
-            final FormObject[] temp=Fforms;
-            Fforms=new FormObject[oldCount+kidCount-1];
+        if (forms == 0) {
+            final int oldCount = Fforms.length;
+            final FormObject[] temp = Fforms;
+            Fforms = new FormObject[oldCount + kidCount - 1];
             System.arraycopy(temp, 0, Fforms, 0, oldCount);
-        }else{
-            final int oldCount=Aforms.length;
-            final FormObject[] temp=Aforms;
-            Aforms=new FormObject[oldCount+kidCount-1];
+        } else {
+            final int oldCount = Aforms.length;
+            final FormObject[] temp = Aforms;
+            Aforms = new FormObject[oldCount + kidCount - 1];
             System.arraycopy(temp, 0, Aforms, 0, oldCount);
         }
-        
+
         for (final byte[] aKidList : kidList) { //iterate through all parts
-            
+
             final String key = new String(aKidList);
-            
+
             //now we have inherited values, read
             final FormObject childObj = new FormObject(key);
-            
+
             //inherit values
             childObj.copyInheritedValuesFromParent(formObject);
-            
+
             currentPdfFile.readObject(childObj);
-            
+
             childObj.setRef(key);
-            
+
             if (childObj.getKeyArray(PdfDictionary.Kids) == null) {
-                
-                if(!childObj.isAppearanceUsed()){
+
+                if (!childObj.isAppearanceUsed()) {
                     new FormStream().createAppearanceString(childObj, currentPdfFile);
                 }
-                
+
                 i = processFormObject(page, formsProcessed, childObj, key, i, forms);
             } else {
-                
+
                 i = flattenKids(page, formsProcessed, childObj, i, forms);
             }
         }
         return i;
     }
-    
+
     private int processFormObject(final int page, final Map<String, String> formsProcessed, final FormObject formObject, final String objRef, int i, final int forms) {
-        boolean isOnPage=false;
-        if(forms==0){ //check page
+        boolean isOnPage = false;
+        if (forms == 0) { //check page
             isOnPage = isFormObjectOnPage(formObject, page);
         }
-        
-        if(forms==1 || isOnPage){
-            
+
+        if (forms == 1 || isOnPage) {
+
             formObject.setPageNumber(page);
-            
-            final String parent=formObject.getStringKey(PdfDictionary.Parent);
-            
+
+            final String parent = formObject.getStringKey(PdfDictionary.Parent);
+
             //clone parent to allow inheritance of values or create new
-            if(parent!=null){
+            if (parent != null) {
                 final FormObject parentObj = getParent(parent, formObject);
                 
                 /*
@@ -970,156 +978,156 @@ public class AcroRenderer{
                 }
 
                 //inherited values
-                if(parentObj!=null){
+                if (parentObj != null) {
                     //all values are copied from the parent inside this call
-                    formObject.setParent(parent,parentObj,true);
+                    formObject.setParent(parent, parentObj, true);
                 }
             }
-            
-            if(!formObject.isAppearanceUsed()){
+
+            if (!formObject.isAppearanceUsed()) {
                 fDecoder.createAppearanceString(formObject, currentPdfFile);
             }
-            
+
             //Check that type returns as a valid value to lock out broken objects
             //Added for case 22215
-            if (formObject.getParameterConstant(PdfDictionary.Subtype)!=-1){
-                if(parent!=null) {
-                    formObject.setParent(parent);//parent object was added earlier
+            if (formObject.getParameterConstant(PdfDictionary.Subtype) != -1) {
+                if (parent != null) {
+                    formObject.setParent(parent); //parent object was added earlier
                 }
-                
-                if(forms==0) {
+
+                if (forms == 0) {
                     Fforms[i++] = formObject;
                 } else {
                     Aforms[i++] = formObject;
                 }
-                
+
                 //also flag
-                if(objRef!=null) {
+                if (objRef != null) {
                     formsProcessed.put(objRef, "x");
                 }
             }
         }
         return i;
     }
-    
-    private boolean isFormObjectOnPage(final FormObject formObject, final int page){
-        PdfObject pageObj=formObject.getDictionary(PdfDictionary.P);
-            
-            byte[] pageRef=null;
-            
-            if(pageObj!=null) {
-                pageRef = pageObj.getUnresolvedData();
+
+    private boolean isFormObjectOnPage(final FormObject formObject, final int page) {
+        PdfObject pageObj = formObject.getDictionary(PdfDictionary.P);
+
+        byte[] pageRef = null;
+
+        if (pageObj != null) {
+            pageRef = pageObj.getUnresolvedData();
+        }
+
+        if (pageRef == null || pageObj == null) {
+
+            final String parent = formObject.getStringKey(PdfDictionary.Parent);
+
+            if (parent != null) {
+                final PdfObject parentObj = getParent(parent, null);
+
+                pageObj = parentObj.getDictionary(PdfDictionary.P);
+                if (pageObj != null) {
+                    pageRef = pageObj.getUnresolvedData();
+                }
             }
-            
-            if(pageRef==null || pageObj==null){
-                
-                final String parent=formObject.getStringKey(PdfDictionary.Parent);
-                
-                if(parent!=null){
-                    final PdfObject parentObj = getParent(parent, null);
-                    
-                    pageObj=parentObj.getDictionary(PdfDictionary.P);
-                    if(pageObj!=null) {
+        }
+
+        if (pageRef == null) {
+
+            final byte[][] kidList = getKid(formObject, false);
+
+            if (kidList != null && kidList.length > 0) {
+
+                final int kidCount = kidList.length;
+
+                FormObject kidObject;
+                for (int jj = 0; jj < kidCount; jj++) {
+                    final String key = new String(kidList[jj]);
+
+                    kidObject = compData.getRawFormData().get(key);
+
+                    if (kidObject == null) {
+                        kidObject = new FormObject(key);
+
+                        currentPdfFile.readObject(kidObject);
+
+                        compData.storeRawData(kidObject);
+
+                    }
+
+                    pageObj = kidObject.getDictionary(PdfDictionary.P);
+
+                    if (pageObj != null) {
                         pageRef = pageObj.getUnresolvedData();
                     }
-                }
-            }
-            
-            if(pageRef==null){
-                
-                final byte[][] kidList = getKid(formObject,false);
-                
-                if (kidList!=null && kidList.length>0) {
-                    
-                    final int kidCount=kidList.length;
-                    
-                    FormObject kidObject;
-                    for(int jj=0;jj<kidCount;jj++){
-                        final String key=new String(kidList[jj]);
-                        
-                        kidObject= compData.getRawFormData().get(key);
-                        
-                        if(kidObject==null){
-                            kidObject = new FormObject(key);
-                            
-                            currentPdfFile.readObject(kidObject);
-                            
-                            compData.storeRawData(kidObject);
-                            
-                        }
-                        
-                        pageObj=kidObject.getDictionary(PdfDictionary.P);
-                        
-                        if(pageObj!=null) {
-                            pageRef = pageObj.getUnresolvedData();
-                        }
-                        
-                        if(pageRef!=null) {
-                            jj = kidCount;
-                        }
+
+                    if (pageRef != null) {
+                        jj = kidCount;
                     }
                 }
             }
-            
-            int objPage=-1;
-            if(pageRef!=null) {
-                objPage = currentPdfFile.convertObjectToPageNumber(new String(pageRef));
-            }
-            
-            return objPage==page;
-            
+        }
+
+        int objPage = -1;
+        if (pageRef != null) {
+            objPage = currentPdfFile.convertObjectToPageNumber(new String(pageRef));
+        }
+
+        return objPage == page;
+
     }
-    
+
     private FormObject getParent(final String parent, final FormObject formObj) {
-        
-        FormObject parentObj= compData.getRawFormData().get(parent);
-        
-        if(parentObj==null && parent!=null){ //not yet read so read and cache
+
+        FormObject parentObj = compData.getRawFormData().get(parent);
+
+        if (parentObj == null && parent != null) { //not yet read so read and cache
             parentObj = new FormObject(parent);
             currentPdfFile.readObject(parentObj);
-            
+
             //remove kids in Parent
-            parentObj.setKeyArray(PdfDictionary.Kids,null);
-            
+            parentObj.setKeyArray(PdfDictionary.Kids, null);
+
             compData.storeRawData(parentObj);
-            
+
         }
-        
-        if(parentObj!=null && formObj!=null){
-            final byte[][] kidsInParent=parentObj.getRawKids();
+
+        if (parentObj != null && formObj != null) {
+            final byte[][] kidsInParent = parentObj.getRawKids();
             formObj.setRawKids(kidsInParent);
         }
-            
+
         return parentObj;
     }
-    
+
     private byte[][] getKid(final FormObject formObject, final boolean ignoreParent) {
-        
-        final int formType=formObject.getNameAsConstant(PdfDictionary.FT);
-        if(formType==PdfDictionary.Tx || formType==PdfDictionary.Btn) {
+
+        final int formType = formObject.getNameAsConstant(PdfDictionary.FT);
+        if (formType == PdfDictionary.Tx || formType == PdfDictionary.Btn) {
             return null;
         }
-        
-        byte[][] kidList=formObject.getKeyArray(PdfDictionary.Kids);
-        
-        if(kidList!=null && !ignoreParent){
-            final String parentRef=formObject.getStringKey(PdfDictionary.Parent);
-            
-            final PdfObject parentObj= this.getFormObject(parentRef);
-            
-            if(parentObj!=null && parentObj.getKeyArray(PdfDictionary.Kids)!=null) {
+
+        byte[][] kidList = formObject.getKeyArray(PdfDictionary.Kids);
+
+        if (kidList != null && !ignoreParent) {
+            final String parentRef = formObject.getStringKey(PdfDictionary.Parent);
+
+            final PdfObject parentObj = this.getFormObject(parentRef);
+
+            if (parentObj != null && parentObj.getKeyArray(PdfDictionary.Kids) != null) {
                 kidList = null;
             }
         }
-        
+
         return kidList;
     }
-    
+
     /**
      * display widgets on screen for range (inclusive)
      */
     public void displayComponentsOnscreen(final int startPage, int endPage) {
-        
+
         //On rare occurances compData can be null as dispose called during paint.
         //As dispose only called on viewer close we can lock issue out here
         if (compData != null) {
@@ -1132,19 +1140,19 @@ public class AcroRenderer{
             org.jpedal.DevFlags.formsLoaded = true;
         }
     }
-    
+
     private void initJSonFields(final Map<String, String> formsCreated) {
-        
+
         //scan all fields for javascript actions
         for (final String ref : formsCreated.keySet()) {
-            
+
             final FormObject formObject = getFormObject(ref);
-            
-            javascript.execute(formObject, PdfDictionary.K,ActionHandler.FOCUS_EVENT, ' ');
-            
+
+            javascript.execute(formObject, PdfDictionary.K, ActionHandler.FOCUS_EVENT, ' ');
+
         }
     }
-    
+
     /**
      * create a widget to handle fields
      */
@@ -1152,34 +1160,34 @@ public class AcroRenderer{
 
         //avoid creation of Swing widgets if we have 2 copies in play on ULC
         //noinspection PointlessBooleanExpression
-        if(ExternalHandlers.isULCPresent() &&
-                formFactory.getType()==FormFactory.SWING){
-            
+        if (ExternalHandlers.isULCPresent() &&
+                formFactory.getType() == FormFactory.SWING) {
+
             return;
         }
-       
+
         final Integer widgetType; //no value set
-        
-        final Object retComponent=null;
-        
-        final int formType=formObject.getNameAsConstant(PdfDictionary.FT); //FT
-        
-        final int formFactoryType=formFactory.getType();
-        
+
+        final Object retComponent = null;
+
+        final int formType = formObject.getNameAsConstant(PdfDictionary.FT); //FT
+
+        final int formFactoryType = formFactory.getType();
+
         //if sig object set global sig object so we can access later
         storeSignatures(formObject, formType);
 
         //check if a popup is associated
-        if(formObject.getDictionary(PdfDictionary.Popup)!=null){
+        if (formObject.getDictionary(PdfDictionary.Popup) != null) {
             formObject.setActionFlag(FormObject.POPUP);
         }
-        
+
         //flags used to alter interactivity of all fields
         final boolean readOnly;
         final boolean required;
         final boolean noexport;
 
-        final boolean[] flags = formObject.getFieldFlags();//Ff
+        final boolean[] flags = formObject.getFieldFlags(); //Ff
         if (flags != null) {
             //noinspection UnusedAssignment
             readOnly = flags[FormObject.READONLY_ID];
@@ -1207,28 +1215,28 @@ public class AcroRenderer{
              * boolean sort=flags[FormObject.SORT_ID];
              */
         }
-        
+
         //hard-coded for HTML non-forms
-        if(!ExternalHandlers.isXFAPresent() && (formFactoryType==FormFactory.HTML || formFactoryType==FormFactory.SVG)){
-            widgetType=FormFactory.ANNOTATION;
-           
-        }else if (formType == PdfDictionary.Btn) {//----------------------------------- BUTTON  ----------------------------------------
-            widgetType=createButtonField(flags);
+        if (!ExternalHandlers.isXFAPresent() && (formFactoryType == FormFactory.HTML || formFactoryType == FormFactory.SVG)) {
+            widgetType = FormFactory.ANNOTATION;
+
+        } else if (formType == PdfDictionary.Btn) { //----------------------------------- BUTTON  ----------------------------------------
+            widgetType = createButtonField(flags);
         } else {
-            widgetType=createInteractiveField(flags, formType);
+            widgetType = createInteractiveField(flags, formType);
         }
-        
+
         formObject.setFormType(widgetType);
 
-        if(formFactory.getType()==FormFactory.HTML || formFactory.getType()==FormFactory.SVG){
+        if (formFactory.getType() == FormFactory.HTML || formFactory.getType() == FormFactory.SVG) {
             compData.checkGUIObjectResolved(formObject);
-            
-        }else if(retComponent!=null && formFactory.getType()!=FormFactory.SWING){
-            formObject.setGUIComponent(retComponent,formFactory.getType());
+
+        } else if (retComponent != null && formFactory.getType() != FormFactory.SWING) {
+            formObject.setGUIComponent(retComponent, formFactory.getType());
             compData.setGUIComp(formObject, retComponent);
         }
     }
-    
+
     private int createInteractiveField(final boolean[] flags, final int formType) {
 
         final int widgetType;
@@ -1236,7 +1244,7 @@ public class AcroRenderer{
         switch (formType) {
             case PdfDictionary.Tx:
                 boolean isMultiline = false,
-                 hasPassword = false;// doNotScroll = false, richtext = false, fileSelect = false, doNotSpellCheck = false;
+                        hasPassword = false; // doNotScroll = false, richtext = false, fileSelect = false, doNotSpellCheck = false;
                 if (flags != null) {
                     isMultiline = flags[FormObject.MULTILINE_ID];
                     hasPassword = flags[FormObject.PASSWORD_ID];
@@ -1254,7 +1262,7 @@ public class AcroRenderer{
                     } else {
                         widgetType = FormFactory.MULTILINETEXT;
                     }
-                } else {//singleLine
+                } else { //singleLine
 
                     if (hasPassword) {
                         widgetType = FormFactory.SINGLELINEPASSWORD;
@@ -1268,7 +1276,7 @@ public class AcroRenderer{
 
                 //flags used for choice types
                 //20100212 (ms) Unused ones commented out
-                boolean isCombo = false;// multiSelect = false, sort = false, isEditable = false, doNotSpellCheck = false, comminOnSelChange = false;
+                boolean isCombo = false; // multiSelect = false, sort = false, isEditable = false, doNotSpellCheck = false, comminOnSelChange = false;
                 if (flags != null) {
                     isCombo = flags[FormObject.COMBO_ID];
                     //multiSelect = flags[FormObject.MULTISELECT_ID];
@@ -1277,9 +1285,9 @@ public class AcroRenderer{
                     //doNotSpellCheck = flags[FormObject.DONOTSPELLCHECK_ID];
                     //comminOnSelChange = flags[FormObject.COMMITONSELCHANGE_ID];
                 }
-                if (isCombo) {// || (type==XFAFORM && ((XFAFormObject)formObject).choiceShown!=XFAFormObject.CHOICE_ALWAYS)){                   
+                if (isCombo) { // || (type==XFAFORM && ((XFAFormObject)formObject).choiceShown!=XFAFormObject.CHOICE_ALWAYS)){
                     widgetType = FormFactory.COMBOBOX;
-                } else {//it is a list
+                } else { //it is a list
                     widgetType = FormFactory.LIST;
                 }
                 break;
@@ -1293,50 +1301,50 @@ public class AcroRenderer{
         }
         return widgetType;
     }
-    
-    private int createButtonField(final boolean[] flags){
-            final int widgetType;
-            //flags used for button types
-            //20100212 (ms) Unused ones commented out
-            boolean isPushButton = false, isRadio = false;// hasNoToggleToOff = false, radioinUnison = false;
-            if (flags != null) {
-                isPushButton = flags[FormObject.PUSHBUTTON_ID];
-                isRadio = flags[FormObject.RADIO_ID];
-                //hasNoToggleToOff = flags[FormObject.NOTOGGLETOOFF_ID];
-                //radioinUnison = flags[FormObject.RADIOINUNISON_ID];
-            }
-            
-            if (isPushButton) {               
-                widgetType=FormFactory.PUSHBUTTON;               
-            }else if(isRadio){
-                widgetType=FormFactory.RADIOBUTTON;
-                
-            }else {
-                widgetType=FormFactory.CHECKBOXBUTTON;
-            }
-            return widgetType;
+
+    private int createButtonField(final boolean[] flags) {
+        final int widgetType;
+        //flags used for button types
+        //20100212 (ms) Unused ones commented out
+        boolean isPushButton = false, isRadio = false; // hasNoToggleToOff = false, radioinUnison = false;
+        if (flags != null) {
+            isPushButton = flags[FormObject.PUSHBUTTON_ID];
+            isRadio = flags[FormObject.RADIO_ID];
+            //hasNoToggleToOff = flags[FormObject.NOTOGGLETOOFF_ID];
+            //radioinUnison = flags[FormObject.RADIOINUNISON_ID];
+        }
+
+        if (isPushButton) {
+            widgetType = FormFactory.PUSHBUTTON;
+        } else if (isRadio) {
+            widgetType = FormFactory.RADIOBUTTON;
+
+        } else {
+            widgetType = FormFactory.CHECKBOXBUTTON;
+        }
+        return widgetType;
     }
-    
+
     /**
      * If possible we recommend you work with the Form Objects rather than
      * resolve GUI components
-     *
+     * <p>
      * null key will return all values
-     *
+     * <p>
      * if pageNumber is -1 it will process whole document, otherwise just that
      * page
-     * 
+     * <p>
      * For a full example of usage please see http://files.idrsolutions.com/samplecode/org/jpedal/examples/acroform/ExtractFormDataAsObject.java.html
-     *
-     * Object[] will vary depending on what ReturnValues enum is passed in and could contain String (Names), FormObject or Component 
+     * <p>
+     * Object[] will vary depending on what ReturnValues enum is passed in and could contain String (Names), FormObject or Component
      */
     public Object[] getFormComponents(final String objectName, final ReturnValues value, final int pageNumber) {
 
-        switch(value) {
+        switch (value) {
 
             case EMBEDDED_FILES:
-                
-                if(currentPdfFile.getNamesLookup()==null){
+
+                if (currentPdfFile.getNamesLookup() == null) {
                     return new Object[]{};
                 }
                 return currentPdfFile.getNamesLookup().getEmbeddedFiles();
@@ -1356,103 +1364,105 @@ public class AcroRenderer{
                 return compData.getFormComponents(objectName, value, pageNumber).toArray();
         }
     }
-    
+
     /**
      * setup object which creates all GUI objects
      */
     public void setFormFactory(final FormFactory newFormFactory) {
-        
+
         formFactory = newFormFactory;
         
         /*
          * allow user to create custom structure to hold data
          */
-        compData=formFactory.getCustomCompData();
-        
+        compData = formFactory.getCustomCompData();
+
     }
-    
+
     /**
      * get GUIData object with all widgets
      */
     public GUIData getCompData() {
         return compData;
     }
-    
-    /**return Signature as iterator with one or more objects or null*/
+
+    /**
+     * return Signature as iterator with one or more objects or null
+     */
     public Iterator<FormObject> getSignatureObjects() {
-        if(sigObject==null) {
+        if (sigObject == null) {
             return null;
         } else {
             return sigObject.iterator();
         }
     }
-    
+
     public ActionHandler getActionHandler() {
         return formsActionHandler;
     }
-    
+
     public FormFactory getFormFactory() {
         return formFactory;
     }
-    
+
     public void setIgnoreForms(final boolean ignoreForms) {
-        this.ignoreForms=ignoreForms;
+        this.ignoreForms = ignoreForms;
     }
-    
+
     public boolean ignoreForms() {
         return ignoreForms || ignoreAllForms;
     }
-    
+
     public void dispose() {
-        
+
         AfieldCount = null;
-        
-        fDecoder=null;
-        
-        formsActionHandler=null;
-        
-        if(javascript!=null){
+
+        fDecoder = null;
+
+        formsActionHandler = null;
+
+        if (javascript != null) {
             javascript.dispose();
         }
-        javascript=null;
-        
-        Fforms=null;
-        
-        Aforms=null;
-        
-        fieldList=null;
-        annotList=null;
-        
-        formFactory=null;
-        
-        if(compData!=null){
+        javascript = null;
+
+        Fforms = null;
+
+        Aforms = null;
+
+        fieldList = null;
+        annotList = null;
+
+        formFactory = null;
+
+        if (compData != null) {
             compData.dispose();
         }
-        compData=null;
-        
-        if(sigObject!=null){
+        compData = null;
+
+        if (sigObject != null) {
             sigObject.clear();
         }
-        sigObject=null;
-        
-        if(sigKeys!=null){
+        sigObject = null;
+
+        if (sigKeys != null) {
             sigKeys.clear();
         }
-        sigKeys=null;
-        
-        pageData=null;
-        
-        if(currentPdfFile!=null){
+        sigKeys = null;
+
+        pageData = null;
+
+        if (currentPdfFile != null) {
             currentPdfFile.dispose();
         }
-        currentPdfFile=null;
-        
-        fDecoder=null;
-        
+        currentPdfFile = null;
+
+        fDecoder = null;
+
         formCreator = null;
 
     }
-    
+
     /**
      * get Iterator with list of all Annots on page or
      * return null if no Annots  - no longer needs
@@ -1463,89 +1473,90 @@ public class AcroRenderer{
      */
     @Deprecated
     public PdfArrayIterator getAnnotsOnPage(final int page) {
-        
+
         //check annots decoded - will just return if done
-        createDisplayComponentsForPage(page,null);
-        
-        if(annotList!=null && annotList.length>page && annotList[page]!=null){
+        createDisplayComponentsForPage(page, null);
+
+        if (annotList != null && annotList.length > page && annotList[page] != null) {
             annotList[page].resetToStart();
             return annotList[page];
-        }else{
+        } else {
             return null;
         }
     }
-    
+
     /**
      * returns false if not XFA (or XFA in Legacy mode)
      * and true if XFA using XFA data
-     * @return 
+     *
+     * @return
      */
     public boolean isXFA() {
         return hasXFA;
     }
-    
+
     public boolean useXFA() {
         return useXFA;
     }
 
     public boolean hasFormsOnPage(final int page) {
-        
-        final boolean hasAnnots=(annotList!=null && annotList.length>page && annotList[page]!=null);
-        final boolean hasForm=(hasXFA && useXFA && fDecoder.hasXFADataSet())||fieldList!=null;
+
+        final boolean hasAnnots = (annotList != null && annotList.length > page && annotList[page] != null);
+        final boolean hasForm = (hasXFA && useXFA && fDecoder.hasXFADataSet()) || fieldList != null;
         return hasAnnots || hasForm;
     }
-    
+
     public Object[] getFormResources() {
-        
-        return new Object[]{AcroRes,CO};
+
+        return new Object[]{AcroRes, CO};
     }
-    
+
     public boolean formsRasterizedForDisplay() {
         return compData.formsRasterizedForDisplay();
     }
-    
+
     /**
      * get FormObject
+     *
      * @param ref
-     * @return
-     * In all modes except HTML,SVG,JavaFX will decode other forms on pages if not
+     * @return In all modes except HTML,SVG,JavaFX will decode other forms on pages if not
      * found
      */
     public FormObject getFormObject(final String ref) {
-        
+
         FormObject obj = compData.getRawFormData().get(ref);
-        
+
         //if not found now decode all page and retry
-        if (obj == null && formFactory.getType()!=FormFactory.HTML && formFactory.getType()!=FormFactory.SVG) {
+        if (obj == null && formFactory.getType() != FormFactory.HTML && formFactory.getType() != FormFactory.SVG) {
             for (int ii = 1; ii < this.pageCount; ii++) {
-                
+
                 createDisplayComponentsForPage(ii, null);
                 obj = compData.getRawFormData().get(ref);
-                
+
                 if (obj != null) {
                     break;
                 }
             }
         }
-        
+
         return obj;
     }
-    
-    public void setInsets(final int width, final int height){
+
+    public void setInsets(final int width, final int height) {
         compData.setPageData(compData.pageData, width, height);
     }
 
     FormObject convertRefToFormObject(final String objRef, final int page) {
-        
+
         FormObject formObject = compData.getRawFormData().get(objRef);
         if (formObject == null) {
 
             formObject = new FormObject(objRef);
-            
-            if(page!=-1) {
+
+            if (page != -1) {
                 formObject.setPageRotation(pageData.getRotation(page));
             }
-            
+
             //formObject.setPDFRef((String)objRef);
 
             if (objRef.charAt(objRef.length() - 1) == 'R') {
@@ -1566,6 +1577,7 @@ public class AcroRenderer{
     /**
      * Allow user to get ENUM to show type of form
      * FormTypes (XFA_LEGACY, XFA_DYNAMIC, NON_XFA)
+     *
      * @return
      */
     public Enum<FormTypes> getPDFformType() {
@@ -1573,7 +1585,7 @@ public class AcroRenderer{
     }
 
     public void alwaysuseXFA(final boolean alwaysUseXFA) {
-        this.alwaysUseXFA=alwaysUseXFA;
+        this.alwaysUseXFA = alwaysUseXFA;
     }
 
     public boolean alwaysuseXFA() {
@@ -1582,33 +1594,33 @@ public class AcroRenderer{
 
     public void init(final SwingFormCreator formCreator) {
 
-        this.formCreator=formCreator;
-        
-        compData=formCreator.getData();
-        
+        this.formCreator = formCreator;
+
+        compData = formCreator.getData();
+
     }
 
     public PdfStreamDecoder getStreamDecoder(final PdfObjectReader currentPdfFile, final PdfLayerList layer, final boolean isFirst) {
-    
-        if(isFirst){
-            return new PdfStreamDecoder(currentPdfFile); 
-        }else{
-            return new PdfStreamDecoder(currentPdfFile,layer);
+
+        if (isFirst) {
+            return new PdfStreamDecoder(currentPdfFile);
+        } else {
+            return new PdfStreamDecoder(currentPdfFile, layer);
         }
     }
-    
-    public boolean showFormWarningMessage(final int page) {
-        
-        boolean warnOnceOnForms=false;
 
-        if(hasXFA){
-            warnOnceOnForms=true;
+    public boolean showFormWarningMessage(final int page) {
+
+        boolean warnOnceOnForms = false;
+
+        if (hasXFA) {
+            warnOnceOnForms = true;
             System.out.println("[WARNING] This file contains XFA forms that are not supported by this version of JPDF2HTML5. To convert into functional HTML forms and display non-legacy mode page content, JPDF2HTML5 Forms Edition must be used.");
-        }else if(hasFormsOnPage(page)){
-            warnOnceOnForms=true;
+        } else if (hasFormsOnPage(page)) {
+            warnOnceOnForms = true;
             System.out.println("[WARNING] This file contains form components that have been rasterized. To convert into functional HTML forms, JPDF2HTML5 Forms Edition must be used.");
         }
-        
+
         return warnOnceOnForms;
     }
 
@@ -1619,7 +1631,7 @@ public class AcroRenderer{
     public HashMap getPageMapXFA() {
         throw new UnsupportedOperationException("getPageMapXFA should never be called");
     }
-    
+
     public byte[] getXMLContentAsBytes(final int dataType) {
         return null;
     }
@@ -1633,7 +1645,7 @@ public class AcroRenderer{
     }
 
     public BufferedImage decode(final PdfObject pdfObject, final PdfObjectReader currentPdfFile, final PdfObject XObject, final int subtype, final int width, final int height, final int offsetImage, final float pageScaling) {
-        LogWriter.writeLog("called decode("+pdfObject+", "+ currentPdfFile+", "+ XObject+", "+subtype+", "+width+", "+height+", "+offsetImage+", "+pageScaling);
+        LogWriter.writeLog("called decode(" + pdfObject + ", " + currentPdfFile + ", " + XObject + ", " + subtype + ", " + width + ", " + height + ", " + offsetImage + ", " + pageScaling);
 
         return null;
     }

@@ -45,7 +45,7 @@ public class Q {
         //save or retrieve
         if (isLowerCase) {
             graphicsStates.pushGraphicsState(gs, current);
-        } else{
+        } else {
             gs = graphicsStates.restoreGraphicsState(current);
 
             //flag font has changed

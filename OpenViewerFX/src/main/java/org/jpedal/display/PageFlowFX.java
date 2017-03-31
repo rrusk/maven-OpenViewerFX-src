@@ -36,6 +36,7 @@ package org.jpedal.display;
 import java.awt.image.BufferedImage;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -74,19 +75,19 @@ import org.jpedal.utils.Messages;
  * Main JavaFX Code for Page Flow Display Mode used
  * by both SwingViewer and JavaFXViewer.
  */
-public class PageFlowFX extends AnchorPane{
-    
+public class PageFlowFX extends AnchorPane {
+
     private final boolean isFX;
-    
-    public PageFlowFX(final PdfDecoderInt pdfDecoder,final boolean isFX) {
-        
+
+    public PageFlowFX(final PdfDecoderInt pdfDecoder, final boolean isFX) {
+
         // JavaFX cannot be restarted after exiting, so turn off auto exit.
         Platform.setImplicitExit(false);
 
         // Setup PDF info
         pdf = pdfDecoder;
-       
-        this.isFX =isFX;
+
+        this.isFX = isFX;
         //pageData = pdf.getPdfPageData();
         pageCount = pdf.getPageCount();
         setPageNumber(pdfDecoder.getPageNumber());
@@ -112,16 +113,16 @@ public class PageFlowFX extends AnchorPane{
         pages = new Page[pageCount];
 
         createScene();
-        
+
         pageLimit = 50;
     }
-    
+
     protected final PdfDecoderInt pdf;
     private boolean stopAddingPages;
     private final int pageCount;
     private int displayRotation;
     protected int pageNumber;
-    
+
     private int pagesToGenerate = 21;
 
     private static final int textureSize = 256;
@@ -158,7 +159,7 @@ public class PageFlowFX extends AnchorPane{
     private boolean enableReflection = true, enablePerspectiveTransform = true;
 
     private void createScene() {
-                
+
         final ObservableList<Node> children = this.getChildren();
 
         sceneXOffset = newSceneWidth / 2;
@@ -206,20 +207,20 @@ public class PageFlowFX extends AnchorPane{
         children.addAll(backgroundTop, backgroundBottom, navBar, zoomBar, perspectiveCheckBox, reflectionCheckBox);
 
         setupMouseHandlers();
-                
+
         setupWindowResizeListeners();
-        
+
         addPages();
     }
-    
+
     private double newSceneWidth;
     private double newSceneHeight;
-    
-    private void repositionObjects(){
-        
+
+    private void repositionObjects() {
+
         newSceneWidth = getWidth();
         newSceneHeight = getHeight();
-        
+
         sceneXOffset = newSceneWidth / 2;
         totalPageWidth = pageCount * getPageWidthOrHeight();
         sceneYOffset = newSceneHeight / 2;
@@ -233,7 +234,7 @@ public class PageFlowFX extends AnchorPane{
                 backgroundTop.setHeight(newSceneHeight);
                 backgroundBottom.setHeight(newSceneHeight);
                 backgroundBottom.setY(newSceneHeight / 2);
-                
+
                 if (pages[pageNumber - 1] != null) {
                     pages[pageNumber - 1].setMain(true);
                 }
@@ -244,9 +245,9 @@ public class PageFlowFX extends AnchorPane{
                 }
             }
         });
-        
+
     }
-    
+
     // Listen out for window resizes to update the x,y,width,height of pages dynamically.
     private void setupWindowResizeListeners() {
 
@@ -445,19 +446,19 @@ public class PageFlowFX extends AnchorPane{
                                 }
                             }
                         }
-                    } else if ((value > 0) &&  (scaling > 1)) {
-                            scaling -= 0.1;
-                            if (scaling < 1) {
-                                scaling = 1;
-                            }
-                            zoomBar.update();
-                            for (final Page page : pages) {
-                                if (page != null) {
-                                    page.update();
-                                }
+                    } else if ((value > 0) && (scaling > 1)) {
+                        scaling -= 0.1;
+                        if (scaling < 1) {
+                            scaling = 1;
+                        }
+                        zoomBar.update();
+                        for (final Page page : pages) {
+                            if (page != null) {
+                                page.update();
                             }
                         }
-                    
+                    }
+
                 } else {
                     if (value > 0) {
                         final int dest = pageNumber - 1;
@@ -508,7 +509,7 @@ public class PageFlowFX extends AnchorPane{
         }
 
         currentZPosition = position;
-        
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -688,7 +689,7 @@ public class PageFlowFX extends AnchorPane{
         }
 
         //update pdfdecoder's pagenumber (-100 flag to prevent loop)
-        pdf.setPageParameters(-100f, firstDestination);//Purpose is to maintain same page when swapping to Single Pages view-mode.
+        pdf.setPageParameters(-100f, firstDestination); // Purpose is to maintain same page when swapping to Single Pages view-mode.
 
         addPages();
 
@@ -697,7 +698,7 @@ public class PageFlowFX extends AnchorPane{
             newDestination = firstDestination;
             return;
         }
-        
+
         final Thread thread = new Thread("PageFlow-goTo") {
             @Override
             public void run() {
@@ -795,7 +796,7 @@ public class PageFlowFX extends AnchorPane{
             pdf.setScaling(currentScaling);
 
             final BufferedImage result = new BufferedImage(quality, quality, BufferedImage.TYPE_INT_ARGB);
-            
+
             final java.awt.Graphics2D g2 = (java.awt.Graphics2D) result.getGraphics();
             g2.rotate((rotation / 180.0) * Math.PI, quality / 2, quality / 2);
             final int x = (quality - raw.getWidth()) / 2;
@@ -827,12 +828,12 @@ public class PageFlowFX extends AnchorPane{
             formRenderer.setIgnoreForms(formsIgnoredStore);
         }
 
-      //  System.gc();
+        //  System.gc();
     }
 
     public void stop() {
         stopAddingPages = true;
-        if(!isFX){
+        if (!isFX) {
             while (currentlyAddingPages) {
                 try {
                     Thread.sleep(100);
@@ -847,8 +848,8 @@ public class PageFlowFX extends AnchorPane{
      * Add pages around the current page
      */
     private void addPages() {
-        
-    final Task<Void> task = new Task<Void>() {
+
+        final Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 currentlyAddingPages = true;
@@ -940,7 +941,7 @@ public class PageFlowFX extends AnchorPane{
                         }
                     }
                     if (pn > 0 && pages != null && pages[pn - 1] == null) {
-                       
+
                         final Page page = new Page(pn);
                         if (pages != null) {
                             pages[pn - 1] = page;
@@ -971,7 +972,7 @@ public class PageFlowFX extends AnchorPane{
                 return null;
             }
         };
-    
+
         final Thread th = new Thread(task);
         if (!currentlyAddingPages) {
             currentlyAddingPages = true;
@@ -994,7 +995,7 @@ public class PageFlowFX extends AnchorPane{
                 if (debugMemory) {
                     System.out.println("Clearing old pages, calling GC and retesting");
                 }
-               // System.gc();
+                // System.gc();
 
                 boolean shrinkingSuccessful = true;
                 while (runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory()) < threshold) {
@@ -1004,7 +1005,7 @@ public class PageFlowFX extends AnchorPane{
                         if (toRemove > 0) {
                             removeFurthestPages(toRemove);
                         }
-                      //  System.gc();
+                        //  System.gc();
                     } else {
                         shrinkingSuccessful = false;
                     }
@@ -1023,7 +1024,7 @@ public class PageFlowFX extends AnchorPane{
                         if (!pageFlowEnding) {
                             isUpdateMemory = true;
                             memoryMessage = Messages.getMessage("PdfViewer.PageFlowLowMemory");
-                        }else{
+                        } else {
                             isUpdateMemory = false;
                         }
 
@@ -1043,25 +1044,25 @@ public class PageFlowFX extends AnchorPane{
                 // canvas.stopRenderer(); // No FX equivalent
                 if (Platform.isFxApplicationThread()) {
 
-                  //  currentGUI.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
+                    //  currentGUI.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
 
                 } else {
                     final Runnable doPaintComponent = new Runnable() {
 
                         @Override
                         public void run() {
-                          //  currentGUI.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
+                            //  currentGUI.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
                         }
                     };
                     Platform.runLater(doPaintComponent);
                 }
-               
+
 //                pdf.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED); // Commented in Java3D also
                 if (!pageFlowEnding) {
                     pageFlowEnding = true;
                     isUpdateMemory = true;
                     memoryMessage = Messages.getMessage("PdfViewer.PageFlowNotEnoughMemory");
-                }else{
+                } else {
                     isUpdateMemory = false;
                 }
                 return true;
@@ -1390,19 +1391,19 @@ public class PageFlowFX extends AnchorPane{
                             return;
                         }
 //                        if (!isFX) {
-                            mainTextureSize = (int) getFullPageWidthOrHeight();
-                            final Image img = getPageImage(page, rotation, mainTextureSize);
-                                    
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
+                        mainTextureSize = (int) getFullPageWidthOrHeight();
+                        final Image img = getPageImage(page, rotation, mainTextureSize);
 
-                                    if (img != null) {
-                                        setImage(img);
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
 
-                                    }
+                                if (img != null) {
+                                    setImage(img);
+
                                 }
-                            });
+                            }
+                        });
 //                        }
                     }
                 };
@@ -1476,9 +1477,9 @@ public class PageFlowFX extends AnchorPane{
             navCircle.setStrokeWidth(2);
             navCircle.setStroke(Color.WHITE);
             navCircle.setFill(Color.GRAY);
-            
+
             getChildren().addAll(navLine, navCircle);
-            
+
         }
 
         public boolean isNavBarHover(final MouseEvent mouseEvent) {
@@ -1556,9 +1557,9 @@ public class PageFlowFX extends AnchorPane{
                 public void run() {
                     navCircle.setCenterY(newSceneHeight - distanceFromBottom);
                     navLine.setStartX(distanceFromSides);
-                    navLine.setStartY(newSceneHeight - distanceFromBottom + 0.5);// +0.5 to make pixel perfect line
+                    navLine.setStartY(newSceneHeight - distanceFromBottom + 0.5); // +0.5 to make pixel perfect line
                     navLine.setEndX(newSceneWidth - distanceFromSides);
-                    navLine.setEndY(newSceneHeight - distanceFromBottom + 0.5);// +0.5 to make pixel perfect line
+                    navLine.setEndY(newSceneHeight - distanceFromBottom + 0.5); // +0.5 to make pixel perfect line
                     final double percent = (pageFocus - 1) / (pageCount - 1);
                     final double x = distanceFromSides + ((newSceneWidth - (distanceFromSides * 2)) * percent);
                     navCircle.setCenterX(x);
@@ -1595,7 +1596,7 @@ public class PageFlowFX extends AnchorPane{
             if (mouseEvent.getX() < distanceFromSide * 2
                     && mouseEvent.getY() > getStartY() - 5 && mouseEvent.getY() < getEndY() + 5) { // Allow +/- 5
                 handlingMouse = true;
-                isZoomBarDrag(mouseEvent);// Borrow what happens with the drag!
+                isZoomBarDrag(mouseEvent); // Borrow what happens with the drag!
                 return true;
             } else {
                 return false;
@@ -1644,9 +1645,9 @@ public class PageFlowFX extends AnchorPane{
                 @Override
                 public void run() {
                     zoomCircle.setCenterX(distanceFromSide);
-                    zoomLine.setStartX(distanceFromSide + 0.5);// +0.5 to make pixel perfect line
+                    zoomLine.setStartX(distanceFromSide + 0.5); // +0.5 to make pixel perfect line
                     zoomLine.setStartY(newSceneHeight * 0.2);
-                    zoomLine.setEndX(distanceFromSide + 0.5);// +0.5 to make pixel perfect line
+                    zoomLine.setEndX(distanceFromSide + 0.5); // +0.5 to make pixel perfect line
                     zoomLine.setEndY(newSceneHeight * 0.4);
 
                     final double percent = 2 - scaling;
@@ -1671,21 +1672,25 @@ public class PageFlowFX extends AnchorPane{
     }
 
     final DoubleProperty pageNumberProperty = new SimpleDoubleProperty();
+
     public DoubleProperty getPageNumber() {
         return pageNumberProperty;
     }
-    private void setPageNumber(final int pn){
+
+    private void setPageNumber(final int pn) {
         pageNumberProperty.set(pn);
         pageNumber = pn;
     }
-    
+
     private boolean isUpdateMemory;
-    public boolean isUpdateMemory(){
+
+    public boolean isUpdateMemory() {
         return isUpdateMemory;
     }
-    
+
     private String memoryMessage;
-    public String getMemoryMessage(){
+
+    public String getMemoryMessage() {
         return memoryMessage;
     }
 }

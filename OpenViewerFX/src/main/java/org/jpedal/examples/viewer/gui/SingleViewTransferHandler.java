@@ -36,67 +36,61 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.util.List;
 import javax.swing.JComponent;
+
 import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.Values;
+import org.jpedal.examples.viewer.commands.OpenFile;
 import org.jpedal.exception.PdfException;
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.utils.LogWriter;
 
-public class SingleViewTransferHandler extends BaseTransferHandler{
+public class SingleViewTransferHandler extends BaseTransferHandler {
 
-	public SingleViewTransferHandler(final Values commonValues, final GUIFactory currentGUI, final Commands currentCommands) {
-		super(commonValues, currentGUI, currentCommands);
-	}
+    public SingleViewTransferHandler(final Values commonValues, final GUIFactory currentGUI, final Commands currentCommands) {
+        super(commonValues, currentGUI, currentCommands);
+    }
 
-	@Override
+    @Override
     public boolean importData(final JComponent src, final Transferable transferable) {
-		try {
-			final Object dragImport = getImport(transferable);
+        try {
+            final Object dragImport = getImport(transferable);
 
-			if (dragImport instanceof String) {
-				final String url = (String) dragImport;
-				
-				if (url.indexOf("file:/") != url.lastIndexOf("file:/")) // make sure only one url is in the String
+            if (dragImport instanceof String) {
+                final String url = (String) dragImport;
+
+                if (url.indexOf("file:/") != url.lastIndexOf("file:/")) // make sure only one url is in the String
                 {
                     currentGUI.showMessageDialog("You may only import 1 file at a time");
                 } else {
                     openFile(url);
                 }
-			} else if (dragImport instanceof List) {
-				final List files = (List) dragImport;
-				
+            } else if (dragImport instanceof List) {
+                final List files = (List) dragImport;
+
                 //System.out.println("list = " + list);
                 if (files.size() == 1) { // we can process
-					final File file = (File) files.get(0);
-					openFile(file.getAbsolutePath());
-				} else {
-					currentGUI.showMessageDialog("You may only import 1 file at a time");
-				}
-			}
-		} catch (final Exception e) {
-			LogWriter.writeLog("Exception e "+e.getMessage());
-			return false;
-		}
-		
-		return true;
-	}
+                    final File file = (File) files.get(0);
+                    openFile(file.getAbsolutePath());
+                } else {
+                    currentGUI.showMessageDialog("You may only import 1 file at a time");
+                }
+            }
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception e " + e.getMessage());
+            return false;
+        }
 
-	protected void openFile(final String file) throws PdfException {
-		final String testFile = file.toLowerCase();
-		
-		final boolean isValid = ((testFile.endsWith(".pdf"))
-                || (testFile.endsWith(".dcm")) || (testFile.endsWith(".psd"))
-                || (testFile.endsWith(".sgi")) || (testFile.endsWith(".rgb"))
-				|| (testFile.endsWith(".fdf")) || (testFile.endsWith(".tiff"))
-				|| (testFile.endsWith(".tif")) || (testFile.endsWith(".png"))
-				|| (testFile.endsWith(".jpg")) || (testFile.endsWith(".jpeg"))
-                || (testFile.endsWith(".jpx")) || (testFile.endsWith(".jp2")) 
-                || (testFile.endsWith(".j2k")));
-	
-		if (isValid) {
-			currentCommands.handleTransferedFile(file);
-		} else {
-			currentGUI.showMessageDialog("You may only import a valid PDF or image");
-		}
-	}	
+        return true;
+    }
+
+    protected void openFile(final String file) throws PdfException {
+
+        final boolean isValid = OpenFile.isSupportedFileExtension(file.toLowerCase());
+
+        if (isValid) {
+            currentCommands.handleTransferedFile(file);
+        } else {
+            currentGUI.showMessageDialog("You may only import a valid PDF or image");
+        }
+    }
 }

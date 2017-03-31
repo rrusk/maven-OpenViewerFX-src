@@ -42,6 +42,7 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
 import org.jpedal.JDeliHelper;
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.ColorSpaceConvertor;
@@ -51,154 +52,160 @@ import org.jpedal.utils.LogWriter;
  * handle Separation ColorSpace and some DeviceN functions
  */
 public class SeparationColorSpace extends GenericColorSpace {
-    
+
     protected GenericColorSpace altCS;
 
     protected ColorMapping colorMapper;
 
     float[] domain;
 
-    public SeparationColorSpace() {}
-    
-    public SeparationColorSpace(final ColorMapping colorMapper, final float[] domain, final GenericColorSpace altCS){
-        
-        this.colorMapper=colorMapper;
-        this.domain=domain;
-        this.altCS=altCS;
-       
-        componentCount=1;
-        
+    public SeparationColorSpace() {
+    }
+
+    public SeparationColorSpace(final ColorMapping colorMapper, final float[] domain, final GenericColorSpace altCS) {
+
+        this.colorMapper = colorMapper;
+        this.domain = domain;
+        this.altCS = altCS;
+
+        componentCount = 1;
+
         setType(ColorSpaces.Separation);
-        
-    }
-    
-    /**private method to do the calculation*/
-    private void setColor(final float value){
-
-            //adjust size if needed
-            int elements=1;
-            
-            if(domain!=null) {
-                elements=domain.length/2;
-            }
-            
-            final float[] values = new float[elements];
-            for(int j=0;j<elements;j++) {
-                values[j] = value;
-            }
-            
-            final float[] operand =colorMapper.getOperandFloat(values);
-            
-            altCS.setColor(operand,operand.length);
 
     }
-    
-    /** set color (translate and set in alt colorspace */
+
+    /**
+     * private method to do the calculation
+     */
+    private void setColor(final float value) {
+
+        //adjust size if needed
+        int elements = 1;
+
+        if (domain != null) {
+            elements = domain.length / 2;
+        }
+
+        final float[] values = new float[elements];
+        for (int j = 0; j < elements; j++) {
+            values[j] = value;
+        }
+
+        final float[] operand = colorMapper.getOperandFloat(values);
+
+        altCS.setColor(operand, operand.length);
+
+    }
+
+    /**
+     * set color (translate and set in alt colorspace
+     */
     @Override
     public void setColor(final float[] operand, final int opCount) {
-        
+
         setColor(operand[0]);
-        
+
     }
-    
-    /** set color (translate and set in alt colorspace */
+
+    /**
+     * set color (translate and set in alt colorspace
+     */
     @Override
     public void setColor(final String[] operand, final int opCount) {
-        
-        final float[] f=new float[1];
-        f[0]=Float.parseFloat(operand[0]);
-        
-        setColor(f,1);
-        
+
+        final float[] f = new float[1];
+        f[0] = Float.parseFloat(operand[0]);
+
+        setColor(f, 1);
+
     }
-    
+
     @Override
-    public void invalidateCaching(final int color){
-        
+    public void invalidateCaching(final int color) {
+
         super.invalidateCaching(color);
-        
+
         altCS.invalidateCaching(color);
-         
+
         altCS.setColor(new PdfColor(color));
     }
-    
+
     /**
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage( final byte[] data, final int ww, final int hh, final int pX, final int pY) {
-        
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int ww, final int hh, final int pX, final int pY) {
+
         BufferedImage image;
         ByteArrayInputStream in = null;
-        
-        ImageReader iir=null;
-        ImageInputStream iin=null;
-        
+
+        ImageReader iir = null;
+        ImageInputStream iin = null;
+
         try {
-            
+
             //read the image data
             in = new ByteArrayInputStream(data);
 
             //suggestion from Carol
             final Iterator<ImageReader> iterator = ImageIO.getImageReadersByFormatName("JPEG");
-            
-            while (iterator.hasNext())
-            {
+
+            while (iterator.hasNext()) {
                 final ImageReader o = iterator.next();
                 iir = o;
                 if (iir.canReadRaster()) {
                     break;
                 }
             }
-            
+
             ImageIO.setUseCache(false);
             iin = ImageIO.createImageInputStream((in));
             iir.setInput(iin, true);
-            Raster ras=iir.readRaster(0, null);
-            
-            ras=cleanupRaster(ras,pX,pY,1); //note uses 1 not count
-            
+            Raster ras = iir.readRaster(0, null);
+
+            ras = cleanupRaster(ras, pX, pY, 1); //note uses 1 not count
+
             final int w = ras.getWidth();
             final int h = ras.getHeight();
 
             final DataBufferByte rgb = (DataBufferByte) ras.getDataBuffer();
-            final byte[] rawData=rgb.getData();
-            
+            final byte[] rawData = rgb.getData();
+
             //special case
-            if(this.altCS.getID()==ColorSpaces.DeviceGray){
-                
-                for(int aa=0;aa<rawData.length;aa++) {
-                    rawData[aa]= (byte) (rawData[aa]^255);
+            if (this.altCS.getID() == ColorSpaces.DeviceGray) {
+
+                for (int aa = 0; aa < rawData.length; aa++) {
+                    rawData[aa] = (byte) (rawData[aa] ^ 255);
                 }
                 final int[] bands = {0};
-                image=new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
-                final Raster raster =Raster.createInterleavedRaster(new DataBufferByte(rawData, rawData.length),w,h,w,1,bands,null);
-                
+                image = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+                final Raster raster = Raster.createInterleavedRaster(new DataBufferByte(rawData, rawData.length), w, h, w, 1, bands, null);
+
                 image.setData(raster);
-                
-            }else{
+
+            } else {
                 //convert the image in general case
-                image=createImage(w, h, rawData);
+                image = createImage(w, h, rawData);
             }
         } catch (final Exception ee) {
             image = null;
-            
+
             LogWriter.writeLog("Couldn't read JPEG, not even raster: " + ee);
         }
-        
+
         try {
             in.close();
             iir.dispose();
             iin.close();
         } catch (final Exception ee) {
-            
+
             LogWriter.writeLog("Problem closing  " + ee);
         }
-        
+
         return image;
-        
+
     }
-    
+
     /**
      * convert data stream to srgb image
      */
@@ -212,7 +219,7 @@ public class SeparationColorSpace extends GenericColorSpace {
 
             if (rawData != null) {
 
-                IndexedColorMap = null;//make index null as we already processed
+                IndexedColorMap = null; //make index null as we already processed
 
                 //convert the image
                 if (getID() == ColorSpaces.DeviceN) {
@@ -231,99 +238,99 @@ public class SeparationColorSpace extends GenericColorSpace {
         return image;
 
     }
-    
+
     private BufferedImage createImageN(final int w, final int h, final byte[] rawData) {
-        
+
         final BufferedImage image;
-        
-        final byte[] rgb=new byte[w*h*3];
-        
-        final int bytesCount=rawData.length;
-        
+
+        final byte[] rgb = new byte[w * h * 3];
+
+        final int bytesCount = rawData.length;
+
         //convert data to RGB format
         final int byteCount;
-        if(IndexedColorMap!=null){
-            byteCount=rawData.length;
-        }else{
-            byteCount= rawData.length/componentCount;
+        if (IndexedColorMap != null) {
+            byteCount = rawData.length;
+        } else {
+            byteCount = rawData.length / componentCount;
         }
-        
-        final float[] values=new float[componentCount];
-        
-        int j=0,j2=0,index;
-        
-        for(int i=0;i<byteCount;i++){
-            
-            if(j>=bytesCount) {
+
+        final float[] values = new float[componentCount];
+
+        int j = 0, j2 = 0, index;
+
+        for (int i = 0; i < byteCount; i++) {
+
+            if (j >= bytesCount) {
                 break;
             }
-            
-            if(IndexedColorMap!=null){
-                index=(rawData[i] & 255)*componentCount;
-               
-                for(int comp=0;comp<componentCount;comp++){
-                    values[comp]=((IndexedColorMap[index+comp] & 255)/255f);
+
+            if (IndexedColorMap != null) {
+                index = (rawData[i] & 255) * componentCount;
+
+                for (int comp = 0; comp < componentCount; comp++) {
+                    values[comp] = ((IndexedColorMap[index + comp] & 255) / 255f);
                 }
-            }else{
-                for(int comp=0;comp<componentCount;comp++){
-                    values[comp]=((rawData[j] & 255)/255f);
+            } else {
+                for (int comp = 0; comp < componentCount; comp++) {
+                    values[comp] = ((rawData[j] & 255) / 255f);
                     j++;
                 }
             }
-            
-            setColor(values,componentCount);
-            
+
+            setColor(values, componentCount);
+
             //set values
-            final int foreground =altCS.currentColor.getRGB();
-            
-            rgb[j2]=(byte) ((foreground>>16) & 0xFF);
-            rgb[j2+1]=(byte) ((foreground>>8) & 0xFF);
-            rgb[j2+2]=(byte) ((foreground) & 0xFF);
-            
+            final int foreground = altCS.currentColor.getRGB();
+
+            rgb[j2] = (byte) ((foreground >> 16) & 0xFF);
+            rgb[j2 + 1] = (byte) ((foreground >> 8) & 0xFF);
+            rgb[j2 + 2] = (byte) ((foreground) & 0xFF);
+
             j2 += 3;
-            
+
         }
-        
+
         //create the RGB image
-        final int[] bands = {0,1,2};
-        image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
-        final DataBuffer dataBuf=new DataBufferByte(rgb, rgb.length);
-        final Raster raster =Raster.createInterleavedRaster(dataBuf,w,h,w*3,3,bands,null);
+        final int[] bands = {0, 1, 2};
+        image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        final DataBuffer dataBuf = new DataBufferByte(rgb, rgb.length);
+        final Raster raster = Raster.createInterleavedRaster(dataBuf, w, h, w * 3, 3, bands, null);
         image.setData(raster);
-        
+
         return image;
     }
-    
+
     /**
      * convert separation stream to RGB and return as an image
      */
     @Override
-    public BufferedImage  dataToRGB(final byte[] data, final int w, final int h) {
-        
+    public BufferedImage dataToRGB(final byte[] data, final int w, final int h) {
+
         BufferedImage image;
-        
+
         try {
-            
+
             //convert data
-            image=createImage(w, h, data);
-            
+            image = createImage(w, h, data);
+
         } catch (final Exception ee) {
             image = null;
-            
+
             LogWriter.writeLog("Couldn't convert Separation colorspace data: " + ee);
         }
-        
+
         return image;
-        
+
     }
-    
+
     @Override
-    public byte[]  dataToRGBByteArray(final byte[] rgb, final int w, final int h) {
-        final int pixelCount=3*w*h;
-        final byte[] imageData=new byte[pixelCount];      
+    public byte[] dataToRGBByteArray(final byte[] rgb, final int w, final int h) {
+        final int pixelCount = 3 * w * h;
+        final byte[] imageData = new byte[pixelCount];
         float[] operand;
         final int inpLen = domain.length / 2;
-        
+
         if (inpLen == 1) {
             float last = -1, cur;
             int p = 0, pp = 0, tt;
@@ -358,7 +365,7 @@ public class SeparationColorSpace extends GenericColorSpace {
         }
         return imageData;
     }
-    
+
 //    /**
 //     * keeping this old case incase it is needed
 //     * convert separation stream to RGB and return as an image
@@ -399,24 +406,24 @@ public class SeparationColorSpace extends GenericColorSpace {
 //        
 //        return imageData;
 //    }
-    
+
     /**
      * turn raw data into an image
      */
     BufferedImage createImage(final int w, final int h, final byte[] rgb) {
-        
+
         final BufferedImage image;
-        
-        final byte[]imageData=dataToRGBByteArray(rgb,w,h);
-        
+
+        final byte[] imageData = dataToRGBByteArray(rgb, w, h);
+
         //create the RGB image
-        image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         final Raster raster = ColorSpaceConvertor.createInterleavedRaster(imageData, w, h);
         image.setData(raster);
-        
+
         return image;
     }
-    
+
     /**
      * create rgb index for color conversion
      */
@@ -431,7 +438,7 @@ public class SeparationColorSpace extends GenericColorSpace {
         final float[] inputs = new float[inpLen];
         float[] operand;
         int p = 0, pp = 0, tt;
-        
+
         for (int i = 0, ii = Math.min(256, palLen); i < ii; i++) {
             for (int j = 0; j < inpLen; j++) {
                 inputs[j] = (data[p++] & 0xff) / 255f;
@@ -445,14 +452,14 @@ public class SeparationColorSpace extends GenericColorSpace {
         }
         return newdata;
     }
-    
+
     /**
      * get color
      */
     @Override
     public PdfPaint getColor() {
-        
+
         return altCS.getColor();
-        
+
     }
 }

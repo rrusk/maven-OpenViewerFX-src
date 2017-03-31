@@ -33,6 +33,7 @@
 package org.jpedal.gui;
 
 import java.util.Map;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.RecentDocumentsFactory;
@@ -50,11 +51,11 @@ public interface GUIFactory {
     int BUTTONBAR = 0;
     int NAVBAR = 1;
     int PAGES = 2;
-    
-    boolean deletePropertiesOnExit=false;
-    boolean alwaysShowMouse=false;
-    
-    
+
+    boolean deletePropertiesOnExit = false;
+    boolean alwaysShowMouse = false;
+
+
     /**
      * flag used to show opening of multiple PDFs
      */
@@ -64,7 +65,7 @@ public interface GUIFactory {
      * access to command object
      */
     org.jpedal.examples.viewer.Commands getCommand();
-    
+
     /**
      * align rotation combo box to default for page
      */
@@ -111,7 +112,7 @@ public interface GUIFactory {
     void toogleAutoScrolling();
 
     void setupThumbnailPanel();
-    
+
     void setAutoScrolling(boolean autoScroll);
 
     /**
@@ -137,7 +138,7 @@ public interface GUIFactory {
     void resetNavBar();
 
     void showMessageDialog(String message1);
-    
+
     int showMessageDialog(Object message1, Object[] options, int selectedChoice);
 
     void showMessageDialog(Object message, String title, int type);
@@ -180,195 +181,196 @@ public interface GUIFactory {
     void setStatusProgress(int size);
 
     Object printDialog(String[] printersList, String defaultPrinter);
-    
+
     void setPage(int newPage);
 
     Enum getType();
 
     Object getMultiViewerFrames();
-        
+
     void setBookmarks(boolean alwaysGenerate);
-    
+
     String getBookmark(String bookmark);
 
     void alterProperty(String value, boolean show);
-    
+
     SwingCursor getGUICursor();
 
     void setRotationFromExternal(int rotation);
-    
+
     void setResults(GUISearchList results);
-    
+
     void setMultibox(int[] flags);
-    
+
     /**
-    * This method returns the object that stores and handles the various preferences for the viewer.
-    * The returned object can be used to get property values and set them.
-    * @return The PropertiesFile object currently in use by the viewer.
-    */
+     * This method returns the object that stores and handles the various preferences for the viewer.
+     * The returned object can be used to get property values and set them.
+     *
+     * @return The PropertiesFile object currently in use by the viewer.
+     */
     PropertiesFile getProperties();
-    
+
     void snapScalingToDefaults(float newScaling);
-    
+
     Object getVerticalScrollBar();
-    
+
     String getPropertiesFileLocation();
-    
+
     boolean isSingle();
-    
+
     Object getPageContainer();
-    
+
     PaperSizes getPaperSizes();
-    
+
     void setPropertiesFileLocation(String file);
-    
+
     /**
-    * return comboBox or nul if not (QUALITY, SCALING or ROTATION
-    * @param ID
-    * @return
-    */
+     * return comboBox or nul if not (QUALITY, SCALING or ROTATION
+     *
+     * @param ID
+     * @return
+     */
     GUICombo getCombo(int ID);
-    
+
     /**
-    * Method to enable / disable search options on the toolbar.
-    */
+     * Method to enable / disable search options on the toolbar.
+     */
     void enableSearchItems(boolean enabled);
-    
+
     Object getDisplayPane();
-    
+
     void reinitialiseTabs(boolean showVisible);
-    
+
     void scrollToPage(int page);
-    
+
     Object getStatusBar();
-    
+
     void setTabsNotInitialised(boolean b);
-   
+
     //void selectBookmark();
-    
+
     void setScalingFromExternal(String scale);
-    
+
     boolean getPageTurnScalingAppropriate();
-    
+
     void resetPageNav();
-    
+
     void removeSearchWindow(boolean justHide);
-    
+
     Map getHotspots();
-     
-     void setSearchText(Object searchText);
-     
-     void stopThumbnails();
-     
-     Object getThumbnailPanel();
-     
-     Object getOutlinePanel();
-     
-     void setDownloadProgress(String message, int percentage);
-     
-     void reinitThumbnails();
-     
-     Object getThumbnailScrollBar();
-     
-     void setThumbnailScrollBarVisibility(boolean v);
-     
-     void setThumbnailScrollBarValue(int pageNum);
-     
-     Object getSideTabBar();
-     
-     int getSplitDividerLocation();
-     
-     void dispose();
-     
-     void rescanPdfLayers();
-     
-     void setRootContainer(Object rawValue);
-     
-     void setSearchFrame(GUISearchWindow searchFrame);
-     
-     void searchInTab(GUISearchWindow searchFrame);
-     
-     void setDisplayMode(Integer mode);
-     /**
-      * @return a boolean commandInThread
-      */
-     boolean isCommandInThread();
-     
-     /**
-      * @param b
-      * assigns commandInThread to b
-      */
-     void setCommandInThread(boolean b);
-     
-     /**
-      * @return a boolean executingCommand
-      */
-     boolean isExecutingCommand();
-     
-     /**
-      * @param b
-      * assigns executingCommand to b
-      */
-     void setExecutingCommand(boolean b);
+
+    void setSearchText(Object searchText);
+
+    void stopThumbnails();
+
+    Object getThumbnailPanel();
+
+    Object getOutlinePanel();
+
+    void setDownloadProgress(String message, int percentage);
+
+    void reinitThumbnails();
+
+    Object getThumbnailScrollBar();
+
+    void setThumbnailScrollBarVisibility(boolean v);
+
+    void setThumbnailScrollBarValue(int pageNum);
+
+    Object getSideTabBar();
+
+    int getSplitDividerLocation();
+
+    void dispose();
+
+    void rescanPdfLayers();
+
+    void setRootContainer(Object rawValue);
+
+    void setSearchFrame(GUISearchWindow searchFrame);
+
+    void searchInTab(GUISearchWindow searchFrame);
+
+    void setDisplayMode(Integer mode);
+
+    /**
+     * @return a boolean commandInThread
+     */
+    boolean isCommandInThread();
+
+    /**
+     * @param b assigns commandInThread to b
+     */
+    void setCommandInThread(boolean b);
+
+    /**
+     * @return a boolean executingCommand
+     */
+    boolean isExecutingCommand();
+
+    /**
+     * @param b assigns executingCommand to b
+     */
+    void setExecutingCommand(boolean b);
 
     PdfDecoderInt getPdfDecoder();
-    
+
     GUIButtons getButtons();
-    
+
     Values getValues();
-    
+
     void setScrollBarPolicy(ScrollPolicy pol);
-    
+
     GUIMenuItems getMenuItems();
-    
+
     void decodePage();
 
     RecentDocumentsFactory getRecentDocument();
-    
+
     void setRecentDocument();
 
     void openFile(String fileToOpen);
-    
+
     void open(String fileName);
-    
+
     void enablePageCounter(PageCounter value, boolean enabled, boolean visibility);
-    
+
     void setPageCounterText(PageCounter value, String text);
-    
+
     Object getPageCounter(PageCounter value);
-    
+
     void updateTextBoxSize();
-    
+
     String getTitles(String title);
-    
+
     void enableStatusBar(boolean enabled, boolean visible);
-    
+
     void enableCursor(boolean enabled, boolean visible);
-    
+
     void enableMemoryBar(boolean enabled, boolean visible);
-    
+
     void enableNavigationBar(boolean enabled, boolean visible);
-    
+
     void enableDownloadBar(boolean enabled, boolean visible);
-    
+
     int getSidebarTabCount();
-    
+
     String getSidebarTabTitleAt(int pos);
-    
+
     void removeSidebarTabAt(int pos);
 
     double getDividerLocation();
-    
+
     float scaleToVisible(float left, float right, float top, float bottom);
-    
+
     int getDropShadowDepth();
-    
+
     void setPannable(boolean pan);
-    
+
     void setupSplitPaneDivider(int size, boolean visibility);
-    
+
     double getStartSize();
-    
+
     void setStartSize(int size);
 
     void setDisplayView(int SINGLE_PAGE, int DISPLAY_CENTERED);
@@ -378,10 +380,10 @@ public interface GUIFactory {
     PdfDecoderInt openNewMultiplePage(final String selectedFile, final Values commonValues);
 
     void triggerPageTurnAnimation(final PdfDecoderInt decode_pdf, final Values commonValues, final int updatedTotal, final boolean rightTurn);
-    
+
     String getPageLabel(int pageNumber);
-    
+
     GUIAnnotationPanel getAnnotationPanel();
-    
+
     Object getGlassPane();
 }

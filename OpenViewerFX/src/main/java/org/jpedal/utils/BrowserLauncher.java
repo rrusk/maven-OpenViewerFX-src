@@ -37,7 +37,7 @@ import java.net.URI;
 
 /**
  * Browser Launcer is a Class with one method,
- * pass in the URL string that you want to open in 
+ * pass in the URL string that you want to open in
  * the systems default browser window.
  */
 public class BrowserLauncher {

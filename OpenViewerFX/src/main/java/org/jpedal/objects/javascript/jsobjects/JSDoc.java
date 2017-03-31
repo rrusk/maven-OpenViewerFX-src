@@ -34,6 +34,7 @@ package org.jpedal.objects.javascript.jsobjects;
 
 import java.util.HashMap;
 import java.util.List;
+
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.ReturnValues;
 import org.jpedal.objects.raw.FormObject;
@@ -41,75 +42,76 @@ import org.jpedal.objects.raw.PdfDictionary;
 
 
 public class JSDoc {
-//	public boolean external = true;
-	private AcroRenderer acroRenderer;
-	private HashMap<String, JSField> nameTofields = new HashMap<String, JSField>();
-	private HashMap<String, JSField> refTofields = new HashMap<String, JSField>();
+    //	public boolean external = true;
+    private AcroRenderer acroRenderer;
+    private HashMap<String, JSField> nameTofields = new HashMap<String, JSField>();
+    private HashMap<String, JSField> refTofields = new HashMap<String, JSField>();
 
-	//public Object ADBE = null;
+    //public Object ADBE = null;
 
-	public JSDoc() {}
-    
-	public void setAcroRenderer(final AcroRenderer acro) {
-		acroRenderer = acro;
-		if(acro != null) {
-			loadFormObjects();
-		}
-	}
+    public JSDoc() {
+    }
 
-	// TODO: add call to loadFormObjects() to GenericParser in a way that its called after the acrorender/GUIData has loaded the FormObjects
-	public void loadFormObjects() {
-		if(acroRenderer == null) {
-			throw new RuntimeException("No acrorender object set for Doc object.");
-		}
-		final List<FormObject> obs = acroRenderer.getCompData().getFormComponents(null, ReturnValues.FORMOBJECTS_FROM_REF, -1);
+    public void setAcroRenderer(final AcroRenderer acro) {
+        acroRenderer = acro;
+        if (acro != null) {
+            loadFormObjects();
+        }
+    }
+
+    // TODO: add call to loadFormObjects() to GenericParser in a way that its called after the acrorender/GUIData has loaded the FormObjects
+    public void loadFormObjects() {
+        if (acroRenderer == null) {
+            throw new RuntimeException("No acrorender object set for Doc object.");
+        }
+        final List<FormObject> obs = acroRenderer.getCompData().getFormComponents(null, ReturnValues.FORMOBJECTS_FROM_REF, -1);
 //		System.out.println("obs=" + obs);
 //		System.out.println("size=" + obs.size());
-		for(final FormObject formObject : obs) {
-			final JSField field = new JSField(formObject);
-			refTofields.put(formObject.getObjectRefAsString(), field);
-			nameTofields.put(formObject.getTextStreamValue(PdfDictionary.T), field);
-		}
-	}
+        for (final FormObject formObject : obs) {
+            final JSField field = new JSField(formObject);
+            refTofields.put(formObject.getObjectRefAsString(), field);
+            nameTofields.put(formObject.getTextStreamValue(PdfDictionary.T), field);
+        }
+    }
 
-	public JSField getField(final String name) {
+    public JSField getField(final String name) {
 //		System.out.println("Called getField(" + name + ");");
 
-		// check if there are field objects in the map
-		if(nameTofields.size() <= 0) {
-			loadFormObjects();
-		}
-		if(nameTofields.containsKey(name)) {
-			return nameTofields.get(name);
-		}
-		return null;
-	}
+        // check if there are field objects in the map
+        if (nameTofields.size() <= 0) {
+            loadFormObjects();
+        }
+        if (nameTofields.containsKey(name)) {
+            return nameTofields.get(name);
+        }
+        return null;
+    }
 
-	public JSField getFieldByRef(final String ref) {
+    public JSField getFieldByRef(final String ref) {
 //		System.out.println("Called getFieldByRef(" + ref + ");");
-		// check if there are field objects in the map
-		if(refTofields.size() <= 0) {
-			loadFormObjects();
-		}
-		if(refTofields.containsKey(ref)) {
-			return refTofields.get(ref);
-		}
-		return null;
-	}
+        // check if there are field objects in the map
+        if (refTofields.size() <= 0) {
+            loadFormObjects();
+        }
+        if (refTofields.containsKey(ref)) {
+            return refTofields.get(ref);
+        }
+        return null;
+    }
 
-	public void flush() {
-		nameTofields = new HashMap<String, JSField>();
-		refTofields = new HashMap<String, JSField>();
-	}
+    public void flush() {
+        nameTofields = new HashMap<String, JSField>();
+        refTofields = new HashMap<String, JSField>();
+    }
 
-	public FormObject[] getFormObjects() {
-		final FormObject[] formObjects = new FormObject[refTofields.size()];
-		int i = 0;
-		for(final String S : refTofields.keySet()) {
-			formObjects[i] = refTofields.get(S).target;
-			i ++;
-		}
-		return formObjects;
-	}
+    public FormObject[] getFormObjects() {
+        final FormObject[] formObjects = new FormObject[refTofields.size()];
+        int i = 0;
+        for (final String S : refTofields.keySet()) {
+            formObjects[i] = refTofields.get(S).target;
+            i++;
+        }
+        return formObjects;
+    }
 
 }

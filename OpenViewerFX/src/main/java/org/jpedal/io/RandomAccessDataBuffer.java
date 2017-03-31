@@ -37,67 +37,66 @@ import java.io.IOException;
 
 public class RandomAccessDataBuffer implements RandomAccessBuffer {
 
-  private byte[] data;
-  private long pointer;
+    private byte[] data;
+    private long pointer;
 
-  public RandomAccessDataBuffer(final byte[] data)
-  {
-    this.data = data;
-    this.pointer = -1;
-  }
-
-  @Override
-  public long getFilePointer() throws IOException {
-    return pointer;
-  }
-
-  @Override
-  public void seek(final long pos) throws IOException {
-    if ( checkPos(pos) ) {
-      this.pointer = pos;
-    } else {
-      throw new IOException("Position out of bounds");
+    public RandomAccessDataBuffer(final byte[] data) {
+        this.data = data;
+        this.pointer = -1;
     }
-  }
 
-  @Override
-  public void close() throws IOException {
-    this.data = null;
-    this.pointer = -1;
-  }
-
-  @Override
-  public long length() throws IOException {
-  
-    if (data!=null) {
-      return data.length;
-    } else {
-      throw new IOException("Data buffer not initialized.");
+    @Override
+    public long getFilePointer() throws IOException {
+        return pointer;
     }
-  }
 
-  @Override
-  public int read() throws IOException {
-    if (checkPos(this.pointer)) {
-      return b2i(this.data[(int)pointer++]);
-    } else {
-      return -1;
+    @Override
+    public void seek(final long pos) throws IOException {
+        if (checkPos(pos)) {
+            this.pointer = pos;
+        } else {
+            throw new IOException("Position out of bounds");
+        }
     }
-  }
 
-  private int peek() throws IOException {
-    if (checkPos(this.pointer)) {
-      return b2i(this.data[(int)pointer]);
-    } else {
-      return -1;
+    @Override
+    public void close() throws IOException {
+        this.data = null;
+        this.pointer = -1;
     }
-  }
 
-  /**
-   * return next line (returns null if no line)
-   */
-  @Override
-  public String readLine() throws IOException {
+    @Override
+    public long length() throws IOException {
+
+        if (data != null) {
+            return data.length;
+        } else {
+            throw new IOException("Data buffer not initialized.");
+        }
+    }
+
+    @Override
+    public int read() throws IOException {
+        if (checkPos(this.pointer)) {
+            return b2i(this.data[(int) pointer++]);
+        } else {
+            return -1;
+        }
+    }
+
+    private int peek() throws IOException {
+        if (checkPos(this.pointer)) {
+            return b2i(this.data[(int) pointer]);
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * return next line (returns null if no line)
+     */
+    @Override
+    public String readLine() throws IOException {
 
         if (this.pointer >= this.data.length - 1) {
             return null;
@@ -118,36 +117,36 @@ public class RandomAccessDataBuffer implements RandomAccessBuffer {
         }
     }
 
-  @Override
-  public int read(final byte[] b) throws IOException {
-    if (data==null) {
-        throw new IOException("Data buffer not initialized.");
+    @Override
+    public int read(final byte[] b) throws IOException {
+        if (data == null) {
+            throw new IOException("Data buffer not initialized.");
+        }
+        if (pointer < 0 || pointer >= data.length) {
+            return -1;
+        }
+        final int length = Math.min(b.length, data.length - (int) pointer);
+        for (int i = 0; i < length; i++) {
+            b[i] = data[(int) pointer++];
+        }
+        return length;
     }
-    if (pointer<0 || pointer>=data.length) {
-        return -1;
-    }
-    final int length=Math.min(b.length, data.length-(int)pointer);
-    for (int i=0; i<length; i++) {
-      b[i] = data[ (int)pointer++ ];
-    }
-    return length;
-  }
 
-  private static int b2i(final byte b) {
-    if (b>=0) {
-        return b;
+    private static int b2i(final byte b) {
+        if (b >= 0) {
+            return b;
+        }
+        return 256 + b;
     }
-    return 256+b;
-  }
 
-  private boolean checkPos(final long pos) throws IOException {
-    return ( (pos>=0) && (pos<length()) );
-  }
+    private boolean checkPos(final long pos) throws IOException {
+        return ((pos >= 0) && (pos < length()));
+    }
 
-/* returns the byte data*/
-@Override
-public byte[] getPdfBuffer(){
-	return data;
-}
+    /* returns the byte data*/
+    @Override
+    public byte[] getPdfBuffer() {
+        return data;
+    }
 }
 

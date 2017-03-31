@@ -33,6 +33,7 @@
 package org.jpedal.parser.image;
 
 import java.awt.image.BufferedImage;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ErrorTracker;
 import org.jpedal.external.ImageHandler;
@@ -64,7 +65,7 @@ public class DO extends ImageDecoder {
         }
 
         try {
-            
+
             // Internal tests can disable images to speed up conversion
             if (System.getProperty("testsDisableImages") == null) {
                 processXImage(name, name, key, XObject);
@@ -73,14 +74,14 @@ public class DO extends ImageDecoder {
         } catch (final Error e) {
 
             LogWriter.writeLog("Error: " + e.getMessage());
-            
-            parserOptions.imagesProcessedFully=false;
+
+            parserOptions.imagesProcessedFully = false;
             errorTracker.addPageFailureMessage("Error " + e + " in DO");
         } catch (final Exception e) {
 
             LogWriter.writeLog("Exception " + e);
-            
-            parserOptions.imagesProcessedFully=false;
+
+            parserOptions.imagesProcessedFully = false;
             errorTracker.addPageFailureMessage("Error " + e + " in DO");
         }
 
@@ -93,31 +94,31 @@ public class DO extends ImageDecoder {
 
         final int previousUse = -1;
 
-        if(ImageCommands.trackImages){
+        if (ImageCommands.trackImages) {
             details += " Image";
-            if(imagesInFile==null) {
+            if (imagesInFile == null) {
                 imagesInFile = "";
             }
         }
 
-        final boolean isForHTML= current.isHTMLorSVG();
+        final boolean isForHTML = current.isHTMLorSVG();
 
         /*don't process unless needed*/
         if (parserOptions.imagesNeeded()) {
 
             //read stream for image
-            final byte[] objectData= currentPdfFile.readStream(XObject, true, true, false, false, false, XObject.getCacheName(currentPdfFile.getObjectReader()));
+            final byte[] objectData = currentPdfFile.readStream(XObject, true, true, false, false, false, XObject.getCacheName(currentPdfFile.getObjectReader()));
 
             //flag issue
-            if(objectData==null){
-                parserOptions.imagesProcessedFully=false;
-            }else{
+            if (objectData == null) {
+                parserOptions.imagesProcessedFully = false;
+            } else {
 
                 //generate name including filename to make it unique less /
                 currentImage = parserOptions.getFileName() + '-' + name;
 
                 //process the image and save raw version
-                
+
                 BufferedImage image = processImageXObject(XObject, name, objectData, details);
 
                 //fix for oddity in Annotation
@@ -129,11 +130,11 @@ public class DO extends ImageDecoder {
                 //save transformed image
                 if (image != null) {
 
-                    if(isForHTML){
-                        current.drawImage(parserOptions.getPageNumber(),image,gs,false,name, -2);
-                    }else{
+                    if (isForHTML) {
+                        current.drawImage(parserOptions.getPageNumber(), image, gs, false, name, -2);
+                    } else {
 
-                        if(parserOptions.renderImages()){
+                        if (parserOptions.renderImages()) {
                             gs.x = gs.CTM[2][0];
                             gs.y = gs.CTM[2][1];
 
@@ -146,17 +147,17 @@ public class DO extends ImageDecoder {
                                 cache.setImposedKey(key, id);
                             }
                         }
-                        
-                        if(parserOptions.isPageContent() && ImageCommands.isExtractionAllowed(currentPdfFile)){
+
+                        if (parserOptions.isPageContent() && ImageCommands.isExtractionAllowed(currentPdfFile)) {
                             if (parserOptions.isClippedImagesExtracted()) {
                                 generateClippedImage(image);
-                            } else if(parserOptions.isFinalImagesExtracted() || parserOptions.isRawImagesExtracted()){
+                            } else if (parserOptions.isFinalImagesExtracted() || parserOptions.isRawImagesExtracted()) {
                                 try {
                                     generateTransformedImageSingle(image);
                                 } catch (final Exception e) {
                                     LogWriter.writeLog("Exception " + e + " on transforming image in file");
                                 }
-                            }  
+                            }
                         }
                     }
 

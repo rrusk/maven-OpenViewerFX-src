@@ -34,84 +34,84 @@
 package org.jpedal.examples.viewer.gui;
 
 import java.util.TimerTask;
+
 import org.jpedal.FileAccess;
 import org.jpedal.display.Display;
 
 /**
- *
  * @author markee
  */
 public class PageMoveTracker {
-    
+
     java.util.Timer t2;
     TimerTask listener;
-    
+
     /**
      * fix submitted by Niklas Matthies
      */
     public void dispose() {
-        if(t2!=null) {
+        if (t2 != null) {
             t2.cancel();
         }
         t2 = null;
     }
-    
-    void startTimer(final Display pages,final int  pageNumber, final FileAccess fileAccess) {
-        
-        if(t2==null) {
+
+    void startTimer(final Display pages, final int pageNumber, final FileAccess fileAccess) {
+
+        if (t2 == null) {
             t2 = new java.util.Timer();
         }
-        
+
         //turn if off if running
         if (listener != null) {
             listener.cancel();
             t2.purge();
         }
-        
+
         //restart - if its not stopped it will trigger page update
         listener = new PageListener(pages, pageNumber, fileAccess);
         t2.schedule(listener, 500);
     }
-    
+
     /**
      * used to update statusBar object if exists
      */
     private final class PageListener extends TimerTask {
-        
+
         final Display pages;
-        
+
         final FileAccess fileAccess;
-        
-        final int  pageNumber,pageCount;
-        
-        private PageListener(final Display pages, final int  pageNumber, final FileAccess fileAccess) {
-            this.pages=pages;
-            this.pageNumber=pageNumber;
-            this.fileAccess=fileAccess;
-            this.pageCount=fileAccess.getPageCount();
+
+        final int pageNumber, pageCount;
+
+        private PageListener(final Display pages, final int pageNumber, final FileAccess fileAccess) {
+            this.pages = pages;
+            this.pageNumber = pageNumber;
+            this.fileAccess = fileAccess;
+            this.pageCount = fileAccess.getPageCount();
         }
-        
+
         @Override
         public void run() {
-            
+
             if (Display.debugLayout) {
-                 System.out.println("PageListener action called pageNumber="+pageNumber);
+                System.out.println("PageListener action called pageNumber=" + pageNumber);
             }
-            
-            if(pages!=null){
-                
+
+            if (pages != null) {
+
                 pages.stopGeneratingPage();
-                
+
                 //Ensure page range does not drop below one
-                if(pageNumber<1) {
+                if (pageNumber < 1) {
                     fileAccess.setPageNumber(1);
                 }
-                
-                if(pages!=null) {
+
+                if (pages != null) {
                     pages.decodeOtherPages(pageNumber, pageCount);
                 }
             }
-            
+
             //Ensure we close this timer task at the end of the task
             cancel();
         }

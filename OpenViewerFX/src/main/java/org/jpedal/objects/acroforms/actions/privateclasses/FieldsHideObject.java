@@ -34,22 +34,22 @@
 package org.jpedal.objects.acroforms.actions.privateclasses;
 
 public class FieldsHideObject {
-	private String[] fieldsToHide = new String[0];
+    private String[] fieldsToHide = new String[0];
     private boolean[] whetherToHide = new boolean[0];
-    
-    public void setFieldArray(final String[] newFieldarray){
-    	fieldsToHide = newFieldarray;
+
+    public void setFieldArray(final String[] newFieldarray) {
+        fieldsToHide = newFieldarray;
     }
-    
-    public void setHideArray(final boolean[] newHidearray){
-    	whetherToHide = newHidearray;
+
+    public void setHideArray(final boolean[] newHidearray) {
+        whetherToHide = newHidearray;
     }
-    
-    public String[] getFieldArray(){
-    	return fieldsToHide;
+
+    public String[] getFieldArray() {
+        return fieldsToHide;
     }
-    
-    public boolean[] getHideArray(){
-    	return whetherToHide;
+
+    public boolean[] getHideArray() {
+        return whetherToHide;
     }
 }

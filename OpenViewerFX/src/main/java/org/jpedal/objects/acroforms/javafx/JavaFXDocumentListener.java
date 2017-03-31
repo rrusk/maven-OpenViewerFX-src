@@ -42,12 +42,12 @@ import org.jpedal.objects.raw.FormObject;
 public class JavaFXDocumentListener implements EventHandler<ActionEvent> {
     final TextField comp;
     final FormObject form;
-    
+
     JavaFXDocumentListener(final TextField textcomp, final FormObject form) {
         this.comp = textcomp;
-	this.form = form; 
-   }
-    
+        this.form = form;
+    }
+
     @Override
     public void handle(final ActionEvent t) {
         form.updateValue(comp.getText(), false, false);

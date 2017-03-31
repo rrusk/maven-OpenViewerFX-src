@@ -43,30 +43,40 @@ import org.jpedal.utils.repositories.Vector_Object;
 
 public class GraphicsStates {
 
-    /**flag to show if stack setup*/
+    /**
+     * flag to show if stack setup
+     */
     private boolean isStackInitialised;
 
-    /**stack for graphics states*/
+    /**
+     * stack for graphics states
+     */
     private Vector_Object graphicsStateStack;
 
-    /**stack for graphics states*/
+    /**
+     * stack for graphics states
+     */
     private Vector_Object strokeColorStateStack;
 
-    /**stack for graphics states*/
+    /**
+     * stack for graphics states
+     */
     private Vector_Object nonstrokeColorStateStack;
-    
-    private Vector_Int nonstrokeColorValueStack,strokeColorValueStack;
 
-    /**stack for graphics states*/
+    private Vector_Int nonstrokeColorValueStack, strokeColorValueStack;
+
+    /**
+     * stack for graphics states
+     */
     private Vector_Object textStateStack;
 
     int depth;
 
-    ParserOptions parserOptions=new ParserOptions();
+    ParserOptions parserOptions = new ParserOptions();
 
 
     public GraphicsStates(final ParserOptions parserOptions) {
-        this.parserOptions=parserOptions;
+        this.parserOptions = parserOptions;
     }
 
     /**
@@ -74,18 +84,18 @@ public class GraphicsStates {
      */
     public void pushGraphicsState(final GraphicsState gs, final DynamicVectorRenderer current) {
 
-        if(!isStackInitialised){
-            isStackInitialised=true;
+        if (!isStackInitialised) {
+            isStackInitialised = true;
 
             graphicsStateStack = new Vector_Object(10);
             textStateStack = new Vector_Object(10);
-            
-            strokeColorStateStack= new Vector_Object(20);
-            nonstrokeColorStateStack= new Vector_Object(20);
-            
-            nonstrokeColorValueStack= new Vector_Int(20);
-            strokeColorValueStack= new Vector_Int(20);
-            
+
+            strokeColorStateStack = new Vector_Object(20);
+            nonstrokeColorStateStack = new Vector_Object(20);
+
+            nonstrokeColorValueStack = new Vector_Int(20);
+            strokeColorValueStack = new Vector_Int(20);
+
             //clipStack=new Vector_Object(20);
         }
 
@@ -107,7 +117,7 @@ public class GraphicsStates {
         //save colorspaces
         nonstrokeColorStateStack.push(gs.nonstrokeColorSpace);
         strokeColorStateStack.push(gs.strokeColorSpace);
-        
+
         //preserve colors
         final int strokeColorData = gs.strokeColorSpace.getColor().getRGB();
         final int nonStrokeColorData = gs.nonstrokeColorSpace.getColor().getRGB();
@@ -116,8 +126,8 @@ public class GraphicsStates {
         nonstrokeColorValueStack.push(nonStrokeColorData);
 
         //System.out.println(gs.nonstrokeColorSpace+" "+gs.strokeColorSpace);
-        
-        current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
+
+        current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE, null);
 
     }
 
@@ -125,44 +135,43 @@ public class GraphicsStates {
      * restore GraphicsState status from graphics stack
      */
     public GraphicsState restoreGraphicsState(final DynamicVectorRenderer current) {
-		GraphicsState gs = null;
-        if(!isStackInitialised){
+
+        GraphicsState gs = new GraphicsState();
+        gs.setTextState(new TextState());
+
+        if (!isStackInitialised) {
 
             LogWriter.writeLog("No GraphicsState saved to retrieve");
-            
-            //reset to defaults
-            gs=new GraphicsState();
-            gs.setTextState(new TextState());
 
-        }else if(depth>0){
+        } else if (depth > 0) {
 
             depth--;
 
             gs = (GraphicsState) graphicsStateStack.pull();
             gs.setTextState((TextState) textStateStack.pull());
 
-            gs.strokeColorSpace=(GenericColorSpace) strokeColorStateStack.pull();
-            gs.nonstrokeColorSpace=(GenericColorSpace) nonstrokeColorStateStack.pull();
+            gs.strokeColorSpace = (GenericColorSpace) strokeColorStateStack.pull();
+            gs.nonstrokeColorSpace = (GenericColorSpace) nonstrokeColorStateStack.pull();
 
-            final int strokeColorData=strokeColorValueStack.pull();
-            final int nonStrokeColorData= nonstrokeColorValueStack.pull();
-            
+            final int strokeColorData = strokeColorValueStack.pull();
+            final int nonStrokeColorData = nonstrokeColorValueStack.pull();
+
             gs.resetColorSpaces(strokeColorData, nonStrokeColorData);
-            
+
         }
-        
+
         //save for later
-        if (parserOptions.isRenderPage()){
+        if (parserOptions.isRenderPage()) {
 
-            current.drawClip(gs,parserOptions.defaultClip,false) ;
+            current.drawClip(gs, parserOptions.defaultClip, false);
 
-            current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE,null);
+            current.writeCustom(DynamicVectorRenderer.RESET_COLORSPACE, null);
 
             /*
              * align display
              */
-            current.setGraphicsState(GraphicsState.FILL,gs.getAlpha(GraphicsState.FILL),gs.getBMValue());
-            current.setGraphicsState(GraphicsState.STROKE,gs.getAlpha(GraphicsState.STROKE),gs.getBMValue());
+            current.setGraphicsState(GraphicsState.FILL, gs.getAlpha(GraphicsState.FILL), gs.getBMValue());
+            current.setGraphicsState(GraphicsState.STROKE, gs.getAlpha(GraphicsState.STROKE), gs.getBMValue());
         }
 
         return gs;
@@ -175,7 +184,7 @@ public class GraphicsStates {
 
     public void correctDepth(final int currentDepth, final GraphicsState gs, final DynamicVectorRenderer current) {
 
-        while(depth>currentDepth){
+        while (depth > currentDepth) {
             restoreGraphicsState(current);
         }
     }

@@ -41,6 +41,7 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
 import org.jpedal.JDeliHelper;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.exception.PdfException;
@@ -48,13 +49,12 @@ import org.jpedal.external.ImageHelper;
 import org.jpedal.utils.LogWriter;
 
 public class StandardImageIO implements ImageHelper {
-    
-    public StandardImageIO(){
+
+    public StandardImageIO() {
         ImageIO.setUseCache(false);
     }
 
     /**
-     *
      * @param image
      * @param type
      * @param file_name
@@ -62,51 +62,49 @@ public class StandardImageIO implements ImageHelper {
      */
     @Override
     public void write(final BufferedImage image, final String type, final String file_name) throws IOException {
-       
-        JDeliHelper.write(image, type, file_name,GenericColorSpace.fasterPNG);
-        
+
+        JDeliHelper.write(image, type, file_name, GenericColorSpace.fasterPNG);
+
     }
 
     /**
-     *
      * @param file_name (including path)
      * @return
      */
     @Override
     public BufferedImage read(final String file_name) {
-        
-        BufferedImage image=null;
-        
+
+        BufferedImage image = null;
+
         try {
             image = ImageIO.read(new File(file_name));
-            
+
             //BufferedInputStream in = new BufferedInputStream(new FileInputStream(file_name));
             //image = ImageIO.read(in);
             //in.close();
         } catch (final IOException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         } catch (final Error err) {
-            
+
             LogWriter.writeLog("Error: " + err.getMessage());
-            
-            throw new RuntimeException("Error " + err + " loading "+file_name+" with ImageIO");
-            
+
+            throw new RuntimeException("Error " + err + " loading " + file_name + " with ImageIO");
+
         }
-        
+
         return image;
     }
 
 
     /**
-     *
      * @param data (final byte[] data for image file - PNG, TIF, JPEG)
      * @return
      * @throws IOException
      */
     @Override
-    public synchronized BufferedImage read(final byte[] data) throws IOException{
-    	final ByteArrayInputStream bis=new ByteArrayInputStream(data);
-        
+    public synchronized BufferedImage read(final byte[] data) throws IOException {
+        final ByteArrayInputStream bis = new ByteArrayInputStream(data);
+
         ImageIO.setUseCache(false);
 
         return ImageIO.read(bis);
@@ -114,7 +112,6 @@ public class StandardImageIO implements ImageHelper {
     }
 
     /**
-     *
      * @param data (binary data for image file - PNG, TIF, JPEG)
      * @return
      * @throws IOException
@@ -122,17 +119,17 @@ public class StandardImageIO implements ImageHelper {
     @Override
     public Raster readRasterFromJPeg(final byte[] data) throws IOException {
 
-        Raster ras=null;
-        ImageReader iir=null;
-        ImageInputStream iin=null;
+        Raster ras = null;
+        ImageReader iir = null;
+        ImageInputStream iin = null;
 
         final ByteArrayInputStream in = new ByteArrayInputStream(data);
 
         //suggestion from Carol
-        try{
+        try {
             final Iterator<ImageReader> iterator = ImageIO.getImageReadersByFormatName("JPEG");
 
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
 
                 final ImageReader o = iterator.next();
                 iir = o;
@@ -146,22 +143,22 @@ public class StandardImageIO implements ImageHelper {
             iin = ImageIO.createImageInputStream(in);
             iir.setInput(iin, true);   //new MemoryCacheImageInputStream(in));
 
-            ras=iir.readRaster(0,null);
+            ras = iir.readRaster(0, null);
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
 
-            LogWriter.writeLog("Unable to find jars on classpath "+e);
-        }finally{
-            if(in!=null) {
+            LogWriter.writeLog("Unable to find jars on classpath " + e);
+        } finally {
+            if (in != null) {
                 in.close();
             }
 
-            if(iin!=null){
+            if (iin != null) {
                 iin.flush();
                 iin.close();
             }
 
-            if(iir!=null) {
+            if (iir != null) {
                 iir.dispose();
             }
         }
@@ -169,12 +166,11 @@ public class StandardImageIO implements ImageHelper {
     }
 
     /**
-     *
-     * @param data  (binary data for image file - PNG, TIF, JPEG)
-     * @param w   image width in pixels
-     * @param h   image height in pixels
-     * @param pX  sensible image width in pixels (ie what we should downscale to)
-     * @param pY  sensible image height in pixels (ie what we should downscale to)
+     * @param data (binary data for image file - PNG, TIF, JPEG)
+     * @param w    image width in pixels
+     * @param h    image height in pixels
+     * @param pX   sensible image width in pixels (ie what we should downscale to)
+     * @param pY   sensible image height in pixels (ie what we should downscale to)
      * @return
      * @throws PdfException
      */

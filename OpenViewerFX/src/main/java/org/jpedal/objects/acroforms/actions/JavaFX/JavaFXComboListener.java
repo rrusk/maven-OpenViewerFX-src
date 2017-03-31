@@ -41,21 +41,21 @@ import org.jpedal.objects.raw.FormObject;
 
 
 public class JavaFXComboListener implements ChangeListener<Number> {
-     
+
     final ComboBox<String> comp;
     final FormObject form;
-    
-     public JavaFXComboListener(final ComboBox<String> comboBox, final FormObject form) {
-         
-	this.comp = comboBox;
-	this.form = form;
+
+    public JavaFXComboListener(final ComboBox<String> comboBox, final FormObject form) {
+
+        this.comp = comboBox;
+        this.form = form;
     }
 
-  
+
     @Override
     public void changed(final ObservableValue<? extends Number> ov, final Number t, final Number t1) {
         final int indexnew = comp.getSelectionModel().getSelectedIndex();
-         form.setSelection(new Object[]{comp.getSelectionModel().getSelectedItem()},comp.getSelectionModel().getSelectedItem(), new int[]{indexnew}, indexnew);
+        form.setSelection(new Object[]{comp.getSelectionModel().getSelectedItem()}, comp.getSelectionModel().getSelectedItem(), new int[]{indexnew}, indexnew);
     }
 
 }

@@ -36,26 +36,29 @@ import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Map;
+
 import org.jpedal.color.PdfColor;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.GraphicsState;
 
-public class T3Display extends SwingDisplay implements T3Renderer{
+public class T3Display extends SwingDisplay implements T3Renderer {
 
-    /**create instance and set flag to show if we draw white background*/
+    /**
+     * create instance and set flag to show if we draw white background
+     */
     public T3Display(final int pageNumber, final boolean addBackground, final int defaultSize, final ObjectStore newObjectRef) {
 
-        this.rawPageNumber =pageNumber;
+        this.rawPageNumber = pageNumber;
         this.objectStoreRef = newObjectRef;
-        this.addBackground=addBackground;
+        this.addBackground = addBackground;
 
         setupArrays(defaultSize);
         type = CREATE_T3;
     }
 
     public T3Display(final byte[] dvr, final Map<Object, Object> map) {
-        super(dvr,map);
+        super(dvr, map);
         type = CREATE_T3;
     }
 
@@ -64,47 +67,47 @@ public class T3Display extends SwingDisplay implements T3Renderer{
      */
     @Override
     public void setType3Glyph(final String pKey) {
-        this.rawKey=pKey;
+        this.rawKey = pKey;
 
-        isType3Font=true;
+        isType3Font = true;
 
     }
 
-        /**
+    /**
      * used by type 3 glyphs to set colour
      */
     @Override
     public void lockColors(final PdfPaint strokePaint, final PdfPaint nonstrokePaint, final boolean lockColour) {
 
-        colorsLocked=lockColour;
-        Color strokeColor=Color.white,nonstrokeColor=Color.white;
+        colorsLocked = lockColour;
+        Color strokeColor = Color.white, nonstrokeColor = Color.white;
 
-        if(strokePaint!=null && !strokePaint.isPattern()) {
+        if (strokePaint != null && !strokePaint.isPattern()) {
             strokeColor = (Color) strokePaint;
         }
-        strokeCol=new PdfColor(strokeColor.getRed(),strokeColor.getGreen(),strokeColor.getBlue());
+        strokeCol = new PdfColor(strokeColor.getRed(), strokeColor.getGreen(), strokeColor.getBlue());
 
-        if(!nonstrokePaint.isPattern()) {
+        if (!nonstrokePaint.isPattern()) {
             nonstrokeColor = (Color) nonstrokePaint;
         }
-        fillCol=new PdfColor (nonstrokeColor.getRed(),nonstrokeColor.getGreen(),nonstrokeColor.getBlue());
+        fillCol = new PdfColor(nonstrokeColor.getRed(), nonstrokeColor.getGreen(), nonstrokeColor.getBlue());
 
     }
-    
-     @Override
-     void renderImage(final AffineTransform imageAf, BufferedImage image, final float alpha,
-            final GraphicsState currentGraphicsState, final float x, final float y) {
+
+    @Override
+    void renderImage(final AffineTransform imageAf, BufferedImage image, final float alpha,
+                     final GraphicsState currentGraphicsState, final float x, final float y) {
 
         
         /*
          * color type3 glyphs if not black
          */
-        if (image !=null && fillCol != null) {
+        if (image != null && fillCol != null) {
 
             image = T3ImageUtils.handleType3Image(image, fillCol);
 
         }
-        
-        super.renderImage(imageAf, image, alpha, currentGraphicsState,  x, y);
-     }
+
+        super.renderImage(imageAf, image, alpha, currentGraphicsState, x, y);
+    }
 }

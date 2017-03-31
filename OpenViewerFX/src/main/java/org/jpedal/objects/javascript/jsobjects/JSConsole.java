@@ -34,6 +34,7 @@ package org.jpedal.objects.javascript.jsobjects;
 
 import javax.swing.JDialog;
 import javax.swing.JTextArea;
+
 import org.jpedal.objects.javascript.JSApp;
 
 
@@ -43,53 +44,54 @@ public class JSConsole {
     private JTextArea consoleArea;
 
     // This isn't part of the Adobe JS API, but is a common method in web JS
-	public void log(final String s) {
+    public void log(final String s) {
 
-        if(JSApp.showOutput){
-		    System.out.println("JAVASCRIPT: " + s);
+        if (JSApp.showOutput) {
+            System.out.println("JAVASCRIPT: " + s);
         }
-        if(consoleArea != null) {
+        if (consoleArea != null) {
             consoleArea.append(s + '\n');
         }
-	}
-	public void println(final String s) {
+    }
 
-        if(JSApp.showOutput){
-		    System.out.println("JAVASCRIPT: " + s);
+    public void println(final String s) {
+
+        if (JSApp.showOutput) {
+            System.out.println("JAVASCRIPT: " + s);
         }
-        if(consoleArea != null) {
+        if (consoleArea != null) {
             consoleArea.append(s + '\n');
         }
-	}
+    }
 
-	public void show() {
+    public void show() {
 
-        if(JSApp.showOutput){
-		    System.out.println("console.show()");
+        if (JSApp.showOutput) {
+            System.out.println("console.show()");
         }
-        if(consoleDialog != null) {
+        if (consoleDialog != null) {
             consoleDialog.setVisible(true);
         }
-	}
+    }
 
-	public void clear() {
+    public void clear() {
 
-        if(JSApp.showOutput){
-		    System.out.println("console.clear()");
+        if (JSApp.showOutput) {
+            System.out.println("console.clear()");
         }
-        if(consoleArea != null) {
+        if (consoleArea != null) {
             consoleArea.setText(null);
             consoleArea.getCaret().setVisible(true);
         }
-	}
+    }
 
-	public void hide() {
+    public void hide() {
 
-        if(JSApp.showOutput){
-		    System.out.println("console.hide()");
+        if (JSApp.showOutput) {
+            System.out.println("console.hide()");
         }
-        if(consoleDialog != null) {
+        if (consoleDialog != null) {
             consoleDialog.setVisible(false);
         }
-	}
+    }
 }

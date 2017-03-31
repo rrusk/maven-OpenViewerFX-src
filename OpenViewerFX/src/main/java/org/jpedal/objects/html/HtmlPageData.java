@@ -34,7 +34,7 @@ package org.jpedal.objects.html;
 
 /**
  * General container for HTML metadata
- * 
+ *
  * @author markee
  */
 public class HtmlPageData {

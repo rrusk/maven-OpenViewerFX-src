@@ -34,6 +34,7 @@ package org.jpedal.io.security;
 
 import java.security.Key;
 import java.security.cert.Certificate;
+
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.crypto.BlockCipher;
@@ -50,14 +51,14 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.jpedal.exception.PdfSecurityException;
 import org.jpedal.utils.LogWriter;
 
-public class BouncyCastleDecryption implements BaseDecryption{
-    
+public class BouncyCastleDecryption implements BaseDecryption {
+
     @Override
     public byte[] v5Decrypt(final byte[] rawValue, final byte[] key) throws PdfSecurityException {
-        final int ELength= rawValue.length;
+        final int ELength = rawValue.length;
         final byte[] returnKey = new byte[ELength];
-        
-        try{
+
+        try {
 
             //setup Cipher
             final BlockCipher cbc = new CBCBlockCipher(new AESFastEngine());
@@ -65,22 +66,22 @@ public class BouncyCastleDecryption implements BaseDecryption{
 
             //translate bytes
             int nextBlockSize;
-            for(int i=0;i<ELength;i += nextBlockSize){
+            for (int i = 0; i < ELength; i += nextBlockSize) {
                 cbc.processBlock(rawValue, i, returnKey, i);
-                nextBlockSize=cbc.getBlockSize();
+                nextBlockSize = cbc.getBlockSize();
             }
-            
-        }catch(final Exception e){
-            throw new PdfSecurityException("Exception "+e.getMessage()+" with v5 encoding");
+
+        } catch (final Exception e) {
+            throw new PdfSecurityException("Exception " + e.getMessage() + " with v5 encoding");
         }
         return returnKey;
     }
-    
-    
+
+
     @Override
     public byte[] decodeAES(final byte[] encKey, final byte[] encData, final byte[] ivData)
             throws Exception {
-        
+
         final KeyParameter keyParam = new KeyParameter(encKey);
         final CipherParameters params = new ParametersWithIV(keyParam, ivData);
 
@@ -102,30 +103,30 @@ public class BouncyCastleDecryption implements BaseDecryption{
 
         // return string representation of decoded bytes
         return out;
-    }   
-    
-    
+    }
+
+
     @Override
     public byte[] readCertificate(final byte[][] recipients, final Certificate certificate, final Key key) {
-        
-        byte[] envelopedData=null;
 
-        final String provider="BC";
+        byte[] envelopedData = null;
+
+        final String provider = "BC";
         
         /*
          * loop through all and get data if match found
          */
         for (final byte[] recipient : recipients) {
-            
+
             try {
                 final CMSEnvelopedData recipientEnvelope = new CMSEnvelopedData(recipient);
-                
+
                 final Object[] recipientList = recipientEnvelope.getRecipientInfos().getRecipients().toArray();
                 final int listCount = recipientList.length;
-                
+
                 for (int ii = 0; ii < listCount; ii++) {
                     final RecipientInformation recipientInfo = (RecipientInformation) recipientList[ii];
-                    
+
                     if (recipientInfo.getRID().match(certificate)) {
                         envelopedData = recipientInfo.getContent(key, provider);
                         ii = listCount;
@@ -135,7 +136,7 @@ public class BouncyCastleDecryption implements BaseDecryption{
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
-        
+
         return envelopedData;
     }
 }

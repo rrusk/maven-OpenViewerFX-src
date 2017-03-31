@@ -32,7 +32,6 @@
  */
 
 
-
 package org.jpedal.function;
 
 import java.util.Arrays;
@@ -92,43 +91,43 @@ public class PostScriptCompiler {
     private static final int T_EBRACE = 125; //end brace
 
     private static final double radToDegrees = 180f / Math.PI;
-    private static final double toBase10=Math.log(10);
+    private static final double toBase10 = Math.log(10);
 
     private static final byte[] CHAR256 = {
-        //      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F,
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, // 0
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 1
-        1, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, // 2
-        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 2, 0, 2, 0, // 3
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 4
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, // 5
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 6
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, // 7
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 8
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 9
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // B
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // C
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // D
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // E
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // F    
+            //      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, // 0
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 1
+            1, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, // 2
+            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 2, 0, 2, 0, // 3
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 4
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, // 5
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 6
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, // 7
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 8
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 9
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // B
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // C
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // D
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // E
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // F
     };
 
     private final double[] dValues = new double[1000]; //hold default values
     private final int[] dTypes = new int[1000]; //hold default types
 
-    private final double[] cValues ;
-    private final int[] cTypes ;
+    private final double[] cValues;
+    private final int[] cTypes;
 
-    private int sp;//stream pointer
-    private int dp;//default pointer
-    private int cp;//cur list pointer
+    private int sp; //stream pointer
+    private int dp; //default pointer
+    private int cp; //cur list pointer
 
     private final Stack<Boolean> braces = new Stack<Boolean>();
 
     public PostScriptCompiler(final byte[] stream) {
         parseStream(stream);
-        cValues = new double[Math.max(20, dp+10)];
+        cValues = new double[Math.max(20, dp + 10)];
         cTypes = new int[cValues.length];
     }
 
@@ -175,7 +174,7 @@ public class PostScriptCompiler {
                 }
             }
         }
-       
+
     }
 
     private static int getCommand(final String s) {
@@ -299,7 +298,7 @@ public class PostScriptCompiler {
                 C_ADD();
                 break;
             case C_ATAN:
-                C_ATAN();                
+                C_ATAN();
                 break;
             case C_CEILING:
                 C_CEILING();
@@ -394,8 +393,8 @@ public class PostScriptCompiler {
             case C_XOR:
                 C_XOR();
                 break;
-            case C_IF:                
-                C_IF();                
+            case C_IF:
+                C_IF();
                 break;
             case C_IFELSE:
                 C_IFELSE();
@@ -416,7 +415,7 @@ public class PostScriptCompiler {
                 C_INDEX();
                 break;
             case C_ROLL:
-                C_ROLL();                
+                C_ROLL();
                 break;
         }
     }
@@ -450,7 +449,7 @@ public class PostScriptCompiler {
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_ADD() {
         final double[] first = popItem();
         final double[] second = popItem();
@@ -458,35 +457,35 @@ public class PostScriptCompiler {
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_CEILING() {
         final double[] first = popItem();
         cValues[cp] = Math.ceil(first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_COS_OR_SIN() {
         final double[] first = popItem();
         cValues[cp] = Math.sin(first[0] / radToDegrees);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_CVI() {
-        final double[] first = popItem();        
+        final double[] first = popItem();
         cValues[cp] = (int) first[0];
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_CVR() {
-        final double[] first = popItem();        
+        final double[] first = popItem();
         cValues[cp] = first[0];
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_DIV() {
         final double[] first = popItem();
         final double[] second = popItem();
@@ -494,106 +493,106 @@ public class PostScriptCompiler {
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
-    
+
+
     private void C_EXP() {
         final double[] first = popItem();
-        final double[] second = popItem();        
-        cValues[cp] = Math.pow(second[0],first[0]);
+        final double[] second = popItem();
+        cValues[cp] = Math.pow(second[0], first[0]);
         cTypes[cp] = (int) first[1];
     }
-    
-    
+
+
     private void C_FLOOR() {
         final double[] first = popItem();
         cValues[cp] = Math.floor(first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-        
+
     private void C_IDIV() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = ((int) second[0]) / ((int) first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
-    }   
-    
+    }
+
     private void C_LN() {
-        final double[] first = popItem();        
+        final double[] first = popItem();
         cValues[cp] = Math.log(first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
-    }    
-    
+    }
+
     private void C_LOG() {
-        final double[] first = popItem();        
-        cValues[cp] = Math.log(first[0])/toBase10;
+        final double[] first = popItem();
+        cValues[cp] = Math.log(first[0]) / toBase10;
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_MOD() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = ((int) second[0]) % ((int) first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-       
+
     private void C_MUL() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = first[0] * second[0];
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_NEG() {
-        final double[] first = popItem();        
+        final double[] first = popItem();
         cValues[cp] = -first[0];
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
-    
+
+
     private void C_SORT() {
-        final double[] first = popItem();        
+        final double[] first = popItem();
         cValues[cp] = Math.sqrt(first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_SUB() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = second[0] - first[0];
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_ROUND() {
-        final double[] first = popItem();        
+        final double[] first = popItem();
         cValues[cp] = Math.round(first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_TRUNCATE() {
-        final double[] first = popItem();        
-        cValues[cp] = (int)(first[0]);
+        final double[] first = popItem();
+        cValues[cp] = (int) (first[0]);
         cTypes[cp] = (int) first[1];
         cp++;
     }
-        
+
     private void C_AND() {
         final double[] first = popItem();
-        final double[] second = popItem();        
-        if(first[1] == T_NUMBER && second[1] == T_NUMBER){
-            cValues[cp] = ((int)second[0]) & ((int)first[0]);
+        final double[] second = popItem();
+        if (first[1] == T_NUMBER && second[1] == T_NUMBER) {
+            cValues[cp] = ((int) second[0]) & ((int) first[0]);
             cTypes[cp] = T_NUMBER;
-        }else{
-            cValues[cp] = first[0] == second[0] ? 1 : 0 ;
+        } else {
+            cValues[cp] = first[0] == second[0] ? 1 : 0;
             cTypes[cp] = T_BOOLEAN;
         }
         cp++;
@@ -601,42 +600,42 @@ public class PostScriptCompiler {
 
     private void C_BITSHIFT() {
         final double[] first = popItem();
-        final double[] second = popItem();        
-        cValues[cp] = ((int)second[0])<<((int)first[0]);
-        cTypes[cp] = (int)first[1];
+        final double[] second = popItem();
+        cValues[cp] = ((int) second[0]) << ((int) first[0]);
+        cTypes[cp] = (int) first[1];
         cp++;
     }
-     
+
     private void C_EQ() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = first[0] == second[0] ? 1 : 0;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_FALSE() {
         cValues[cp] = 0;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_GE() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = second[0] >= first[0] ? 1 : 0;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_GT() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = second[0] > first[0] ? 1 : 0;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_LE() {
         final double[] first = popItem();
         final double[] second = popItem();
@@ -644,68 +643,68 @@ public class PostScriptCompiler {
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_LT() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = second[0] < first[0] ? 1 : 0;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_NE() {
         final double[] first = popItem();
-        final double[] second = popItem();        
+        final double[] second = popItem();
         cValues[cp] = second[0] != first[0] ? 1 : 0;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-        
+
     private void C_NOT() {
         final double[] first = popItem();
-        if(first[1] == T_NUMBER){
-            cValues[cp] = ~(int)first[0];
-        }else{
+        if (first[1] == T_NUMBER) {
+            cValues[cp] = ~(int) first[0];
+        } else {
             cValues[cp] = first[0] != 1 ? 1 : 0;
         }
-        cTypes[cp] = (int)first[1];
+        cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_OR() {
         final double[] first = popItem();
-        final double[] second = popItem();        
-        if(first[1] == T_NUMBER && second[1] == T_NUMBER){
-            cValues[cp] = ((int)second[0]) | ((int)first[0]);
+        final double[] second = popItem();
+        if (first[1] == T_NUMBER && second[1] == T_NUMBER) {
+            cValues[cp] = ((int) second[0]) | ((int) first[0]);
             cTypes[cp] = T_NUMBER;
-        }else{
-            cValues[cp] = first[0]==1 || second[0]==1 ? 1 : 0 ;
+        } else {
+            cValues[cp] = first[0] == 1 || second[0] == 1 ? 1 : 0;
             cTypes[cp] = T_BOOLEAN;
         }
         cp++;
     }
-    
+
     private void C_TRUE() {
         cValues[cp] = 1;
         cTypes[cp] = T_BOOLEAN;
         cp++;
     }
-    
+
     private void C_XOR() {
         final double[] first = popItem();
         final double[] second = popItem();
-        cValues[cp] = ((int)second[0]) ^ ((int)first[0]);
-        if(first[1] == T_NUMBER && second[1] == T_NUMBER){
+        cValues[cp] = ((int) second[0]) ^ ((int) first[0]);
+        if (first[1] == T_NUMBER && second[1] == T_NUMBER) {
             cTypes[cp] = T_NUMBER;
-        }else{
+        } else {
             cTypes[cp] = T_BOOLEAN;
         }
         cp++;
     }
-    
+
     private void C_IF() {
         final int old = dp;
-        final double[] first = popItem();        
+        final double[] first = popItem();
         if (first[0] == 1) {
             while (dTypes[dp] != T_SBRACE && dp > 0) {
                 dp--;
@@ -715,58 +714,58 @@ public class PostScriptCompiler {
         }
         dp = old;
     }
-    
+
     private void C_IFELSE() {
         final int old = dp;
         final double[] first = popItem();
         //todo
         if (first[0] == 1) {
             int br = 0;
-            while(dp > 0){
+            while (dp > 0) {
                 final int cdp = dTypes[dp--];
-                if(cdp == T_SBRACE){
+                if (cdp == T_SBRACE) {
                     br++;
-                }else if(cdp == T_EBRACE){
+                } else if (cdp == T_EBRACE) {
                     br--;
                 }
-                if(cdp == T_SBRACE && br == 0){
+                if (cdp == T_SBRACE && br == 0) {
                     break;
                 }
             }
             final int end = dp;
             br = 0;
-            while(dp > 0){
+            while (dp > 0) {
                 final int cdp = dTypes[dp--];
-                if(cdp == T_SBRACE){
+                if (cdp == T_SBRACE) {
                     br++;
-                }else if(cdp == T_EBRACE){
+                } else if (cdp == T_EBRACE) {
                     br--;
                 }
-                if(cdp == T_SBRACE && br == 0){
+                if (cdp == T_SBRACE && br == 0) {
                     break;
                 }
             }
-            dp+=2;
+            dp += 2;
             executeInterval(end);
         } else {
             int br = 0;
-            while(dp > 0){
+            while (dp > 0) {
                 final int cdp = dTypes[dp--];
-                if(cdp == T_SBRACE){
+                if (cdp == T_SBRACE) {
                     br++;
-                }else if(cdp == T_EBRACE){
+                } else if (cdp == T_EBRACE) {
                     br--;
                 }
-                if(cdp == T_SBRACE && br == 0){
+                if (cdp == T_SBRACE && br == 0) {
                     break;
                 }
             }
-            dp+=2;
+            dp += 2;
             executeInterval(old);
         }
         dp = old;
     }
-    
+
     private void C_COPY() {
         final double[] first = popItem();
         final int n;
@@ -778,57 +777,57 @@ public class PostScriptCompiler {
             System.arraycopy(cTypes, cValues.length - n, types, 0, n);
             for (int i = 0; i < n; i++) {
                 cValues[cp] = values[0];
-                cTypes[cp] =  types[1];
+                cTypes[cp] = types[1];
                 cp++;
             }
         }
     }
-    
+
     private void C_EXCH() {
         final double[] first = popItem();
         final double[] second = popItem();
         cValues[cp] = first[0];
-        cTypes[cp] = (int)first[1];
+        cTypes[cp] = (int) first[1];
         cp++;
         cValues[cp] = second[0];
-        cTypes[cp] = (int)second[1];
+        cTypes[cp] = (int) second[1];
         cp++;
     }
-    
+
     private void C_DUP() {
         final double[] first = popItem();
         cValues[cp] = first[0];
-        cTypes[cp] = (int)first[1];
+        cTypes[cp] = (int) first[1];
         cp++;
         cValues[cp] = first[0];
-        cTypes[cp] = (int)first[1];
+        cTypes[cp] = (int) first[1];
         cp++;
     }
-    
+
     private void C_INDEX() {
         final double[] first = popItem();
-        final int n = (int)first[0];
+        final int n = (int) first[0];
         cValues[cp] = cValues[cp - 1 - n];
         cTypes[cp] = cTypes[cp - 1 - n];
         cp++;
     }
-    
+
     private void C_ROLL() {
-        int j = (int)(popItem()[0]);
-        final int n = (int)(popItem()[0]);
+        int j = (int) (popItem()[0]);
+        final int n = (int) (popItem()[0]);
         if (n == 0 || j == 0 || n > cp) {
             //should not roll in these cases
             return;
         }
         final LinkedList<Double> listV = new LinkedList<Double>();
         final LinkedList<Integer> listT = new LinkedList<Integer>();
-        
+
         for (int i = 0; i < n; i++) {
             final double[] dd = popItem();
             listV.add(dd[0]);
-            listT.add((int)dd[1]);
+            listT.add((int) dd[1]);
         }
-        
+
         if (j > 0) {
             for (int i = 0; i < j; i++) {
                 final double v = listV.removeFirst();
@@ -851,7 +850,7 @@ public class PostScriptCompiler {
             cp++;
         }
     }
-    
+
     private double[] popItem() {
         cp--;
         return new double[]{cValues[cp], cTypes[cp]};
@@ -864,7 +863,7 @@ public class PostScriptCompiler {
         dp = 0;
 
         for (int i = 0; i < inp.length; i++) {
-            cValues[i] = inp[i];           
+            cValues[i] = inp[i];
             cTypes[i] = T_NUMBER;
         }
 
@@ -873,8 +872,8 @@ public class PostScriptCompiler {
         return cValues;
 
     }
-    
-    private void executeInterval(final int maxDP){
+
+    private void executeInterval(final int maxDP) {
         int type;
         double value;
         while (dp < maxDP) {
@@ -896,11 +895,11 @@ public class PostScriptCompiler {
                     while (buff != 0 && dp < maxDP) {
                         dp++;
                         final int t = dTypes[dp];
-                        if(t == T_SBRACE){
+                        if (t == T_SBRACE) {
                             buff++;
-                        }else if(t == T_EBRACE){
+                        } else if (t == T_EBRACE) {
                             buff--;
-                        }                        
+                        }
                     }
                     break;
                 default:

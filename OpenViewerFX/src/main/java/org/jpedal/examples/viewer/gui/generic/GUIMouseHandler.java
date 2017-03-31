@@ -32,14 +32,16 @@
  */
 package org.jpedal.examples.viewer.gui.generic;
 
-/**abstract level of mouse support in Viewer*/
+/**
+ * abstract level of mouse support in Viewer
+ */
 public interface GUIMouseHandler {
 
-	void setupMouse();
+    void setupMouse();
 
     void dispose();
-	//void updateRectangle();
+    //void updateRectangle();
 
-	//void setupExtractor();
-	
+    //void setupExtractor();
+
 }

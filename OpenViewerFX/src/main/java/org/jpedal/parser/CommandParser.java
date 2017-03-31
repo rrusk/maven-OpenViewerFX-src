@@ -41,125 +41,131 @@ public class CommandParser {
 
     private final byte[] characterStream;
 
-    private int commandID=-1;
+    private int commandID = -1;
 
-    private static final int[] prefixes={60,40}; //important that [ comes before (  '<'=60 '('=40
+    private static final int[] prefixes = {60, 40}; //important that [ comes before (  '<'=60 '('=40
 
-    private static final int[] suffixes={62,41}; //'>'=62 ')'=41
+    private static final int[] suffixes = {62, 41}; //'>'=62 ')'=41
 
-    private static final int[][] intValues={
-                {0,100000,200000,300000,400000,500000,600000,700000,800000,900000},
-                {0,10000,20000,30000,40000,50000,60000,70000,80000,90000},
-                {0,1000,2000,3000,4000,5000,6000,7000,8000,9000},
-                {0,100,200,300,400,500,600,700,800,900},
-                {0,10,20,30,40,50,60,70,80,90},
-                {0,1,2,3,4,5,6,7,8,9}};
+    private static final int[][] intValues = {
+            {0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000},
+            {0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000},
+            {0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000},
+            {0, 100, 200, 300, 400, 500, 600, 700, 800, 900},
+            {0, 10, 20, 30, 40, 50, 60, 70, 80, 90},
+            {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
 
-    /**maximum ops*/
-    private static final int MAXOPS=50;
+    /**
+     * maximum ops
+     */
+    private static final int MAXOPS = 50;
 
-    /**lookup table for operands on commands*/
-    private int[] opStart= new int[MAXOPS];
-    private int[] opEnd= new int[MAXOPS];
+    /**
+     * lookup table for operands on commands
+     */
+    private int[] opStart = new int[MAXOPS];
+    private int[] opEnd = new int[MAXOPS];
 
     private int operandCount;
 
-    /**current op*/
+    /**
+     * current op
+     */
     private int currentOp;
 
     int streamSize;
 
 
     public CommandParser(final byte[] characterStr) {
-        this.characterStream=characterStr;
+        this.characterStream = characterStr;
 
-        streamSize=characterStr.length;
+        streamSize = characterStr.length;
 
     }
 
 
     int getCommandValues(int dataPointer, final int tokenNumber) {
 
-        final int count=prefixes.length;
-        int start,end=0;
+        final int count = prefixes.length;
+        int start, end = 0;
 
-        commandID=-1;
-        final int sLen=characterStream.length;
+        commandID = -1;
+        final int sLen = characterStream.length;
 
-        dataPointer=StreamReaderUtils.skipSpacesOrOtherCharacter(characterStream, dataPointer, 0);
-        
-        if(dataPointer==streamSize) //allow for end of stream
+        dataPointer = StreamReaderUtils.skipSpacesOrOtherCharacter(characterStream, dataPointer, 0);
+
+        if (dataPointer == streamSize) //allow for end of stream
         {
             return dataPointer;
         }
 
         //lose any comments in stream which start %
-        while(dataPointer<streamSize && characterStream[dataPointer]==37){
-            dataPointer=StreamReaderUtils.skipComment(characterStream,dataPointer);
+        while (dataPointer < streamSize && characterStream[dataPointer] == 37) {
+            dataPointer = StreamReaderUtils.skipComment(characterStream, dataPointer);
         }
 
-        if(dataPointer>=streamSize){ //allow for end of stream
+        if (dataPointer >= streamSize) { //allow for end of stream
             return dataPointer;
         }
 
-        int current =characterStream[dataPointer];
+        int current = characterStream[dataPointer];
 
         // read in value (note several options)
-        boolean matchFound=false;
-        final int type=getType(current,  dataPointer);
+        boolean matchFound = false;
+        final int type = getType(current, dataPointer);
 
-        if(type==3){ //option - its an aphabetical so may be command or operand values
+        if (type == 3) { //option - its an aphabetical so may be command or operand values
 
-            start=dataPointer;
+            start = dataPointer;
 
-            while(true){ //read next valid char
+            while (true) { //read next valid char
 
                 dataPointer++;
-                if((dataPointer)>=sLen) //trap for end of stream
+                if ((dataPointer) >= sLen) //trap for end of stream
                 {
                     break;
                 }
 
                 current = characterStream[dataPointer];
                 //return,space,( / or [
-                if (current == 13 || current == 10 || current == 32 || current == 40 || current == 47 || current == 91 || current == 9 || current=='<') {
+                if (current == 13 || current == 10 || current == 32 || current == 40 || current == 47 || current == 91 || current == 9 || current == '<') {
                     break;
                 }
 
             }
 
-            end=dataPointer-1;
+            end = dataPointer - 1;
 
-            if(end>=sLen) {
+            if (end >= sLen) {
                 return end;
             }
 
             //move back if ends with / or [
-            final int endC=characterStream[end];
-            if(endC==47 || endC==91 || endC=='<' || endC=='%') {
+            final int endC = characterStream[end];
+            if (endC == 47 || endC == 91 || endC == '<' || endC == '%') {
                 end--;
             }
 
             //see if command
-            commandID=-1;
-            if(end-start<3){ //no command over 3 chars long
+            commandID = -1;
+            if (end - start < 3) { //no command over 3 chars long
                 //@turn key into ID.
                 //convert token to int
-                int key=0,x=0;
-                for(int i2=end;i2>start-1;i2--){
-                    key += (characterStream[i2]<<x);
+                int key = 0, x = 0;
+                for (int i2 = end; i2 > start - 1; i2--) {
+                    key += (characterStream[i2] << x);
                     x += 8;
                 }
-                commandID=Cmd.getCommandID(key);
+                commandID = Cmd.getCommandID(key);
             }
 
             // if command execute otherwise add to stack
-            if (commandID==-1) {
+            if (commandID == -1) {
 
-                opStart[currentOp]=start;
-                opEnd[currentOp]=end;
+                opStart[currentOp] = start;
+                opEnd[currentOp] = end;
 
-                if(PdfStreamDecoder.showCommands) {
+                if (PdfStreamDecoder.showCommands) {
                     System.out.println(PdfStreamDecoder.indent + generateOpAsString(currentOp, false) + " (value) " + tokenNumber);
                 }
 
@@ -168,19 +174,19 @@ public class CommandParser {
                     currentOp = 0;
                 }
                 operandCount++;
-            }else{
+            } else {
 
                 //showCommands=(tokenNumber>6300);
                 //this makes rest of page disappear
-               // if(tokenNumber>22)
-               	//return streamSize;
+                // if(tokenNumber>22)
+                //return streamSize;
 
-                if(PdfStreamDecoder.showCommands) {
+                if (PdfStreamDecoder.showCommands) {
                     System.out.println(PdfStreamDecoder.indent + Cmd.getCommandAsString(commandID) + " (Command) " + tokenNumber);
                 }
-                
+
                 //reorder values so work
-                if(operandCount>0){
+                if (operandCount > 0) {
                     reverseOperands();
                 }
 
@@ -188,22 +194,22 @@ public class CommandParser {
                 return -dataPointer;
 
             }
-        }else if(type!=4){
+        } else if (type != 4) {
 
-            start=dataPointer;
-           
+            start = dataPointer;
+
             //option  << values >>
             //option  [value] and [value (may have spaces and brackets)]
-            if(type==1 || type==2){
+            if (type == 1 || type == 2) {
 
-                boolean inStream=false;
-                matchFound=true;
+                boolean inStream = false;
+                matchFound = true;
 
-                int last=32;  // ' '=32
+                int last = 32;  // ' '=32
 
-                while(true){ //read rest of chars
+                while (true) { //read rest of chars
 
-                    if(last==92 && current==92) //allow for \\  \\=92
+                    if (last == 92 && current == 92) //allow for \\  \\=92
                     {
                         last = 120;  //'x'=120
                     } else {
@@ -212,67 +218,67 @@ public class CommandParser {
 
                     dataPointer++; //roll on counter
 
-                    if(dataPointer==sLen) //allow for end of stream
+                    if (dataPointer == sLen) //allow for end of stream
                     {
                         break;
                     }
 
                     //read next valid char, converting CR to space
                     current = characterStream[dataPointer];
-                    if(current==13 || current==10 || current==9) {
+                    if (current == 13 || current == 10 || current == 9) {
                         current = 32;
                     }
 
                     //exit at end
-                    boolean isBreak=false;
+                    boolean isBreak = false;
 
 
-                    if(current==62 && last==62 &&(type==1))  //'>'=62
+                    if (current == 62 && last == 62 && (type == 1))  //'>'=62
                     {
-                        if(characterStream[dataPointer+1]=='>'){ //all fpr >> and >
+                        if (characterStream[dataPointer + 1] == '>') { //all fpr >> and >
                             dataPointer++; //roll on in case no gap (ie case 25436)
                         }
                         isBreak = true;
                     }
 
-                    if(type==2){
+                    if (type == 2) {
                         //stream flags
-                        if((current==40)&&(last!=92)) 	//'('=40 '\\'=92
+                        if ((current == 40) && (last != 92))    //'('=40 '\\'=92
                         {
                             inStream = true;
-                        } else if((current==41)&&(last!=92)) {
+                        } else if ((current == 41) && (last != 92)) {
                             inStream = false;
                         }
 
                         //exit at end
-                        if (!inStream && current==93 && last != 92)	//']'=93
+                        if (!inStream && current == 93 && last != 92)    //']'=93
                         {
                             isBreak = true;
                         }
                     }
 
-                    if(isBreak) {
+                    if (isBreak) {
                         break;
                     }
                 }
 
-                end=dataPointer;
+                end = dataPointer;
             }
 
-            if(!matchFound){ //option 3 other braces
+            if (!matchFound) { //option 3 other braces
 
-                int last=32;
-                for(int startChars=0;startChars<count;startChars++){
+                int last = 32;
+                for (int startChars = 0; startChars < count; startChars++) {
 
-                    if(current==prefixes[startChars]){
-                        matchFound=true;
+                    if (current == prefixes[startChars]) {
+                        matchFound = true;
 
-                        start=dataPointer;
+                        start = dataPointer;
 
-                        int numOfPrefixs=0;//counts the brackets when inside a text stream
-                        while(true){ //read rest of chars
+                        int numOfPrefixs = 0; //counts the brackets when inside a text stream
+                        while (true) { //read rest of chars
 
-                            if((last==92) &&(current==92)) //allow for \\ '\\'=92
+                            if ((last == 92) && (current == 92)) //allow for \\ '\\'=92
                             {
                                 last = 120; //'x'=120
                             } else {
@@ -280,74 +286,74 @@ public class CommandParser {
                             }
                             dataPointer++; //roll on counter
 
-                            if(dataPointer==sLen) {
+                            if (dataPointer == sLen) {
                                 break;
                             }
-                            current =characterStream[dataPointer]; //read next valid char, converting CR to space
-                            if(current==13 || current==10 || current==9) {
+                            current = characterStream[dataPointer]; //read next valid char, converting CR to space
+                            if (current == 13 || current == 10 || current == 9) {
                                 current = 32;
                             }
 
-                            if(current ==prefixes[startChars] && last!=92) // '\\'=92
+                            if (current == prefixes[startChars] && last != 92) // '\\'=92
                             {
                                 numOfPrefixs++;
                             }
 
-                            if ((current == suffixes[startChars])&& (last != 92)){ //exit at end  '\\'=92
-                                if(numOfPrefixs==0) {
+                            if ((current == suffixes[startChars]) && (last != 92)) { //exit at end  '\\'=92
+                                if (numOfPrefixs == 0) {
                                     break;
-                                } else{
+                                } else {
                                     numOfPrefixs--;
 
                                 }
                             }
                         }
-                        startChars=count; //exit loop after match
+                        startChars = count; //exit loop after match
                     }
                 }
-                end=dataPointer;
+                end = dataPointer;
             }
 
             //option 2 -its a value followed by a deliminator (CR,space,/)
-            if(!matchFound){
+            if (!matchFound) {
 
-                start=dataPointer;
-                final int firstChar=characterStream[start];
+                start = dataPointer;
+                final int firstChar = characterStream[start];
 
-                while(true){ //read next valid char
+                while (true) { //read next valid char
                     dataPointer++;
-                    if(dataPointer==sLen) //trap for end of stream
+                    if (dataPointer == sLen) //trap for end of stream
                     {
                         break;
                     }
 
                     current = characterStream[dataPointer];
-                    if (current == 13 || current == 10 || current == 32 || current == 40 || current == 47 || current == 91 || current==9 || (firstChar=='/' && current=='<'))
-                        //							// '('=40	'/'=47  '['=91
+                    if (current == 13 || current == 10 || current == 32 || current == 40 || current == 47 || current == 91 || current == 9 || (firstChar == '/' && current == '<'))
+                    //							// '('=40	'/'=47  '['=91
                     {
                         break;
                     }
 
                 }
 
-                end=dataPointer;
+                end = dataPointer;
 
             }
 
-            if(end<characterStream.length){
-                final int next=characterStream[end];
-                if(next==47 || next==91) {
+            if (end < characterStream.length) {
+                final int next = characterStream[end];
+                if (next == 47 || next == 91) {
                     end--;
                 }
             }
 
-            opStart[currentOp]=start;
-            opEnd[currentOp]=end;
+            opStart[currentOp] = start;
+            opEnd[currentOp] = end;
 
             if (PdfStreamDecoder.showCommands) {
                 System.out.println(PdfStreamDecoder.indent + generateOpAsString(currentOp, false) + "<<----");
             }
-            
+
             currentOp++;
             if (currentOp == MAXOPS) {
                 currentOp = 0;
@@ -357,10 +363,10 @@ public class CommandParser {
         }
 
         //increment pointer
-        if(dataPointer < streamSize){
+        if (dataPointer < streamSize) {
 
-            final int nextChar=characterStream[dataPointer];
-            if(nextChar != 47 && nextChar != 40 && nextChar!= 91  && nextChar!= '<'){
+            final int nextChar = characterStream[dataPointer];
+            if (nextChar != 47 && nextChar != 40 && nextChar != 91 && nextChar != '<') {
                 dataPointer++;
             }
         }
@@ -369,25 +375,25 @@ public class CommandParser {
     }
 
     private void reverseOperands() {
-        final int[] orderedOpStart=new int[MAXOPS];
-        final int[] orderedOpEnd=new int[MAXOPS];
-        int opid=0;
-        for(int jj=this.currentOp-1;jj>-1;jj--){
+        final int[] orderedOpStart = new int[MAXOPS];
+        final int[] orderedOpEnd = new int[MAXOPS];
+        int opid = 0;
+        for (int jj = this.currentOp - 1; jj > -1; jj--) {
 
-            orderedOpStart[opid]=opStart[jj];
-            orderedOpEnd[opid]=opEnd[jj];
-            if(opid==operandCount) {
+            orderedOpStart[opid] = opStart[jj];
+            orderedOpEnd[opid] = opEnd[jj];
+            if (opid == operandCount) {
                 jj = -1;
             }
             opid++;
         }
-        if(opid==operandCount){
+        if (opid == operandCount) {
             currentOp--; //decrease to make loop comparison faster
-            for(int jj= MAXOPS-1;jj>currentOp;jj--){
+            for (int jj = MAXOPS - 1; jj > currentOp; jj--) {
 
-                orderedOpStart[opid]=opStart[jj];
-                orderedOpEnd[opid]=opEnd[jj];
-                if(opid==operandCount) {
+                orderedOpStart[opid] = opStart[jj];
+                orderedOpEnd[opid] = opEnd[jj];
+                if (opid == operandCount) {
                     jj = currentOp;
                 }
                 opid++;
@@ -395,8 +401,8 @@ public class CommandParser {
             currentOp++;
         }
 
-        opStart=orderedOpStart;
-        opEnd=orderedOpEnd;
+        opStart = orderedOpStart;
+        opEnd = orderedOpEnd;
     }
 
     public int getCommandID() {
@@ -406,23 +412,23 @@ public class CommandParser {
 
     private int getType(final int current, final int dataPointer) {
 
-        int type=0;
+        int type = 0;
 
-        if(current==60 && characterStream[dataPointer+1]==60) //look for <<
+        if (current == 60 && characterStream[dataPointer + 1] == 60) //look for <<
         {
             type = 1;
-        } else if(current==32) {
+        } else if (current == 32) {
             type = 4;
-        } else if(current==91) //[
+        } else if (current == 91) //[
         {
             type = 2;
-        } else if(current>=97 && current<=122) //lower case alphabetical a-z
+        } else if (current >= 97 && current <= 122) //lower case alphabetical a-z
         {
             type = 3;
-        } else if(current>=65 && current<=90) //upper case alphabetical A-Z
+        } else if (current >= 65 && current <= 90) //upper case alphabetical A-Z
         {
             type = 3;
-        } else if(current==39 || current==34) //not forgetting the non-alphabetical commands '\'-'\"'/*
+        } else if (current == 39 || current == 34) //not forgetting the non-alphabetical commands '\'-'\"'/*
         {
             type = 3;
         }
@@ -433,50 +439,50 @@ public class CommandParser {
 
     /**
      * convert Op value to String
-     * @param p is current op number
+     *
+     * @param p               is current op number
      * @param loseSlashPrefix
-     * @return 
+     * @return
      */
-public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
+    public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
 
-        final byte[] dataStream=characterStream;
+        final byte[] dataStream = characterStream;
 
         final String s;
 
-        int start=this.opStart[p];
+        int start = this.opStart[p];
 
         //remove / on keys
-        if(loseSlashPrefix && dataStream[start]==47) {
+        if (loseSlashPrefix && dataStream[start] == 47) {
             start++;
         }
 
-        int end=this.opEnd[p];
+        int end = this.opEnd[p];
 
         //lose spaces or returns at end
-        while((dataStream[end]==32)||(dataStream[end]==13)||(dataStream[end]==10)) {
+        while ((dataStream[end] == 32) || (dataStream[end] == 13) || (dataStream[end] == 10)) {
             end--;
         }
 
-        final int count=end-start+1;
+        final int count = end - start + 1;
 
         //discount duplicate spaces
-        int spaces=0;
-        for(int ii=0;ii<count;ii++){
-            if((ii>0)&&((dataStream[start+ii]==32)||(dataStream[start+ii]==13)||(dataStream[start+ii]==10))&&
-                    ((dataStream[start+ii-1]==32)||(dataStream[start+ii-1]==13)||(dataStream[start+ii-1]==10))) {
+        int spaces = 0;
+        for (int ii = 0; ii < count; ii++) {
+            if ((ii > 0) && ((dataStream[start + ii] == 32) || (dataStream[start + ii] == 13) || (dataStream[start + ii] == 10)) &&
+                    ((dataStream[start + ii - 1] == 32) || (dataStream[start + ii - 1] == 13) || (dataStream[start + ii - 1] == 10))) {
                 spaces++;
             }
         }
 
-        final char[] charString=new char[count-spaces];
-        int pos=0;
+        final char[] charString = new char[count - spaces];
+        int pos = 0;
 
-        for(int ii=0;ii<count;ii++){
-            if((ii>0)&&((dataStream[start+ii]==32)||(dataStream[start+ii]==13)||(dataStream[start+ii]==10))&&
-                    ((dataStream[start+ii-1]==32)||(dataStream[start+ii-1]==13)||(dataStream[start+ii-1]==10)))
-            {
-            }else{
-                if((dataStream[start+ii]==10)||(dataStream[start+ii]==13)) {
+        for (int ii = 0; ii < count; ii++) {
+            if ((ii > 0) && ((dataStream[start + ii] == 32) || (dataStream[start + ii] == 13) || (dataStream[start + ii] == 10)) &&
+                    ((dataStream[start + ii - 1] == 32) || (dataStream[start + ii - 1] == 13) || (dataStream[start + ii - 1] == 10))) {
+            } else {
+                if ((dataStream[start + ii] == 10) || (dataStream[start + ii] == 13)) {
                     charString[pos] = ' ';
                 } else {
                     charString[pos] = (char) dataStream[start + ii];
@@ -485,65 +491,65 @@ public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
             }
         }
 
-        s=String.copyValueOf(charString);
+        s = String.copyValueOf(charString);
 
         return s;
 
     }
 
 
-    public final float parseFloat(final int id){
+    public final float parseFloat(final int id) {
 
-        final byte[] stream=characterStream;
+        final byte[] stream = characterStream;
 
         final float f;
 
-        final int start=opStart[id];
-        final int charCount=opEnd[id]-start;
+        final int start = opStart[id];
+        final int charCount = opEnd[id] - start;
 
-        int floatptr=charCount,intStart=0;
+        int floatptr = charCount, intStart = 0;
 
-        boolean isMinus=false;
+        boolean isMinus = false;
         //hand optimised float code
         //find decimal point
-        for(int j=charCount-1;j>-1;j--){
-            if(stream[start+j]==46){ //'.'=46
-                floatptr=j;
+        for (int j = charCount - 1; j > -1; j--) {
+            if (stream[start + j] == 46) { //'.'=46
+                floatptr = j;
                 break;
             }
         }
 
-        int intChars=floatptr;
+        int intChars = floatptr;
         //allow for minus
-        if(stream[start]==43){ //'+'=43
+        if (stream[start] == 43) { //'+'=43
             intChars--;
             intStart++;
-        }else if(stream[start]==45){ //'-'=45
+        } else if (stream[start] == 45) { //'-'=45
             //intChars--;
             intStart++;
-            isMinus=true;
+            isMinus = true;
         }
 
         //optimisations
-        final int intNumbers=intChars-intStart;
-        int decNumbers=charCount-floatptr;
+        final int intNumbers = intChars - intStart;
+        int decNumbers = charCount - floatptr;
 
-        if(intNumbers>3 || decNumbers>11){ //non-optimised to cover others (tiny decimals on big scaling can add up to a big diff)
-            isMinus=false;
-            
-            f=Float.parseFloat(this.generateOpAsString(id, false));
-            
-        }else{
+        if (intNumbers > 3 || decNumbers > 11) { //non-optimised to cover others (tiny decimals on big scaling can add up to a big diff)
+            isMinus = false;
 
-            if(decNumbers>6){ //old code used this accuracy so kept to avoid lots of minor changes
-                decNumbers=6;
+            f = Float.parseFloat(this.generateOpAsString(id, false));
+
+        } else {
+
+            if (decNumbers > 6) { //old code used this accuracy so kept to avoid lots of minor changes
+                decNumbers = 6;
             }
 
-           f = NumberUtils.convertFloatFromStream(stream, start+intStart, start+floatptr, intNumbers, decNumbers);
+            f = NumberUtils.convertFloatFromStream(stream, start + intStart, start + floatptr, intNumbers, decNumbers);
 
         }
 
-        if(isMinus) {
+        if (isMinus) {
             return -f;
         } else {
             return f;
@@ -574,31 +580,31 @@ public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
         int startPtr, endPtr;
         final ArrayList<Float> values = new ArrayList<Float>();
         for (int chars = start + 1; chars < end; chars++) {
-            
+
             char c = (char) characterStream[chars];
-            
+
             //gap
             while (c != '.' && c != '-' && (c < '0' || c > '9')) {
                 chars++;
                 c = (char) characterStream[chars];
             }
-            
+
             startPtr = chars;
-            
+
             //number
             while (c == '.' || c == '-' || (c >= '0' && c <= '9')) {
                 chars++;
                 c = (char) characterStream[chars];
             }
-            
+
             endPtr = chars;
-            
+
             count++;
-            
+
             values.add(NumberUtils.parseFloat(startPtr, endPtr - startPtr, characterStream));
-            
+
         }
-        
+
         final float[] op = new float[count];
         for (int i = 0; i < count; i++) {
             op[i] = (values.get(i));
@@ -608,62 +614,62 @@ public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
 
     public String[] getValuesAsString() {
 
-        final String[] op=new String[operandCount];
-        for(int i=0;i<operandCount;i++) {
+        final String[] op = new String[operandCount];
+        for (int i = 0; i < operandCount; i++) {
             op[i] = generateOpAsString(i, true);
         }
         return op;
     }
 
 
-    public final int parseInt(){
+    public final int parseInt() {
 
-        final int start=opStart[0];
-        final int end =this.opEnd[0];
+        final int start = opStart[0];
+        final int end = this.opEnd[0];
 
-        final byte[] stream=characterStream;
+        final byte[] stream = characterStream;
 
-        int number=0;
-        final int id=0;
+        int number = 0;
+        final int id = 0;
 
-        final int charCount= end -start;
+        final int charCount = end - start;
 
-        int intStart=0;
-        boolean isMinus=false;
+        int intStart = 0;
+        boolean isMinus = false;
 
 
-        int intChars=charCount;
+        int intChars = charCount;
         //allow for minus
-        if(stream[start]==43){ //'+'=43
+        if (stream[start] == 43) { //'+'=43
             intChars--;
             intStart++;
-        }else if(stream[start]==45){ //'-'=45
+        } else if (stream[start] == 45) { //'-'=45
             //intChars--;
             intStart++;
-            isMinus=true;
+            isMinus = true;
         }
 
         //optimisations
-        final int intNumbers=intChars-intStart;
+        final int intNumbers = intChars - intStart;
 
-        if((intNumbers>6)){ //non-optimised to cover others
-            isMinus=false;
-            number=Integer.parseInt(generateOpAsString(id, false));
+        if ((intNumbers > 6)) { //non-optimised to cover others
+            isMinus = false;
+            number = Integer.parseInt(generateOpAsString(id, false));
 
-        }else{ //optimised lookup version
+        } else { //optimised lookup version
 
             int c;
 
-            for(int jj=5;jj>-1;jj--){
-                if(intNumbers>jj){
-                    c=stream[start+intStart]-48;
-                    number += intValues[5-jj][c];
+            for (int jj = 5; jj > -1; jj--) {
+                if (intNumbers > jj) {
+                    c = stream[start + intStart] - 48;
+                    number += intValues[5 - jj][c];
                     intStart++;
                 }
             }
         }
 
-        if(isMinus) {
+        if (isMinus) {
             return -number;
         } else {
             return number;
@@ -671,10 +677,9 @@ public String generateOpAsString(final int p, final boolean loseSlashPrefix) {
     }
 
 
-
     public void reset() {
-        currentOp=0;
-        operandCount=0;
+        currentOp = 0;
+        operandCount = 0;
     }
 
     public int getOperandCount() {

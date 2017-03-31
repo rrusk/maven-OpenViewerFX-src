@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -50,7 +51,7 @@ import org.jpedal.utils.Messages;
  * of the document which adds a level of security.
  * It uses itext function encrypt() to achieve this.
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class Security {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
@@ -62,7 +63,7 @@ public class Security {
             } else {
                 //get values from user
                 final EncryptPDFDocument encryptPage = new EncryptPDFDocument(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int encrypt = encryptPage.display((Component)currentGUI.getFrame(), "Standard Security");
+                final int encrypt = encryptPage.display((Component) currentGUI.getFrame(), "Standard Security");
 
                 //get parameters and call if YES
                 if (encrypt == JOptionPane.OK_OPTION) {

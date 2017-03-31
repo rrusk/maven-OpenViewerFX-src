@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.gui.javafx;
 
 import java.util.Iterator;
 import java.util.Map;
+
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
@@ -46,125 +47,139 @@ import org.jpedal.examples.viewer.gui.generic.GUILayersPanel;
 import org.jpedal.objects.layers.PdfLayerList;
 
 /**
- *
- * @author Simon
+ * Interface class to display PDF layer data.
  */
 public class JavaFXLayersPanel extends Tab implements GUILayersPanel {
     private final BorderPane content;
     private final TreeItem<String> metaDataRoot;
     private final TreeView<String> layersTree;
-    
+
+    /**
+     * An implementation of GUILayersPanel.
+     * <p>
+     * This class is an extension of JPanel to display layer information from a PDF in the viewer.
+     */
     public JavaFXLayersPanel() {
         final TreeView<String> metaDataTree = new TreeView<String>();
         content = new BorderPane();
         layersTree = new TreeView<String>();
-        metaDataRoot=new TreeItem<String>("Info");
-        
+        metaDataRoot = new TreeItem<String>("Info");
+
         // setup meta data view
         metaDataTree.setRoot(metaDataRoot);
         metaDataTree.setShowRoot(true);
         metaDataTree.setTooltip(new Tooltip("Double click to see any metadata"));
         metaDataTree.setPrefHeight(60);
-        
+
         // Use a custom callback to determine the style of the tree item
         layersTree.setCellFactory(new Callback<TreeView<String>, TreeCell<String>>() {
-            @Override 
+            @Override
             public TreeCell<String> call(final TreeView<String> param) {
                 return new LayersCell();
             }
         });
-        
+
         layersTree.setShowRoot(true);
 
         content.setTop(metaDataTree);
         content.setCenter(layersTree);
-        
+
         setContent(content);
     }
-    
+
+    /**
+     * Method to reinitialise the layer panels contents for the current page.
+     * This method is called by the Viewer when the page is changed.
+     *
+     * @param layersObject PdfLayerList containing the layer data to be loaded
+     * @param decode_pdf   PdfDecoderInt used for the current PDF
+     * @param scrollPane   Object representing the scrollpane used in displaying the PDF in the viewer
+     * @param currentPage  int value representing the current page number
+     */
     @Override
     public void reinitialise(final PdfLayerList layersObject, final PdfDecoderInt decode_pdf, final Object scrollPane, final int currentPage) {
 
         metaDataRoot.getChildren().clear();
         layersTree.setRoot(null);
-        
+
         final Map<String, String> metaData = layersObject.getMetaData();
-        
-        final Iterator<String> metaDataKeys=metaData.keySet().iterator();
+
+        final Iterator<String> metaDataKeys = metaData.keySet().iterator();
         Object nextKey;
         String value;
-        while(metaDataKeys.hasNext()){
+        while (metaDataKeys.hasNext()) {
 
-            nextKey=metaDataKeys.next();
-            value=metaData.get(nextKey);
-            metaDataRoot.getChildren().add(new TreeItem<String>(nextKey+"="+value));
+            nextKey = metaDataKeys.next();
+            value = metaData.get(nextKey);
+            metaDataRoot.getChildren().add(new TreeItem<String>(nextKey + "=" + value));
         }
-        
-        final Object[] layerNames=layersObject.getDisplayTree();
-        if(layerNames != null){
+
+        final Object[] layerNames = layersObject.getDisplayTree();
+        if (layerNames != null) {
             final TreeItem<String> layersRoot = new TreeItem<String>("Layers");
             addLayersToTree(layerNames, layersRoot, true, layersObject);
-            
+
             // Attach to the root node an event handler which handles checked events
             // from nodes lower down the tree
-            layersRoot.addEventHandler(CheckBoxTreeItem.<String>checkBoxSelectionChangedEvent()
-                    ,new EventHandler<CheckBoxTreeItem.TreeModificationEvent<String>>() {
-                @Override
-                public void handle(final CheckBoxTreeItem.TreeModificationEvent<String> t) {
-                    
-                    final CheckBoxTreeItem<String> node = t.getTreeItem();
-                    
-                    final StringBuilder rawName = new StringBuilder(node.getValue());
-                    
-                    TreeItem<String> parent = node.getParent();
-                    
-                    while(parent.getParent() != null){
-                        rawName.append(PdfLayerList.deliminator).append(parent.getValue());
-                        parent = parent.getParent();
-                    }
-                    
-                    final String name = rawName.toString();
-                    
-                    if(layersObject.isLayerName(name) && !layersObject.isLocked(name)){
-                        final Runnable updateComponent = new Runnable() {
-                            @Override public void run() {
-                                layersObject.setVisiblity(name, node.isSelected());
-                                try{
-                                    decode_pdf.decodePage(currentPage);
-                                }catch(final Exception e){
-                                    e.printStackTrace();
+            layersRoot.addEventHandler(CheckBoxTreeItem.<String>checkBoxSelectionChangedEvent(),
+                    new EventHandler<CheckBoxTreeItem.TreeModificationEvent<String>>() {
+                        @Override
+                        public void handle(final CheckBoxTreeItem.TreeModificationEvent<String> t) {
+
+                            final CheckBoxTreeItem<String> node = t.getTreeItem();
+
+                            final StringBuilder rawName = new StringBuilder(node.getValue());
+
+                            TreeItem<String> parent = node.getParent();
+
+                            while (parent.getParent() != null) {
+                                rawName.append(PdfLayerList.deliminator).append(parent.getValue());
+                                parent = parent.getParent();
+                            }
+
+                            final String name = rawName.toString();
+
+                            if (layersObject.isLayerName(name) && !layersObject.isLocked(name)) {
+                                final Runnable updateComponent = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        layersObject.setVisiblity(name, node.isSelected());
+                                        try {
+                                            decode_pdf.decodePage(currentPage);
+                                        } catch (final Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                };
+
+                                if (Platform.isFxApplicationThread()) {
+                                    updateComponent.run();
+                                } else {
+                                    Platform.runLater(updateComponent);
                                 }
                             }
-                        };
-                        
-                        if(Platform.isFxApplicationThread()){
-                            updateComponent.run();
-                        }else{
-                            Platform.runLater(updateComponent);
+
                         }
-                    }
-                    
-                }
-            });
+                    });
             // Tree listener here
-            
+
             layersRoot.setExpanded(true);
             layersTree.setRoot(layersRoot);
         }
     }
-    
+
     private static void addLayersToTree(final Object[] layerNames, TreeItem<String> topLayer, boolean isEnabled, final PdfLayerList layersObject) {
         String name;
         TreeItem<String> currentNode = topLayer;
-        boolean parentEnabled=isEnabled, parentIsSelected=true;
-        
-        for(final Object layerName: layerNames){
-            if(layerName instanceof Object[]){
+        boolean parentEnabled = isEnabled, parentIsSelected = true;
+
+        for (final Object layerName : layerNames) {
+            if (layerName instanceof Object[]) {
                 final TreeItem<String> oldNode = currentNode;
-                addLayersToTree((Object[])layerName, currentNode, isEnabled && parentIsSelected, layersObject);
+                addLayersToTree((Object[]) layerName, currentNode, isEnabled && parentIsSelected, layersObject);
                 currentNode = oldNode;
-                isEnabled=parentEnabled;
-            }else{
+                isEnabled = parentEnabled;
+            } else {
                 //store possible recursive settings
                 parentEnabled = isEnabled;
 
@@ -185,7 +200,7 @@ public class JavaFXLayersPanel extends Tab implements GUILayersPanel {
                 if (ptr != -1) {
                     title = title.substring(0, ptr);
                 }
-                
+
                 if (name.endsWith(" R")) { //ignore
                 } else if (!layersObject.isLayerName(name)) { //just text
 
@@ -203,49 +218,55 @@ public class JavaFXLayersPanel extends Tab implements GUILayersPanel {
 
                     //see if showing and set box to match
                     if (layersObject.isVisible(name)) {
-                        ((CheckBoxTreeItem<String>)currentNode).setSelected(true);
+                        ((CheckBoxTreeItem<String>) currentNode).setSelected(true);
                         parentIsSelected = true;
-                    } else{
-                        ((CheckBoxTreeItem<String>)currentNode).setSelected(false);
+                    } else {
+                        ((CheckBoxTreeItem<String>) currentNode).setSelected(false);
                         parentIsSelected = false;
                     }
-                    
+
                     //check locks and allow Parents to disable children
                     if (isEnabled) {
                         isEnabled = !layersObject.isLocked(name);
                     }
-                
+
                     // No set enabled for CheckBoxTreeItem<String>
 //                    (Node) currentNode).setEnabled(isEnabled);
                 }
             }
         }
     }
-    
+
+    /**
+     * rescanPdfLayers is unsupported in OpenViewerFX
+     */
     @Override
     public void rescanPdfLayers() {
     }
 
+    /**
+     * resetLayers is unsupported in OpenViewerFX
+     */
     @Override
     public void resetLayers() {
     }
-    
+
     /**
      * The class used for the cell factory, what happens here is that we check that
      * the related item on the tree is not a CheckBoxTreeItem and if so, remove the checkbox (graphic)
      */
-    private static class LayersCell extends CheckBoxTreeCell<String>{
+    private static class LayersCell extends CheckBoxTreeCell<String> {
         @Override
-        public void updateItem(final String item, final boolean empty){
+        public void updateItem(final String item, final boolean empty) {
             super.updateItem(item, empty);
-            
-            if(empty){
+
+            if (empty) {
                 setGraphic(null);
                 setText(null);
-            }else if (!(getTreeItem() instanceof CheckBoxTreeItem)){
+            } else if (!(getTreeItem() instanceof CheckBoxTreeItem)) {
                 setGraphic(null);
             }
         }
     }
-    
+
 }

@@ -33,25 +33,24 @@
 package org.jpedal.parser.image.utils;
 
 /**
- *
  * @author markee
  */
 public class ArrayUtils {
-    
+
     public static boolean isArrayInverted(final float[] decodeArray) {
-        
+
         //work out if inverted (assume true and disprove)
-        boolean arrayInverted=false;
-        if(decodeArray!=null){
-            
-            arrayInverted=true;
-            final int count=decodeArray.length;
-            for(int aa=0;aa<count;aa += 2){
-                if(decodeArray[aa]==1f && decodeArray[aa+1]==0f){
+        boolean arrayInverted = false;
+        if (decodeArray != null) {
+
+            arrayInverted = true;
+            final int count = decodeArray.length;
+            for (int aa = 0; aa < count; aa += 2) {
+                if (decodeArray[aa] == 1f && decodeArray[aa + 1] == 0f) {
                     //okay
-                }else{
-                    arrayInverted=false;
-                    aa=count;
+                } else {
+                    arrayInverted = false;
+                    aa = count;
                 }
             }
         }

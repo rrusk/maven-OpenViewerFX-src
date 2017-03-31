@@ -35,10 +35,10 @@ package org.jpedal.objects.acroforms.creation;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import javax.swing.JComboBox;
+
 import org.jpedal.objects.raw.FormObject;
 
 /**
- *
  * Sync gui values back into FormObject
  */
 public class ComboListener implements ItemListener {
@@ -47,13 +47,13 @@ public class ComboListener implements ItemListener {
     final FormObject form;
 
     ComboListener(final JComboBox comboBox, final FormObject form) {
-	this.comp = comboBox;
-	this.form = form;
+        this.comp = comboBox;
+        this.form = form;
     }
 
     @Override
     public void itemStateChanged(final ItemEvent e) {
-        final int index=comp.getSelectedIndex();
-	form.setSelection(comp.getSelectedObjects(), (String) comp.getSelectedItem(),new int[]{index},index);
+        final int index = comp.getSelectedIndex();
+        form.setSelection(comp.getSelectedObjects(), (String) comp.getSelectedItem(), new int[]{index}, index);
     }
 }

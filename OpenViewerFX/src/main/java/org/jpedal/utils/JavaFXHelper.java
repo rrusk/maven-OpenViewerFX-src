@@ -42,12 +42,12 @@ import java.net.URLClassLoader;
  * home for general JavaFX code
  */
 public class JavaFXHelper {
-    
+
     //dev flag
     private static boolean javaFXAvailable = true;
-    
+
     private static boolean javaFXTested;
-    
+
     public static boolean isJavaFXAvailable() {
         if (!javaFXTested) {
             try {
@@ -57,18 +57,18 @@ public class JavaFXHelper {
                 if (tryToLoadFX()) {
                     javaFXAvailable = true;
                 } else {
-                    LogWriter.writeLog("JavaFX Unavailable. Exception "+e);
-                    
+                    LogWriter.writeLog("JavaFX Unavailable. Exception " + e);
+
                     javaFXAvailable = false;
                 }
             } catch (final Error e) {
                 // extra error catch for java.lang.UnsupportedClassVersionError preventing running on 1.5
-                
+
                 if (tryToLoadFX()) {
                     javaFXAvailable = true;
                 } else {
-                    LogWriter.writeLog("JavaFX Unavailable. Exception "+e);
-                    
+                    LogWriter.writeLog("JavaFX Unavailable. Exception " + e);
+
                     javaFXAvailable = false;
                 }
             }
@@ -76,7 +76,7 @@ public class JavaFXHelper {
         }
         return javaFXAvailable;
     }
-    
+
     private static boolean tryToLoadFX() {
         try {
             final File jfxrt = new File(System.getProperty("java.home") + "/lib/jfxrt.jar");
@@ -84,7 +84,7 @@ public class JavaFXHelper {
                 throw new Exception("jfxrt.jar not found.");
             }
             final URL url = jfxrt.toURI().toURL();
-            final URLClassLoader sysloader = (URLClassLoader)ClassLoader.getSystemClassLoader();
+            final URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
             final Class<?> sysclass = URLClassLoader.class;
             try {
                 final Method method = sysclass.getDeclaredMethod("addURL", URL.class);
@@ -92,17 +92,17 @@ public class JavaFXHelper {
                 method.invoke(sysloader, url);
             } catch (final Throwable t) {
                 //t.printStackTrace();
-                throw new IOException("Error, could not add URL to system classloader "+t);
+                throw new IOException("Error, could not add URL to system classloader " + t);
             }
             return true;
         } catch (final Exception e) {
 
-            LogWriter.writeLog("Exception in handling JavaFX "+e);
-            
+            LogWriter.writeLog("Exception in handling JavaFX " + e);
+
             return false;
         }
     }
-    
+
     /**
      * return version of Java FX used
      */

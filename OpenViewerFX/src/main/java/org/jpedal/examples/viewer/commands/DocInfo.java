@@ -44,6 +44,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.fonts.FontMappings;
@@ -77,9 +78,9 @@ public class DocInfo {
         if (args == null) {
             if (!commonValues.isPDF()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.ImageSearch"));
-            }else if(commonValues.getSelectedFile() == null || !decode_pdf.isOpen()){
-                    currentGUI.showMessageDialog(Messages.getMessage("PdfVieweremptyFile.message"), Messages.getMessage("PdfViewerTooltip.pageSize"), JOptionPane.PLAIN_MESSAGE);
-            }else{
+            } else if (commonValues.getSelectedFile() == null || !decode_pdf.isOpen()) {
+                currentGUI.showMessageDialog(Messages.getMessage("PdfVieweremptyFile.message"), Messages.getMessage("PdfViewerTooltip.pageSize"), JOptionPane.PLAIN_MESSAGE);
+            } else {
                 getDocumentProperties(commonValues.getSelectedFile(), commonValues.getFileSize(), commonValues.getPageCount(), commonValues.getCurrentPage(), decode_pdf, currentGUI);
             }
         }
@@ -90,7 +91,7 @@ public class DocInfo {
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Color.WHITE);
 
-        if(LogWriter.isRunningFromIDE){
+        if (LogWriter.isRunningFromIDE) {
             tabbedPane.setName("docProp");
         }
 
@@ -132,7 +133,7 @@ public class DocInfo {
             final Object[] formsOnPage = formRenderer.getFormComponents(null, ReturnValues.FORM_NAMES, decode_pdf.getPageNumber());
 
             //Do not add if no forms on page
-            if (formsOnPage != null && formsOnPage.length>0) {
+            if (formsOnPage != null && formsOnPage.length > 0) {
                 //Form list is guaranteed to not be null by this point
                 tabbedPane.add(getFormList(decode_pdf));
                 tabbedPane.setTitleAt(nextTab, "Forms");
@@ -207,7 +208,7 @@ public class DocInfo {
             g5.setFont(textFont);
             details.add(g5);
 
-            final StringBuilder g6Text = new StringBuilder ("PDF " );
+            final StringBuilder g6Text = new StringBuilder("PDF ");
             g6Text.append(decode_pdf.getPDFVersion());
 
             //add in if Linearized
@@ -444,10 +445,10 @@ public class DocInfo {
 
                 String current = FontMappings.fontSubstitutionLocation.get(nextFont);
 
-                if(!FontMappings.fontPropertiesTablePath.containsKey(current)){
+                if (!FontMappings.fontPropertiesTablePath.containsKey(current)) {
                     continue;
                 }
-                
+
                 if (sortFontsByDir) {
                     int ptr = current.lastIndexOf(System.getProperty("file.separator"));
                     if (ptr == -1 && current.indexOf('/') != -1) {
@@ -533,6 +534,7 @@ public class DocInfo {
     private static final JScrollPane fontScrollPane = new JScrollPane();
 
     //<link><a name="fontdetails" />
+
     /**
      * show fonts on system displayed
      */

@@ -33,47 +33,48 @@
 package org.jpedal.parser;
 
 import java.util.Iterator;
+
 import org.jpedal.constants.PageInfo;
 
 public class DecoderResults {
 
-    private boolean imagesProcessedFully=true,hasNonEmbeddedCIDFonts,hasYCCKimages,pageSuccessful;
+    private boolean imagesProcessedFully = true, hasNonEmbeddedCIDFonts, hasYCCKimages, pageSuccessful;
 
     private boolean ttHintingRequired;
 
     //values on last decodePage
     private Iterator colorSpacesUsed;
 
-    private String nonEmbeddedCIDFonts="";
+    private String nonEmbeddedCIDFonts = "";
 
     private boolean tooManyShapes;
     /**
      * flag to show embedded fonts present
      */
     private boolean hasEmbeddedFonts;
-    
+
     public boolean getImagesProcessedFully() {
         return imagesProcessedFully;
     }
 
     public void update(final PdfStreamDecoder current, final boolean includeAll) {
 
-        colorSpacesUsed= (Iterator) current.getObjectValue(PageInfo.COLORSPACES);
+        colorSpacesUsed = (Iterator) current.getObjectValue(PageInfo.COLORSPACES);
 
 
-        nonEmbeddedCIDFonts= (String) current.getObjectValue(DecodeStatus.NonEmbeddedCIDFonts);
+        nonEmbeddedCIDFonts = (String) current.getObjectValue(DecodeStatus.NonEmbeddedCIDFonts);
 
         hasYCCKimages = current.getBooleanValue(DecodeStatus.YCCKImages);
         pageSuccessful = current.getBooleanValue(DecodeStatus.PageDecodingSuccessful);
 
         imagesProcessedFully = current.getBooleanValue(DecodeStatus.ImagesProcessed);
         tooManyShapes = current.getBooleanValue(DecodeStatus.TooManyShapes);
-        
-        hasNonEmbeddedCIDFonts= current.getBooleanValue(DecodeStatus.NonEmbeddedCIDFonts);
 
-        ttHintingRequired= current.getBooleanValue(DecodeStatus.TTHintingRequired);
+        hasNonEmbeddedCIDFonts = current.getBooleanValue(DecodeStatus.NonEmbeddedCIDFonts);
 
-        if(includeAll){
+        ttHintingRequired = current.getBooleanValue(DecodeStatus.TTHintingRequired);
+
+        if (includeAll) {
             hasEmbeddedFonts = current.getBooleanValue(ValueTypes.EmbeddedFonts);
         }
 
@@ -81,7 +82,7 @@ public class DecoderResults {
 
     public boolean getPageDecodeStatus(final int status) {
 
-        switch(status){
+        switch (status) {
             case DecodeStatus.NonEmbeddedCIDFonts:
                 return hasNonEmbeddedCIDFonts;
 
@@ -93,15 +94,15 @@ public class DecoderResults {
 
             case DecodeStatus.YCCKImages:
                 return hasYCCKimages;
-            
+
             case DecodeStatus.TooManyShapes:
-                return tooManyShapes;    
+                return tooManyShapes;
 
             case DecodeStatus.TTHintingRequired:
                 return ttHintingRequired;
 
             default:
-                throw new RuntimeException("Unknown parameter "+status);
+                throw new RuntimeException("Unknown parameter " + status);
 
         }
     }
@@ -109,11 +110,11 @@ public class DecoderResults {
     /**
      * return details on page for type (defined in org.jpedal.constants.PageInfo) or null if no values
      * Unrecognised key will throw a RunTime exception
-     *
+     * <p>
      * null returned if JPedal not clear on result
      */
     public Iterator getPageInfo(final int type) {
-        switch(type){
+        switch (type) {
 
             case PageInfo.COLORSPACES:
                 return colorSpacesUsed;
@@ -128,9 +129,9 @@ public class DecoderResults {
      */
     public String getPageDecodeStatusReport(final int status) {
 
-        if(status==DecodeStatus.NonEmbeddedCIDFonts){
+        if (status == DecodeStatus.NonEmbeddedCIDFonts) {
             return nonEmbeddedCIDFonts;
-        }else {
+        } else {
             throw new RuntimeException("Unknown parameter");
         }
     }
@@ -145,6 +146,6 @@ public class DecoderResults {
 
     public void resetColorSpaces() {
         //disable color list if forms
-        colorSpacesUsed=null;
+        colorSpacesUsed = null;
     }
 }

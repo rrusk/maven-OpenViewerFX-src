@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.constants.JPedalSettings;
 import org.jpedal.exception.PdfException;

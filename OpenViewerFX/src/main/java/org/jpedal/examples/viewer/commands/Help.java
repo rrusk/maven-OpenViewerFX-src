@@ -37,6 +37,7 @@ import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
+
 import org.jpedal.display.GUIDisplay;
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.utils.BrowserLauncher;
@@ -124,9 +125,9 @@ public class Help {
 //                errorPanel.add(textArea);
 //
 //                showMessageDialog(errorPanel,"Error loading web browser",JOptionPane.PLAIN_MESSAGE);
-                  
-                LogWriter.writeLog("Exception attempting launch browser: " + e1); 
-                
+
+                    LogWriter.writeLog("Exception attempting launch browser: " + e1);
+
                 }
             }
 

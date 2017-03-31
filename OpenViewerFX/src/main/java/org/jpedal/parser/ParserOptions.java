@@ -35,6 +35,7 @@ package org.jpedal.parser;
 import java.awt.Shape;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.external.GlyphTracker;
 import org.jpedal.external.ShapeTracker;
@@ -44,36 +45,38 @@ import org.jpedal.objects.structuredtext.StructuredContentHandler;
 public class ParserOptions {
 
     //flag to show raw images extracted
-    boolean clippedImagesExtracted=true;
-    
+    boolean clippedImagesExtracted = true;
+
     //private boolean extractRawCMYK;
-    
+
     //flag to show raw images extracted
-    boolean finalImagesExtracted=true;
-    
+    boolean finalImagesExtracted = true;
+
     //flag to show if we physical generate a scaled version of the images extracted
     boolean createScaledVersion = true;
-    
+
     //flag to show content is being rendered
     boolean renderImages;
-    
+
     //flag to show raw images extracted
-    boolean rawImagesExtracted=true;
-    
-     /**flag to show if YCCK images*/
+    boolean rawImagesExtracted = true;
+
+    /**
+     * flag to show if YCCK images
+     */
     public boolean hasYCCKimages;
 
     public boolean imagesProcessedFully;
 
-    private boolean isLayerVisible=true;
-    
+    private boolean isLayerVisible = true;
+
     private boolean isType3Font;
-    
+
     private int layerLevel;
 
-    private Set<Integer> layerVisibility=new HashSet<Integer>(50);
+    private Set<Integer> layerVisibility = new HashSet<Integer>(50);
 
-    public final Set<Integer> layerClips=new HashSet<Integer>(50);
+    public final Set<Integer> layerClips = new HashSet<Integer>(50);
 
     public PdfLayerList layers;
 
@@ -88,28 +91,36 @@ public class ParserOptions {
     private float flattenX, flattenY;
 
     private boolean isPrinting;
-    
-    protected float samplingUsed=-1;
+
+    protected float samplingUsed = -1;
 
     protected org.jpedal.objects.structuredtext.StructuredContentHandler contentHandler;
-    
+
     private int textPrint;
 
-    /**clip if we render directly*/
+    /**
+     * clip if we render directly
+     */
     public Shape defaultClip;
 
     //save font info and generate glyph on first render
     protected boolean generateGlyphOnRender;
 
-    /**flag to show text is being extracted*/
-    private boolean textExtracted=true;
+    /**
+     * flag to show text is being extracted
+     */
+    private boolean textExtracted = true;
 
-    /**flag to show content is being rendered*/
+    /**
+     * flag to show content is being rendered
+     */
     private boolean renderText;
-    
+
     private boolean renderClipText;
 
-    /**flags to show we need colour data as well*/
+    /**
+     * flags to show we need colour data as well
+     */
     private boolean textColorExtracted;
 
     int renderMode;
@@ -120,7 +131,9 @@ public class ParserOptions {
 
     boolean useJavaFX;
 
-    /**allow us to know if XFA content*/
+    /**
+     * allow us to know if XFA content
+     */
     private boolean isXFA;
 
     protected GlyphTracker customGlyphTracker;
@@ -128,25 +141,25 @@ public class ParserOptions {
 
     ShapeTracker customShapeTracker;
 
-    String fileName="";
-    
+    String fileName = "";
+
     boolean tooManyShapes;
 
     public void setName(final String name) {
-        if(name!=null){
-            this.fileName=name.toLowerCase();
+        if (name != null) {
+            this.fileName = name.toLowerCase();
 
             /*check no separators*/
-            int sep=fileName.lastIndexOf(47); // '/'=47
-            if(sep!=-1) {
+            int sep = fileName.lastIndexOf(47); // '/'=47
+            if (sep != -1) {
                 fileName = fileName.substring(sep + 1);
             }
-            sep=fileName.lastIndexOf(92); // '\\'=92
-            if(sep!=-1) {
+            sep = fileName.lastIndexOf(92); // '\\'=92
+            if (sep != -1) {
                 fileName = fileName.substring(sep + 1);
             }
-            sep=fileName.lastIndexOf(46); // "."=46
-            if(sep!=-1) {
+            sep = fileName.lastIndexOf(46); // "."=46
+            if (sep != -1) {
                 fileName = fileName.substring(0, sep);
             }
         }
@@ -161,7 +174,7 @@ public class ParserOptions {
     }
 
     public void setXFA(final boolean isXFA) {
-        this.isXFA=isXFA;
+        this.isXFA = isXFA;
     }
 
 
@@ -173,64 +186,64 @@ public class ParserOptions {
         return renderPage;
     }
 
-    public void init(final boolean isPageContent, final boolean renderPage, final int renderMode, final int extractionMode, final boolean isPrinting, final boolean useJavaFX){
+    public void init(final boolean isPageContent, final boolean renderPage, final int renderMode, final int extractionMode, final boolean isPrinting, final boolean useJavaFX) {
 
-        this.isPageContent=isPageContent;
-        this.renderPage=renderPage;
+        this.isPageContent = isPageContent;
+        this.renderPage = renderPage;
 
-        this.renderMode=renderMode;
+        this.renderMode = renderMode;
 
-        this.extractionMode=extractionMode;
+        this.extractionMode = extractionMode;
 
-        this.isPrinting=isPrinting;
+        this.isPrinting = isPrinting;
 
-        this.useJavaFX=useJavaFX;
+        this.useJavaFX = useJavaFX;
 
-        textExtracted=(extractionMode & PdfDecoderInt.TEXT)==PdfDecoderInt.TEXT;
+        textExtracted = (extractionMode & PdfDecoderInt.TEXT) == PdfDecoderInt.TEXT;
 
-        renderText=renderPage &&(renderMode & PdfDecoderInt.RENDERTEXT) == PdfDecoderInt.RENDERTEXT;
+        renderText = renderPage && (renderMode & PdfDecoderInt.RENDERTEXT) == PdfDecoderInt.RENDERTEXT;
 
-        textColorExtracted=(extractionMode & PdfDecoderInt.TEXTCOLOR) == PdfDecoderInt.TEXTCOLOR;
+        textColorExtracted = (extractionMode & PdfDecoderInt.TEXTCOLOR) == PdfDecoderInt.TEXTCOLOR;
 
-        renderImages=renderPage &&(renderMode & PdfDecoderInt.RENDERIMAGES )== PdfDecoderInt.RENDERIMAGES;
-        
-        finalImagesExtracted=(extractionMode & PdfDecoderInt.FINALIMAGES) == PdfDecoderInt.FINALIMAGES;
-        
+        renderImages = renderPage && (renderMode & PdfDecoderInt.RENDERIMAGES) == PdfDecoderInt.RENDERIMAGES;
+
+        finalImagesExtracted = (extractionMode & PdfDecoderInt.FINALIMAGES) == PdfDecoderInt.FINALIMAGES;
+
         //extractRawCMYK=(extractionMode & PdfDecoderInt.CMYKIMAGES)==PdfDecoderInt.CMYKIMAGES;
-        
-        clippedImagesExtracted=(extractionMode & PdfDecoderInt.CLIPPEDIMAGES)==PdfDecoderInt.CLIPPEDIMAGES;
-        
-        rawImagesExtracted=(extractionMode & PdfDecoderInt.RAWIMAGES) == PdfDecoderInt.RAWIMAGES;
-        
+
+        clippedImagesExtracted = (extractionMode & PdfDecoderInt.CLIPPEDIMAGES) == PdfDecoderInt.CLIPPEDIMAGES;
+
+        rawImagesExtracted = (extractionMode & PdfDecoderInt.RAWIMAGES) == PdfDecoderInt.RAWIMAGES;
+
         createScaledVersion = finalImagesExtracted || renderImages;
-        
+
     }
 
     public ParserOptions() {
 
     }
 
-    public boolean isRenderClipText(){
+    public boolean isRenderClipText() {
         return renderClipText;
     }
-    
-    public boolean isRenderText(){
+
+    public boolean isRenderText() {
         return renderText;
     }
 
-    public void isPrinting(final boolean printing){
-        isPrinting=printing;
+    public void isPrinting(final boolean printing) {
+        isPrinting = printing;
     }
-    
-    public boolean isPrinting(){
+
+    public boolean isPrinting() {
         return isPrinting;
     }
 
-    public boolean isTextColorExtracted(){
+    public boolean isTextColorExtracted() {
         return textColorExtracted;
     }
 
-    public boolean isTextExtracted(){
+    public boolean isTextExtracted() {
         return textExtracted;
     }
 
@@ -253,17 +266,17 @@ public class ParserOptions {
     public boolean generateGlyphOnRender() {
         return generateGlyphOnRender;
     }
-    
+
     public void setGenerateGlyphOnRender(final boolean value) {
-        generateGlyphOnRender=value;
+        generateGlyphOnRender = value;
     }
 
     public int getTextPrint() {
         return textPrint;
     }
-    
+
     public void setTextPrint(final int value) {
-        textPrint=value;
+        textPrint = value;
     }
 
     public StructuredContentHandler getContentHandler() {
@@ -271,19 +284,19 @@ public class ParserOptions {
     }
 
     public void setContentHandler(final StructuredContentHandler contentHandler) {
-        this.contentHandler=contentHandler;
+        this.contentHandler = contentHandler;
     }
-    
+
     public boolean renderDirectly() {
         return renderDirectly;
     }
 
     void setRenderDirectly(final boolean b) {
-        renderDirectly=b;
+        renderDirectly = b;
     }
 
     public void setSamplingUsed(final float scaleY) {
-        samplingUsed=scaleY;
+        samplingUsed = scaleY;
     }
 
     float getSamplingUsed() {
@@ -300,12 +313,12 @@ public class ParserOptions {
 
     public void setPageNumber(final int value) {
 
-        pageNum=value;
+        pageNum = value;
 
     }
 
     public void setCustomShapeTracker(final ShapeTracker obj) {
-        customShapeTracker=obj;
+        customShapeTracker = obj;
     }
 
     public ShapeTracker getCustomShapeTraker() {
@@ -313,7 +326,7 @@ public class ParserOptions {
     }
 
     public void setFlattenedForm(final boolean b) {
-        isFlattenedForm=b;
+        isFlattenedForm = b;
     }
 
     public boolean isFlattenedForm() {
@@ -321,8 +334,8 @@ public class ParserOptions {
     }
 
     public void setOffsets(final float x, final float y) {
-        flattenX=x;
-        flattenY=y;
+        flattenX = x;
+        flattenY = y;
     }
 
     public float getflattenX() {
@@ -338,13 +351,13 @@ public class ParserOptions {
     }
 
     public void setPdfLayerList(final PdfLayerList layers) {
-        this.layers=layers;
+        this.layers = layers;
     }
 
     boolean hasContentHandler() {
-        
-        return contentHandler!=null;
-        
+
+        return contentHandler != null;
+
     }
 
     /**
@@ -383,9 +396,9 @@ public class ParserOptions {
     }
 
     public void isType3Font(final boolean isType3Font) {
-       this.isType3Font=isType3Font;
+        this.isType3Font = isType3Font;
     }
-    
+
     public boolean isType3Font() {
         return isType3Font;
     }
@@ -399,14 +412,14 @@ public class ParserOptions {
     }
 
     public boolean renderImages() {
-        return renderImages ;
+        return renderImages;
     }
-    
+
     public boolean imagesNeeded() {
         return renderImages || finalImagesExtracted || clippedImagesExtracted || rawImagesExtracted;
     }
-    
-    public boolean createScaledVersion(){
+
+    public boolean createScaledVersion() {
         return createScaledVersion;
     }
 

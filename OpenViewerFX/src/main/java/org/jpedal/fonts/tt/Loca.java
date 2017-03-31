@@ -36,53 +36,55 @@ import org.jpedal.utils.LogWriter;
 
 
 public class Loca extends Table {
-    
-    /**points to location of glyph programs*/
+
+    /**
+     * points to location of glyph programs
+     */
     int[] glyphIndexStart;
-    
+
     boolean isCorrupted;
-    
+
     public int format;
     public int glyphCount;
     public int glyfTableLength;
-    
-    public Loca(final FontFile2 currentFontFile, final int glyphCount, final int format){
-	
-	//handles super call in LocaWriter
-	if(currentFontFile==null) {
-        return;
-    }
-	
-	this.format=format;
-	this.glyphCount=glyphCount;
-	this.glyfTableLength=currentFontFile.getOffset(FontFile2.GLYF);
-	
-	//LogWriter.writeMethod("{readLocaTable}", 0);
-	
-	//move to start and check exists
-	final int startPointer=currentFontFile.selectTable(FontFile2.LOCA);
-	
-	int i;
-	
-	final int locaLength=currentFontFile.getOffset(FontFile2.LOCA);
-	
-	glyphIndexStart=new int[glyphCount+1];
-	
-	//read 'head' table
-	if(startPointer!=0){
-	    
-	    glyphIndexStart[0]=0;
-	    //long version
-	    if(format==1 || format==256){ //some tools get the byte order wrong
-		if((locaLength/4)!=(glyphCount+1)) {
-            LogWriter.writeLog("Incorrect length");
+
+    public Loca(final FontFile2 currentFontFile, final int glyphCount, final int format) {
+
+        //handles super call in LocaWriter
+        if (currentFontFile == null) {
+            return;
         }
-		
-		for(i=0;i<glyphCount;i++) {
-            glyphIndexStart[i] = currentFontFile.getNextUint32();
-        }
-		
-	    }else{ //short
+
+        this.format = format;
+        this.glyphCount = glyphCount;
+        this.glyfTableLength = currentFontFile.getOffset(FontFile2.GLYF);
+
+        //LogWriter.writeMethod("{readLocaTable}", 0);
+
+        //move to start and check exists
+        final int startPointer = currentFontFile.selectTable(FontFile2.LOCA);
+
+        int i;
+
+        final int locaLength = currentFontFile.getOffset(FontFile2.LOCA);
+
+        glyphIndexStart = new int[glyphCount + 1];
+
+        //read 'head' table
+        if (startPointer != 0) {
+
+            glyphIndexStart[0] = 0;
+            //long version
+            if (format == 1 || format == 256) { //some tools get the byte order wrong
+                if ((locaLength / 4) != (glyphCount + 1)) {
+                    LogWriter.writeLog("Incorrect length");
+                }
+
+                for (i = 0; i < glyphCount; i++) {
+                    glyphIndexStart[i] = currentFontFile.getNextUint32();
+                }
+
+            } else { //short
 //		if((locaLength/2)!=(glyphCount+1)){
 //		    
 //		    if(LogWriter.isOutput())
@@ -90,35 +92,35 @@ public class Loca extends Table {
 //		    
 //		    isCorrupted=true;
 //		}else{
-		    for(i=0;i<glyphCount;i++) {
-                glyphIndexStart[i] = (currentFontFile.getNextUint16() * 2);
-            }
- 
+                for (i = 0; i < glyphCount; i++) {
+                    glyphIndexStart[i] = (currentFontFile.getNextUint16() * 2);
+                }
+
                 //}
-	    }
-	    
-	    glyphIndexStart[glyphCount]=glyfTableLength;
-	    
-	}
+            }
+
+            glyphIndexStart[glyphCount] = glyfTableLength;
+
+        }
     }
-    
-    public int[] getIndices(){
-	return glyphIndexStart;
+
+    public int[] getIndices() {
+        return glyphIndexStart;
     }
-    
-    public boolean isCorrupted(){
-	return isCorrupted;
+
+    public boolean isCorrupted() {
+        return isCorrupted;
     }
-    
-    public int getFormat(){
-	return format;
+
+    public int getFormat() {
+        return format;
     }
 
     public int getGlyphCount() {
-	return glyphCount;
+        return glyphCount;
     }
 
     public int getGlyfTableLength() {
-	return glyfTableLength;
+        return glyfTableLength;
     }
 }

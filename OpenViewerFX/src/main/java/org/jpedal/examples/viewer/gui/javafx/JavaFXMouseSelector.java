@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.gui.javafx;
 
 import java.io.File;
 import java.util.Date;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
@@ -110,7 +111,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
     MenuItem speakHighlighted;
 
     public JavaFXMouseSelector(final PdfDecoderFX decode_pdf, final GUIFactory currentGUI,
-            final Values commonValues, final Commands currentCommands) {
+                               final Values commonValues, final Commands currentCommands) {
 
         this.decode_pdf = decode_pdf;
         this.currentGUI = currentGUI;
@@ -119,7 +120,9 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
         this.page_data = decode_pdf.getPdfPageData();
 
     }
+
     ContextMenu cm;
+
     private void createRightClickMenu() {
         
         /*
@@ -134,9 +137,9 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
         extractImage = new MenuItem(Messages.getMessage("PdfRightClick.extractImage"));
         snapshotIcon = new Image("/org/jpedal/examples/viewer/res/snapshot_menu.gif");
         snapShot = new MenuItem(Messages.getMessage("PdfRightClick.snapshot"), new ImageView(snapshotIcon));
-        if(GUI.debugFX){
+        if (GUI.debugFX) {
             extract.getItems().addAll(extractText, extractImage, snapShot);
-        }else{
+        } else {
             extract.getItems().addAll(extractText, extractImage);
         }
         find = new MenuItem(Messages.getMessage("PdfRightClick.find"));
@@ -183,24 +186,24 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
             @Override
             public void handle(final ActionEvent t) {
                 if ((decode_pdf.getPages().getHighlightedImage() != null) &&
-                     (decode_pdf.getDisplayView() == 1)) {
-                        final FileChooser jf = new FileChooser();
-                        final FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG (*jpg)", "*.jpg");
-                        final FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG (*PNG)", "*.png");
-                        final FileChooser.ExtensionFilter extFilterTIFF = new FileChooser.ExtensionFilter("Tiff (*TIFF)", "*.tiff");
-                        jf.getExtensionFilters().addAll(extFilterJPG, extFilterPNG, extFilterTIFF);
-                       
-                        final File file = jf.showSaveDialog((Window)currentGUI.getFrame());
-                        String fileExt = file.getName();
-                        fileExt = fileExt.substring(fileExt.indexOf('.')+1, fileExt.length());
-                        
-                        final FXDisplay fxRenderer=(FXDisplay) decode_pdf.getDynamicRenderer();                       
-                        
-                        fxRenderer.saveImage(id, file.getAbsolutePath(), fileExt);
-                  
-                    }
+                        (decode_pdf.getDisplayView() == 1)) {
+                    final FileChooser jf = new FileChooser();
+                    final FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG (*jpg)", "*.jpg");
+                    final FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG (*PNG)", "*.png");
+                    final FileChooser.ExtensionFilter extFilterTIFF = new FileChooser.ExtensionFilter("Tiff (*TIFF)", "*.tiff");
+                    jf.getExtensionFilters().addAll(extFilterJPG, extFilterPNG, extFilterTIFF);
+
+                    final File file = jf.showSaveDialog((Window) currentGUI.getFrame());
+                    String fileExt = file.getName();
+                    fileExt = fileExt.substring(fileExt.indexOf('.') + 1, fileExt.length());
+
+                    final FXDisplay fxRenderer = (FXDisplay) decode_pdf.getDynamicRenderer();
+
+                    fxRenderer.saveImage(id, file.getAbsolutePath(), fileExt);
+
                 }
-            
+            }
+
         });
         snapShot.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -308,98 +311,95 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                     searchType |= SearchType.MUTLI_LINE_RESULTS;
                 }
 
-                if (textToFind != null) {
-                    try {
-                        final float[] co_ords;
+                try {
+                    final float[] co_ords;
 
-                        co_ords = decode_pdf.getGroupingObject().findText(t_x1, t_y1, t_x2, t_y2, new String[]{textToFind}, searchType);
+                    co_ords = decode_pdf.getGroupingObject().findText(t_x1, t_y1, t_x2, t_y2, new String[]{textToFind}, searchType);
 
-                        if (co_ords.length >= 2) {
-                            if (co_ords.length < 3) {
-                                currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.Found") + ' ' + co_ords[0] + ',' + co_ords[1]);
-                            } else {
-                                final StringBuilder displayCoords = new StringBuilder();
-                                String coordsMessage = Messages.getMessage("PdfViewerMessage.FoundAt");
-                                for (int i = 0; i < co_ords.length; i += 5) {
-                                    displayCoords.append(coordsMessage).append(' ');
-                                    displayCoords.append(co_ords[i]);
-                                    displayCoords.append(',');
-                                    displayCoords.append(co_ords[i + 1]);
-
-                                    displayCoords.append('\n');
-                                    if (co_ords[i + 4] == -101) {
-                                        coordsMessage = Messages.getMessage("PdfViewerMessage.FoundAtHyphen");
-                                    } else {
-                                        coordsMessage = Messages.getMessage("PdfViewerMessage.FoundAt");
-                                    }
-
-                                }
-                                currentGUI.showMessageDialog(displayCoords.toString());
-                            }
+                    if (co_ords.length >= 2) {
+                        if (co_ords.length < 3) {
+                            currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.Found") + ' ' + co_ords[0] + ',' + co_ords[1]);
                         } else {
-                            currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NotFound"));
-                        }
+                            final StringBuilder displayCoords = new StringBuilder();
+                            String coordsMessage = Messages.getMessage("PdfViewerMessage.FoundAt");
+                            for (int i = 0; i < co_ords.length; i += 5) {
+                                displayCoords.append(coordsMessage).append(' ');
+                                displayCoords.append(co_ords[i]);
+                                displayCoords.append(',');
+                                displayCoords.append(co_ords[i + 1]);
 
-                    } catch (final PdfException e1) {
-                        e1.printStackTrace();
+                                displayCoords.append('\n');
+                                if (co_ords[i + 4] == -101) {
+                                    coordsMessage = Messages.getMessage("PdfViewerMessage.FoundAtHyphen");
+                                } else {
+                                    coordsMessage = Messages.getMessage("PdfViewerMessage.FoundAt");
+                                }
+
+                            }
+                            currentGUI.showMessageDialog(displayCoords.toString());
+                        }
+                    } else {
+                        currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NotFound"));
                     }
 
+                } catch (final PdfException e1) {
+                    e1.printStackTrace();
                 }
             }
         });
 
-        final Speech speech = (Speech)decode_pdf.getExternalHandler(Options.SpeechEngine);
-        final boolean useSpeech = speech!=null;
+        final Speech speech = (Speech) decode_pdf.getExternalHandler(Options.SpeechEngine);
+        final boolean useSpeech = speech != null;
         if (useSpeech) {
             //option = option.substring(0, option.indexOf('('));
             speech.setVoice(currentGUI.getProperties().getValue("voice"));
         }
-            speakHighlighted.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(final ActionEvent t) {
-                    if (useSpeech) {
-                        if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
-                            final Thread speak = new Thread(new Runnable() {
+        speakHighlighted.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(final ActionEvent t) {
+                if (useSpeech) {
+                    if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
+                        final Thread speak = new Thread(new Runnable() {
 
-                                @Override
-                                public void run() {
-                                    final String text = GUICopy.copySelectedText(decode_pdf, currentGUI, commonValues);
-                                    speech.speakText(text);
-                                }
-                            });
-                            speak.setDaemon(true);
-                            speak.start();
-                        } else {
-                            if (GUI.showMessages) {
-                                currentGUI.showMessageDialog("Speak text is only avalible in single page display mode");
+                            @Override
+                            public void run() {
+                                final String text = GUICopy.copySelectedText(decode_pdf, currentGUI, commonValues);
+                                speech.speakText(text);
                             }
+                        });
+                        speak.setDaemon(true);
+                        speak.start();
+                    } else {
+                        if (GUI.showMessages) {
+                            currentGUI.showMessageDialog("Speak text is only avalible in single page display mode");
                         }
                     }
                 }
-            });
+            }
+        });
         
         
         /*
          * Add Items to Main Menu.
          */
         if (decode_pdf != null && decode_pdf.isOpen()) {
-            if(GUI.debugFX){
+            if (GUI.debugFX) {
                 cm.getItems().add(copy);
                 cm.getItems().addAll(new SeparatorMenuItem(), selectAll, deselectall);
-                cm.getItems().addAll(new SeparatorMenuItem(),extract);
-                cm.getItems().addAll(new SeparatorMenuItem(),find);
-                cm.getItems().addAll(new SeparatorMenuItem(),speakHighlighted);
-            }else{
+                cm.getItems().addAll(new SeparatorMenuItem(), extract);
+                cm.getItems().addAll(new SeparatorMenuItem(), find);
+                cm.getItems().addAll(new SeparatorMenuItem(), speakHighlighted);
+            } else {
                 cm.getItems().add(copy);
                 cm.getItems().addAll(new SeparatorMenuItem(), selectAll, deselectall);
-                cm.getItems().addAll(new SeparatorMenuItem(),extract);
+                cm.getItems().addAll(new SeparatorMenuItem(), extract);
                 //cm.getItems().addAll(new SeparatorMenuItem(),find);
                 //cm.getItems().addAll(new SeparatorMenuItem(),speakHighlighted);
             }
         }
 
     }
-    
+
     @Override
     public void mouseClicked(final MouseEvent e) {
         if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE || (activateMultipageHighlight && decode_pdf.getDisplayView() == Display.CONTINUOUS && decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING)) {
@@ -417,33 +417,32 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                     clickCount++;
                 }
 
-                //Point mousePoint = getCoordsOnPage(e.getX(), e.getY(), commonValues.getCurrentPage());
                 final int pagenumber = decode_pdf.getPageNumber();
                 this.page_data = decode_pdf.getPdfPageData();
                 final int crx = page_data.getCropBoxX(pagenumber);
                 final int cry = page_data.getCropBoxY(pagenumber);
-                commonValues.m_x1 = (int)e.getX()+crx;
-                commonValues.m_y1 = (int)e.getY()+cry;
+                commonValues.m_x1 = (int) e.getX() + crx;
+                commonValues.m_y1 = (int) e.getY() + cry;
 
-                final FXDisplay fxRenderer=(FXDisplay) decode_pdf.getDynamicRenderer();                       
-                    
+                final FXDisplay fxRenderer = (FXDisplay) decode_pdf.getDynamicRenderer();
+
                 if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
                     id = fxRenderer.isInsideImage(commonValues.m_x1, commonValues.m_y1);
                 } else {
                     id = -1;
-                } 
+                }
 
                 if (lastId != id && id != -1) {
-                       
+
                     final int[] imageArea = fxRenderer.getAreaAsArray(id);
 
                     if (imageArea != null) {
                         int h = imageArea[3];
                         int w = imageArea[2];
 
-                        int x = imageArea[0]; 
+                        int x = imageArea[0];
                         int y = imageArea[1];
-                             
+
                         fxRenderer.setneedsHorizontalInvert(false);
                         fxRenderer.setneedsVerticalInvert(false);
                         //						Check for negative values
@@ -457,7 +456,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                             h = -h;
                             y -= h;
                         }
-                        
+
                         decode_pdf.getPages().setHighlightedImage(new int[]{x, y, w, h});
                     }
                     lastId = id;
@@ -465,10 +464,10 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                     decode_pdf.getPages().setHighlightedImage(null);
                     lastId = -1;
                 }
-                
-                if ((id == -1) &&  (clickCount > 1)) {
-                        switch (clickCount) {
-                            case 1: //single click adds caret to page
+
+                if ((id == -1) && (clickCount > 1)) {
+                    switch (clickCount) {
+                        case 1: //single click adds caret to page
                                 /*
                                  * Does nothing yet. IF above prevents this case
                                  * from ever happening Add Caret code here and
@@ -476,32 +475,32 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                                  * remember to comment out "if(clickCount>1)"
                                  * from around this switch to activate
                                  */
-                                break;
-                            case 2: //double click selects line
-                                final int[][] lineAreas = decode_pdf.getTextLines().getLineAreasAs2DArray(commonValues.getCurrentPage());
+                            break;
+                        case 2: //double click selects line
+                            final int[][] lineAreas = decode_pdf.getTextLines().getLineAreasAs2DArray(commonValues.getCurrentPage());
 
-                                if (lineAreas != null) { //Null is page has no lines
-                                    final int[] point = {commonValues.m_x1, commonValues.m_y1, 1, 1};
-                                    for (int i = 0; i != lineAreas.length; i++) {
-                                        if (TextLines.intersects(point, lineAreas[i])) {
-                                            decode_pdf.updateCursorBoxOnScreen(lineAreas[i], DecoderOptions.highlightColor.getRGB());
-                                            decode_pdf.getTextLines().addHighlights(new int[][]{lineAreas[i]}, false, commonValues.getCurrentPage());
-                                        }
+                            if (lineAreas != null) { //Null is page has no lines
+                                final int[] point = {commonValues.m_x1, commonValues.m_y1, 1, 1};
+                                for (int i = 0; i != lineAreas.length; i++) {
+                                    if (TextLines.intersects(point, lineAreas[i])) {
+                                        decode_pdf.updateCursorBoxOnScreen(lineAreas[i], DecoderOptions.highlightColor.getRGB());
+                                        decode_pdf.getTextLines().addHighlights(new int[][]{lineAreas[i]}, false, commonValues.getCurrentPage());
                                     }
                                 }
-                                break;
-                            case 3: //triple click selects paragraph
-                                final int[] para = decode_pdf.getTextLines().setFoundParagraphAsArray(commonValues.m_x1, commonValues.m_y1, commonValues.getCurrentPage());
-                                if (para != null) {
-                                    decode_pdf.updateCursorBoxOnScreen(para, DecoderOptions.highlightColor.getRGB());
-                                }
-                                break;
-                            case 4: //quad click selects page
-                                currentCommands.executeCommand(Commands.SELECTALL, null);
-                                break;
-                        }
+                            }
+                            break;
+                        case 3: //triple click selects paragraph
+                            final int[] para = decode_pdf.getTextLines().setFoundParagraphAsArray(commonValues.m_x1, commonValues.m_y1, commonValues.getCurrentPage());
+                            if (para != null) {
+                                decode_pdf.updateCursorBoxOnScreen(para, DecoderOptions.highlightColor.getRGB());
+                            }
+                            break;
+                        case 4: //quad click selects page
+                            currentCommands.executeCommand(Commands.SELECTALL, null);
+                            break;
                     }
-                
+                }
+
                 decode_pdf.repaintPane(commonValues.getCurrentPage());
             }
         }
@@ -519,42 +518,42 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
 
     @Override
     public void mousePressed(final MouseEvent e) {
-        if ((decode_pdf.getDisplayView() == Display.SINGLE_PAGE || (activateMultipageHighlight && decode_pdf.getDisplayView() == Display.CONTINUOUS && decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING)) 
-            && (isOtherKey(e))) {
+        if ((decode_pdf.getDisplayView() == Display.SINGLE_PAGE || (activateMultipageHighlight && decode_pdf.getDisplayView() == Display.CONTINUOUS && decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING))
+                && (isOtherKey(e))) {
                 /*
                  * remove any outline and reset variables used to track change
                  */
-                decode_pdf.updateCursorBoxOnScreen(null, 0); //remove box
-                decode_pdf.getPages().setHighlightedImage(null);// remove image highlight
-                decode_pdf.getTextLines().clearHighlights();
+            decode_pdf.updateCursorBoxOnScreen(null, 0); //remove box
+            decode_pdf.getPages().setHighlightedImage(null); // remove image highlight
+            decode_pdf.getTextLines().clearHighlights();
 
-                //Remove focus from form is if anywhere on pdf panel is clicked / mouse dragged
-                decode_pdf.requestFocus();
+            //Remove focus from form is if anywhere on pdf panel is clicked / mouse dragged
+            decode_pdf.requestFocus();
 
-                //Point values = getCoordsOnPage(e.getX(), e.getY(), commonValues.getCurrentPage());
-                final int pagenumber = decode_pdf.getPageNumber();
-                this.page_data = decode_pdf.getPdfPageData();
-                final int crx = page_data.getCropBoxX(pagenumber);
-                final int cry = page_data.getCropBoxY(pagenumber);
-                commonValues.m_x1 = (int)e.getX()+crx;
-                commonValues.m_y1 = (int)e.getY()+cry;
+            //Point values = getCoordsOnPage(e.getX(), e.getY(), commonValues.getCurrentPage());
+            final int pagenumber = decode_pdf.getPageNumber();
+            this.page_data = decode_pdf.getPdfPageData();
+            final int crx = page_data.getCropBoxX(pagenumber);
+            final int cry = page_data.getCropBoxY(pagenumber);
+            commonValues.m_x1 = (int) e.getX() + crx;
+            commonValues.m_y1 = (int) e.getY() + cry;
 
-                final int[][] rectParams = decode_pdf.getTextLines().getHighlightedAreasAs2DArray(commonValues.getCurrentPage());
-                if (rectParams != null && rectParams.length > 0) {
-                    decode_pdf.getPages().refreshDisplay();
-                }
+            final int[][] rectParams = decode_pdf.getTextLines().getHighlightedAreasAs2DArray(commonValues.getCurrentPage());
+            if (rectParams != null && rectParams.length > 0) {
+                decode_pdf.getPages().refreshDisplay();
             }
         }
-    
+    }
+
 
     @Override
     public void mouseReleased(final MouseEvent e) {
         if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE || (activateMultipageHighlight && decode_pdf.getDisplayView() == Display.CONTINUOUS && decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING)) {
-            
-            if(cm!=null && cm.isShowing()){
+
+            if (cm != null && cm.isShowing()) {
                 cm.hide();
             }
-            
+
             if (isOtherKey(e)) {
 
                 //If we have been highlighting, stop now and reset all flags
@@ -573,7 +572,7 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                      */
                     decode_pdf.updateCursorBoxOnScreen(null, 0); //remove box
                     decode_pdf.getTextLines().clearHighlights(); //remove highlighted text
-                    decode_pdf.getPages().setHighlightedImage(null);// remove image highlight
+                    decode_pdf.getPages().setHighlightedImage(null); // remove image highlight
 
                     decode_pdf.setCursor(Cursor.DEFAULT);
 
@@ -584,35 +583,35 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
                 }
 
             } else if ((e.getButton().equals(MouseButton.SECONDARY)) &&
-                 (currentGUI.getProperties().getValue("allowRightClick").toLowerCase().equals("true"))) {
-                    if(cm==null){
-                        createRightClickMenu();
-                    }
-                    
-                    cm.show(((JavaFxGUI)currentGUI).getRoot(),e.getScreenX(), e.getScreenY());
-
-                    if (decode_pdf.getPages().getHighlightedImage() == null) {
-                        extractImage.setDisable(true);
-                    } else {
-                        extractImage.setDisable(false);
-                    }
-
-                    if (decode_pdf.getTextLines().getHighlightedAreasAs2DArray(commonValues.getCurrentPage()) == null) {
-                        extractText.setDisable(true);
-                        find.setDisable(true);
-                        speakHighlighted.setDisable(true);
-                        copy.setDisable(true);
-                    } else {
-                        extractText.setDisable(false);
-                        find.setDisable(false);
-                        speakHighlighted.setDisable(false);
-                        copy.setDisable(false);
-                    }
-
+                    (currentGUI.getProperties().getValue("allowRightClick").toLowerCase().equals("true"))) {
+                if (cm == null) {
+                    createRightClickMenu();
                 }
+
+                cm.show(((JavaFxGUI) currentGUI).getRoot(), e.getScreenX(), e.getScreenY());
+
+                if (decode_pdf.getPages().getHighlightedImage() == null) {
+                    extractImage.setDisable(true);
+                } else {
+                    extractImage.setDisable(false);
+                }
+
+                if (decode_pdf.getTextLines().getHighlightedAreasAs2DArray(commonValues.getCurrentPage()) == null) {
+                    extractText.setDisable(true);
+                    find.setDisable(true);
+                    speakHighlighted.setDisable(true);
+                    copy.setDisable(true);
+                } else {
+                    extractText.setDisable(false);
+                    find.setDisable(false);
+                    speakHighlighted.setDisable(false);
+                    copy.setDisable(false);
+                }
+
             }
         }
-    
+    }
+
 
     @Override
     public void mouseDragged(final MouseEvent e) {
@@ -623,14 +622,14 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
             }
 
             //Point values = getCoordsOnPage(e.getX(), e.getY(), commonValues.getCurrentPage());
-           
+
             // Adjust to center of decode_pdf
             final int pagenumber = decode_pdf.getPageNumber();
             final int crx = decode_pdf.getPdfPageData().getCropBoxX(pagenumber);
             final int cry = decode_pdf.getPdfPageData().getCropBoxY(pagenumber);
             commonValues.m_x2 = (int) e.getX() + crx;
             commonValues.m_y2 = (int) e.getY() + cry;
-            
+
             if (commonValues.isPDF()) {
                 decode_pdf.setCursor(Cursor.TEXT);
                 generateNewCursorBox();
@@ -643,76 +642,46 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
     public void mouseMoved(final MouseEvent e) {
         //Stub
     }
-    
+
     /**
      * Find and updates coords for the current page
-     * @param x :: The x coordinate of the cursors location in display area coordinates
-     * @param y :: The y coordinate of the cursors location in display area coordinates
+     *
+     * @param x    :: The x coordinate of the cursors location in display area coordinates
+     * @param y    :: The y coordinate of the cursors location in display area coordinates
      * @param page :: The page we are currently on
      * @return Point object of the cursor location in page coordinates
      */
     @SuppressWarnings("MethodMayBeStatic")
-    public Point getCoordsOnPage(final double x, final double y, final int page){
-        
+    public Point getCoordsOnPage(final double x, final double y, final int page) {
+
         //Update cursor position if over page
         throw new UnsupportedOperationException("We do not currently use this method for JavaFX as it appears the X and Y coords\n" +
-                                                    " can be retrieved from the bottom left in JavaFX compared to the top left in Swing "+x+" "+y+" "+page);
-        
-//        Point pagePosition;
-//        switch(decode_pdf.getDisplayView()){
-//            case Display.SINGLE_PAGE:
-//                pagePosition = getPageCoordsInSingleDisplayMode(x, y, page);
-//                x = pagePosition.getX();
-//                y = pagePosition.getY();
-//                break;
-//            case Display.CONTINUOUS:
-//                pagePosition = getPageCoordsInContinuousDisplayMode(x, y, page);
-//                x = pagePosition.getX();
-//                y = pagePosition.getY();
-//                break;
-//                
-//            case Display.FACING:
-//                pagePosition = getPageCoordsInFacingDisplayMode(x, y);
-//                x = pagePosition.getX();
-//                y = pagePosition.getY();
-//                break;
-//                
-//            case Display.CONTINUOUS_FACING:
-//                pagePosition = getPageCoordsInContinuousFacingDisplayMode(x, y, page);
-//                x = pagePosition.getX();
-//                y = pagePosition.getY();
-//                break;
-//            default : break;
-//        }
-//        
-//        Point point = new Point();
-//        point.setX(x);
-//        point.setY(y);
-//        return point;
+                " can be retrieved from the bottom left in JavaFX compared to the top left in Swing " + x + " " + y + " " + page);
     }
-  
+
     /**
      * Checks to see whether the primary mouse button or any other key that
      * is not the secondary mouse button or the middle mouse button is pressed,
      * if it is then return true, otherwise return false.
+     *
      * @param e
-     * @return 
+     * @return
      */
-    private static boolean isOtherKey(final MouseEvent e){
+    private static boolean isOtherKey(final MouseEvent e) {
 
         return e.getButton().equals(MouseButton.PRIMARY) || e.getButton().equals(MouseButton.NONE);
     }
-    
+
     /**
      * generate new  cursorBox and highlight extractable text,
      * if hardware acceleration off and extraction on<br>
      * and update current cursor box displayed on screen
      */
     protected void generateNewCursorBox() {
-        
+
         //redraw rectangle of dragged box onscreen if it has changed significantly
-        if ((old_m_x2!=-1)||(old_m_y2!=-1)||(Math.abs(commonValues.m_x2-old_m_x2)>5)||(Math.abs(commonValues.m_y2-old_m_y2)>5)) {
-            
+        if ((old_m_x2 != -1) || (old_m_y2 != -1) || (Math.abs(commonValues.m_x2 - old_m_x2) > 5) || (Math.abs(commonValues.m_y2 - old_m_y2) > 5)) {
+
             //allow for user to go up
             int top_x = commonValues.m_x1;
             if (commonValues.m_x1 > commonValues.m_x2) {
@@ -724,12 +693,12 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
             }
             final int w = Math.abs(commonValues.m_x2 - commonValues.m_x1);
             final int h = Math.abs(commonValues.m_y2 - commonValues.m_y1);
-            
+
             //add an outline rectangle  to the display
-            final int[] currentRectangle={top_x,top_y,w,h};
-            
+            final int[] currentRectangle = {top_x, top_y, w, h};
+
             //tell JPedal to highlight text in this area (you can add other areas to array)
-            decode_pdf.updateCursorBoxOnScreen(currentRectangle,DecoderOptions.highlightColor.getRGB());
+            decode_pdf.updateCursorBoxOnScreen(currentRectangle, DecoderOptions.highlightColor.getRGB());
             if (!currentCommands.extractingAsImage) {
                 final int[] r = {commonValues.m_x1, commonValues.m_y1, commonValues.m_x2 - commonValues.m_x1, commonValues.m_y2 - commonValues.m_y1};
 
@@ -737,9 +706,9 @@ public class JavaFXMouseSelector extends MouseSelector implements JavaFXMouseFun
 
             }
             //reset tracking
-            old_m_x2=commonValues.m_x2;
-            old_m_y2=commonValues.m_y2;
-            
+            old_m_x2 = commonValues.m_x2;
+            old_m_y2 = commonValues.m_y2;
+
         }
         decode_pdf.repaintPane(commonValues.getCurrentPage());
     }

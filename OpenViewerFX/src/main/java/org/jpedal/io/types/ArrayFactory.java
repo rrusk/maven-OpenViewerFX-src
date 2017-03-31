@@ -36,7 +36,6 @@ import org.jpedal.io.PdfFileReader;
 import org.jpedal.objects.raw.PdfDictionary;
 
 /**
- *
  * @author markee
  */
 public class ArrayFactory {
@@ -58,7 +57,7 @@ public class ArrayFactory {
                 return new IntArray(objectReader, i, raw);
 
             case PdfDictionary.VALUE_IS_KEY_ARRAY:
-                return new KeyArray(objectReader, i,  raw);
+                return new KeyArray(objectReader, i, raw);
 
             case PdfDictionary.VALUE_IS_MIXED_ARRAY:
                 return new Array(objectReader, i, type, raw);

@@ -36,20 +36,21 @@ package org.jpedal.objects;
  * Code for storing and modifying the current clip held in the GraphicsState.
  */
 public interface PdfClip {
-    
+
     /**
      * Updates the clip by adding the passed in shape to the clip.
-     * 
+     *
      * @param path The path to be added to the clip
      * @return Whether the clip has been changed
      */
     boolean updateClip(Object path);
-    
+
     /**
      * Gets the current clipping shape. Must be cast to the appropriate object.
-     * @return 
+     *
+     * @return
      */
     Object getClippingShape();
-    
-    
+
+
 }

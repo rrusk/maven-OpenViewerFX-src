@@ -37,6 +37,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.io.File;
 import java.io.IOException;
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -64,19 +65,19 @@ import org.jpedal.utils.Messages;
  * Extracting the drawn CursorBox as an Image.
  */
 public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
-    
-    protected static final int BUTTONWIDTH = 55;
-    
-    public static void execute(final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
-        extractSelectedScreenAsImage(commonValues,currentGUI,decode_pdf); //Calls the generic code.
 
-        
+    protected static final int BUTTONWIDTH = 55;
+
+    public static void execute(final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
+        extractSelectedScreenAsImage(commonValues, currentGUI, decode_pdf); //Calls the generic code.
+
+
         final VBox pane = new VBox();
-        final FXDialog dialog = new FXDialog((Stage)currentGUI.getFrame(), Modality.APPLICATION_MODAL, pane);
+        final FXDialog dialog = new FXDialog((Stage) currentGUI.getFrame(), Modality.APPLICATION_MODAL, pane);
         dialog.setTitle(Messages.getMessage("PdfViewerMessage.SaveImage"));
         dialog.setResizeable(false);
         final String style;
-        
+
         //wrap image so we can display
         if (snapShot != null) {
 
@@ -123,7 +124,7 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
         } else {
             return;
         }
-        
+
         final HBox btnBox = new HBox();
         final Button copyBtn = new Button(Messages.getMessage("PdfSnapshotPreview.Copy"));
         final Button saveBtn = new Button(Messages.getMessage("PdfSnapshotPreview.Save"));
@@ -132,38 +133,39 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
         btnBox.setAlignment(Pos.BOTTOM_CENTER);
         btnBox.setSpacing(5);
         btnBox.setPadding(new Insets(5));
-        
+
         //Set colors for display
-        if(style!=null){
+        if (style != null) {
             btnBox.setStyle(style);
         }
-        
+
         //Prevent button resize from hiding text
         copyBtn.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
         saveBtn.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
         cancelBtn.setMinSize(Button.USE_PREF_SIZE, Button.USE_PREF_SIZE);
-        
+
         pane.getChildren().add(btnBox);
-        
+
         //Ensure window is never so small as to hide buttons
         dialog.getDialog().sizeToScene();
-        
+
         copyBtn.setPrefWidth(BUTTONWIDTH);
         copyBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override 
+            @Override
             public void handle(final ActionEvent t) {
-                
-            dialog.getDialog().hide();
 
-            final ClipboardImage clipboardImage = new ClipboardImage(snapShot);
-            final Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-            c.setContents(clipboardImage, null);
+                dialog.getDialog().hide();
+
+                final ClipboardImage clipboardImage = new ClipboardImage(snapShot);
+                final Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+                c.setContents(clipboardImage, null);
             }
         });
-        
+
         saveBtn.setPrefWidth(BUTTONWIDTH);
         saveBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent t) {
+            @Override
+            public void handle(final ActionEvent t) {
 
                 dialog.getDialog().hide();
 
@@ -176,44 +178,45 @@ public class JavaFXExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                 chooser.getExtensionFilters().add(extFilter2);
 
                 final File outputFile = chooser.showSaveDialog(dialog.getDialog());
-                
-                    if (outputFile != null) {
-                        final StringBuilder outName = new StringBuilder(outputFile.getAbsolutePath());
 
-                        final FileChooser.ExtensionFilter filter = chooser.getSelectedExtensionFilter();
+                if (outputFile != null) {
+                    final StringBuilder outName = new StringBuilder(outputFile.getAbsolutePath());
 
-                        String format = "tif";
-                        if (filter.getDescription().toLowerCase().contains("jp")) {
-                            format = "jpg";
-                        }
+                    final FileChooser.ExtensionFilter filter = chooser.getSelectedExtensionFilter();
 
-                        if (!outName.toString().toLowerCase().endsWith(('.' + format).toLowerCase())) {
-                            outName.append('.').append(format);
-                        }
+                    String format = "tif";
+                    if (filter.getDescription().toLowerCase().contains("jp")) {
+                        format = "jpg";
+                    }
 
-                        //Do the actual save
-                        if (snapShot != null) {
+                    if (!outName.toString().toLowerCase().endsWith(('.' + format).toLowerCase())) {
+                        outName.append('.').append(format);
+                    }
 
-                            try {
-                                DefaultImageHelper.write(snapShot, format, outName.toString());
-                            } catch (final IOException ex) {
-                                LogWriter.writeLog("Exception in writing image " + ex);
-                            }
+                    //Do the actual save
+                    if (snapShot != null) {
+
+                        try {
+                            DefaultImageHelper.write(snapShot, format, outName.toString());
+                        } catch (final IOException ex) {
+                            LogWriter.writeLog("Exception in writing image " + ex);
                         }
                     }
+                }
             }
         });
-        
+
         cancelBtn.setPrefWidth(BUTTONWIDTH);
         cancelBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent t) {
+            @Override
+            public void handle(final ActionEvent t) {
                 dialog.close();
             }
         });
-        
+
         dialog.show();
-        
-        if(GUI.debugFX){
+
+        if (GUI.debugFX) {
             System.out.println("Save Dialog required for JavaFXExtractSelectionAsImage.java");
         }
     }

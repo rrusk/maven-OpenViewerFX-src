@@ -33,7 +33,6 @@
 package org.jpedal.utils;
 
 
-
 public interface LogScanner {
 
     //passed any messages from LogWriter.writeLog

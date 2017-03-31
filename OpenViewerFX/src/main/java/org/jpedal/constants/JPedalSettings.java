@@ -35,12 +35,12 @@ package org.jpedal.constants;
 /**
  * used by JPedal for contants which allow user to set flags<br>
  * This is achived with a PdfDecoder method modifyJPedalParameters(Map values).<br>
-
+ * <p>
  * How does it work?<br>
- *
+ * <p>
  * The example code below gives examples of how to use this function and a full list of valid settings.
  * It should be called before any files are opened.<br>
-
+ * <p>
  * Map mapValues=new HashMap();<br>
  * mapValues.put(JPedalSettings.DISPLAY_INVISIBLE_TEXT,Boolean.TRUE);<br>
  * mapValues.put(JPedalSettings.TEXT_HIGHLIGHT_COLOUR, Color.GREEN); <br>
@@ -50,85 +50,131 @@ package org.jpedal.constants;
  */
 
 public class JPedalSettings {
-    
-	/**allow user to set colour used to highlight text found in JPanel*/
-	public static final Integer TEXT_HIGHLIGHT_COLOUR = 1;
-    
-	/**allow user to display invisible text in current fill colour*/
-	public static final Integer DISPLAY_INVISIBLE_TEXT = 2;
 
-    /**allow user to cache large fonts to avoid big memory hit*/
-    public static final Integer CACHE_LARGE_FONTS= 3;
+    /**
+     * allow user to set colour used to highlight text found in JPanel
+     */
+    public static final Integer TEXT_HIGHLIGHT_COLOUR = 1;
 
-    /**allow user print all fonts as textprinting*/
-    public static final Integer TEXT_PRINT_NON_EMBEDDED_FONTS= 4;
+    /**
+     * allow user to display invisible text in current fill colour
+     */
+    public static final Integer DISPLAY_INVISIBLE_TEXT = 2;
 
-    /**allow user to define color for text when highlighted*/
+    /**
+     * allow user to cache large fonts to avoid big memory hit
+     */
+    public static final Integer CACHE_LARGE_FONTS = 3;
+
+    /**
+     * allow user print all fonts as textprinting
+     */
+    public static final Integer TEXT_PRINT_NON_EMBEDDED_FONTS = 4;
+
+    /**
+     * allow user to define color for text when highlighted
+     */
     public static final Integer TEXT_INVERTED_COLOUR = 5;
     
     /*allow user to define custom upscaling val to improve quality of extr images*/
     //public static final Integer IMAGE_UPSCALE =new Integer(6);
-    
-    /**allow user to set a flag to use hi res settings*/
+
+    /**
+     * allow user to set a flag to use hi res settings
+     */
     @Deprecated
     public static final Integer IMAGE_HIRES = 7;
     
     /*allow user to extract best quality images at the cost of memory */
     //public static final Integer EXTRACT_AT_BEST_QUALITY = new Integer(8);
 
-    /**allow user to limit the amount of scaling on Best quality*/
+    /**
+     * allow user to limit the amount of scaling on Best quality
+     */
     public static final Integer EXTRACT_AT_BEST_QUALITY_MAXSCALING = 9;
 
-    /**allow user to limit the amount of scaling on Best quality - needs PAGE_SIZE_OVERRIDES_IMAGE set to true*/
+    /**
+     * allow user to limit the amount of scaling on Best quality - needs PAGE_SIZE_OVERRIDES_IMAGE set to true
+     */
     public static final Integer EXTRACT_AT_PAGE_SIZE = 10;
 
-    /**allow user to choose which takes priority*/
+    /**
+     * allow user to choose which takes priority
+     */
     public static final Integer PAGE_SIZE_OVERRIDES_IMAGE = 11;
 
-    /**allow user to set highlight to invert colours on area of page*/
+    /**
+     * allow user to set highlight to invert colours on area of page
+     */
     public static final Integer INVERT_HIGHLIGHT = 12;
     
     /*allow user to set highlight mode*/
     //public static final Integer TEXT_HIGHLIGHT_MODE = new Integer(13);
 
-    /**allow user to stop some forms being printed*/
+    /**
+     * allow user to stop some forms being printed
+     */
     public static final Integer IGNORE_FORMS_ON_PRINT = 14;
-    
-    /**allow user to generate pages smaller than page size using hi res*/
+
+    /**
+     * allow user to generate pages smaller than page size using hi res
+     */
     public static final Integer ALLOW_PAGES_SMALLER_THAN_PAGE_SIZE = 15;
-    
-    /**Integer for color to use for background*/
+
+    /**
+     * Integer for color to use for background
+     */
     public static final Integer PAGE_COLOR = 16;
-    
-    /**Integer for color of non rendered page background*/
+
+    /**
+     * Integer for color of non rendered page background
+     */
     public static final Integer UNDRAWN_PAGE_COLOR = 17;
 
-    /**Integer for color to use for text*/
+    /**
+     * Integer for color to use for text
+     */
     public static final Integer TEXT_COLOR = 18;
 
-    /**Integer to flag text value should be changed*/
+    /**
+     * Integer to flag text value should be changed
+     */
     public static final Integer REPLACE_TEXT_COLOR = 19;
 
-    /**Integer to flag alt text color should include line art*/
+    /**
+     * Integer to flag alt text color should include line art
+     */
     public static final Integer CHANGE_LINEART = 20;
-    
-    /**Integer for color to use for text*/
+
+    /**
+     * Integer for color to use for text
+     */
     public static final Integer DISPLAY_BACKGROUND = 21;
 
-    /**Integer to flag text value should be changed*/
+    /**
+     * Integer to flag text value should be changed
+     */
     public static final Integer REPLACE_DISPLAY_BACKGROUND = 22;
 
-    /**Integer to flag text value threshold for change*/
+    /**
+     * Integer to flag text value threshold for change
+     */
     public static final Integer REPLACEMENT_COLOR_THRESHOLD = 23;
-    
-    /**Integer to flag enhance thin lines*/
+
+    /**
+     * Integer to flag enhance thin lines
+     */
     public static final Integer ENHANCE_FRACTIONAL_LINES = 24;
 
-    /**Possible value for TEXT_HIGHLIGHT_MODE use legacy highlighting mode*/
+    /**
+     * Possible value for TEXT_HIGHLIGHT_MODE use legacy highlighting mode
+     */
     public static final Integer LEGACY_HIGHLIGHTING = 140;
 
-    /**Possible value for TEXT_HIGHLIGHT_MODE use legacy highlighting mode*/
+    /**
+     * Possible value for TEXT_HIGHLIGHT_MODE use legacy highlighting mode
+     */
     public static final Integer TEXT_BASED_HIGHLIGHTING = 150;
-    
+
 
 }

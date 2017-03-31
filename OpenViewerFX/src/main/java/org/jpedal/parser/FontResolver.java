@@ -47,80 +47,88 @@ import org.jpedal.render.output.HTMLFontHandler;
 import org.jpedal.utils.LogWriter;
 
 public class FontResolver {
+
     /**
      * decode or get font
+     *
+     * @param gs
      * @param pdfStreamDecoder
      * @param fontID
      * @param pdfFontFactory
+     * @param cache
+     * @return
      */
     public static PdfFont resolveFont(final GraphicsState gs, final PdfStreamDecoder pdfStreamDecoder, String fontID, final PdfFontFactory pdfFontFactory, final PdfObjectCache cache) {
 
         PdfFont restoredFont;
 
-        String fontKey=fontID;
-        if(gs!=null && cache.resolvedFonts.get("t-"+fontID)!=null){ //see if cached type3 font and use colour if so
-             fontKey = fontID + ':' + gs.nonstrokeColorSpace.getColor().getRGB();
-        }
-        restoredFont=cache.resolvedFonts.get(fontKey);
-        
-        //check it was decoded
-        if(restoredFont==null){
+        //local copies
+        final PdfObjectReader currentPdfFile = pdfStreamDecoder.currentPdfFile;
+        final ParserOptions parserOptions = pdfStreamDecoder.parserOptions;
 
-            PdfObject newFont=null;
-            final byte[] newFontData= cache.unresolvedFonts.get(fontID);
-            if(newFontData==null){ //once decoded remove from this list of stub font objects 
+        String fontKey = fontID;
+        if (gs != null && cache.resolvedFonts.get("t-" + fontID) != null) { //see if cached type3 font and use colour if so
+            fontKey = fontID + ':' + gs.nonstrokeColorSpace.getColor().getRGB();
+        }
+        restoredFont = cache.resolvedFonts.get(fontKey);
+
+        //check it was decoded
+        if (restoredFont == null) {
+
+            PdfObject newFont = null;
+            final byte[] newFontData = cache.unresolvedFonts.get(fontID);
+            if (newFontData == null) { //once decoded remove from this list of stub font objects 
                 cache.directFonts.remove(fontID);
-            }else{
-                newFont=getFontObjectFromRefOrDirect(pdfStreamDecoder.currentPdfFile, newFontData);
+            } else {
+                newFont = getFontObjectFromRefOrDirect(currentPdfFile, newFontData);
             }
-            
+
             /*
              * in Flatten forms, if font not in our resources, we need to create one based on name
              * Otherwise we will not switch from whatever is last being used on page (and might have custom value)
              */
-            if(pdfStreamDecoder.parserOptions.isFlattenedForm() && newFont==null){
+            if (parserOptions.isFlattenedForm() && newFont == null) {
 
-                newFont=new FontObject("0 0 R");
-                
+                newFont = new FontObject("0 0 R");
+
                 fontID = resolveFlattenedFont(fontID, newFont);
             }
 
-            if(newFont!=null){
+            if (newFont != null) {
 
-                pdfStreamDecoder.currentPdfFile.checkResolved(newFont);
+                currentPdfFile.checkResolved(newFont);
 
                 try {
-                    
-                    final org.jpedal.render.DynamicVectorRenderer current= pdfStreamDecoder.current;
-                    
-                    boolean fallbackToArial=false;
-                    
-                    final boolean isHTML=current.isHTMLorSVG();
-                    
+
+                    final org.jpedal.render.DynamicVectorRenderer current = pdfStreamDecoder.current;
+
+                    boolean fallbackToArial = false;
+
+                    final boolean isHTML = current.isHTMLorSVG();
+
                     /* if text as shape or image, display Arial if font not embedded*/
-                    if(isHTML && !current.getBooleanValue(DynamicVectorRenderer.IsRealText)){
-                        fallbackToArial=true;
+                    if (isHTML && !current.getBooleanValue(DynamicVectorRenderer.IsRealText)) {
+                        fallbackToArial = true;
                     }
-                    
+
                     restoredFont = pdfFontFactory.createFont(fallbackToArial, newFont, fontID, pdfStreamDecoder.objectStoreStreamRef,
-                            pdfStreamDecoder.parserOptions.isRenderPage(),
-                            pdfStreamDecoder.errorTracker, pdfStreamDecoder.isPrinting, isHTML);
+                            parserOptions.isRenderPage(), pdfStreamDecoder.errorTracker, isHTML);
 
                     if (isHTML) {
-                        HTMLFontHandler.processFont(restoredFont, current, newFont, pdfStreamDecoder.currentPdfFile);
+                        HTMLFontHandler.processFont(restoredFont, current, newFont, currentPdfFile);
                     }
-                   
+
                 } catch (final PdfException e) {
                     LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
 
             //store (we cache Type3 with colour as colour can change)
-            if(restoredFont!=null && !pdfStreamDecoder.parserOptions.isFlattenedForm()) {
-                pdfStreamDecoder.cache.resolvedFonts.put(fontKey, restoredFont);
-                
-                if(restoredFont.getFontType()==StandardFonts.TYPE3){
-                    pdfStreamDecoder.cache.resolvedFonts.put("t-"+fontID, new PdfFont());
+            if (restoredFont != null && !pdfStreamDecoder.parserOptions.isFlattenedForm()) {
+                cache.resolvedFonts.put(fontKey, restoredFont);
+
+                if (restoredFont.getFontType() == StandardFonts.TYPE3) {
+                    cache.resolvedFonts.put("t-" + fontID, new PdfFont());
                 }
             }
         }
@@ -129,37 +137,37 @@ public class FontResolver {
     }
 
     private static String resolveFlattenedFont(String fontID, final PdfObject newFont) {
-        String name= StandardFonts.expandName(fontID.replace(",", "-"));
+        String name = StandardFonts.expandName(fontID.replace(",", "-"));
         //if font not present then use a replacement
-        if(FontMappings.fontSubstitutionAliasTable.get(name)==null && FontMappings.fontSubstitutionTable!=null && FontMappings.fontSubstitutionTable.get(name)==null){
-            final String rawName=name.toLowerCase();
-            if(rawName.contains("bold")) {
+        if (FontMappings.fontSubstitutionAliasTable.get(name) == null && FontMappings.fontSubstitutionTable != null && FontMappings.fontSubstitutionTable.get(name) == null) {
+            final String rawName = name.toLowerCase();
+            if (rawName.contains("bold")) {
                 name = "Arial-Bold";
-            } else if(rawName.contains("italic")) {
+            } else if (rawName.contains("italic")) {
                 name = "Arial-Italic";
             } else {
                 name = "Arial";
             }
         }
         newFont.setConstant(PdfDictionary.Subtype, StandardFonts.TRUETYPE);
-        fontID=StandardFonts.expandName(name); //turns common shortened versions used in AP (ie Helv to Helvetica)
+        fontID = StandardFonts.expandName(name); //turns common shortened versions used in AP (ie Helv to Helvetica)
         return fontID;
     }
-    
-    private static FontObject getFontObjectFromRefOrDirect(final  PdfObjectReader currentPdfFile, final byte[] data) {
-        
-        final FontObject obj  = new FontObject(new String(data));
 
-        if(data[0]=='<') {
+    private static FontObject getFontObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
+
+        final FontObject obj = new FontObject(new String(data));
+
+        if (data[0] == '<') {
             obj.setStatus(PdfObject.UNDECODED_DIRECT);
         } else {
             obj.setStatus(PdfObject.UNDECODED_REF);
         }
-        obj.setUnresolvedData(data,PdfDictionary.Font);
-        
-        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        obj.setUnresolvedData(data, PdfDictionary.Font);
+
+        final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
         objectDecoder.checkResolved(obj);
-        
+
         return obj;
     }
 }

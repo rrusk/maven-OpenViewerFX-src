@@ -35,32 +35,32 @@ package org.jpedal.examples.viewer.gui.generic;
 import org.jpedal.PdfDecoderInt;
 
 public interface GUIAnnotationPanel {
-    
-    enum FORMMODE{
+
+    enum FORMMODE {
         CREATION, EDIT
     }
-    
+
     boolean addPanel();
-    
+
     Object getAnnotationType();
-    
+
     void clearAnnotationType();
-    
+
     Object getAnnotationListener();
-    
+
     void addAnnotationForWriting(Object annot);
-    
+
     boolean annotationAdded();
 
     void clearAnnotations();
-    
+
     void saveAnnotations(String input, String output);
-    
+
     void saveForms(String input, String output, Object[] objArr);
-    
+
     void dispose();
-    
+
     Object getDisplayPanel();
-    
+
     void populateList(PdfDecoderInt decode_pdf);
 }

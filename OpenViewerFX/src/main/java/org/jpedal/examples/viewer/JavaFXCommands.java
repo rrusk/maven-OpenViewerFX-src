@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer;
 
 import java.util.Map;
+
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import org.jpedal.FileAccess;
@@ -51,12 +52,27 @@ import org.jpedal.external.JPedalActionHandler;
 import org.jpedal.external.Options;
 import org.jpedal.gui.GUIFactory;
 
+/**
+ * This class contains code to execute the actual commands.
+ * http://www.idrsolutions.com/access-pdf-viewer-features-from-your-code/
+ */
 public class JavaFXCommands extends Commands {
 
     public JavaFXCommands(final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final GUIThumbnailPanel thumbnails, final PropertiesFile properties, final GUISearchWindow searchFrame) {
         super(commonValues, currentGUI, decode_pdf, thumbnails, properties, searchFrame, null);
     }
 
+    /**
+     * main routine which executes code for current command
+     * <p>
+     * Values can also be passed in so it can be called from your own code
+     * <p>
+     * some commands return a status Object otherwise null
+     *
+     * @param ID   is of type Int
+     * @param args Program arguments passed into the Viewer.
+     * @return the status object
+     */
     @SuppressWarnings("OverlyLongMethod")
     @Override
     public Object executeCommand(final int ID, Object[] args) {
@@ -93,54 +109,54 @@ public class JavaFXCommands extends Commands {
                 case GETPDFNAME: //Used for JavaFX Netbeans PDF Viewer Plugin.
                     status = decode_pdf.getFileName(); //cast to string when using.
                     break;
-                    
-                case SINGLE:                    
-                    ((FileAccess)decode_pdf.getExternalHandler(Options.FileAccess)).setLastPageDecoded(-1);
+
+                case SINGLE:
+                    ((FileAccess) decode_pdf.getExternalHandler(Options.FileAccess)).setLastPageDecoded(-1);
                     Single.execute(args, decode_pdf, currentGUI);
                     JavaFXTextSelect.execute(args, currentGUI, mouseMode, decode_pdf);
                     break;
-                  
+
                 case CONTINUOUS:
-                    ((FileAccess)decode_pdf.getExternalHandler(Options.FileAccess)).setLastPageDecoded(-1);
+                    ((FileAccess) decode_pdf.getExternalHandler(Options.FileAccess)).setLastPageDecoded(-1);
                     Continuous.execute(decode_pdf, currentGUI, args);
                     //PanModeFX.execute(args, currentGUI, mouseMode, decode_pdf); //Enables Panning of document
                     break;
-                  
-                    case PAGEFLOW:
+
+                case PAGEFLOW:
                     PageFlow.execute(args, currentGUI, commonValues, decode_pdf, properties, searchFrame);
                     break;
-                 
+
                 case CONTINUOUS_FACING:
-                    ((FileAccess)decode_pdf.getExternalHandler(Options.FileAccess)).setLastPageDecoded(-1);
+                    ((FileAccess) decode_pdf.getExternalHandler(Options.FileAccess)).setLastPageDecoded(-1);
                     ContinuousFacing.execute(args, decode_pdf, currentGUI, commonValues);
                     //PanModeFX.execute(args, currentGUI, mouseMode, decode_pdf); //Enables Panning of document
                     break;
-                    
-                   
+
+
                 //case FACING:
-                  //  Facing.execute(args, decode_pdf, currentGUI, commonValues);
-                    //PanMode.execute(args, currentGUI, mouseMode, decode_pdf); //Enables Panning of document
-                    //break;
-                    
+                //  Facing.execute(args, decode_pdf, currentGUI, commonValues);
+                //PanMode.execute(args, currentGUI, mouseMode, decode_pdf); //Enables Panning of document
+                //break;
+
                 case SNAPSHOT:
                     extractingAsImage = Snapshot.execute(args, currentGUI, decode_pdf, extractingAsImage); // Snapshot selected area
                     if (extractingAsImage) {
                         ((Node) decode_pdf).setCursor(Cursor.CROSSHAIR);
                     }
                     break;
-                    
+
                 case ZOOMIN:
                     status = ZoomIn.execute(args, currentGUI, decode_pdf);
                     break;
-            
+
                 case ZOOMOUT:
                     status = ZoomOut.execute(args, currentGUI, decode_pdf);
                     break;
-            
+
                 case EXTRACTASIMAGE:
                     JavaFXExtractSelectionAsImage.execute(commonValues, currentGUI, decode_pdf);
                     break;
-                   
+
                 case EXTRACTTEXT:
                     JavaFXExtractText.execute(args, currentGUI, decode_pdf, commonValues);
                     break;
@@ -173,8 +189,8 @@ public class JavaFXCommands extends Commands {
                     break;
                 case PREFERENCES:
                     JavaFXPreferences.execute(args, currentGUI);
-                     break;
-               // case UPDATE:
+                    break;
+                // case UPDATE:
                 //    Update.execute(args, currentGUI);
                 case SCALING:
                     JavaFXScaling.execute(args, commonValues, decode_pdf, currentGUI);
@@ -270,13 +286,13 @@ public class JavaFXCommands extends Commands {
                     RotationRight.execute(currentGUI, commonValues);
                     break;
                 default:
-                    if(GUI.debugFX) {
+                    if (GUI.debugFX) {
                         System.out.println("Command ID " + ID + " not Implemented Yet for JavaFX");
                     }
                     break;
             }
         } else {
-            throw new RuntimeException("Swing Called JavaFXCommands");           
+            throw new RuntimeException("Swing Called JavaFXCommands");
         }
 
         //Mark as executed is not running in thread
@@ -287,12 +303,17 @@ public class JavaFXCommands extends Commands {
         return status;
 
     }
-    
+
+    /**
+     * Opens a files that has been dragged onto the viewer
+     *
+     * @throws PdfException -if an issue occurs whilst opening the file
+     */
     @Override
     public void openTransferedFile() throws PdfException {
-        
+
         decode_pdf.flushObjectValues(true);
-        
+
         JavaFXOpenFile.openFile(commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
 

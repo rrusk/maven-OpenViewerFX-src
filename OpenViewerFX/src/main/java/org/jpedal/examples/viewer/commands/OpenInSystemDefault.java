@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.commands;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.parser.DecoderOptions;
@@ -42,23 +43,33 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
 public class OpenInSystemDefault {
-    
-    public static void execute(final GUIFactory currentGUI, final Values commonValues) {
 
-        if (commonValues.getSelectedFile() != null) {
+    public static void execute(final GUIFactory currentGUI, final Values commonValues) {
+        execute(null, currentGUI, commonValues);
+    }
+
+    public static void execute(final Object[] args, final GUIFactory currentGUI, final Values commonValues) {
+
+        String file = commonValues.getSelectedFile();
+
+        if (args != null && args.length > 0) {
+            file = (String) args[0];
+        }
+
+        if (file != null) {
             try {
 
                 if (DecoderOptions.isRunningOnWindows) {
                     Runtime.getRuntime().exec(new String[]{"rundll32", "url.dll,FileProtocolHandler",
-                        commonValues.getSelectedFile()});
+                            file});
                 } else {
                     if (DecoderOptions.isRunningOnMac || DecoderOptions.isRunningOnLinux) {
                         Runtime.getRuntime().exec(new String[]{"/usr/bin/open",
-                            commonValues.getSelectedFile()});
+                                file});
                     } else {
                         if (Desktop.isDesktopSupported()) {
                             try {
-                                Desktop.getDesktop().open(new File(commonValues.getSelectedFile()));
+                                Desktop.getDesktop().open(new File(file));
                             } catch (final IOException ex) {
                                 currentGUI.showMessageDialog(Messages.getMessage("PdfSystemDefault.error"));
                                 LogWriter.writeLog(Messages.getMessage("PdfSystemDefault.exception") + ex.getMessage());

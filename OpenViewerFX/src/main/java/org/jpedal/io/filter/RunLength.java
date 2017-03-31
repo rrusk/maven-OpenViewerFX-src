@@ -36,6 +36,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Map;
+
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.FastByteArrayOutputStream;
@@ -62,7 +63,7 @@ public class RunLength extends BaseFilter implements PdfFilter {
         int len;
         int value;
 
-        count=data.length;
+        count = data.length;
         bos = new FastByteArrayOutputStream(count);
 
         for (int i = 0; i < count; i++) {
@@ -83,20 +84,20 @@ public class RunLength extends BaseFilter implements PdfFilter {
 
                 len = 257 - len;
 
-                value=data[i];
+                value = data[i];
 
 
-                for (int j = 0; j < len; j++){
+                for (int j = 0; j < len; j++) {
                     bos.write(value);
                 }
 
             } else {
                 i++;
                 len++;
-                for (int j = 0; j < len; j++){
+                for (int j = 0; j < len; j++) {
 
 
-                    value=data[i+j];
+                    value = data[i + j];
                     bos.write(value);
 
                 }
@@ -117,11 +118,11 @@ public class RunLength extends BaseFilter implements PdfFilter {
     @Override
     public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map<String, String> cachedObjects) {
 
-        this.bis=bis;
-        this.streamCache=streamCache;
-        this.cachedObjects=cachedObjects;
+        this.bis = bis;
+        this.streamCache = streamCache;
+        this.cachedObjects = cachedObjects;
 
-        try{
+        try {
 
             final int count;
             int len;
@@ -129,16 +130,16 @@ public class RunLength extends BaseFilter implements PdfFilter {
             int value2;
 
 
-            count=bis.available();
+            count = bis.available();
 
             for (int i = 0; i < count; i++) {
 
-                nextLen=bis.read();
-                if(nextLen>=128) {
+                nextLen = bis.read();
+                if (nextLen >= 128) {
                     nextLen -= 256;
                 }
 
-                len=nextLen;
+                len = nextLen;
 
                 if (len < 0) {
                     len = 256 + len;
@@ -154,22 +155,22 @@ public class RunLength extends BaseFilter implements PdfFilter {
 
                     len = 257 - len;
 
-                    value2=bis.read();
-                    if(value2>=128) {
+                    value2 = bis.read();
+                    if (value2 >= 128) {
                         value2 -= 256;
                     }
 
-                    for (int j = 0; j < len; j++){
+                    for (int j = 0; j < len; j++) {
                         streamCache.write(value2);
                     }
 
                 } else {
                     i++;
                     len++;
-                    for (int j = 0; j < len; j++){
+                    for (int j = 0; j < len; j++) {
 
-                        value2=bis.read();
-                        if(value2>=128) {
+                        value2 = bis.read();
+                        if (value2 >= 128) {
                             value2 -= 256;
                         }
                         streamCache.write(value2);
@@ -180,7 +181,7 @@ public class RunLength extends BaseFilter implements PdfFilter {
             }
         } catch (final IOException e1) {
 
-        	LogWriter.writeLog("IO exception in RunLength "+e1);
+            LogWriter.writeLog("IO exception in RunLength " + e1);
         }
     }
 }

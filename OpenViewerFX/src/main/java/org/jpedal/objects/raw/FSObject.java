@@ -40,7 +40,7 @@ public class FSObject extends FormObject {
 
     private byte[][] Names;
 
-    private PdfObject Assets, EF;
+    private PdfObject Assets, EF, Thumb, CI;
 
     public FSObject(final String ref) {
         super(ref);
@@ -61,6 +61,12 @@ public class FSObject extends FormObject {
             case PdfDictionary.EF:
                 return EF;
 
+            case PdfDictionary.Thumb:
+                return Thumb;
+
+            case PdfDictionary.CI:
+                return CI;
+
             default:
                 return super.getDictionary(id);
         }
@@ -79,6 +85,14 @@ public class FSObject extends FormObject {
 
             case PdfDictionary.EF:
                 EF = value;
+                break;
+
+            case PdfDictionary.Thumb:
+                Thumb = value;
+                break;
+
+            case PdfDictionary.CI:
+                CI = value;
                 break;
 
             default:
@@ -160,6 +174,23 @@ public class FSObject extends FormObject {
 
             default:
                 return super.getTextStreamValue(id);
+
+        }
+    }
+
+    @Override
+    public byte[] getTextStreamValueAsByte(final int id) {
+
+        switch (id) {
+
+            case PdfDictionary.Desc:
+                return rawDesc;
+
+            case PdfDictionary.UF:
+                return rawUF;
+
+            default:
+                return super.getTextStreamValueAsByte(id);
 
         }
     }

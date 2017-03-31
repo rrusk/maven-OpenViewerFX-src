@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.commands;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.utils.FileFilterer;
@@ -47,7 +48,7 @@ import org.jpedal.utils.Messages;
 /**
  * Saves the form and sends data to database server
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class SaveForm {
 
     public static void execute(final Object[] args, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final Values commonValues) {
@@ -102,8 +103,8 @@ public class SaveForm {
 
                     if (file.exists()) {
                         final int n = currentGUI.showConfirmDialog(fileToSave + '\n'
-                                + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + ".\n"
-                                + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
+                                        + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + ".\n"
+                                        + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
                                 Messages.getMessage("PdfViewerMessage.Resave"), JOptionPane.YES_NO_OPTION);
                         if (n == 1) {
                             continue;
@@ -115,11 +116,11 @@ public class SaveForm {
                 }
             }
 
-            if(currentGUI.getAnnotationPanel().annotationAdded()){
+            if (currentGUI.getAnnotationPanel().annotationAdded()) {
                 currentGUI.getAnnotationPanel().saveAnnotations(commonValues.getSelectedFile(), fileToSave);
             }
-            
-            if(ExternalHandlers.isITextPresent()){
+
+            if (ExternalHandlers.isITextPresent()) {
 //                final ItextFunctions itextFunctions = new ItextFunctions(currentGUI, commonValues.getSelectedFile(), decode_pdf);
                 ItextFunctions.saveFormsData(fileToSave);
             }
@@ -132,24 +133,24 @@ public class SaveForm {
 
         }
     }
-    
+
     /**
      * warns user forms unsaved and offers save option
      */
     public static void handleUnsaveForms(final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf) {
-        
-        if(!org.jpedal.DevFlags.GUITESTINGINPROGRESS){
-           
-        	//OLD FORM CHANGE CODE
-            if(commonValues.isFormsChanged()){
-                final int n = currentGUI.showConfirmDialog(Messages.getMessage("PdfViewerFormsUnsavedOptions.message"),Messages.getMessage("PdfViewerFormsUnsavedWarning.message"), JOptionPane.YES_NO_OPTION);
-                
-                if(n==JOptionPane.YES_OPTION) {
+
+        if (!org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
+
+            //OLD FORM CHANGE CODE
+            if (commonValues.isFormsChanged()) {
+                final int n = currentGUI.showConfirmDialog(Messages.getMessage("PdfViewerFormsUnsavedOptions.message"), Messages.getMessage("PdfViewerFormsUnsavedWarning.message"), JOptionPane.YES_NO_OPTION);
+
+                if (n == JOptionPane.YES_OPTION) {
                     SaveForm.saveChangedForm(currentGUI, decode_pdf, commonValues);
                 }
-            }  
+            }
         }
-        
+
         commonValues.setFormsChanged(false);
         currentGUI.setViewerTitle(null);
     }

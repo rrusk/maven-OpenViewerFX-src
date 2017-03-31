@@ -34,49 +34,51 @@ package org.jpedal.fonts.glyph;
 
 public class T3Glyphs extends PdfJavaGlyphs {
 
-	/**holds lookup to type 3 charProcs*/
-	private final PdfGlyph[] charProcs = new PdfGlyph[256];
+    /**
+     * holds lookup to type 3 charProcs
+     */
+    private final PdfGlyph[] charProcs = new PdfGlyph[256];
 
-	/**
-	 * template used by t1/tt fonts
-	 */
-	@Override
+    /**
+     * template used by t1/tt fonts
+     */
+    @Override
     public PdfGlyph getEmbeddedGlyph(final GlyphFactory factory, final String glyph, final float[][] Trm, final int rawInt, final String displayValue, final float currentWidth, final String key) {
 
 		/*flush cache if needed*/
-		if((lastTrm[0][0]!=Trm[0][0])|(lastTrm[1][0]!=Trm[1][0])|
-				(lastTrm[0][1]!=Trm[0][1])|(lastTrm[1][1]!=Trm[1][1])){
-			lastTrm=Trm;
-			flush();
-		}
+        if ((lastTrm[0][0] != Trm[0][0]) | (lastTrm[1][0] != Trm[1][0]) |
+                (lastTrm[0][1] != Trm[0][1]) | (lastTrm[1][1] != Trm[1][1])) {
+            lastTrm = Trm;
+            flush();
+        }
 
-		//either calculate the glyph to draw or reuse if alreasy drawn
-		PdfGlyph transformedGlyph2 = getEmbeddedCachedShape(rawInt);
+        //either calculate the glyph to draw or reuse if alreasy drawn
+        PdfGlyph transformedGlyph2 = getEmbeddedCachedShape(rawInt);
 
-		if (transformedGlyph2 == null) {
+        if (transformedGlyph2 == null) {
 
-			//shape to draw onto
-			transformedGlyph2=charProcs[rawInt];
+            //shape to draw onto
+            transformedGlyph2 = charProcs[rawInt];
 
-			//save so we can reuse if it occurs again in this TJ command
-			setEmbeddedCachedShape(rawInt, transformedGlyph2);
+            //save so we can reuse if it occurs again in this TJ command
+            setEmbeddedCachedShape(rawInt, transformedGlyph2);
 
-		}
+        }
 
-		return transformedGlyph2;
-	}
+        return transformedGlyph2;
+    }
 
-   // make key Integer and don't lookup Glyph on T3 and make charProcs an array with int key
+    // make key Integer and don't lookup Glyph on T3 and make charProcs an array with int key
     @Override
     public void setT3Glyph(final int key, final int altKey, final PdfGlyph glyph) {
 
-       charProcs[key]=glyph;
-       
-       if(altKey!=-1 && charProcs[altKey]==null) {
-           charProcs[altKey] = glyph;
-       }
+        charProcs[key] = glyph;
 
-       //debug code
+        if (altKey != -1 && charProcs[altKey] == null) {
+            charProcs[altKey] = glyph;
+        }
+
+        //debug code
 //       BufferedImage img=new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB);
 //       Graphics2D g2=img.createGraphics();
 //       g2.setPaint(Color.GREEN);
@@ -86,5 +88,5 @@ public class T3Glyphs extends PdfJavaGlyphs {
 //       if(key==49)
 //       ShowGUIMessage.showGUIMessage("x",img,"x");
 
-	}
+    }
 }

@@ -34,6 +34,7 @@ package org.jpedal.io;
 
 import java.util.HashMap;
 import java.util.Iterator;
+
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.raw.*;
 import org.jpedal.utils.StringUtils;
@@ -45,81 +46,82 @@ public class NameLookup extends HashMap<String, Object> {
 
     private final PdfFileReader objectReader;
 
-    private final HashMap<String, String> embeddedFiles=new HashMap<String, String>();
+    private final HashMap<String, String> embeddedFiles = new HashMap<String, String>();
 
     /**
-     *
      * @param objectReader
      */
     public NameLookup(final PdfFileReader objectReader) {
 
-        this.objectReader=objectReader;
+        this.objectReader = objectReader;
 
     }
 
     /**
      * read any names
+     *
      * @param nameObject
      * @param javascript
      * @param isKid
      */
-    public void readNames(final PdfObject nameObject, final Javascript javascript, final boolean isKid){
+    public void readNames(final PdfObject nameObject, final Javascript javascript, final boolean isKid) {
 
-        final PdfKeyPairsIterator keyPairs=nameObject.getKeyPairsIterator();
+        final PdfKeyPairsIterator keyPairs = nameObject.getKeyPairsIterator();
 
-        if(keyPairs.getTokenCount()>0){
+        if (keyPairs.getTokenCount() > 0) {
 
-            while(keyPairs.hasMorePairs()){
+            while (keyPairs.hasMorePairs()) {
                 this.put(keyPairs.getNextKeyAsString(), keyPairs.getNextValueAsString());
                 keyPairs.nextPair();
             }
-        }else{
+        } else {
             readNamesObject(nameObject, javascript, isKid);
         }
     }
-        
+
     /**
      * read any names
+     *
      * @param nameObject
      * @param javascript
      * @param isKid
      */
-    private void readNamesObject(final PdfObject nameObject, final Javascript javascript, final boolean isKid){
+    private void readNamesObject(final PdfObject nameObject, final Javascript javascript, final boolean isKid) {
 
-        
-        final ObjectDecoder objectDecoder=new ObjectDecoder(objectReader);
+
+        final ObjectDecoder objectDecoder = new ObjectDecoder(objectReader);
         objectDecoder.checkResolved(nameObject);
 
-        final int[] nameLists= {PdfDictionary.Dests, PdfDictionary.EmbeddedFiles, PdfDictionary.JavaScript,PdfDictionary.XFAImages};
-        int count=nameLists.length;
-        if(isKid) {
+        final int[] nameLists = {PdfDictionary.Dests, PdfDictionary.EmbeddedFiles, PdfDictionary.JavaScript, PdfDictionary.XFAImages};
+        int count = nameLists.length;
+        if (isKid) {
             count = 1;
         }
-        
+
         PdfObject pdfObj;
         PdfArrayIterator namesArray;
 
-        String name,value;
+        String name, value;
 
-        for(int ii=0;ii<count;ii++){
+        for (int ii = 0; ii < count; ii++) {
 
-            if(isKid) {
+            if (isKid) {
                 pdfObj = nameObject;
             } else {
                 pdfObj = nameObject.getDictionary(nameLists[ii]);
             }
 
-            if(pdfObj==null) {
+            if (pdfObj == null) {
                 continue;
             }
-            
+
             //any kids
             final byte[][] kidList = pdfObj.getKeyArray(PdfDictionary.Kids);
-            if(kidList!=null){
-                final int kidCount=kidList.length;
+            if (kidList != null) {
+                final int kidCount = kidList.length;
 
                 /* allow for empty value and put next pages in the queue */
-                if (kidCount> 0) {
+                if (kidCount > 0) {
 
                     for (final byte[] aKidList : kidList) {
 
@@ -127,12 +129,12 @@ public class NameLookup extends HashMap<String, Object> {
 
                         final PdfObject nextObject = new NamesObject(nextValue);
 
-                        if(aKidList[0]=='<') {
+                        if (aKidList[0] == '<') {
                             nextObject.setStatus(PdfObject.UNDECODED_DIRECT);
                         } else {
                             nextObject.setStatus(PdfObject.UNDECODED_REF);
                         }
-                        nextObject.setUnresolvedData(aKidList,nameLists[ii]);
+                        nextObject.setUnresolvedData(aKidList, nameLists[ii]);
 
                         nextObject.ignoreRecursion(false);
 
@@ -147,27 +149,27 @@ public class NameLookup extends HashMap<String, Object> {
             namesArray = pdfObj.getMixedArray(PdfDictionary.Names);
 
             //read all the values
-            if (namesArray != null && namesArray.getTokenCount()>0) {
+            if (namesArray != null && namesArray.getTokenCount() > 0) {
                 while (namesArray.hasMoreTokens()) {
 
-                    if(nameLists[ii]==PdfDictionary.EmbeddedFiles) {
+                    if (nameLists[ii] == PdfDictionary.EmbeddedFiles) {
                         name = StringUtils.getTextString(namesArray.getNextValueAsByte(true), false);
-                    }else{
-                        name =namesArray.getNextValueAsString(true);
+                    } else {
+                        name = namesArray.getNextValueAsString(true);
                     }
                     //fix for baseline_screens/11jun/Bundy_vs_F_Kruger_Sons_Bundy_v_F_Kruger!~!2200.pdf
                     //as code assumes paired values and not in this file (List a list)
-                    if(!namesArray.hasMoreTokens()) {
+                    if (!namesArray.hasMoreTokens()) {
                         continue;
                     }
 
-                    value =namesArray.getNextValueAsString(true);
+                    value = namesArray.getNextValueAsString(true);
 
-                    switch(nameLists[ii]){
+                    switch (nameLists[ii]) {
 
                         case PdfDictionary.EmbeddedFiles:
 
-                            embeddedFiles.put(name,value);
+                            embeddedFiles.put(name, value);
 
                             break;
 
@@ -175,11 +177,11 @@ public class NameLookup extends HashMap<String, Object> {
                         case PdfDictionary.JavaScript:
                             setJavaScriptName(value, objectDecoder, javascript, name);
                             break;
-                            
+
                         case PdfDictionary.XFAImages:
                             setXFAImage(value, objectDecoder, name);
                             break;
-                            
+
                         default: //just store
                             this.put(name, value);
                     }
@@ -189,56 +191,56 @@ public class NameLookup extends HashMap<String, Object> {
     }
 
     private void setXFAImage(final String value, final ObjectDecoder objectDecoder, final String name) {
-        
-        final PdfObject XFAImagesObj=new XObject(value);
+
+        final PdfObject XFAImagesObj = new XObject(value);
         XFAImagesObj.decompressStreamWhenRead();
-        final byte[] xfaData=StringUtils.toBytes(value);
-        if(xfaData[0]=='<') {
+        final byte[] xfaData = StringUtils.toBytes(value);
+        if (xfaData[0] == '<') {
             XFAImagesObj.setStatus(PdfObject.UNDECODED_DIRECT);
         } else {
             XFAImagesObj.setStatus(PdfObject.UNDECODED_REF);
         }
-        
-        if(value.contains(" ") || value.contains("<")){
-            
+
+        if (value.contains(" ") || value.contains("<")) {
+
             //must be done AFTER setStatus()
             XFAImagesObj.setUnresolvedData(xfaData, PdfDictionary.XObject);
             objectDecoder.checkResolved(XFAImagesObj);
 
-            final byte[] decodedImageData=objectReader.readStream(XFAImagesObj, true, true, false, false, false, null);
+            final byte[] decodedImageData = objectReader.readStream(XFAImagesObj, true, true, false, false, false, null);
 
-            this.put(name,decodedImageData);
+            this.put(name, decodedImageData);
         }
     }
 
     static void setJavaScriptName(final String value, final ObjectDecoder objectDecoder, final Javascript javascript, final String name) {
         final String JSstring;
-        
-        final PdfObject javascriptObj=new NamesObject(value);
-        final byte[] jsData=StringUtils.toBytes(value);
-        if(jsData[0]=='<') {
+
+        final PdfObject javascriptObj = new NamesObject(value);
+        final byte[] jsData = StringUtils.toBytes(value);
+        if (jsData[0] == '<') {
             javascriptObj.setStatus(PdfObject.UNDECODED_DIRECT);
         } else {
             javascriptObj.setStatus(PdfObject.UNDECODED_REF);
         }
-        
-        if(value.contains(" ") || value.contains("<")){
+
+        if (value.contains(" ") || value.contains("<")) {
             //must be done AFTER setStatus()
             javascriptObj.setUnresolvedData(jsData, PdfDictionary.JS);
             objectDecoder.checkResolved(javascriptObj);
-            
-            
-            final PdfObject JS=javascriptObj.getDictionary(PdfDictionary.JS);
-            if(JS!=null){ //in stream
-                JSstring=new String(JS.getDecodedStream());
-            }else{ //can also be text
-                JSstring=javascriptObj.getTextStreamValue((PdfDictionary.JS));
+
+
+            final PdfObject JS = javascriptObj.getDictionary(PdfDictionary.JS);
+            if (JS != null) { //in stream
+                JSstring = new String(JS.getDecodedStream());
+            } else { //can also be text
+                JSstring = javascriptObj.getTextStreamValue((PdfDictionary.JS));
             }
-        }else{
-            JSstring=value;
+        } else {
+            JSstring = value;
         }
-        
-        if(JSstring!=null){
+
+        if (JSstring != null) {
             //store
             javascript.setCode(name, JSstring);
         }
@@ -246,40 +248,41 @@ public class NameLookup extends HashMap<String, Object> {
 
     /**
      * used to parser on demand if needed and return as key pair of name, PdfObject
+     *
      * @return
      */
     public Object[] getEmbeddedFiles() {
 
-        final Object[] returnValues=new Object[embeddedFiles.keySet().size()*2];
-        int ptr=0;
+        final Object[] returnValues = new Object[embeddedFiles.keySet().size() * 2];
+        int ptr = 0;
 
         String name, value;
-        final Iterator<String> embeddedFileNames=embeddedFiles.keySet().iterator();
+        final Iterator<String> embeddedFileNames = embeddedFiles.keySet().iterator();
 
-        final ObjectDecoder objectDecoder=new ObjectDecoder(objectReader);
+        final ObjectDecoder objectDecoder = new ObjectDecoder(objectReader);
 
-        while(embeddedFileNames.hasNext()){
-            name= embeddedFileNames.next();
-            returnValues[ptr++]=name;
-            value= embeddedFiles.get(name);
+        while (embeddedFileNames.hasNext()) {
+            name = embeddedFileNames.next();
+            returnValues[ptr++] = name;
+            value = embeddedFiles.get(name);
 
-            final PdfObject embeddedObj =new FSObject(value);
-            final byte[] jsData=StringUtils.toBytes(value);
-            if(jsData[0]=='<') {
+            final PdfObject embeddedObj = new FSObject(value);
+            final byte[] jsData = StringUtils.toBytes(value);
+            if (jsData[0] == '<') {
                 embeddedObj.setStatus(PdfObject.UNDECODED_DIRECT);
             } else {
                 embeddedObj.setStatus(PdfObject.UNDECODED_REF);
             }
 
-            if(value.contains(" ") || value.contains("<")){
+            if (value.contains(" ") || value.contains("<")) {
                 //must be done AFTER setStatus()
                 embeddedObj.setUnresolvedData(jsData, PdfDictionary.JS);
                 objectDecoder.checkResolved(embeddedObj);
 
 
-                returnValues[ptr++]= embeddedObj;
-            }else{
-                returnValues[ptr++]=null;
+                returnValues[ptr++] = embeddedObj;
+            } else {
+                returnValues[ptr++] = null;
             }
         }
         return returnValues;

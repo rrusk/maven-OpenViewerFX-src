@@ -41,26 +41,26 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class KeyArray extends Array {
 
-    public KeyArray(final PdfFileReader pdfFileReader, final int i,  final byte[] raw) {
-        super(pdfFileReader, i, PdfDictionary.VALUE_IS_KEY_ARRAY,raw);  
+    public KeyArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
+        super(pdfFileReader, i, PdfDictionary.VALUE_IS_KEY_ARRAY, raw);
     }
 
     @Override
     boolean isSingleKey() {
-         return StreamReaderUtils.isRef(arrayData, j2);
+        return StreamReaderUtils.isRef(arrayData, j2);
     }
 
     @Override
     void fillArray(final int elementCount, final PdfObject pdfObject) {
-        
+
         final byte[][] finalByteValues = new byte[elementCount][];
-       
-        for(int a=0;a<elementCount;a++){
-            finalByteValues[a]=valuesRead.get(a);
+
+        for (int a = 0; a < elementCount; a++) {
+            finalByteValues[a] = valuesRead.get(a);
         }
-        
+
         pdfObject.setKeyArray(PDFkeyInt, finalByteValues);
-               
+
     }
 }
 

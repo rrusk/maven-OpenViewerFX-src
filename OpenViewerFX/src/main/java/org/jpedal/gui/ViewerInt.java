@@ -33,20 +33,21 @@
 package org.jpedal.gui;
 
 import java.util.Map;
+
 import org.jpedal.objects.PdfPageData;
 
 public interface ViewerInt {
-	void resetPrintData();
+    void resetPrintData();
 
-	byte[] getPrintData();
+    byte[] getPrintData();
 
-	//Hotspots getPrintHotspots();
+    //Hotspots getPrintHotspots();
 
-	//Map getUserIconsForPrinting();
+    //Map getUserIconsForPrinting();
 
-	//void deserializeHotspotData(final byte[] hotspotData, boolean b) throws IOException, ClassNotFoundException;
+    //void deserializeHotspotData(final byte[] hotspotData, boolean b) throws IOException, ClassNotFoundException;
 
-	PdfPageData getPageData();
+    PdfPageData getPageData();
 
-	Map<Object, Object> getFontList();
+    Map<Object, Object> getFontList();
 }

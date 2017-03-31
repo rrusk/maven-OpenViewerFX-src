@@ -43,8 +43,8 @@ public class RotationLeft {
 
     public static void execute(final GUIFactory currentGUI, final Values commonValues) {
         if (commonValues.getSelectedFile() != null) {
-            int rot = currentGUI.getRotation()-90;
-            if(rot<0){
+            int rot = currentGUI.getRotation() - 90;
+            if (rot < 0) {
                 rot = 270;
             }
             currentGUI.setRotationFromExternal(rot);

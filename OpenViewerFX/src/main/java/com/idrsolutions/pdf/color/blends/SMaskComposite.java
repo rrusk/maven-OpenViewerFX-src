@@ -38,7 +38,6 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 /**
- *
  * @author suda
  */
 public class SMaskComposite implements CompositeContext {
@@ -93,13 +92,13 @@ public class SMaskComposite implements CompositeContext {
                 aR = 0;
 
                 if (aB != 0) {
-                    aR =  aB + qS - (aB * qS);
+                    aR = aB + qS - (aB * qS);
                     for (int i = 0; i < bnColors; i++) {
                         cB = bColors[i];
                         bColors[i] = cB + qS - (qS * cB);
                     }
                 }
-                
+
                 if (hasAlphaB) {
                     bColors[bnColors] = aR;
                 }

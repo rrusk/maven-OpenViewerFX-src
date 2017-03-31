@@ -33,6 +33,7 @@
 package org.jpedal.color;
 
 import java.awt.color.ColorSpace;
+
 import org.jpedal.JDeliHelper;
 
 public class FastColorSpaceCMYK extends ColorSpace {
@@ -48,29 +49,29 @@ public class FastColorSpaceCMYK extends ColorSpace {
         final int y = (int) (cv[2] * 255);
         final int k = (int) (cv[3] * 255);
         final int[] rgb = JDeliHelper.convertCMYKtoRGB(c, m, y, k);
-        if(rgb == null){
+        if (rgb == null) {
             final float[] out = new float[4];
             out[0] = (1 - cv[0]) * (1 - cv[3]);
             out[1] = (1 - cv[1]) * (1 - cv[3]);
             out[2] = (1 - cv[2]) * (1 - cv[3]);
             return out;
         }
-        return new float[]{rgb[0]/255f,rgb[1]/255f,rgb[2]/255f};
+        return new float[]{rgb[0] / 255f, rgb[1] / 255f, rgb[2] / 255f};
     }
 
     @Override
     public float[] fromRGB(final float[] rgbvalue) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public float[] toCIEXYZ(final float[] colorvalue) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public float[] fromCIEXYZ(final float[] colorvalue) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        throw new UnsupportedOperationException("Not supported yet.");
 
     }
 

@@ -34,7 +34,7 @@
 package org.jpedal.utils.repositories.generic;
 
 /**
- * A generic class to create and manipulate the raw 
+ * A generic class to create and manipulate the raw
  * x,y,w,h values for Swing/JavaFX rectangles.
  */
 public class Vector_Rectangle_Int extends GUIVector_Rectangle {
@@ -46,10 +46,10 @@ public class Vector_Rectangle_Int extends GUIVector_Rectangle {
         max_size = number;
         items = new int[max_size][4];
     }
-    
+
     public Vector_Rectangle_Int() {
     }
-    
+
     /**
      * check the size of the array and increase if needed
      */
@@ -72,17 +72,16 @@ public class Vector_Rectangle_Int extends GUIVector_Rectangle {
         }
     }
 
-    
+
     /**
      * add an item
      */
-    public synchronized void addElement(final int[] value )
-    {
-        checkSize( current_item );
+    public synchronized void addElement(final int[] value) {
+        checkSize(current_item);
         items[current_item] = value;
         current_item++;
     }
-    
+
     /**
      * clear the array
      */
@@ -102,7 +101,7 @@ public class Vector_Rectangle_Int extends GUIVector_Rectangle {
         }
         current_item = 0;
     }
-    
+
     /**
      * Returns two dimensional array
      * containing raw x,y,w,h data for
@@ -111,7 +110,7 @@ public class Vector_Rectangle_Int extends GUIVector_Rectangle {
     public final int[][] get() {
         return items;
     }
-    
+
     /**
      * Returns an array containing x,y,w,h
      * of one of items[][] elements.
@@ -122,10 +121,10 @@ public class Vector_Rectangle_Int extends GUIVector_Rectangle {
         } else {
             final int[] rectParams = new int[4];
             System.arraycopy(items[id], 0, rectParams, 0, rectParams.length);
-           return rectParams;
+            return rectParams;
         }
     }
-    
+
     public void trim() {
 
         final int[][] newItems = new int[current_item][4];
@@ -135,5 +134,5 @@ public class Vector_Rectangle_Int extends GUIVector_Rectangle {
         items = newItems;
         max_size = current_item;
     }
-  
+
 }

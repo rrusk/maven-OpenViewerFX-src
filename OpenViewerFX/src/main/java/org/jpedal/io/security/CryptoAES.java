@@ -39,10 +39,11 @@ import javax.crypto.spec.SecretKeySpec;
 public class CryptoAES implements Crypto {
 
     private static final byte[] SALT = new byte[16];
-    static{
+
+    static {
         new Random().nextBytes(SALT);
     }
-    
+
     @Override
     public byte[] encrypt(final byte[] password, final byte[] data) throws Exception {
         final SecretKeySpec secretKey = new SecretKeySpec(generateKey(password), "AES");

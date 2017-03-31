@@ -38,7 +38,6 @@ import org.jpedal.parser.ParserOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 
 /**
- *
  * @author markee
  */
 class EscapedTextUtils {
@@ -47,11 +46,11 @@ class EscapedTextUtils {
                                final int streamLength, final ParserOptions parserOptions, final DynamicVectorRenderer current) {
         // any escape chars '\\'=92
         i++;
-        
-        glyphData.setLastChar(glyphData.getRawChar());//update last char as escape
-        
+
+        glyphData.setLastChar(glyphData.getRawChar()); //update last char as escape
+
         if ((streamLength > (i + 2)) && (Character.isDigit((char) stream[i]))) {
-            
+
             //see how long number is
             int numberCount = 1;
             if (Character.isDigit((char) stream[i + 1])) {
@@ -60,94 +59,94 @@ class EscapedTextUtils {
                     numberCount++;
                 }
             }
-            
+
             // convert octal escapes
             int rawInt = TD.readEscapeValue(i, numberCount, 8, stream);
             i = i + numberCount - 1;
-            
+
             if (rawInt > 255) {
                 rawInt -= 256;
             }
-            
+
             glyphData.setRawChar((char) rawInt); //set to dummy value as may be / value
-            
+
             glyphData.setRawInt(rawInt);
-            
-           glyphData.setDisplayValue(currentFontData.getGlyphValue(rawInt));
-            
-            if (parserOptions.isTextExtracted()) { 
+
+            glyphData.setDisplayValue(currentFontData.getGlyphValue(rawInt));
+
+            if (parserOptions.isTextExtracted()) {
                 glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), rawInt));
             }
-            
+
             //allow for \134 (ie \\)
             if (glyphData.getRawChar() == 92) // '\\'=92
             {
-                glyphData.setRawChar((char)120);
+                glyphData.setRawChar((char) 120);
             }
-            
+
         } else {
-            
+
             int rawInt = stream[i] & 255;
             glyphData.setRawChar((char) rawInt);
-            
+
             if (glyphData.getRawChar() == 'u') { //convert unicode of format uxxxx to char value
                 rawInt = TD.readEscapeValue(i + 1, 4, 16, stream);
                 i += 4;
                 //rawChar = (char) glyphData.rawInt;
                 glyphData.setDisplayValue(currentFontData.getGlyphValue(rawInt));
-                if(parserOptions.isTextExtracted()) {
+                if (parserOptions.isTextExtracted()) {
                     glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), rawInt));
                 }
-                
+
             } else {
-                
-                final char testChar=glyphData.getRawChar();
+
+                final char testChar = glyphData.getRawChar();
                 switch (testChar) {
                     case 'n':
-                        rawInt='\n';
+                        rawInt = '\n';
                         glyphData.setRawChar('\n');
                         break;
                     case 'b':
-                        rawInt='\b';
+                        rawInt = '\b';
                         glyphData.setRawChar('\b');
                         break;
                     case 't':
-                        rawInt='\t';
+                        rawInt = '\t';
                         glyphData.setRawChar('\t');
                         break;
                     case 'r':
-                        rawInt='\r';
+                        rawInt = '\r';
                         glyphData.setRawChar('\r');
                         break;
                     case 'f':
-                        rawInt='\f';
+                        rawInt = '\f';
                         glyphData.setRawChar('\f');
                         break;
                     default:
                         break;
                 }
-                
+
                 glyphData.setDisplayValue(currentFontData.getGlyphValue(rawInt));
-                
+
                 if (parserOptions.isTextExtracted()) {
-                    glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(),rawInt));
+                    glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), rawInt));
                 }
-                
-                if (!glyphData.getDisplayValue().isEmpty()){ //set raw char
+
+                if (!glyphData.getDisplayValue().isEmpty()) { //set raw char
                     glyphData.setRawChar(glyphData.getDisplayValue().charAt(0));
                 }
             }
-            
+
             glyphData.setRawInt(rawInt);
         }
         //fix for character wrong in some T1 fonts
-        if(currentFontData.getFontType()==StandardFonts.TYPE1 && current.isHTMLorSVG()){
-            final String possAltValue = currentFontData.getMappedChar(glyphData.getRawInt(),true);
-            if(possAltValue!=null && possAltValue.length()==1 && possAltValue.equalsIgnoreCase(glyphData.getUnicodeValue().toLowerCase())){
+        if (currentFontData.getFontType() == StandardFonts.TYPE1 && current.isHTMLorSVG()) {
+            final String possAltValue = currentFontData.getMappedChar(glyphData.getRawInt(), true);
+            if (possAltValue != null && possAltValue.length() == 1 && possAltValue.equalsIgnoreCase(glyphData.getUnicodeValue().toLowerCase())) {
                 glyphData.set(possAltValue);
             }
         }
         return i;
     }
-    
+
 }

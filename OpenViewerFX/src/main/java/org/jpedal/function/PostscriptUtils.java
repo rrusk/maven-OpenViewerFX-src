@@ -36,150 +36,149 @@ package org.jpedal.function;
 import static org.jpedal.function.PostscriptFactory.*;
 
 /**
- *
  * @author markee
  */
 class PostscriptUtils {
 
-    
-	//get string for command
-	static String toString(final int id){
 
-		final String str;
+    //get string for command
+    static String toString(final int id) {
 
-		switch(id){
-		case PS_abs:
-			str="abs";
-			break;
-		case PS_add:
-			str="add";
-			break;
-		case PS_atan:
-			str="atan";
-			break;
-		case PS_ceil:
-			str="ceiling";
-			break;
-		case PS_cos:
-			str="cos";
-			break;
-		case PS_cvi:
-			str="cvi";
-			break;
-		case PS_cvr:
-			str="cvr";
-			break;
-		case PS_div:
-			str="div";
-			break;
-		case PS_exp:
-			str="exp";
-			break;
-		case PS_floo:
-			str="floor";
-			break;
-		case PS_idiv:
-			str="idiv";
-			break;
-		case PS_ln:
-			str="ln";
-			break;
-		case PS_log:
-			str="log";
-			break;
-		case PS_mod:
-			str="mod";
-			break;
-		case PS_mul:
-			str="mul";
-			break;
-		case PS_neg:
-			str="neg";
-			break;
-		case PS_sin:
-			str="sin";
-			break;
-		case PS_sqrt:
-			str="sqrt";
-			break;
-		case PS_sub:
-			str="sub";
-			break;
-		case PS_roun:
-			str="round";
-			break;
-		case PS_trun:
-			str="truncate";
-			break;
-		case PS_and:
-			str="and";
-			break;
-		case PS_bits:
-			str="bitshift";
-			break;
-		case PS_eq:
-			str="eq";
-			break;
-		case PS_fals:
-			str="false";
-			break;
-		case PS_ge:
-			str="ge";
-			break;
-		case PS_gt:
-			str="gt";
-			break;
-		case PS_le:
-			str="le";
-			break;
-		case PS_lt:
-			str="lt";
-			break;
-		case PS_ne:
-			str="ne";
-			break;
-		case PS_not:
-			str="not";
-			break;
-		case PS_or:
-			str="or";
-			break;
-		case PS_true:
-			str="true";
-			break;
-		case PS_xor:
-			str="xor";
-			break;
-		case PS_if:
-			str="if";
-			break;
-		case PS_ifel:
-			str="ifelse";
-			break;
-		case PS_copy:
-			str="copy";
-			break;
-		case PS_exch:
-			str="exch";
-			break;
-		case PS_pop:
-			str="pop";
-			break;
-		case PS_dup:
-			str="dup";
-			break;
-		case PS_inde:
-			str="index";
-			break;
-		case PS_roll:
-			str="roll";
-			break;
-		default:
-			str="UNKNOWN";
+        final String str;
 
-		}
-		return str;
+        switch (id) {
+            case PS_abs:
+                str = "abs";
+                break;
+            case PS_add:
+                str = "add";
+                break;
+            case PS_atan:
+                str = "atan";
+                break;
+            case PS_ceil:
+                str = "ceiling";
+                break;
+            case PS_cos:
+                str = "cos";
+                break;
+            case PS_cvi:
+                str = "cvi";
+                break;
+            case PS_cvr:
+                str = "cvr";
+                break;
+            case PS_div:
+                str = "div";
+                break;
+            case PS_exp:
+                str = "exp";
+                break;
+            case PS_floo:
+                str = "floor";
+                break;
+            case PS_idiv:
+                str = "idiv";
+                break;
+            case PS_ln:
+                str = "ln";
+                break;
+            case PS_log:
+                str = "log";
+                break;
+            case PS_mod:
+                str = "mod";
+                break;
+            case PS_mul:
+                str = "mul";
+                break;
+            case PS_neg:
+                str = "neg";
+                break;
+            case PS_sin:
+                str = "sin";
+                break;
+            case PS_sqrt:
+                str = "sqrt";
+                break;
+            case PS_sub:
+                str = "sub";
+                break;
+            case PS_roun:
+                str = "round";
+                break;
+            case PS_trun:
+                str = "truncate";
+                break;
+            case PS_and:
+                str = "and";
+                break;
+            case PS_bits:
+                str = "bitshift";
+                break;
+            case PS_eq:
+                str = "eq";
+                break;
+            case PS_fals:
+                str = "false";
+                break;
+            case PS_ge:
+                str = "ge";
+                break;
+            case PS_gt:
+                str = "gt";
+                break;
+            case PS_le:
+                str = "le";
+                break;
+            case PS_lt:
+                str = "lt";
+                break;
+            case PS_ne:
+                str = "ne";
+                break;
+            case PS_not:
+                str = "not";
+                break;
+            case PS_or:
+                str = "or";
+                break;
+            case PS_true:
+                str = "true";
+                break;
+            case PS_xor:
+                str = "xor";
+                break;
+            case PS_if:
+                str = "if";
+                break;
+            case PS_ifel:
+                str = "ifelse";
+                break;
+            case PS_copy:
+                str = "copy";
+                break;
+            case PS_exch:
+                str = "exch";
+                break;
+            case PS_pop:
+                str = "pop";
+                break;
+            case PS_dup:
+                str = "dup";
+                break;
+            case PS_inde:
+                str = "index";
+                break;
+            case PS_roll:
+                str = "roll";
+                break;
+            default:
+                str = "UNKNOWN";
 
-	}
+        }
+        return str;
+
+    }
 
 }

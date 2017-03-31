@@ -43,81 +43,82 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class FunctionFactory {
 
-	/**
-	 * Get the correct Function for the shading objct
-	 * @param currentPdfFile :: Current PDF File data
-	 * @return The required function
-	 */
-	public static PDFFunction getFunction(final PdfObject functionObj, final PdfObjectReader currentPdfFile) {
+    /**
+     * Get the correct Function for the shading objct
+     *
+     * @param currentPdfFile :: Current PDF File data
+     * @return The required function
+     */
+    public static PDFFunction getFunction(final PdfObject functionObj, final PdfObjectReader currentPdfFile) {
 
-		PDFFunction newFunction=null;
+        PDFFunction newFunction = null;
 
-		final byte[] stream=functionObj.getDecodedStream();
+        final byte[] stream = functionObj.getDecodedStream();
 
-        final float[] domain=functionObj.getFloatArray(PdfDictionary.Domain);
-        final float[] range=functionObj.getFloatArray(PdfDictionary.Range);
+        final float[] domain = functionObj.getFloatArray(PdfDictionary.Domain);
+        final float[] range = functionObj.getFloatArray(PdfDictionary.Range);
 
-        final int type =functionObj.getInt(PdfDictionary.FunctionType);
-        final int bits=functionObj.getInt(PdfDictionary.BitsPerSample);
-		final float[] decode=functionObj.getFloatArray(PdfDictionary.Decode);
-		final float[] C0=functionObj.getFloatArray(PdfDictionary.C0);
-		final float[] C1=functionObj.getFloatArray(PdfDictionary.C1);
-		final int[] size=functionObj.getIntArray(PdfDictionary.Size);
-		final float[] encode=functionObj.getFloatArray(PdfDictionary.Encode);
-		final float[] bounds=functionObj.getFloatArray(PdfDictionary.Bounds);
+        final int type = functionObj.getInt(PdfDictionary.FunctionType);
+        final int bits = functionObj.getInt(PdfDictionary.BitsPerSample);
+        final float[] decode = functionObj.getFloatArray(PdfDictionary.Decode);
+        final float[] C0 = functionObj.getFloatArray(PdfDictionary.C0);
+        final float[] C1 = functionObj.getFloatArray(PdfDictionary.C1);
+        final int[] size = functionObj.getIntArray(PdfDictionary.Size);
+        final float[] encode = functionObj.getFloatArray(PdfDictionary.Encode);
+        final float[] bounds = functionObj.getFloatArray(PdfDictionary.Bounds);
 
-		//set order
-		float N=0;
-        final float newN=functionObj.getFloatNumber(PdfDictionary.N);
-        if(newN!=-1) {
+        //set order
+        float N = 0;
+        final float newN = functionObj.getFloatNumber(PdfDictionary.N);
+        if (newN != -1) {
             N = newN;
         }
 
-		final PdfArrayIterator keys=functionObj.getMixedArray(PdfDictionary.Functions);
-		int functionCount=0;
-		if(keys!=null) {
+        final PdfArrayIterator keys = functionObj.getMixedArray(PdfDictionary.Functions);
+        int functionCount = 0;
+        if (keys != null) {
             functionCount = keys.getTokenCount();
         }
 
-		PDFFunction[] functions=null;
-		
-		if(keys!=null){
-			
-			final PdfObject[] subFunction=new PdfObject[functionCount];
-			
-			for(int i=0;i<functionCount;i++){
-				    subFunction[i]=ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, keys.getNextValueAsByte(true));
-			}
+        PDFFunction[] functions = null;
 
-			functions = new PDFFunction[subFunction.length];
+        if (keys != null) {
+
+            final PdfObject[] subFunction = new PdfObject[functionCount];
+
+            for (int i = 0; i < functionCount; i++) {
+                subFunction[i] = ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, keys.getNextValueAsByte(true));
+            }
+
+            functions = new PDFFunction[subFunction.length];
 
             /*
              * get values for sub stream Function
              */
-            for (int i1 =0,imax= subFunction.length; i1 <imax; i1++) {
+            for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {
                 functions[i1] = FunctionFactory.getFunction(subFunction[i1], currentPdfFile);
             }
 
-		}
+        }
 
-		switch (type) {
-		case 0 :
-        	newFunction=new PDFSampled(stream,bits, domain, range, encode, decode, size);
-			break;
-		case 2 :
-			newFunction=new PDFExponential(N,C0, C1, domain,range);
-			break;
-		case 3 :
-			newFunction = new PDFStitching(functions, encode, bounds, domain,range);
-			break;
-		case 4 :
-			newFunction=new PDFCalculator(stream,domain,range);
-			break;
-		}
+        switch (type) {
+            case 0:
+                newFunction = new PDFSampled(stream, bits, domain, range, encode, decode, size);
+                break;
+            case 2:
+                newFunction = new PDFExponential(N, C0, C1, domain, range);
+                break;
+            case 3:
+                newFunction = new PDFStitching(functions, encode, bounds, domain, range);
+                break;
+            case 4:
+                newFunction = new PDFCalculator(stream, domain, range);
+                break;
+        }
 
 
-		return newFunction;
-	}
+        return newFunction;
+    }
 
-	
+
 }

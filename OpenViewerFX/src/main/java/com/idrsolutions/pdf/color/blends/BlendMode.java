@@ -36,22 +36,23 @@ import java.awt.Composite;
 import java.awt.CompositeContext;
 import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
+
 import org.jpedal.objects.raw.PdfDictionary;
 
 /**
  *
  */
 public class BlendMode implements Composite {
-    
+
     final int blendMode;
-    
+
     final float alpha;
-    
+
     public BlendMode(final int blendMode, final float alpha) {
         this.blendMode = blendMode;
         this.alpha = alpha;
     }
-    
+
     @Override
     public CompositeContext createContext(final ColorModel srcColorModel, final ColorModel dstColorModel, final RenderingHints hints) {
 
@@ -67,7 +68,7 @@ public class BlendMode implements Composite {
             default:
 //               return new BlendContext(blendMode); 
                 return new BlendComposite(srcColorModel, dstColorModel, blendMode, alpha);
-        }        
+        }
     }
-    
+
 }

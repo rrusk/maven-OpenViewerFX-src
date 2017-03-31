@@ -33,5 +33,5 @@
 package org.jpedal.gui;
 
 public interface UIViewerInt {
-	void invokeServerMethod(String s, Object[] objects);
+    void invokeServerMethod(String s, Object[] objects);
 }

@@ -40,6 +40,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.io.Serializable;
 import java.util.ArrayList;
+
 import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.color.PdfPaint;
@@ -105,7 +106,7 @@ public class ShadedPaint implements PdfPaint, Serializable {
      * read general values
      */
     public ShadedPaint(final PdfObject Shading, final boolean isPrinting, final GenericColorSpace shadingColorSpace,
-            final PdfObjectReader currentPdfFile, final float[][] matrix, final boolean colorsReversed) {
+                       final PdfObjectReader currentPdfFile, final float[][] matrix, final boolean colorsReversed) {
 
         this.isPrinting = isPrinting;
         this.colorsReversed = colorsReversed;
@@ -138,14 +139,14 @@ public class ShadedPaint implements PdfPaint, Serializable {
         final PdfArrayIterator keys = Shading.getMixedArray(PdfDictionary.Function);
 
         final int functionCount = keys.getTokenCount();
-            
-        if (functionCount>0) {
+
+        if (functionCount > 0) {
 
             final PdfObject[] subFunction = new PdfObject[functionCount];
 
             for (int i = 0; i < functionCount; i++) {
-                final byte[] nextValue=keys.getNextValueAsByte(true);
-                subFunction[i] =ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, nextValue);
+                final byte[] nextValue = keys.getNextValueAsByte(true);
+                subFunction[i] = ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, nextValue);
             }
 
             function = new PDFFunction[subFunction.length];
@@ -153,7 +154,7 @@ public class ShadedPaint implements PdfPaint, Serializable {
             // get values for sub stream Function
             for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {
                 function[i1] = FunctionFactory.getFunction(subFunction[i1], currentPdfFile);
-            }           
+            }
         }
 
         final float[] newDomain = Shading.getFloatArray(PdfDictionary.Domain);
@@ -211,7 +212,7 @@ public class ShadedPaint implements PdfPaint, Serializable {
 
     @Override
     public PaintContext createContext(final ColorModel cm, final Rectangle db, final Rectangle2D ub,
-            final AffineTransform xform, final RenderingHints hints) {
+                                      final AffineTransform xform, final RenderingHints hints) {
 
         PaintContext pt = null;
 
@@ -227,20 +228,20 @@ public class ShadedPaint implements PdfPaint, Serializable {
             offY = (int) xform.getTranslateY();
             scaling = (float) xform.getScaleY();
         }
-		
+
         switch (type) {
             case FUNCTION:
-				if (textX == 0 && textY == 0) {
-					pt = new FunctionShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
-				} else {
-					pt = new FunctionContext(cropH, (float) (1f / xform.getScaleX()), shadingColorSpace, colorsReversed, function);
-				}
+                if (textX == 0 && textY == 0) {
+                    pt = new FunctionShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
+                } else {
+                    pt = new FunctionContext(cropH, (float) (1f / xform.getScaleX()), shadingColorSpace, colorsReversed, function);
+                }
                 break;
 
             case AXIAL:
-                if(textX == 0 && textY==0){
+                if (textX == 0 && textY == 0) {
                     pt = new AxialShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
-                }else{
+                } else {
                     pt = new AxialContext(xform, isPrinting, offX, offY, cropX, cropH, 1f / scaling, isExtended, domain, coords, shadingColorSpace, colorsReversed, background, function);
                 }
                 break;
@@ -250,19 +251,19 @@ public class ShadedPaint implements PdfPaint, Serializable {
                 break;
 
             case FREEFORM:
-				if (textX == 0 && textY==0){
-					pt = new FreeFormShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
-				} else {
-					pt = new FreeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
-				}
+                if (textX == 0 && textY == 0) {
+                    pt = new FreeFormShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
+                } else {
+                    pt = new FreeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
+                }
                 break;
 
             case LATTICEFORM:
-				if (textX == 0 && textY == 0) {
-					pt = new LatticeFormShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
-				} else {
-					pt = new LatticeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
-				}
+                if (textX == 0 && textY == 0) {
+                    pt = new LatticeFormShadeContext(xform, shadingColorSpace, background, Shading, matrix, function);
+                } else {
+                    pt = new LatticeFormContext(shadingColorSpace, background, Shading, matrix, cropH, scaling, offX, offY);
+                }
                 break;
 
             case COONS:
@@ -276,7 +277,7 @@ public class ShadedPaint implements PdfPaint, Serializable {
 
                 break;
             case TENSOR:
-            //check store setup and try using cached context
+                //check store setup and try using cached context
 
                 if (!shapesList.isEmpty()) {
                     pt = new TensorContext(xform, shadingColorSpace, shapesList, background, matrix, function);

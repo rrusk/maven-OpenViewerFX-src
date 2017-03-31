@@ -33,28 +33,31 @@
 package org.jpedal.examples.viewer.gui.generic;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.w3c.dom.Node;
 
-/**abstract level for outlines panel*/
+/**
+ * abstract level for outlines panel
+ */
 public interface GUIOutline {
 
-	Object getTree();
+    Object getTree();
 
-	DefaultMutableTreeNode getLastSelectedPathComponent();
+    DefaultMutableTreeNode getLastSelectedPathComponent();
 
-	String getPage(String title);
+    String getPage(String title);
 
-	//Point getPoint(String title);
+    //Point getPoint(String title);
 
-	//void setMinimumSize(Dimension dimension);
+    //void setMinimumSize(Dimension dimension);
 
-	//void selectBookmark();
+    //void selectBookmark();
 
-	//int readChildNodes(Node rootNode,DefaultMutableTreeNode topNode, int nodeIndex);
+    //int readChildNodes(Node rootNode,DefaultMutableTreeNode topNode, int nodeIndex);
 
     void reset(Node rootNode);
 
-	//String getPageViaNodeNumber(int nodeNumber);
+    //String getPageViaNodeNumber(int nodeNumber);
 
     String convertNodeIDToRef(int index);
 }

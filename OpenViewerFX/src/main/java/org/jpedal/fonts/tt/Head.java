@@ -36,60 +36,64 @@ import org.jpedal.utils.LogWriter;
 
 
 public class Head extends Table {
-	
-	/**format used*/
+
+    /**
+     * format used
+     */
     protected int glyphDataFormat; //default for otf
 
     protected int indexToLocFormat;
-	
-	/**bounds on font*/
-    protected float[] FontBBox =new float[4];
 
-	protected int flags; //default for otf
+    /**
+     * bounds on font
+     */
+    protected float[] FontBBox = new float[4];
 
-	protected int unitsPerEm=1024;  //default for otf
+    protected int flags; //default for otf
 
-	public Head(final FontFile2 currentFontFile){
-	
-		//move to start and check exists
-		final int startPointer=currentFontFile.selectTable(FontFile2.HEAD);
-		
-		//read 'head' table
-		if(startPointer==0){
-			LogWriter.writeLog("No head table found");
-        }else{
-			
-			currentFontFile.getNextUint32(); //id
-			
-			//ignore values
-			for(int i=0;i<3;i++) {
+    protected int unitsPerEm = 1024;  //default for otf
+
+    public Head(final FontFile2 currentFontFile) {
+
+        //move to start and check exists
+        final int startPointer = currentFontFile.selectTable(FontFile2.HEAD);
+
+        //read 'head' table
+        if (startPointer == 0) {
+            LogWriter.writeLog("No head table found");
+        } else {
+
+            currentFontFile.getNextUint32(); //id
+
+            //ignore values
+            for (int i = 0; i < 3; i++) {
                 currentFontFile.getNextUint32();
             }
-			
-			flags=currentFontFile.getNextUint16();
-			unitsPerEm=currentFontFile.getNextUint16();
-			
-			//ignore dates
-			for(int i=0;i<2;i++) {
+
+            flags = currentFontFile.getNextUint16();
+            unitsPerEm = currentFontFile.getNextUint16();
+
+            //ignore dates
+            for (int i = 0; i < 2; i++) {
                 currentFontFile.getNextUint64();
             }
-			
-			//bounds
-			for(int i=0;i<4;i++) {
+
+            //bounds
+            for (int i = 0; i < 4; i++) {
                 FontBBox[i] = currentFontFile.getNextSignedInt16();
             }
 
-			//ignore more flags
-			for(int i=0;i<3;i++) {
+            //ignore more flags
+            for (int i = 0; i < 3; i++) {
                 currentFontFile.getNextUint16();
             }
 
-            indexToLocFormat=currentFontFile.getNextUint16();
+            indexToLocFormat = currentFontFile.getNextUint16();
 
-			glyphDataFormat =currentFontFile.getNextUint16();
-			
-		}
-	}
+            glyphDataFormat = currentFontFile.getNextUint16();
+
+        }
+    }
 
     public Head() {
     }
@@ -99,15 +103,15 @@ public class Head extends Table {
         return indexToLocFormat;
     }
 
-    public float[] getFontBBox(){
-		return this.FontBBox;
-	}
+    public float[] getFontBBox() {
+        return this.FontBBox;
+    }
 
     /**
-	 *  Returns the unitsPerEm.
-	 */
-	public int getUnitsPerEm() {
-		return unitsPerEm;
-	}
+     * Returns the unitsPerEm.
+     */
+    public int getUnitsPerEm() {
+        return unitsPerEm;
+    }
 
 }

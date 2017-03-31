@@ -34,14 +34,13 @@
 package org.jpedal.objects.structuredtext;
 
 /**
- *
  * @author markee
  */
 public class HTMLMarkedContentGenerator extends MarkedContentGenerator {
 
     public HTMLMarkedContentGenerator() {
-        
-        isHTML=true;
+
+        isHTML = true;
     }
 
     public java.util.Map<String, String> getLookup() {

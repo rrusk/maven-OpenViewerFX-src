@@ -37,44 +37,45 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.glyph.PdfGlyph;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfShape;
 
-public interface DynamicVectorRenderer  {
+public interface DynamicVectorRenderer {
 
-    
-    int FontMode=1;
 
-    int TEXT=1;
-	int SHAPE=2;
-	int IMAGE=3;
-	int TRUETYPE=4;
-	int TYPE1C=5;
-	int TYPE3=6;
-	int CLIP=7;
-	int COLOR=8;
-	int AF=9;
-	int TEXTCOLOR=10;
-	int FILLCOLOR=11;
-	int STROKECOLOR=12;
-	int STROKE=14;
-	int TR=15;
-	int STRING=16;
-	int STROKEOPACITY=17;
-	int FILLOPACITY=18;
+    int FontMode = 1;
 
-	int STROKEDSHAPE=19;
-	int FILLEDSHAPE=20;
+    int TEXT = 1;
+    int SHAPE = 2;
+    int IMAGE = 3;
+    int TRUETYPE = 4;
+    int TYPE1C = 5;
+    int TYPE3 = 6;
+    int CLIP = 7;
+    int COLOR = 8;
+    int AF = 9;
+    int TEXTCOLOR = 10;
+    int FILLCOLOR = 11;
+    int STROKECOLOR = 12;
+    int STROKE = 14;
+    int TR = 15;
+    int STRING = 16;
+    int STROKEOPACITY = 17;
+    int FILLOPACITY = 18;
 
-	int FONTSIZE=21;
-	int LINEWIDTH=22;
+    int STROKEDSHAPE = 19;
+    int FILLEDSHAPE = 20;
 
-	int CUSTOM=23;
+    int FONTSIZE = 21;
+    int LINEWIDTH = 22;
 
-	//int fontBB=24;
+    int CUSTOM = 23;
+
+    //int fontBB=24;
 
     //int DELETED_IMAGE = 27;
     int REUSED_IMAGE = 29;
@@ -88,62 +89,66 @@ public interface DynamicVectorRenderer  {
     int IsSVGMode = 44;
     int IsTextSelectable = 45;
     int IsRealText = 46;
-    int MARKER=200;
+    int MARKER = 200;
 
-	/**flag to enable debugging of painting*/
-	boolean debugPaint=false;
+    /**
+     * flag to enable debugging of painting
+     */
+    boolean debugPaint = false;
 
-	/**
-	 * various types of DVR which we have
-	 */
-	int DISPLAY_SCREEN = 1;//
-	int DISPLAY_IMAGE = 2;//
-	int CREATE_PATTERN =3;
-	int CREATE_HTML =4;
-	int CREATE_SVG =5;
-	int CREATE_EPOS =7;
-        //int CREATE_SMASK =8;
-        int CREATE_T3 =9;
-	
-	/**
-	 * Keys for use with set value
-	 */
-	int ALT_BACKGROUND_COLOR=1;
-	int ALT_FOREGROUND_COLOR=2;
-	int FOREGROUND_INCLUDE_LINEART=3; //Alt foreground color changes lineart as well
-	int COLOR_REPLACEMENT_THRESHOLD=4;
-	int ENHANCE_FRACTIONAL_LINES=5; //Any line with width <1 is set to 1 to ensure visible (0 to turn off, 1 to turn on)
-	
-    int TOKEN_NUMBER=6; 
-    
-    int CUSTOM_IMAGE_HANDLER=7;
-	int CUSTOM_COLOR_HANDLER=8;
-	
-    int FLUSH=43;
-    
-    int FLUSH_ADDITIONAL_OBJECTS_ON_PAGE=42;
-    int PAINT_BACKGROUND=41;
-    int PAGE_DECODING_FINISHED=19;
-    int RESET_COLORSPACE=18;
-	
+    /**
+     * various types of DVR which we have
+     */
+    int DISPLAY_SCREEN = 1; //
+    int DISPLAY_IMAGE = 2; //
+    int CREATE_PATTERN = 3;
+    int CREATE_HTML = 4;
+    int CREATE_SVG = 5;
+    int CREATE_EPOS = 7;
+    //int CREATE_SMASK =8;
+    int CREATE_T3 = 9;
+
+    /**
+     * Keys for use with set value
+     */
+    int ALT_BACKGROUND_COLOR = 1;
+    int ALT_FOREGROUND_COLOR = 2;
+    int FOREGROUND_INCLUDE_LINEART = 3; //Alt foreground color changes lineart as well
+    int COLOR_REPLACEMENT_THRESHOLD = 4;
+    int ENHANCE_FRACTIONAL_LINES = 5; //Any line with width <1 is set to 1 to ensure visible (0 to turn off, 1 to turn on)
+
+    int TOKEN_NUMBER = 6;
+
+    int CUSTOM_IMAGE_HANDLER = 7;
+    int CUSTOM_COLOR_HANDLER = 8;
+
+    int FLUSH = 43;
+
+    int FLUSH_ADDITIONAL_OBJECTS_ON_PAGE = 42;
+    int PAINT_BACKGROUND = 41;
+    int PAGE_DECODING_FINISHED = 19;
+    int RESET_COLORSPACE = 18;
+
     /**
      * Used to pass in Graphics2D for all versions
+     *
      * @param g2
      */
-	void setG2(Graphics2D g2);
-    
+    void setG2(Graphics2D g2);
+
     void eliminateHiddenText(Shape currentShape, GraphicsState gs, int segmentCount, boolean ignoreScaling);
 
     /**
      * Renders all the objects onto the g2 surface for screen display
-     * 
+     *
      * @param highlights
      * @param viewScaling
      * @param userAnnot
      */
-	void paint(Rectangle[] highlights, AffineTransform viewScaling, Rectangle userAnnot);
+    void paint(Rectangle[] highlights, AffineTransform viewScaling, Rectangle userAnnot);
 
-	/** Saves text object with attributes for rendering
+    /**
+     * Saves text object with attributes for rendering
      *
      * @param Trm
      * @param text
@@ -153,20 +158,19 @@ public interface DynamicVectorRenderer  {
      * @param javaFont
      */
 
-	void drawText(float[][] Trm, String text, GraphicsState currentGraphicsState, float x, float y, Font javaFont);
+    void drawText(float[][] Trm, String text, GraphicsState currentGraphicsState, float x, float y, Font javaFont);
 
-	/**
-     *
+    /**
      * Set page values
-     * 
+     *
      * @param width
      * @param height
      * @param backgroundColor
      */
-	void init(int width, int height, Color backgroundColor);
-	
-	/** 
-     * save image in array to draw 
+    void init(int width, int height, Color backgroundColor);
+
+    /**
+     * save image in array to draw
      *
      * @param pageNumber
      * @param image
@@ -177,58 +181,60 @@ public interface DynamicVectorRenderer  {
      * @return
      */
 
-	int drawImage(int pageNumber, BufferedImage image, GraphicsState currentGraphicsState, boolean alreadyCached, String name, int previousUse);
+    int drawImage(int pageNumber, BufferedImage image, GraphicsState currentGraphicsState, boolean alreadyCached, String name, int previousUse);
 
-	/**
+    /**
      * Used by Swing to Draw shape
+     *
      * @param currentShape
      * @param currentGraphicsState
      * @param cmd
      */
     void drawShape(PdfShape currentShape, GraphicsState currentGraphicsState, int cmd);
-    
+
     /**
      * Used by FX to Draw shape
+     *
      * @param currentShape
      * @param currentGraphicsState
      */
     void drawShape(Object currentShape, GraphicsState currentGraphicsState);
 
-	/**
+    /**
      * save opacity settings
      *
      * @param fillType
      * @param value
      * @param BM
      */
-	void setGraphicsState(int fillType, float value, int BM);
+    void setGraphicsState(int fillType, float value, int BM);
 
     /**
      * Method to add Shape, Text or image to main display on page over PDF - will be flushed on redraw
+     *
      * @param type
      * @param colors
      * @param obj
      * @throws PdfException
      */
 
-	void drawAdditionalObjectsOverPage(int[] type, Color[] colors, Object[] obj) throws PdfException;
+    void drawAdditionalObjectsOverPage(int[] type, Color[] colors, Object[] obj) throws PdfException;
 
     /**
-     *
      * @param value
      */
-	void drawTR(int value);
+    void drawTR(int value);
 
     /**
-     *
      * @param currentGraphicsState
      * @param defaultClip
      * @param alwaysApply
      */
     void drawClip(GraphicsState currentGraphicsState, Shape defaultClip, boolean alwaysApply);
 
-	/**
-	 * Store glyph info
+    /**
+     * Store glyph info
+     *
      * @param Trm
      * @param fontSize
      * @param embeddedGlyph
@@ -239,34 +245,33 @@ public interface DynamicVectorRenderer  {
      * @param glyf
      * @param currentFontData
      * @param glyfWidth
-	 */
-	void drawEmbeddedText(float[][] Trm, int fontSize,
-						  PdfGlyph embeddedGlyph, Object javaGlyph, int type,
-						  GraphicsState gs, double[] at, String glyf, PdfFont currentFontData, float glyfWidth);
+     */
+    void drawEmbeddedText(float[][] Trm, int fontSize,
+                          PdfGlyph embeddedGlyph, Object javaGlyph, int type,
+                          GraphicsState gs, double[] at, String glyf, PdfFont currentFontData, float glyfWidth);
 
     /**
-     *
      * @param cropX
      * @param cropH
      * @param scaling
      */
     void setScalingValues(double cropX, double cropH, float scaling);
 
-	/**
-	 * Turn object into byte[] so we can move across
-	 * this way should be much faster than the stadard Java serialise.
-	 *
-	 * NOT PART OF API and subject to change (DO NOT USE)
-	 *
+    /**
+     * Turn object into byte[] so we can move across
+     * this way should be much faster than the stadard Java serialise.
+     * <p>
+     * NOT PART OF API and subject to change (DO NOT USE)
+     *
      * @param fontsAlreadyOnClient
-     * @return 
-	 * @throws java.io.IOException
-	 */
-	byte[] serializeToByteArray(Set<String> fontsAlreadyOnClient) throws IOException;
+     * @return
+     * @throws java.io.IOException
+     */
+    byte[] serializeToByteArray(Set<String> fontsAlreadyOnClient) throws IOException;
 
     /**
      * Generic method to set any values as an object
-     * 
+     *
      * @param key key value defined in this interface or inheriting class
      * @param obj value for key settings
      */
@@ -274,40 +279,41 @@ public interface DynamicVectorRenderer  {
 
     /**
      * Generic method to set int values
-     * 
+     *
      * @param key key value defined in this interface or inheriting class
-     * @param i value for key settings
+     * @param i   value for key settings
      */
     void setValue(int key, int i);
 
     /**
      * Generic method to access int values
-     * 
+     *
      * @param key - int key value defined in this interface or inheriting class
      * @return - an int value
      */
-	int getValue(int key);
+    int getValue(int key);
 
     /**
      * Generic method to access boolean flags
-     * 
+     *
      * @param key - int key value defined in this interface or inheriting class
      * @return true/false boolean
      */
-	boolean getBooleanValue(int key);
+    boolean getBooleanValue(int key);
 
     /**
      * Passes in width value for font glyphs  - only used in HTML5 and SVG conversion
+     *
      * @param fontObjID
      * @param glyphName
      * @param potentialWidth
      */
-	void saveAdvanceWidth(int fontObjID, String glyphName, int potentialWidth);
-    
+    void saveAdvanceWidth(int fontObjID, String glyphName, int potentialWidth);
+
     /**
      * Allows generic code to identify if it is doing HTML/SVG conversion
-     * 
-     * @return boolean which will be true for HTML/SVG conversion and otherwise false 
+     *
+     * @return boolean which will be true for HTML/SVG conversion and otherwise false
      */
     boolean isHTMLorSVG();
 

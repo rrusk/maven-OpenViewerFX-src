@@ -42,17 +42,17 @@ import org.jpedal.gui.GUIFactory;
  * Takes an Image Snapshot of the Selected Area
  */
 public class ZoomIn {
-    
+
     private static final int[] scalingValues = {25, 50, 75, 100, 125, 150, 200, 250, 500, 750, 1000};
-    
+
     public static boolean execute(final Object[] args, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
-        
+
         if (args == null) {
             float scaling = 100 * currentGUI.getScaling();
-            scaling = (int)(decode_pdf.getDPIFactory().removeScaling(scaling)+0.5f);
-            
+            scaling = (int) (decode_pdf.getDPIFactory().removeScaling(scaling) + 0.5f);
+
             if (scaling < scalingValues[0]) {
-                ((GUI)currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[0]));
+                ((GUI) currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[0]));
             } else {
                 int scalingToUse = -1;
                 for (int i = 0; i != scalingValues.length - 1; i++) {
@@ -62,7 +62,7 @@ public class ZoomIn {
                     }
                 }
                 if (scalingToUse != -1) {
-                    ((GUI)currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[scalingToUse]));
+                    ((GUI) currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[scalingToUse]));
                 }
             }
         }

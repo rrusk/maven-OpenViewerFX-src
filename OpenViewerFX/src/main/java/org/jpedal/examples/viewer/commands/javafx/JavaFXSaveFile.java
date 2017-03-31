@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.commands.javafx;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.jpedal.examples.viewer.Values;
@@ -70,13 +71,13 @@ public class JavaFXSaveFile {
 
             final FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("PDF file (*.pdf)", "*.pdf"),
-                                                     new FileChooser.ExtensionFilter("FDF file (*.fdf)", "*.fdf"));
-            
+                    new FileChooser.ExtensionFilter("FDF file (*.fdf)", "*.fdf"));
+
             final String fileName = new File(commonValues.getSelectedFile()).getName();
-            
+
             fileChooser.setInitialFileName(fileName);
 
-            file = fileChooser.showSaveDialog((Window)currentGUI.getFrame());
+            file = fileChooser.showSaveDialog((Window) currentGUI.getFrame());
 
             FileInputStream fis = null;
             FileOutputStream fos = null;
@@ -94,10 +95,10 @@ public class JavaFXSaveFile {
                     return;
                 }
 
-               if (file.exists()) {
+                if (file.exists()) {
                     final int n = currentGUI.showConfirmDialog(fileToSave + '\n'
-                            + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + '\n'
-                            + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
+                                    + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + '\n'
+                                    + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
                             Messages.getMessage("PdfViewerMessage.Resave"), FXOptionDialog.YES_NO_OPTION);
                     if (n == 1) {
                         continue;
@@ -115,16 +116,16 @@ public class JavaFXSaveFile {
                         fos.write(buffer, 0, bytes_read);
                     }
                 } catch (final Exception e1) {
-                    
+
                     //e1.printStackTrace();
-                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerException.NotSaveInternetFile")+' '+e1);
+                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerException.NotSaveInternetFile") + ' ' + e1);
                 }
 
                 try {
                     fis.close();
                     fos.close();
                 } catch (final Exception e2) {
-                    LogWriter.writeLog("Exception attempting to Read File: " + e2); 
+                    LogWriter.writeLog("Exception attempting to Read File: " + e2);
                 }
             }
             finished = true;

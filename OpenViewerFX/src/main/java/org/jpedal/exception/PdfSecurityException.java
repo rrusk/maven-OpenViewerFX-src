@@ -33,18 +33,18 @@
 package org.jpedal.exception;
 
 /**
- * used to handle problems with Encryption 
+ * used to handle problems with Encryption
  */
 public class PdfSecurityException extends PdfException {
 
-	/**
-	 * provides a security exception if access not permitted
-	 */
-	public PdfSecurityException(final String message) {
-		
-		error_message = message;
-		
-	}
+    /**
+     * provides a security exception if access not permitted
+     */
+    public PdfSecurityException(final String message) {
 
-	
+        error_message = message;
+
+    }
+
+
 }

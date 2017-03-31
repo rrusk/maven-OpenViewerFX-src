@@ -35,15 +35,15 @@ package org.jpedal.constants;
 
 public class ErrorCodes {
 
-    public static final int JSInvalidFormat=1;
+    public static final int JSInvalidFormat = 1;
 
-    public static final int JSInvalidDateFormat=2;
+    public static final int JSInvalidDateFormat = 2;
 
-    public static final int JSInvalidRangeFormat=3;
+    public static final int JSInvalidRangeFormat = 3;
 
-    public static final int JSInvalidNumberFormat=4;
+    public static final int JSInvalidNumberFormat = 4;
 
-    public static final int JSInvalidPercentFormat=5;
+    public static final int JSInvalidPercentFormat = 5;
 
-    public static final int JSInvalidSpecialFormat=6;
+    public static final int JSInvalidSpecialFormat = 6;
 }

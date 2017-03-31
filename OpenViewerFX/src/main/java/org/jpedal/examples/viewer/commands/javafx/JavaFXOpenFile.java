@@ -38,10 +38,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
 import javafx.application.Platform;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+
 import javax.imageio.ImageIO;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.display.GUIThumbnailPanel;
@@ -74,15 +77,15 @@ import org.jpedal.utils.Messages;
 public class JavaFXOpenFile {
 
     private static File file;
-    
+
     private static InputStream inputStream;
-   
+
     public static void executeOpenFile(final Object[] args, final GUIFactory currentGUI, final GUISearchWindow searchFrame, final PropertiesFile properties, final GUIThumbnailPanel thumbnails, final PdfDecoderInt decode_pdf, final Values commonValues) {
-        
+
         currentGUI.removePageListener();
-        
+
         currentGUI.setDisplayView(Display.SINGLE_PAGE, decode_pdf.getPageAlignment());
-        
+
         //reset value to null
         inputStream = null;
 
@@ -95,7 +98,7 @@ public class JavaFXOpenFile {
 
             if (org.jpedal.examples.viewer.utils.Printer.isPrinting()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPrintWait.message"));
-            } else  if (Values.isProcessing()) {
+            } else if (Values.isProcessing()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
             } else {
 
@@ -103,7 +106,7 @@ public class JavaFXOpenFile {
 
                 commonValues.setFileIsURL(false);
             }
-        }else {
+        } else {
             if (args.length == 2 && args[0] instanceof byte[] && args[1] instanceof String) {
 
                 final byte[] data = (byte[]) args[0];
@@ -115,7 +118,7 @@ public class JavaFXOpenFile {
                 currentGUI.setViewerTitle(null);
 
                 if ((commonValues.getSelectedFile() != null) && !Values.isProcessing()) {
-                    
+
                     try {
                         commonValues.setMultiTiff(false);
 
@@ -130,12 +133,12 @@ public class JavaFXOpenFile {
                             searchFrame.removeSearchWindow(false);
                         }
 
-                        commonValues.maxViewY = 0;// rensure reset for any  viewport
-                        
+                        commonValues.maxViewY = 0; // ensure reset for any  viewport
+
                         commonValues.setCurrentPage(1);
 
                         decode_pdf.closePdfFile();
-                        
+
                         decode_pdf.openPdfArray(data);
 
                         currentGUI.updateStatusMessage("opening file");
@@ -259,8 +262,8 @@ public class JavaFXOpenFile {
                                 file = file.getCanonicalFile();
                             } catch (final Exception e) {
 
-                                LogWriter.writeLog("Exception in opening file "+e);
-                                
+                                LogWriter.writeLog("Exception in opening file " + e);
+
                                 file = new File(parent, filename);
                             }
                         }
@@ -277,7 +280,7 @@ public class JavaFXOpenFile {
                          */
                         try {
                             commonValues.setInputDir(file.getParentFile().getCanonicalPath());
-                            
+
                             open(file.getAbsolutePath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
                             /*
@@ -307,9 +310,9 @@ public class JavaFXOpenFile {
                                 try {
                                     Thread.sleep(100);
                                 } catch (final InterruptedException e) {
-                                    e.printStackTrace(); 
-                                    
-                                    
+                                    e.printStackTrace();
+
+
                                 }
                             }
                         } catch (final IOException e1) {
@@ -322,10 +325,10 @@ public class JavaFXOpenFile {
             }
         }
     }
-    
+
     public static void executeOpenURL(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
+                                      final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                                      final GUIThumbnailPanel thumbnails) {
 
         //reset value
         inputStream = null;
@@ -337,8 +340,8 @@ public class JavaFXOpenFile {
             //SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
 //            currentGUI.resetNavBar();
-            
-            final String newFile = selectURL(commonValues, searchFrame, currentGUI, decode_pdf,properties, thumbnails);
+
+            final String newFile = selectURL(commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
             if (newFile != null) {
                 commonValues.setSelectedFile(newFile);
                 commonValues.setFileIsURL(true);
@@ -361,7 +364,7 @@ public class JavaFXOpenFile {
                     }
                 } catch (final Exception e) {
                     failed = true;
-                    LogWriter.writeLog("Unable to open as URL " + newFile+ ' ' +e);
+                    LogWriter.writeLog("Unable to open as URL " + newFile + ' ' + e);
                 }
 
                 if (failed) {
@@ -404,23 +407,23 @@ public class JavaFXOpenFile {
                     }
 
                 } else { // no file selected so redisplay old
-                    
+
                     //((PdfDecoder)decode_pdf).repaint();
-                    
+
                     // currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NoSelection"));
                 }
             }
         }
     }
-    
+
     /**
      * checks file can be opened (permission)
      *
      * @throws PdfException
      */
     public static void openFile(final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
+                                final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                                final GUIThumbnailPanel thumbnails) {
 
         commonValues.setMultiTiff(false);
 
@@ -435,9 +438,9 @@ public class JavaFXOpenFile {
             searchFrame.removeSearchWindow(false);
         }
 
-        commonValues.maxViewY = 0;// rensure reset for any viewport
+        commonValues.maxViewY = 0; // ensure reset for any viewport
         commonValues.setPDF(true);
-        
+
 
         //switch off continous mode for images
         if (!commonValues.isPDF()) {
@@ -458,9 +461,9 @@ public class JavaFXOpenFile {
             }
 
         }
-        
+
         commonValues.setCurrentPage(1);
-        
+
         try {
             final boolean fileCanBeOpened = openUpFile(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
@@ -483,8 +486,8 @@ public class JavaFXOpenFile {
         //t.start();
         //commonValues.setProcessing(false);
     }
-    
-    
+
+
     public static void open(final String file, final Values commonValues, final GUISearchWindow searchFrame,
                             final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
                             final GUIThumbnailPanel thumbnails) {
@@ -527,7 +530,7 @@ public class JavaFXOpenFile {
 
         }
     }
-    
+
     /**
      * decode and display selected page
      */
@@ -607,17 +610,17 @@ public class JavaFXOpenFile {
             Values.setProcessing(false);
         }
     }
-    
+
     /**
      * initial method called to open a new PDF
      *
      * @throws PdfException
      */
     public static boolean openUpFile(final String selectedFile, final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) throws PdfException {
+                                     final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                                     final GUIThumbnailPanel thumbnails) throws PdfException {
 
-        commonValues.maxViewY = 0;//ensure reset for any viewport
+        commonValues.maxViewY = 0; // ensure reset for any viewport
 
         searchFrame.resetSearchWindow();
 
@@ -672,12 +675,12 @@ public class JavaFXOpenFile {
                                                 Platform.runLater(new Runnable() {
 
                                                     @Override
-                                                    public void run() { 
+                                                    public void run() {
                                                         currentGUI.setDownloadProgress("download", dlp.getProgress());
                                                     }
                                                 });
                                             }
-                                            
+
                                             try {
                                                 Thread.sleep(500);
                                             } catch (final Exception e) {
@@ -756,7 +759,7 @@ public class JavaFXOpenFile {
                         }
                     } catch (final Exception e) {
                         currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.UrlError") + " file=" + selectedFile + '\n' + e.getMessage());
-                        
+
                         decode_pdf.closePdfFile();
                         fileCanBeOpened = false;
                     }
@@ -768,7 +771,7 @@ public class JavaFXOpenFile {
 
                         //customise message for missing bouncycastle error
                         final String message;
-                        if (e.getMessage()!=null && e.getMessage().contains("bouncycastle")) {
+                        if (e.getMessage() != null && e.getMessage().contains("bouncycastle")) {
                             message = e.getMessage();
                         } else {
                             message = "Exception in code " + e.getMessage() + " please send to IDRsolutions";
@@ -807,7 +810,7 @@ public class JavaFXOpenFile {
 
                         //Default to first page
                         commonValues.setTiffImageToLoad(0);
-                        
+
                         //Multiple pages held within Tiff
                         if (pageCount > 1) {
                             //Set page count
@@ -870,10 +873,10 @@ public class JavaFXOpenFile {
                 }
 
             }
-            
+
             //Ensure bookmarks are loaded on file open
             currentGUI.setBookmarks(true);
-            
+
             if (fileCanBeOpened) {
 
                 if (properties.getValue("Recentdocuments").equals("true")) {
@@ -891,7 +894,7 @@ public class JavaFXOpenFile {
 
         } catch (final PdfException e) {
             LogWriter.writeLog(("Exception " + e + " opening file"));
-            
+
             if (GUI.showMessages) {
                 System.out.println("ErrorDialog in JavaFXOpenFile.java needs JavaFX Rewrite of Error Dialog class");
                 //ErrorDialog.showError(e, Messages.getMessage("PdfViewerOpenerror"), currentGUI.getFrame(), commonValues.getSelectedFile());
@@ -908,23 +911,23 @@ public class JavaFXOpenFile {
             return fileCanBeOpened;
         }
     }
-    
+
     /**
      * opens a pdf file and calls the display/decode routines
      */
     public static void selectFile(final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
+                                  final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                                  final GUIThumbnailPanel thumbnails) {
 
         //remove search frame if visible
         if (searchFrame != null) {
             searchFrame.removeSearchWindow(false);
         }
 
-        
+
         final FileChooser chooser = new FileChooser();
         chooser.setTitle("Open PDF file");
-        
+
         //Open directory from existing directory
         if (file != null) {
             final File existDirectory = file.getParentFile();
@@ -937,7 +940,7 @@ public class JavaFXOpenFile {
         final FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PDF files (*.pdf)", "*.pdf");
         chooser.getExtensionFilters().add(extFilter);
 
-        file = chooser.showOpenDialog((Window)currentGUI.getFrame());
+        file = chooser.showOpenDialog((Window) currentGUI.getFrame());
 
         /*
          * decode
@@ -969,108 +972,109 @@ public class JavaFXOpenFile {
             currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NoSelection"));
         }
     }
-    
+
     /**
      * examine first few bytes to see if linearized and return true linearized file
+     *
      * @param pdfUrl
      * @return
      * @throws PdfException
      */
     public static final boolean isPDFLinearized(final String pdfUrl) {
-        
+
         if (pdfUrl.startsWith("jar")) {
             return false;
         }
-        
-        boolean isLinear=false;
+
+        boolean isLinear = false;
         //read first few bytes
         final URL url;
         final InputStream is;
-        
+
         try {
             url = new URL(pdfUrl);
             is = url.openStream();
             //final String filename = url.getPath().substring(url.getPath().lastIndexOf('/')+1);
-            
+
             // Download buffer
             final byte[] buffer = new byte[128];
             is.read(buffer);
             is.close();
-            
+
             //test if linearized
-            
+
             //scan for Linearized in text
-            final int len=buffer.length;
-            for(int i=0;i<len;i++ ){
-                
-                if(buffer[i]=='/' && buffer[i+1]=='L' && buffer[i+2]=='i' && buffer[i+3]=='n' && buffer[i+4]=='e' && buffer[i+5]=='a' && buffer[i+6]=='r'){
-                    isLinear=true;
-                    i=len;
+            final int len = buffer.length;
+            for (int i = 0; i < len; i++) {
+
+                if (buffer[i] == '/' && buffer[i + 1] == 'L' && buffer[i + 2] == 'i' && buffer[i + 3] == 'n' && buffer[i + 4] == 'e' && buffer[i + 5] == 'a' && buffer[i + 6] == 'r') {
+                    isLinear = true;
+                    i = len;
                 }
             }
-            
+
         } catch (final IOException e) {
             LogWriter.writeLog("[PDF] Exception " + e + " scanning URL " + pdfUrl);
         }
-        
+
         return isLinear;
-        
+
     }
-    
-    private static String selectURL( final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
-        
+
+    private static String selectURL(final Values commonValues, final GUISearchWindow searchFrame,
+                                    final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                                    final GUIThumbnailPanel thumbnails) {
+
         String selectedFile = currentGUI.showInputDialog(Messages.getMessage("PdfViewerMessage.RequestURL"));
-        
+
         //lose any spaces
-        if(selectedFile!=null) {
+        if (selectedFile != null) {
             selectedFile = selectedFile.trim();
         }
-        
+
         if ((selectedFile != null) && !selectedFile.trim().startsWith("http://") && !selectedFile.trim().startsWith("https://") && !selectedFile.trim().startsWith("file:/")) { //simon
             currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.URLMustContain"));
             selectedFile = null;
         }
-        
-        if(selectedFile!=null){
+
+        if (selectedFile != null) {
             final boolean isValid = ((selectedFile.endsWith(".pdf"))
                     || (selectedFile.endsWith(".fdf")) || (selectedFile.endsWith(".tif"))
                     || (selectedFile.endsWith(".tiff")) || (selectedFile.endsWith(".png"))
                     || (selectedFile.endsWith(".jpg")) || (selectedFile.endsWith(".jpeg")));
-            
-            
+
+
             if (!isValid) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.NotValidPdfWarning"));
-                selectedFile=null;
+                selectedFile = null;
             }
         }
-        
-        if(selectedFile!=null){
+
+        if (selectedFile != null) {
 
             commonValues.setSelectedFile(selectedFile);
 
-            boolean failed=false;
+            boolean failed = false;
             try {
-                final URL testExists=new URL(selectedFile);
-                final URLConnection conn=testExists.openConnection();
+                final URL testExists = new URL(selectedFile);
+                final URLConnection conn = testExists.openConnection();
 
-                if(conn.getContent()==null) {
+                if (conn.getContent() == null) {
                     failed = true;
                 }
             } catch (final Exception e) {
-                failed=true;
+                failed = true;
 
-                LogWriter.writeLog("Exception in handling URL "+e);
+                LogWriter.writeLog("Exception in handling URL " + e);
             }
 
-            if(failed){
-                selectedFile=null;
-                currentGUI.showMessageDialog("URL "+selectedFile+ ' ' +Messages.getMessage("PdfViewerError.DoesNotExist"));
+            if (failed) {
+                selectedFile = null;
+                currentGUI.showMessageDialog("URL " + selectedFile + ' ' + Messages.getMessage("PdfViewerError.DoesNotExist"));
             }
 
         }
-        
+
         //ensure immediate redraw of blank screen
         //decode_pdf.invalidate();
         //decode_pdf.repaint();
@@ -1078,18 +1082,18 @@ public class JavaFXOpenFile {
         /*
          * decode
          */
-        if (selectedFile != null ) {
+        if (selectedFile != null) {
             try {
-                
+
                 commonValues.setFileSize(0);
                 
                 /* save path so we reopen her for later selections */
                 //commonValues.setInputDir(new URL(commonValues.getSelectedFile()).getPath());
-                
+
                 currentGUI.setViewerTitle(null);
-                
+
             } catch (final Exception e) {
-                System.err.println(Messages.getMessage("PdfViewerError.Exception")+ ' ' + e + ' ' +Messages.getMessage("PdfViewerError.GettingPaths"));
+                System.err.println(Messages.getMessage("PdfViewerError.Exception") + ' ' + e + ' ' + Messages.getMessage("PdfViewerError.GettingPaths"));
             }
             
             /*
@@ -1104,24 +1108,24 @@ public class JavaFXOpenFile {
                 
                 /* if running terminate first */
                 thumbnails.terminateDrawing();
-                
+
                 decode_pdf.flushObjectValues(true);
-                
+
                 //reset the viewableArea before opening a new file
 //                decode_pdf.resetViewableArea();
-                
+
 //                currentGUI.stopThumbnails();
 
                 OpenFile.openFile(commonValues.getSelectedFile(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
             }
-            
+
         } else { //no file selected so redisplay old
             decode_pdf.repaintPane(decode_pdf.getPageNumber());
-            
+
             currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NoSelection"));
         }
-        
+
         return selectedFile;
     }
 }

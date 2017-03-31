@@ -37,9 +37,10 @@ package org.jpedal.function;
 /**
  * Interface for PDF Shading function classes
  */
-public interface PDFFunction{
+public interface PDFFunction {
 
     float[] compute(float[] values);
-	float[] computeStitch(float[] subinput);
-    
+
+    float[] computeStitch(float[] subinput);
+
 }

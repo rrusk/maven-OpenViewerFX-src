@@ -34,114 +34,118 @@
 package org.jpedal.parser.text;
 
 import java.util.StringTokenizer;
+
 import org.jpedal.io.types.StreamReaderUtils;
+
 import static org.jpedal.parser.text.TD.getString;
+
 import org.jpedal.utils.NumberUtils;
 
 /**
- *
  * @author markee
  */
 class Leading {
-    
-    /**thousand as a value*/
-    static final float THOUSAND=1000;
+
+    /**
+     * thousand as a value
+     */
+    static final float THOUSAND = 1000;
 
     static float getLeading(final byte[] stream, final int ptr, final int leadingStart, final boolean isMultipleValues) {
 
         //get string
-        int strt=leadingStart;
+        int strt = leadingStart;
         strt = StreamReaderUtils.skipSpaces(stream, strt);
 
         //more than one value separated by space
         float value;
-        if(isMultipleValues){
+        if (isMultipleValues) {
 
             //read values
-            final StringTokenizer values=new StringTokenizer(getString(strt,strt+ptr-1,stream));
-            value=0;
-            while(values.hasMoreTokens()) {
+            final StringTokenizer values = new StringTokenizer(getString(strt, strt + ptr - 1, stream));
+            value = 0;
+            while (values.hasMoreTokens()) {
                 value += Float.parseFloat(values.nextToken());
             }
 
-            value =-value/ THOUSAND;
-        }else{
-            value=-NumberUtils.parseFloat(strt, strt + ptr, stream)/THOUSAND;
+            value = -value / THOUSAND;
+        } else {
+            value = -NumberUtils.parseFloat(strt, strt + ptr, stream) / THOUSAND;
         }
 
         return value;
     }
-    
-     
-     static int readLeading(int i, final byte[] stream, final GlyphData glyphData) {
-        
+
+
+    static int readLeading(int i, final byte[] stream, final GlyphData glyphData) {
+
 // ')'=41 '>'=62 '<'=60
         //handle leading between text ie -100 in  (The)-100(text)
         float value = 0;
         i++;
         //allow for spaces
         i = StreamReaderUtils.skipSpaces(stream, i);
-        
-        char nc = (char) stream[i], rc=' ';
-        
+
+        char nc = (char) stream[i], rc = ' ';
+
         //allow for )( or >< (ie no value)
-        if(nc==40 || nc==60){ //'('=40 '<'=60
+        if (nc == 40 || nc == 60) { //'('=40 '<'=60
             i--;
-        }else if (nc != 39 && nc != 34 && nc != 40 &&  nc != 93 && nc != 60) { //leading so roll on char
+        } else if (nc != 39 && nc != 34 && nc != 40 && nc != 93 && nc != 60) { //leading so roll on char
             //'\''=39 '\"'=34 '('=40  //']'=93 '<'=60
-            int ptr=0;
-            
-            final int leadingStart=i; //allow for failure
-            boolean failed=false;
-            boolean isMultipleValues=false, isLastValue=false;
+            int ptr = 0;
+
+            final int leadingStart = i; //allow for failure
+            boolean failed = false;
+            boolean isMultipleValues = false, isLastValue = false;
             while (!failed) {
                 rc = nc;
-                if(rc!=10 && rc !=13){
+                if (rc != 10 && rc != 13) {
                     ptr++;
                 }
-                
+
                 nc = (char) stream[i + 1];
-                
-                if(nc==32) {
+
+                if (nc == 32) {
                     isMultipleValues = true;
                 }
-                
-                if(nc==']') {
+
+                if (nc == ']') {
                     isLastValue = true;
                 }
-                
-                if (nc == 40 || nc == 60 || nc==']' || nc==10){ // '('=40 '<'=60
+
+                if (nc == 40 || nc == 60 || nc == ']' || nc == 10) { // '('=40 '<'=60
                     break;
                 }
-                
-                if(nc==45 || nc==46 || nc==32 || (nc>='0' && nc<='9')){
+
+                if (nc == 45 || nc == 46 || nc == 32 || (nc >= '0' && nc <= '9')) {
                     //'-'=45 '.'=46 ' '=32
-                }else {
+                } else {
                     failed = true;
                 }
-                
+
                 i++;
             }
-            
-            if(failed) {
+
+            if (failed) {
                 i = leadingStart;
-            } else if(isMultipleValues || ptr>0){
+            } else if (isMultipleValues || ptr > 0) {
                 value = getLeading(stream, ptr, leadingStart, isMultipleValues);
             }
-            
+
             //is someone adds on leading at end ignore as it breaks extraction width calculation
-            if(isLastValue && value==-glyphData.getWidth()){
+            if (isLastValue && value == -glyphData.getWidth()) {
                 //width=width-value;
                 glyphData.subtractLeading(value);
-               
+
             }
         }
-        
-        glyphData.updateGlyphSettings(value,rc);
-        
-        
+
+        glyphData.updateGlyphSettings(value, rc);
+
+
         return i;
     }
-   
+
 
 }

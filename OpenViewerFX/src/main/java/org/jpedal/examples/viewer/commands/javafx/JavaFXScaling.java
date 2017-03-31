@@ -46,16 +46,16 @@ import org.jpedal.gui.GUIFactory;
 public class JavaFXScaling {
 
     public static void execute(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
-        
+
         if (args == null) {
             if (!Values.isProcessing() && commonValues.getSelectedFile() != null) {
-                
-                final int mode=decode_pdf.getDisplayView();
-                final int alignment=decode_pdf.getPageAlignment();
-                ((Pane)decode_pdf).getChildren().clear();
-                
+
+                final int mode = decode_pdf.getDisplayView();
+                final int alignment = decode_pdf.getPageAlignment();
+                ((Pane) decode_pdf).getChildren().clear();
+
                 currentGUI.scaleAndRotate();
-                currentGUI.setDisplayView(mode,alignment);
+                currentGUI.setDisplayView(mode, alignment);
             }
         } else {
             currentGUI.setScalingFromExternal((String) args[0]);
@@ -65,7 +65,7 @@ public class JavaFXScaling {
                 try {
                     Thread.sleep(100);
                 } catch (final InterruptedException e) {
-                    e.printStackTrace();  
+                    e.printStackTrace();
                 }
             }
         }

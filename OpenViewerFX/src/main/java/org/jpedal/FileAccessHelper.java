@@ -33,15 +33,14 @@
 package org.jpedal;
 
 /**
- *
  * @author markee
  */
 public class FileAccessHelper {
 
-    public static final int mode=1;
-    
+    public static final int mode = 1;
+
     static void init() {
-     //   throw new UnsupportedOperationException("Not supported yet."); 
+        //   throw new UnsupportedOperationException("Not supported yet.");
     }
-   
+
 }

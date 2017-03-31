@@ -37,27 +37,26 @@ import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
 /**
- *
  * @author markee
  */
 public class StringArray extends Array {
-    
+
     public StringArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
         super(pdfFileReader, i, PdfDictionary.VALUE_IS_STRING_ARRAY, raw);
     }
 
     @Override
     void fillArray(final int elementCount, final PdfObject pdfObject) {
-        
+
         final byte[][] finalByteValues = new byte[elementCount][];
-       
-        for(int a=0;a<elementCount;a++){
-            finalByteValues[a]=valuesRead.get(a);
+
+        for (int a = 0; a < elementCount; a++) {
+            finalByteValues[a] = valuesRead.get(a);
         }
-        
+
         pdfObject.setStringArray(PDFkeyInt, finalByteValues);
-        
+
     }
-    
-    
+
+
 }

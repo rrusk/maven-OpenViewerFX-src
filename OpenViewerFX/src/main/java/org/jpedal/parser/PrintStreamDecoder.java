@@ -37,6 +37,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.print.PrinterException;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.CustomPrintHintingHandler;
@@ -50,8 +51,8 @@ import org.jpedal.objects.raw.PdfObject;
 public interface PrintStreamDecoder {
 
     void print(Graphics2D g2, AffineTransform scaling, int currentPrintPage,
-               Rectangle userAnnot, CustomPrintHintingHandler customPrintHintingHandler, PdfDecoderInt pdf) throws PrinterException ;
-    
+               Rectangle userAnnot, CustomPrintHintingHandler customPrintHintingHandler, PdfDecoderInt pdf) throws PrinterException;
+
     void setObjectValue(int key, Object obj);
 
     void setParameters(boolean b, boolean b0, int i, int i0, boolean isPrinting, boolean b1);
@@ -62,7 +63,7 @@ public interface PrintStreamDecoder {
 
     @SuppressWarnings("UnusedReturnValue")
     T3Size decodePageContent(PdfObject pdfObject) throws PdfException;
-    
+
     Object getObjectValue(int key);
 
     ErrorTracker getErrorTracker();

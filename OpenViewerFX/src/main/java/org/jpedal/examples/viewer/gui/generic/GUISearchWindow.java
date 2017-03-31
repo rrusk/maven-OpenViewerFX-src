@@ -33,60 +33,63 @@
 package org.jpedal.examples.viewer.gui.generic;
 
 import java.util.Map;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 
-/**abstract level of search window*/ 
+/**
+ * abstract level of search window
+ */
 public interface GUISearchWindow {
-	
+
     int SEARCH_EXTERNAL_WINDOW = 0;
     int SEARCH_TABBED_PANE = 1;
     int SEARCH_MENU_BAR = 2;
-    
-	//Varible added to allow multiple search style to be implemented
-	//int style = 0;
 
-	void find(PdfDecoderInt decode_pdf, Values values);
-	
-	void findWithoutWindow(PdfDecoderInt decode_pdf, Values values, int searchType, boolean listOfTerms, boolean singlePageOnly, String searchValue);
+    //Varible added to allow multiple search style to be implemented
+    //int style = 0;
 
-	void grabFocusInInput();
+    void find(PdfDecoderInt decode_pdf, Values values);
 
-	boolean isSearchVisible();
-	
-	void init(PdfDecoderInt dec, Values values);
+    void findWithoutWindow(PdfDecoderInt decode_pdf, Values values, int searchType, boolean listOfTerms, boolean singlePageOnly, String searchValue);
 
-	void removeSearchWindow(boolean justHide);
-	
-	void resetSearchWindow();
-	
-	GUISearchList getResults();
+    void grabFocusInInput();
 
-	GUISearchList getResults(int page);
+    boolean isSearchVisible();
 
-	Map getTextRectangles();
+    void init(PdfDecoderInt dec, Values values);
 
-	int getViewStyle();
+    void removeSearchWindow(boolean justHide);
 
-	void setViewStyle(int i);
+    void resetSearchWindow();
 
-	//boolean isSearching();
-	
-	int getFirstPageWithResults();
-	
-	void setWholeWords(boolean wholeWords);
-	
-	void setCaseSensitive(boolean caseSensitive);
-	
-	void setMultiLine(boolean multiLine);
-    
+    GUISearchList getResults();
+
+    GUISearchList getResults(int page);
+
+    Map getTextRectangles();
+
+    int getViewStyle();
+
+    void setViewStyle(int i);
+
+    //boolean isSearching();
+
+    int getFirstPageWithResults();
+
+    void setWholeWords(boolean wholeWords);
+
+    void setCaseSensitive(boolean caseSensitive);
+
+    void setMultiLine(boolean multiLine);
+
     //    public void setSearchHighlightsOnly(boolean highlightOnly);
-        
+
     void setSearchText(String s);
-	
+
     void setUpdateListDuringSearch(boolean updateListDuringSearch);
-    
+
     void dispose();
-    
+
     void selectSearchOptions(int options);
 }

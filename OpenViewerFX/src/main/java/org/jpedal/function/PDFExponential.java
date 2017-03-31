@@ -65,7 +65,7 @@ public class PDFExponential extends PDFGenericFunction implements PDFFunction {
 
         for (int i = 0; i < diffs.length; i++) {
             diffs[i] = this.C1[i] - this.C0[i];
-        }        
+        }
 
     }
 
@@ -85,20 +85,20 @@ public class PDFExponential extends PDFGenericFunction implements PDFFunction {
     @Override
     public float[] compute(final float[] values) {
 
-	final float[] output = new float[returnValues];
+        final float[] output = new float[returnValues];
 
         float x = min(max(values[0], domain[0]), domain[1]);
-        if(N!=1.0){
+        if (N != 1.0) {
             x = (float) Math.pow(x, N);
         }
-        
+
         for (int j = 0; j < C0.length; j++) {
             output[j] = C0[j] + x * diffs[j];
         }
-        
-        if(range!=null){
+
+        if (range != null) {
             for (int i = 0; i < C0.length; i++) {
-                output[i] = (min(max(output[i], range[i * 2]), range[i * 2 + 1]));         
+                output[i] = (min(max(output[i], range[i * 2]), range[i * 2 + 1]));
             }
         }
 
@@ -107,12 +107,10 @@ public class PDFExponential extends PDFGenericFunction implements PDFFunction {
 }
 
 
-
-
 //		//Only first value required
 //		final float x=min(max(values[0],domain[0*2]),domain[0*2+1]);
 //		
-//		if (N==1f){// special case
+//		if (N==1f){ // special case
 //			
 //			for (int i=0; i<C0.length; i++){
 //				//x^1 = x so don't bother finding the power

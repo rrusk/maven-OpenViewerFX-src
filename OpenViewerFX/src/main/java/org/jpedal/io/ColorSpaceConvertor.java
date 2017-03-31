@@ -35,6 +35,7 @@ package org.jpedal.io;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+
 import org.jpedal.JDeliHelper;
 import org.jpedal.color.CMYKtoRGB;
 import org.jpedal.color.ColorSpaces;
@@ -42,20 +43,21 @@ import org.jpedal.color.DeviceCMYKColorSpace;
 import org.jpedal.utils.LogWriter;
 
 /**
- * set of static methods to save/load objects to convert images between 
- * different colorspaces - 
- *
+ * set of static methods to save/load objects to convert images between
+ * different colorspaces -
+ * <p>
  * Several methods are very similar and I should recode my code to use a common
- * method for the RGB conversion 
- *
+ * method for the RGB conversion
+ * <p>
  * LogWriter is JPedal logging class
- *
  */
 public class ColorSpaceConvertor {
 
-    /** Flag to trigger raster printing */
+    /**
+     * Flag to trigger raster printing
+     */
     public static boolean isUsingARGB;
-    
+
     /*
      * slightly contrived but very effective way to convert to RGB
      * @param width
@@ -63,7 +65,7 @@ public class ColorSpaceConvertor {
      * @param data
      * @return
      */
-    public static BufferedImage convertFromICCCMYK(final int width, final int height,byte[] data) {
+    public static BufferedImage convertFromICCCMYK(final int width, final int height, byte[] data) {
 
         /*make sure data big enough and pad out if not*/
         final int size = width * height * 4;
@@ -72,22 +74,22 @@ public class ColorSpaceConvertor {
             System.arraycopy(data, 0, newData, 0, data.length);
             data = newData;
         }
-            
+
         final int dim = width * height;
-        byte [] bp = JDeliHelper.convertCMYK2RGB(width, height, size, data);
-        
-        if(bp == null){
+        byte[] bp = JDeliHelper.convertCMYK2RGB(width, height, size, data);
+
+        if (bp == null) {
             bp = DeviceCMYKColorSpace.convertCMYK2RGBWithSimple(width, height, size, data);
         }
-        
+
         final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        final int [] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
-        int r,g,b,pos = 0;
+        final int[] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+        int r, g, b, pos = 0;
         for (int i = 0; i < dim; i++) {
-            r = bp[pos++]&0xff;
-            g = bp[pos++]&0xff;
-            b = bp[pos++]&0xff;
-            pixels[i] = (r<<16) | (g<<8) | b ;
+            r = bp[pos++] & 0xff;
+            g = bp[pos++] & 0xff;
+            b = bp[pos++] & 0xff;
+            pixels[i] = (r << 16) | (g << 8) | b;
         }
         return img;
     }
@@ -103,7 +105,7 @@ public class ColorSpaceConvertor {
         //don't bother if already rgb or ICC
         if ((image.getType() != BufferedImage.TYPE_INT_RGB)) {
 
-            try{
+            try {
                 /**/
                 final BufferedImage raw_image = image;
                 image =
@@ -125,8 +127,8 @@ public class ColorSpaceConvertor {
             } catch (final Error ee) {
 
                 LogWriter.writeLog("Error " + ee + " converting to RGB");
-                
-                image=null;
+
+                image = null;
             }
         }
 
@@ -164,9 +166,10 @@ public class ColorSpaceConvertor {
 
     /**
      * Convert YCbCr to RGB using formula.
+     *
      * @param buffer is of type byte[]
-     * @param w is of type final int
-     * @param h is of type final int
+     * @param w      is of type final int
+     * @param h      is of type final int
      * @return BufferedImage
      */
     public static BufferedImage algorithmicConvertYCbCrToRGB(final byte[] buffer, final int w, final int h) {
@@ -175,67 +178,67 @@ public class ColorSpaceConvertor {
         BufferedImage image = null;
         final byte[] new_data = new byte[w * h * 3];
 
-        int pixelCount = w * h*3;
+        int pixelCount = w * h * 3;
 
-        if(pixelCount>buffer.length) {
+        if (pixelCount > buffer.length) {
             pixelCount = buffer.length;
         }
 
-        int r=0,g=0,b=0;
-        int lastY =-1, lastCb =-1, lastCr =-1;
+        int r = 0, g = 0, b = 0;
+        int lastY = -1, lastCb = -1, lastCr = -1;
         int pixelReached = 0;
         float val1;
 
         for (int i = 0; i < pixelCount; i += 3) {
 
             final int Y = ((buffer[i] & 255));
-            final int Cb = ((buffer[1+i] & 255));
-            final int Cr = ((buffer[2+i] & 255));
+            final int Cb = ((buffer[1 + i] & 255));
+            final int Cr = ((buffer[2 + i] & 255));
 
-            if((lastY ==Y)&&(lastCb ==Cb)&&(lastCr ==Cr)){
+            if ((lastY == Y) && (lastCb == Cb) && (lastCr == Cr)) {
                 //use existing values
-            }else{//work out new
+            } else { //work out new
 
-                val1=298.082f*Y;
+                val1 = 298.082f * Y;
 
-                r = (int)(((val1+(408.583f*Cr))/256f)-222.921);
-                if(r<0) {
+                r = (int) (((val1 + (408.583f * Cr)) / 256f) - 222.921);
+                if (r < 0) {
                     r = 0;
                 }
-                if(r>255) {
+                if (r > 255) {
                     r = 255;
                 }
 
-                g = (int)(((val1-(100.291f*Cb)-(208.120f*Cr))/256f)+135.576f);
-                if(g<0) {
+                g = (int) (((val1 - (100.291f * Cb) - (208.120f * Cr)) / 256f) + 135.576f);
+                if (g < 0) {
                     g = 0;
                 }
-                if(g>255) {
+                if (g > 255) {
                     g = 255;
                 }
 
-                b = (int)(((val1+(516.412f*Cb))/256f)-276.836f);
-                if(b<0) {
+                b = (int) (((val1 + (516.412f * Cb)) / 256f) - 276.836f);
+                if (b < 0) {
                     b = 0;
                 }
-                if(b>255) {
+                if (b > 255) {
                     b = 255;
                 }
 
-                lastY =Y;
-                lastCb =Cb;
-                lastCr =Cr;
+                lastY = Y;
+                lastCb = Cb;
+                lastCr = Cr;
 
             }
 
-            new_data[pixelReached++] =(byte) (r);
+            new_data[pixelReached++] = (byte) (r);
             new_data[pixelReached++] = (byte) (g);
             new_data[pixelReached++] = (byte) (b);
 
         }
 
         try {
-            image =new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
             final Raster raster = createInterleavedRaster(new_data, w, h);
             image.setData(raster);
@@ -252,173 +255,173 @@ public class ColorSpaceConvertor {
 
         BufferedImage image;
         final DataBuffer db;
-        
+
         //assume true in case of 8 bit and disprove
         //not currently used
-        final boolean isGrayscale=false;//d==8; //@change
+        final boolean isGrayscale = false; //d==8; //@change
 
-        final int[] bandsRGB = {0,1,2};
-        final int[] bandsARGB = {0,1,2,3};
+        final int[] bandsRGB = {0, 1, 2};
+        final int[] bandsARGB = {0, 1, 2, 3};
         int[] bands;
-        int components=3;
+        int components = 3;
 
 
-        if(isARGB){
-            bands=bandsARGB;
-            components=4;
-        }else {
+        if (isARGB) {
+            bands = bandsARGB;
+            components = 4;
+        } else {
             bands = bandsRGB;
         }
 
-        final byte[] newData=convertIndexToRGBByte(index, w, h, components, d, data, isDownsampled, isARGB);
-        
-        if(isARGB) {
+        final byte[] newData = convertIndexToRGBByte(index, w, h, components, d, data, isDownsampled, isARGB);
+
+        if (isARGB) {
             image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        } else if(isGrayscale) {
+        } else if (isGrayscale) {
             image = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
         } else {
             image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         }
 
-        if(isGrayscale){
+        if (isGrayscale) {
 
-            final byte[] grayData=new byte[w*h];
-            int j=0;
-            for(int i=0;i<newData.length;i += 3){
-                grayData[j]=newData[i];
+            final byte[] grayData = new byte[w * h];
+            int j = 0;
+            for (int i = 0; i < newData.length; i += 3) {
+                grayData[j] = newData[i];
                 j++;
             }
 
             bands = new int[]{0};
 
-            final Raster raster =Raster.createInterleavedRaster(new DataBufferByte(grayData, grayData.length),w,h,w,1,bands,null);
+            final Raster raster = Raster.createInterleavedRaster(new DataBufferByte(grayData, grayData.length), w, h, w, 1, bands, null);
 
-            image =new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
+            image = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
             image.setData(raster);
 
-        }else{
+        } else {
             db = new DataBufferByte(newData, newData.length);
-            final WritableRaster raster =Raster.createInterleavedRaster(db,w,h,w * components,components,bands,null);
+            final WritableRaster raster = Raster.createInterleavedRaster(db, w, h, w * components, components, bands, null);
             image.setData(raster);
         }
 
         return image;
     }
-    
-    
+
+
     public static byte[] normaliseTo8Bit(final int d, final int w, final int h, byte[] data) throws RuntimeException {
-        
-        if(d!=8){
-            
-            final int newSize=w*h;
-            
-            final byte[] newData=new byte[newSize];
-            
+
+        if (d != 8) {
+
+            final int newSize = w * h;
+
+            final byte[] newData = new byte[newSize];
+
             //Java needs 8 bit so expand out
-            switch(d){
-                
+            switch (d) {
+
                 case 1:
-                    ColorSpaceConvertor.flatten1bpc(w, data, 0,null, false, newSize, 0,newData);
-                    
+                    ColorSpaceConvertor.flatten1bpc(w, data, 0, null, false, newSize, 0, newData);
+
                     break;
-                    
+
                 case 2:
                     ColorSpaceConvertor.flatten2bpc(w, data, null, false, newSize, newData);
-                    
+
                     break;
-                    
+
                 case 4:
-                    ColorSpaceConvertor.flatten4bpc(w, data,newSize, newData);
+                    ColorSpaceConvertor.flatten4bpc(w, data, newSize, newData);
                     break;
-                    
+
                 case 16:
-                    
-                    for(int ptr=0;ptr<newSize;ptr++){
-                        newData[ptr]=data[ptr*2];
+
+                    for (int ptr = 0; ptr < newSize; ptr++) {
+                        newData[ptr] = data[ptr * 2];
                     }
 
                     break;
-                    
+
                 default:
                     LogWriter.writeLog("unknown comp= " + d);
             }
-            
-            data=newData;
-            
+
+            data = newData;
+
         }
         return data;
     }
-    
+
     public static byte[] convertIndexToRGBByte(final byte[] index, final int w, final int h, final int components, final int d, final byte[] data, final boolean isDownsampled, final boolean isARGB) {
-        
-        int indexLength=0;
-        if(index!=null) {
+
+        int indexLength = 0;
+        if (index != null) {
             indexLength = index.length;
         }
-        final int length=(w * h * components);
-        final byte[] newData =new byte[length];
-        final int id=0;
-        final float ratio=0f;
-        switch(d){
+        final int length = (w * h * components);
+        final byte[] newData = new byte[length];
+        final int id = 0;
+        final float ratio = 0f;
+        switch (d) {
             case 8:
                 flatten8bpc(data, isDownsampled, ratio, id, length, newData, index, indexLength, isARGB);
                 break;
-                
+
             case 4:
                 flatten4bpc(w, data, index, isARGB, length, newData);
                 break;
-                
+
             case 2:
                 flatten2bpc(w, data, index, isARGB, length, newData);
                 break;
-                
+
             case 1:
-                flatten1bpc(w, data, components,index, isARGB, length, 255,newData);
+                flatten1bpc(w, data, components, index, isARGB, length, 255, newData);
                 break;
-                
+
         }
         return newData;
     }
 
     public static void flatten8bpc(final byte[] data, final boolean isDownsampled, float ratio, int id, final int length, final byte[] newData, final byte[] index, final int indexLength, final boolean isARGB) {
-        int pt=0;
-        
-        for(int ii=0;ii< data.length-1;ii++){
-            
-            if(isDownsampled) {
+        int pt = 0;
+
+        for (int ii = 0; ii < data.length - 1; ii++) {
+
+            if (isDownsampled) {
                 ratio = (data[ii] & 0xff) / 255f;
             } else {
                 id = (data[ii] & 0xff) * 3;
             }
-            
-            if(pt>=length) {
+
+            if (pt >= length) {
                 break;
             }
-            
+
             //see - if really  grayscale all components the same
 //                if(index==null)
 //                    isGrayscale=isGrayscale && newData[pt]== newData[pt+1] && newData[pt]== newData[pt+2];
 //                else
 //                    isGrayscale=isGrayscale && index[id]== index[id+1] && index[id]== index[id+2];
-            
-            if(isDownsampled){
-                if(ratio>0){
-                    newData[pt++]= (byte) ((255- index[0])*ratio);
-                    newData[pt++]= (byte) ((255- index[1])*ratio);
-                    newData[pt++]= (byte) ((255- index[2])*ratio);
-                }else {
+
+            if (isDownsampled) {
+                if (ratio > 0) {
+                    newData[pt++] = (byte) ((255 - index[0]) * ratio);
+                    newData[pt++] = (byte) ((255 - index[1]) * ratio);
+                    newData[pt++] = (byte) ((255 - index[2]) * ratio);
+                } else {
                     pt += 3;
                 }
-            }else{
-                if(id< indexLength){
-                    newData[pt++]= index[id];
-                    newData[pt++]= index[id+1];
-                    newData[pt++]= index[id+2];
+            } else {
+                if (id < indexLength) {
+                    newData[pt++] = index[id];
+                    newData[pt++] = index[id + 1];
+                    newData[pt++] = index[id + 2];
                 }
             }
-            
-            if(isARGB){
-                if(id==0 && ratio==0) {
+
+            if (isARGB) {
+                if (id == 0 && ratio == 0) {
                     newData[pt++] = (byte) 255;
                 } else {
                     newData[pt++] = 0;
@@ -429,9 +432,9 @@ public class ColorSpaceConvertor {
 
     private static void flatten4bpc(final int w, final byte[] data, final byte[] index, final boolean isARGB, final int length, final byte[] newData) {
 
-        int id1,pt=0;
-        final int[] shift={4,0};
-        int widthReached=0;
+        int id1, pt = 0;
+        final int[] shift = {4, 0};
+        int widthReached = 0;
 
         for (final byte aData : data) {
 
@@ -467,9 +470,9 @@ public class ColorSpaceConvertor {
 
     public static void flatten1bpc(final int w, final byte[] data, final int comp, final byte[] index, final boolean isARGB, final int length, final int transparency, final byte[] newData) {
 
-        int pt=0;
-        int id;//work through the bytes
-        int widthReached=0;
+        int pt = 0;
+        int id; //work through the bytes
+        int widthReached = 0;
         for (final byte aData : data) {
 
             for (int bits = 0; bits < 8; bits++) {
@@ -502,17 +505,17 @@ public class ColorSpaceConvertor {
                     }
 
                 } else {
-                    if(index==null){
-                        if(id==1){
-                            newData[pt++] = (byte)255;
-                        }else{
-                            newData[pt++] = (byte)0;
+                    if (index == null) {
+                        if (id == 1) {
+                            newData[pt++] = (byte) 255;
+                        } else {
+                            newData[pt++] = (byte) 0;
                         }
-                        
-                    }else{
+
+                    } else {
                         id *= comp;
-                        for(int ii=0;ii<comp;ii++){
-                            newData[pt++] = index[id+ii];
+                        for (int ii = 0; ii < comp; ii++) {
+                            newData[pt++] = index[id + ii];
                         }
                     }
 
@@ -529,19 +532,20 @@ public class ColorSpaceConvertor {
 
     /**
      * convert to RGB or gray. If index is null we assume single component gray
-     * @param w is of type int
-     * @param data is of type byte[]
-     * @param index is of type byte[]
-     * @param isARGB is of type boolean
-     * @param length is of type int
+     *
+     * @param w       is of type int
+     * @param data    is of type byte[]
+     * @param index   is of type byte[]
+     * @param isARGB  is of type boolean
+     * @param length  is of type int
      * @param newData is of type byte[]
      */
     public static void flatten2bpc(final int w, final byte[] data, final byte[] index, final boolean isARGB, final int length, final byte[] newData) {
 
-        int id1,pt=0;
+        int id1, pt = 0;
 
-        final int[] shift={6,4,2,0};
-        int widthReached=0;
+        final int[] shift = {6, 4, 2, 0};
+        int widthReached = 0;
 
         for (final byte aData : data) {
 
@@ -583,80 +587,82 @@ public class ColorSpaceConvertor {
         }
     }
 
-/**
- * Convert YCC to CMY via formula and the CMYK to sRGB via profiles.
- * @param buffer is of type byte[]
- * @param w is of type int
- * @param h is of type int
- * @return BufferedImage 
- */
+    /**
+     * Convert YCC to CMY via formula and the CMYK to sRGB via profiles.
+     *
+     * @param buffer is of type byte[]
+     * @param w      is of type int
+     * @param h      is of type int
+     * @return BufferedImage
+     */
     public static BufferedImage iccConvertCMYKImageToRGB(final byte[] buffer, final int w, final int h) {
 
-        final int pixelCount = w * h*4;
-        int Y,Cb,Cr,CENTER,lastY=-1,lastCb=-1,lastCr=-1,lastCENTER=-1;
+        final int pixelCount = w * h * 4;
+        int Y, Cb, Cr, CENTER, lastY = -1, lastCb = -1, lastCr = -1, lastCENTER = -1;
 
-        int outputC=0, outputM=0,outputY=0;
-        double R,G,B;
+        int outputC = 0, outputM = 0, outputY = 0;
+        double R, G, B;
         //turn YCC in Buffer to CYM using profile
         for (int i = 0; i < pixelCount; i += 4) {
 
-            Y=(buffer[i] & 255);
-            Cb = (buffer[i+1] & 255);
-            Cr = (buffer[i+2] & 255);
-            CENTER = (buffer[i+3] & 255);
+            Y = (buffer[i] & 255);
+            Cb = (buffer[i + 1] & 255);
+            Cr = (buffer[i + 2] & 255);
+            CENTER = (buffer[i + 3] & 255);
 
-            if(Y==lastY && Cb==lastCb && Cr==lastCr && CENTER==lastCENTER){
+            if (Y == lastY && Cb == lastCb && Cr == lastCr && CENTER == lastCENTER) {
                 //no change so use last value
-            }else{ //new value
+            } else { //new value
 
 
                 R = Y + 1.402 * Cr - 179.456;
-                if(R<0d) {
+                if (R < 0d) {
                     R = 0d;
-                } else if(R>255d) {
+                } else if (R > 255d) {
                     R = 255d;
                 }
-                
-                G=Y - 0.34414 * Cb - 0.71414 * Cr + 135.45984;
-                if(G<0d) {
+
+                G = Y - 0.34414 * Cb - 0.71414 * Cr + 135.45984;
+                if (G < 0d) {
                     G = 0d;
-                } else if(G>255d) {
+                } else if (G > 255d) {
                     G = 255d;
                 }
-                
+
                 B = Y + 1.772 * Cb - 226.816;
-                if(B<0d) {
+                if (B < 0d) {
                     B = 0d;
-                } else if(B>255d) {
+                } else if (B > 255d) {
                     B = 255d;
                 }
 
-                outputC = 255 - (int)R;
-                outputM = 255 - (int)G;
-                outputY = 255 - (int)B;
+                outputC = 255 - (int) R;
+                outputM = 255 - (int) G;
+                outputY = 255 - (int) B;
 
                 //flag so we can just reuse if next value the same
-                lastY=Y;
-                lastCb=Cb;
-                lastCr=Cr;
-                lastCENTER=CENTER;
+                lastY = Y;
+                lastCb = Cb;
+                lastCr = Cr;
+                lastCENTER = CENTER;
             }
 
 
             //put back as CMY
-            buffer[i] = (byte) (outputC );
-            buffer[i + 1] = (byte) (outputM );
-            buffer[i + 2] = (byte) (outputY );
+            buffer[i] = (byte) (outputC);
+            buffer[i + 1] = (byte) (outputM);
+            buffer[i + 2] = (byte) (outputY);
 
         }
-        
-        return CMYKtoRGB.convert(buffer,w,h);
-        
+
+        return CMYKtoRGB.convert(buffer, w, h);
+
     }
 
     /**
      * Convert a BufferedImage to RGB colourspace.
-     * @param image is of type BufferedImage
+     *
+     * @param image   is of type BufferedImage
      * @param newType is of type int
      * @return BufferedImage
      */
@@ -677,7 +683,9 @@ public class ColorSpaceConvertor {
         return image;
     }
 
-    /**convenience method used to check value within bounds*/
+    /**
+     * convenience method used to check value within bounds
+     */
     static double clip01(double value) {
 
         if (value < 0) {
@@ -699,80 +707,80 @@ public class ColorSpaceConvertor {
     public static Raster createInterleavedRaster(final byte[] data, final int w, final int h) {
 
         final DataBuffer db = new DataBufferByte(data, data.length);
-        final int[] bands = {0,1,2};
-        return Raster.createInterleavedRaster(db,w,h,w * 3,3,bands,null);
+        final int[] bands = {0, 1, 2};
+        return Raster.createInterleavedRaster(db, w, h, w * 3, 3, bands, null);
     }
 
     public static void drawImage(final Graphics2D g2, final BufferedImage tileImg, final AffineTransform tileAff, final ImageObserver observer) {
 
-        g2.drawImage(tileImg,tileAff,observer);
+        g2.drawImage(tileImg, tileAff, observer);
 
     }
 
 
     public static void flatten4bpc(final int w, final byte[] data, final int newSize, final byte[] newData) {
 
-        final int origSize=data.length;
+        final int origSize = data.length;
 
         byte rawByte;
-        int ptr=0,currentLine=0;
-        final boolean oddValues=((w & 1)==1);
-        for(int ii=0;ii<origSize;ii++){
-            rawByte=data[ii];
+        int ptr = 0, currentLine = 0;
+        final boolean oddValues = ((w & 1) == 1);
+        for (int ii = 0; ii < origSize; ii++) {
+            rawByte = data[ii];
 
             currentLine += 2;
-            newData[ptr]=(byte) (rawByte & 240);
-            if(newData[ptr]==-16)   //fix for white
+            newData[ptr] = (byte) (rawByte & 240);
+            if (newData[ptr] == -16)   //fix for white
             {
                 newData[ptr] = (byte) 255;
             }
             ptr++;
 
-            if(oddValues && currentLine>w){ //ignore second value if odd as just packing
-                currentLine=0;
-            }else{
-                newData[ptr]=(byte) ((rawByte & 15) <<4);
-                if(newData[ptr]==-16)  //fix for white
+            if (oddValues && currentLine > w) { //ignore second value if odd as just packing
+                currentLine = 0;
+            } else {
+                newData[ptr] = (byte) ((rawByte & 15) << 4);
+                if (newData[ptr] == -16)  //fix for white
                 {
                     newData[ptr] = (byte) 255;
                 }
                 ptr++;
             }
 
-            if(ptr==newSize) {
+            if (ptr == newSize) {
                 ii = origSize;
             }
         }
     }
-    
+
     public static BufferedImage createRGBImage(final int width, final int height, final byte[] data) {
-        
-      //  System.out.println("createARGBImage "+width+" "+height+" "+data.length);
-        
+
+        //  System.out.println("createARGBImage "+width+" "+height+" "+data.length);
+
         final DataBuffer db = new DataBufferByte(data, data.length);
-        
-        final int[] bands = { 0, 1, 2 };
+
+        final int[] bands = {0, 1, 2};
         final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        final Raster raster = Raster.createInterleavedRaster(db, width, height, width * 3,3, bands, null);
-        
+        final Raster raster = Raster.createInterleavedRaster(db, width, height, width * 3, 3, bands, null);
+
         image.setData(raster);
-        
+
         return image;
     }
-    
+
     public static BufferedImage createARGBImage(final int width, final int height, final byte[] data) {
 
         final DataBuffer db = new DataBufferByte(data, data.length);
-        
-        final int[] bands = { 0, 1, 2,3 };
+
+        final int[] bands = {0, 1, 2, 3};
         final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         final Raster raster = Raster.createInterleavedRaster(db, width, height, width * 4, 4, bands, null);
-        
+
         image.setData(raster);
-        
+
         return image;
     }
-    
+
     /* save raw CMYK data by converting to RGB using algorithm method -
      * pdfsages supplied the C source and I have converted -
      * This works very well on most colours but not dark shades which are
@@ -795,27 +803,27 @@ public class ColorSpaceConvertor {
         BufferedImage image = null;
         final byte[] new_data = new byte[w * h * 3];
 
-        final int pixelCount = w * h*4;
+        final int pixelCount = w * h * 4;
 
-        double lastC=-1,lastM=-1.12,lastY=-1.12,lastK=-1.21;
-        final double x=255;
+        double lastC = -1, lastM = -1.12, lastY = -1.12, lastK = -1.21;
+        final double x = 255;
 
 
         double c, m, y, aw, ac, am, ay, ar, ag, ab;
-        double outRed=0, outGreen=0, outBlue=0;
+        double outRed = 0, outGreen = 0, outBlue = 0;
 
         int pixelReached = 0;
         for (int i = 0; i < pixelCount; i += 4) {
 
-            final double inCyan = (buffer[i]&0xff)/x ;
-            final double inMagenta = (buffer[i + 1]&0xff) / x;
-            final double inYellow = (buffer[i + 2]&0xff) / x;
-            final double inBlack = (buffer[i + 3]&0xff) / x;
+            final double inCyan = (buffer[i] & 0xff) / x;
+            final double inMagenta = (buffer[i + 1] & 0xff) / x;
+            final double inYellow = (buffer[i + 2] & 0xff) / x;
+            final double inBlack = (buffer[i + 3] & 0xff) / x;
 
-            if((lastC==inCyan)&&(lastM==inMagenta)&&
-                    (lastY==inYellow)&&(lastK==inBlack)){
+            if ((lastC == inCyan) && (lastM == inMagenta) &&
+                    (lastY == inYellow) && (lastK == inBlack)) {
                 //use existing values
-            }else{//work out new
+            } else { //work out new
                 final double k = 1;
                 c = clip01(inCyan + inBlack);
                 m = clip01(inMagenta + inBlack);
@@ -827,10 +835,10 @@ public class ColorSpaceConvertor {
                 ar = (k - c) * m * y;
                 ag = c * (k - m) * y;
                 ab = c * m * (k - y);
-                outRed = x*clip01(aw + 0.9137 * am + 0.9961 * ay + 0.9882 * ar);
-                outGreen = x*clip01(aw + 0.6196 * ac + ay + 0.5176 * ag);
+                outRed = x * clip01(aw + 0.9137 * am + 0.9961 * ay + 0.9882 * ar);
+                outGreen = x * clip01(aw + 0.6196 * ac + ay + 0.5176 * ag);
                 outBlue =
-                        x*clip01(
+                        x * clip01(
                                 aw
                                         + 0.7804 * ac
                                         + 0.5412 * am
@@ -838,20 +846,20 @@ public class ColorSpaceConvertor {
                                         + 0.2118 * ag
                                         + 0.4863 * ab);
 
-                lastC=inCyan;
-                lastM=inMagenta;
-                lastY=inYellow;
-                lastK=inBlack;
+                lastC = inCyan;
+                lastM = inMagenta;
+                lastY = inYellow;
+                lastK = inBlack;
             }
 
-            new_data[pixelReached++] =(byte)(outRed);
+            new_data[pixelReached++] = (byte) (outRed);
             new_data[pixelReached++] = (byte) (outGreen);
             new_data[pixelReached++] = (byte) (outBlue);
 
         }
 
         try {
-            image = new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
             final Raster raster = createInterleavedRaster(new_data, w, h);
             image.setData(raster);

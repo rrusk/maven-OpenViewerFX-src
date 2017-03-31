@@ -33,6 +33,7 @@
 package org.jpedal.fonts.tt;
 
 import java.util.Map;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.fonts.FontMappings;
 import org.jpedal.fonts.StandardFonts;
@@ -45,7 +46,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
     protected int[] CIDToGIDMap;
 
-    float[] FontBBox= {0f,0f,1000f,1000f};
+    float[] FontBBox = {0f, 0f, 1000f, 1000f};
 
     boolean isCorrupted;
 
@@ -72,7 +73,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
     //int glyphCount=0;
 
     //assume TT and set to OTF further down
-    int type= StandardFonts.TRUETYPE;
+    int type = StandardFonts.TRUETYPE;
 
     private int unitsPerEm;
 
@@ -84,22 +85,22 @@ public class TTGlyphs extends PdfJavaGlyphs {
      * used by  non type3 font
      */
     @Override
-    public PdfGlyph getEmbeddedGlyph(final GlyphFactory factory, final String glyph, final float[][]Trm, int rawInt,
+    public PdfGlyph getEmbeddedGlyph(final GlyphFactory factory, final String glyph, final float[][] Trm, int rawInt,
                                      final String displayValue, final float currentWidth, final String key) {
 
-        final int id=rawInt; 
-        if(hasGIDtoCID && (isIdentity()|| currentCMAP==null) &&  CIDToGIDMap.length>rawInt){  
-            
-            final int mappedValue=CIDToGIDMap[rawInt];
-            
-            if(mappedValue>0){
-                rawInt=mappedValue;
-            }           
+        final int id = rawInt;
+        if (hasGIDtoCID && (isIdentity() || currentCMAP == null) && CIDToGIDMap.length > rawInt) {
+
+            final int mappedValue = CIDToGIDMap[rawInt];
+
+            if (mappedValue > 0) {
+                rawInt = mappedValue;
+            }
         }
         /* flush cache if needed*/
-        if(Trm!=null && (lastTrm[0][0]!=Trm[0][0])|(lastTrm[1][0]!=Trm[1][0])|
-                (lastTrm[0][1]!=Trm[0][1])|(lastTrm[1][1]!=Trm[1][1])){
-            lastTrm=Trm;
+        if (Trm != null && (lastTrm[0][0] != Trm[0][0]) | (lastTrm[1][0] != Trm[1][0]) |
+                (lastTrm[0][1] != Trm[0][1]) | (lastTrm[1][1] != Trm[1][1])) {
+            lastTrm = Trm;
             flush();
         }
 
@@ -109,7 +110,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
         if (transformedGlyph2 == null) {
 
             //use CMAP to get actual glyph ID
-            int idx=rawInt;
+            int idx = rawInt;
 
 
             if ((!isCID || !isIdentity()) && currentCMAP != null) {
@@ -122,28 +123,28 @@ public class TTGlyphs extends PdfJavaGlyphs {
             }
 
             //shape to draw onto
-            try{
-                if(hasCFF){
+            try {
+                if (hasCFF) {
 
-                    transformedGlyph2=currentCFF.getCFFGlyph(factory,glyph,Trm,idx, displayValue,currentWidth,key);
+                    transformedGlyph2 = currentCFF.getCFFGlyph(factory, glyph, Trm, idx, displayValue, currentWidth, key);
 
                     //set raw width to use for scaling
-                    if(transformedGlyph2!=null) {
+                    if (transformedGlyph2 != null) {
 
-                        if(isCID && remappedCFFFont) {
-                           idx = currentCMAP.getGlyphToIndex(rawInt);
+                        if (isCID && remappedCFFFont) {
+                            idx = currentCMAP.getGlyphToIndex(rawInt);
                         }
 
                         //transformedGlyph2.setWidth(getUnscaledWidth(glyph, rawInt, false));
                         transformedGlyph2.setWidth(getUnscaledWidth(glyph, idx, false));
                     }
 
-                }else {
+                } else {
                     transformedGlyph2 = getTTGlyph(idx, glyph, rawInt, displayValue, factory);
                 }
-            }catch(final Exception e){
+            } catch (final Exception e) {
                 //noinspection UnusedAssignment
-                transformedGlyph2=null;
+                transformedGlyph2 = null;
 
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
@@ -160,45 +161,37 @@ public class TTGlyphs extends PdfJavaGlyphs {
      */
     private PdfGlyph getTTGlyph(int idx, final String glyph, final int rawInt, final String displayValue, final GlyphFactory factory) {
 
-        if(isCorrupted) {
+        if (isCorrupted) {
             idx = rawInt;
         }
 
-        PdfGlyph currentGlyph=null;
+        PdfGlyph currentGlyph = null;
 
-        try{
-            //final boolean debug=(rawInt==2465);
-            BaseTTGlyph.debug=false;
+        try {
 
-
-            if(idx!=-1){
+            if (idx != -1) {
                 //move the pointer to the commands
-                final int p=currentGlyf.getCharString(idx);
+                final int p = currentGlyf.getCharString(idx);
 
-                if(p!=-1){
-                    
-                    if(factory.useFX()){
-                        currentGlyph=factory.getGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), vm,baseFontName);
-                        
-                    }else if (TTGlyph.useHinting) {
-                            currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), vm);
-                        } else {
-                            currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), baseFontName);
-                        }
-                    
-                    if(BaseTTGlyph.debug) {
-                        System.out.println(">>" + p + ' ' + rawInt + ' ' + displayValue + ' ' + baseFontName);
+                if (p != -1) {
+
+                    if (factory.useFX()) {
+                        currentGlyph = factory.getGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), vm, baseFontName);
+
+                    } else if (TTGlyph.useHinting) {
+                        currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), vm);
+                    } else {
+                        currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), baseFontName);
                     }
-
                 } else if (!factory.useFX() && (" ".equals(glyph) || " ".equals(displayValue))) {
                     //Add a marker glyph in to record the number of the space glyph
-                    currentGlyph = new MarkerGlyph(0,0,0,0,baseFontName);
-                    currentGlyph.setGlyphNumber(idx+1);
+                    currentGlyph = new MarkerGlyph(0, 0, 0, 0, baseFontName);
+                    currentGlyph.setGlyphNumber(idx + 1);
                 }
             }
 
-        }catch(final Exception ee){
-            LogWriter.writeLog("Exception "+ee);
+        } catch (final Exception ee) {
+            LogWriter.writeLog("Exception " + ee);
         }
 
         //if(glyph.equals("fl"))
@@ -209,8 +202,8 @@ public class TTGlyphs extends PdfJavaGlyphs {
     @Override
     public void setEncodingToUse(final boolean hasEncoding, final int fontEncoding, final boolean isCIDFont) {
 
-        if(currentCMAP!=null){
-            if(isCorrupted) {
+        if (currentCMAP != null) {
+            if (isCorrupted) {
                 currentCMAP.setEncodingToUse(hasEncoding, fontEncoding, isCIDFont);
             } else {
                 currentCMAP.setEncodingToUse(hasEncoding, fontEncoding, isCIDFont);
@@ -219,9 +212,9 @@ public class TTGlyphs extends PdfJavaGlyphs {
     }
 
     @Override
-    public int getConvertedGlyph(final int idx){
+    public int getConvertedGlyph(final int idx) {
 
-        if(currentCMAP==null) {
+        if (currentCMAP == null) {
             return idx;
         } else {
             return currentCMAP.convertIndexToCharacterCode(null, idx);
@@ -231,14 +224,15 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
     /**
      * Return charstrings and subrs - used by PS to OTF converter
+     *
      * @return
      */
     @Override
     public Map<Integer, Integer> getCharStrings() {
 
-        if(currentCMAP!=null){
+        if (currentCMAP != null) {
             return currentCMAP.buildCharStringTable();
-        }else{
+        } else {
             return currentGlyf.buildCharStringTable();
         }
     }
@@ -250,24 +244,24 @@ public class TTGlyphs extends PdfJavaGlyphs {
     public float getTTWidth(final String glyph, final int rawInt, final String displayValue, final boolean TTstreamisCID) {
 
         //use CMAP if not CID
-        int idx=rawInt;
+        int idx = rawInt;
 
-        float width=0;
+        float width = 0;
 
-        try{
-            if((!TTstreamisCID)) {
+        try {
+            if ((!TTstreamisCID)) {
                 idx = currentCMAP.convertIndexToCharacterCode(glyph, rawInt);
             }
 
             //if no value use post to lookup
-            if(idx<1) {
+            if (idx < 1) {
                 idx = currentPost.convertGlyphToCharacterCode(glyph);
             }
 
             //if(idx!=-1)
-            width=currentHmtx.getWidth(idx);
+            width = currentHmtx.getWidth(idx);
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Attempting to read width " + e);
         }
 
@@ -280,25 +274,25 @@ public class TTGlyphs extends PdfJavaGlyphs {
     private float getUnscaledWidth(final String glyph, final int rawInt, final boolean TTstreamisCID) {
 
         //use CMAP if not CID
-        int idx=rawInt;
+        int idx = rawInt;
 
         float width;
 
-        try{
-            if((!TTstreamisCID)) {
+        try {
+            if ((!TTstreamisCID)) {
                 idx = currentCMAP.convertIndexToCharacterCode(glyph, rawInt);
             }
 
             //if no value use post to lookup
-            if(idx<1) {
+            if (idx < 1) {
                 idx = currentPost.convertGlyphToCharacterCode(glyph);
             }
 
             //if(idx!=-1)
-            width=currentHmtx.getUnscaledWidth(idx);
+            width = currentHmtx.getUnscaledWidth(idx);
 
-        }catch(final Exception e){
-            width=1000;
+        } catch (final Exception e) {
+            width = 1000;
             LogWriter.writeLog("Attempting to read width " + e);
         }
 
@@ -309,14 +303,14 @@ public class TTGlyphs extends PdfJavaGlyphs {
     @Override
     public boolean isValidGIDtoCID(final int value) {
 
-        return CIDToGIDMap!=null && CIDToGIDMap.length>value && CIDToGIDMap[value]>0;
+        return CIDToGIDMap != null && CIDToGIDMap.length > value && CIDToGIDMap[value] > 0;
     }
-    
+
     @Override
     public void setGIDtoCID(final int[] cidToGIDMap) {
 
-        hasGIDtoCID=true;
-        this.CIDToGIDMap=cidToGIDMap;
+        hasGIDtoCID = true;
+        this.CIDToGIDMap = cidToGIDMap;
 
     }
 
@@ -324,53 +318,53 @@ public class TTGlyphs extends PdfJavaGlyphs {
      * return name of font or all fonts if TTC
      * NAME will be LOWERCASE to avoid issues of capitalisation
      * when used for lookup - if no name, will default to  null
-     *
+     * <p>
      * Mode is PdfDecoder.SUBSTITUTE_* CONSTANT. RuntimeException will be thrown on invalid value
      */
     public static String[] readFontNames(final FontData fontData, final int mode) {
 
         /* setup read the table locations*/
-        final FontFile2 currentFontFile=new FontFile2(fontData);
+        final FontFile2 currentFontFile = new FontFile2(fontData);
 
         //get type
         //int fontType=currentFontFile.getType();
 
-        final int fontCount=currentFontFile.getFontCount();
+        final int fontCount = currentFontFile.getFontCount();
 
-        final String[] fontNames=new String[fontCount];
+        final String[] fontNames = new String[fontCount];
 
         /* read tables for names*/
-        for(int i=0;i<fontCount;i++){
+        for (int i = 0; i < fontCount; i++) {
 
             currentFontFile.setSelectedFontIndex(i);
 
-            final Name currentName=new Name(currentFontFile);
+            final Name currentName = new Name(currentFontFile);
 
             final String name;
 
             switch (mode) {
                 case PdfDecoderInt.SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME:
-                    name=currentName.getString(Name.POSTSCRIPT_NAME);
+                    name = currentName.getString(Name.POSTSCRIPT_NAME);
                     break;
                 case PdfDecoderInt.SUBSTITUTE_FONT_USING_FAMILY_NAME:
-                    name=currentName.getString(Name.FONT_FAMILY_NAME);
+                    name = currentName.getString(Name.FONT_FAMILY_NAME);
                     break;
                 case PdfDecoderInt.SUBSTITUTE_FONT_USING_FULL_FONT_NAME:
-                    name=currentName.getString(Name.FULL_FONT_NAME);
+                    name = currentName.getString(Name.FULL_FONT_NAME);
                     break;
                 default:
                     //tell user if invalid
-                    throw new RuntimeException("Unsupported mode "+mode+". Unable to resolve font names");
+                    throw new RuntimeException("Unsupported mode " + mode + ". Unable to resolve font names");
             }
 
-            if(name==null){
-                fontNames[i]=null;
-            }else{
-                fontNames[i]=name.toLowerCase();
+            if (name == null) {
+                fontNames[i] = null;
+            } else {
+                fontNames[i] = name.toLowerCase();
             }
         }
 
-        if(fontData!=null) {
+        if (fontData != null) {
             fontData.close();
         }
 
@@ -383,24 +377,24 @@ public class TTGlyphs extends PdfJavaGlyphs {
     public static void addStringValues(final FontData fontData, final Map<String, String> fontDetails) {
 
         /* setup read the table locations*/
-        final FontFile2 currentFontFile=new FontFile2(fontData);
+        final FontFile2 currentFontFile = new FontFile2(fontData);
 
         //get type
         //int fontType=currentFontFile.getType();
 
-        final int fontCount=currentFontFile.getFontCount();
+        final int fontCount = currentFontFile.getFontCount();
 
         /* read tables for names*/
-        for(int i=0;i<fontCount;i++){
+        for (int i = 0; i < fontCount; i++) {
 
             currentFontFile.setSelectedFontIndex(i);
 
-            final Name currentName=new Name(currentFontFile);
+            final Name currentName = new Name(currentFontFile);
 
-            final Map<Integer, String> stringValues= currentName.getStrings();
+            final Map<Integer, String> stringValues = currentName.getStrings();
 
 
-            if(stringValues!=null){
+            if (stringValues != null) {
                 for (final Integer o : stringValues.keySet()) {
                     final Integer currentKey = o;
 
@@ -412,7 +406,7 @@ public class TTGlyphs extends PdfJavaGlyphs {
             }
         }
 
-        if(fontData!=null) {
+        if (fontData != null) {
             fontData.close();
         }
     }
@@ -422,10 +416,10 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
         final FontFile2 currentFontFile;
 
-        isCID=TTstreamisCID;
+        isCID = TTstreamisCID;
 
         /* setup read the table locations*/
-        if(fontDataAsArray!=null) {
+        if (fontDataAsArray != null) {
             currentFontFile = new FontFile2(fontDataAsArray);
         } else {
             currentFontFile = new FontFile2(fontData);
@@ -433,67 +427,67 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
         //select font if TTC
         //does nothing if TT
-        if(FontMappings.fontSubstitutionFontID==null){
+        if (FontMappings.fontSubstitutionFontID == null) {
             currentFontFile.setPointer(0);
-        }else{
-            final Integer fontID= FontMappings.fontSubstitutionFontID.get(fontName.toLowerCase());
+        } else {
+            final Integer fontID = FontMappings.fontSubstitutionFontID.get(fontName.toLowerCase());
 
-            if(fontID!=null) {
+            if (fontID != null) {
                 currentFontFile.setPointer(fontID);
             } else {
                 currentFontFile.setPointer(0);
             }
         }
 
-        currentHead=new Head(currentFontFile);
+        currentHead = new Head(currentFontFile);
 
-        currentPost=new Post(currentFontFile);
+        currentPost = new Post(currentFontFile);
 
         //currentName=new Name(currentFontFile);
 
-        final Maxp currentMaxp =new Maxp(currentFontFile);
-        glyphCount= currentMaxp.getGlyphCount();
-        currentLoca=new Loca(currentFontFile,glyphCount,currentHead.getIndexToLocFormat());
+        final Maxp currentMaxp = new Maxp(currentFontFile);
+        glyphCount = currentMaxp.getGlyphCount();
+        currentLoca = new Loca(currentFontFile, glyphCount, currentHead.getIndexToLocFormat());
 
-        isCorrupted=currentLoca.isCorrupted();
+        isCorrupted = currentLoca.isCorrupted();
 
-        currentGlyf=new Glyf(currentFontFile,glyphCount,currentLoca.getIndices());
+        currentGlyf = new Glyf(currentFontFile, glyphCount, currentLoca.getIndices());
 
-        currentCFF=new CFF(currentFontFile,isCID, remappedCFFFont);
+        currentCFF = new CFF(currentFontFile, isCID, remappedCFFFont);
 
-        hasCFF=currentCFF.hasCFFData();
-        if(hasCFF) {
+        hasCFF = currentCFF.hasCFFData();
+        if (hasCFF) {
             type = StandardFonts.OPENTYPE;
         }
 
         //currentCvt=new Cvt(currentFontFile);
 
-        if(TTGlyph.useHinting){
+        if (TTGlyph.useHinting) {
             //Classes in hinting package which we will delete in lgpl
-            vm=new TTVM(currentFontFile, currentMaxp);
+            vm = new TTVM(currentFontFile, currentMaxp);
         }
 
-        currentHhea=new Hhea(currentFontFile);
+        currentHhea = new Hhea(currentFontFile);
 
-        FontBBox=currentHead.getFontBBox();
+        FontBBox = currentHead.getFontBBox();
 
-        currentHmtx=new Hmtx(currentFontFile,glyphCount,currentHhea.getNumberOfHMetrics(),(int)FontBBox[3]);
+        currentHmtx = new Hmtx(currentFontFile, glyphCount, currentHhea.getNumberOfHMetrics(), (int) FontBBox[3]);
 
         //not all files have CMAPs
         //if(!TTstreamisCID){
-        final int startPointer=currentFontFile.selectTable(FontFile2.CMAP);
+        final int startPointer = currentFontFile.selectTable(FontFile2.CMAP);
 
-        if(startPointer!=0) {
+        if (startPointer != 0) {
             currentCMAP = new CMAP(currentFontFile, startPointer);
         }
 
         //}
 
-        unitsPerEm=currentHead.getUnitsPerEm();
+        unitsPerEm = currentHead.getUnitsPerEm();
 
-        fontTable=new FontFile2(currentGlyf.getTableData(),true);
+        fontTable = new FontFile2(currentGlyf.getTableData(), true);
 
-        if(fontData!=null) {
+        if (fontData != null) {
             fontData.close();
         }
 
@@ -518,32 +512,32 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
     @Override
     public void setCorrupted(final boolean corrupt) {
-        isCorrupted=corrupt;
+        isCorrupted = corrupt;
     }
 
     @Override
-    public Table getTable(final int type){
+    public Table getTable(final int type) {
 
         final Table table;
-        switch(type){
+        switch (type) {
             case FontFile2.LOCA:
-                table=currentLoca;
+                table = currentLoca;
                 break;
 
             case FontFile2.CMAP:
-                table=currentCMAP;
+                table = currentCMAP;
                 break;
 
             case FontFile2.HHEA:
-                table=currentHhea;
+                table = currentHhea;
                 break;
 
             case FontFile2.HMTX:
-                table=currentHmtx;
+                table = currentHmtx;
                 break;
 
             case FontFile2.HEAD:
-                table=currentHead;
+                table = currentHead;
                 break;
 
             default:

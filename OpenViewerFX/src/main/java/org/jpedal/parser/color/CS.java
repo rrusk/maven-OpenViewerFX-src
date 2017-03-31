@@ -44,22 +44,22 @@ import org.jpedal.parser.PdfObjectCache;
  *
  */
 public class CS {
-   
+
     public static void execute(final boolean isLowerCase, final String colorspaceObject, final GraphicsState gs, final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final boolean isPrinting) {
 
         //set flag for stroke
         final boolean isStroke = !isLowerCase;
 
-        final Object rawDict=cache.get(PdfObjectCache.Colorspaces,colorspaceObject);
+        final Object rawDict = cache.get(PdfObjectCache.Colorspaces, colorspaceObject);
 
-        final PdfArrayIterator array=ColorspaceFactory.convertColValueToMixedArray(currentPdfFile,(byte[])rawDict);
+        final PdfArrayIterator array = ColorspaceFactory.convertColValueToMixedArray(currentPdfFile, (byte[]) rawDict);
 
-        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, array);
+        final GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, array);
 
         newColorSpace.setPrinting(isPrinting);
 
         //pass in pattern arrays containing all values
-        if(newColorSpace.getID()==ColorSpaces.Pattern){
+        if (newColorSpace.getID() == ColorSpaces.Pattern) {
 
             //at this point we only know it is Pattern so need to pass in WHOLE array
             newColorSpace.setPattern(cache.getPatterns());
@@ -67,9 +67,9 @@ public class CS {
         }
 
         //track colorspace use
-        cache.put(PdfObjectCache.ColorspacesUsed, newColorSpace.getID(),"x");
+        cache.put(PdfObjectCache.ColorspacesUsed, newColorSpace.getID(), "x");
 
-        if(isStroke) {
+        if (isStroke) {
             gs.strokeColorSpace = newColorSpace;
         } else {
             gs.nonstrokeColorSpace = newColorSpace;

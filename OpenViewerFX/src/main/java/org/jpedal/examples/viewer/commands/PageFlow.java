@@ -38,6 +38,7 @@ import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.display.GUIDisplay;
@@ -60,7 +61,7 @@ public class PageFlow {
 
     public static void execute(final Object[] args, final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf, final PropertiesFile properties, final GUISearchWindow searchFrame) {
 
-        if (!decode_pdf.isOpen() || decode_pdf.getDisplayView()==Display.PAGEFLOW) {
+        if (!decode_pdf.isOpen() || decode_pdf.getDisplayView() == Display.PAGEFLOW) {
             return;
         }
 
@@ -70,7 +71,7 @@ public class PageFlow {
         if (args == null) {
 
             //Added condition to disable coverflow on applet.
-            if (commonValues.getModeOfOperation() != Values.RUNNING_APPLET) {// && JavaFXHelper.isJavaFXAvailable()){
+            if (commonValues.getModeOfOperation() != Values.RUNNING_APPLET) { // && JavaFXHelper.isJavaFXAvailable()){
 
                 //display dialog advising Java FX usage
                 if (!JavaFXHelper.isJavaFXAvailable()) {
@@ -123,7 +124,7 @@ public class PageFlow {
 
                         final Object[] options = {Messages.getMessage("PdfViewer.PageFlowJarsNeeded.Continue")};
                         JOptionPane.showOptionDialog(
-                                (Component)currentGUI.getFrame(),
+                                (Component) currentGUI.getFrame(),
                                 a,
                                 Messages.getMessage("PdfViewer.PageFlowJarsNeeded.Title"),
                                 JOptionPane.DEFAULT_OPTION,
@@ -139,23 +140,22 @@ public class PageFlow {
                 currentGUI.getCombo(Commands.SCALING).setEnabled(false);
                 currentGUI.getButtons().getButton(Commands.MOUSEMODE).setEnabled(false);
                 currentGUI.getButtons().getButton(Commands.SNAPSHOT).setEnabled(false);
-                            
+
                 currentGUI.getButtons().getButton(Commands.ROTATELEFT).setEnabled(false);
                 currentGUI.getButtons().getButton(Commands.ROTATERIGHT).setEnabled(false);
-                
-                if (currentGUI.getGlassPane() != null){
-                    ((Component)currentGUI.getGlassPane()).setVisible(false);
-                }  
-                
+
+                if (currentGUI.getGlassPane() != null) {
+                    ((Component) currentGUI.getGlassPane()).setVisible(false);
+                }
+
                 currentGUI.getButtons().alignLayoutMenuOption(Display.PAGEFLOW);
-                
+
                 if (SharedViewer.isFX()) {
                     ModeChange.changeModeInJavaFX(Display.PAGEFLOW, decode_pdf, currentGUI);
                 } else {
                     ModeChange.changeModeInSwing(Display.PAGEFLOW, decode_pdf, currentGUI, commonValues);
                 }
-                
-                          
+
 
             } else {
                 //Case 8720: Temporarily disabled PageFlow when running on a Applet
@@ -169,7 +169,7 @@ public class PageFlow {
                     currentGUI.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
 
                     currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-                    ((GUI)currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
+                    ((GUI) currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
                 } else {
                     currentGUI.setCommandInThread(true);
                     final Runnable doPaintComponent = new Runnable() {
@@ -179,7 +179,7 @@ public class PageFlow {
                             currentGUI.setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
 
                             currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-                            ((GUI)currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
+                            ((GUI) currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
 
                             currentGUI.setExecutingCommand(false);
                         }
@@ -190,7 +190,7 @@ public class PageFlow {
             }
 
             currentGUI.getCombo(Commands.ROTATION).setEnabled(false);
-            
+
             currentGUI.updateTextBoxSize();
         }
     }

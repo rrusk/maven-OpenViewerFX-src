@@ -36,6 +36,7 @@ package org.jpedal.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+
 import org.jpedal.utils.LogWriter;
 
 public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
@@ -48,24 +49,23 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
     private ByteBuffer mb;
 
     @SuppressWarnings("UnusedDeclaration")
-    public RandomAccessFileChannelBuffer(final InputStream inFile)
-    {
+    public RandomAccessFileChannelBuffer(final InputStream inFile) {
 
-        try{
+        try {
 
-            length=inFile.available();
-            mb=ByteBuffer.allocate(length);
+            length = inFile.available();
+            mb = ByteBuffer.allocate(length);
 
             int read;
-            final byte[] buffer=new byte[4096];
+            final byte[] buffer = new byte[4096];
             while ((read = inFile.read(buffer)) != -1) {
-                if(read>0){
-                    for(int i=0;i<read;i++) {
+                if (read > 0) {
+                    for (int i = 0; i < read; i++) {
                         mb.put(buffer[i]);
                     }
                 }
             }
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
     }
@@ -78,7 +78,7 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
 
     @Override
     public void seek(final long pos) throws IOException {
-        if ( checkPos(pos) ) {
+        if (checkPos(pos)) {
             this.pointer = pos;
         } else {
             throw new IOException("Position out of bounds");
@@ -88,17 +88,17 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
     @Override
     public void close() throws IOException {
 
-        if(mb !=null){
+        if (mb != null) {
 
-            mb =null;
+            mb = null;
         }
 
         this.pointer = -1;
 
     }
 
-     @Override
-     protected void finalize(){
+    @Override
+    protected void finalize() {
 
         try {
             super.finalize();
@@ -117,7 +117,7 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
     @Override
     public long length() throws IOException {
 
-    	if (mb !=null) {
+        if (mb != null) {
             return length;
         } else {
             throw new IOException("Data buffer not initialized.");
@@ -128,7 +128,7 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
     public int read() throws IOException {
 
         if (checkPos(this.pointer)) {
-            mb.position((int)pointer);
+            mb.position((int) pointer);
             pointer++;
 
             return mb.get();
@@ -139,12 +139,12 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
 
     private int peek() throws IOException {
 
-    	if (checkPos(this.pointer)) {
+        if (checkPos(this.pointer)) {
 
-            mb.position((int)pointer);
+            mb.position((int) pointer);
 
             return mb.get();
-        } else{
+        } else {
             return -1;
         }
     }
@@ -177,21 +177,21 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
     @Override
     public int read(final byte[] b) throws IOException {
 
-        if (mb ==null) {
+        if (mb == null) {
             throw new IOException("Data buffer not initialized.");
         }
 
-        if (pointer<0 || pointer>=length) {
+        if (pointer < 0 || pointer >= length) {
             return -1;
         }
 
-        int length=this.length-(int)pointer;
-        if(length>b.length) {
+        int length = this.length - (int) pointer;
+        if (length > b.length) {
             length = b.length;
         }
 
-        for (int i=0; i<length; i++) {
-            mb.position((int)pointer);
+        for (int i = 0; i < length; i++) {
+            mb.position((int) pointer);
             pointer++;
             b[i] = mb.get();
 
@@ -201,14 +201,14 @@ public class RandomAccessFileChannelBuffer implements RandomAccessBuffer {
     }
 
     private boolean checkPos(final long pos) throws IOException {
-        return ( (pos>=0) && (pos<length()) );
+        return ((pos >= 0) && (pos < length()));
     }
 
     /* returns the byte data*/
     @Override
-    public byte[] getPdfBuffer(){
+    public byte[] getPdfBuffer() {
 
-        final byte[] bytes=new byte[length];
+        final byte[] bytes = new byte[length];
 
         mb.position(0);
         mb.get(bytes);

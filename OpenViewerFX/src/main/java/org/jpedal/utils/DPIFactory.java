@@ -33,41 +33,45 @@
 package org.jpedal.utils;
 
 public class DPIFactory {
-	
-	//Current DPI value, Java is 72 by default
-	private float dpi = 72f;
 
-	/**
-	 * Corrects the image scaling to take into account the user specified DPI value
-	 * @param scaling :: Raw scaling value before DPI is applied (DPI of 72 is default)
-	 * @return Corrected scaling in the form of a float
-	 */
-    public float adjustScaling(final float scaling) {
-    		return scaling * (dpi/72f);
-    }
-    
+    //Current DPI value, Java is 72 by default
+    private float dpi = 72f;
+
     /**
-	 * Corrects the image scaling to take into account the user specified DPI value
-	 * @param scaling :: Raw scaling value before DPI is applied (DPI of 72 is default)
-	 * @return Corrected scaling in the form of a float
-	 */
-    public float removeScaling(final float scaling) {
-    		return scaling / (dpi/72f);
+     * Corrects the image scaling to take into account the user specified DPI value
+     *
+     * @param scaling :: Raw scaling value before DPI is applied (DPI of 72 is default)
+     * @return Corrected scaling in the form of a float
+     */
+    public float adjustScaling(final float scaling) {
+        return scaling * (dpi / 72f);
     }
-    
+
+    /**
+     * Corrects the image scaling to take into account the user specified DPI value
+     *
+     * @param scaling :: Raw scaling value before DPI is applied (DPI of 72 is default)
+     * @return Corrected scaling in the form of a float
+     */
+    public float removeScaling(final float scaling) {
+        return scaling / (dpi / 72f);
+    }
+
     /**
      * Get the current value of the user defined DPI (default = 72)
+     *
      * @return :: The current DPI value as a float
      */
-	public float getDpi() {
-		return dpi;
-	}
+    public float getDpi() {
+        return dpi;
+    }
 
-	/**
-	 * Sets the current DPI to the input value dpi
-	 * @param dpi :: The new dpi value expressed as a float
-	 */
-	public void setDpi(final float dpi) {
-		this.dpi = dpi;
-	}
+    /**
+     * Sets the current DPI to the input value dpi
+     *
+     * @param dpi :: The new dpi value expressed as a float
+     */
+    public void setDpi(final float dpi) {
+        this.dpi = dpi;
+    }
 }

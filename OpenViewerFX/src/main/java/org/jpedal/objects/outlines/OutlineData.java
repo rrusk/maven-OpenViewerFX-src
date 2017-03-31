@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.acroforms.actions.DestHandler;
 import org.jpedal.objects.raw.PdfArrayIterator;
@@ -50,129 +51,134 @@ import org.w3c.dom.Element;
  */
 public class OutlineData {
 
-	private Document OutlineDataXML;
+    private Document OutlineDataXML;
 
-    private final Map<String, PdfObject> DestObjs=new HashMap<String, PdfObject>();
+    private final Map<String, PdfObject> DestObjs = new HashMap<String, PdfObject>();
 
-	/**create list when object initialised*/
-	public OutlineData(){
+    /**
+     * create list when object initialised
+     */
+    public OutlineData() {
 
-		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		try {
-			OutlineDataXML=factory.newDocumentBuilder().newDocument();
-		} catch (final ParserConfigurationException e) {
-			System.err.println("Exception "+e+" generating XML document");
-		}
-	}
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            OutlineDataXML = factory.newDocumentBuilder().newDocument();
+        } catch (final ParserConfigurationException e) {
+            System.err.println("Exception " + e + " generating XML document");
+        }
+    }
 
-	/**return the list*/
-	public Document getList(){
-		return OutlineDataXML;
-	}
+    /**
+     * return the list
+     */
+    public Document getList() {
+        return OutlineDataXML;
+    }
 
-	/**
-	 * read the outline data
-	 */
-	@SuppressWarnings("UnusedReturnValue")
+    /**
+     * read the outline data
+     */
+    @SuppressWarnings("UnusedReturnValue")
     public int readOutlineFileMetadata(final PdfObject OutlinesObj, final PdfObjectReader currentPdfFile) {
 
-		final int count=OutlinesObj.getInt(PdfDictionary.Count);
+        final int count = OutlinesObj.getInt(PdfDictionary.Count);
 
-		final PdfObject FirstObj=OutlinesObj.getDictionary(PdfDictionary.First);
+        final PdfObject FirstObj = OutlinesObj.getDictionary(PdfDictionary.First);
         currentPdfFile.checkResolved(FirstObj);
-        if(FirstObj !=null){
+        if (FirstObj != null) {
 
-			final Element root=OutlineDataXML.createElement("root");
+            final Element root = OutlineDataXML.createElement("root");
 
-			OutlineDataXML.appendChild(root);
+            OutlineDataXML.appendChild(root);
 
-			final int level=0;
-			readOutlineLevel(root,currentPdfFile, FirstObj, level, false);
+            final int level = 0;
+            readOutlineLevel(root, currentPdfFile, FirstObj, level, false);
 
-		}
+        }
 
-		return count;
-	}
+        return count;
+    }
 
-	/**
-	 * read a level
-	 */
-	private void readOutlineLevel(final Element root, final PdfObjectReader currentPdfFile, PdfObject outlineObj, final int level, boolean isClosed) {
+    /**
+     * read a level
+     */
+    private void readOutlineLevel(final Element root, final PdfObjectReader currentPdfFile, PdfObject outlineObj, final int level, boolean isClosed) {
 
-		String ID;
-		int page;
-		Element child=OutlineDataXML.createElement("title");
+        String ID;
+        int page;
+        Element child = OutlineDataXML.createElement("title");
         PdfObject FirstObj, NextObj;
 
-		while(true){
+        while (true) {
 
-			ID=outlineObj.getObjectRefAsString();
-			
+            ID = outlineObj.getObjectRefAsString();
+
 			/*
 			 * process and move onto next value
 			 */
-			FirstObj=outlineObj.getDictionary(PdfDictionary.First);
+            FirstObj = outlineObj.getDictionary(PdfDictionary.First);
             currentPdfFile.checkResolved(FirstObj);
-            NextObj=outlineObj.getDictionary(PdfDictionary.Next);
+            NextObj = outlineObj.getDictionary(PdfDictionary.Next);
             currentPdfFile.checkResolved(NextObj);
 
-            final int numberOfItems=outlineObj.getInt(PdfDictionary.Count);
+            final int numberOfItems = outlineObj.getInt(PdfDictionary.Count);
 
-            if(numberOfItems!=0) {
+            if (numberOfItems != 0) {
                 isClosed = numberOfItems < 0;
             }
 
-            final PdfArrayIterator dest =DestHandler.resolveIfIndirect(outlineObj, DestHandler.getDestFromObject(outlineObj, currentPdfFile), currentPdfFile);
-			page = DestHandler.getPageNumberFromLink(dest, currentPdfFile); //set to -1 as default
-			final Object[] zoomArray = DestHandler.getZoomFromDest(dest);
+            final PdfArrayIterator dest = DestHandler.resolveIfIndirect(outlineObj, DestHandler.getDestFromObject(outlineObj, currentPdfFile), currentPdfFile);
+            page = DestHandler.getPageNumberFromLink(dest, currentPdfFile); //set to -1 as default
+            final Object[] zoomArray = DestHandler.getZoomFromDest(dest);
 
-			//add title to tree
-			final byte[] titleData=outlineObj.getTextStreamValueAsByte(PdfDictionary.Title);
-			if(titleData !=null){
+            //add title to tree
+            final byte[] titleData = outlineObj.getTextStreamValueAsByte(PdfDictionary.Title);
+            if (titleData != null) {
 
-				final String title= StringUtils.getTextString(titleData, false);
+                final String title = StringUtils.getTextString(titleData, false);
 
-				//add node
-				child=OutlineDataXML.createElement("title");
-				root.appendChild(child);
-				child.setAttribute("title",title);
+                //add node
+                child = OutlineDataXML.createElement("title");
+                root.appendChild(child);
+                child.setAttribute("title", title);
 
-			}
+            }
 
             child.setAttribute("isClosed", String.valueOf(isClosed));
 
             //store Object containing Dest so we can access
-            if(outlineObj!=null) {
+            if (outlineObj != null) {
                 DestObjs.put(ID, outlineObj);
             }
 
-            if(page==PdfDictionary.Null){
+            if (page == PdfDictionary.Null) {
                 child.setAttribute("page", "-1");
-            }else{
+            } else {
                 child.setAttribute("page", String.valueOf(page));
             }
 
-			if (zoomArray != null) {
-				child.setAttribute("zoom", DestHandler.convertZoomArrayToString(zoomArray));
-			}
+            if (zoomArray != null) {
+                child.setAttribute("zoom", DestHandler.convertZoomArrayToString(zoomArray));
+            }
 
             child.setAttribute("level", String.valueOf(level));
-            child.setAttribute("objectRef",ID);
+            child.setAttribute("objectRef", ID);
 
-			if(FirstObj!=null) {
+            if (FirstObj != null) {
                 readOutlineLevel(child, currentPdfFile, FirstObj, level + 1, isClosed);
             }
 
-			if(NextObj==null) {
+            if (NextObj == null) {
                 break;
             }
 
-			outlineObj = NextObj;            
-		}
-	}
-    
+            outlineObj = NextObj;
+        }
+    }
+
     /**
      * not recommended for general usage
+     *
      * @param ref
      * @return Aobj
      */

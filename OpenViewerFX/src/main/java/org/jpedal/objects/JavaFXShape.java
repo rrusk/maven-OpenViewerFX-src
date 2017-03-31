@@ -34,6 +34,7 @@ package org.jpedal.objects;
 
 import java.awt.Shape;
 import java.io.Serializable;
+
 import javafx.collections.ObservableList;
 import javafx.scene.shape.*;
 
@@ -49,8 +50,7 @@ import javafx.scene.shape.*;
  * these commands into a shape. Has to be done this way as Winding rule is not
  * necessarily declared at start.
  */
-public class JavaFXShape implements Serializable, PdfShape
-{
+public class JavaFXShape implements Serializable, PdfShape {
 
     /*used to stop lots of huge, complex shapes.
      * Note we DO NOT reset as we reuse this object and
@@ -60,81 +60,82 @@ public class JavaFXShape implements Serializable, PdfShape
 
     /*flag to show if image is for clip*/
     private boolean isClip;
-    
+
     private Path path = new Path();
-    
+
     ObservableList<PathElement> elements = path.getElements();
-        
+
     private FillRule windingRule;
-    
+
     // Stores the previously moved to path (Used for addBezierCurveV())
     private final float[] currentPos = new float[2];
 
     private boolean isClosed;
 
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * end a shape, storing info for later
      */
     @Override
-    public final void closeShape()
-    {        
+    public final void closeShape() {
         elements.add(new ClosePath());
     }
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * add a curve to the shape
      */
     @Override
-    public final void addBezierCurveC( final float x, final float y, final float x2, final float y2, final float x3, final float y3 )
-    {
-        elements.add(new CubicCurveTo(x,y,x2,y2,x3,y3));
+    public final void addBezierCurveC(final float x, final float y, final float x2, final float y2, final float x3, final float y3) {
+        elements.add(new CubicCurveTo(x, y, x2, y2, x3, y3));
         currentPos[0] = x3;
         currentPos[1] = y3;
     }
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * set winding rule - non zero
      */
     @Override
-    public final void setNONZEROWindingRule()
-    {
+    public final void setNONZEROWindingRule() {
         setWindingRule(FillRule.NON_ZERO);
     }
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * add a line to the shape
      */
     @Override
-    public final void lineTo( final float x, final float y )
-    {
-        elements.add(new LineTo(x,y));
+    public final void lineTo(final float x, final float y) {
+        elements.add(new LineTo(x, y));
         currentPos[0] = x;
         currentPos[1] = y;
     }
     ///////////////////////////////////////////////////////////////////////////
+
     /**
      * add a curve to the shape
      */
     @Override
-    public final void addBezierCurveV( final float x2, final float y2, final float x3, final float y3 )
-    {
-        elements.add(new CubicCurveTo(currentPos[0], currentPos[1],x2,y2,x3,y3));
+    public final void addBezierCurveV(final float x2, final float y2, final float x3, final float y3) {
+        elements.add(new CubicCurveTo(currentPos[0], currentPos[1], x2, y2, x3, y3));
 
         currentPos[0] = x3;
         currentPos[1] = y3;
     }
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * turn shape commands into a Shape object, storing info for later. Has to
      * be done this way because we need the winding rule to initialise the shape
      * in Java, and it could be set anywhere in the command stream
      */
     @Override
-    public final java.awt.Shape generateShapeFromPath( final float[][] CTM, final float thickness, final int cmd){
+    public final java.awt.Shape generateShapeFromPath(final float[][] CTM, final float thickness, final int cmd) {
 
         //may need to code this in if we ever implement
-       // isClosed=false; // set in code if H called
+        // isClosed=false; // set in code if H called
 
         // returns an empty path as null breaks stuff.
         return new java.awt.geom.GeneralPath();
@@ -142,7 +143,7 @@ public class JavaFXShape implements Serializable, PdfShape
         /*
          * Code kept in case it needs to be used in future:
          */
-        
+
         //used to debug
 //        final boolean show = false;
 //        final boolean debug= false;
@@ -185,28 +186,28 @@ public class JavaFXShape implements Serializable, PdfShape
     }
 
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * add a rectangle to set of shapes
      */
     @Override
-    public final void appendRectangle( final float x, final float y, final float w, final float h )
-    {
-        moveTo( x, y );
-        lineTo( x + w, y );
-        lineTo( x + w, y + h );
-        lineTo( x, y + h );
-        lineTo( x, y );
+    public final void appendRectangle(final float x, final float y, final float w, final float h) {
+        moveTo(x, y);
+        lineTo(x + w, y);
+        lineTo(x + w, y + h);
+        lineTo(x, y + h);
+        lineTo(x, y);
         closeShape();
     }
-    
+
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * start a shape by creating a shape object
      */
     @Override
-    public final void moveTo( final float x, final float y )
-    {
-        elements.add(new MoveTo(x,y));
+    public final void moveTo(final float x, final float y) {
+        elements.add(new MoveTo(x, y));
         currentPos[0] = x;
         currentPos[1] = y;
     }
@@ -215,9 +216,8 @@ public class JavaFXShape implements Serializable, PdfShape
      * add a curve to the shape
      */
     @Override
-    public final void addBezierCurveY( final float x, final float y, final float x3, final float y3 )
-    {
-        elements.add(new QuadCurveTo(x,y,x3,y3));
+    public final void addBezierCurveY(final float x, final float y, final float x3, final float y3) {
+        elements.add(new QuadCurveTo(x, y, x3, y3));
         currentPos[0] = x3;
         currentPos[1] = y3;
     }
@@ -226,24 +226,23 @@ public class JavaFXShape implements Serializable, PdfShape
      * reset path to empty
      */
     @Override
-    public final void resetPath()
-    { 
+    public final void resetPath() {
         path = new Path();
         elements = path.getElements();
-        
+
         windingRule = FillRule.NON_ZERO;
     }
     ///////////////////////////////////////////////////////////////////////////
+
     /**
      * set winding rule - even odd
      */
     @Override
-    public final void setEVENODDWindingRule()
-    {
+    public final void setEVENODDWindingRule() {
         setWindingRule(FillRule.EVEN_ODD);
     }
-    
-    public final void setWindingRule(final FillRule rule){
+
+    public final void setWindingRule(final FillRule rule) {
         windingRule = rule;
         path.setFillRule(windingRule);
     }
@@ -289,30 +288,30 @@ public class JavaFXShape implements Serializable, PdfShape
      */
     @Override
     public int getSegmentCount() {
-        if(path == null){
+        if (path == null) {
             return 0;
-        }else {
+        } else {
             return elements.size();
         }
     }
 
     @Override
     public void setClip(final boolean b) {
-        this.isClip=b;
+        this.isClip = b;
     }
 
     @Override
     public boolean isClip() {
-        return isClip;  
+        return isClip;
     }
-    
+
     @Override
     public int getComplexClipCount() {
         return complexClipCount;
     }
 
     @Override
-    public Path getPath() {    
+    public Path getPath() {
 //        if(DEBUG)
 //            showPath();
         return path;
@@ -325,7 +324,7 @@ public class JavaFXShape implements Serializable, PdfShape
 
     @Override
     public void setShape(final Shape currentShape) {
-        throw new UnsupportedOperationException("setShape Not supported yet."); 
+        throw new UnsupportedOperationException("setShape Not supported yet.");
     }
 
     @Override
@@ -356,5 +355,5 @@ public class JavaFXShape implements Serializable, PdfShape
 //        }
 //        System.out.println("=========");
 //    }
-    
+
 }

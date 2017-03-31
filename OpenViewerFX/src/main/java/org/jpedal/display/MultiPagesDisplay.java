@@ -36,12 +36,11 @@ package org.jpedal.display;
 import org.jpedal.render.DynamicVectorRenderer;
 
 /**
- *
  * @author markee
  */
 public interface MultiPagesDisplay extends Display {
 
-    
+
     int getDisplayRotation();
 
     void setCurrentDisplay(DynamicVectorRenderer currentDisplay);

@@ -36,34 +36,34 @@ package org.jpedal.utils;
  * useful static number methods
  */
 public class NumberUtils {
-    
-    public static final int[] powers={1,10,100,1000,10000,100000,1000000,10000000,100000000,
-        1000000000};
-    
+
+    public static final int[] powers = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000,
+            1000000000};
+
     /**
      * turn stream of bytes into a number
      */
     public static int parseInt(int i, final int j, final byte[] bytes) {
-        int finalValue=0;
-        int power=0;
-        
-        boolean isNegative=false;
+        int finalValue = 0;
+        int power = 0;
+
+        boolean isNegative = false;
         i--; //decrement  pointer to speed up
-        for(int current=j-1;current>i;current--){
-            
-            if(bytes[current]=='-'){
-                isNegative=true;
-            }else{
-                if(bytes[current]!='0') {
-                    finalValue += ((bytes[current]-48)*powers[power]);
+        for (int current = j - 1; current > i; current--) {
+
+            if (bytes[current] == '-') {
+                isNegative = true;
+            } else {
+                if (bytes[current] != '0') {
+                    finalValue += ((bytes[current] - 48) * powers[power]);
                 }
-                
+
                 //System.out.println(finalValue+" "+powers[power]+" "+current+" "+(char)bytes[current]+" "+bytes[current]);
                 power++;
             }
         }
-        
-        if(isNegative) {
+
+        if (isNegative) {
             return -finalValue;
         } else {
             return finalValue;
@@ -74,70 +74,70 @@ public class NumberUtils {
         final double dec;
         final double num;
         final double d;
-        double thous=0f,units=0f,tens=0f,hundreds=0f,tenths=0f,hundredths=0f, thousands=0f, tenthousands=0f,hunthousands=0f,millis=0f;
+        double thous = 0f, units = 0f, tens = 0f, hundreds = 0f, tenths = 0f, hundredths = 0f, thousands = 0f, tenthousands = 0f, hunthousands = 0f, millis = 0f;
 
 
         //thousands
-        if(intNumbers>3){
+        if (intNumbers > 3) {
             thous = getThousands(stream, intStart);
             intStart++;
         }
 
         //hundreds
-        if(intNumbers>2){
+        if (intNumbers > 2) {
             hundreds = getHundreds(stream, intStart);
             intStart++;
         }
 
         //tens
-        if(intNumbers>1){
+        if (intNumbers > 1) {
             tens = getTens(stream, intStart);
             intStart++;
         }
 
         //units
-        if(intNumbers>0){
+        if (intNumbers > 0) {
             units = getUnits(stream, intStart);
         }
 
         //tenths
-        if(decNumbers>1){
+        if (decNumbers > 1) {
             decStart++; //move beyond.
             tenths = getTenths(stream, decStart);
         }
 
         //hundredths
-        if(decNumbers>2){
+        if (decNumbers > 2) {
             decStart++; //move beyond.
             hundredths = getHundredths(stream, decStart);
         }
 
         //thousands
-        if(decNumbers>3){
+        if (decNumbers > 3) {
             decStart++; //move beyond.
             thousands = getThousandths(stream, decStart);
         }
 
         //tenthousands
-        if(decNumbers>4){
+        if (decNumbers > 4) {
             decStart++; //move beyond.
             tenthousands = getTenThousandths(stream, decStart);
         }
 
         //100thousands
-        if(decNumbers>5){
+        if (decNumbers > 5) {
             decStart++; //move beyond.
             hunthousands = getHundredThousdandths(stream, decStart);
         }
 
-        if(decNumbers>6){
+        if (decNumbers > 6) {
             decStart++; //move beyond.
             millis = getMillionths(stream, decStart);
         }
 
-        dec=tenths+hundredths+thousands+tenthousands+hunthousands+millis;
-        num=thous+hundreds+tens+units;
-        d=num+dec;
+        dec = tenths + hundredths + thousands + tenthousands + hunthousands + millis;
+        num = thous + hundreds + tens + units;
+        d = num + dec;
         return d;
     }
 
@@ -145,56 +145,56 @@ public class NumberUtils {
      * turn stream of bytes into a flaot number
      */
     public static float parseFloat(final int start, final int end, final byte[] stream) {
-        
+
         final float d;
 
-        int ptr=end;
-        int intStart=start;
-        boolean isMinus=false;
+        int ptr = end;
+        int intStart = start;
+        boolean isMinus = false;
         //hand optimised float code
-        
+
         //find decimal point
-        for(int j=end-1;j>start-1;j--){
-            if(stream[j]==46){ //'.'=46
-                ptr=j;
+        for (int j = end - 1; j > start - 1; j--) {
+            if (stream[j] == 46) { //'.'=46
+                ptr = j;
                 break;
             }
         }
-        
-        int intChars=ptr;
-        
-        final int decStart=ptr;
-        
+
+        int intChars = ptr;
+
+        final int decStart = ptr;
+
         //allow for minus
-        if(stream[start]==43){ //'+'=43
+        if (stream[start] == 43) { //'+'=43
             intChars--;
             intStart++;
-        }else if(stream[start]==45){ //'-'=45
+        } else if (stream[start] == 45) { //'-'=45
             //intChars--;
             intStart++;
-            isMinus=true;
+            isMinus = true;
         }
-        
+
         //optimisations
-        final int intNumbers=intChars-intStart;
-        final int decNumbers=end-ptr;
-        
-        if(intNumbers>4){// || decNumbers>4){ //non-optimised to cover others
-            isMinus=false;
-            
-            final int count=end-start;
-            final byte[] floatVal=new byte[count];
-            
-            System.arraycopy(stream, start,floatVal,0,count);
-            
+        final int intNumbers = intChars - intStart;
+        final int decNumbers = end - ptr;
+
+        if (intNumbers > 4) { // || decNumbers>4){ //non-optimised to cover others
+            isMinus = false;
+
+            final int count = end - start;
+            final byte[] floatVal = new byte[count];
+
+            System.arraycopy(stream, start, floatVal, 0, count);
+
             //System.out.println(new String(floatVal)+"<");
-            d=Float.parseFloat(new String(floatVal));
-            
-        }else{
+            d = Float.parseFloat(new String(floatVal));
+
+        } else {
             d = convertFloatFromStream(stream, intStart, decStart, intNumbers, decNumbers);
         }
-        
-        if(isMinus) {
+
+        if (isMinus) {
             return -d;
         } else {
             return d;
@@ -206,104 +206,104 @@ public class NumberUtils {
         final float dec;
         final float num;
         final float d;
-        float thous=0f,units=0f,tens=0f,hundreds=0f,tenths=0f,hundredths=0f, thousands=0f, tenthousands=0f,hunthousands=0f,millis=0f;
+        float thous = 0f, units = 0f, tens = 0f, hundreds = 0f, tenths = 0f, hundredths = 0f, thousands = 0f, tenthousands = 0f, hunthousands = 0f, millis = 0f;
 
         //thousands
-        if(intNumbers>3){
+        if (intNumbers > 3) {
             thous = getThousands(stream, intStart);
             intStart++;
         }
 
         //hundreds
-        if(intNumbers>2){
+        if (intNumbers > 2) {
             hundreds = getHundreds(stream, intStart);
             intStart++;
         }
 
         //tens
-        if(intNumbers>1){
+        if (intNumbers > 1) {
             tens = getTens(stream, intStart);
             intStart++;
         }
 
         //units
-        if(intNumbers>0){
+        if (intNumbers > 0) {
             units = getUnits(stream, intStart);
         }
 
         //tenths
-        if(decNumbers>1){
+        if (decNumbers > 1) {
             decStart++; //move beyond.
             tenths = getTenths(stream, decStart);
         }
 
         //hundredths
-        if(decNumbers>2){
+        if (decNumbers > 2) {
             decStart++; //move beyond.
             hundredths = getHundredths(stream, decStart);
         }
 
         //thousands
-        if(decNumbers>3){
+        if (decNumbers > 3) {
             decStart++; //move beyond.
             thousands = getThousandths(stream, decStart);
         }
 
         //tenthousands
-        if(decNumbers>4){
+        if (decNumbers > 4) {
             decStart++; //move beyond.
             tenthousands = getTenThousandths(stream, decStart);
         }
 
         //100thousands
-        if(decNumbers>5){
+        if (decNumbers > 5) {
             decStart++; //move beyond.
             hunthousands = getHundredThousdandths(stream, decStart);
         }
 
-        if(decNumbers>6){
+        if (decNumbers > 6) {
             decStart++; //move beyond.
             millis = getMillionths(stream, decStart);
         }
 
-        dec=tenths+hundredths+thousands+tenthousands+hunthousands+millis;
-        num=thous+hundreds+tens+units;
-        d=num+dec;
+        dec = tenths + hundredths + thousands + tenthousands + hunthousands + millis;
+        num = thous + hundreds + tens + units;
+        d = num + dec;
         return d;
     }
 
     private static float getMillionths(final byte[] stream, final int decStart) {
 
-        float millis=0;
-        final int c=stream[decStart]-48;
+        float millis = 0;
+        final int c = stream[decStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                millis=0.000001f;
+                millis = 0.000001f;
                 break;
             case 2:
-                millis=0.000002f;
+                millis = 0.000002f;
                 break;
             case 3:
-                millis=0.000003f;
+                millis = 0.000003f;
                 break;
             case 4:
-                millis=0.000004f;
+                millis = 0.000004f;
                 break;
             case 5:
-                millis=0.000005f;
+                millis = 0.000005f;
                 break;
             case 6:
-                millis=0.000006f;
+                millis = 0.000006f;
                 break;
             case 7:
-                millis=0.000007f;
+                millis = 0.000007f;
                 break;
             case 8:
-                millis=0.000008f;
+                millis = 0.000008f;
                 break;
             case 9:
-                millis=0.000009f;
+                millis = 0.000009f;
                 break;
         }
         return millis;
@@ -311,36 +311,36 @@ public class NumberUtils {
 
     private static float getHundredThousdandths(final byte[] stream, final int decStart) {
 
-        float hunthousands=0;
-        final int c=stream[decStart]-48;
+        float hunthousands = 0;
+        final int c = stream[decStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                hunthousands=0.00001f;
+                hunthousands = 0.00001f;
                 break;
             case 2:
-                hunthousands=0.00002f;
+                hunthousands = 0.00002f;
                 break;
             case 3:
-                hunthousands=0.00003f;
+                hunthousands = 0.00003f;
                 break;
             case 4:
-                hunthousands=0.00004f;
+                hunthousands = 0.00004f;
                 break;
             case 5:
-                hunthousands=0.00005f;
+                hunthousands = 0.00005f;
                 break;
             case 6:
-                hunthousands=0.00006f;
+                hunthousands = 0.00006f;
                 break;
             case 7:
-                hunthousands=0.00007f;
+                hunthousands = 0.00007f;
                 break;
             case 8:
-                hunthousands=0.00008f;
+                hunthousands = 0.00008f;
                 break;
             case 9:
-                hunthousands=0.00009f;
+                hunthousands = 0.00009f;
                 break;
         }
         return hunthousands;
@@ -348,36 +348,36 @@ public class NumberUtils {
 
     private static float getTenThousandths(final byte[] stream, final int decStart) {
 
-        float tenthousands=0;
-        final int c=stream[decStart]-48;
+        float tenthousands = 0;
+        final int c = stream[decStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                tenthousands=0.0001f;
+                tenthousands = 0.0001f;
                 break;
             case 2:
-                tenthousands=0.0002f;
+                tenthousands = 0.0002f;
                 break;
             case 3:
-                tenthousands=0.0003f;
+                tenthousands = 0.0003f;
                 break;
             case 4:
-                tenthousands=0.0004f;
+                tenthousands = 0.0004f;
                 break;
             case 5:
-                tenthousands=0.0005f;
+                tenthousands = 0.0005f;
                 break;
             case 6:
-                tenthousands=0.0006f;
+                tenthousands = 0.0006f;
                 break;
             case 7:
-                tenthousands=0.0007f;
+                tenthousands = 0.0007f;
                 break;
             case 8:
-                tenthousands=0.0008f;
+                tenthousands = 0.0008f;
                 break;
             case 9:
-                tenthousands=0.0009f;
+                tenthousands = 0.0009f;
                 break;
         }
         return tenthousands;
@@ -385,36 +385,36 @@ public class NumberUtils {
 
     private static float getThousandths(final byte[] stream, final int decStart) {
 
-        float thousands=0;
+        float thousands = 0;
 
-        final int c=stream[decStart]-48;
-        switch(c){
+        final int c = stream[decStart] - 48;
+        switch (c) {
             case 1:
-                thousands=0.001f;
+                thousands = 0.001f;
                 break;
             case 2:
-                thousands=0.002f;
+                thousands = 0.002f;
                 break;
             case 3:
-                thousands=0.003f;
+                thousands = 0.003f;
                 break;
             case 4:
-                thousands=0.004f;
+                thousands = 0.004f;
                 break;
             case 5:
-                thousands=0.005f;
+                thousands = 0.005f;
                 break;
             case 6:
-                thousands=0.006f;
+                thousands = 0.006f;
                 break;
             case 7:
-                thousands=0.007f;
+                thousands = 0.007f;
                 break;
             case 8:
-                thousands=0.008f;
+                thousands = 0.008f;
                 break;
             case 9:
-                thousands=0.009f;
+                thousands = 0.009f;
                 break;
         }
         return thousands;
@@ -422,36 +422,36 @@ public class NumberUtils {
 
     private static float getHundredths(final byte[] stream, final int decStart) {
 
-        float hundredths=0;
-        final int c=stream[decStart]-48;
+        float hundredths = 0;
+        final int c = stream[decStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                hundredths=0.01f;
+                hundredths = 0.01f;
                 break;
             case 2:
-                hundredths=0.02f;
+                hundredths = 0.02f;
                 break;
             case 3:
-                hundredths=0.03f;
+                hundredths = 0.03f;
                 break;
             case 4:
-                hundredths=0.04f;
+                hundredths = 0.04f;
                 break;
             case 5:
-                hundredths=0.05f;
+                hundredths = 0.05f;
                 break;
             case 6:
-                hundredths=0.06f;
+                hundredths = 0.06f;
                 break;
             case 7:
-                hundredths=0.07f;
+                hundredths = 0.07f;
                 break;
             case 8:
-                hundredths=0.08f;
+                hundredths = 0.08f;
                 break;
             case 9:
-                hundredths=0.09f;
+                hundredths = 0.09f;
                 break;
         }
         return hundredths;
@@ -459,36 +459,36 @@ public class NumberUtils {
 
     private static float getTenths(final byte[] stream, final int decStart) {
 
-        float tenths=0;
-        final int c=stream[decStart]-48;
+        float tenths = 0;
+        final int c = stream[decStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                tenths=0.1f;
+                tenths = 0.1f;
                 break;
             case 2:
-                tenths=0.2f;
+                tenths = 0.2f;
                 break;
             case 3:
-                tenths=0.3f;
+                tenths = 0.3f;
                 break;
             case 4:
-                tenths=0.4f;
+                tenths = 0.4f;
                 break;
             case 5:
-                tenths=0.5f;
+                tenths = 0.5f;
                 break;
             case 6:
-                tenths=0.6f;
+                tenths = 0.6f;
                 break;
             case 7:
-                tenths=0.7f;
+                tenths = 0.7f;
                 break;
             case 8:
-                tenths=0.8f;
+                tenths = 0.8f;
                 break;
             case 9:
-                tenths=0.9f;
+                tenths = 0.9f;
                 break;
         }
         return tenths;
@@ -496,36 +496,36 @@ public class NumberUtils {
 
     private static float getUnits(final byte[] stream, final int intStart) {
 
-        float units=0;
-        final int c=stream[intStart]-48;
+        float units = 0;
+        final int c = stream[intStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                units=1.0f;
+                units = 1.0f;
                 break;
             case 2:
-                units=2.0f;
+                units = 2.0f;
                 break;
             case 3:
-                units=3.0f;
+                units = 3.0f;
                 break;
             case 4:
-                units=4.0f;
+                units = 4.0f;
                 break;
             case 5:
-                units=5.0f;
+                units = 5.0f;
                 break;
             case 6:
-                units=6.0f;
+                units = 6.0f;
                 break;
             case 7:
-                units=7.0f;
+                units = 7.0f;
                 break;
             case 8:
-                units=8.0f;
+                units = 8.0f;
                 break;
             case 9:
-                units=9.0f;
+                units = 9.0f;
                 break;
         }
         return units;
@@ -533,36 +533,36 @@ public class NumberUtils {
 
     private static float getTens(final byte[] stream, final int intStart) {
 
-        float tens=0;
-        final int c=stream[intStart]-48;
+        float tens = 0;
+        final int c = stream[intStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                tens=10.0f;
+                tens = 10.0f;
                 break;
             case 2:
-                tens=20.0f;
+                tens = 20.0f;
                 break;
             case 3:
-                tens=30.0f;
+                tens = 30.0f;
                 break;
             case 4:
-                tens=40.0f;
+                tens = 40.0f;
                 break;
             case 5:
-                tens=50.0f;
+                tens = 50.0f;
                 break;
             case 6:
-                tens=60.0f;
+                tens = 60.0f;
                 break;
             case 7:
-                tens=70.0f;
+                tens = 70.0f;
                 break;
             case 8:
-                tens=80.0f;
+                tens = 80.0f;
                 break;
             case 9:
-                tens=90.0f;
+                tens = 90.0f;
                 break;
         }
         return tens;
@@ -570,37 +570,37 @@ public class NumberUtils {
 
     private static float getHundreds(final byte[] stream, final int intStart) {
 
-        float hundreds=0;
+        float hundreds = 0;
 
-        final int c=stream[intStart]-48;
+        final int c = stream[intStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                hundreds=100.0f;
+                hundreds = 100.0f;
                 break;
             case 2:
-                hundreds=200.0f;
+                hundreds = 200.0f;
                 break;
             case 3:
-                hundreds=300.0f;
+                hundreds = 300.0f;
                 break;
             case 4:
-                hundreds=400.0f;
+                hundreds = 400.0f;
                 break;
             case 5:
-                hundreds=500.0f;
+                hundreds = 500.0f;
                 break;
             case 6:
-                hundreds=600.0f;
+                hundreds = 600.0f;
                 break;
             case 7:
-                hundreds=700.0f;
+                hundreds = 700.0f;
                 break;
             case 8:
-                hundreds=800.0f;
+                hundreds = 800.0f;
                 break;
             case 9:
-                hundreds=900.0f;
+                hundreds = 900.0f;
                 break;
         }
         return hundreds;
@@ -608,36 +608,36 @@ public class NumberUtils {
 
     private static float getThousands(final byte[] stream, final int intStart) {
 
-        float thous=0;
-        final int c=stream[intStart]-48;
+        float thous = 0;
+        final int c = stream[intStart] - 48;
 
-        switch(c){
+        switch (c) {
             case 1:
-                thous=1000.0f;
+                thous = 1000.0f;
                 break;
             case 2:
-                thous=2000.0f;
+                thous = 2000.0f;
                 break;
             case 3:
-                thous=3000.0f;
+                thous = 3000.0f;
                 break;
             case 4:
-                thous=4000.0f;
+                thous = 4000.0f;
                 break;
             case 5:
-                thous=5000.0f;
+                thous = 5000.0f;
                 break;
             case 6:
-                thous=6000.0f;
+                thous = 6000.0f;
                 break;
             case 7:
-                thous=7000.0f;
+                thous = 7000.0f;
                 break;
             case 8:
-                thous=8000.0f;
+                thous = 8000.0f;
                 break;
             case 9:
-                thous=9000.0f;
+                thous = 9000.0f;
                 break;
         }
         return thous;

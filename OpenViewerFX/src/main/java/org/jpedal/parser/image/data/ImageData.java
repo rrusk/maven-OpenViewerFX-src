@@ -37,34 +37,36 @@ import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.ImageCommands;
+import org.jpedal.parser.image.PdfImageTypes;
 
 public class ImageData {
 
-    int pX,pY;
-        
-    int width, height, depth = 1, rawDepth=1;
+    int pX, pY;
+
+    int width, height, depth = 1, rawDepth = 1;
 
     boolean imageMask;
 
     byte[] objectData;
-    
-    boolean isDCT,isJPX,isJBIG, wasDCT;
+
+    boolean isDCT, isJPX, isJBIG, wasDCT;
     private int numComponents;
-    
+
     boolean isDownsampled;
-  
-    int mode=ImageCommands.XOBJECT;
-    
+
+    int mode = ImageCommands.XOBJECT;
+
     private boolean removed;
     private float[] decodeArray;
-    
+    private PdfImageTypes rawType = PdfImageTypes.Other;
+
     public ImageData(final byte[] objectData) {
-        this.objectData=objectData;
+        this.objectData = objectData;
     }
-    
+
     public ImageData(final PdfObject XObject, final byte[] objectData) {
 
-        this.objectData=objectData;
+        this.objectData = objectData;
 
         width = XObject.getInt(PdfDictionary.Width);
         height = XObject.getInt(PdfDictionary.Height);
@@ -72,19 +74,19 @@ public class ImageData {
         final int newDepth = XObject.getInt(PdfDictionary.BitsPerComponent);
         if (newDepth != PdfDictionary.Unknown) {
             depth = newDepth;
-            rawDepth=depth;
+            rawDepth = depth;
         }
-        
-        imageMask= XObject.getBoolean(PdfDictionary.ImageMask);
-        
-       // decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
-       
+
+        imageMask = XObject.getBoolean(PdfDictionary.ImageMask);
+
+        // decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
+
     }
 
     public ImageData(final int mode) {
-        this.mode=mode;
+        this.mode = mode;
     }
-    
+
     public void setIsDownsampled(final boolean isDownsampled) {
         this.isDownsampled = isDownsampled;
     }
@@ -96,7 +98,7 @@ public class ImageData {
     public int getMode() {
         return mode;
     }
-    
+
     public int getWidth() {
         return width;
     }
@@ -134,70 +136,70 @@ public class ImageData {
     }
 
     public void setpX(final int pX) {
-        this.pX=pX;
+        this.pX = pX;
     }
-    
+
     public void setpY(final int pY) {
-        this.pY=pY;
+        this.pY = pY;
     }
-    
+
     public int getpX() {
         return pX;
     }
-    
+
     public int getpY() {
         return pY;
     }
-    
+
     public void swapValues() {
         final int temp = pX;
-        pX=pY;
-        pY=temp;
+        pX = pY;
+        pY = temp;
     }
 
     public boolean isJPX() {
         return isJPX;
     }
-    
-    public void setDCT(final boolean isDCT){
+
+    public void setDCT(final boolean isDCT) {
         this.isDCT = isDCT;
     }
-    
+
     public boolean isDCT() {
         return isDCT;
     }
-    
-    public boolean isJBIG(){
+
+    public boolean isJBIG() {
         return isJBIG;
     }
-    
+
     public PdfArrayIterator getFilter(final PdfObject XObject) {
-        
+
         PdfArrayIterator Filters = XObject.getMixedArray(PdfDictionary.Filter);
-        
+
         //check not handled elsewhere
         int firstValue;
-        if(Filters!=null && Filters.hasMoreTokens()){
-            while(Filters.hasMoreTokens()){
-                firstValue=Filters.getNextValueAsConstant(true);
-                isDCT=firstValue==PdfFilteredReader.DCTDecode;
-                isJPX=firstValue==PdfFilteredReader.JPXDecode;
-                isJBIG=firstValue==PdfFilteredReader.JBIG2Decode;
+        if (Filters != null && Filters.hasMoreTokens()) {
+            while (Filters.hasMoreTokens()) {
+                firstValue = Filters.getNextValueAsConstant(true);
+                isDCT = firstValue == PdfFilteredReader.DCTDecode;
+                isJPX = firstValue == PdfFilteredReader.JPXDecode;
+                isJBIG = firstValue == PdfFilteredReader.JBIG2Decode;
             }
-        }else {
+        } else {
             Filters = null;
         }
-        
-        decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
-       
-        
+
+        decodeArray = XObject.getFloatArray(PdfDictionary.Decode);
+
+
         return Filters;
     }
 
     public void setCompCount(final int numComponents) {
-        this.numComponents=numComponents;
+        this.numComponents = numComponents;
     }
-    
+
     public int getCompCount() {
         return numComponents;
     }
@@ -216,30 +218,44 @@ public class ImageData {
     }
 
     public int getRawDepth() {
-       return rawDepth;
+        return rawDepth;
     }
 
     public void setIsJPX(final boolean b) {
-        isJPX=b;
+        isJPX = b;
     }
 
     public void setIsDCT(final boolean b) {
-         isDCT=b;
+        isDCT = b;
     }
 
     public boolean wasDCT() {
         return wasDCT;
     }
-    
+
     public void wasDCT(final boolean b) {
-        wasDCT=b;
+        wasDCT = b;
     }
 
     public void setDecodeArray(final float[] value) {
-        decodeArray=value;
+        decodeArray = value;
     }
 
     public float[] getDecodeArray() {
-       return decodeArray;
+        return decodeArray;
+    }
+
+    /**
+     * @param rawType
+     */
+    public void setImageType(PdfImageTypes rawType) {
+        this.rawType = rawType;
+    }
+
+    /**
+     *
+     */
+    public PdfImageTypes getImageType() {
+        return rawType;
     }
 }

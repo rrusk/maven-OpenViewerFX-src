@@ -34,41 +34,45 @@ package org.jpedal;
 
 
 public class DevFlags {
-    
+
     //flag to say we are using fest testing so need to customise some actions.
     public static boolean GUITESTINGINPROGRESS;
-    
+
     public static Thread thread;
-    
+
     public static String currentFile;
-    
+
     public static int currentPage;
-    
-    /** Flag to indicate when a file has finished "being" open */
+
+    /**
+     * Flag to indicate when a file has finished "being" open
+     */
     public static boolean fileLoaded;
-    
+
     public static boolean formsLoaded = true;
-    
+
     /**
      * Flag to indicate when a file has finished "being" printed
      */
     public static boolean printingDone;
-    
+
     public static boolean testing;
-    
+
     public static boolean isTesting;
-    
-    /** displays the viewport border */
+
+    /**
+     * displays the viewport border
+     */
     public static boolean displayViewportBorder;
-    
-    
+
+
     public static void addShutdownHook() {
         if (!DevFlags.isTesting) {
-            
+
             if (thread != null) {
                 Runtime.getRuntime().removeShutdownHook(thread);
             }
-            
+
             thread = new Thread() {
                 @Override
                 public void run() {
@@ -77,7 +81,7 @@ public class DevFlags {
                 }
             };
             Runtime.getRuntime().addShutdownHook(thread);
-            
+
         }
     }
 }

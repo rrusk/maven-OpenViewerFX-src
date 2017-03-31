@@ -42,29 +42,32 @@ import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.Serializable;
+
 import org.jpedal.fonts.tt.hinting.TTVM;
 import org.jpedal.io.PathSerializer;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.Vector_Path;
 
-public class TTGlyph extends BaseTTGlyph implements Serializable{
+public class TTGlyph extends BaseTTGlyph implements Serializable {
 
-    /** only used for debugging so make static */
+    /**
+     * only used for debugging so make static
+     */
     static java.awt.image.BufferedImage img;
 
     Area glyphShape;
-    
+
     private boolean hasEndCurve;
 
     /**
      * method to set the paths after the object has be deserialized.
-     *
+     * <p>
      * NOT PART OF API and subject to change (DO NOT USE)
      *
      * @param vp - the Vector_Path to set
      */
-    public void setPaths(final Vector_Path vp){
+    public void setPaths(final Vector_Path vp) {
         paths = vp;
     }
 
@@ -74,22 +77,22 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
      * The correct usage is to first serialize this object, cached_current_path is marked
      * as transient so it will not be serilized, this method should then be called, so the
      * paths are serialized directly after the main object in the same ObjectOutput.
-     *
+     * <p>
      * NOT PART OF API and subject to change (DO NOT USE)
      *
      * @param os - ObjectOutput to write to
      * @throws IOException
      */
     public void writePathsToStream(final ObjectOutput os) throws IOException {
-        if((paths!=null)){
+        if ((paths != null)) {
 
-            final GeneralPath[] generalPaths=paths.get();
+            final GeneralPath[] generalPaths = paths.get();
 
-            int count=0;
+            int count = 0;
 
             /* find out how many items are in the collection */
             for (int i = 0; i < generalPaths.length; i++) {
-                if(generalPaths[i]==null){
+                if (generalPaths[i] == null) {
                     count = i;
                     break;
                 }
@@ -111,36 +114,9 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
     /**
      * Unhinted constructor
      */
-    public TTGlyph(final Glyf currentGlyf, final FontFile2 glyfTable, final Hmtx currentHmtx, final int idx, final float unitsPerEm, final String baseFontName){
+    public TTGlyph(final Glyf currentGlyf, final FontFile2 glyfTable, final Hmtx currentHmtx, final int idx, final float unitsPerEm, final String baseFontName) {
 
-        super(currentGlyf, glyfTable, currentHmtx, idx, unitsPerEm,  baseFontName);
-        
-        /**/
-        if(debug){
-            try{
-                System.out.println("debugging"+idx);
-                final java.awt.image.BufferedImage img=new java.awt.image.BufferedImage(700,700, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-
-                final Graphics2D gg2= img.createGraphics();
-
-                for(int jj=0;jj<paths.size()-1;jj++){
-                    if(jj==0) {
-                        gg2.setColor(Color.red);
-                    } else {
-                        gg2.setColor(Color.blue);
-                    }
-
-                    gg2.fill(paths.elementAt(jj));
-
-
-                    gg2.draw(paths.elementAt(jj).getBounds());
-                }
-                //org.jpedal.gui.ShowGUIMessage.showGUIMessage("glyf "+ '/' +paths.size(),img,"glyf "+ '/' +paths.size()+ '/' +compCount);
-            }catch(final Exception e){
-                LogWriter.writeLog("Exception: " + e.getMessage());
-            }
-        }
-
+        super(currentGlyf, glyfTable, currentHmtx, idx, unitsPerEm, baseFontName);
 
         //if(idx==2060)
         //ShowGUIMessage.showGUIMessage("done",img,"glyf done");
@@ -149,36 +125,9 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
     /**
      * Hinted constructor
      */
-    public TTGlyph(final Glyf currentGlyf, final FontFile2 glyfTable, final Hmtx currentHmtx, final int idx, final float unitsPerEm, final TTVM vm){
+    public TTGlyph(final Glyf currentGlyf, final FontFile2 glyfTable, final Hmtx currentHmtx, final int idx, final float unitsPerEm, final TTVM vm) {
 
-        super(currentGlyf, glyfTable, currentHmtx, idx, unitsPerEm,  vm);
-        
-        /**/
-        if(debug){
-            try{
-                System.out.println("debugging"+idx);
-                final java.awt.image.BufferedImage img=new java.awt.image.BufferedImage(700,700, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-
-                final Graphics2D gg2= img.createGraphics();
-
-                for(int jj=0;jj<paths.size()-1;jj++){
-                    if(jj==0) {
-                        gg2.setColor(Color.red);
-                    } else {
-                        gg2.setColor(Color.blue);
-                    }
-
-                    gg2.fill(paths.elementAt(jj));
-
-
-                    gg2.draw(paths.elementAt(jj).getBounds());
-                }
-                //org.jpedal.gui.ShowGUIMessage.showGUIMessage("glyf "+ '/' +paths.size(),img,"glyf "+ '/' +paths.size()+ '/' +compCount);
-            }catch(final Exception e){
-                LogWriter.writeLog("Exception: " + e.getMessage());
-            }
-        }
-
+        super(currentGlyf, glyfTable, currentHmtx, idx, unitsPerEm, vm);
 
         //if(idx==2060)
         //ShowGUIMessage.showGUIMessage("done",img,"glyf done");
@@ -187,10 +136,10 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
     //public void render(Graphics2D g2){}
     @Override
-    public void render(final int type, final Graphics2D g2, final float scaling, final boolean isFormGlyph){
+    public void render(final int type, final Graphics2D g2, final float scaling, final boolean isFormGlyph) {
 
         final AffineTransform restore = g2.getTransform();
-        final BasicStroke oldStroke = (BasicStroke)g2.getStroke();
+        final BasicStroke oldStroke = (BasicStroke) g2.getStroke();
 
         float strokeWidth = oldStroke.getLineWidth();
 
@@ -198,7 +147,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
             strokeWidth = -strokeWidth;
         }
 
-        if(useHinting){
+        if (useHinting) {
             //Scale down glyph
             g2.scale(1 / 100d, 1 / 100d);
 
@@ -214,12 +163,12 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                 oldStroke.getDashPhase()));
 
         /* drawn the paths*/
-        for(int jj=0;jj<paths.size()-1;jj++){
+        for (int jj = 0; jj < paths.size() - 1; jj++) {
 
-            if((type & GraphicsState.FILL)==GraphicsState.FILL){
+            if ((type & GraphicsState.FILL) == GraphicsState.FILL) {
                 g2.fill(paths.elementAt(jj));
-            }else if((type & GraphicsState.STROKE)==GraphicsState.STROKE){
-                
+            } else if ((type & GraphicsState.STROKE) == GraphicsState.STROKE) {
+
                 if (!hasEndCurve || !((((BasicStroke) g2.getStroke()).getDashPhase() == 0.0f) && ((BasicStroke) g2.getStroke()).getDashArray() != null)) {
 
                     g2.draw(paths.elementAt(jj));
@@ -235,16 +184,23 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
         }
     }
 
-    /**return outline of shape*/
+    /**
+     * return outline of shape
+     */
     @Override
-    public Area getShape(){/**/
+    public Area getShape() { /**/
 
-        if(glyphShape==null){
+        if (glyphShape == null) {
 
             /* drawn the paths*/
-            final GeneralPath path=paths.elementAt(0);
+            final GeneralPath path;
+            if (paths.elementAt(0) != null) {
+                path = (GeneralPath) paths.elementAt(0).clone();
+            } else {
+                path = null;
+            }
 
-            for(int jj=1;jj<paths.size()-1;jj++) {
+            for (int jj = 1; jj < paths.size() - 1; jj++) {
                 path.append(paths.elementAt(jj), false);
             }
 
@@ -252,7 +208,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                 return null;
             }
 
-            glyphShape=new Area(path);
+            glyphShape = new Area(path);
 
         }
 
@@ -260,12 +216,14 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
 
     }
 
-    /**create the actual shape*/
+    /**
+     * create the actual shape
+     */
     @Override
-    public void createPaths(final int[] pX, final int[] pY, final boolean[] onCurve, final boolean[] endOfContour, final int endIndex){
+    public void createPaths(final int[] pX, final int[] pY, final boolean[] onCurve, final boolean[] endOfContour, final int endIndex) {
 
         //allow for bum data
-        if(endOfContour==null) {
+        if (endOfContour == null) {
             return;
         }
 
@@ -273,241 +231,180 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
          * scan data and adjust glyfs after first if do not end in contour
          */
 
-        final int ptCount=endOfContour.length;
+        final int ptCount = endOfContour.length;
 
-        int start=0, firstPt=-1;
-        for(int ii=0;ii<ptCount;ii++){
+        int start = 0, firstPt = -1;
+        for (int ii = 0; ii < ptCount; ii++) {
 
-            if(endOfContour[ii]){
+            if (endOfContour[ii]) {
 
-                if(firstPt!=-1 && (!onCurve[start] || !onCurve[ii]) ){ //last point not on curve and we have a first point
+                if (firstPt != -1 && (!onCurve[start] || !onCurve[ii])) { //last point not on curve and we have a first point
                     setPoint(pX, pY, onCurve, start, firstPt, ii);
                 }
 
                 //reset values
-                start=ii+1;
-                firstPt=-1;
+                start = ii + 1;
+                firstPt = -1;
 
-            }else if(onCurve[ii] && firstPt==-1){ //track first point
-                firstPt=ii;
+            } else if (onCurve[ii] && firstPt == -1) { //track first point
+                firstPt = ii;
             }
 
         }
 
-        boolean isFirstDraw=true;
+        boolean isFirstDraw = true;
 
-        final GeneralPath current_path =new GeneralPath(GeneralPath.WIND_NON_ZERO);
+        final GeneralPath current_path = new GeneralPath(GeneralPath.WIND_NON_ZERO);
 
-        final int c= pX.length;
-        int fc=-1;
+        final int c = pX.length;
+        int fc = -1;
 
         //find first end contour
-        for(int jj=0;jj<c;jj++){
-            if(endOfContour[jj]){
-                fc=jj+1;
-                jj=c;
+        for (int jj = 0; jj < c; jj++) {
+            if (endOfContour[jj]) {
+                fc = jj + 1;
+                jj = c;
             }
         }
 
-        int x1,y1,x2=0,y2=0,x3=0,y3=0;
+        int x1, y1, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
 
-        x1=pX[0];
-        y1=pY[0];
+        x1 = pX[0];
+        y1 = pY[0];
 
-        if(debug) {
-            System.out.println(pX[0] + " " + pY[0] + " move to x1,y1=" + x1 + ' ' + y1);
-        }
+        current_path.moveTo(x1, y1);
 
-        current_path.moveTo(x1,y1);
+        int xs = 0, ys = 0, lc = 0;
+        boolean isEnd = false;
 
-        if(debug){
-            System.out.println("first contour="+fc+"===================================="+pX[0]+ ' ' +pY[0]);
-        }
+        for (int j = 0; j < endIndex; j++) {
 
-        int xs=0,ys=0,lc=0;
-        boolean isEnd=false;
-
-        for (int j = 0; j <endIndex; j++) {
-
-            final int p=j%fc;
-            int p1=(j+1)%fc;
-            int p2=(j+2)%fc;
-            int pm1=(j-1)%fc;
+            final int p = j % fc;
+            int p1 = (j + 1) % fc;
+            int p2 = (j + 2) % fc;
+            int pm1 = (j - 1) % fc;
 
             /* special cases
              *
              *round up to last point at end
              *First point
              */
-            if(j==0) {
+            if (j == 0) {
                 pm1 = fc - 1;
             }
-            if(p1<lc) {
+            if (p1 < lc) {
                 p1 += lc;
             }
-            if(p2<lc) {
+            if (p2 < lc) {
                 p2 += lc;
             }
 
-            if(debug) {
-                System.out.println("points=" + lc + '/' + fc + ' ' + pm1 + ' ' + p + ' ' + p1 + ' ' + p2 + " j=" + j + " endOfContour[j]=" + endOfContour[j]);
-            }
-
             //allow for wrap around on contour
-            if(endOfContour[j]){
-                isEnd=true;
+            if (endOfContour[j]) {
+                isEnd = true;
 
-                if(onCurve[fc]){
-                    xs=pX[fc];
-                    ys=pY[fc];
-                }else{
-                    xs=pX[j+1];
-                    ys=pY[j+1];
+                if (onCurve[fc]) {
+                    xs = pX[fc];
+                    ys = pY[fc];
+                } else {
+                    xs = pX[j + 1];
+                    ys = pY[j + 1];
                 }
 
                 //remember start point
-                lc=fc;
+                lc = fc;
                 //find next contour
-                for(int jj=j+1;jj<c;jj++){
-                    if(endOfContour[jj]){
-                        fc=jj+1;
-                        jj=c;
+                for (int jj = j + 1; jj < c; jj++) {
+                    if (endOfContour[jj]) {
+                        fc = jj + 1;
+                        jj = c;
                     }
-                }
-
-                if(debug) {
-                    System.out.println("End of contour. next=" + j + ' ' + fc + ' ' + lc);
-                }
-
-            }
-
-            if(debug){
-                if(j>0) {
-                    System.out.println("curves=" + onCurve[p] + ' ' + onCurve[p1] + ' ' + onCurve[p2] + " EndOfContour j-1=" + endOfContour[j - 1] + " j=" + endOfContour[j] + " j+1=" + endOfContour[j + 1]);
-                } else {
-                    System.out.println("curves=" + onCurve[p] + ' ' + onCurve[p1] + ' ' + onCurve[p2] + " EndOfContour j=" + endOfContour[j] + " j+1=" + endOfContour[j + 1]);
                 }
             }
 
-            if(lc==fc && onCurve[p]){
-                j=c;
-                if(debug) {
-                    System.out.println("last 2 match");
-                }
-            }else{
+            if (lc == fc && onCurve[p]) {
+                j = c;
+            } else {
 
-                if(debug) {
-                    System.out.println(fc + " " + pm1 + ' ' + p + ' ' + p1 + ' ' + p2);
-                }
+                if (onCurve[p] && onCurve[p1]) { //straight line
+                    x3 = pX[p1];
+                    y3 = pY[p1];
+                    current_path.lineTo(x3, y3);
 
-                if(onCurve[p] && onCurve[p1]){ //straight line
-                    x3=pX[p1];
-                    y3=pY[p1];
-                    current_path.lineTo(x3,y3);
-                    if(debug) {
-                        System.out.println(p + " pt,pt " + x3 + ' ' + y3 + " (lineTo)");
-                    }
-
-                    isFirstDraw=false;
+                    isFirstDraw = false;
                     //curves
-                }else if(j<(c-3) &&((fc-lc)>1 || fc==lc)){
-                    boolean checkEnd=false;
-                    if(onCurve[p] && !onCurve[p1] && onCurve[p2] ){ //2 points + control
+                } else if (j < (c - 3) && ((fc - lc) > 1 || fc == lc)) {
+                    boolean checkEnd = false;
+                    if (onCurve[p] && !onCurve[p1] && onCurve[p2]) { //2 points + control
 
-                        x1=pX[p];
-                        y1=pY[p];
-                        x2=pX[p1];
-                        y2=pY[p1];
-                        x3=pX[p2];
-                        y3=pY[p2];
+                        x1 = pX[p];
+                        y1 = pY[p];
+                        x2 = pX[p1];
+                        y2 = pY[p1];
+                        x3 = pX[p2];
+                        y3 = pY[p2];
                         j++;
-                        checkEnd=true;
-                        if(debug) {
-                            System.out.println(p + " pt,cv,pt " + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2 + ' ' + x3 + ' ' + y3);
-                        }
+                        checkEnd = true;
 
-                    }else if(onCurve[p] && !onCurve[p1] && !onCurve[p2]){ //1 point + 2 control
+                    } else if (onCurve[p] && !onCurve[p1] && !onCurve[p2]) { //1 point + 2 control
 
-                        x1=pX[p];
-                        y1=pY[p];
-                        x2=pX[p1];
-                        y2=pY[p1];
-                        x3=midPt(pX[p1], pX[p2]);
-                        y3=midPt(pY[p1], pY[p2]);
+                        x1 = pX[p];
+                        y1 = pY[p];
+                        x2 = pX[p1];
+                        y2 = pY[p1];
+                        x3 = midPt(pX[p1], pX[p2]);
+                        y3 = midPt(pY[p1], pY[p2]);
                         j++;
 
-                        checkEnd=true;
+                        checkEnd = true;
 
-                        if(debug) {
-                            System.out.println(p + " pt,cv,cv " + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2 + ' ' + x3 + ' ' + y3);
-                        }
+                    } else if (!onCurve[p] && !onCurve[p1] && (!endOfContour[p2] || fc - p2 == 1)) { // 2 control + 1 point (final check allows for last point to complete loop
 
-                    }else if(!onCurve[p] && !onCurve[p1] && (!endOfContour[p2] ||fc-p2==1)){ // 2 control + 1 point (final check allows for last point to complete loop
+                        x1 = midPt(pX[pm1], pX[p]);
+                        y1 = midPt(pY[pm1], pY[p]);
+                        x2 = pX[p];
+                        y2 = pY[p];
 
-                        x1=midPt(pX[pm1], pX[p]);
-                        y1=midPt(pY[pm1], pY[p]);
-                        x2=pX[p];
-                        y2=pY[p];
+                        x3 = midPt(pX[p], pX[p1]);
+                        y3 = midPt(pY[p], pY[p1]);
 
-                        x3=midPt(pX[p], pX[p1]);
-                        y3=midPt(pY[p], pY[p1]);
-                        if(debug) {
-                            System.out.println(p + " cv,cv1 " + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2 + ' ' + x3 + ' ' + y3);
-                        }
+                    } else if (!onCurve[p] && onCurve[p1]) { // 1 control + 2 point
 
-
-                    }else if(!onCurve[p] && onCurve[p1]){ // 1 control + 2 point
-
-                        x1=midPt(pX[pm1], pX[p]);
-                        y1=midPt(pY[pm1], pY[p]);
-                        x2=pX[p];
-                        y2=pY[p];
-                        x3=pX[p1];
-                        y3=pY[p1];
-                        if(debug) {
-                            System.out.println(p + " cv,pt " + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2 + ' ' + x3 + ' ' + y3);
-                        }
+                        x1 = midPt(pX[pm1], pX[p]);
+                        y1 = midPt(pY[pm1], pY[p]);
+                        x2 = pX[p];
+                        y2 = pY[p];
+                        x3 = pX[p1];
+                        y3 = pY[p1];
                     }
 
-                    if(isFirstDraw){
-                        current_path.moveTo(x1,y1);
-                        isFirstDraw=false;
-
-                        if(debug) {
-                            System.out.println("first draw move to " + x1 + ' ' + y1);
-                        }
-
+                    if (isFirstDraw) {
+                        current_path.moveTo(x1, y1);
+                        isFirstDraw = false;
                     }
 
-                    if (!(endOfContour[p] && p > 0 && endOfContour[p-1])) {    
-                        hasEndCurve=true;
+                    if (!(endOfContour[p] && p > 0 && endOfContour[p - 1])) {
+                        hasEndCurve = true;
                         current_path.curveTo(x1, y1, x2, y2, x3, y3);
                     }
 
-                    if(debug) {
-                        System.out.println("curveto " + x1 + ' ' + y1 + ' ' + x2 + ' ' + y2 + ' ' + x3 + ' ' + y3);
-                    }
-
                     /* if end after curve, roll back so we pick up the end*/
-                    if( checkEnd && endOfContour[j]){
+                    if (checkEnd && endOfContour[j]) {
 
-                        isEnd=true;
+                        isEnd = true;
 
-                        xs=pX[fc];
-                        ys=pY[fc];
+                        xs = pX[fc];
+                        ys = pY[fc];
                         //remmeber start point
-                        lc=fc;
+                        lc = fc;
                         //find next contour
-                        for(int jj=j+1;jj<c;jj++){
-                            if(endOfContour[jj]){
-                                fc=jj+1;
-                                jj=c;
+                        for (int jj = j + 1; jj < c; jj++) {
+                            if (endOfContour[jj]) {
+                                fc = jj + 1;
+                                jj = c;
                             }
                         }
 
-                        if(debug) {
-                            System.out.println("Curve");
-                        }
                     }
                 }
 
@@ -515,21 +412,9 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
                     current_path.closePath();
                 }
 
-                if(debug) {
-                    System.out.println("x2 " + xs + ' ' + ys + ' ' + isEnd);
-                }
-
-
-                if(isEnd){
-                    current_path.moveTo(xs,ys);
-                    isEnd=false;
-                    if(debug) {
-                        System.out.println("Move to " + xs + ' ' + ys);
-                    }
-                }
-
-                if(debug){
-                    showDebugImage(current_path, p);
+                if (isEnd) {
+                    current_path.moveTo(xs, ys);
+                    isEnd = false;
                 }
             }
         }
@@ -539,61 +424,55 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
          */
         paths.addElement(current_path);
 
-        if(debug) {
-            System.out.println("Ends at " + x1 + ' ' + y1 + " x=" + minX + ',' + maxX + " y=" + minY + ',' + maxY + " glyph x=" + compMinX + ',' + compMaxX + " y=" + compMinY + ',' + compMaxY);
-        }
-
     }
 
     static void showDebugImage(final GeneralPath current_path, final int p) {
-        try{
-            if(img==null) {
+        try {
+            if (img == null) {
                 img = new java.awt.image.BufferedImage(800, 800, java.awt.image.BufferedImage.TYPE_INT_ARGB);
             }
 
-            final Graphics2D g2= img.createGraphics();
+            final Graphics2D g2 = img.createGraphics();
             g2.setColor(Color.green);
             g2.draw(current_path);
 
-            final String key= String.valueOf(p);
+            final String key = String.valueOf(p);
 
-            org.jpedal.gui.ShowGUIMessage.showGUIMessage(key,img,key);
+            org.jpedal.gui.ShowGUIMessage.showGUIMessage(key, img, key);
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
     }
 
     void setPoint(final int[] pX, final int[] pY, final boolean[] onCurve, final int start, final int firstPt, final int ii) {
-        final int diff=firstPt-start;
+        final int diff = firstPt - start;
         int newPos;
 
         //make a deep copy of values
-        final int pXlength=pX.length;
-        final int[] old_pX=new int[pXlength];
-        System.arraycopy(pX,0,old_pX,0,pXlength);
+        final int pXlength = pX.length;
+        final int[] old_pX = new int[pXlength];
+        System.arraycopy(pX, 0, old_pX, 0, pXlength);
 
-        final int[] old_pY=new int[pXlength];
-        System.arraycopy(pY,0,old_pY,0,pXlength);
+        final int[] old_pY = new int[pXlength];
+        System.arraycopy(pY, 0, old_pY, 0, pXlength);
 
-        final boolean[] old_onCurve=new boolean[pXlength];
-        System.arraycopy(onCurve,0,old_onCurve,0,pXlength);
+        final boolean[] old_onCurve = new boolean[pXlength];
+        System.arraycopy(onCurve, 0, old_onCurve, 0, pXlength);
 
         //rotate values to ensure point at start
-        for(int oldPos=start;oldPos<ii+1;oldPos++){
+        for (int oldPos = start; oldPos < ii + 1; oldPos++) {
 
-            newPos=oldPos+diff;
-            if(newPos>ii) {
+            newPos = oldPos + diff;
+            if (newPos > ii) {
                 newPos -= (ii - start + 1);
             }
-            pX[oldPos]=old_pX[newPos];
-            pY[oldPos]=old_pY[newPos];
-            onCurve[oldPos]=old_onCurve[newPos];
+            pX[oldPos] = old_pX[newPos];
+            pY[oldPos] = old_pY[newPos];
+            onCurve[oldPos] = old_onCurve[newPos];
 
         }
     }
-
-
 
 
     //	/**convert to 1000 size*/
@@ -656,7 +535,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
     ////            if (absC - absD <= 33d/65536 && absC - absD >= -33d/65536)
     ////                n = 2*n;
     ////
-    ////            return (int)((n*(((x * (scale01/n)) + (y * (yscale/n)))+ytranslate))/unitsPerEm);//+30;
+    ////            return (int)((n*(((x * (scale01/n)) + (y * (yscale/n)))+ytranslate))/unitsPerEm); //+30;
     //            if (!useHinting)
     //                return (int)((((x * scale01) + (y * yscale))+ytranslate)/unitsPerEm);
     //            else
@@ -665,7 +544,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable{
     //	}
 
     public void flushArea() {
-        glyphShape=null;
+        glyphShape = null;
     }
 
     @Override

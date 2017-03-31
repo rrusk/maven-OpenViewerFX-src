@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer;
 
 import java.util.ResourceBundle;
+
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
@@ -51,31 +52,31 @@ import org.jpedal.parser.DecoderOptions;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
-/** <h2><b>PDF Viewer</b></h2>
- *
+/**
+ * <h2><b>PDF Viewer</b></h2>
+ * <p>
  * <p>If you are compiling, you will need to download all the examples source files from :
  * <a href="http://www.idrsolutions.com/how-to-view-pdf-files-in-java/">How to View PDF File in Java.</a></p>
- * 
+ * <p>
  * <p><b>Run directly from jar with java -cp jpedal.jar org.jpedal.examples.viewer.FXStartup (needs Java8)</b></p>
- *
+ * <p>
  * <p>There are plenty of tutorials on how to configure the Viewer on our website <a href="http://www.idrsolutions.com/java-pdf-library-support/">Support Section.</a></p>
- * 
+ * <p>
  * <p><a href="http://javadoc.idrsolutions.com/org/jpedal/constants/JPedalSettings.html">See Here for Settings to Customise the PDF Viewer</a></p>
- *
+ * <p>
  * <p>We also have our Swing Viewer documented at :</p>
  * <a href="http://files.idrsolutions.com/samplecode/org/jpedal/examples/viewer/Viewer.java.html">Swing Viewer Documentation.</a>
- * 
+ * <p>
  * <p>If you want to implement your own there is
- * a very simple example at : 
+ * a very simple example at :
  * <a href="http://files.idrsolutions.com/samplecode/org/jpedal/examples/baseviewer/BaseOpenViewerFX.java.html">BaseOpenViewerFX Demo</a>
  * <p>We recommend you look at the full viewer as it is totally configurable and does everything for you.</p>
- * 
  */
 public class OpenViewerFX extends SharedViewer {
 
     //flag if OS or commerical - DO NOT remove quotes as will break code
-    public static boolean isOpenFX = OpenViewerFX.class.getResourceAsStream("/org/jpedal/examples/viewer/Open"+"Viewer"+"FX.class")!= null;
-    
+    public static boolean isOpenFX = OpenViewerFX.class.getResourceAsStream("/org/jpedal/examples/viewer/Open" + "Viewer" + "FX.class") != null;
+
     static {
         checkUserJavaVersion();
         isFX = true;
@@ -87,27 +88,27 @@ public class OpenViewerFX extends SharedViewer {
     /**
      * Base Constructor to use when starting Viewer as a stand alone Stage.
      * Please ensure you call setupViewer after calling this constructor.
-     * 
+     *
      * @param stage Is of type Stage
-     * @param args Program arguments passed into the Viewer
+     * @param args  Program arguments passed into the Viewer
      */
     public OpenViewerFX(final Stage stage, final String[] args) {
         this.stage = stage;
         this.args = args;
         init();
     }
-    
+
     /**
      * Constructor to use when embedding the JavaFX Viewer in your own
      * JavaFX application, pass in your parentPane and the Viewer will
      * become a child of the parentPane.
-     * 
+     * <p>
      * Please ensure you call setupViewer after calling this constructor.
-     * 
-     * To add the JavaFX Viewer to a Tab, please pass a 
+     * <p>
+     * To add the JavaFX Viewer to a Tab, please pass a
      * Pane or ScrollPane and add the passed Pane to the Tab.
-     * 
-     * @param parentPane Is a constructor of your own JavaFX application in which JavaFx Viewer will be embedded
+     *
+     * @param parentPane      Is a constructor of your own JavaFX application in which JavaFx Viewer will be embedded
      * @param preferencesPath The path of the preferences file
      */
     public OpenViewerFX(final Parent parentPane, final String preferencesPath) {
@@ -119,14 +120,14 @@ public class OpenViewerFX extends SharedViewer {
             try {
                 properties.loadProperties(preferencesPath);
             } catch (final Exception e) {
-                System.err.println("Specified Preferrences file not found at " + preferencesPath + ". If this file is within a jar ensure filename has jar: at the begining.\n\nLoading default properties. "+e);
+                System.err.println("Specified Preferrences file not found at " + preferencesPath + ". If this file is within a jar ensure filename has jar: at the begining.\n\nLoading default properties. " + e);
 
                 properties.loadProperties();
             }
         } else {
             properties.loadProperties();
         }
-        
+
         init();
 
         setRootContainer(parentPane);
@@ -134,14 +135,14 @@ public class OpenViewerFX extends SharedViewer {
 
     /**
      * Sets up the Viewer and Displays it.
-     * 
+     * <p>
      * Please make sure you call this method
      * after calling any constructor to initialise
      * key components.
      */
     @Override
     public void setupViewer() {
-        
+
         super.setupViewer();
         Platform.runLater(new Runnable() {
             @Override
@@ -160,14 +161,14 @@ public class OpenViewerFX extends SharedViewer {
             }
         });
     }
-    
+
     void init() {
-        
+
         //load locale file
         try {
             Messages.setBundle(ResourceBundle.getBundle("org.jpedal.international.messages"));
         } catch (final Exception e) {
-            
+
             LogWriter.writeLog("Exception " + e + " loading resource bundle.\n"
                     + "Also check you have a file in org.jpedal.international.messages to support Locale=" + java.util.Locale.getDefault());
         }
@@ -177,11 +178,11 @@ public class OpenViewerFX extends SharedViewer {
         thumbnails = new JavaFXThumbnailPanel(decode_pdf);
 
         currentGUI = new JavaFxGUI(stage, decode_pdf, commonValues, thumbnails, properties);
-        
+
         decode_pdf.addExternalHandler(new JavaFXDefaultActionHandler(currentGUI), Options.FormsActionHandler);
         decode_pdf.addExternalHandler(new FXClientExternalHandler(), Options.AdditionalHandler);
-        
-        if(GUI.debugFX) {
+
+        if (GUI.debugFX) {
             System.out.println("OpenViewerFX init()");
         }
 
@@ -189,19 +190,19 @@ public class OpenViewerFX extends SharedViewer {
 
         currentCommands = new JavaFXCommands(commonValues, currentGUI, decode_pdf,
                 thumbnails, properties, searchFrame);
-        
-                
-		//enable error messages which are OFF by default
-		DecoderOptions.showErrorMessages=true;
-		
-		final String prefFile = System.getProperty("org.jpedal.Viewer.Prefs");
-		if(prefFile != null){
-			properties.loadProperties(prefFile);
-		}else{
-			properties.loadProperties();
-		}
+
+
+        //enable error messages which are OFF by default
+        DecoderOptions.showErrorMessages = true;
+
+        final String prefFile = System.getProperty("org.jpedal.Viewer.Prefs");
+        if (prefFile != null) {
+            properties.loadProperties(prefFile);
+        } else {
+            properties.loadProperties();
+        }
     }
-    
+
     /**
      * Allows the viewer to handle any JVM/Program arguments.
      *
@@ -212,22 +213,22 @@ public class OpenViewerFX extends SharedViewer {
 
         //Ensure default open is on event thread, otherwise the display is updated as values are changing
         if (Platform.isFxApplicationThread()) {
-            if (args !=null && args.length > 0) {
+            if (args != null && args.length > 0) {
                 openDefaultFile(args[0]);
 
             } else if ((properties.getValue("openLastDocument").toLowerCase().equals("true")) &&
-                 (properties.getRecentDocuments() != null
-                        && properties.getRecentDocuments().length > 1)) {
+                    (properties.getRecentDocuments() != null
+                            && properties.getRecentDocuments().length > 1)) {
 
-                    int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
+                int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
 
-                    if (lastPageViewed < 0) {
-                        lastPageViewed = 1;
-                    }
-
-                    openDefaultFileAtPage(properties.getRecentDocuments()[0], lastPageViewed);
+                if (lastPageViewed < 0) {
+                    lastPageViewed = 1;
                 }
-            
+
+                openDefaultFileAtPage(properties.getRecentDocuments()[0], lastPageViewed);
+            }
+
         } else {
 
             final Runnable run = new Runnable() {
@@ -238,18 +239,18 @@ public class OpenViewerFX extends SharedViewer {
                         openDefaultFile(args[0]);
 
                     } else if ((properties.getValue("openLastDocument").toLowerCase().equals("true")) &&
-                         (properties.getRecentDocuments() != null
-                                && properties.getRecentDocuments().length > 1)){
+                            (properties.getRecentDocuments() != null
+                                    && properties.getRecentDocuments().length > 1)) {
 
-                            int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
+                        int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
 
-                            if (lastPageViewed < 0) {
-                                lastPageViewed = 1;
-                            }
-
-                            openDefaultFileAtPage(properties.getRecentDocuments()[0], lastPageViewed);
+                        if (lastPageViewed < 0) {
+                            lastPageViewed = 1;
                         }
+
+                        openDefaultFileAtPage(properties.getRecentDocuments()[0], lastPageViewed);
                     }
+                }
             };
             Platform.runLater(run);
         }
@@ -257,30 +258,29 @@ public class OpenViewerFX extends SharedViewer {
 
     /**
      * Releases all resources used by the viewer - <em>Please note this calls System.exit(0);</em>
-     * This method has to be called when you explicitly want 
+     * This method has to be called when you explicitly want
      * to close the viewer.
      */
-    public void close(){
+    public void close() {
         SharedViewer.closeCalled = true;
         currentCommands.executeCommand(Commands.EXIT, null);
     }
-   
+
     /**
-     * 
      * Not part of the API.
-     * 
+     * <p>
      * To add Viewer to your own parent node, please use:
      * OpenViewerFX(Parent parentPane, String preferencesPath).
-     * 
+     *
      * @return The root of your JavaFX application
      */
-    public BorderPane getRoot(){
-        return ((JavaFxGUI)currentGUI).getRoot();
+    public BorderPane getRoot() {
+        return ((JavaFxGUI) currentGUI).getRoot();
     }
-    
-    protected static void checkUserJavaVersion(){ 
+
+    protected static void checkUserJavaVersion() {
         if (Float.parseFloat(System.getProperty("java.specification.version")) < 1.8f) {
             throw new RuntimeException("To run the JPedal FX Viewer, you must have Java8 or above installed");
-         }
+        }
     }
 }

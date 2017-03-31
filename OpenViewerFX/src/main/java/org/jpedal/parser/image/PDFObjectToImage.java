@@ -35,6 +35,7 @@ package org.jpedal.parser.image;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.color.GenericColorSpace;
@@ -56,110 +57,109 @@ import org.jpedal.utils.LogWriter;
  */
 public class PDFObjectToImage {
 
-    
-    
+
     public static BufferedImage getImageFromPdfObject(final PdfObject newSMask, int fx, final int fw, int fy, final int fh,
-            final PdfObjectReader currentPdfFile, final ParserOptions parserOptions, final int formLevel, final float multiplyer, final boolean useTransparency, final float scaling) {
-        
+                                                      final PdfObjectReader currentPdfFile, final ParserOptions parserOptions, final int formLevel, final float multiplyer, final boolean useTransparency, final float scaling) {
+
         BufferedImage smaskImage;
         final Graphics2D formG2;
-        final byte[] objectData =currentPdfFile.readStream(newSMask,true,true,false, false,false, newSMask.getCacheName(currentPdfFile.getObjectReader()));
-        
+        final byte[] objectData = currentPdfFile.readStream(newSMask, true, true, false, false, false, newSMask.getCacheName(currentPdfFile.getObjectReader()));
+
         final ObjectStore localStore = new ObjectStore();
-        
-        final DynamicVectorRenderer glyphDisplay=new ImageDisplay(0,false,20,localStore);
-        
-        final PdfStreamDecoder glyphDecoder=new PdfStreamDecoder(currentPdfFile); 
-        
-        glyphDecoder.setParameters(parserOptions.isPageContent(),parserOptions.isRenderPage(), parserOptions.getRenderMode(), parserOptions.getExtractionMode(), false,false);
+
+        final DynamicVectorRenderer glyphDisplay = new ImageDisplay(0, false, 20, localStore);
+
+        final PdfStreamDecoder glyphDecoder = new PdfStreamDecoder(currentPdfFile);
+
+        glyphDecoder.setParameters(parserOptions.isPageContent(), parserOptions.isRenderPage(), parserOptions.getRenderMode(), parserOptions.getExtractionMode(), false, false);
         glyphDecoder.setObjectValue(ValueTypes.ObjectStore, localStore);
         glyphDecoder.setRenderer(glyphDisplay);
         glyphDecoder.setMultiplyer(multiplyer);
         glyphDecoder.setFormLevel(formLevel);
-       
+
         //we need to explicitly set scaling to 1
         //glyphDisplay.setScalingValues(0,0,1);
         
         /*read any resources*/
-        try{
-            
-            final PdfObject SMaskResources =newSMask.getDictionary(PdfDictionary.Resources);
+        try {
+
+            final PdfObject SMaskResources = newSMask.getDictionary(PdfDictionary.Resources);
             if (SMaskResources != null) {
                 glyphDecoder.readResources(SMaskResources, false);
             }
-            
-        }catch(final PdfException e){
+
+        } catch (final PdfException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-        
-        int w=fw-fx;
-        if(w<0){
-            w=-w;
-            fx -= w;         
+
+        int w = fw - fx;
+        if (w < 0) {
+            w = -w;
+            fx -= w;
         }
-        if(w==0) {
+        if (w == 0) {
             w = 1;
         }
-        
-        int h=fh-fy;
-        if(h<0){
-            h=-h;
-            fy -= h;        
+
+        int h = fh - fy;
+        if (h < 0) {
+            h = -h;
+            fy -= h;
         }
-        
-        if(h==0) {
+
+        if (h == 0) {
             h = 1;
         }
-        try{
-            
-            smaskImage=new  BufferedImage((int)(w*scaling),(int)(h*scaling),BufferedImage.TYPE_INT_ARGB);
-            
-            formG2=smaskImage.createGraphics();
-            
+        try {
+
+            smaskImage = new BufferedImage((int) (w * scaling), (int) (h * scaling), BufferedImage.TYPE_INT_ARGB);
+
+            formG2 = smaskImage.createGraphics();
+
             formG2.scale(scaling, scaling);
-            formG2.translate(-fx,-fy);
-            
+            formG2.translate(-fx, -fy);
+
             glyphDisplay.setG2(formG2);
-            
-            if(useTransparency){ //try to mimic any group transparency
-                
-                final PdfObject group=newSMask.getDictionary(PdfDictionary.Group);
-                if(group!=null){
+
+            if (useTransparency) { //try to mimic any group transparency
+
+                final PdfObject group = newSMask.getDictionary(PdfDictionary.Group);
+                if (group != null) {
                     currentPdfFile.checkResolved(group);
-                    final String Tname=group.getName(PdfDictionary.S);
-                    
-                    final PdfArrayIterator ColorSpace=group.getMixedArray(PdfDictionary.ColorSpace);
+                    final String Tname = group.getName(PdfDictionary.S);
 
-                    if(ColorSpace!=null && ColorSpace.getTokenCount()>0){
+                    final PdfArrayIterator ColorSpace = group.getMixedArray(PdfDictionary.ColorSpace);
 
-                        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
-                        
+                    if (ColorSpace != null && ColorSpace.getTokenCount() > 0) {
+
+                        final GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+
                         //System.out.println(group.getDictionary(PdfDictionary.ColorSpace) +" "+group.getObjectRefAsString()+" "+group.getBoolean(PdfDictionary.I)+" "+group.getBoolean(PdfDictionary.K)+" ");
-                        if(group.getBoolean(PdfDictionary.I)==false && group.getBoolean(PdfDictionary.K)==false && newColorSpace!=null && newColorSpace.getID()==ColorSpaces.DeviceCMYK){
-                          //  System.out.println("Ignore");
-                        }else if(Tname.equals("Transparency")){
+                        if (group.getBoolean(PdfDictionary.I) == false && group.getBoolean(PdfDictionary.K) == false && newColorSpace != null && newColorSpace.getID() == ColorSpaces.DeviceCMYK) {
+                            //  System.out.println("Ignore");
+                        } else if (Tname.equals("Transparency")) {
 
                             formG2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
                         }
-                    }                  
+                    }
                 }
             }
-            
-        }catch(final Error err){
+
+        } catch (final Error err) {
             LogWriter.writeLog("Exception: " + err.getMessage());
-            
-            smaskImage=null;
+
+            smaskImage = null;
         }
         
         /*decode the stream*/
-        if(objectData!=null) {
+        if (objectData != null) {
             glyphDecoder.decodeStreamIntoObjects(objectData, false);
         }
-        
+
         glyphDecoder.dispose();
-        
+
         localStore.flush();
-        
+
         return smaskImage;
     }
 }

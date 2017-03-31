@@ -19,6 +19,7 @@
 package org.jpedal.examples.viewer.commands;
 
 import javax.print.PrintServiceLookup;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.utils.*;
@@ -31,7 +32,7 @@ import org.jpedal.utils.Messages;
 public class Print {
 
     public static void execute(final Object[] args, final GUIFactory currentGUI, final Values commonValues,
-            final PropertiesFile properties, final PrinterInt currentPrinter, final PdfDecoderInt decode_pdf) {
+                               final PropertiesFile properties, final PrinterInt currentPrinter, final PdfDecoderInt decode_pdf) {
         throw new UnsupportedOperationException("Not supported in JavaFX");
     }
 }

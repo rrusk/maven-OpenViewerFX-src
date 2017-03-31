@@ -36,6 +36,7 @@ package org.jpedal.parser;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.external.CustomPrintHintingHandler;
 import org.jpedal.external.ErrorTracker;
@@ -46,7 +47,7 @@ import org.jpedal.objects.layers.PdfLayerList;
 import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.render.SwingDisplay;
 
-public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements PrintStreamDecoder  {
+public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements PrintStreamDecoder {
 
     public PdfStreamDecoderForPrinting(final PdfObjectReader currentPdfFile, final PdfLayerList layers) {
         super(currentPdfFile, layers);
@@ -56,13 +57,13 @@ public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements Pri
 
     @Override
     public void print(final Graphics2D g2, final AffineTransform scaling, final int currentPrintPage,
-                      final Rectangle userAnnot, final CustomPrintHintingHandler customPrintHintingHandler, final PdfDecoderInt pdf){
+                      final Rectangle userAnnot, final CustomPrintHintingHandler customPrintHintingHandler, final PdfDecoderInt pdf) {
 
-        final SwingDisplay swingDisplay=(SwingDisplay) current;
-        
-        if(customPrintHintingHandler!=null){
+        final SwingDisplay swingDisplay = (SwingDisplay) current;
+
+        if (customPrintHintingHandler != null) {
             swingDisplay.stopG2HintSetting(true);
-            customPrintHintingHandler.preprint(g2,pdf);
+            customPrintHintingHandler.preprint(g2, pdf);
         }
 
         swingDisplay.setPrintPage(currentPrintPage);
@@ -70,22 +71,22 @@ public class PdfStreamDecoderForPrinting extends PdfStreamDecoder implements Pri
         current.writeCustom(DynamicVectorRenderer.CUSTOM_COLOR_HANDLER, pdf.getExternalHandler(Options.ColorHandler));
 
         current.setG2(g2);
-        current.paint(null,scaling,userAnnot);
+        current.paint(null, scaling, userAnnot);
     }
 
     @Override
-    public void setObjectValue(final int key, final Object  obj){
+    public void setObjectValue(final int key, final Object obj) {
 
-        if(key==ValueTypes.ObjectStore){
-            objectStoreStreamRef = (ObjectStore)obj;
+        if (key == ValueTypes.ObjectStore) {
+            objectStoreStreamRef = (ObjectStore) obj;
 
-            current=new SwingDisplay(parserOptions.getPageNumber(),objectStoreStreamRef,true);
-            
-            if(customImageHandler!=null && current!=null) {
+            current = new SwingDisplay(parserOptions.getPageNumber(), objectStoreStreamRef, true);
+
+            if (customImageHandler != null && current != null) {
                 current.writeCustom(DynamicVectorRenderer.CUSTOM_IMAGE_HANDLER, customImageHandler);
             }
-        }else{
-            super.setObjectValue(key,obj);
+        } else {
+            super.setObjectValue(key, obj);
         }
 
     }

@@ -55,7 +55,7 @@ import javafx.stage.Stage;
 /**
  * An extension of FXDialog which displays a message to the user.
  * You can set an image as the warning image and the message text.
- * 
+ *
  * @author Simon
  */
 public class FXMessageDialog extends FXDialog {
@@ -67,33 +67,34 @@ public class FXMessageDialog extends FXDialog {
     public static final int WARNING_MESSAGE = 2; // NYI
     public static final int QUESTION_MESSAGE = 3; // NYI
     public static final int PLAIN_MESSAGE = -1; // NYI
-    
+
     protected static final int FONTSIZE = 14;
     protected static final int BUTTONWIDTH = 55;
-    
+
     private final BorderPane content;
     private final StringProperty message;
     private final ImageView iconView;
     private final HBox bottom;
     private final VBox center;
-    
+
     public FXMessageDialog(final Stage parent) {
         content = new BorderPane();
         iconView = new ImageView();
         message = new SimpleStringProperty();
         final Button okButton = new Button("OK");
-        
+
         okButton.setPrefWidth(BUTTONWIDTH);
         okButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent t) {
+            @Override
+            public void handle(final ActionEvent t) {
                 positiveClose();
             }
         });
-        
+
         init(parent, Modality.APPLICATION_MODAL, content);
-        
+
         dialog.setResizable(false);
-        
+
         // Setup centre
         center = new VBox();
         final Label label = new Label();
@@ -103,20 +104,20 @@ public class FXMessageDialog extends FXDialog {
         center.getChildren().add(label);
         center.setAlignment(Pos.CENTER);
         center.setPadding(new Insets(20));
-        
+
         // Setup left pane
         final VBox left = new VBox();
         left.setAlignment(Pos.CENTER);
         iconView.setPreserveRatio(true);
         iconView.setFitWidth(0);
         left.getChildren().add(iconView);
-        
+
         // Setup bottom pane
         bottom = new HBox(5);
         bottom.setAlignment(Pos.CENTER);
         bottom.getChildren().add(okButton);
-        bottom.setPadding(new Insets(5,5,10,5));
-        
+        bottom.setPadding(new Insets(5, 5, 10, 5));
+
         content.setCenter(center);
         content.setLeft(left);
         content.setBottom(bottom);
@@ -129,59 +130,60 @@ public class FXMessageDialog extends FXDialog {
         this(parent);
         this.message.set(message);
     }
-    
+
     public FXMessageDialog(final Stage parent, final Image icon) {
         this(parent);
         setImage(icon);
     }
-    
+
     public FXMessageDialog(final Stage parent, final Image icon, final String message) {
         this(parent);
         setImage(icon);
         this.message.set(message);
     }
-    
+
     /**
      * MessageDialog with custom center node
-     *  @param parent The stage of Dialog
-     * @param group The group of the Dialog
+     *
+     * @param parent The stage of Dialog
+     * @param group  The group of the Dialog
      */
-    public FXMessageDialog(final Stage parent, final Parent group){
+    public FXMessageDialog(final Stage parent, final Parent group) {
         this(parent);
         content.setCenter(group);
     }
-    
-    public final void setImage(final Image icon){
-        if(icon == null){
+
+    public final void setImage(final Image icon) {
+        if (icon == null) {
             iconView.setFitWidth(0);
             return;
         }
         iconView.setFitWidth(icon.getWidth());
         iconView.setImage(icon);
     }
-    
-    protected BorderPane getBorderPane(){
+
+    protected BorderPane getBorderPane() {
         return content;
     }
-    
-    public void setCenterAlignment(final Pos pos){
-        ((VBox)content.getCenter()).setAlignment(pos);
+
+    public void setCenterAlignment(final Pos pos) {
+        ((VBox) content.getCenter()).setAlignment(pos);
     }
-    
-    protected HBox getButtonGroup(){
+
+    protected HBox getButtonGroup() {
         return bottom;
     }
-    
-    protected VBox getCenterGroup(){
+
+    protected VBox getCenterGroup() {
         return center;
     }
-    
-    protected StringProperty getMessage(){
+
+    protected StringProperty getMessage() {
         return message;
     }
-    
+
     @Override
-    protected void positiveClose(){
+    protected void positiveClose() {
         isCancelled = false;
         dialog.close();
     }

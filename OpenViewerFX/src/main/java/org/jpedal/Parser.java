@@ -38,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.jpedal.constants.SpecialOptions;
 import org.jpedal.display.Display;
 import org.jpedal.display.PageOffsets;
@@ -83,9 +84,11 @@ public class Parser {
     /**
      * list of images for decoded page
      */
-    private String imagesInFile= "";
+    private String imagesInFile = "";
 
-    /**custom upscale val for JPedal settings*/
+    /**
+     * custom upscale val for JPedal settings
+     */
     private float multiplyer = 1;
 
     /**
@@ -110,7 +113,7 @@ public class Parser {
 
     private int displayRotation;
 
-    private float scaling=1.0f;
+    private float scaling = 1.0f;
 
     /**
      * flag to stop multiple access to background decoding
@@ -129,16 +132,18 @@ public class Parser {
      */
     private int renderMode = 7;
 
-    private DecoderOptions options=new DecoderOptions();
+    private DecoderOptions options = new DecoderOptions();
 
     private final FileAccess fileAcces;
 
-    private PdfResources res=new PdfResources();
+    private PdfResources res = new PdfResources();
 
-    private DecoderResults resultsFromDecode=new DecoderResults();
+    private DecoderResults resultsFromDecode = new DecoderResults();
 
-    /**holds lines of text we create*/
-    private final TextLines textLines=new TextLines();
+    /**
+     * holds lines of text we create
+     */
+    private final TextLines textLines = new TextLines();
 
     private boolean generateGlyphOnRender;
     private int indent;
@@ -147,28 +152,28 @@ public class Parser {
     private final boolean useJavaFX;
     private boolean warnOnceOnForms;
     private PdfObject structTreeRootObj;
-    
+
     //private HTMLMarkedContentGenerator htmlMarkedContent;
-    
+
     /**
      * return scaleup factor applied to last Hires image of page generated
-     *
+     * <p>
      * negative values mean no upscaling applied and should be ignored
      */
-    float getHiResUpscaleFactor(){
+    float getHiResUpscaleFactor() {
 
         return multiplyer;
     }
 
     void setParms(final int displayRotation, final float scaling, final int indent, final int specialMode) {
-        this.displayRotation=displayRotation;
-        this.scaling=scaling;
-        this.indent=indent;
-        this.specialMode=specialMode;
+        this.displayRotation = displayRotation;
+        this.scaling = scaling;
+        this.indent = indent;
+        this.specialMode = specialMode;
     }
 
     void resetOnOpen() {
-        warnOnceOnForms=false;
+        warnOnceOnForms = false;
     }
 
     /**
@@ -184,7 +189,6 @@ public class Parser {
     }
 
     /**
-     *
      * access textlines object
      */
     TextLines getTextLines() {
@@ -193,33 +197,34 @@ public class Parser {
 
     Parser(final ExternalHandlers externalHandlers, final DecoderOptions options, final FileAccess fileAcces, final PdfResources res, final DecoderResults resultsFromDecode) {
 
-        this.externalHandlers=externalHandlers;
-        this.options=options;
-        this.fileAcces=fileAcces;
-        this.res=res;
-        this.resultsFromDecode=resultsFromDecode;
+        this.externalHandlers = externalHandlers;
+        this.options = options;
+        this.fileAcces = fileAcces;
+        this.res = res;
+        this.resultsFromDecode = resultsFromDecode;
 
-        useJavaFX=externalHandlers.isJavaFX();
-        
+        useJavaFX = externalHandlers.isJavaFX();
+
         //setup Swing of FX display depending on mode (External Handler can be FX of Swing)
         externalHandlers.setDVR(fileAcces);
-        
+
     }
-    
+
     /**
      * Create a new Parser object using this variables values
+     *
      * @return Parser object
      */
-    public Parser createNewParser(){
+    public Parser createNewParser() {
         //Get original DVR
         final DynamicVectorRenderer dvr = fileAcces.getDynamicRenderer();
-        
+
         //Creating a new parser overrides the existing DVR, this is not desired
         final Parser parser = new Parser(this.externalHandlers, this.options, this.fileAcces, this.res, this.resultsFromDecode);
-        
+
         //Add DVR back to fileaccess to prevent render issues oepning side tab bar
         fileAcces.setDVR(dvr);
-        
+
         //Set the other values
         final int extractionMode = this.extractionMode;
         parser.setRenderMode(renderMode);
@@ -227,7 +232,7 @@ public class Parser {
         parser.setGenerateGlyphOnRender(generateGlyphOnRender);
         parser.setParms(displayRotation, scaling, indent, specialMode);
         parser.setStatusBar(statusBar);
-        
+
         return parser;
     }
 
@@ -237,53 +242,51 @@ public class Parser {
      * Should not need to be called in general usage
      */
     protected void setGenerateGlyphOnRender(final boolean generateGlyphOnRender) {
-        this.generateGlyphOnRender=generateGlyphOnRender;
+        this.generateGlyphOnRender = generateGlyphOnRender;
     }
-    
+
     /**
-     *
      * Please do not use for general usage. Use setPageParameters(scalingValue, pageNumber) to set page scaling
      */
     void setExtractionMode(final int mode, final float newScaling) {
 
-        final PdfPageData pageData=fileAcces.getPdfPageData();
+        final PdfPageData pageData = fileAcces.getPdfPageData();
         pageData.setScalingValue(newScaling); //ensure aligned
 
         extractionMode = mode;
 
-        final PdfLayerList layers=res.getPdfLayerList();
-        if(layers!=null){
-            final boolean layersChanged=layers.setZoom(newScaling);
+        final PdfLayerList layers = res.getPdfLayerList();
+        if (layers != null) {
+            final boolean layersChanged = layers.setZoom(newScaling);
 
-            if(layersChanged){
-                    decodePage(-1);
+            if (layersChanged) {
+                decodePage(-1);
             }
         }
     }
-
 
 
     void decodePageInBackground(final int i) throws PdfException {
 
         if (fileAcces.isDecoding()) {
             LogWriter.writeLog("[PDF]WARNING - this file is being decoded already in foreground");
-            LogWriter.writeLog("[PDF]Multiple access not recommended - use  waitForDecodingToFinish() to check");     
+            LogWriter.writeLog("[PDF]Multiple access not recommended - use  waitForDecodingToFinish() to check");
         } else if (isBackgroundDecoding) {
             LogWriter.writeLog("[PDF]WARNING - this file is being decoded already in background");
         } else {
 
-            try{
+            try {
                 isBackgroundDecoding = true;
 
                 if (i > fileAcces.getPageCount()) {
 
                     LogWriter.writeLog("Page out of bounds");
-                    
+
                 } else {
 
                     final String currentPageOffset = getIO().getReferenceforPage(i);
 
-                    final AcroRenderer formRenderer=externalHandlers.getFormRenderer();
+                    final AcroRenderer formRenderer = externalHandlers.getFormRenderer();
 
                     /*
                      * decode the file if not already decoded, there is a valid
@@ -296,18 +299,18 @@ public class Parser {
                                     "File not open - did you call closePdfFile() inside a loop and not reopen");
                         }
 
-                        final PdfObject pdfObject=new PageObject(currentPageOffset);
+                        final PdfObject pdfObject = new PageObject(currentPageOffset);
                         getIO().readObject(pdfObject);
-                        final PdfObject Resources=pdfObject.getDictionary(PdfDictionary.Resources);
+                        final PdfObject Resources = pdfObject.getDictionary(PdfDictionary.Resources);
 
                         //ensure set (needed for XFA)
                         pdfObject.setPageNumber(i);
 
                         final ObjectStore backgroundObjectStoreRef = new ObjectStore();
 
-                        final PdfStreamDecoder backgroundDecoder=formRenderer.getStreamDecoder(getIO(), res.getPdfLayerList(),false);
+                        final PdfStreamDecoder backgroundDecoder = formRenderer.getStreamDecoder(getIO(), res.getPdfLayerList(), false);
 
-                        backgroundDecoder.setParameters(true, false, 0, extractionMode,false,useJavaFX);
+                        backgroundDecoder.setParameters(true, false, 0, extractionMode, false, useJavaFX);
 
                         backgroundDecoder.setXMLExtraction(options.isXMLExtraction());
                         externalHandlers.addHandlers(backgroundDecoder);
@@ -315,30 +318,29 @@ public class Parser {
                         backgroundDecoder.setObjectValue(ValueTypes.Name, fileAcces.getFilename());
                         //Display object added but not rendered as renderPage is false (DO NOT REMOVE, BREAKS SEARCH)
                         backgroundDecoder.setRenderer(new ImageDisplay(fileAcces.getPageNumber(), false, 5000, new ObjectStore()));
-                        backgroundDecoder.setObjectValue(ValueTypes.ObjectStore,backgroundObjectStoreRef);
-                        backgroundDecoder.setObjectValue(ValueTypes.PDFPageData,fileAcces.getPdfPageData());
+                        backgroundDecoder.setObjectValue(ValueTypes.ObjectStore, backgroundObjectStoreRef);
+                        backgroundDecoder.setObjectValue(ValueTypes.PDFPageData, fileAcces.getPdfPageData());
                         backgroundDecoder.setIntValue(ValueTypes.PageNum, i);
 
-                        res.setupResources(backgroundDecoder, false, Resources,fileAcces.getPageNumber(),getIO());
+                        res.setupResources(backgroundDecoder, false, Resources, fileAcces.getPageNumber(), getIO());
 
                         backgroundDecoder.decodePageContent(pdfObject);
 
                         //get extracted data
-                        pdfBackgroundData = (PdfData)backgroundDecoder.getObjectValue(ValueTypes.PDFData);
+                        pdfBackgroundData = (PdfData) backgroundDecoder.getObjectValue(ValueTypes.PDFData);
                         pdfBackgroundImages = (PdfImageData) backgroundDecoder.getObjectValue(ValueTypes.PDFImages);
 
 
                     }
                 }
 
-            }catch(final PdfException e){
+            } catch (final PdfException e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
-            }finally {
+            } finally {
                 isBackgroundDecoding = false;
             }
         }
     }
-
 
 
     /**
@@ -351,7 +353,7 @@ public class Parser {
         // make sure in range
         if (pageIndex > fileAcces.getPageCount() || pageIndex < 1) {
             LogWriter.writeLog("Page " + pageIndex + " not in range");
-            
+
         } else {
 
             if (getIO() == null) {
@@ -360,25 +362,25 @@ public class Parser {
 
             final String currentPageOffset = getIO().getReferenceforPage(pageIndex);
 
-            final PdfPageData pageData=fileAcces.getPdfPageData();
+            final PdfPageData pageData = fileAcces.getPdfPageData();
 
             if (currentPageOffset != null || externalHandlers.getFormRenderer().isXFA()) {
 
-                final PDFtoImageConvertor pdfToImageConvertor=externalHandlers.getConverter(multiplyer, options);
-                
-                image = pdfToImageConvertor.convert(resultsFromDecode, displayRotation, res, externalHandlers,renderMode,pageData,externalHandlers.getFormRenderer(),scaling,getIO(),pageIndex, imageIsTransparent, currentPageOffset);
+                final PDFtoImageConvertor pdfToImageConvertor = externalHandlers.getConverter(multiplyer, options);
+
+                image = pdfToImageConvertor.convert(resultsFromDecode, displayRotation, res, externalHandlers, renderMode, pageData, externalHandlers.getFormRenderer(), scaling, getIO(), pageIndex, imageIsTransparent, currentPageOffset);
 
                 //Check for exceptions in TrueType hinting and re decode if neccessary
                 if (TTGlyph.redecodePage) {
-                    
+
                     //the software may well have flagged forms on page as decoded and will ignore this second attempt. So set back to not decoded.
-                    this.externalHandlers.getFormRenderer().getCompData().setListForPage(pageIndex,null,true);
-                    
+                    this.externalHandlers.getFormRenderer().getCompData().setListForPage(pageIndex, null, true);
+
                     TTGlyph.redecodePage = false;
                     return getPageAsImage(pageIndex, imageIsTransparent);
                 }
 
-                multiplyer=pdfToImageConvertor.getMultiplyer();
+                multiplyer = pdfToImageConvertor.getMultiplyer();
 
             }
 
@@ -419,19 +421,17 @@ public class Parser {
 
     void disposeObjects() {
 
-        FontMappings.fontsInitialised=false;
+        FontMappings.fontsInitialised = false;
 
         externalHandlers.dispose();
 
-        if(pdfData!=null) {
+        if (pdfData != null) {
             pdfData.dispose();
         }
-        pdfData=null;
+        pdfData = null;
 
 
-
-        FontMappings.defaultFont=null;
-
+        FontMappings.defaultFont = null;
 
 
         //        if(current!=null)
@@ -443,16 +443,17 @@ public class Parser {
 
     /**
      * will return some dictionary values - if not a set value, will return null
+     *
      * @return
      */
-    Object getJPedalObject(final int id){
-        switch(id){
+    Object getJPedalObject(final int id) {
+        switch (id) {
             case PdfDictionary.Layer:
                 return res.getPdfLayerList();
 
             case PdfDictionary.Linearized:
 
-                return fileAcces.linearParser.getLinearObject(fileAcces.isOpen,getIO());
+                return fileAcces.linearParser.getLinearObject(fileAcces.isOpen, getIO());
 
             case PdfDictionary.LinearizedReader:
 
@@ -470,14 +471,12 @@ public class Parser {
     /**
      * @param pageIndex number of the page we want to extract
      * @return image of the extracted page
-     * @throws org.jpedal.exception.PdfException
-     * Page size is defined by CropBox
-     * see http://files.idrsolutions.com/samplecode/org/jpedal/examples/images/ConvertPagesToHiResImages.java.html for full details
-     *
+     * @throws org.jpedal.exception.PdfException Page size is defined by CropBox
+     *                                           see http://files.idrsolutions.com/samplecode/org/jpedal/examples/images/ConvertPagesToHiResImages.java.html for full details
      */
-    synchronized BufferedImage getPageAsHiRes(final int pageIndex, final boolean isTransparent)throws PdfException{
+    synchronized BufferedImage getPageAsHiRes(final int pageIndex, final boolean isTransparent) throws PdfException {
 
-        multiplyer=options.getImageDimensions(pageIndex, fileAcces.getPdfPageData());
+        multiplyer = options.getImageDimensions(pageIndex, fileAcces.getPdfPageData());
 
         return getPageAsImage(pageIndex, isTransparent);
 
@@ -485,6 +484,7 @@ public class Parser {
 
     /**
      * see if page available if in Linearized mode or return true
+     *
      * @param rawPage
      * @return
      */
@@ -528,11 +528,10 @@ public class Parser {
      * returns object containing grouped text of last decoded page
      * - if no page decoded, a Runtime exception is thrown to warn user
      * Please see org.jpedal.examples.text for example code.
-     *
      */
     PdfGroupingAlgorithms getGroupingObject() throws PdfException {
 
-        return options.getGroupingObject(fileAcces.getLastPageDecoded() , getPdfData());
+        return options.getGroupingObject(fileAcces.getLastPageDecoded(), getPdfData());
 
     }
 
@@ -544,7 +543,7 @@ public class Parser {
 
         return options.getBackgroundGroupingObject(pdfBackgroundData);
     }
-    
+
     /**
      * provide method for outside class to get data object
      * containing images
@@ -634,9 +633,9 @@ public class Parser {
         TTGlyph.redecodePage = false;
 
         //flag if decoding started
-        final Object customErrorTracker=externalHandlers.getExternalHandler(Options.ErrorTracker);
+        final Object customErrorTracker = externalHandlers.getExternalHandler(Options.ErrorTracker);
 
-        if(customErrorTracker!=null) {
+        if (customErrorTracker != null) {
             ((ErrorTracker) customErrorTracker).startedPageDecoding(rawPage);
         }
 
@@ -645,26 +644,26 @@ public class Parser {
 
         final DynamicVectorRenderer currentDisplay;
 
-        final PdfPageData pageData=fileAcces.getPdfPageData();
+        final PdfPageData pageData = fileAcces.getPdfPageData();
 
-        if(customDVR!=null){
+        if (customDVR != null) {
 
-            currentDisplay=customDVR;
+            currentDisplay = customDVR;
 
             /*intercept code to render and image and flag text as invisible or visible*/
-            if (customDVR.isHTMLorSVG()) {// Special case for HTML and SVG to allow for the available text modes.
+            if (customDVR.isHTMLorSVG()) { // Special case for HTML and SVG to allow for the available text modes.
 
 
                 fileAcces.setDVR(currentDisplay);
 
                 /*
                  * flag if content is structured so we can use this in HTML
-                 */             
-                this.structTreeRootObj=res.getPdfObject(PdfResources.StructTreeRootObj);
-                if(structTreeRootObj!=null){
+                 */
+                this.structTreeRootObj = res.getPdfObject(PdfResources.StructTreeRootObj);
+                if (structTreeRootObj != null) {
                     this.fileAcces.getIO().checkResolved(structTreeRootObj);
                 }
-                
+
 //                if(1==2 && structTreeRootObj!=null && htmlMarkedContent==null && structTreeRootObj.getDictionary(PdfDictionary.ParentTree)!=null){
 //                    //System.out.println("HTML file containts Structured content");
 //                    htmlMarkedContent=new org.jpedal.objects.structuredtext.HTMLMarkedContentGenerator(); 
@@ -675,35 +674,35 @@ public class Parser {
 //        
 //                } 
             }
-        }else{
-            currentDisplay=fileAcces.getDynamicRenderer();
+        } else {
+            currentDisplay = fileAcces.getDynamicRenderer();
         }
 
         //flag to allow us to not do some things when we re decode the page with layers on for example
         boolean isDuplicate = false;
-        if(rawPage==-1){
-            rawPage=fileAcces.getLastPageDecoded();
+        if (rawPage == -1) {
+            rawPage = fileAcces.getLastPageDecoded();
             isDuplicate = true;
         }
 
-        final int page=rawPage;
+        final int page = rawPage;
 
         if (fileAcces.isDecoding()) {
             LogWriter.writeLog("[PDF]WARNING - this file is being decoded already - use  waitForDecodingToFinish() to check");
-            
+
         } else {
 
-            PdfObject pdfObject=fileAcces.linearParser.getLinearPageObject();
+            PdfObject pdfObject = fileAcces.linearParser.getLinearPageObject();
 
-            final AcroRenderer formRenderer=externalHandlers.getFormRenderer();
+            final AcroRenderer formRenderer = externalHandlers.getFormRenderer();
 
             fileAcces.setDecoding(true);
 
-            try{
+            try {
                 fileAcces.setDecoding(true);
 
-                final PdfLayerList layers=res.getPdfLayerList();
-                if(layers!=null && layers.getChangesMade()){
+                final PdfLayerList layers = res.getPdfLayerList();
+                if (layers != null && layers.getChangesMade()) {
                     handleJSInLayer(formRenderer, layers);
                 }
 
@@ -712,16 +711,16 @@ public class Parser {
                 decodeStatus = "";
 
                 DevFlags.currentPage = page;
-                
-                currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH,null);
+
+                currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH, null);
 
                 if (page > fileAcces.getPageCount() || page < 1) {
 
                     LogWriter.writeLog("Page out of bounds");
-                    
+
                     fileAcces.setDecoding(false);
 
-                } else{
+                } else {
 
                     /*
                      * title changes to give user something to see under timer
@@ -747,34 +746,34 @@ public class Parser {
 
                     final PdfStreamDecoder current = setupObjectsForDecode(currentDisplay, pageData, page, pdfObject, formRenderer);
 
-                   // if(isHTML)
-                  //      current.setObjectValue(ValueTypes.DirectRendering, null);//(Graphics2D) graphics);
-        
+                    // if(isHTML)
+                    //      current.setObjectValue(ValueTypes.DirectRendering, null); //(Graphics2D) graphics);
+
                     try {
                         /*
                         * If highlights are required for page, reset highlights
                         */
-                        if(textLines != null) {
+                        if (textLines != null) {
                             textLines.setLineAreas(null);
                         }
 
-                        
+
 //                        if(htmlMarkedContent!=null){
 //                            current.setObjectValue(ValueTypes.MarkedContent,htmlMarkedContent.getLookup());
 //                            htmlMarkedContent.traverseContentTree(structTreeRootObj,current);
 //                        }
-                       
+
                         current.decodePageContent(pdfObject);
-                        
+
                     } catch (final Error err) {
-                        decodeStatus = decodeStatus+ "Error in decoding page "+ err;
+                        decodeStatus = decodeStatus + "Error in decoding page " + err;
                     } catch (final PdfException e) {
 
-                        LogWriter.writeLog("Exception "+e.getMessage());
+                        LogWriter.writeLog("Exception " + e.getMessage());
 
                         //cascade up so we can show in viewer
-                        if(e.getMessage()!=null && e.getMessage().contains("JPeg 2000")){
-                            decodeStatus = decodeStatus+ "Error in decoding page "+ e;
+                        if (e.getMessage() != null && e.getMessage().contains("JPeg 2000")) {
+                            decodeStatus = decodeStatus + "Error in decoding page " + e;
                         }
                     }
 
@@ -792,15 +791,15 @@ public class Parser {
                      */
                     if (options.getRenderPage() && !isDuplicate && (renderMode & PdfDecoderInt.REMOVE_NOFORMS) != PdfDecoderInt.REMOVE_NOFORMS && !formRenderer.ignoreForms()) {
 
-                        final PageOffsets currentOffset=fileAcces.getOffset();
-                        if(currentOffset!=null) {
+                        final PageOffsets currentOffset = fileAcces.getOffset();
+                        if (currentOffset != null) {
                             formRenderer.getCompData().setPageValues(scaling, displayRotation, indent, 0, 0, Display.SINGLE_PAGE, currentOffset.getWidestPageNR(), currentOffset.getWidestPageR());
                         }
 
-                        formRenderer.createDisplayComponentsForPage(page,current);
+                        formRenderer.createDisplayComponentsForPage(page, current);
 
                         formRenderer.getFormFactory().indexAllKids();
-                        
+
                         //critical we enable this code in standard mode to render forms
                         if (!formRenderer.useXFA() && currentDisplay.isHTMLorSVG()) {
 
@@ -811,15 +810,15 @@ public class Parser {
 
                                 if (nextVal != null) {
 
-                                    formRenderer.getFormFlattener().drawFlattenedForm(current,(PdfObject) nextVal, true, (PdfObject) formRenderer.getFormResources()[0]);
+                                    formRenderer.getFormFlattener().drawFlattenedForm(current, (PdfObject) nextVal, true, (PdfObject) formRenderer.getFormResources()[0]);
 
                                 }
-                            }                           
+                            }
                         }
-                        
-                        if(specialMode!= SpecialOptions.NONE &&
-                                specialMode!= SpecialOptions.SINGLE_PAGE &&
-                                page!=fileAcces.getPageCount()) {
+
+                        if (specialMode != SpecialOptions.NONE &&
+                                specialMode != SpecialOptions.SINGLE_PAGE &&
+                                page != fileAcces.getPageCount()) {
                             formRenderer.createDisplayComponentsForPage(page + 1, current);
                         }
                     }
@@ -829,10 +828,10 @@ public class Parser {
             } finally {
 
                 DevFlags.fileLoaded = true;
-                
+
                 fileAcces.setDecoding(false);
 
-                if(statusBar!=null) {
+                if (statusBar != null) {
                     statusBar.percentageDone = 100;
                 }
             }
@@ -842,8 +841,8 @@ public class Parser {
         if (TTGlyph.redecodePage) {
             decodePage(rawPage);
         }
-        
-        if(customErrorTracker!=null) {
+
+        if (customErrorTracker != null) {
             ((ErrorTracker) customErrorTracker).finishedPageDecoding(rawPage);
         }
 
@@ -853,8 +852,8 @@ public class Parser {
 
     private PdfObject getPdfObject(final int page, PdfObject pdfObject) {
 
-        if(pdfObject==null){
-            pdfObject=new PageObject(getIO().getReferenceforPage(page));
+        if (pdfObject == null) {
+            pdfObject = new PageObject(getIO().getReferenceforPage(page));
 
             getIO().readObject(pdfObject);
 
@@ -862,7 +861,7 @@ public class Parser {
             getIO().checkParentForResources(pdfObject);
         }
 
-        if(pdfObject.getPageNumber()==-1){
+        if (pdfObject.getPageNumber() == -1) {
             pdfObject.setPageNumber(page);
         }
         return pdfObject;
@@ -873,61 +872,61 @@ public class Parser {
         /*
          * execute any JS needed (true flushes list)
          */
-        final Iterator<String> commands=layers.getJSCommands();
-        final Javascript javascript=externalHandlers.getJavaScript();
-        if(javascript!=null && commands!=null){
+        final Iterator<String> commands = layers.getJSCommands();
+        final Javascript javascript = externalHandlers.getJavaScript();
+        if (javascript != null && commands != null) {
             //execute code here
-            while(commands.hasNext()){
+            while (commands.hasNext()) {
                 javascript.executeAction(commands.next());
             }
         }
 
         fileAcces.setLastPageDecoded(-1);
-        layers.setChangesMade(false);//set flag to say we have decoded the changes
+        layers.setChangesMade(false); //set flag to say we have decoded the changes
 
         //refresh forms in case any effected by layer change
         formRenderer.getCompData().setForceRedraw(true);
         formRenderer.getCompData().setLayerData(layers);
-        formRenderer.getCompData().resetScaledLocation(scaling,displayRotation,indent);//indent here does nothing.
+        formRenderer.getCompData().resetScaledLocation(scaling, displayRotation, indent); //indent here does nothing.
     }
 
     private PdfStreamDecoder setupObjectsForDecode(final DynamicVectorRenderer currentDisplay, final PdfPageData pageData, final int page, final PdfObject pdfObject, final AcroRenderer formRenderer) throws PdfException {
-        final PdfStreamDecoder current;//location for non-XFA res
-        PdfObject Resources=pdfObject.getDictionary(PdfDictionary.Resources);
+        final PdfStreamDecoder current; //location for non-XFA res
+        PdfObject Resources = pdfObject.getDictionary(PdfDictionary.Resources);
 
-        if(formRenderer.isXFA() && formRenderer.useXFA()){
+        if (formRenderer.isXFA() && formRenderer.useXFA()) {
             current = formRenderer.getStreamDecoder(getIO(), res.getPdfLayerList(), false);
-            Resources=(PdfObject) formRenderer.getFormResources()[0];//XFA in Acroforms
-        }else{
-            
-            //needs to be out of loop as we can get flattened forms on pages with no content
-            current = formRenderer.getStreamDecoder(getIO(), res.getPdfLayerList(),false);
+            Resources = (PdfObject) formRenderer.getFormResources()[0]; //XFA in Acroforms
+        } else {
 
-            if(!warnOnceOnForms){
-                warnOnceOnForms=true; //not used in XFA at present but set for consistency
+            //needs to be out of loop as we can get flattened forms on pages with no content
+            current = formRenderer.getStreamDecoder(getIO(), res.getPdfLayerList(), false);
+
+            if (!warnOnceOnForms) {
+                warnOnceOnForms = true; //not used in XFA at present but set for consistency
             }
         }
-        
-        if(!warnOnceOnForms){
-            warnOnceOnForms=formRenderer.showFormWarningMessage(page);
+
+        if (!warnOnceOnForms) {
+            warnOnceOnForms = formRenderer.showFormWarningMessage(page);
         }
-        
+
         current.setXMLExtraction(options.isXMLExtraction());
 
-        currentDisplay.writeCustom(DynamicVectorRenderer.CUSTOM_COLOR_HANDLER,(externalHandlers.getExternalHandler(Options.ColorHandler)));
+        currentDisplay.writeCustom(DynamicVectorRenderer.CUSTOM_COLOR_HANDLER, (externalHandlers.getExternalHandler(Options.ColorHandler)));
 
-        current.setParameters(true, options.getRenderPage(), renderMode, extractionMode,false,useJavaFX);
+        current.setParameters(true, options.getRenderPage(), renderMode, extractionMode, false, useJavaFX);
 
         externalHandlers.addHandlers(current);
 
         current.setBooleanValue(ValueTypes.GenerateGlyphOnRender, generateGlyphOnRender);
-        
+
         current.setObjectValue(ValueTypes.Name, fileAcces.getFilename());
         current.setIntValue(ValueTypes.PageNum, page);
         current.setRenderer(currentDisplay);
-        current.setObjectValue(ValueTypes.ObjectStore,fileAcces.getObjectStore());
+        current.setObjectValue(ValueTypes.ObjectStore, fileAcces.getObjectStore());
         current.setObjectValue(ValueTypes.StatusBar, statusBar);
-        current.setObjectValue(ValueTypes.PDFPageData,pageData);
+        current.setObjectValue(ValueTypes.PDFPageData, pageData);
 
         res.setupResources(current, false, Resources, page, getIO());
 
@@ -952,25 +951,25 @@ public class Parser {
             } else {
                 currentDisplay.setValue(DynamicVectorRenderer.ENHANCE_FRACTIONAL_LINES, 0);
             }
-        }else{
+        } else {
             currentDisplay.setValue(DynamicVectorRenderer.ENHANCE_FRACTIONAL_LINES, 0);
         }
-        
+
         return current;
     }
 
     private void setResultsFromDecode(final int page, final PdfStreamDecoder current, final boolean isHTML) {
         //All data loaded so now get all line areas for page
-        if(textLines!=null && extractionMode>0 && !isHTML){
+        if (textLines != null && extractionMode > 0 && !isHTML) {
             final Vector_Rectangle_Int vr = (Vector_Rectangle_Int) current.getObjectValue(ValueTypes.TextAreas);
             vr.trim();
             final int[][] pageTextAreas = vr.get();
 
-            final Vector_Int vi =  (Vector_Int) current.getObjectValue(ValueTypes.TextDirections);
+            final Vector_Int vi = (Vector_Int) current.getObjectValue(ValueTypes.TextDirections);
             vi.trim();
             final int[] pageTextDirections = vi.get();
 
-            for(int k=0; k!=pageTextAreas.length; k++){
+            for (int k = 0; k != pageTextAreas.length; k++) {
                 textLines.addToLineAreas(pageTextAreas[k], pageTextDirections[k], page);
             }
         }
@@ -986,22 +985,22 @@ public class Parser {
         pdfImages = (PdfImageData) current.getObjectValue(ValueTypes.PDFImages);
 
         //read flags
-        resultsFromDecode.update(current,true);
+        resultsFromDecode.update(current, true);
     }
 
-     protected PdfObjectReader getIO() {
-         return fileAcces.getIO();
-     }
-     
-     void resetMultiplyer() {
-         multiplyer = 1; // Reset multiplier so we don't get an image scaled too far in
-     }
-     
-     void resetFontsInFile() {
-         fontsInFile="";
-     }
-     
-     void setStatusBar(final StatusBar statusBar) {
-         this.statusBar=statusBar;
-     }
+    protected PdfObjectReader getIO() {
+        return fileAcces.getIO();
+    }
+
+    void resetMultiplyer() {
+        multiplyer = 1; // Reset multiplier so we don't get an image scaled too far in
+    }
+
+    void resetFontsInFile() {
+        fontsInFile = "";
+    }
+
+    void setStatusBar(final StatusBar statusBar) {
+        this.statusBar = statusBar;
+    }
 }

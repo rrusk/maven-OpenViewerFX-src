@@ -36,6 +36,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -47,12 +48,16 @@ import org.jpedal.gui.GUIFactory;
  */
 public class FullScreen {
 
-    /**window for full screen mode*/
+    /**
+     * window for full screen mode
+     */
     private static Window win;
-       /**location to restore after full screen*/
+    /**
+     * location to restore after full screen
+     */
     private static Point screenPosition;
-    
-    
+
+
     public static void execute(final Object[] args, final GUIFactory currentGUI, final GUIThumbnailPanel thumbnails, final Values commonValues, final PdfDecoderInt decode_pdf, final PropertiesFile properties) {
         if (args == null) {
             // Determine if full-screen mode is supported directly
@@ -78,14 +83,14 @@ public class FullScreen {
             }
 
             if (currentGUI.getFrame() instanceof JFrame) {
-                ((RootPaneContainer) currentGUI.getFrame()).getContentPane().remove((Component)currentGUI.getDisplayPane());
+                ((RootPaneContainer) currentGUI.getFrame()).getContentPane().remove((Component) currentGUI.getDisplayPane());
                 // Java 1.6 has issues with original pane remaining visible so hide when fullscreen selected
-                ((Component)currentGUI.getFrame()).setVisible(false);
+                ((Component) currentGUI.getFrame()).setVisible(false);
             } else {
-                ((Container)currentGUI.getFrame()).remove((Component)currentGUI.getDisplayPane());
+                ((Container) currentGUI.getFrame()).remove((Component) currentGUI.getDisplayPane());
             }
 
-            win.add((Component)currentGUI.getDisplayPane(), BorderLayout.CENTER);
+            win.add((Component) currentGUI.getDisplayPane(), BorderLayout.CENTER);
 
             // Create a button that leaves full-screen mode
             final JButton btn = new JButton("Return");
@@ -99,18 +104,18 @@ public class FullScreen {
             });
 
             try {
-                screenPosition = ((Component)currentGUI.getFrame()).getLocation();
+                screenPosition = ((Component) currentGUI.getFrame()).getLocation();
                 // Enter full-screen mode
                 gs.setFullScreenWindow(win);
                 win.validate();
                 currentGUI.scaleAndRotate();
             } catch (final Error e) {
                 currentGUI.showMessageDialog("Full screen mode not supported on this machine.\n"
-                        + "JPedal will now exit "+e);
+                        + "JPedal will now exit " + e);
 
                 Exit.exit(thumbnails, currentGUI, commonValues, decode_pdf, properties);
                 // ...
-            }// finally {
+            } // finally {
             // Exit full-screen mode
             //	gs.setFullScreenWindow(null);
             //}
@@ -128,29 +133,29 @@ public class FullScreen {
                 final GraphicsDevice gs = ge.getDefaultScreenDevice();
                 gs.setFullScreenWindow(null);
 
-                win.remove((Component)currentGUI.getDisplayPane());
+                win.remove((Component) currentGUI.getDisplayPane());
 
                 if (currentGUI.getFrame() instanceof JFrame) {
-                    ((RootPaneContainer) currentGUI.getFrame()).getContentPane().add((Component)currentGUI.getDisplayPane(), BorderLayout.CENTER);
+                    ((RootPaneContainer) currentGUI.getFrame()).getContentPane().add((Component) currentGUI.getDisplayPane(), BorderLayout.CENTER);
                     // Java 1.6 has issues with original pane remaining visible so show when fullscreen turned off
-                    ((Component)currentGUI.getFrame()).setVisible(true);
+                    ((Component) currentGUI.getFrame()).setVisible(true);
 
                     //restore to last position which we saved on entering full screen
                     if (screenPosition != null) {
-                        ((Component)currentGUI.getFrame()).setLocation(screenPosition);
+                        ((Component) currentGUI.getFrame()).setLocation(screenPosition);
                     }
                     screenPosition = null;
                 } else {
-                    ((Container)currentGUI.getFrame()).add((Component)currentGUI.getDisplayPane(), BorderLayout.CENTER);
+                    ((Container) currentGUI.getFrame()).add((Component) currentGUI.getDisplayPane(), BorderLayout.CENTER);
                 }
 
-                ((Component)currentGUI.getDisplayPane()).invalidate();
-                ((JComponent)currentGUI.getDisplayPane()).updateUI();
+                ((Component) currentGUI.getDisplayPane()).invalidate();
+                ((JComponent) currentGUI.getDisplayPane()).updateUI();
 
                 if (currentGUI.getFrame() instanceof JFrame) {
                     ((RootPaneContainer) currentGUI.getFrame()).getContentPane().validate();
                 } else {
-                    ((Component)currentGUI.getFrame()).validate();
+                    ((Component) currentGUI.getFrame()).validate();
                 }
 
                 win.dispose();

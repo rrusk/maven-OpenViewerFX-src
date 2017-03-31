@@ -34,43 +34,43 @@
 package org.jpedal.color;
 
 import java.awt.image.BufferedImage;
+
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.render.T3Display;
 
 public class PatternDisplay extends T3Display {
-    
-    
+
+
     private BufferedImage lastImg;
-    
+
     private int imageCount;
-    
-    public PatternDisplay(final int i, final boolean b, final int j, final ObjectStore localStore)
-    {
-        super(i,b,j,localStore);
-        
+
+    public PatternDisplay(final int i, final boolean b, final int j, final ObjectStore localStore) {
+        super(i, b, j, localStore);
+
     }
-    
+
     /* save image in array to draw */
     @Override
     public int drawImage(final int pageNumber, final BufferedImage image,
-            final GraphicsState currentGraphicsState,
-            final boolean alreadyCached, final String name, final int previousUse) {
-        
-        lastImg=image;
-        
+                         final GraphicsState currentGraphicsState,
+                         final boolean alreadyCached, final String name, final int previousUse) {
+
+        lastImg = image;
+
         imageCount++;
-        
+
         return super.drawImage(pageNumber, image, currentGraphicsState, alreadyCached, name, previousUse);
     }
-    
-    
-    BufferedImage getSingleImagePattern(){
-        if(imageCount!=1) {
+
+
+    BufferedImage getSingleImagePattern() {
+        if (imageCount != 1) {
             return null;
         } else {
             return lastImg;
         }
     }
-    
+
 }

@@ -33,6 +33,7 @@
 package org.jpedal.io.types;
 
 import java.util.Map;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.RandomAccessBuffer;
 import org.jpedal.utils.LogWriter;
@@ -43,78 +44,78 @@ import org.jpedal.utils.NumberUtils;
  */
 public class CompressedObjects {
 
-    
-        /**
+
+    /**
      * @param First
      * @param compressedStream
      */
-     public static void extractCompressedObjectOffset(final Map<String, String> offsetStart, final Map<String, String> offsetEnd, final int First, final byte[] compressedStream,
-                                                      final int compressedID, final Offsets offset) {
+    public static void extractCompressedObjectOffset(final Map<String, String> offsetStart, final Map<String, String> offsetEnd, final int First, final byte[] compressedStream,
+                                                     final int compressedID, final Offsets offset) {
 
-        String lastKey=null,key,offsetRef ;
+        String lastKey = null, key, offsetRef;
 
-        int startKey,endKey,startOff,endOff,id;
+        int startKey, endKey, startOff, endOff, id;
 
         //read the offsets table
-        for(int ii=0;ii<First;ii++){
+        for (int ii = 0; ii < First; ii++) {
 
-            if(compressedStream.length==0) {
+            if (compressedStream.length == 0) {
                 continue;
             }
 
             //ignore any gaps between entries
             ii = StreamReaderUtils.skipSpaces(compressedStream, ii);
             /*work out key size*/
-            startKey=ii;
-            
-            if(startKey==First) {
+            startKey = ii;
+
+            if (startKey == First) {
                 continue;
             }
-            
-            while(compressedStream[ii]!=32 && compressedStream[ii]!=13 && compressedStream[ii]!=10){
+
+            while (compressedStream[ii] != 32 && compressedStream[ii] != 13 && compressedStream[ii] != 10) {
                 ii++;
             }
-            endKey=ii-1;
+            endKey = ii - 1;
 
             /*extract key as String and Number*/
-            int length=endKey-startKey+1;
+            int length = endKey - startKey + 1;
             key = getString(compressedStream, startKey, length);
-            id= NumberUtils.parseInt(startKey, startKey + length, compressedStream);
+            id = NumberUtils.parseInt(startKey, startKey + length, compressedStream);
                 
             /*move to offset*/
             ii = StreamReaderUtils.skipSpaces(compressedStream, ii);
             /*get size*/
-            startOff=ii;
-            while((compressedStream[ii]!=32 && compressedStream[ii]!=13 && compressedStream[ii]!=10)&&(ii<First)){
+            startOff = ii;
+            while ((compressedStream[ii] != 32 && compressedStream[ii] != 13 && compressedStream[ii] != 10) && (ii < First)) {
                 ii++;
             }
-            endOff=ii-1;
+            endOff = ii - 1;
 
             /*extract offset*/
-            length=endOff-startOff+1;
+            length = endOff - startOff + 1;
             offsetRef = getString(compressedStream, startOff, length);
 
             /*
              * save values if in correct block (can list items over-written in another compressed obj)
              */
-            if(compressedID==offset.elementAt(id)){
-                offsetStart.put(key,offsetRef);
+            if (compressedID == offset.elementAt(id)) {
+                offsetStart.put(key, offsetRef);
 
                 //save end as well
-                if(lastKey!=null) {
+                if (lastKey != null) {
                     offsetEnd.put(lastKey, offsetRef);
                 }
 
-                lastKey=key;
+                lastKey = key;
             }
         }
     }
 
-    static String getString(final byte[] compressedStream,final int startOff,final int length) {
+    static String getString(final byte[] compressedStream, final int startOff, final int length) {
 
-        final char[] newCommand=new char[length];
+        final char[] newCommand = new char[length];
 
-        for(int i=0;i<length;i++) {
+        for (int i = 0; i < length; i++) {
             newCommand[i] = (char) compressedStream[startOff + i];
         }
 
@@ -126,25 +127,25 @@ public class CompressedObjects {
 
         //now parse the stream and extract values
 
-        final boolean debug=false;
+        final boolean debug = false;
 
-        if(debug) {
+        if (debug) {
             System.out.println("===============read offsets============= current=" + current + " numbEntries=" + numbEntries);
         }
 
-        final int[] defaultValue={1,0,0};
+        final int[] defaultValue = {1, 0, 0};
 
-        boolean hasCase0=false;
+        boolean hasCase0 = false;
 
-        for(int i=0;i<numbEntries;i++){
+        for (int i = 0; i < numbEntries; i++) {
 
             //read the next 3 values
-            final int[] nextValue=new int[3];
-            for(int ii=0;ii<3;ii++){
-                if(fieldSizes[ii]==0){
-                    nextValue[ii]=defaultValue[ii];
-                }else{
-                    nextValue[ii]=getWord(xrefs,pntr,fieldSizes[ii]);
+            final int[] nextValue = new int[3];
+            for (int ii = 0; ii < 3; ii++) {
+                if (fieldSizes[ii] == 0) {
+                    nextValue[ii] = defaultValue[ii];
+                } else {
+                    nextValue[ii] = getWord(xrefs, pntr, fieldSizes[ii]);
                     pntr += fieldSizes[ii];
                 }
             }
@@ -152,68 +153,68 @@ public class CompressedObjects {
             //handle values appropriately
             final int id;
             int gen;
-            switch(nextValue[0]){
+            switch (nextValue[0]) {
                 case 0: //linked list of free objects
                     current++;
 
-                    hasCase0=nextValue[1]==0 && nextValue[2]==0;
+                    hasCase0 = nextValue[1] == 0 && nextValue[2] == 0;
 
-                    if(debug) {
+                    if (debug) {
                         System.out.println("case 0 nextFree=" + nextValue[1] + " gen=" + nextValue[2]);
                     }
 
                     break;
 
                 case 1: //non-compressed
-                    id=nextValue[1];
-                    gen=nextValue[2];
+                    id = nextValue[1];
+                    gen = nextValue[2];
 
-                    if(debug) {
+                    if (debug) {
                         System.out.println("case 1   current=" + current + " id=" + id + " byteOffset=" + nextValue[1] + " gen=" + nextValue[2]);
                     }
-                     
+
                     //if number equals offsetRef , test if valid
-                    boolean refIsvalid=true;
-                    if(current==id){
-                        refIsvalid=false;
+                    boolean refIsvalid = true;
+                    if (current == id) {
+                        refIsvalid = false;
 
                         //allow for idiot setting in some files
                         //(ie LT2 Protokoll GV Aug 2012_oD_Teil4.pdf)
-                        
-                        try{
+
+                        try {
                             //get the data and see if genuine match
-                            final int size=20;
-                            final byte[] data=new byte[size];
-                            
+                            final int size = 20;
+                            final byte[] data = new byte[size];
+
                             pdf_datafile.seek(current);
-                            
+
                             pdf_datafile.read(data); //get next chars
-                            
+
                             //find space
-                            int ptr=0;
-                            for(int ii=0;ii<size;ii++){
-                                
-                                if(data[ii]==32 || data[ii]==10 || data[ii]==13){
-                                    ptr=ii;
-                                    ii=size;
+                            int ptr = 0;
+                            for (int ii = 0; ii < size; ii++) {
+
+                                if (data[ii] == 32 || data[ii] == 10 || data[ii] == 13) {
+                                    ptr = ii;
+                                    ii = size;
 
                                 }
                             }
 
-                            if(ptr>0){
-                                final int ref= NumberUtils.parseInt(0, ptr, data);
-                                if(ref==current) {
+                            if (ptr > 0) {
+                                final int ref = NumberUtils.parseInt(0, ptr, data);
+                                if (ref == current) {
                                     refIsvalid = true;
                                 }
                             }
-                        }catch(final Exception ee){
-                            refIsvalid=false;
+                        } catch (final Exception ee) {
+                            refIsvalid = false;
 
-                            LogWriter.writeLog("Ref is invalid "+ee);
+                            LogWriter.writeLog("Ref is invalid " + ee);
                         }
                     }
 
-                    if(refIsvalid || !hasCase0) {
+                    if (refIsvalid || !hasCase0) {
                         offset.storeObjectOffset(current, id, gen, false, false);
                     }
 
@@ -221,28 +222,30 @@ public class CompressedObjects {
                     break;
 
                 case 2: //compressed
-                    id=nextValue[1];
+                    id = nextValue[1];
                     //gen=nextValue[2];
 
-                    if(debug) {
+                    if (debug) {
                         System.out.println("case 2  current=" + current + " object number=" + id + " index=" + gen);
                     }
 
-                    offset.storeObjectOffset(current, id, 0, true,false);
+                    offset.storeObjectOffset(current, id, 0, true, false);
 
                     current++;
 
                     break;
 
                 default:
-                    throw new PdfException("Exception Unsupported Compression mode with value "+nextValue[0]);
+                    throw new PdfException("Exception Unsupported Compression mode with value " + nextValue[0]);
             }
         }
 
         return pntr;
     }
-    
-    /** Utility method used during processing of type1C files */
+
+    /**
+     * Utility method used during processing of type1C files
+     */
     static int getWord(final byte[] content, final int index, final int size) {
         int result = 0;
         for (int i = 0; i < size; i++) {

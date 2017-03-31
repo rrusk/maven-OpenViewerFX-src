@@ -40,6 +40,7 @@ import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.stream.ImageInputStream;
+
 import org.jpedal.constants.PDFflags;
 import org.jpedal.display.Display;
 import org.jpedal.display.PageOffsets;
@@ -65,26 +66,36 @@ import org.jpedal.utils.LogWriter;
 
 public class FileAccess {
 
-    /**user can open encrypted file with certificate*/
+    /**
+     * user can open encrypted file with certificate
+     */
     Certificate certificate;
 
     private PageOffsets currentOffset;
-    
+
     private String password;
 
-    /**the actual display object*/
+    /**
+     * the actual display object
+     */
     private DynamicVectorRenderer currentDisplay; //
 
     //flag to track if page decoded twice
     private int lastPageDecoded = -1;
 
-    /**used for opening encrypted file*/
+    /**
+     * used for opening encrypted file
+     */
     PrivateKey key;
 
-    /** holds page information used in grouping*/
+    /**
+     * holds page information used in grouping
+     */
     private PdfPageData pageData = new PdfPageData();
 
-    /** the ObjectStore for this file */
+    /**
+     * the ObjectStore for this file
+     */
     private ObjectStore objectStoreRef = new ObjectStore();
 
     public boolean isOpen;
@@ -92,78 +103,86 @@ public class FileAccess {
     /**
      * the size above which objects stored on disk (-1 is off)
      */
-    int minimumCacheSize = -1;//20000;
+    int minimumCacheSize = -1; //20000;
 
-    public static int bb=-5;
+    public static int bb = -5;
 
     /**
      * sed to stop close on method
      */
-    private boolean closeOnExit=true;
+    private boolean closeOnExit = true;
 
     private String filename;
-     
+
     /**
      * provide access to pdf file objects
      */
     private PdfObjectReader currentPdfFile;
 
-    /** count of how many pages loaded */
+    /**
+     * count of how many pages loaded
+     */
     private int pageCount;
 
-    /**current page*/
-    private int pageNumber=1;
+    /**
+     * current page
+     */
+    private int pageNumber = 1;
 
-    /**flag to stop multiple attempts to decode*/
+    /**
+     * flag to stop multiple attempts to decode
+     */
     private boolean isDecoding;
 
-    /**handlers file reading/decoding of linear PDF data*/
-    final LinearParser linearParser=new LinearParser();
+    /**
+     * handlers file reading/decoding of linear PDF data
+     */
+    final LinearParser linearParser = new LinearParser();
 
     final ExternalHandlers externalHandlers;
 
-   
+
     private final PdfResources res;
 
     private final DecoderOptions options;
 
     public FileAccess(final ExternalHandlers externalHandlers, final PdfResources res, final DecoderOptions options) {
-        this.externalHandlers=externalHandlers;
-        this.res=res;
-        this.options=options;
-        
-    }
-    
-    public boolean isFileViewable(final PdfObjectReader currentPdfFile) {
-        if (currentPdfFile != null){
-            final PdfFileReader objectReader=currentPdfFile.getObjectReader();
+        this.externalHandlers = externalHandlers;
+        this.res = res;
+        this.options = options;
 
-            final DecryptionFactory decryption=objectReader.getDecryptionObject();
-            return decryption==null || decryption.getBooleanValue(PDFflags.IS_FILE_VIEWABLE) || certificate!=null;
-        }else {
+    }
+
+    public boolean isFileViewable(final PdfObjectReader currentPdfFile) {
+        if (currentPdfFile != null) {
+            final PdfFileReader objectReader = currentPdfFile.getObjectReader();
+
+            final DecryptionFactory decryption = objectReader.getDecryptionObject();
+            return decryption == null || decryption.getBooleanValue(PDFflags.IS_FILE_VIEWABLE) || certificate != null;
+        } else {
             return false;
         }
     }
-    
+
     void openPdfArray(final byte[] data, final String password) throws PdfException {
 
-        this.password=password;
-        
+        this.password = password;
+
         openPdfArray(data);
-        
+
     }
 
     void openPdfArray(final byte[] data) throws PdfException {
 
-        if(data==null) {
+        if (data == null) {
             throw new RuntimeException("Attempting to open null byte stream");
         }
 
-        if(isOpen) {
+        if (isOpen) {
             //throw new RuntimeException("Previous file not closed");
             closePdfFile(); //also checks decoding done
         }
-        
+
         isOpen = false;
 
         res.flush();
@@ -171,12 +190,12 @@ public class FileAccess {
 
         try {
 
-            if(password!=null){
+            if (password != null) {
                 currentPdfFile = new PdfObjectReader(password);
-            }else{
+            } else {
                 currentPdfFile = new PdfObjectReader();
             }
-        
+
             currentPdfFile.openPdfFile(data);
 
             openPdfFile();
@@ -196,22 +215,22 @@ public class FileAccess {
     DynamicVectorRenderer getDynamicRenderer() {
         return currentDisplay;
     }
-    
+
     public PdfResources getRes() {
         return res;
     }
-    
+
     /**
      * gets DynamicVector Object - NOT PART OF API (used by ULC for Swing) and subject to change (DO NOT USE)
      */
     DynamicVectorRenderer getDynamicRenderer(final boolean reset) {
 
-        final DynamicVectorRenderer latestVersion=currentDisplay;
+        final DynamicVectorRenderer latestVersion = currentDisplay;
 
-        if(reset) {
-            currentDisplay=new SwingDisplay(0, objectStoreRef,false);
+        if (reset) {
+            currentDisplay = new SwingDisplay(0, objectStoreRef, false);
         }
-        
+
         return latestVersion;
     }
 
@@ -224,23 +243,23 @@ public class FileAccess {
     public final void openPdfFileFromStream(final Object filename, final String password) throws PdfException {
 
         //tell JPedal NOT to close stream!!!
-        closeOnExit=false;
+        closeOnExit = false;
 
-        if(filename instanceof ImageInputStream){
+        if (filename instanceof ImageInputStream) {
 
-            final ImageInputStream iis=(ImageInputStream)filename;
+            final ImageInputStream iis = (ImageInputStream) filename;
 
-            if(isOpen) {
+            if (isOpen) {
                 //throw new RuntimeException("Previous file not closed");
                 closePdfFile(); //also checks decoding done
             }
-            
+
             isOpen = false;
 
             this.filename = "ImageInputStream" + System.currentTimeMillis();
 
             org.jpedal.DevFlags.currentFile = this.filename;
-            
+
             res.flush();
             res.flushObjects();
 
@@ -254,23 +273,23 @@ public class FileAccess {
 
             openPdfFile();
 
-        }else{
-            throw new RuntimeException(filename+" not currently an option");
+        } else {
+            throw new RuntimeException(filename + " not currently an option");
         }
 
     }
 
     void openPdfFile(final String filename, final String password) throws PdfException {
 
-        if(isOpen) {
+        if (isOpen) {
             //throw new RuntimeException("Previous file not closed");
             closePdfFile(); //also checks decoding done
         }
-        
+
         isOpen = false;
 
         org.jpedal.DevFlags.currentFile = filename;
-        
+
         this.filename = filename;
         res.flush();
         res.flushObjects();
@@ -293,7 +312,7 @@ public class FileAccess {
     }
 
     public void setPageNumber(final int newPage) {
-        this.pageNumber=newPage;
+        this.pageNumber = newPage;
     }
 
 
@@ -305,7 +324,7 @@ public class FileAccess {
     }
 
     void setPageCount(final int newPageCount) {
-        pageCount=newPageCount;
+        pageCount = newPageCount;
     }
 
 
@@ -314,20 +333,20 @@ public class FileAccess {
     }
 
     void setDecoding(final boolean b) {
-        isDecoding=b;
+        isDecoding = b;
     }
 
     public boolean isPasswordSupplied(final PdfObjectReader currentPdfFile) {
         //allow through if user has verified password or set certificate
-        if (currentPdfFile != null){
-            final PdfFileReader objectReader=currentPdfFile.getObjectReader();
+        if (currentPdfFile != null) {
+            final PdfFileReader objectReader = currentPdfFile.getObjectReader();
 
-            final DecryptionFactory decryption=objectReader.getDecryptionObject();
-            if(decryption != null && decryption.getEncHash()!= null){
+            final DecryptionFactory decryption = objectReader.getDecryptionObject();
+            if (decryption != null && decryption.getEncHash() != null) {
                 objectStoreRef.setEncHash(decryption.getEncHash().clone());
-            }            
-            return decryption!=null && (decryption.getBooleanValue(PDFflags.IS_PASSWORD_SUPPLIED) || certificate!=null);
-        }else {
+            }
+            return decryption != null && (decryption.getBooleanValue(PDFflags.IS_PASSWORD_SUPPLIED) || certificate != null);
+        } else {
             return false;
         }
     }
@@ -348,18 +367,18 @@ public class FileAccess {
     }
 
     public void setUserEncryption(final Certificate certificate, final PrivateKey key) {
-        
-        this.certificate=certificate;
-        this.key=key;
+
+        this.certificate = certificate;
+        this.key = key;
     }
 
     public PdfObjectReader getNewReader() {
 
         final PdfObjectReader currentPdfFile;
 
-        if(certificate!=null){
+        if (certificate != null) {
             currentPdfFile = new PdfObjectReader(certificate, key);
-        }else {
+        } else {
             currentPdfFile = new PdfObjectReader();
         }
 
@@ -375,7 +394,7 @@ public class FileAccess {
     }
 
     public void setIO(final PdfObjectReader pdfObjectReader) {
-        currentPdfFile =pdfObjectReader;
+        currentPdfFile = pdfObjectReader;
     }
 
     /**
@@ -388,10 +407,10 @@ public class FileAccess {
     public final boolean isEncrypted() {
 
         if (currentPdfFile != null) {
-            final PdfFileReader objectReader= currentPdfFile.getObjectReader();
-            final DecryptionFactory decryption=objectReader.getDecryptionObject();
-            return decryption!=null && decryption.getBooleanValue(PDFflags.IS_FILE_ENCRYPTED);
-        }else {
+            final PdfFileReader objectReader = currentPdfFile.getObjectReader();
+            final DecryptionFactory decryption = objectReader.getDecryptionObject();
+            return decryption != null && decryption.getBooleanValue(PDFflags.IS_FILE_ENCRYPTED);
+        } else {
             return false;
         }
     }
@@ -399,14 +418,14 @@ public class FileAccess {
     public void dispose() {
 
         //current=null;
-        if(currentPdfFile!=null) {
+        if (currentPdfFile != null) {
             currentPdfFile.dispose();
         }
-        
-        currentPdfFile=null;
 
-        currentDisplay=null;
-        
+        currentPdfFile = null;
+
+        currentDisplay = null;
+
         bb += 1;
     }
 
@@ -416,32 +435,32 @@ public class FileAccess {
 
     float[] defaultMediaSize;
     float[] defaultCropSize;
-    
+
     /**
      * read the data from pages lists and pages so we can open each page.
-     *
+     * <p>
      * object reference to first trailer
      */
-    public int readAllPageReferences(final boolean ignoreRecursion, final PdfObject pdfObject , final Map<String, Integer> rotations, final Map<String, String> parents, int tempPageCount, final AcroRenderer formRenderer, final PdfResources res, final int insetW, final int insetH) {
+    public int readAllPageReferences(final boolean ignoreRecursion, final PdfObject pdfObject, final Map<String, Integer> rotations, final Map<String, String> parents, int tempPageCount, final AcroRenderer formRenderer, final PdfResources res, final int insetW, final int insetH) {
 
-        final String currentPageOffset=pdfObject.getObjectRefAsString();
+        final String currentPageOffset = pdfObject.getObjectRefAsString();
 
-        final boolean debug=false;
+        final boolean debug = false;
 
-        int rotation=0;
+        int rotation = 0;
 
-        int type=pdfObject.getParameterConstant(PdfDictionary.Type);
+        int type = pdfObject.getParameterConstant(PdfDictionary.Type);
 
-        if(debug) {
-            System.out.println("currentPageOffset="+currentPageOffset+" type="+type+ ' '+PdfDictionary.showAsConstant(type));
+        if (debug) {
+            System.out.println("currentPageOffset=" + currentPageOffset + " type=" + type + ' ' + PdfDictionary.showAsConstant(type));
         }
 
-        if(type== PdfDictionary.Unknown) {
-           
-            if(pdfObject.getKeyArray(PdfDictionary.Kids)!=null){
-                type= PdfDictionary.Pages;
-            }else{
-                 type= PdfDictionary.Page;
+        if (type == PdfDictionary.Unknown) {
+
+            if (pdfObject.getKeyArray(PdfDictionary.Kids) != null) {
+                type = PdfDictionary.Pages;
+            } else {
+                type = PdfDictionary.Page;
             }
         }
 
@@ -451,41 +470,41 @@ public class FileAccess {
          */
 
         /* page rotation for this or up tree*/
-        int rawRotation=pdfObject.getInt(PdfDictionary.Rotate);
-        String parent=pdfObject.getStringKey(PdfDictionary.Parent);
+        int rawRotation = pdfObject.getInt(PdfDictionary.Rotate);
+        String parent = pdfObject.getStringKey(PdfDictionary.Parent);
 
-        if(rawRotation==-1 ){
+        if (rawRotation == -1) {
 
-            while(parent!=null && rawRotation==-1){
+            while (parent != null && rawRotation == -1) {
 
-                if(parent!=null){
-                    final Integer savedRotation=rotations.get(parent);
-                    if(savedRotation!=null) {
-                        rawRotation= savedRotation;
+                if (parent != null) {
+                    final Integer savedRotation = rotations.get(parent);
+                    if (savedRotation != null) {
+                        rawRotation = savedRotation;
                     }
                 }
 
-                if(rawRotation==-1) {
-                    parent=parents.get(parent);
+                if (rawRotation == -1) {
+                    parent = parents.get(parent);
                 }
 
             }
 
             //save
-            if(rawRotation!=-1){
+            if (rawRotation != -1) {
                 rotations.put(currentPageOffset, rawRotation);
-                parents.put(currentPageOffset,parent);
+                parents.put(currentPageOffset, parent);
             }
-        }else{ //save so we can lookup
+        } else { //save so we can lookup
             rotations.put(currentPageOffset, rawRotation);
-            parents.put(currentPageOffset,parent);
+            parents.put(currentPageOffset, parent);
         }
 
-        if(rawRotation!=-1) {
-            rotation=rawRotation;
+        if (rawRotation != -1) {
+            rotation = rawRotation;
         }
 
-        final PdfPageData pageData= this.pageData;
+        final PdfPageData pageData = this.pageData;
 
         pageData.setPageRotation(rotation, tempPageCount);
 
@@ -493,17 +512,17 @@ public class FileAccess {
          * handle media and crop box, defaulting to higher value if needed (ie
          * Page uses Pages and setting crop box
          */
-        float[] mediaBox=pdfObject.getFloatArray(PdfDictionary.MediaBox);
-        float[] cropBox=pdfObject.getFloatArray(PdfDictionary.CropBox);
+        float[] mediaBox = pdfObject.getFloatArray(PdfDictionary.MediaBox);
+        float[] cropBox = pdfObject.getFloatArray(PdfDictionary.CropBox);
 
-        if(mediaBox==null) {
+        if (mediaBox == null) {
             mediaBox = defaultMediaSize;
         }
-        
-        if(cropBox==null) {
+
+        if (cropBox == null) {
             cropBox = defaultCropSize;
         }
-        
+
         if (mediaBox != null) {
             pageData.setMediaBox(mediaBox);
         }
@@ -513,54 +532,54 @@ public class FileAccess {
         }
 
         /* process page to read next level down */
-        if (type==PdfDictionary.Pages) {
+        if (type == PdfDictionary.Pages) {
 
-            if(pdfObject.getDictionary(PdfDictionary.Resources)!=null) {
+            if (pdfObject.getDictionary(PdfDictionary.Resources) != null) {
                 res.setPdfObject(PdfResources.GlobalResources, pdfObject.getDictionary(PdfDictionary.Resources));
             }
 
             final byte[][] kidList = pdfObject.getKeyArray(PdfDictionary.Kids);
 
-            int kidCount=0;
-            if(kidList!=null) {
-                kidCount=kidList.length;
+            int kidCount = 0;
+            if (kidList != null) {
+                kidCount = kidList.length;
             }
 
-            if(debug) {
-                System.out.println("PAGES---------------------currentPageOffset="+currentPageOffset+" kidCount="+kidCount);
+            if (debug) {
+                System.out.println("PAGES---------------------currentPageOffset=" + currentPageOffset + " kidCount=" + kidCount);
             }
 
             /* allow for empty value and put next pages in the queue */
-            if (kidCount> 0) {
+            if (kidCount > 0) {
 
-                if(debug) {
-                    System.out.println("KIDS---------------------currentPageOffset="+currentPageOffset);
+                if (debug) {
+                    System.out.println("KIDS---------------------currentPageOffset=" + currentPageOffset);
                 }
 
                 PdfObject nextObject;
-                for(int ii=0;ii<kidCount;ii++){
+                for (int ii = 0; ii < kidCount; ii++) {
 
-                    nextObject=new PageObject(new String(kidList[ii]));
+                    nextObject = new PageObject(new String(kidList[ii]));
                     nextObject.ignoreRecursion(ignoreRecursion);
                     nextObject.ignoreStream(true);
-                    
+
                     final float[] lastMediaBox = defaultMediaSize;
                     defaultMediaSize = mediaBox;
-                    
+
                     final float[] lastCropBox = defaultCropSize;
                     defaultCropSize = cropBox;
                     currentPdfFile.readObject(nextObject);
-                    tempPageCount=readAllPageReferences(ignoreRecursion, nextObject, rotations, parents,tempPageCount,formRenderer,res,  insetW, insetH);
-                    defaultMediaSize=lastMediaBox;
-                    defaultCropSize=lastCropBox;
+                    tempPageCount = readAllPageReferences(ignoreRecursion, nextObject, rotations, parents, tempPageCount, formRenderer, res, insetW, insetH);
+                    defaultMediaSize = lastMediaBox;
+                    defaultCropSize = lastCropBox;
                 }
 
             }
 
-        } else if (type==PdfDictionary.Page) {
+        } else if (type == PdfDictionary.Page) {
 
-            if(debug) {
-                System.out.println("PAGE---------------------currentPageOffset="+currentPageOffset);
+            if (debug) {
+                System.out.println("PAGE---------------------currentPageOffset=" + currentPageOffset);
             }
 
             // store ref for later
@@ -577,8 +596,8 @@ public class FileAccess {
                 byte[][] annotList = pdfObject.getKeyArray(PdfDictionary.Annots);
 
                 //allow for empty
-                if(annotList!=null && annotList.length==1 && annotList[0]==null) {
-                    annotList=null;
+                if (annotList != null && annotList.length == 1 && annotList[0] == null) {
+                    annotList = null;
                 }
 
                 if (annotList != null) {
@@ -593,9 +612,9 @@ public class FileAccess {
 
         return tempPageCount;
     }
-    
-    
-    static{
+
+
+    static {
         FileAccessHelper.init();
     }
 
@@ -631,8 +650,8 @@ public class FileAccess {
             try {
                 Thread.sleep(100);
             } catch (final InterruptedException e) {
-                LogWriter.writeLog("Exception: "+e.getMessage());
-                
+                LogWriter.writeLog("Exception: " + e.getMessage());
+
                 //ensure will exit loop
                 isDecoding = false;
             }
@@ -642,6 +661,7 @@ public class FileAccess {
 
     /**
      * common code for reading URL and InputStream
+     *
      * @param supportLinearized
      * @param is
      * @param rawFileName
@@ -657,31 +677,31 @@ public class FileAccess {
         res.flush();
         res.flushObjects();
 
-        if(password==null){
+        if (password == null) {
             currentPdfFile = new PdfObjectReader();
-        }else{
+        } else {
             currentPdfFile = new PdfObjectReader(password);
         }
 
-        if(is!=null){
+        if (is != null) {
             try {
 
                 final File tempURLFile;
-                if(rawFileName.startsWith("inputstream")){
-                    tempURLFile = new File(ObjectStore.temp_dir+rawFileName);
+                if (rawFileName.startsWith("inputstream")) {
+                    tempURLFile = new File(ObjectStore.temp_dir + rawFileName);
                     filename = tempURLFile.getAbsolutePath();
-                }else {
+                } else {
                     tempURLFile = ObjectStore.createTempFile(rawFileName);
                 }
 
                 /* store file name for use elsewhere as part of ref key without .pdf */
                 objectStoreRef.storeFileName(tempURLFile.getName().substring(0, tempURLFile.getName().lastIndexOf('.')));
 
-                if(supportLinearized){
+                if (supportLinearized) {
 
-                    final byte[] linearBytes=linearParser.readLinearData(currentPdfFile,tempURLFile,is, this);
+                    final byte[] linearBytes = linearParser.readLinearData(currentPdfFile, tempURLFile, is, this);
 
-                    if(linearBytes!=null){
+                    if (linearBytes != null) {
 
 
                         currentPdfFile.openPdfFile(linearBytes);
@@ -701,7 +721,7 @@ public class FileAccess {
                         return true;
                     }
 
-                }else{
+                } else {
 
                     currentPdfFile.openPdfFile(is);
 
@@ -716,7 +736,7 @@ public class FileAccess {
 
                 }
 
-                if(supportLinearized){
+                if (supportLinearized) {
                     /* get reader object to open the file */
                     openPdfFile(tempURLFile.getAbsolutePath());
 
@@ -746,15 +766,15 @@ public class FileAccess {
         //make sure we have stopped thread doing background linear reading
         linearParser.closePdfFile();
 
-        final Javascript javascript=externalHandlers.getJavaScript();
-        if (javascript != null){
+        final Javascript javascript = externalHandlers.getJavaScript();
+        if (javascript != null) {
             javascript.closeFile();
         }
 
         // pass handle into renderer
-        final AcroRenderer formRenderer=externalHandlers.getFormRenderer();
+        final AcroRenderer formRenderer = externalHandlers.getFormRenderer();
         if (formRenderer != null) {
-            formRenderer.openFile(pageCount,0,0, pageData, currentPdfFile, null);
+            formRenderer.openFile(pageCount, 0, 0, pageData, currentPdfFile, null);
 
             formRenderer.removeDisplayComponentsFromScreen();
         }
@@ -764,12 +784,12 @@ public class FileAccess {
 
         pageCount = 0;
 
-        if (currentPdfFile != null && closeOnExit){
+        if (currentPdfFile != null && closeOnExit) {
             currentPdfFile.closePdfFile();
 
             currentPdfFile = null;
         }
-        
+
         lastPageDecoded = -1;
 
         currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH, null);
@@ -781,22 +801,21 @@ public class FileAccess {
      * setting minimum size in bytes (of uncompressed stream) above which object
      * will be stored on disk if possible (default is -1 bytes which is all
      * objects stored in memory) - Must be set before file opened.
-     *
      */
     public void setStreamCacheSize(final int size) {
         this.minimumCacheSize = size;
     }
-    
-     int getLastPageDecoded() {
+
+    int getLastPageDecoded() {
         return lastPageDecoded;
     }
 
     public void setLastPageDecoded(final int page) {
-      lastPageDecoded = page;
+        lastPageDecoded = page;
     }
 
     public void setDVR(final DynamicVectorRenderer swingDisplay) {
-        currentDisplay=swingDisplay;
+        currentDisplay = swingDisplay;
     }
 
     public PageOffsets getOffset() {
@@ -804,7 +823,7 @@ public class FileAccess {
     }
 
     public void setOffset(final PageOffsets newOffset) {
-        currentOffset=newOffset;
+        currentOffset = newOffset;
     }
 
     public void openPdfFile() throws PdfException {
@@ -815,7 +834,7 @@ public class FileAccess {
 
         isDecoding = true;
 
-        final AcroRenderer formRenderer=externalHandlers.getFormRenderer();
+        final AcroRenderer formRenderer = externalHandlers.getFormRenderer();
 
         try {
             // set cache size to use
@@ -824,18 +843,18 @@ public class FileAccess {
             // reset page data - needed to flush crop settings
             pageData = new PdfPageData();
 
-            final PdfPageData pageData= this.pageData;
+            final PdfPageData pageData = this.pageData;
 
             // read and log the version number of pdf used
             final String pdfVersion = currentPdfFile.getObjectReader().getType();
 
             LogWriter.writeLog("Pdf version : " + pdfVersion);
-            
+
             if (pdfVersion == null) {
                 currentPdfFile = null;
                 isDecoding = false;
 
-                throw new PdfException( "No version on first line ");
+                throw new PdfException("No version on first line ");
 
             }
 
@@ -843,80 +862,80 @@ public class FileAccess {
             // encrypted
             PdfObject pdfObject;
 
-            int linearPageCount=-1;
+            int linearPageCount = -1;
 
             //linear page object set differently
-            if(linearParser.hasLinearData()){
+            if (linearParser.hasLinearData()) {
 
                 /*
                  * read and decode the hints table and the ref table
                  */
-                pdfObject=linearParser.readHintTable(currentPdfFile);
+                pdfObject = linearParser.readHintTable(currentPdfFile);
 
-                linearPageCount=linearParser.getPageCount();
+                linearPageCount = linearParser.getPageCount();
 
-            }else {
-                pdfObject= currentPdfFile.getObjectReader().readReferenceTable(null, currentPdfFile.getObjectReader());
+            } else {
+                pdfObject = currentPdfFile.getObjectReader().readReferenceTable(null, currentPdfFile.getObjectReader());
             }
 
             //new load code - be more judicious in how far down tree we scan
-            final boolean ignoreRecursion=true;
+            final boolean ignoreRecursion = true;
 
             // open if not encrypted or has password
             if (!isEncrypted() || isPasswordSupplied(currentPdfFile)) {
 
-                if (pdfObject != null){
+                if (pdfObject != null) {
                     pdfObject.ignoreRecursion(ignoreRecursion);
 
                     res.setValues(pdfObject, currentPdfFile);
 
                     //read Names, Dest, PageLabels (we process last once we have page count)
-                    currentPdfFile.readDocumentMetaData(pdfObject,externalHandlers.getJavaScript());
-                    
+                    currentPdfFile.readDocumentMetaData(pdfObject, externalHandlers.getJavaScript());
+
                 }
 
-                final int type=pdfObject.getParameterConstant(PdfDictionary.Type);
-                if(type!=PdfDictionary.Page){
+                final int type = pdfObject.getParameterConstant(PdfDictionary.Type);
+                if (type != PdfDictionary.Page) {
 
-                    final PdfObject pageObj= pdfObject.getDictionary(PdfDictionary.Pages);
-                    if(pageObj!=null){ //do this way incase in separate compressed stream
+                    final PdfObject pageObj = pdfObject.getDictionary(PdfDictionary.Pages);
+                    if (pageObj != null) { //do this way incase in separate compressed stream
 
-                        pdfObject=new PageObject(pageObj.getObjectRefAsString());
+                        pdfObject = new PageObject(pageObj.getObjectRefAsString());
                         currentPdfFile.readObject(pdfObject);
 
                         // System.out.println("page="+pageObj+" "+pageObj.getObjectRefAsString());
                         //catch for odd files
-                        if(pdfObject.getParameterConstant(PdfDictionary.Type)==-1) {
-                            pdfObject=pageObj;
-                        }                    
+                        if (pdfObject.getParameterConstant(PdfDictionary.Type) == -1) {
+                            pdfObject = pageObj;
+                        }
                     }
                 }
 
                 if (pdfObject != null) {
 
-                    LogWriter.writeLog("Pages being read from "+pdfObject+ ' '+pdfObject.getObjectRefAsString());
-                    
+                    LogWriter.writeLog("Pages being read from " + pdfObject + ' ' + pdfObject.getObjectRefAsString());
+
                     pageNumber = 1; // reset page number for metadata
 
                     //flush annots before we reread
 
-                    if(formRenderer!=null) {
-                        formRenderer.resetAnnotData(options.getInsetW(), options.getInsetW(), pageData, 1, currentPdfFile,null);
+                    if (formRenderer != null) {
+                        formRenderer.resetAnnotData(options.getInsetW(), options.getInsetW(), pageData, 1, currentPdfFile, null);
                     }
 
                     //recursively read all pages
-                    final int tempPageCount=readAllPageReferences(ignoreRecursion, pdfObject, new HashMap<String, Integer>(1000), new HashMap<String, String>(1000),1,formRenderer,res, options.getInsetW(), options.getInsetH());
+                    final int tempPageCount = readAllPageReferences(ignoreRecursion, pdfObject, new HashMap<String, Integer>(1000), new HashMap<String, String>(1000), 1, formRenderer, res, options.getInsetW(), options.getInsetH());
 
                     //set PageCount if in Linearized data
-                    if(linearPageCount>0){
+                    if (linearPageCount > 0) {
                         pageCount = linearPageCount;
-                    }else{
+                    } else {
                         pageCount = tempPageCount - 1; // save page count
                     }
-                    
+
                     //now read PageLabels
                     currentPdfFile.readPageLabels(pageCount);
-                    
+
                     //pageNumber = 0; // reset page number for metadata;
                     if (pageCount == 0) {
                         LogWriter.writeLog("No pages found");
@@ -925,20 +944,20 @@ public class FileAccess {
 
                 // pass handle into renderer
                 if (formRenderer != null) {
-                    pageCount=formRenderer.openFile(pageCount,options.getInsetW(), options.getInsetH(), pageData, currentPdfFile, res.getPdfObject(PdfResources.AcroFormObj));
+                    pageCount = formRenderer.openFile(pageCount, options.getInsetW(), options.getInsetH(), pageData, currentPdfFile, res.getPdfObject(PdfResources.AcroFormObj));
 
-                    DevFlags.formsLoaded=false;
-                   
+                    DevFlags.formsLoaded = false;
+
                 }
-                
+
                 pageData.setPageCount(pageCount);
             }
 
             final ActionHandler handler = externalHandlers.getFormActionHandler();
-            if(handler!=null){
+            if (handler != null) {
                 handler.init(null, externalHandlers.getJavaScript(), formRenderer);
             }
-            
+
             currentOffset = null;
 
             isOpen = true;
@@ -946,13 +965,13 @@ public class FileAccess {
 
             //ensure all data structures/handles flushed
             isDecoding = false;
-            isOpen=true; //temporarily set to true as otherwise will not work
+            isOpen = true; //temporarily set to true as otherwise will not work
             closePdfFile();
 
-            isOpen=false;
+            isOpen = false;
 
             throw new PdfException(e.getMessage() + " opening file");
-        }finally{
+        } finally {
             isDecoding = false;
         }
     }
@@ -962,7 +981,7 @@ public class FileAccess {
         isOpen = false;
 
         org.jpedal.DevFlags.currentFile = filename;
-        
+
         //System.out.println(filename);
 
         this.filename = filename;

@@ -57,8 +57,8 @@ public class ComboColorRenderer extends JLabel implements ListCellRenderer {
     public Component getListCellRendererComponent(final JList list, final Object rawValue, final int index,
                                                   final boolean isSelected, final boolean cellHasFocus) {
 
-        final String value=(String) rawValue;
-        
+        final String value = (String) rawValue;
+
         setBackground(color);
 
         if (value == null || value.isEmpty()) {

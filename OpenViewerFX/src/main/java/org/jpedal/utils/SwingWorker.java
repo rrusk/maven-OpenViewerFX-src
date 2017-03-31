@@ -35,20 +35,29 @@ package org.jpedal.utils;
 public abstract class SwingWorker {
     private Object value;  // see getValue(), setValue()
     //private Thread thread;
-    
+
     /**
      * Class to maintain reference to current worker thread
      * under separate synchronization control.
      */
     private static class ThreadVar {
         private Thread thread;
-        ThreadVar(final Thread t) { thread = t; }
-        synchronized Thread get() { return thread; }
-        synchronized void clear() { thread = null; }
+
+        ThreadVar(final Thread t) {
+            thread = t;
+        }
+
+        synchronized Thread get() {
+            return thread;
+        }
+
+        synchronized void clear() {
+            thread = null;
+        }
     }
-    
+
     final ThreadVar threadVar;
-    
+
     /**
      * Get the value produced by the worker thread, or null if it
      * hasn't been constructed yet.
@@ -56,14 +65,14 @@ public abstract class SwingWorker {
     protected synchronized Object getValue() {
         return value;
     }
-    
+
     /**
      * Set the value produced by worker thread
      */
     private synchronized void setValue(final Object x) {
         value = x;
     }
-    
+
     /**
      * Compute the value to be returned by the get method.
      */
@@ -77,18 +86,18 @@ public abstract class SwingWorker {
         final Thread t = threadVar.get();
         if (t != null) {
             t.interrupt();
-            
-            while(t.isAlive()){
+
+            while (t.isAlive()) {
                 try {
                     Thread.sleep(20);
                 } catch (final InterruptedException e) {
-                    LogWriter.writeLog("Exception: "+e.getMessage());
+                    LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
         }
         threadVar.clear();
     }
-    
+
     /**
      * Return the value created by the construct method
      * Returns null if either the constructing thread or the current
@@ -104,18 +113,17 @@ public abstract class SwingWorker {
             }
             try {
                 t.join();
-            }
-            catch (final InterruptedException e) {
+            } catch (final InterruptedException e) {
 
-                LogWriter.writeLog("Exception in handling thread "+e);
-               
+                LogWriter.writeLog("Exception in handling thread " + e);
+
                 Thread.currentThread().interrupt(); // propagate
                 return null;
             }
         }
     }
-    
-    
+
+
     /**
      * Start a thread that will call the construct method
      * and then exit.
@@ -127,21 +135,20 @@ public abstract class SwingWorker {
             public void run() {
                 try {
                     setValue(construct());
-                    
-                }catch(final Exception e){
+
+                } catch (final Exception e) {
                     LogWriter.writeLog("Caught a Exception " + e);
-                }
-                finally {
+                } finally {
                     threadVar.clear();
                 }
             }
         };
-        
+
         final Thread t = new Thread(doConstruct);
         t.setDaemon(true);
         threadVar = new ThreadVar(t);
     }
-    
+
     /**
      * Start the worker thread.
      */

@@ -42,27 +42,27 @@ import org.jpedal.gui.GUIFactory;
  * Takes an Image Snapshot of the Selected Area
  */
 public class ZoomOut {
-    
+
     private static final int[] scalingValues = {25, 50, 75, 100, 125, 150, 200, 250, 500, 750, 1000};
-    
+
     public static boolean execute(final Object[] args, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
-        
+
         if (args == null) {
             float scaling = 100 * currentGUI.getScaling();
-            scaling = (int)(decode_pdf.getDPIFactory().removeScaling(scaling)+0.5f);
-            
-            if (scaling > scalingValues[scalingValues.length-1]) {
-                ((GUI)currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[scalingValues.length - 1])); 
+            scaling = (int) (decode_pdf.getDPIFactory().removeScaling(scaling) + 0.5f);
+
+            if (scaling > scalingValues[scalingValues.length - 1]) {
+                ((GUI) currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[scalingValues.length - 1]));
             } else {
                 int scalingToUse = -1;
-                for (int i = scalingValues.length-1; i != 0; i--) {
+                for (int i = scalingValues.length - 1; i != 0; i--) {
                     if (scaling <= scalingValues[i] && scaling > scalingValues[i - 1]) {
                         scalingToUse = i - 1;
                         break;
                     }
                 }
                 if (scalingToUse != -1) {
-                ((GUI)currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[scalingToUse]));
+                    ((GUI) currentGUI).setSelectedComboItem(Commands.SCALING, String.valueOf(scalingValues[scalingToUse]));
                 }
             }
         }

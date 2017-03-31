@@ -39,12 +39,13 @@ import java.util.StringTokenizer;
  * from the token or create a font object
  */
 public class Fonts {
-    
-    public static final String fe="</font>";
-    
-    public static final String fb="<font ";
-    
+
+    public static final String fe = "</font>";
+
+    public static final String fb = "<font ";
+
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * Take data which has just been joined and tidy up fonts<br> Removes
      * duplicate font commands where a font is turned off with /FONT tag and
@@ -59,21 +60,21 @@ public class Fonts {
         boolean next_font_is_identical = false;
         final StringTokenizer data_As_tokens = new StringTokenizer(input, "<>", true);
         String next_item = data_As_tokens.nextToken();
-        
+
         //work through all tokens in the data
         while (data_As_tokens.hasMoreTokens()) {
-            
+
             if (next_item.equals("<") && data_As_tokens.hasMoreTokens()) {
-                
+
                 //get token
                 current_token =
                         next_item
-                        + data_As_tokens.nextToken()
-                        + data_As_tokens.nextToken();
+                                + data_As_tokens.nextToken()
+                                + data_As_tokens.nextToken();
                 pointer += current_token.length();
                 //where we are in original data
                 next_item = ""; //set to no value
-                
+
                 //track font in use so we can eliminate font off/same font on in data
                 if ((current_token.startsWith(fb))) {
                     current_font = current_token;
@@ -81,63 +82,63 @@ public class Fonts {
 
                 //ignore if next font the same - otherewise keep
                 if ((current_token.equals(fe))) {
-                    
+
                     //don't lose if if we are about to end a token pair
-                    final int nextToken=input.indexOf('<', pointer - 1);
-                    final int nextEndToken=input.indexOf("</", pointer - 1);
-                    
-                    if(nextToken==nextEndToken){
+                    final int nextToken = input.indexOf('<', pointer - 1);
+                    final int nextEndToken = input.indexOf("</", pointer - 1);
+
+                    if (nextToken == nextEndToken) {
                         output_data.append(current_token);
-                    }else{
-                        
-                        final int next_font_pointer_s =input.indexOf(fb, pointer - 1);
-                        final int next_font_pointer_e =input.indexOf('>', next_font_pointer_s);
+                    } else {
+
+                        final int next_font_pointer_s = input.indexOf(fb, pointer - 1);
+                        final int next_font_pointer_e = input.indexOf('>', next_font_pointer_s);
                         next_font_is_identical = false;
-                        
+
                         if ((next_font_pointer_s != -1)
                                 && (next_font_pointer_e != -1)) {
-                            final String next_font =input.substring(next_font_pointer_s,next_font_pointer_e + 1);
+                            final String next_font = input.substring(next_font_pointer_s, next_font_pointer_e + 1);
                             if (next_font.equals(current_font)) {
                                 next_font_is_identical = true;
                             }
                         }
-                        
+
                         //add if no matches
                         if (!next_font_is_identical) {
                             output_data.append(current_token);
                         }
                     }
-                } else if ((current_token.startsWith(fb))& next_font_is_identical) {
+                } else if ((current_token.startsWith(fb)) & next_font_is_identical) {
                     next_font_is_identical = false; //ignore next font command
                 } else {
                     output_data.append(current_token);
                 }
             } else {
-                
+
                 //not token so put in data
                 output_data.append(next_item);
                 pointer += next_item.length();
                 //where we are in original data
                 next_item = "";
             }
-            
+
             //read next item if not read already
-            if ((data_As_tokens.hasMoreTokens())){
+            if ((data_As_tokens.hasMoreTokens())) {
                 next_item = data_As_tokens.nextToken();
                 
                 /*allow for it being the last item*/
-                if (!data_As_tokens.hasMoreTokens()){
+                if (!data_As_tokens.hasMoreTokens()) {
                     //not token so put in data
                     output_data.append(next_item);
                     pointer += next_item.length();
                 }
-                
+
             }
         }
-        
+
         return output_data.toString();
     }
-    
+
     /**
      * extract font size from font string. If a value is not found
      * in the first value, the second will be used.
@@ -149,7 +150,7 @@ public class Fonts {
         final int end;
         String return_value = "";
         start = raw_string.lastIndexOf(fb);
-        
+
         if (start > -1) {
             end = raw_string.indexOf("\">", start);
             if (end > 0) {
@@ -157,7 +158,7 @@ public class Fonts {
             }
         } else {
             start = full_value.lastIndexOf(fb);
-            
+
             if (start > -1) {
                 end = full_value.indexOf("\">", start);
                 if (end > 0) {
@@ -165,23 +166,23 @@ public class Fonts {
                 }
             }
         }
-        
+
         return return_value;
     }
-    
+
     /**
      * create XML font token for putting into stream
      */
     public static final String createFontToken(String font_name, final int font_size) {
-        
+
         final String font_token;
-        
+
         //set font used and include styles for truetype (ie Arial,Bold)
         final int pointer = font_name.indexOf(',');
         if (pointer != -1) {
             final String weight = font_name.substring(pointer + 1);
             font_name = font_name.substring(0, pointer);
-            font_token =fb+
+            font_token = fb +
                     "face=\""
                     + font_name
                     + "\" style=\"font-size:"
@@ -190,7 +191,7 @@ public class Fonts {
                     + weight
                     + "\">";
         } else {
-            font_token =fb+
+            font_token = fb +
                     "face=\""
                     + font_name
                     + "\" style=\"font-size:"

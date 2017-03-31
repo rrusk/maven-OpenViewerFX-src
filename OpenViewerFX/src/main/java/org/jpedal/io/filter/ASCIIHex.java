@@ -34,6 +34,7 @@ package org.jpedal.io.filter;
 
 import java.io.*;
 import java.util.Map;
+
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.FastByteArrayOutputStream;
@@ -80,7 +81,7 @@ public class ASCIIHex extends BaseFilter implements PdfFilter {
             }
 
         } catch (final Exception e) {
-        	LogWriter.writeLog("Exception " + e + " reading ASCII stream ");
+            LogWriter.writeLog("Exception " + e + " reading ASCII stream ");
         }
 
         if (mappingStream != null) {
@@ -88,7 +89,7 @@ public class ASCIIHex extends BaseFilter implements PdfFilter {
                 mappingStream.close();
                 bis.close();
             } catch (final IOException e) {
-                LogWriter.writeLog("Exception: "+e.getMessage());
+                LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
 
@@ -143,11 +144,11 @@ public class ASCIIHex extends BaseFilter implements PdfFilter {
     @Override
     public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map<String, String> cachedObjects) {
 
-        this.bis=bis;
-        this.streamCache=streamCache;
-        this.cachedObjects=cachedObjects;
+        this.bis = bis;
+        this.streamCache = streamCache;
+        this.cachedObjects = cachedObjects;
 
-        try{
+        try {
             StringBuffer value = new StringBuffer();
             char current;
 
@@ -186,7 +187,7 @@ public class ASCIIHex extends BaseFilter implements PdfFilter {
             }
 
         } catch (final IOException e1) {
-        	LogWriter.writeLog("IO exception in RunLength "+e1);
+            LogWriter.writeLog("IO exception in RunLength " + e1);
         }
     }
 }

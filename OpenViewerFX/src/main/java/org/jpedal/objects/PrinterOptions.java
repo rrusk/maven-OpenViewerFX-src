@@ -34,29 +34,41 @@ package org.jpedal.objects;
 
 import org.jpedal.utils.Messages;
 
-/**Public contstants used in printing*/
+/**
+ * Public contstants used in printing
+ */
 public class PrinterOptions {
 
-	/**String representation of scaling types*/
-    public static final String[] PRINT_SCALING_OPTIONS={ Messages.getMessage("PdfViewerPrint.NoScaling"),
-		Messages.getMessage("PdfViewerPrint.FitToPrinterMargins"),
-		Messages.getMessage("PdfViewerPrint.ReduceToPrinterMargins")};
-	/**type of printing*/
-    public static final int PAGE_SCALING_NONE=0;
-	/**type of printing*/
-    public static final int PAGE_SCALING_FIT_TO_PRINTER_MARGINS=1;
-	/**type of printing*/
-    public static final int PAGE_SCALING_REDUCE_TO_PRINTER_MARGINS=2;
-	
-	/**last printer option*/
-	public static int LAST_SCALING_CHOICE=2;
-	
-	public static final int ALL_PAGES=8;
-	
-	public static final int ODD_PAGES_ONLY=16;
-	
-	public static final int EVEN_PAGES_ONLY=32;
-	
-	public static final int PRINT_PAGES_REVERSED=64;
+    /**
+     * String representation of scaling types
+     */
+    public static final String[] PRINT_SCALING_OPTIONS = {Messages.getMessage("PdfViewerPrint.NoScaling"),
+            Messages.getMessage("PdfViewerPrint.FitToPrinterMargins"),
+            Messages.getMessage("PdfViewerPrint.ReduceToPrinterMargins")};
+    /**
+     * type of printing
+     */
+    public static final int PAGE_SCALING_NONE = 0;
+    /**
+     * type of printing
+     */
+    public static final int PAGE_SCALING_FIT_TO_PRINTER_MARGINS = 1;
+    /**
+     * type of printing
+     */
+    public static final int PAGE_SCALING_REDUCE_TO_PRINTER_MARGINS = 2;
+
+    /**
+     * last printer option
+     */
+    public static int LAST_SCALING_CHOICE = 2;
+
+    public static final int ALL_PAGES = 8;
+
+    public static final int ODD_PAGES_ONLY = 16;
+
+    public static final int EVEN_PAGES_ONLY = 32;
+
+    public static final int PRINT_PAGES_REVERSED = 64;
 
 }

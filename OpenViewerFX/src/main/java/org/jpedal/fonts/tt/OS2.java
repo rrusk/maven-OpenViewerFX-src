@@ -36,8 +36,8 @@ package org.jpedal.fonts.tt;
 public class OS2 extends Table {
 
     protected int version, xAvgCharWidth, usWeightClass, usWidthClass, fsType, yStrikeoutSize, yStrikeoutPosition, sFamilyClass,
-        fsSelection, usFirstCharIndex, usLastCharIndex, sTypoAscender, sTypoDescender, sTypoLineGap, usWinAscent,
-        usWinDescent, sxHeight, sCapHeight, usDefaultChar, usBreakChar, usMaxContext;
+            fsSelection, usFirstCharIndex, usLastCharIndex, sTypoAscender, sTypoDescender, sTypoLineGap, usWinAscent,
+            usWinDescent, sxHeight, sCapHeight, usDefaultChar, usBreakChar, usMaxContext;
     protected final int[] subscriptData = new int[4];
     protected final int[] superscriptData = new int[4];
     protected final int[] panose = new int[10];
@@ -58,22 +58,22 @@ public class OS2 extends Table {
         usWeightClass = font.getNextUint16();
         usWidthClass = font.getNextInt16();
         fsType = font.getNextInt16();
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             subscriptData[i] = font.getNextInt16();
         }
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             superscriptData[i] = font.getNextInt16();
         }
         yStrikeoutSize = font.getNextInt16();
         yStrikeoutPosition = font.getNextInt16();
         sFamilyClass = font.getNextInt16();
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             panose[i] = font.getNextint8();
         }
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             ulUnicodeRange[i] = font.getNextUint32();
         }
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             achVendID[i] = font.getNextint8();
         }
         fsSelection = font.getNextUint16();
@@ -86,7 +86,7 @@ public class OS2 extends Table {
         usWinDescent = font.getNextInt16();
 
         if (version > 0) {
-            for (int i=0; i<2; i++) {
+            for (int i = 0; i < 2; i++) {
                 ulCodePageRange[i] = font.getNextUint32();
             }
         }

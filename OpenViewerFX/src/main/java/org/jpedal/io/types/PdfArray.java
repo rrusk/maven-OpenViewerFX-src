@@ -33,63 +33,63 @@
 package org.jpedal.io.types;
 
 public class PdfArray {
-	
 
-	/**
-	 * @param value
-	 * @return
-	 */
-	public static float[] convertToFloatArray(final String value) {
 
-        final char[] bts=value.toCharArray();
+    /**
+     * @param value
+     * @return
+     */
+    public static float[] convertToFloatArray(final String value) {
+
+        final char[] bts = value.toCharArray();
 
         final float[] f;
-        int fPointer =0,wStart;
+        int fPointer = 0, wStart;
 
         char[] buffer;
 
-        final int len=bts.length;
-        int ptr=0;
+        final int len = bts.length;
+        int ptr = 0;
 
         //create array which must fit all items
-        f=new float[len];
+        f = new float[len];
 
         //find the first [
-        while(ptr<len && bts[ptr]!='[') {
+        while (ptr < len && bts[ptr] != '[') {
             ptr++;
         }
 
         // in case first '[' is missing start at the begging of bts
-        if(ptr==bts.length) {
+        if (ptr == bts.length) {
             ptr = 0;
         } else {
             ptr++;
         }
 
-        while(ptr<len){
+        while (ptr < len) {
 
             //ignore any spaces
-            while(ptr<len && bts[ptr]==' ') {
+            while (ptr < len && bts[ptr] == ' ') {
                 ptr++;
             }
 
             //set start and find next space,] or end
-            wStart=ptr;
+            wStart = ptr;
 
-            while(ptr<len && bts[ptr]!=' ' && bts[ptr]!=']') {
+            while (ptr < len && bts[ptr] != ' ' && bts[ptr] != ']') {
                 ptr++;
             }
 
-            final int valLen=ptr-wStart;
+            final int valLen = ptr - wStart;
 
             //ensure exit or convert to float
-            if(valLen<1) {
+            if (valLen < 1) {
                 ptr = len;
-            } else{
+            } else {
                 //log value and repeat above until end
                 buffer = new char[valLen];
 
-                for(int t=0;wStart<ptr;wStart++){
+                for (int t = 0; wStart < ptr; wStart++) {
                     buffer[t] = bts[wStart];
                     t++;
                 }

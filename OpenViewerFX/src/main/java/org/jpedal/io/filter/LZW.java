@@ -36,9 +36,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.sun.LZWDecoder;
+
 /**
  * LZW
  */
@@ -60,21 +62,21 @@ public class LZW extends BaseFilter implements PdfFilter {
         rows = height;
         columns = width;
 
-        if(decodeParms!=null){
+        if (decodeParms != null) {
 
             final int newBitsPerComponent = decodeParms.getInt(PdfDictionary.BitsPerComponent);
-            if(newBitsPerComponent!=-1) {
-                bitsPerComponent=newBitsPerComponent;
+            if (newBitsPerComponent != -1) {
+                bitsPerComponent = newBitsPerComponent;
             }
 
             final int newColors = decodeParms.getInt(PdfDictionary.Colors);
-            if(newColors!=-1) {
-                colors=newColors;
+            if (newColors != -1) {
+                colors = newColors;
             }
 
             final int columnsSet = decodeParms.getInt(PdfDictionary.Columns);
-            if(columnsSet!=-1) {
-                columns=columnsSet;
+            if (columnsSet != -1) {
+                columns = columnsSet;
             }
 
             EarlyChange = decodeParms.getInt(PdfDictionary.EarlyChange);
@@ -82,8 +84,8 @@ public class LZW extends BaseFilter implements PdfFilter {
             predictor = decodeParms.getInt(PdfDictionary.Predictor);
 
             final int rowsSet = decodeParms.getInt(PdfDictionary.Rows);
-            if(rowsSet!=-1) {
-                rows=rowsSet;
+            if (rowsSet != -1) {
+                rows = rowsSet;
             }
 
         }
@@ -116,7 +118,7 @@ public class LZW extends BaseFilter implements PdfFilter {
                 data = processed.toByteArray();
             }
 
-            data = applyPredictor(predictor, data, colors,  bitsPerComponent, columns);
+            data = applyPredictor(predictor, data, colors, bitsPerComponent, columns);
 
         }
 
@@ -124,7 +126,7 @@ public class LZW extends BaseFilter implements PdfFilter {
     }
 
     @Override
-    public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map cachedObjects) throws Exception{
+    public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map cachedObjects) throws Exception {
 
         if (rows * columns != 1) {
 
@@ -144,7 +146,7 @@ public class LZW extends BaseFilter implements PdfFilter {
                 }
             }
 
-            applyPredictor(predictor, null, colors,  bitsPerComponent, columns);
+            applyPredictor(predictor, null, colors, bitsPerComponent, columns);
 
         }
     }

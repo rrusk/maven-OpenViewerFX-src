@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+
 import org.jpedal.FileAccess;
 import org.jpedal.io.LinearizedHintTable;
 import org.jpedal.io.PdfObjectReader;
@@ -58,35 +59,35 @@ public class LinearThread extends Thread {
     final File tempURLFile;
     final LinearizedHintTable linHintTable;
 
-    final byte[] startObj= {'o','b','j'},endObj= {'e','n','d','o','b','j'};
+    final byte[] startObj = {'o', 'b', 'j'}, endObj = {'e', 'n', 'd', 'o', 'b', 'j'};
     int startCharReached, endCharReached;
-    int startObjPtr,endObjPtr;
+    int startObjPtr, endObjPtr;
 
     //use top line to slow down load speed
-    public static int bufSize=8192;
+    public static int bufSize = 8192;
 
     int ref;
     final int firstObjLength;
 
     final FileAccess fileAccess;
-    
+
     final byte[] linearBytes;
-    
+
 
     public LinearThread(final InputStream is, final FileChannel fos, final File tempURLFile, final PdfObject linearObj, final byte[] linearBytes, final LinearizedHintTable linHintTable, final FileAccess fileAccess) {
 
-        this.fos=fos;
-        this.linearObj=linearObj;
-        this.is=is;
-        this.tempURLFile=tempURLFile;
-        this.linHintTable=linHintTable;
-        
-        this.linearBytes=linearBytes;
+        this.fos = fos;
+        this.linearObj = linearObj;
+        this.is = is;
+        this.tempURLFile = tempURLFile;
+        this.linHintTable = linHintTable;
 
-        this.fileAccess=fileAccess;
+        this.linearBytes = linearBytes;
+
+        this.fileAccess = fileAccess;
 
         //scan start of file for objects
-        firstObjLength=linearBytes.length;
+        firstObjLength = linearBytes.length;
 
         scanStreamForObjects(0, null, linearBytes);
 
@@ -94,60 +95,60 @@ public class LinearThread extends Thread {
 
     }
 
-    public int getPercentageLoaded(){
+    public int getPercentageLoaded() {
         return percentageDone;
     }
 
     @Override
     public void run() {
 
-        final int linearfileLength=linearObj.getInt(PdfDictionary.L);
+        final int linearfileLength = linearObj.getInt(PdfDictionary.L);
 
-        try{
+        try {
 
-            int read,bytesRead=0;
+            int read, bytesRead = 0;
 
             //we cache last few bytes incase ref rolls across boundary
-            byte[] lastBuffer=linearBytes;//new byte[lastBytes];
-            
+            byte[] lastBuffer = linearBytes; //new byte[lastBytes];
+
             byte[] buffer = new byte[bufSize];
             byte[] b;
             while ((read = is.read(buffer)) != -1 && !this.isInterrupted() && isAlive()) {
 
-                if(read>0){
-                    synchronized (fos){
+                if (read > 0) {
+                    synchronized (fos) {
 
-                        b=new byte[read];
-                        System.arraycopy(buffer,0,b,0,read);
-                        buffer=b;
-                        final ByteBuffer f=ByteBuffer.wrap(b);
+                        b = new byte[read];
+                        System.arraycopy(buffer, 0, b, 0, read);
+                        buffer = b;
+                        final ByteBuffer f = ByteBuffer.wrap(b);
                         fos.write(f);
                     }
                 }
 
                 //track start endobj and flag so we know if object read
-                if(read>0){
-                    scanStreamForObjects(firstObjLength+bytesRead, lastBuffer, buffer);
+                if (read > 0) {
+                    scanStreamForObjects(firstObjLength + bytesRead, lastBuffer, buffer);
 
                     bytesRead += read;
 
                     //save last few bytes incase of overlap
-                    int aa=30;
+                    int aa = 30;
 
-                    final int size1=buffer.length;
+                    final int size1 = buffer.length;
 
-                    if(aa>size1-1) {
+                    if (aa > size1 - 1) {
                         aa = size1 - 1;
                     }
 
-                    lastBuffer=new byte[aa];
-                    System.arraycopy(buffer, size1-aa, lastBuffer,0,aa);
+                    lastBuffer = new byte[aa];
+                    System.arraycopy(buffer, size1 - aa, lastBuffer, 0, aa);
                 }
 
-                percentageDone= (int) (100*(bytesRead/(float)linearfileLength));
+                percentageDone = (int) (100 * (bytesRead / (float) linearfileLength));
 
                 //debug code to simulate slow file stream by slowing down read of data from file
-               // System.out.println("percentage="+percentageDone);
+                // System.out.println("percentage="+percentageDone);
 //                try {
 //                    Thread.sleep(2000);
 //                } catch (InterruptedException e) {
@@ -161,11 +162,11 @@ public class LinearThread extends Thread {
 
         } catch (final IOException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
-        } finally{
+        } finally {
 
-            try{
+            try {
                 is.close();
-                synchronized (fos){
+                synchronized (fos) {
                     fos.close();
                 }
                 //possible that page still being decoded on slower machine so wait
@@ -174,14 +175,14 @@ public class LinearThread extends Thread {
                 fileAccess.setIO(new PdfObjectReader());
 
                 /* get reader object to open the file if all downloaded*/
-                if(isAlive() && !isInterrupted()){
+                if (isAlive() && !isInterrupted()) {
                     fileAccess.openPdfFile(tempURLFile.getAbsolutePath());
 
                     /* store fi name for use elsewhere as part of ref key without .pdf */
                     fileAccess.getObjectStore().storeFileName(tempURLFile.getName().substring(0, tempURLFile.getName().lastIndexOf('.')));
                 }
 
-            }catch(final Exception e){
+            } catch (final Exception e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
@@ -189,89 +190,89 @@ public class LinearThread extends Thread {
 
     private void scanStreamForObjects(final int bytesRead, final byte[] lastBuffer, final byte[] buffer) {
 
-        final int bufSize=buffer.length;
+        final int bufSize = buffer.length;
 
-        for(int i=0;i<bufSize;i++){
+        for (int i = 0; i < bufSize; i++) {
 
-            if(startCharReached==0){ //look for gap at start of obj
-                if(buffer[i]==' ' || buffer[i]==0 || buffer[i]==10 || buffer[i]==32 ) {
+            if (startCharReached == 0) { //look for gap at start of obj
+                if (buffer[i] == ' ' || buffer[i] == 0 || buffer[i] == 10 || buffer[i] == 32) {
                     startCharReached++;
                 }
-            }else if(startCharReached<4){ //look for rest of obj
+            } else if (startCharReached < 4) { //look for rest of obj
 
-                if(buffer[i]==startObj[startCharReached-1]){
+                if (buffer[i] == startObj[startCharReached - 1]) {
 
-                    if(startCharReached==3){ //start found so read object ref and log start
+                    if (startCharReached == 3) { //start found so read object ref and log start
 
-                        startObjPtr=bytesRead+i-4;
+                        startObjPtr = bytesRead + i - 4;
 
                         //get the values
-                        int ii=i-4;
-                        
+                        int ii = i - 4;
+
                         final byte[] data;
 
                         //add in last buffer to allow for crossing boundary
-                        if(lastBuffer!=null && ii<30){
+                        if (lastBuffer != null && ii < 30) {
 
-                            final int size1=lastBuffer.length;
-                            final int size2=buffer.length;
-                            data =new byte[size1+size2];
-                            System.arraycopy(lastBuffer,0, data,0,size1);
-                            System.arraycopy(buffer,0, data,size1,size2);
+                            final int size1 = lastBuffer.length;
+                            final int size2 = buffer.length;
+                            data = new byte[size1 + size2];
+                            System.arraycopy(lastBuffer, 0, data, 0, size1);
+                            System.arraycopy(buffer, 0, data, size1, size2);
 
                             ii += size1;
-                            
-                        }else{
-                            data =buffer;
+
+                        } else {
+                            data = buffer;
                         }
 
-                        int keyEnd =ii;
-                        
+                        int keyEnd = ii;
+
                         //generation value
-                        while(data[ii]!=10 && data[ii]!=13 && data[ii]!=32 && data[ii]!=9){
+                        while (data[ii] != 10 && data[ii] != 13 && data[ii] != 32 && data[ii] != 9) {
                             ii--;
                             startObjPtr--;
                         }
-                                
+
                         //generation
                         NumberUtils.parseInt(ii + 1, keyEnd, data);
 
                         //roll back to start of number
-                        while(data[ii]==10 || data[ii]==13 || data[ii]==32 || data[ii]==47 || data[ii]==60){
+                        while (data[ii] == 10 || data[ii] == 13 || data[ii] == 32 || data[ii] == 47 || data[ii] == 60) {
                             ii--;
                             startObjPtr--;
                         }
 
-                        keyEnd =ii+1;
+                        keyEnd = ii + 1;
 
-                        while(data[ii]!=10 && data[ii]!=13 && data[ii]!=32 && data[ii]!=47 && data[ii]!=60 && data[ii]!=62){
+                        while (data[ii] != 10 && data[ii] != 13 && data[ii] != 32 && data[ii] != 47 && data[ii] != 60 && data[ii] != 62) {
                             ii--;
                             startObjPtr--;
                         }
 
-                        ref= NumberUtils.parseInt(ii + 1, keyEnd, data);
+                        ref = NumberUtils.parseInt(ii + 1, keyEnd, data);
 
                     }
 
                     startCharReached++;
-                }else {
+                } else {
                     startCharReached = 0;
                 }
 
-            }else{
-                if(buffer[i]==endObj[endCharReached]){
+            } else {
+                if (buffer[i] == endObj[endCharReached]) {
                     endCharReached++;
 
-                    if(endCharReached==6){
-                        endObjPtr=bytesRead+i;
+                    if (endCharReached == 6) {
+                        endObjPtr = bytesRead + i;
 
                         //currentPdfFile.storeOffset()
-                        linHintTable.storeOffset(ref,startObjPtr,endObjPtr);
+                        linHintTable.storeOffset(ref, startObjPtr, endObjPtr);
 
-                        startCharReached=0;
-                        endCharReached=0;
+                        startCharReached = 0;
+                        endCharReached = 0;
                     }
-                }else {
+                } else {
                     endCharReached = 0;
                 }
             }

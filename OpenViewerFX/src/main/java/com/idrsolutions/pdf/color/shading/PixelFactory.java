@@ -34,22 +34,22 @@ package com.idrsolutions.pdf.color.shading;
 
 public class PixelFactory {
 
-	//return both pdfX at [0] & pdfY at [1]
-	public static float[] convertPhysicalToPDF(final boolean isPrinting, final float x, final float y, final float offX, final float offY, final float scaling, final int xstart, final int ystart, final int minX, final int pageHeight) {
+    //return both pdfX at [0] & pdfY at [1]
+    public static float[] convertPhysicalToPDF(final boolean isPrinting, final float x, final float y, final float offX, final float offY, final float scaling, final int xstart, final int ystart, final int minX, final int pageHeight) {
 
         final float pdfX;
         final float pdfY;
 
-        if(isPrinting){
-        	
-            pdfX=((x+xstart)-offX)*scaling;
-            pdfY=((y+ystart)-offY)*scaling;
-            
-        }else{
-        	pdfX=(scaling*(x+xstart+minX-offX));
-            pdfY=(scaling*((pageHeight-(y+ystart-offY))));
-            
+        if (isPrinting) {
+
+            pdfX = ((x + xstart) - offX) * scaling;
+            pdfY = ((y + ystart) - offY) * scaling;
+
+        } else {
+            pdfX = (scaling * (x + xstart + minX - offX));
+            pdfY = (scaling * ((pageHeight - (y + ystart - offY))));
+
         }
-		return new float[] {pdfX, pdfY};
-	}
+        return new float[]{pdfX, pdfY};
+    }
 }

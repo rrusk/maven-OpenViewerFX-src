@@ -31,7 +31,9 @@
  * ---------------
  */
 package org.jpedal.io;
+
 import java.awt.image.BufferedImage;
+
 import org.jpedal.JDeliHelper;
 
 public class TiffHelper {
@@ -44,12 +46,12 @@ public class TiffHelper {
     /**
      * setup access to Tif file and also read page count
      */
-    public TiffHelper(final String file){
+    public TiffHelper(final String file) {
 
         this.file = file;
-        
-        pageCount=JDeliHelper.getTiffPageCount(file);
-        
+
+        pageCount = JDeliHelper.getTiffPageCount(file);
+
     }
 
     public int getTiffPageCount() {
@@ -57,9 +59,9 @@ public class TiffHelper {
     }
 
     public BufferedImage getImage(final int tiffImageToLoad) {
-        
-        return JDeliHelper.getTiffImage(tiffImageToLoad,file);
-        
+
+        return JDeliHelper.getTiffImage(tiffImageToLoad, file);
+
     }
 }
 

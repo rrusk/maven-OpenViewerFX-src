@@ -40,12 +40,12 @@ public class StreamObject extends PdfObject {
 
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
+        return true;
+    }
 
 
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.CompressedObject;
     }
 }

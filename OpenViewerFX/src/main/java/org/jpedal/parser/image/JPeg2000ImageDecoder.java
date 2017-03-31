@@ -34,6 +34,7 @@
 package org.jpedal.parser.image;
 
 import java.awt.image.BufferedImage;
+
 import org.jpedal.JDeliHelper;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.exception.PdfException;
@@ -41,31 +42,30 @@ import org.jpedal.parser.image.data.ImageData;
 import org.jpedal.utils.LogWriter;
 
 /**
- *
  * @author markee
  */
 public class JPeg2000ImageDecoder {
-    
-    
+
+
     public static BufferedImage decode(final int w, final int h, final GenericColorSpace decodeColorData, final byte[] data, final ImageData imageData, final int d) throws RuntimeException, PdfException {
 
         LogWriter.writeLog("JPeg 2000 Image " + w + "W * " + h + 'H');
 
-        return decodeColorData.JPEG2000ToRGBImage(data,w,h,imageData.getpX(),imageData.getpY(),d);
+        return decodeColorData.JPEG2000ToRGBImage(data, w, h, imageData.getpX(), imageData.getpY(), d);
 
     }
-    
+
     public static byte[] getBytesFromJPEG2000(final byte[] data) {
-        
+
         try {
             return JDeliHelper.getBytesFromJPEG(data);
         } catch (final Exception ex) {
             LogWriter.writeLog("Exception with JPeg Image " + ex);
         }
         return null;
-        
+
     }
-    
+
     public static byte[] getUnconvertedBytesFromJPEG2000(final byte[] data) {
         try {
             return JDeliHelper.getUnconvertedBytesFromJPEG2000(data);
@@ -73,6 +73,6 @@ public class JPeg2000ImageDecoder {
             LogWriter.writeLog("Exception with JPeg Image " + ex);
         }
         return null;
-        
+
     }
 }

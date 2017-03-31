@@ -37,27 +37,26 @@ import org.jpedal.objects.PdfPageData;
 import org.jpedal.utils.LogWriter;
 
 /**
- *
  * @author markee
  */
 public class MultiDisplayOptions {
-    
-    private boolean turnoverOn =  GUIDisplay.default_turnoverOn;
+
+    private boolean turnoverOn = GUIDisplay.default_turnoverOn;
 
     private boolean separateCover = GUIDisplay.default_separateCover;
-    
+
     private int[] xReached, yReached, pageW, pageH;
-    
+
     private boolean isGeneratingOtherPages;
-    
+
     private boolean running;
-    
-    private int startViewPage=1,endViewPage;
-    
+
+    private int startViewPage = 1, endViewPage;
+
     private int pageNumber;
-    
+
     private final PdfPageData pageData = new PdfPageData();
- 
+
     /**
      * @return the turnoverOn
      */
@@ -87,17 +86,18 @@ public class MultiDisplayOptions {
     }
 
     void resetValues(final int pageCount) {
-        setxReached(new int[pageCount+1]);
-        setyReached(new int[pageCount+1]);
-        setPageW(new int[pageCount+1]);
-        setPageH(new int[pageCount+1]);
+        setxReached(new int[pageCount + 1]);
+        setyReached(new int[pageCount + 1]);
+        setPageW(new int[pageCount + 1]);
+        setPageH(new int[pageCount + 1]);
     }
 
     public void setReachedToNull() {
         setxReached(null);
-            
+
     }
-    public void setPageValuesToNull(){
+
+    public void setPageValuesToNull() {
         setPageH(null);
         setPageW(null);
     }
@@ -108,11 +108,11 @@ public class MultiDisplayOptions {
     public int[] getPageH() {
         return pageH;
     }
-    
+
     public int getPageH(final int i) {
         return pageH[i];
     }
-    
+
     /**
      * @param pageH the pageH to set
      */
@@ -126,7 +126,7 @@ public class MultiDisplayOptions {
     public int[] getPageW() {
         return pageW;
     }
-    
+
     public int getPageW(final int i) {
         return pageW[i];
     }
@@ -144,7 +144,7 @@ public class MultiDisplayOptions {
     public int[] getyReached() {
         return yReached;
     }
-    
+
     public int getyReached(final int i) {
         return yReached[i];
     }
@@ -162,7 +162,7 @@ public class MultiDisplayOptions {
     public int[] getxReached() {
         return xReached;
     }
-    
+
     public int getxReached(final int i) {
         return xReached[i];
     }
@@ -229,31 +229,32 @@ public class MultiDisplayOptions {
     public void setEndViewPage(final int endViewPage) {
         this.endViewPage = endViewPage;
     }
-    public void calcDisplayRangeForFacing(){
 
-        final int pageCount=pageData.getPageCount();
+    public void calcDisplayRangeForFacing() {
+
+        final int pageCount = pageData.getPageCount();
 
         if (separateCover) {
-                if(pageCount==2){ //special case
-                    startViewPage = 1;
-                    endViewPage = 2;         
-                }else{
-                    startViewPage = pageNumber;
-
-                    if(startViewPage ==1){ //special case
-                        endViewPage=1;
-                    }else if((startViewPage & 1)!=1){ //right even page selected
-                        startViewPage = pageNumber;
-                        endViewPage = pageNumber+1;
-                    }else{ //left odd page selected
-                        startViewPage = pageNumber-1;
-                        endViewPage = pageNumber;
-                    }
-                }
+            if (pageCount == 2) { //special case
+                startViewPage = 1;
+                endViewPage = 2;
             } else {
-                 startViewPage = pageNumber - (1 - (pageNumber & 1));
-            endViewPage = startViewPage +1;
+                startViewPage = pageNumber;
+
+                if (startViewPage == 1) { //special case
+                    endViewPage = 1;
+                } else if ((startViewPage & 1) != 1) { //right even page selected
+                    startViewPage = pageNumber;
+                    endViewPage = pageNumber + 1;
+                } else { //left odd page selected
+                    startViewPage = pageNumber - 1;
+                    endViewPage = pageNumber;
+                }
             }
+        } else {
+            startViewPage = pageNumber - (1 - (pageNumber & 1));
+            endViewPage = startViewPage + 1;
+        }
     }
 
     /**
@@ -269,7 +270,8 @@ public class MultiDisplayOptions {
     public void setPageNumber(final int pageNumber) {
         this.pageNumber = pageNumber;
     }
-    public void waitToDieThred(){
+
+    public void waitToDieThred() {
         //wait to die
         while (running) {
             // System.out.println("Waiting to die");

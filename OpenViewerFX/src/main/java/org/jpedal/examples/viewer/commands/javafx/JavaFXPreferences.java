@@ -36,6 +36,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.*;
 import java.util.jar.JarFile;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -58,8 +59,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
+
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.examples.viewer.OpenViewerFX;
@@ -149,7 +152,7 @@ public class JavaFXPreferences {
     private static CheckBox mouseSelectCB;
     private static ComboBox<String> voiceSelect;
     private static ComboBox<String> transitionSelect;
-    
+
     /*
      * Declare Objects for Color Menu.
      */
@@ -162,21 +165,21 @@ public class JavaFXPreferences {
     private static CheckBox changeLineArtColorCB;
     private static CheckBox replaceDisplayCB;
     private static ColorPicker displayBGColorPicker;
-    
+
     /*
      * Declare Objects for Printing Menu.
      */
-    private static ComboBox<String> printerCombo=new ComboBox<String>();
-    private static ComboBox<String> paperSizesCombo=new ComboBox<String>();
+    private static ComboBox<String> printerCombo = new ComboBox<String>();
+    private static ComboBox<String> paperSizesCombo = new ComboBox<String>();
     private static TextField defaultDPITF;
     private static TextField blackListTF;
     private static TabPane tabs;
-    
+
     //Text to Speech external handler
     private static Speech speech;
-    
+
     private static void init(final GUIFactory currentGUI) {
-        speech = (Speech)currentGUI.getPdfDecoder().getExternalHandler(Options.SpeechEngine);
+        speech = (Speech) currentGUI.getPdfDecoder().getExternalHandler(Options.SpeechEngine);
         
         /*
          * Initialise Objects for General Menu.
@@ -204,12 +207,12 @@ public class JavaFXPreferences {
         pageInsetsTF = new TextField();
         final ObservableList<String> pageOptions
                 = FXCollections.observableArrayList(
-                        Messages.getMessage("PageLayoutViewMenu.SinglePage"),
-                        Messages.getMessage("PageLayoutViewMenu.Continuous"),
-                        Messages.getMessage("PageLayoutViewMenu.Facing"),
-                        Messages.getMessage("PageLayoutViewMenu.ContinousFacing"),
-                        Messages.getMessage("PageLayoutViewMenu.PageFlow")
-                );
+                Messages.getMessage("PageLayoutViewMenu.SinglePage"),
+                Messages.getMessage("PageLayoutViewMenu.Continuous"),
+                Messages.getMessage("PageLayoutViewMenu.Facing"),
+                Messages.getMessage("PageLayoutViewMenu.ContinousFacing"),
+                Messages.getMessage("PageLayoutViewMenu.PageFlow")
+        );
         displayCombo = new ComboBox<String>(pageOptions);
         enablePageFlipCB = new CheckBox(Messages.getMessage("PdfCustomGui.enhancedFacing"));
         scrollableThumbsCB = new CheckBox(Messages.getMessage("PdfCustomGui.thumbnailScroll"));
@@ -223,7 +226,7 @@ public class JavaFXPreferences {
                 Messages.getMessage("PageLayoutViewMenu.WindowSearch"),
                 Messages.getMessage("PageLayoutViewMenu.TabbedSearch"),
                 Messages.getMessage("PageLayoutViewMenu.MenuSearch")
-            );
+        );
 
         searchStyle = new ComboBox<String>(layoutOptions);
         maxViewerTF = new TextField();
@@ -232,7 +235,7 @@ public class JavaFXPreferences {
         rightClickCB = new CheckBox(Messages.getMessage("PdfCustomGui.allowRightClick"));
         wheelZoomCB = new CheckBox(Messages.getMessage("PdfCustomGui.allowScrollwheelZoom"));
         mouseSelectCB = new CheckBox("Show Mouse Selection Box");
-        if (speech!=null) {
+        if (speech != null) {
             final List<String> availableVoices = new ArrayList<String>(Arrays.asList(speech.listVoices()));
             final ObservableList<String> speechOptions = FXCollections.observableList(availableVoices);
             voiceSelect = new ComboBox<String>(speechOptions);
@@ -240,10 +243,10 @@ public class JavaFXPreferences {
             final ObservableList<String> speechOptions = FXCollections.observableArrayList("No Voice Options Detected");
             voiceSelect = new ComboBox<String>(speechOptions);
         }
-        
+
         // Set up transition list
         final List<String> transitions = new ArrayList<String>();
-        for(final FXViewerTransitions.TransitionType s : FXViewerTransitions.TransitionType.values()){
+        for (final FXViewerTransitions.TransitionType s : FXViewerTransitions.TransitionType.values()) {
             transitions.add(s.name().replace("_", " "));
         }
         final ObservableList<String> transitionOptions = FXCollections.observableArrayList(transitions);
@@ -258,8 +261,8 @@ public class JavaFXPreferences {
         /*
          * Initialise Objects for Printing Menu.
          */
-        
-        if(!OpenViewerFX.isOpenFX){
+
+        if (!OpenViewerFX.isOpenFX) {
             final List<String> availablePrinters = new ArrayList<String>(Arrays.asList(org.jpedal.examples.viewer.utils.Printer.getAvailablePrinters(properties.getValue("printerBlacklist"))));
             final PrintService defaultPrintService = PrintServiceLookup.lookupDefaultPrintService();
             if (defaultPrintService != null) {
@@ -314,15 +317,15 @@ public class JavaFXPreferences {
         final VBox vBox = new VBox();
         final ToggleGroup buttonsGroup = new ToggleGroup();
         final ToggleButton[] buttonsArr = {
-            new ToggleButton(Messages.getMessage("PdfPreferences.GeneralTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/display.png"))),
-            new ToggleButton(Messages.getMessage("PdfPreferences.PageDisplayTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/pagedisplay.png"))),
-            new ToggleButton(Messages.getMessage("PdfPreferences.InterfaceTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/interface.png"))),
-            new ToggleButton("Color", new ImageView(new Image("/org/jpedal/examples/viewer/res/color.png"))),
-            new ToggleButton("Menu", new ImageView(new Image("/org/jpedal/examples/viewer/res/menu.png"))),
-            new ToggleButton(Messages.getMessage("PdfPreferences.PrintingTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/printing.png"))),
-            new ToggleButton(Messages.getMessage("PdfPreferences.ExtensionsTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/extensions.png")))
+                new ToggleButton(Messages.getMessage("PdfPreferences.GeneralTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/display.png"))),
+                new ToggleButton(Messages.getMessage("PdfPreferences.PageDisplayTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/pagedisplay.png"))),
+                new ToggleButton(Messages.getMessage("PdfPreferences.InterfaceTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/interface.png"))),
+                new ToggleButton("Color", new ImageView(new Image("/org/jpedal/examples/viewer/res/color.png"))),
+                new ToggleButton("Menu", new ImageView(new Image("/org/jpedal/examples/viewer/res/menu.png"))),
+                new ToggleButton(Messages.getMessage("PdfPreferences.PrintingTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/printing.png"))),
+                new ToggleButton(Messages.getMessage("PdfPreferences.ExtensionsTitle"), new ImageView(new Image("/org/jpedal/examples/viewer/res/extensions.png")))
         };
-        
+
         buttonsArr[0].setSelected(true);
         for (final ToggleButton aButtonsArr : buttonsArr) {
             aButtonsArr.setContentDisplay(ContentDisplay.TOP);
@@ -340,7 +343,7 @@ public class JavaFXPreferences {
         buttonsGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
             @Override
             public void changed(final ObservableValue<? extends Toggle> ov,
-                    final Toggle toggle, final Toggle new_toggle) {
+                                final Toggle toggle, final Toggle new_toggle) {
 
                 for (int i = 0; i < buttonsArr.length; ++i) {
                     if (buttonsGroup.getSelectedToggle() == buttonsArr[i]) {
@@ -459,20 +462,20 @@ public class JavaFXPreferences {
                 final FileChooser chooser = new FileChooser();
                 chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("XML File", "*.xml"));
                 chooser.setInitialFileName("*.xml");
-                
+
                 final File xmlFile = chooser.showSaveDialog(null);
                 
                 /*
                  * Start Save Protocol.
                  */
-                if(xmlFile != null){
+                if (xmlFile != null) {
                     currentGUI.setPropertiesFileLocation(xmlFile.getAbsolutePath());
                     updateSettings(currentGUI);
-                    
+
                     try {
-                		properties.writeDoc();
-                	} catch (final Exception e1) {
-                		LogWriter.writeLog("Exception attempting to Write proterties: " + e1); 
+                        properties.writeDoc();
+                    } catch (final Exception e1) {
+                        LogWriter.writeLog("Exception attempting to Write proterties: " + e1);
                     }
                 }
                 
@@ -490,7 +493,7 @@ public class JavaFXPreferences {
                 //The properties file used when jpedal opened
                 if (result == FXOptionDialog.YES_OPTION) {
                     final String lastProperties = currentGUI.getPropertiesFileLocation();
-                    
+
                     final File f = new File(lastProperties);
                     if (f.exists()) {
                         f.delete();
@@ -499,7 +502,7 @@ public class JavaFXPreferences {
                     try {
                         properties.writeDoc();
                     } catch (final Exception e2) {
-                        LogWriter.writeLog("Exception attempting to Write proterties: " + e2); 
+                        LogWriter.writeLog("Exception attempting to Write proterties: " + e2);
                     }
                     if (GUI.showMessages) {
 
@@ -634,10 +637,10 @@ public class JavaFXPreferences {
 
         final HBox sideTabHBox = new HBox();
         sideTabHBox.getChildren().addAll(new Label(Messages.getMessage("PdfCustomGui.SideTabLength")), sideTabTF);
-        
+
         final HBox transitionHBox = new HBox();
         transitionHBox.getChildren().addAll(new Label("Transition type: "), transitionSelect);
-        
+
         appearanceVBox.getChildren().addAll(appGenOptions, winTitleHBox, iconLocHBox, searchStyleHBox, maxViewersHBox, appSideTabOptions, sideTabHBox, consistentSideTabCB, transitionHBox);
         appearanceVBox.setPadding(new Insets(contentGap));
         appearanceVBox.setSpacing(contentGap);
@@ -689,7 +692,7 @@ public class JavaFXPreferences {
      * @return ScrollPane Object
      */
     private static ScrollPane getColorContent() {
-        
+
         contentScrollPane = new ScrollPane();
         title.setText("Color");
         final VBox contentVBox = new VBox();
@@ -701,30 +704,31 @@ public class JavaFXPreferences {
 
         final HBox highlightsHBox = new HBox();
         final Label changeHighlightsLabel = new Label(Messages.getMessage("PdfPreferences.ChangeHighlightColor") + ' ');
-        
+
         highlightsHBox.getChildren().addAll(changeHighlightsLabel, highlightsPicker);
 
         //Setup the highlights transparency text field
         final HBox transparencyHBox = new HBox();
         final Label highlightLabel = new Label(Messages.getMessage("PdfPreferences.ChangeHighlightTransparency") + ' ');
-        transparencyHBox.getChildren().addAll(highlightLabel,highlightTF);
+        transparencyHBox.getChildren().addAll(highlightLabel, highlightTF);
 
         //Setup the invert highlights checkbox
         final String invertHighlights = properties.getValue("invertHighlights");
-        if(!invertHighlights.isEmpty() && invertHighlights.equalsIgnoreCase("true")){
+        if (!invertHighlights.isEmpty() && invertHighlights.equalsIgnoreCase("true")) {
             transparencyHBox.setDisable(true);
             highlightsHBox.setDisable(true);
-        }else{
+        } else {
             transparencyHBox.setDisable(false);
             highlightsHBox.setDisable(false);
         }
 
         invertHighlightsCB.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent e) {
-                if(invertHighlightsCB.isSelected()){
+            @Override
+            public void handle(final ActionEvent e) {
+                if (invertHighlightsCB.isSelected()) {
                     transparencyHBox.setDisable(true);
                     highlightsHBox.setDisable(true);
-                }else{
+                } else {
                     transparencyHBox.setDisable(false);
                     highlightsHBox.setDisable(false);
                 }
@@ -736,20 +740,20 @@ public class JavaFXPreferences {
          */
         final Text displayTitle = new Text("Display Colors");
         displayTitle.setFont(titleFont);
-        
+
         //Setup Change Page Color
         final HBox displayColorsHBox = new HBox();
         final Label pageColorLabel = new Label(Messages.getMessage("PdfPreferences.ChangeBackgroundColor") + ' ');
-        
-        
+
+
         displayColorsHBox.getChildren().addAll(pageColorLabel, pageColorPicker);
 
         //Setup Change Text Color
 
         final HBox textColorHB = new HBox();
         final Label textColorLabel = new Label(Messages.getMessage("PdfPreferences.ChangeForegroundColor") + ' ');
-        
-        
+
+
         textColorHB.getChildren().addAll(textColorLabel, textColorPicker);
 
 
@@ -765,11 +769,12 @@ public class JavaFXPreferences {
             changeLineArtColorCB.setDisable(true);
         }
         replaceTextColorCB.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent e) {
-                if(replaceTextColorCB.isSelected()){
+            @Override
+            public void handle(final ActionEvent e) {
+                if (replaceTextColorCB.isSelected()) {
                     textColorHB.setDisable(false);
                     changeLineArtColorCB.setDisable(false);
-                }else{
+                } else {
                     textColorHB.setDisable(true);
                     changeLineArtColorCB.setDisable(true);
                 }
@@ -782,8 +787,7 @@ public class JavaFXPreferences {
         final HBox displayColorHB = new HBox();
         final Label displayColorLabel = new Label(Messages.getMessage("PdfPreferences.ChangeDisplayBackgroundColor") + ' ');
 
-        
-        
+
         displayColorHB.getChildren().addAll(displayColorLabel, displayBGColorPicker);
 
 
@@ -822,12 +826,12 @@ public class JavaFXPreferences {
 
         contentVBox.setPadding(new Insets(contentGap));
         contentVBox.setSpacing(contentGap);
-        contentVBox.getChildren().addAll(title, highlightsTitle, highlightsHBox , transparencyHBox, invertHighlightsCB, displayTitle, displayColorsHBox, replaceTextColorCB,textColorHB,changeLineArtColorCB,replaceDisplayCB,displayColorHB);
-        
+        contentVBox.getChildren().addAll(title, highlightsTitle, highlightsHBox, transparencyHBox, invertHighlightsCB, displayTitle, displayColorsHBox, replaceTextColorCB, textColorHB, changeLineArtColorCB, replaceDisplayCB, displayColorHB);
+
         contentScrollPane.setContent(contentVBox);
         return contentScrollPane;
     }
-    
+
     /**
      * Performs a Bitshift so we can use Swing get sRGB with JavaFX Color.
      *
@@ -1023,10 +1027,10 @@ public class JavaFXPreferences {
 
         final Text versionTitle = new Text(Messages.getMessage("PdfPreferences.ExtensionVersion"));
         versionTitle.setFont(titleFont);
-        
+
         final Hyperlink cidVersion = new Hyperlink();
         String details = getCidVersion(cidVersion);
-        
+
         final Hyperlink jceVersion = new Hyperlink();
         details += getJCEVersion(jceVersion);
 
@@ -1043,7 +1047,7 @@ public class JavaFXPreferences {
         contentVBox.setSpacing(contentGap);
         contentVBox.getChildren().addAll(title, contentGridPane, copyBtn);
         contentScrollPane.setContent(contentVBox);
-        
+
         int y = 0;
         addLineToExtensionGrid(contentGridPane, nameTitle, descriptionTitle, versionTitle, y);
         y++;
@@ -1052,17 +1056,17 @@ public class JavaFXPreferences {
         addLineToExtensionGrid(contentGridPane, jceName, jceDescr, jceVersion, y);
         y++;
         addLineToExtensionGrid(contentGridPane, rhinoName, rhinoDescr, rhinoVersion, y);
-        
+
         return contentScrollPane;
     }
-    
-    private static Button createCopyDetailsButton(final String details){
+
+    private static Button createCopyDetailsButton(final String details) {
         //Setup Copy Details Buttons.
         final Button copyBtn = new Button(Messages.getMessage("PdfPreferences.CopyToClipboard"));
 
         final String finalDetails = "java: " + System.getProperty("java.vendor") + ' ' + System.getProperty("java.version") + '\n'
-            + "os: " + System.getProperty("os.name") + ' ' + System.getProperty("os.version") + ' ' + System.getProperty("os.arch") + '\n'
-            + "jpedal: " + PdfDecoderInt.version + '\n' + details;
+                + "os: " + System.getProperty("os.name") + ' ' + System.getProperty("os.version") + ' ' + System.getProperty("os.arch") + '\n'
+                + "jpedal: " + PdfDecoderInt.version + '\n' + details;
         copyBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent e) {
@@ -1076,8 +1080,8 @@ public class JavaFXPreferences {
         });
         return copyBtn;
     }
-    
-    private static String getRhinoVersion(final Hyperlink versionNode){
+
+    private static String getRhinoVersion(final Hyperlink versionNode) {
         String details = "";
         final java.io.InputStream in = DefaultParser.class.getClassLoader().getResourceAsStream("org/mozilla/javascript/Context.class");
         if (in != null) {
@@ -1110,8 +1114,8 @@ public class JavaFXPreferences {
         }
         return details;
     }
-    
-    private static String getJCEVersion(final Hyperlink versionNode){
+
+    private static String getJCEVersion(final Hyperlink versionNode) {
         String details = "";
         String version = "Unknown Version";
         try {
@@ -1126,7 +1130,7 @@ public class JavaFXPreferences {
             versionNode.setText(version);
             details += "jce: " + version + '\n';
         } catch (final Exception e) {
-            versionNode.setText(Messages.getMessage("PdfExtensions.getText")+' '+e);
+            versionNode.setText(Messages.getMessage("PdfExtensions.getText") + ' ' + e);
 
             versionNode.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
@@ -1141,8 +1145,8 @@ public class JavaFXPreferences {
         }
         return details;
     }
-    
-    private static String getCidVersion(final Hyperlink versionNode){
+
+    private static String getCidVersion(final Hyperlink versionNode) {
         String details = "";
         try {
             if (JavaFXPreferences.class.getResourceAsStream("/org/jpedal/res/cid/00_ReadMe.pdf") != null) {
@@ -1167,12 +1171,12 @@ public class JavaFXPreferences {
         return details;
     }
 
-    private static void addLineToExtensionGrid(final GridPane contentGridPane, final Node name, final Node desc, final Node value, final int y){
+    private static void addLineToExtensionGrid(final GridPane contentGridPane, final Node name, final Node desc, final Node value, final int y) {
         contentGridPane.add(name, 0, y);
         contentGridPane.add(desc, 1, y);
         contentGridPane.add(value, 2, y);
     }
-    
+
     private static void updateSettings(final GUIFactory currentGUI) {
 
         /*
@@ -1192,10 +1196,10 @@ public class JavaFXPreferences {
         properties.setValue("enhancedViewerMode", String.valueOf(enhancedViewerCB.isSelected()));
         properties.setValue("enhanceFractionalLines", String.valueOf(enhancedFractionalLinesCB.isSelected()));
         int borderTypeValue = 1;
-        if (!showBorderCB.isSelected()){
+        if (!showBorderCB.isSelected()) {
             borderTypeValue = 0;
-        }        
-         properties.setValue("borderType", String.valueOf(borderTypeValue));
+        }
+        properties.setValue("borderType", String.valueOf(borderTypeValue));
         properties.setValue("pageInsets", String.valueOf(pageInsetsTF.getText()));
         // properties.setValue("startView", String.valueOf(displayCombo.getValue()));
         properties.setValue("enhancedFacingMode", String.valueOf(enablePageFlipCB.isSelected()));
@@ -1218,8 +1222,8 @@ public class JavaFXPreferences {
         properties.setValue("allowScrollwheelZoom", String.valueOf(wheelZoomCB.isSelected()));
         properties.setValue("showMouseSelectionBox", String.valueOf(mouseSelectCB.isSelected()));
         properties.setValue("transitionType", transitionSelect.getSelectionModel().getSelectedItem());
-        ((JavaFxGUI)currentGUI).updateTransitionType();
-        if (speech!=null) {
+        ((JavaFxGUI) currentGUI).updateTransitionType();
+        if (speech != null) {
             properties.setValue("voice", String.valueOf(voiceSelect.getValue()));
         }
 
@@ -1231,18 +1235,18 @@ public class JavaFXPreferences {
         properties.setValue("highlightBoxColor", String.valueOf(shiftColorSpaceToSwing(col)));
         properties.setValue("highlightComposite", String.valueOf(highlightTF.getText()));
         properties.setValue("invertHighlights", String.valueOf(invertHighlightsCB.isSelected()));
-        
+
         //Save Page Color
         col = pageColorPicker.getValue();
         properties.setValue("vbgColor", String.valueOf(shiftColorSpaceToSwing(col)));
         properties.setValue("replaceDocumentTextColors", String.valueOf(replaceTextColorCB.isSelected()));
-        
+
         //Save Display Color
         col = displayBGColorPicker.getValue();
         properties.setValue("pdfDisplayBackground", String.valueOf(shiftColorSpaceToSwing(col)));
         properties.setValue("changeTextAndLineart", String.valueOf(changeLineArtColorCB.isSelected()));
         properties.setValue("replacePdfDisplayBackground", String.valueOf(replaceDisplayCB.isSelected()));
-        
+
         //Save Text Color
         col = textColorPicker.getValue();
         properties.setValue("vfgColor", String.valueOf(shiftColorSpaceToSwing(col)));
@@ -1259,37 +1263,37 @@ public class JavaFXPreferences {
         properties.setValue("defaultPagesize", String.valueOf(paperSizesCombo.getValue()));
         properties.setValue("defaultDPI", String.valueOf(defaultDPITF.getText()));
         properties.setValue("printerBlacklist", String.valueOf(blackListTF.getText()));
-        
+
         //Save all options found in a tree
         saveGUIPreferences(currentGUI);
 
     }
-    
-    private static void saveMenuPreferencesChildren(final CheckBoxTreeItem<String> root, final GUIFactory gui){
-        for(int i=0; i!=root.getChildren().size(); i++){
-            final CheckBoxTreeItem<String> node = (CheckBoxTreeItem<String>)root.getChildren().get(i);
+
+    private static void saveMenuPreferencesChildren(final CheckBoxTreeItem<String> root, final GUIFactory gui) {
+        for (int i = 0; i != root.getChildren().size(); i++) {
+            final CheckBoxTreeItem<String> node = (CheckBoxTreeItem<String>) root.getChildren().get(i);
             final String value = (reverseMessage.get(node.getValue()));
-            if(node.isSelected()){
+            if (node.isSelected()) {
                 properties.setValue(value, "true");
                 gui.alterProperty(value, true);
-            }else{
+            } else {
                 properties.setValue(value, "false");
                 gui.alterProperty(value, false);
             }
-            
-            if(!node.getChildren().isEmpty()){
+
+            if (!node.getChildren().isEmpty()) {
                 saveMenuPreferencesChildren(node, gui);
             }
         }
     }
-    
-    private static void saveGUIPreferences(final GUIFactory gui){
-    
-        for(int i=0; i!=tabs.getTabs().size(); i++){
+
+    private static void saveGUIPreferences(final GUIFactory gui) {
+
+        for (int i = 0; i != tabs.getTabs().size(); i++) {
             final Tab currentTab = tabs.getTabs().get(i);
-            final TreeView tree = (TreeView)currentTab.getContent();
-            final CheckBoxTreeItem<String> root = (CheckBoxTreeItem<String>)tree.getRoot();
-            if(!root.getChildren().isEmpty()){
+            final TreeView tree = (TreeView) currentTab.getContent();
+            final CheckBoxTreeItem<String> root = (CheckBoxTreeItem<String>) tree.getRoot();
+            if (!root.getChildren().isEmpty()) {
                 saveMenuPreferencesChildren(root, gui);
             }
         }
@@ -1358,7 +1362,7 @@ public class JavaFXPreferences {
         } else {
             enhancedFractionalLinesCB.setSelected(false);
         }
-        
+
         propValue = properties.getValue("borderType");
         if (!propValue.isEmpty()) {
             if (Integer.parseInt(propValue) == 1) {
@@ -1469,9 +1473,9 @@ public class JavaFXPreferences {
         }
 
         voiceSelect.setValue(properties.getValue("voice"));
-        
+
         propValue = properties.getValue("transitionType");
-        if(!propValue.isEmpty()){
+        if (!propValue.isEmpty()) {
             transitionSelect.getSelectionModel().select(propValue);
         }
         
@@ -1511,19 +1515,19 @@ public class JavaFXPreferences {
          */
         propValue = properties.getValue("highlightBoxColor");
         int hBoxColor;
-        if(!propValue.isEmpty()){
+        if (!propValue.isEmpty()) {
             hBoxColor = Integer.parseInt(propValue);
-        }else{
+        } else {
             hBoxColor = DecoderOptions.highlightColor.getRGB();
         }
         highlightsPicker = new ColorPicker(shiftColorSpaceToFX(hBoxColor));
-        
+
         highlightTF = new TextField();
         final String hComposite = properties.getValue("highlightComposite");
-        if(!hComposite.isEmpty()) {
+        if (!hComposite.isEmpty()) {
             highlightTF.setText(hComposite);
         }
-        
+
         invertHighlightsCB = new CheckBox(Messages.getMessage("PdfPreferences.InvertHighlight"));
         final String invertHighlights = properties.getValue("invertHighlights");
         if (!invertHighlights.isEmpty() && invertHighlights.equalsIgnoreCase("true")) {
@@ -1533,36 +1537,36 @@ public class JavaFXPreferences {
         }
 
         propValue = properties.getValue("vbgColor");
-        if(!propValue.isEmpty()){
+        if (!propValue.isEmpty()) {
             hBoxColor = Integer.parseInt(propValue);
-        }else if(DecoderOptions.backgroundColor!=null){
+        } else if (DecoderOptions.backgroundColor != null) {
             hBoxColor = DecoderOptions.backgroundColor.getRGB();
         }
         pageColorPicker = new ColorPicker(shiftColorSpaceToFX(hBoxColor));
-        
+
         replaceTextColorCB = new CheckBox("Replace Document Text Colors");
         final String replaceTextCol = properties.getValue("replaceDocumentTextColors");
         if (!replaceTextCol.isEmpty() && replaceTextCol.equalsIgnoreCase("true")) {
             replaceTextColorCB.setSelected(true);
-        }else{
+        } else {
             replaceTextColorCB.setSelected(false);
         }
-        
+
         propValue = properties.getValue("vfgColor");
-        if(!propValue.isEmpty()){
+        if (!propValue.isEmpty()) {
             hBoxColor = Integer.parseInt(propValue);
         }
         textColorPicker = new ColorPicker(shiftColorSpaceToFX(hBoxColor));
-        
+
         changeLineArtColorCB = new CheckBox("Change Color of Text and Line Art");
 
         final String changeTextAndLineart = properties.getValue("changeTextAndLineart");
-        if(!changeTextAndLineart.isEmpty() && changeTextAndLineart.equalsIgnoreCase("true")){
+        if (!changeTextAndLineart.isEmpty() && changeTextAndLineart.equalsIgnoreCase("true")) {
             changeLineArtColorCB.setSelected(true);
-        }else{
+        } else {
             changeLineArtColorCB.setSelected(false);
         }
-        
+
         replaceDisplayCB = new CheckBox("Replace Display Background Color");
 
         final String replaceDisplayCol = properties.getValue("replacePdfDisplayBackground");
@@ -1571,14 +1575,13 @@ public class JavaFXPreferences {
         } else {
             replaceDisplayCB.setSelected(false);
         }
-        
+
         propValue = properties.getValue("pdfDisplayBackground");
-        if(!propValue.isEmpty()){
+        if (!propValue.isEmpty()) {
             hBoxColor = Integer.parseInt(propValue);
         }
         displayBGColorPicker = new ColorPicker(shiftColorSpaceToFX(hBoxColor));
-        
-        
+
 
     }
 }

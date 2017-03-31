@@ -60,7 +60,7 @@ import org.jpedal.utils.Messages;
  * It can be called by going to Help then About on the main menu-bar.
  */
 public class JavaFXInfo {
-    
+
     public static void execute(final Object[] args) {
         if (args == null) {
             getInfoBox();
@@ -68,17 +68,17 @@ public class JavaFXInfo {
 
         }
     }
-    
-    private static void getInfoBox(){
 
-        final Text title = new Text ("JavaFX Viewer Information");
+    private static void getInfoBox() {
+
+        final Text title = new Text("JavaFX Viewer Information");
         title.setTextAlignment(TextAlignment.CENTER);
         title.setFont(Font.font("SansSerif", FontWeight.BOLD, 14));
         final ImageView imageView;
         final Hyperlink link;
-         
-        final Text info ;
-   
+
+        final Text info;
+
         if (OpenViewerFX.isOpenFX) {
             info = new Text("OpenViewerFX is a JavaFX PDF Viewer written in JavaFX and released without any warranty or support under an LGPL license.\n"
                     + "This Application is updated regularly and a supported, enhanced version is available as part of the commercial JPedal Java PDF library.");
@@ -93,16 +93,16 @@ public class JavaFXInfo {
             imageView = new ImageView(new Image("/org/jpedal/examples/viewer/res/logo.png"));
             link = new Hyperlink("Take Me To JPedal Library");
         }
-        
+
         info.setWrappingWidth(350);
         info.setTextAlignment(TextAlignment.JUSTIFY);
-        info.setFont(Font.font("SansSerif", FontWeight.NORMAL,12));
-        
+        info.setFont(Font.font("SansSerif", FontWeight.NORMAL, 12));
+
         link.setBorder(Border.EMPTY);
-        
+
         final Button okButton = new Button("OK");
-        okButton.setPadding(new Insets(7,25,7,25));
-        
+        okButton.setPadding(new Insets(7, 25, 7, 25));
+
         final Separator sepBottom = new Separator();
         sepBottom.setPrefHeight(50);
         sepBottom.setVisible(false);
@@ -121,42 +121,42 @@ public class JavaFXInfo {
         sepAfterLink.setOrientation(Orientation.HORIZONTAL);
 
         final VBox vBox = new VBox();
-        vBox.getChildren().addAll(title,sepTop,info,sepBottom,imageView,sepAfterImg,link,sepAfterLink,okButton);
+        vBox.getChildren().addAll(title, sepTop, info, sepBottom, imageView, sepAfterImg, link, sepAfterLink, okButton);
         vBox.setAlignment(Pos.CENTER);
         vBox.setPadding(new Insets(10));
-        
-        final FXDialog newDialog = new FXDialog(null, Modality.APPLICATION_MODAL, vBox, 400,350);
-        
-       if(OpenViewerFX.isOpenFX){
+
+        final FXDialog newDialog = new FXDialog(null, Modality.APPLICATION_MODAL, vBox, 400, 350);
+
+        if (OpenViewerFX.isOpenFX) {
             newDialog.setTitle("About OpenViewerFX");
-       }else{
-           newDialog.setTitle("About JPedal");
-       }
+        } else {
+            newDialog.setTitle("About JPedal");
+        }
         newDialog.setResizeable(false);
-      
+
         //Open default-browser window to support & docs page when link is clicked.
         link.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent e) {
                 try {
-                    
+
                     BrowserLauncher.openURL("http://www.idrsolutions.com/java-pdf-library/");
                     newDialog.close();
                 } catch (final Exception ex) {
-                   ex.printStackTrace();
+                    ex.printStackTrace();
                 }
             }
         });
-        
-         okButton.setOnAction(new EventHandler<ActionEvent>() {
+
+        okButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(final ActionEvent event) {
                 newDialog.close();
             }
         });
-        
+
         newDialog.show();
     }
-    
+
 }

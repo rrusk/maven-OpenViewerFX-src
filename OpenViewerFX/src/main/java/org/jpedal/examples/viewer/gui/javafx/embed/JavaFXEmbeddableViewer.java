@@ -39,44 +39,44 @@ import javafx.scene.layout.Pane;
 import org.jpedal.examples.viewer.OpenViewerFX;
 
 /**
- * A wrapper class for OpenViewerFX which allows the Viewer to be 
+ * A wrapper class for OpenViewerFX which allows the Viewer to be
  * recognised as an embeddable element in JavaFX Scene Builder (2.0)
- * 
+ *
  * @author Simon
  */
 public class JavaFXEmbeddableViewer extends Pane {
-    
+
     private OpenViewerFX viewer;
-    
-    JavaFXEmbeddableViewer(){
+
+    JavaFXEmbeddableViewer() {
         viewer = null;
-        
+
         final Pane thisPane = this;
-        
+
         // Running later as OpenViewerFX was creating some issue (Class load related, I believe)
         // Which caused this class to not be picked up by SceneBuilder
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     viewer = new OpenViewerFX(thisPane, null);
                     viewer.setupViewer();
-                    
+
                     final BorderPane root = viewer.getRoot();
-                    
+
                     // Bind the viewer to match the dimensions on this class
                     root.prefWidthProperty().bind(thisPane.prefWidthProperty());
                     root.prefHeightProperty().bind(thisPane.prefHeightProperty());
-                }catch (final Exception e){
+                } catch (final Exception e) {
                     System.err.println(e.getMessage());
                 }
             }
         });
-        
+
     }
-    
-    public OpenViewerFX getOpenViewerFX(){
-        if(viewer==null){
+
+    public OpenViewerFX getOpenViewerFX() {
+        if (viewer == null) {
             System.err.println("OpenViewerFX has not been initialised yet - Please run in Platform.runLater()");
         }
         return viewer;

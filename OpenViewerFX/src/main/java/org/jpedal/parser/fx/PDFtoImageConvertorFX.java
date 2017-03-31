@@ -34,6 +34,7 @@ package org.jpedal.parser.fx;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.CountDownLatch;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
@@ -55,44 +56,45 @@ import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.render.FXDisplay;
 import org.jpedal.render.FXDisplayForRasterizing;
 
-public class PDFtoImageConvertorFX extends PDFtoImageConvertor{
+public class PDFtoImageConvertorFX extends PDFtoImageConvertor {
 
     int pageIndex;
-    
-     public PDFtoImageConvertorFX(final float multiplyer, final DecoderOptions options) {
+
+    public PDFtoImageConvertorFX(final float multiplyer, final DecoderOptions options) {
         super(multiplyer, options);
         isFX = true;
-        
+
     }
-   
+
     @Override
     public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, final boolean isTransparent) {
-        this.pageIndex=pageIndex;
-        return imageDisplay = new FXDisplayForRasterizing(pageIndex,!isTransparent, 5000, localStore); //note !isTransparent as actually addBackground
-       
+        this.pageIndex = pageIndex;
+        return imageDisplay = new FXDisplayForRasterizing(pageIndex, !isTransparent, 5000, localStore); //note !isTransparent as actually addBackground
+
     }
-    
+
     @Override
     public BufferedImage pageToImage(final boolean imageIsTransparent, final PdfStreamDecoder currentImageDecoder,
-            final float scaling, final PdfObject pdfObject,final AcroRenderer formRenderer) throws PdfException {
+                                     final float scaling, final PdfObject pdfObject, final AcroRenderer formRenderer) throws PdfException {
 
         final SimpleObjectProperty<BufferedImage> imageProperty = new SimpleObjectProperty<BufferedImage>();
         // Locks the Thread until the image is generated
         final CountDownLatch latch = new CountDownLatch(1);
-        
-        if(Platform.isFxApplicationThread()){
-            snapshot(currentImageDecoder, scaling, pdfObject, null, imageProperty,formRenderer);
-        }else{
+
+        if (Platform.isFxApplicationThread()) {
+            snapshot(currentImageDecoder, scaling, pdfObject, null, imageProperty, formRenderer);
+        } else {
             Platform.runLater(new Runnable() {
-                @Override public void run() {
-                    snapshot(currentImageDecoder, scaling, pdfObject, latch, imageProperty,formRenderer);
+                @Override
+                public void run() {
+                    snapshot(currentImageDecoder, scaling, pdfObject, latch, imageProperty, formRenderer);
                 }
             });
-        }     
-        
+        }
+
         try {
             // This will hang if we're on the FX Thread
-            if(!Platform.isFxApplicationThread()) {
+            if (!Platform.isFxApplicationThread()) {
                 latch.await();
             }
         } catch (final InterruptedException ex) {
@@ -100,49 +102,50 @@ public class PDFtoImageConvertorFX extends PDFtoImageConvertor{
         }
         return imageProperty.get();
     }
-    
-    private void snapshot(final PdfStreamDecoder currentImageDecoder, final float scaling, final PdfObject pdfObject, 
-            final CountDownLatch latch, final SimpleObjectProperty<BufferedImage> imageProperty,final AcroRenderer formRenderer){
-        
-        final Pane g=new Pane();
-        
+
+    private void snapshot(final PdfStreamDecoder currentImageDecoder, final float scaling, final PdfObject pdfObject,
+                          final CountDownLatch latch, final SimpleObjectProperty<BufferedImage> imageProperty, final AcroRenderer formRenderer) {
+
+        final Pane g = new Pane();
+
         try {
             formRenderer.getCompData().setRootDisplayComponent(g);
-            
-          // currentImageDecoder.setObjectValue(ValueTypes.DirectRendering, null);//(Graphics2D) graphics);
+
+            // currentImageDecoder.setObjectValue(ValueTypes.DirectRendering, null);//(Graphics2D) graphics);
             currentImageDecoder.decodePageContent(pdfObject);
-            
+
             formRenderer.createDisplayComponentsForPage(pageIndex, currentImageDecoder);
-            
+
             formRenderer.displayComponentsOnscreen(pageIndex, pageIndex);
             formRenderer.getCompData().resetScaledLocation(scaling, 0, 0);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }
-        
+
         final Group group;
-        group=((FXDisplay)imageDisplay).getFXPane();
-       
+        group = ((FXDisplay) imageDisplay).getFXPane();
+
         group.getChildren().addAll(g.getChildren());
-        
+
         // Transform from PDF coordinates and apply scaling
-        group.getTransforms().add(Transform.affine(1 * scaling,0,0,-1 * scaling,crx,h+cry));
-        final Scene scene=new Scene(group,w,h);
+        group.getTransforms().add(Transform.affine(1 * scaling, 0, 0, -1 * scaling, crx, h + cry));
+        final Scene scene = new Scene(group, w, h);
 
         // Fixes blending
         scene.setFill(Color.rgb(255, 255, 255, 1.0));
-        
-        if(latch != null){
+
+        if (latch != null) {
             // Async call to snapshot
             scene.snapshot(new Callback<SnapshotResult, Void>() {
-                @Override public Void call(final SnapshotResult p) {
+                @Override
+                public Void call(final SnapshotResult p) {
                     imageProperty.set(SwingFXUtils.fromFXImage(p.getImage(), null));
                     latch.countDown();
                     return null;
                 }
-            },null);
-        }else{ // If we're on the FX Thread, get the snapshot straight away.
-            imageProperty.set(SwingFXUtils.fromFXImage(scene.snapshot(null),null));
+            }, null);
+        } else { // If we're on the FX Thread, get the snapshot straight away.
+            imageProperty.set(SwingFXUtils.fromFXImage(scene.snapshot(null), null));
         }
     }
 }

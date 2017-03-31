@@ -33,9 +33,8 @@
 package org.jpedal.examples.viewer.gui;
 
 /**
- *
  * @author markee
  */
 public class CommandListenerImpl {
-    
+
 }

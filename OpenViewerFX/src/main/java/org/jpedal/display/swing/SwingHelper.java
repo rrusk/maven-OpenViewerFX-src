@@ -22,7 +22,7 @@ import java.awt.Graphics2D;
 
 @SuppressWarnings("ALL")
 public class SwingHelper {
-  
+
     public static void scaleDisplay(Graphics2D g2, int crx, int cry, int crw, int crh) {
         //   throw new UnsupportedOperationException("Not supported yet."); 
     }

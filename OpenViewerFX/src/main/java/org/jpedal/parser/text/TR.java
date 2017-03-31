@@ -38,10 +38,9 @@ import org.jpedal.objects.GraphicsState;
 public class TR {
 
 
-
     public static int execute(final int key, final GraphicsState gs) {
 
-        int value=key;
+        int value = key;
 
         //Text render mode
         switch (key) {

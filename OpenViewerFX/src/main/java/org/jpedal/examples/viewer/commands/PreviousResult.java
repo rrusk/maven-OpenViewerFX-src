@@ -33,9 +33,11 @@
 package org.jpedal.examples.viewer.commands;
 
 import org.jpedal.PdfDecoderInt;
+
 import static org.jpedal.examples.viewer.Commands.FIRST_DOCUMENT_SEARCH_RESULT_NOW_SHOWN;
 import static org.jpedal.examples.viewer.Commands.SEARCH_NOT_FOUND;
 import static org.jpedal.examples.viewer.Commands.SEARCH_RETURNED_TO_START;
+
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.gui.generic.GUISearchList;
 import org.jpedal.examples.viewer.gui.generic.GUISearchWindow;
@@ -50,16 +52,16 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
  */
 public class PreviousResult {
 
-    public static Object execute(final Object[] args,  final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final GUISearchWindow searchFrame) {
-        
+    public static Object execute(final Object[] args, final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final GUISearchWindow searchFrame) {
+
         Object status = null;
-        
+
         GUISearchList results = null;
-        
+
         if (args == null) {
-            
+
             results = searchFrame.getResults(commonValues.getCurrentPage());
-            
+
             int index = results.getSelectedIndex();
 
             if (index < 0) {
@@ -106,7 +108,7 @@ public class PreviousResult {
             currentGUI.setResults(results);
             results.setSelectedIndex(index);
 
-            if (!Values.isProcessing()) {//{if (!event.getValueIsAdjusting()) {
+            if (!Values.isProcessing()) { // { if (!event.getValueIsAdjusting()) {
 
                 final float scaling = currentGUI.getScaling();
                 //int inset=currentGUI.getPDFDisplayInset();
@@ -150,38 +152,38 @@ public class PreviousResult {
                             }
                         }
 
-                        if ((currPage != nextPage) && (commonValues.getAllHighlightsShown())){
-                                final Vector_Rectangle_Int storageVector = new Vector_Rectangle_Int();
+                        if ((currPage != nextPage) && (commonValues.getAllHighlightsShown())) {
+                            final Vector_Rectangle_Int storageVector = new Vector_Rectangle_Int();
 
-                                Integer kInteger;
+                            Integer kInteger;
 
-                                //Integer allKeys = new Integer(id);
-                                for (int k = 0; k != results.getResultCount(); k++) {
+                            //Integer allKeys = new Integer(id);
+                            for (int k = 0; k != results.getResultCount(); k++) {
 
-                                    kInteger = k;
-                                    //int currentPage = ((Integer)newPage).intValue();
-                                    if (results.getTextPages().get(kInteger) == nextPage) {
+                                kInteger = k;
+                                //int currentPage = ((Integer)newPage).intValue();
+                                if (results.getTextPages().get(kInteger) == nextPage) {
 
-                                        final Object h = searchFrame.getTextRectangles().get(kInteger);
+                                    final Object h = searchFrame.getTextRectangles().get(kInteger);
 
-                                        if (h instanceof int[]) {
-                                            storageVector.addElement((int[]) h);
-                                        }
-                                        if (h instanceof int[][]) {
-                                            final int[][] areas = (int[][]) h;
-                                            for (int i = 0; i != areas.length; i++) {
-                                                storageVector.addElement(areas[i]);
-                                            }
+                                    if (h instanceof int[]) {
+                                        storageVector.addElement((int[]) h);
+                                    }
+                                    if (h instanceof int[][]) {
+                                        final int[][] areas = (int[][]) h;
+                                        for (int i = 0; i != areas.length; i++) {
+                                            storageVector.addElement(areas[i]);
                                         }
                                     }
                                 }
+                            }
 
-                                storageVector.trim();
-                                final int[][] finalHighlight;
-                                finalHighlight = storageVector.get();
-                                decode_pdf.getTextLines().addHighlights(finalHighlight, true, nextPage);
+                            storageVector.trim();
+                            final int[][] finalHighlight;
+                            finalHighlight = storageVector.get();
+                            decode_pdf.getTextLines().addHighlights(finalHighlight, true, nextPage);
                         }
-                        
+
                         if (!commonValues.getAllHighlightsShown()) {
                             final Object highlight = results.textAreas().get(key);
                             if (highlight instanceof int[]) {
@@ -206,8 +208,8 @@ public class PreviousResult {
                 && results.getSelectedIndex() == 0) {
             status = FIRST_DOCUMENT_SEARCH_RESULT_NOW_SHOWN;
         }
-        
+
         return status;
-        
+
     }
 }

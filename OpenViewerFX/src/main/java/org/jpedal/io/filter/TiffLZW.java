@@ -156,7 +156,7 @@ public class TiffLZW {
             return code;
         } catch (final ArrayIndexOutOfBoundsException e) {
 
-            System.err.println("Exception in findNext "+e);
+            System.err.println("Exception in findNext " + e);
             return 257;
         }
     }

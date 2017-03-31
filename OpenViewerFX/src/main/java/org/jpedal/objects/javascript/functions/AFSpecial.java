@@ -38,50 +38,50 @@ import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.raw.FormObject;
 import org.jpedal.sun.PrintfFormat;
 
-public class AFSpecial extends JSFunction{
+public class AFSpecial extends JSFunction {
 
     public AFSpecial(final AcroRenderer acro, final FormObject formObject) {
-        super(acro,formObject);
+        super(acro, formObject);
     }
 
     @Override
     public int execute(final String js, final String[] args, final int type, final int event, final char keyPressed) {
 
-        if(args==null ){
-            debug("Unknown implementation in "+js);
+        if (args == null) {
+            debug("Unknown implementation in " + js);
 
-        }else if(args.length<1){
+        } else if (args.length < 1) {
             debug("Values length is less than 1");
-        }else{
+        } else {
 
             //settings - if no value will default to special
-            int specialID=-1;
-            final char c=args[1].charAt(0);
+            int specialID = -1;
+            final char c = args[1].charAt(0);
 
-            if(args[1].length()==1 && c>='0' && c<='3' ) //ignore if special as would throw exception
+            if (args[1].length() == 1 && c >= '0' && c <= '3') //ignore if special as would throw exception
             {
                 specialID = Integer.parseInt(args[1]);
             }
 
-            boolean isExecuted=true; //asume true and reset if not
+            boolean isExecuted = true; //asume true and reset if not
 
             //current form value
             final String currentVal;
 
-            currentVal=(String)formObject.getFormValue();
-            
-            String processedVal="";
+            currentVal = (String) formObject.getFormValue();
 
-            if(type==KEYSTROKE){
+            String processedVal = "";
+
+            if (type == KEYSTROKE) {
 
                 //massage data with regexp
-                switch (specialID){
+                switch (specialID) {
 
                     case 0:  //zip
 
-                        if(event== ActionHandler.FOCUS_EVENT) {
+                        if (event == ActionHandler.FOCUS_EVENT) {
                             processedVal = applyRegexp(currentVal, new String[]{"\\d{5}"});
-                        } else if(event== ActionHandler.MOUSERELEASED) {
+                        } else if (event == ActionHandler.MOUSERELEASED) {
                             processedVal = applyRegexp(currentVal, new String[]{"\\d{0,5}"});
                         }
 
@@ -89,9 +89,9 @@ public class AFSpecial extends JSFunction{
 
                     case 1:  //extended zip
 
-                        if(event== ActionHandler.FOCUS_EVENT) {
+                        if (event == ActionHandler.FOCUS_EVENT) {
                             processedVal = applyRegexp(currentVal, new String[]{"\\d{5}(\\.|[- ])?\\d{4}"});
-                        } else if(event== ActionHandler.MOUSERELEASED) {
+                        } else if (event == ActionHandler.MOUSERELEASED) {
                             processedVal = applyRegexp(currentVal, new String[]{"\\d{0,5}(\\.|[- ])?\\d{0,4}"});
                         }
 
@@ -100,11 +100,11 @@ public class AFSpecial extends JSFunction{
 
                     case 2:  //phone
 
-                        if(event== ActionHandler.FOCUS_EVENT) {
+                        if (event == ActionHandler.FOCUS_EVENT) {
                             processedVal = applyRegexp(currentVal,
                                     new String[]{"\\d{3}(\\.|[- ])?\\d{4}", "\\d{3}(\\.|[- ])?\\d{3}(\\.|[- ])?\\d{4}",
                                             "\\(\\d{3}\\)(\\.|[- ])?\\d{3}(\\.|[- ])?\\d{4}", "011(\\.|[- \\d])*"});
-                        } else if(event== ActionHandler.MOUSERELEASED) {
+                        } else if (event == ActionHandler.MOUSERELEASED) {
                             processedVal = applyRegexp(currentVal,
                                     new String[]{"\\d{0,3}(\\.|[- ])?\\d{0,3}(\\.|[- ])?\\d{0,4}",
                                             "\\(\\d{0,3}", "\\(\\d{0,3}\\)(\\.|[- ])?\\d{0,3}(\\.|[- ])?\\d{0,4}",
@@ -116,10 +116,10 @@ public class AFSpecial extends JSFunction{
 
                     case 3:  //SSN
 
-                        if(event== ActionHandler.FOCUS_EVENT) {
+                        if (event == ActionHandler.FOCUS_EVENT) {
                             processedVal = applyRegexp(currentVal,
                                     new String[]{"\\d{3}(\\.|[- ])?\\d{2}(\\.|[- ])?\\d{4}"});
-                        } else if(event== ActionHandler.MOUSERELEASED) {
+                        } else if (event == ActionHandler.MOUSERELEASED) {
                             processedVal = applyRegexp(currentVal,
                                     new String[]{"\\d{0,3}(\\.|[- ])?\\d{0,2}(\\.|[- ])?\\d{0,4}"});
                         }
@@ -128,7 +128,7 @@ public class AFSpecial extends JSFunction{
 
                     default:  //special
 
-                        if(event== ActionHandler.FOCUS_EVENT || event== ActionHandler.MOUSERELEASED) {
+                        if (event == ActionHandler.FOCUS_EVENT || event == ActionHandler.MOUSERELEASED) {
                             processedVal = applyRegexp(currentVal, new String[]{args[1]});
                         }
 
@@ -136,40 +136,40 @@ public class AFSpecial extends JSFunction{
                 }
 
                 //if its changed its not valid
-                if(event==ActionHandler.FOCUS_EVENT){
+                if (event == ActionHandler.FOCUS_EVENT) {
 
-                    if(!processedVal.equals(currentVal)){
-                        maskAlert(ErrorCodes.JSInvalidSpecialFormat,args);
+                    if (!processedVal.equals(currentVal)) {
+                        maskAlert(ErrorCodes.JSInvalidSpecialFormat, args);
                         execute(js, args, type, event, keyPressed);
-                    }else{
+                    } else {
 
                         formObject.setLastValidValue(processedVal);
-                        formObject.updateValue(processedVal,false, true); //write back
+                        formObject.updateValue(processedVal, false, true); //write back
                     }
 
-                }else if(event==ActionHandler.MOUSEPRESSED || event ==ActionHandler.MOUSERELEASED){ //we do not check on keystrokes
+                } else if (event == ActionHandler.MOUSEPRESSED || event == ActionHandler.MOUSERELEASED) { //we do not check on keystrokes
 
-                }else {
+                } else {
                     isExecuted = false;
                 }
 
-            }else if(type==FORMAT){
+            } else if (type == FORMAT) {
 
                 /*
                  * strip out number value or 0 for no value
                  */
-                final float number=0;
+                final float number = 0;
 
-                String mask="";
+                String mask = "";
 
-                if(currentVal!=null && !currentVal.isEmpty()){
+                if (currentVal != null && !currentVal.isEmpty()) {
 
                     //massage data with regexp
-                    switch (specialID){
+                    switch (specialID) {
 
                         case 0:  //zip
 
-                            mask="99999";
+                            mask = "99999";
 
                             break;
 
@@ -181,9 +181,9 @@ public class AFSpecial extends JSFunction{
                         case 2:  //phone
 
                             //count digits and choose if 'local' or area
-                            final int digitCount=countDigits(currentVal);
+                            final int digitCount = countDigits(currentVal);
 
-                            if (digitCount >9 ) {
+                            if (digitCount > 9) {
                                 mask = "(999) 999-9999";
                             } else {
                                 mask = "999-9999";
@@ -198,42 +198,41 @@ public class AFSpecial extends JSFunction{
                             break;
 
                         default:
-                            isExecuted=false;
+                            isExecuted = false;
                             break;
                     }
 
                     //apply mask
-                    if(isExecuted) {
+                    if (isExecuted) {
                         processedVal = new PrintfFormat(mask).sprintf(number);
                     }
 
                     formObject.setLastValidValue(processedVal);
-                    formObject.updateValue(processedVal,false, true);  //write back
+                    formObject.updateValue(processedVal, false, true);  //write back
 
 
                 }
-            }else {
+            } else {
                 isExecuted = false;
             }
 
 
-
-            if(!isExecuted) {
+            if (!isExecuted) {
                 debug("Unknown setting or command " + args[0] + " in " + js);
             }
         }
-        
+
         return 0;
     }
 
     //count numbers in string
     private static int countDigits(final String currentVal) {
 
-        int count=0;
-        final int len=currentVal.length();
-        for(int i=0;i<len;i++){
-            final char c=currentVal.charAt(i);
-            if(c>='0' && c<='9') {
+        int count = 0;
+        final int len = currentVal.length();
+        for (int i = 0; i < len; i++) {
+            final char c = currentVal.charAt(i);
+            if (c >= '0' && c <= '9') {
                 count++;
             }
         }

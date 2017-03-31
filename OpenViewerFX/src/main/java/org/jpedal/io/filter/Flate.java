@@ -37,6 +37,7 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.Inflater;
+
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -45,10 +46,10 @@ import org.jpedal.utils.repositories.FastByteArrayOutputStream;
 /**
  * flate
  */
-public class Flate extends BaseFilter implements PdfFilter{
+public class Flate extends BaseFilter implements PdfFilter {
 
     //default values
-    private int predictor = 1,colors = 1,bitsPerComponent = 8,columns = 1;
+    private int predictor = 1, colors = 1, bitsPerComponent = 8, columns = 1;
 
     private boolean hasError;
 
@@ -56,21 +57,21 @@ public class Flate extends BaseFilter implements PdfFilter{
 
         super(decodeParms);
 
-        if(decodeParms!=null){
+        if (decodeParms != null) {
 
             final int newBitsPerComponent = decodeParms.getInt(PdfDictionary.BitsPerComponent);
-            if(newBitsPerComponent!=-1) {
-                bitsPerComponent=newBitsPerComponent;
+            if (newBitsPerComponent != -1) {
+                bitsPerComponent = newBitsPerComponent;
             }
 
             final int newColors = decodeParms.getInt(PdfDictionary.Colors);
-            if(newColors!=-1) {
-                colors=newColors;
+            if (newColors != -1) {
+                colors = newColors;
             }
 
             final int columnsSet = decodeParms.getInt(PdfDictionary.Columns);
-            if(columnsSet!=-1) {
-                columns=columnsSet;
+            if (columnsSet != -1) {
+                columns = columnsSet;
             }
 
             predictor = decodeParms.getInt(PdfDictionary.Predictor);
@@ -80,27 +81,26 @@ public class Flate extends BaseFilter implements PdfFilter{
 
     /**
      * flate decode - use a byte array stream to decompress data in memory
-     *
      */
     @Override
     public byte[] decode(byte[] data) throws Exception {
-        
-        if(data[0] ==0 && data[1] == 0 && data[2]==0){ //no flate flags found so return the raw data : case 24436
+
+        if (data[0] == 0 && data[1] == 0 && data[2] == 0) { //no flate flags found so return the raw data : case 24436
             return data;
         }
 
         int bufSize = 512000;
-        FastByteArrayOutputStream bos=null;
-        boolean failed=true;
+        FastByteArrayOutputStream bos = null;
+        boolean failed = true;
 
-        final int orgSize=data.length;
+        final int orgSize = data.length;
 
         /*
          * decompress byte[]
          */
         if (data != null) {
 
-            while(failed){ //sometimes partly valid so loop to try this
+            while (failed) { //sometimes partly valid so loop to try this
 
                 // create a inflater and initialize it Inflater inf=new Inflater();
                 final Inflater inf = new Inflater();
@@ -116,7 +116,7 @@ public class Flate extends BaseFilter implements PdfFilter{
                 final byte[] buf = new byte[bufSize];
                 //int debug = 20;
                 int count;
-                try{
+                try {
                     while (!inf.finished()) {
 
                         count = inf.inflate(buf);
@@ -127,24 +127,24 @@ public class Flate extends BaseFilter implements PdfFilter{
                         }
                     }
 
-                    failed=false;
-                }catch(final Exception ee){
-                	
-                	LogWriter.writeLog("Exception in Flate "+ee);
-                    
-                    failed=true;
+                    failed = false;
+                } catch (final Exception ee) {
 
-                    hasError=true;
+                    LogWriter.writeLog("Exception in Flate " + ee);
+
+                    failed = true;
+
+                    hasError = true;
 
                     //retrun on small streams
-                    if(data.length==orgSize && data.length>10000){
-                        failed=false;
-                    }else if(data.length>10){
-                        final byte[] newData=new byte[data.length-1];
-                        System.arraycopy(data,0,newData,0,data.length-1);
-                        data=newData;
-                    }else {
-                        failed=false;
+                    if (data.length == orgSize && data.length > 10000) {
+                        failed = false;
+                    } else if (data.length > 10) {
+                        final byte[] newData = new byte[data.length - 1];
+                        System.arraycopy(data, 0, newData, 0, data.length - 1);
+                        data = newData;
+                    } else {
+                        failed = false;
                     }
                 }
             }
@@ -160,18 +160,18 @@ public class Flate extends BaseFilter implements PdfFilter{
     }
 
     @Override
-    public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map<String, String> cachedObjects) throws Exception{
+    public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map<String, String> cachedObjects) throws Exception {
 
-        this.bis=bis;
-        this.streamCache=streamCache;
-        this.cachedObjects=cachedObjects;
+        this.bis = bis;
+        this.streamCache = streamCache;
+        this.cachedObjects = cachedObjects;
 
         /*
          * decompress cached object
          */
         if (bis != null) {
 
-            InputStream inf=null;
+            InputStream inf = null;
 
             try {
 
@@ -204,8 +204,8 @@ public class Flate extends BaseFilter implements PdfFilter{
 
             } catch (final Exception e) {
                 LogWriter.writeLog("Exception " + e + " accessing Flate filter ");
-            }finally {
-                if(inf!=null){
+            } finally {
+                if (inf != null) {
                     inf.close();
                 }
             }
@@ -215,7 +215,7 @@ public class Flate extends BaseFilter implements PdfFilter{
     }
 
     @Override
-    public boolean hasError(){
+    public boolean hasError() {
         return hasError;
     }
 

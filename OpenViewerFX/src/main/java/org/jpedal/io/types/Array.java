@@ -33,10 +33,13 @@
 package org.jpedal.io.types;
 
 import java.util.ArrayList;
+
 import org.jpedal.exception.PdfSecurityException;
 import org.jpedal.io.ObjectDecoder;
+
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
+
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -46,23 +49,23 @@ import org.jpedal.utils.LogWriter;
 /**
  * parse PDF array data from PDF for mixed and object values
  */
-public class Array extends ObjectDecoder implements ArrayDecoder{
+public class Array extends ObjectDecoder implements ArrayDecoder {
 
-    final ArrayList<byte[]> valuesRead=new ArrayList<byte[]>();
-    
+    final ArrayList<byte[]> valuesRead = new ArrayList<byte[]>();
+
     int i, j2;
     int type;
 
     final byte[] raw;
-    byte[]  arrayData;
+    byte[] arrayData;
 
     int PDFkeyInt;
 
     int rawLength;
-    
+
     private String indirectRef;
     private boolean isSingle;
-   
+
     public Array(final PdfFileReader pdfFileReader, final int i, final int type, final byte[] raw) {
         super(pdfFileReader);
 
@@ -70,8 +73,8 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
         this.type = type;
         this.raw = raw;
 
-        if(raw!=null){
-            rawLength=raw.length;
+        if (raw != null) {
+            rawLength = raw.length;
         }
     }
 
@@ -103,24 +106,24 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
 
     private boolean readIndirect(final PdfObject pdfObject) throws RuntimeException {
 
-        isSingle=false;
-        
+        isSingle = false;
+
         //allow for indirect to 1 item
         final int startI = i;
-        
-        final int[] values=StreamReaderUtils.readRefFromStream(raw,i);
-            
-        final int ref=values[0];
-        final int generation=values[1];
-        i=values[2];
-        
+
+        final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
+
+        final int ref = values[0];
+        final int generation = values[1];
+        i = values[2];
+
         //read the Dictionary data
         arrayData = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(ref, generation), ref, generation);
 
-        if(decryption!=null){
-            indirectRef=ref+" "+generation+" R";
+        if (decryption != null) {
+            indirectRef = ref + " " + generation + " R";
         }
-        
+
         //allow for data in Linear object not yet loaded
         if (arrayData == null) {
             pdfObject.setFullyResolved(false);
@@ -155,19 +158,19 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
             }
 
             if (arrayData[j2] == 47) { //allow for value of type  32 0 obj /FlateDecode endob
-              //  j2--;
+                //  j2--;
                 break;
             }
-            
+
             if (arrayData[j2] == '<' && arrayData[j2 + 1] == '<') { //also check ahead to pick up [<<
-               
+
                 j2 = startI;
                 arrayData = raw;
 
                 if (debugFastCode) {
-                    System.out.println(padding + "Single value, not indirect "+pdfObject.getObjectRefAsString());
+                    System.out.println(padding + "Single value, not indirect " + pdfObject.getObjectRefAsString());
                 }
-                isSingle=true;
+                isSingle = true;
 
                 break;
             }
@@ -177,404 +180,409 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
 
         return false;
     }
- 
-    
+
+
     @Override
     public int readArray(final PdfObject pdfObject, final int PDFkeyInt) {
 
-        
-        if(raw[i]!='/' && findStart()){ //will also exit if empty array [] 
+
+        if (raw[i] != '/' && findStart()) { //will also exit if empty array []
             return i + 1;
         }
-        
-        this.PDFkeyInt=PDFkeyInt;
-        j2=i;
-        arrayData=raw;
-       
-        if(debugFastCode) {
+
+        this.PDFkeyInt = PDFkeyInt;
+        j2 = i;
+        arrayData = raw;
+
+        if (debugFastCode) {
             System.out.println(padding + "Reading array type=" + PdfDictionary.showArrayType(type) + " into " + pdfObject + ' ' + (char) raw[i] + ' ' + (char) raw[i + 1] + ' ' + (char) raw[i + 2] + ' ' + (char) raw[i + 3] + ' ' + (char) raw[i + 4]);
         }
-        
+
         //may need to add method to PdfObject is others as well as Mask (last test to  allow for /Contents null
         //0 never occurs but we set as flag if called from gotoDest/DefaultActionHandler
-        final boolean isIndirect=raw[i]!=91  && raw[i]!='(' && raw[0]!=0 && !StreamReaderUtils.isNull(raw,i) && StreamReaderUtils.handleIndirect(raw, i);
-        boolean singleKey=isFirstKeySingle();
-         
+        final boolean isIndirect = raw[i] != 91 && raw[i] != '(' && raw[0] != 0 && !StreamReaderUtils.isNull(raw, i) && StreamReaderUtils.handleIndirect(raw, i);
+        boolean singleKey = isFirstKeySingle();
+
         //single value ie /Filter /FlateDecode or (text)
-        if((type==PdfDictionary.VALUE_IS_OBJECT_ARRAY || !singleKey) && isIndirect){ 
+        if ((type == PdfDictionary.VALUE_IS_OBJECT_ARRAY || !singleKey) && isIndirect) {
             readIndirect(pdfObject);
-            singleKey=isFirstKeySingle();
+
+            if (arrayData == null) {
+                return i;
+            }
+
+            singleKey = isFirstKeySingle();
         }
-        
+
         scanElements(singleKey, pdfObject);
-        
+
         //put cursor in correct place (already there if ref)
-        if(!isIndirect) {
+        if (!isIndirect) {
             i = j2;
         }
-        
-        if(debugFastCode) {
+
+        if (debugFastCode) {
             showValues();
         }
 
         //roll back so loop works if no spaces
-        if(i<rawLength &&(raw[i]==47 || raw[i]==62 || (raw[i]>='0' && raw[i]<='9'))) {
+        if (i < rawLength && (raw[i] == 47 || raw[i] == 62 || (raw[i] >= '0' && raw[i] <= '9'))) {
             i--;
         }
 
         return i;
     }
 
-    void scanElements(boolean singleKey,final PdfObject pdfObject) {
+    void scanElements(boolean singleKey, final PdfObject pdfObject) {
 
-        singleKey=isSingleKey();
-        
+        singleKey = isSingleKey();
+
         findArrayStart();
-        
-        final int arrayEnd=arrayData.length;
-        int keyStart=moveToStartOfNextValue(),currentElement = 0;
+
+        final int arrayEnd = arrayData.length;
+        int keyStart = moveToStartOfNextValue(), currentElement = 0;
         byte[] newValues;
-        
+
         while (j2 < arrayEnd && arrayData[j2] != 93) {
-        
-            if(StreamReaderUtils.isEndObj(arrayData,j2)){
+
+            if (StreamReaderUtils.isEndObj(arrayData, j2)) {
                 break;
-            }else if(arrayData[j2]=='>' && arrayData[j2+1]=='>'){
+            } else if (arrayData[j2] == '>' && arrayData[j2 + 1] == '>') {
                 break;
-            }else if(arrayData[j2-1]=='/'){  //isKey   
-                if(type==PdfDictionary.VALUE_IS_FLOAT_ARRAY ||type==PdfDictionary.VALUE_IS_INT_ARRAY){ //must be end of values in this case
+            } else if (arrayData[j2 - 1] == '/') {  //isKey
+                if (type == PdfDictionary.VALUE_IS_FLOAT_ARRAY || type == PdfDictionary.VALUE_IS_INT_ARRAY) { //must be end of values in this case
                     j2--;
                     break;
                 }
-                newValues=writeKey();
-            }else if(StreamReaderUtils.isRef(arrayData, j2) || (arrayData[j2]=='<' && arrayData[j2+1]=='<')){
+                newValues = writeKey();
+            } else if (StreamReaderUtils.isRef(arrayData, j2) || (arrayData[j2] == '<' && arrayData[j2 + 1] == '<')) {
                 newValues = writeObject(keyStart);
-            }else if(StreamReaderUtils.isNumber(arrayData, j2)){               
-                newValues=writeNumber();
-            }else if(StreamReaderUtils.isNull(arrayData,j2)){               
-                newValues=writeNull();
-            }else if(arrayData[j2]=='('){                                 
-                newValues=writeString(pdfObject);
-            }else if(StreamReaderUtils.isArray(arrayData, j2)){                                
-                newValues=writeArray();
-            }else if(arrayData[j2+1]=='<' && arrayData[j2+2]=='<'){                                
+            } else if (StreamReaderUtils.isNumber(arrayData, j2)) {
+                newValues = writeNumber();
+            } else if (StreamReaderUtils.isNull(arrayData, j2)) {
+                newValues = writeNull();
+            } else if (arrayData[j2] == '(') {
+                newValues = writeString(pdfObject);
+            } else if (StreamReaderUtils.isArray(arrayData, j2)) {
+                newValues = writeArray();
+            } else if (arrayData[j2 + 1] == '<' && arrayData[j2 + 2] == '<') {
                 newValues = writeDirectDictionary(keyStart);
-            }else if(arrayData[j2]=='<'){
-                newValues=writeHexString(pdfObject);
-            }else{ 
+            } else if (arrayData[j2] == '<') {
+                newValues = writeHexString(pdfObject);
+            } else {
                 newValues = writeGeneral(keyStart);
             }
-           
+
             if (debugFastCode) {
-                System.out.println(padding + "<Element -----" + currentElement + "( j2=" + j2 + " ) value=" + new String(newValues) + '<'+" "+singleKey);                      
+                System.out.println(padding + "<Element -----" + currentElement + "( j2=" + j2 + " ) value=" + new String(newValues) + '<' + " " + singleKey);
             }
-            
-            valuesRead.add(newValues);           
-            
+
+            valuesRead.add(newValues);
+
             currentElement++;
-            
-            if(singleKey || isSingle){
+
+            if (singleKey || isSingle) {
                 break;
             }
-            
-            keyStart=moveToStartOfNextValue();
 
-        }          
-        
+            keyStart = moveToStartOfNextValue();
+
+        }
+
         fillArray(currentElement, pdfObject);
-       
+
     }
 
     int moveToStartOfNextValue() {
-        
-        final int size=arrayData.length;
-        
+
+        final int size = arrayData.length;
+
         j2 = StreamReaderUtils.skipSpacesOrOtherCharacter(arrayData, j2, 47);
 
-        while(j2<size && arrayData[j2]=='%'){ //ignore % comments in middle of value
-            while(j2<size && arrayData[j2]!=10){
+        while (j2 < size && arrayData[j2] == '%') { //ignore % comments in middle of value
+            while (j2 < size && arrayData[j2] != 10) {
                 j2++;
             }
-            
-            j2=StreamReaderUtils.skipSpaces(arrayData, j2);
-            
-        } 
+
+            j2 = StreamReaderUtils.skipSpaces(arrayData, j2);
+
+        }
 
         j2 = StreamReaderUtils.skipSpacesOrOtherCharacter(arrayData, j2, 47);
-        
+
         return j2;
     }
 
     byte[] writeGeneral(final int keyStart) {
-        
+
         //general value
-        while(arrayData[j2]!=10 && arrayData[j2]!=13 && arrayData[j2]!=32 && arrayData[j2]!=93 && arrayData[j2]!=47  && arrayData[j2]!='['){
-            
-            if(arrayData[j2]==62 && arrayData[j2+1]==62) { //end of direct object >>
+        while (arrayData[j2] != 10 && arrayData[j2] != 13 && arrayData[j2] != 32 && arrayData[j2] != 93 && arrayData[j2] != 47 && arrayData[j2] != '[') {
+
+            if (arrayData[j2] == 62 && arrayData[j2 + 1] == 62) { //end of direct object >>
                 break;
             }
-            
-            if(arrayData[j2]==60 && arrayData[j2+1]==60) { //allow for number then object (ie 12<</)
+
+            if (arrayData[j2] == 60 && arrayData[j2 + 1] == 60) { //allow for number then object (ie 12<</)
                 break;
             }
-            
+
             j2++;
-            
-            if(j2==arrayData.length) {
+
+            if (j2 == arrayData.length) {
                 break;
             }
         }
-        
+
         final byte[] newValues = ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-        
-        if (arrayData[j2]=='>') {
+
+        if (arrayData[j2] == '>') {
             j2++;
         }
-        
+
         return newValues;
     }
 
     byte[] writeDirectDictionary(final int keyStart) {
-        
+
         //allow for straight into a <<>>
         j2++;
-        if(debugFastCode){
+        if (debugFastCode) {
             System.out.println(padding + "----double <<");
         }
-        
+
         return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-        
+
     }
 
-    private byte[] writeArray(){ // [59 0 R /XYZ null 711 null ] or [/DeviceN [/Black]   /DeviceCMYK 16 0 R]
-        
-        int depth=0;
-        
-        if(debugFastCode){
+    private byte[] writeArray() { // [59 0 R /XYZ null 711 null ] or [/DeviceN [/Black]   /DeviceCMYK 16 0 R]
+
+        int depth = 0;
+
+        if (debugFastCode) {
             System.out.println(padding + "----array");
         }
-        
-        final int keyStart=j2;
-        while(arrayData[j2]!=']' || depth>0) {   
-            
-            if(arrayData[j2]=='['){
+
+        final int keyStart = j2;
+        while (arrayData[j2] != ']' || depth > 0) {
+
+            if (arrayData[j2] == '[') {
                 depth++;
             }
-            
-            j2++; 
-            
-            if(arrayData[j2]==']'){
+
+            j2++;
+
+            if (arrayData[j2] == ']') {
                 depth--;
             }
         }
-        
+
         //exclude end bracket
         j2++;
-        
+
         return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-        
+
     }
 
     byte[] writeString(final PdfObject pdfObject) {
-        
-        if(debugFastCode){
+
+        if (debugFastCode) {
             System.out.println(padding + "----string");
         }
-        
-        final int keyStart=j2+1;
-        while(true){
-            if(arrayData[j2]==')' && !ObjectUtils.isEscaped(arrayData, j2)) {
+
+        final int keyStart = j2 + 1;
+        while (true) {
+            if (arrayData[j2] == ')' && !ObjectUtils.isEscaped(arrayData, j2)) {
                 break;
             }
-            
+
             j2++;
         }
-        
+
         byte[] newValues = ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-            
+
         j2++;
-        
+
         try {
-            if (!pdfObject.isInCompressedStream() && decryption!=null) {
-                
-                String ref=pdfObject.getObjectRefAsString();
-                
-                if(indirectRef!=null){
-                    ref=indirectRef;
+            if (!pdfObject.isInCompressedStream() && decryption != null) {
+
+                String ref = pdfObject.getObjectRefAsString();
+
+                if (indirectRef != null) {
+                    ref = indirectRef;
                 }
-                
-                newValues = decryption.decrypt(newValues,ref, false, null, false, false);
+
+                newValues = decryption.decrypt(newValues, ref, false, null, false, false);
             }
-        }catch (final PdfSecurityException e) {
+        } catch (final PdfSecurityException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-        
+
         return newValues;
     }
 
     byte[] writeObject(final int keyStart) {
-        
-        if(debugFastCode){
+
+        if (debugFastCode) {
             System.out.println(padding + "----ref or direct obj");
         }
-        
-        while(arrayData[j2]!='R' && arrayData[j2]!=']'){
-            
+
+        while (arrayData[j2] != 'R' && arrayData[j2] != ']') {
+
             //allow for embedded object
-            if(arrayData[j2]=='(' && !ObjectUtils.isEscaped(arrayData, j2)){
+            if (arrayData[j2] == '(' && !ObjectUtils.isEscaped(arrayData, j2)) {
                 j2 = TextStream.skipToEnd(arrayData, j2);
-            }else if(arrayData[j2]=='<' && arrayData[j2+1]=='<'){
-                int levels=1;
-                
-                if(debugFastCode) {
+            } else if (arrayData[j2] == '<' && arrayData[j2 + 1] == '<') {
+                int levels = 1;
+
+                if (debugFastCode) {
                     System.out.println(padding + "Reading Direct value");
                 }
-                
-                while(levels>0){
+
+                while (levels > 0) {
                     j2++;
-                    
+
                     if (arrayData[j2] == '(' && !ObjectUtils.isEscaped(arrayData, j2)) {
                         j2 = TextStream.skipToEnd(arrayData, j2);
                     } else if (arrayData[j2] == '<' && arrayData[j2 + 1] == '<') {
                         j2++;
                         levels++;
-                    }else if(arrayData[j2]=='>' && arrayData[j2+1]=='>'){
+                    } else if (arrayData[j2] == '>' && arrayData[j2 + 1] == '>') {
                         j2++;
                         levels--;
                     }
                 }
                 break;
             }
-            
+
             j2++;
         }
-        
+
         j2++;
-        
+
         return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, true);
     }
-    
+
     byte[] writeNumber() {
-        
-        if(debugFastCode){
+
+        if (debugFastCode) {
             System.out.println(padding + "----number");
         }
-        
-        j2=StreamReaderUtils.skipSpaces(arrayData,j2);
-        final int keyStart=j2;
-        
-        while(arrayData[j2]>='0' && arrayData[j2]<='9'){          
+
+        j2 = StreamReaderUtils.skipSpaces(arrayData, j2);
+        final int keyStart = j2;
+
+        while (arrayData[j2] >= '0' && arrayData[j2] <= '9') {
             j2++;
         }
-        
+
         return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
     }
 
     byte[] writeKey() {
-        
-        if(debugFastCode){
+
+        if (debugFastCode) {
             System.out.println(padding + "----key");
         }
-        
-        int keyStart=j2;
-        j2=StreamReaderUtils.skipToEndOfKey(arrayData, j2+1);
-        
+
+        int keyStart = j2;
+        j2 = StreamReaderUtils.skipToEndOfKey(arrayData, j2 + 1);
+
         //include / so we can differentiate /9 and 9
-        if(keyStart>0 && arrayData[keyStart-1]==47) {
+        if (keyStart > 0 && arrayData[keyStart - 1] == 47) {
             keyStart--;
         }
-        
+
         return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-        
+
     }
 
     void findArrayStart() {
-        
-        if(j2<0){
-            j2=0;
+
+        if (j2 < 0) {
+            j2 = 0;
         }
-        
+
         //skip [ and any spaces allow for [[ in recursion
-        boolean startFound=false;
-        while(arrayData[j2]==10 || arrayData[j2]==13 || arrayData[j2]==32 || (arrayData[j2]==91 && !startFound)){
-            
-            if(arrayData[j2]==91) {
+        boolean startFound = false;
+        while (arrayData[j2] == 10 || arrayData[j2] == 13 || arrayData[j2] == 32 || (arrayData[j2] == 91 && !startFound)) {
+
+            if (arrayData[j2] == 91) {
                 startFound = true;
             }
-            
+
             j2++;
         }
-        
+
         if (debugFastCode) {
-            if(j2>0){
-                System.out.println(padding + "----scanElements j2="+j2+" chars="+ arrayData[j2-1]+" "+ arrayData[j2]+" "+ arrayData[j2+1]);
-            }else{
-                System.out.println(padding + "----scanElements j2="+j2+" chars="+ arrayData[j2]+" "+ arrayData[j2+1]);
+            if (j2 > 0) {
+                System.out.println(padding + "----scanElements j2=" + j2 + " chars=" + arrayData[j2 - 1] + " " + arrayData[j2] + " " + arrayData[j2 + 1]);
+            } else {
+                System.out.println(padding + "----scanElements j2=" + j2 + " chars=" + arrayData[j2] + " " + arrayData[j2 + 1]);
             }
         }
     }
 
     byte[] writeNull() {
-        if(debugFastCode){
+        if (debugFastCode) {
             System.out.println(padding + "----null");
         }
-        final int keyStart=j2;
+        final int keyStart = j2;
         j2 += 4;
-        
-        return  ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-        
+
+        return ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
+
     }
-    
+
 
     byte[] writeHexString(final PdfObject pdfObject) {
-        
-        if(debugFastCode){
+
+        if (debugFastCode) {
             System.out.println(padding + "----hex string");
         }
-        
-        boolean hexString =true;
-        
-        final int keyStart=j2+1;
-        
-        while(true){
-            if(arrayData[j2]=='>') {
+
+        boolean hexString = true;
+
+        final int keyStart = j2 + 1;
+
+        while (true) {
+            if (arrayData[j2] == '>') {
                 break;
             }
-            
-            if(arrayData[j2]=='/') {
+
+            if (arrayData[j2] == '/') {
                 hexString = false;
             }
-            
+
             j2++;
-            
+
         }
-        
+
         byte[] newValues = ObjectUtils.readEscapedValue(j2, arrayData, keyStart, false);
-       
-        if(hexString){
-            if(indirectRef==null){
-                newValues =StreamReaderUtils.handleHexString(newValues, decryption, pdfObject.getObjectRefAsString());
-            }else{
-                newValues =StreamReaderUtils.handleHexString(newValues, decryption, indirectRef);
+
+        if (hexString) {
+            if (indirectRef == null) {
+                newValues = StreamReaderUtils.handleHexString(newValues, decryption, pdfObject.getObjectRefAsString());
+            } else {
+                newValues = StreamReaderUtils.handleHexString(newValues, decryption, indirectRef);
             }
         }
-        
+
         j2++;
-        
+
         return newValues;
     }
 
-    
+
     void fillArray(final int elementCount, final PdfObject pdfObject) {
-        
+
         final byte[][] finalByteValues = new byte[elementCount][];
-        for(int a=0;a<elementCount;a++){
-            finalByteValues[a]=valuesRead.get(a);
+        for (int a = 0; a < elementCount; a++) {
+            finalByteValues[a] = valuesRead.get(a);
         }
-        
+
         pdfObject.setMixedArray(PDFkeyInt, finalByteValues);
-        
-               
+
+
     }
 
     /**
@@ -598,10 +606,10 @@ public class Array extends ObjectDecoder implements ArrayDecoder{
     }
 
     boolean isSingleKey() {
-         return (raw[i]=='/' || raw[i]=='(' || raw[i]=='<');
+        return (raw[i] == '/' || raw[i] == '(' || raw[i] == '<');
     }
-    
+
     boolean isFirstKeySingle() {
-         return (raw[i]=='/' || raw[i]=='(' || raw[i]=='<');
+        return (raw[i] == '/' || raw[i] == '(' || raw[i] == '<');
     }
 }

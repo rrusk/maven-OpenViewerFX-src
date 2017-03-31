@@ -42,87 +42,88 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+
 import org.jpedal.io.ObjectStore;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
 public class FileDownload {
-	//Load file from URL into file then open file
-	File tempURLFile;
+    //Load file from URL into file then open file
+    File tempURLFile;
 
     JFrame download;
-	JPanel p;
-	JProgressBar pb;
-	JLabel downloadMessage;
-	JLabel downloadFile;
-	JLabel turnOff;
-	int downloadCount;
-	boolean visible = true;
-	String progress = "";
+    JPanel p;
+    JProgressBar pb;
+    JLabel downloadMessage;
+    JLabel downloadFile;
+    JLabel turnOff;
+    int downloadCount;
+    boolean visible = true;
+    String progress = "";
 
-//	Coords to display the window at
-final Point coords;
+    //	Coords to display the window at
+    final Point coords;
 
-	@SuppressWarnings("UnusedDeclaration")
-    public FileDownload(final boolean showWindow, final Point pos){
+    @SuppressWarnings("UnusedDeclaration")
+    public FileDownload(final boolean showWindow, final Point pos) {
 
-		visible = showWindow;
-		coords = pos;
-		
-		if(visible){
-			download = new JFrame();
-			download.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			p = new JPanel(new GridBagLayout());
-			pb = new JProgressBar();
-			downloadMessage = new JLabel();
-			downloadFile = new JLabel();
-			turnOff = new JLabel();
+        visible = showWindow;
+        coords = pos;
 
-			download.setResizable(false);
-			download.setTitle(Messages.getMessage("PageLayoutViewMenu.DownloadWindowTitle"));
+        if (visible) {
+            download = new JFrame();
+            download.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            p = new JPanel(new GridBagLayout());
+            pb = new JProgressBar();
+            downloadMessage = new JLabel();
+            downloadFile = new JLabel();
+            turnOff = new JLabel();
 
-			//BoxLayout bl = new BoxLayout(p, BoxLayout.X_AXIS);
-			final GridBagConstraints gbc = new GridBagConstraints();
-			gbc.fill=GridBagConstraints.BOTH;
-			gbc.gridy=0;
-			gbc.gridx=0;
-			gbc.gridwidth=2;
-			//gbc.fill = GridBagConstraints.BOTH;
-			downloadFile.setSize(250,downloadFile.getHeight());
-			downloadFile.setMinimumSize(new Dimension(250,15));
-			downloadFile.setMaximumSize(new Dimension(250,15));
-			downloadFile.setPreferredSize(new Dimension(250,15));
-			p.add(downloadFile, gbc);
+            download.setResizable(false);
+            download.setTitle(Messages.getMessage("PageLayoutViewMenu.DownloadWindowTitle"));
 
-			gbc.gridy=1;
-			downloadMessage.setSize(250,downloadFile.getHeight());
-			downloadMessage.setMinimumSize(new Dimension(250,15));
-			downloadMessage.setMaximumSize(new Dimension(250,15));
-			downloadMessage.setPreferredSize(new Dimension(250,15));
-			p.add(downloadMessage,gbc);
+            //BoxLayout bl = new BoxLayout(p, BoxLayout.X_AXIS);
+            final GridBagConstraints gbc = new GridBagConstraints();
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.gridy = 0;
+            gbc.gridx = 0;
+            gbc.gridwidth = 2;
+            //gbc.fill = GridBagConstraints.BOTH;
+            downloadFile.setSize(250, downloadFile.getHeight());
+            downloadFile.setMinimumSize(new Dimension(250, 15));
+            downloadFile.setMaximumSize(new Dimension(250, 15));
+            downloadFile.setPreferredSize(new Dimension(250, 15));
+            p.add(downloadFile, gbc);
 
-			gbc.gridy=2;
-			pb.setSize(260,downloadFile.getHeight());
-			pb.setMinimumSize(new Dimension(260,20));
-			pb.setMaximumSize(new Dimension(260,20));
-			pb.setPreferredSize(new Dimension(260,20));
-			p.add(pb,gbc);
+            gbc.gridy = 1;
+            downloadMessage.setSize(250, downloadFile.getHeight());
+            downloadMessage.setMinimumSize(new Dimension(250, 15));
+            downloadMessage.setMaximumSize(new Dimension(250, 15));
+            downloadMessage.setPreferredSize(new Dimension(250, 15));
+            p.add(downloadMessage, gbc);
 
-			gbc.gridy=3;
-			p.add(turnOff,gbc);
+            gbc.gridy = 2;
+            pb.setSize(260, downloadFile.getHeight());
+            pb.setMinimumSize(new Dimension(260, 20));
+            pb.setMaximumSize(new Dimension(260, 20));
+            pb.setPreferredSize(new Dimension(260, 20));
+            p.add(pb, gbc);
 
-			download.getContentPane().add(p);
-			download.setSize(320, 100);
+            gbc.gridy = 3;
+            p.add(turnOff, gbc);
+
+            download.getContentPane().add(p);
+            download.setSize(320, 100);
 
         }
-	}
+    }
 
-	@SuppressWarnings("UnusedDeclaration")
-    public File createWindow(final String pdfUrl){
-		final URL url;
-		final InputStream is;
+    @SuppressWarnings("UnusedDeclaration")
+    public File createWindow(final String pdfUrl) {
+        final URL url;
+        final InputStream is;
 
-		try {
+        try {
             final int fileLength;
 
             final String str;
@@ -135,110 +136,110 @@ final Point coords;
 //                //fileLength=is.available();
 //                //System.out.println(str+">>"+pdfUrl.substring(4)+"<<>>"+is);
 //            }else{
-                url = new URL(pdfUrl);
+            url = new URL(pdfUrl);
 
-			    is = url.openStream();
+            is = url.openStream();
 
-                str=url.getPath().substring(url.getPath().lastIndexOf('/')+1);
-                fileLength = url.openConnection().getContentLength();
+            str = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+            fileLength = url.openConnection().getContentLength();
 
             //}
 
-			tempURLFile = File.createTempFile(str.substring(0, str.lastIndexOf('.')), str.substring(str.lastIndexOf('.')),new File(ObjectStore.temp_dir));
+            tempURLFile = File.createTempFile(str.substring(0, str.lastIndexOf('.')), str.substring(str.lastIndexOf('.')), new File(ObjectStore.temp_dir));
 
-			final FileOutputStream fos = new FileOutputStream(tempURLFile);
+            final FileOutputStream fos = new FileOutputStream(tempURLFile);
 
-			if(visible && coords!=null){
-				download.setLocation((coords.x-(download.getWidth()/2)), (coords.y-(download.getHeight()/2)));
-				download.setVisible(true);
-			}
-			
-			if(visible){
-				pb.setMinimum(0);
-				pb.setMaximum(fileLength);
-				//saveLocal.setEnabled(false);
+            if (visible && coords != null) {
+                download.setLocation((coords.x - (download.getWidth() / 2)), (coords.y - (download.getHeight() / 2)));
+                download.setVisible(true);
+            }
 
-				String message = Messages.getMessage("PageLayoutViewMenu.DownloadWindowMessage");
-				message = message.replaceAll("FILENAME", str);
-				downloadFile.setText(message);
+            if (visible) {
+                pb.setMinimum(0);
+                pb.setMaximum(fileLength);
+                //saveLocal.setEnabled(false);
 
-				final Font f = turnOff.getFont();
-				turnOff.setFont(new Font(f.getName(), f.getStyle(),  8));
-				turnOff.setAlignmentY(JLabel.RIGHT_ALIGNMENT);
-				turnOff.setText(Messages.getMessage("PageLayoutViewMenu.DownloadWindowTurnOff"));
-			}
-			//download.setVisible(true);
-			// Download buffer
-			final byte[] buffer = new byte[4096];
-			// Download the PDF document
-			int read;
-			int current = 0;
+                String message = Messages.getMessage("PageLayoutViewMenu.DownloadWindowMessage");
+                message = message.replaceAll("FILENAME", str);
+                downloadFile.setText(message);
 
-			String rate = "kb"; //mb
-			int mod = 1000; //1000000
+                final Font f = turnOff.getFont();
+                turnOff.setFont(new Font(f.getName(), f.getStyle(), 8));
+                turnOff.setAlignmentY(JLabel.RIGHT_ALIGNMENT);
+                turnOff.setText(Messages.getMessage("PageLayoutViewMenu.DownloadWindowTurnOff"));
+            }
+            //download.setVisible(true);
+            // Download buffer
+            final byte[] buffer = new byte[4096];
+            // Download the PDF document
+            int read;
+            int current = 0;
 
-			if(fileLength>1000000){
-				rate = "mb";
-				mod = 1000000;
-			}
+            String rate = "kb"; //mb
+            int mod = 1000; //1000000
 
-			if(visible){
-				progress = Messages.getMessage("PageLayoutViewMenu.DownloadWindowProgress");
-				if(fileLength<1000000) {
+            if (fileLength > 1000000) {
+                rate = "mb";
+                mod = 1000000;
+            }
+
+            if (visible) {
+                progress = Messages.getMessage("PageLayoutViewMenu.DownloadWindowProgress");
+                if (fileLength < 1000000) {
                     progress = progress.replaceAll("DVALUE", (fileLength / mod) + " " + rate);
-                } else{
-					String fraction = String.valueOf(((fileLength % mod) / 10000));
-					if(((fileLength%mod)/10000)<10) {
+                } else {
+                    String fraction = String.valueOf(((fileLength % mod) / 10000));
+                    if (((fileLength % mod) / 10000) < 10) {
                         fraction = '0' + fraction;
                     }
-					
-					progress = progress.replaceAll("DVALUE", (fileLength/mod)+"."+fraction+ ' ' +rate);
-				}
-			}
 
-			while ((read = is.read(buffer)) != -1) {
-				current += read;
-				downloadCount += read;
+                    progress = progress.replaceAll("DVALUE", (fileLength / mod) + "." + fraction + ' ' + rate);
+                }
+            }
 
-				if(visible){
-					if(fileLength<1000000) {
+            while ((read = is.read(buffer)) != -1) {
+                current += read;
+                downloadCount += read;
+
+                if (visible) {
+                    if (fileLength < 1000000) {
                         downloadMessage.setText(progress.replaceAll("DSOME", (current / mod) + " " + rate));
-                    } else{
-						String fraction = String.valueOf(((current % mod) / 10000));
-						if(((current%mod)/10000)<10) {
+                    } else {
+                        String fraction = String.valueOf(((current % mod) / 10000));
+                        if (((current % mod) / 10000) < 10) {
                             fraction = '0' + fraction;
                         }
 
-						downloadMessage.setText(progress.replaceAll("DSOME", (current/mod)+"."+fraction+ ' ' +rate));
-					}
-					pb.setValue(current);
+                        downloadMessage.setText(progress.replaceAll("DSOME", (current / mod) + "." + fraction + ' ' + rate));
+                    }
+                    pb.setValue(current);
 
-					download.repaint();
-				}
+                    download.repaint();
+                }
 
-				fos.write(buffer, 0, read);
-			}
-			fos.flush();
-			// Close streams
-			is.close();
-			fos.close();
+                fos.write(buffer, 0, read);
+            }
+            fos.flush();
+            // Close streams
+            is.close();
+            fos.close();
 
-			//File completed download, show the save button
-			if(visible) {
+            //File completed download, show the save button
+            if (visible) {
                 downloadMessage.setText("Download of " + str + " is complete.");
             }
-			//saveLocal.setEnabled(true);
+            //saveLocal.setEnabled(true);
 
-		} catch (final Exception e) {
-			LogWriter.writeLog("[PDF] Exception " + e + " opening URL "+ pdfUrl);
+        } catch (final Exception e) {
+            LogWriter.writeLog("[PDF] Exception " + e + " opening URL " + pdfUrl);
             e.printStackTrace();
-		}
+        }
 
-		if(visible) {
+        if (visible) {
             download.setVisible(false);
         }
 
-		return tempURLFile;
-	}
+        return tempURLFile;
+    }
 
 }

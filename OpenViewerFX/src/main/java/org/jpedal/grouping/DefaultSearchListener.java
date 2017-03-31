@@ -33,15 +33,15 @@
 package org.jpedal.grouping;
 
 public class DefaultSearchListener implements SearchListener {
-	private boolean isCanceled;
+    private boolean isCanceled;
 
-	@Override
+    @Override
     public boolean isCanceled() {
-		return isCanceled;
-	}
+        return isCanceled;
+    }
 
-	@Override
+    @Override
     public void requestCancel() {
-		isCanceled = true;
-	}
+        isCanceled = true;
+    }
 }

@@ -36,33 +36,34 @@ package org.jpedal.objects.acroforms.actions;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.sound.sampled.*;
+
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.utils.LogWriter;
 
 public class SoundHandler {
-    
+
     private static final int EXTERNAL_BUFFER_SIZE = 128000;
     private static int frameSize;
     private static float sampleRate = 44100F;
     private static int sampleSizeInBits = 16;
     private static int channels = 2;
-    private static AudioFormat.Encoding  encoding = AudioFormat.Encoding.PCM_SIGNED;
-    
+    private static AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
+
     public static void setAudioFormat(final int audioFormat, final int b, final float r, final int c) {
-        
+
         sampleSizeInBits = b;
         sampleRate = r;
         channels = c;
-        
-        if(audioFormat!= PdfDictionary.Signed){
-            if(audioFormat==PdfDictionary.Unsigned){
+
+        if (audioFormat != PdfDictionary.Signed) {
+            if (audioFormat == PdfDictionary.Unsigned) {
                 encoding = AudioFormat.Encoding.PCM_UNSIGNED;
-            }else{
+            } else {
                 throw new RuntimeException("AudioFormat currently unsupported! - ");
             }
         }
     }
-    
+
     private static AudioFormat getAudioFormat() {
         
         /* frame size = sample size in *bytes* multiplied by channels */
@@ -86,22 +87,22 @@ public class SoundHandler {
          */
         //AudioFormat audioFormat = new AudioFormat(sampleRate, sampleSizeInBits,
         //	channels, true, true);
-        
+
         return new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels, frameSize, frameRate, true);
     }
-    
-    public  static AudioInputStream getAudioInputStream(final byte[] data) {
+
+    public static AudioInputStream getAudioInputStream(final byte[] data) {
         final AudioFormat audioFormat = getAudioFormat();
 
         final long length = data.length / frameSize;
 
         return new AudioInputStream(
                 new ByteArrayInputStream(data),
-                audioFormat, length );
+                audioFormat, length);
     }
-    
-    public static void PlaySound(final byte[] data) throws Exception{
-        
+
+    public static void PlaySound(final byte[] data) throws Exception {
+
         final AudioFormat audioFormat = getAudioFormat();
         
         /*
@@ -109,29 +110,29 @@ public class SoundHandler {
          * the length, it works for a couple of files though, so may be right.
          */
         final long length = data.length / frameSize;
-        
+
         final AudioInputStream ais = new AudioInputStream(
                 new ByteArrayInputStream(data),
-                audioFormat, length );
-        
-        
+                audioFormat, length);
+
+
         playSoundFromStream(ais);
-        
+
     }
-    
+
     private static void playSoundFromStream(final AudioInputStream ais) {
         SourceDataLine line = null;
         final DataLine.Info info = new DataLine.Info(SourceDataLine.class, ais.getFormat());
         try {
             line = (SourceDataLine) AudioSystem.getLine(info);
-            
+
             line.open(ais.getFormat());
         } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-        
+
         line.start();
-        
+
         int nBytesRead = 0;
         final byte[] abData = new byte[EXTERNAL_BUFFER_SIZE];
         while (nBytesRead != -1) {
@@ -140,14 +141,14 @@ public class SoundHandler {
             } catch (final IOException e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
-            
+
             if (nBytesRead >= 0) {
                 // do not comment out this line -> (no code == no sound)
                 line.write(abData, 0, nBytesRead);
             }
         }
         line.drain();
-        
+
         line.close();
-    }  
+    }
 }

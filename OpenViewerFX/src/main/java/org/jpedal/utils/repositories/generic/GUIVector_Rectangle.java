@@ -80,6 +80,7 @@ public class GUIVector_Rectangle {
     }
 
     ///////////////////////////////////
+
     /**
      * return the size+1 as in last item (so an array of 0 values is 1) if added
      * If using set, use checkCapacity

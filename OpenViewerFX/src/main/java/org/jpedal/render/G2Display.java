@@ -34,10 +34,12 @@ package org.jpedal.render;
 
 import java.awt.*;
 import java.awt.geom.Area;
+
 import org.jpedal.color.PdfColor;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.parser.DecoderOptions;
+
 import static org.jpedal.render.BaseDisplay.textColor;
 
 /**
@@ -48,8 +50,8 @@ import static org.jpedal.render.BaseDisplay.textColor;
 public class G2Display extends BaseDisplay {
 
     final void renderText(final float x, final float y, final int type, final Area transformedGlyph2,
-            final Rectangle textHighlight, PdfPaint strokePaint,
-            PdfPaint textFillCol, final float strokeOpacity, final float fillOpacity) {
+                          final Rectangle textHighlight, PdfPaint strokePaint,
+                          PdfPaint textFillCol, final float strokeOpacity, final float fillOpacity) {
 
         final Paint currentCol = g2.getPaint();
 

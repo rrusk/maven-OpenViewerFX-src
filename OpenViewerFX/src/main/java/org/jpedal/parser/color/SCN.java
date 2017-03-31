@@ -41,53 +41,53 @@ import org.jpedal.parser.PdfObjectCache;
  *
  */
 public class SCN {
-   
+
 
     public static void execute(final boolean isLowerCase, final GraphicsState gs, final CommandParser parser, final PdfObjectCache cache) {
 
         float[] values;
 
-        if(isLowerCase){
+        if (isLowerCase) {
 
-            if(gs.nonstrokeColorSpace.getID()==ColorSpaces.Pattern){
-                final String[] vals=parser.getValuesAsString();
-                gs.nonstrokeColorSpace.setColor(vals,vals.length);
-            }else{
-                values=parser.getValuesAsFloat();
+            if (gs.nonstrokeColorSpace.getID() == ColorSpaces.Pattern) {
+                final String[] vals = parser.getValuesAsString();
+                gs.nonstrokeColorSpace.setColor(vals, vals.length);
+            } else {
+                values = parser.getValuesAsFloat();
 
-                final int operandCount=values.length;
-                final float[] tempValues=new float[operandCount];
-                for(int ii=0;ii<operandCount;ii++) {
+                final int operandCount = values.length;
+                final float[] tempValues = new float[operandCount];
+                for (int ii = 0; ii < operandCount; ii++) {
                     tempValues[operandCount - ii - 1] = values[ii];
                 }
-                values=tempValues;
+                values = tempValues;
 
                 //System.out.println(nonstrokeColorSpace);
-                gs.nonstrokeColorSpace.setColor(values,operandCount);
+                gs.nonstrokeColorSpace.setColor(values, operandCount);
             }
 
             //track colrspace use
-            cache.put(PdfObjectCache.ColorspacesUsed, gs.nonstrokeColorSpace.getID(),"x");
+            cache.put(PdfObjectCache.ColorspacesUsed, gs.nonstrokeColorSpace.getID(), "x");
 
-        }else{
-            if(gs.strokeColorSpace.getID()==ColorSpaces.Pattern){
-                final String[] vals=parser.getValuesAsString();
-                gs.strokeColorSpace.setColor(vals,vals.length);
-            }else{
-                values=parser.getValuesAsFloat();
+        } else {
+            if (gs.strokeColorSpace.getID() == ColorSpaces.Pattern) {
+                final String[] vals = parser.getValuesAsString();
+                gs.strokeColorSpace.setColor(vals, vals.length);
+            } else {
+                values = parser.getValuesAsFloat();
 
-                final int operandCount=values.length;
-                final float[] tempValues=new float[operandCount];
-                for(int ii=0;ii<operandCount;ii++) {
+                final int operandCount = values.length;
+                final float[] tempValues = new float[operandCount];
+                for (int ii = 0; ii < operandCount; ii++) {
                     tempValues[operandCount - ii - 1] = values[ii];
                 }
-                values=tempValues;
+                values = tempValues;
 
-                gs.strokeColorSpace.setColor(values,operandCount);
+                gs.strokeColorSpace.setColor(values, operandCount);
             }
 
             //track colrspace use
-            cache.put(PdfObjectCache.ColorspacesUsed, gs.strokeColorSpace.getID(),"x");
+            cache.put(PdfObjectCache.ColorspacesUsed, gs.strokeColorSpace.getID(), "x");
 
         }
     }

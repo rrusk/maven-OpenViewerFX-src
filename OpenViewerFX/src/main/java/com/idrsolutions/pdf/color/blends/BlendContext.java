@@ -35,6 +35,7 @@ package com.idrsolutions.pdf.color.blends;
 import java.awt.CompositeContext;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+
 import org.jpedal.objects.raw.PdfDictionary;
 
 /**
@@ -42,7 +43,7 @@ import org.jpedal.objects.raw.PdfDictionary;
  */
 public class BlendContext implements CompositeContext {
 
-//    private final float alpha;
+    //    private final float alpha;
     private final int blendMode;
 
     public BlendContext(final int blendMode) {
@@ -97,7 +98,7 @@ public class BlendContext implements CompositeContext {
 //                    }
                     switch (blendMode) {
                         case PdfDictionary.Normal:
-                            break;                        
+                            break;
                         case PdfDictionary.Hue:
                             result = doHue(sp, dp);
                             break;
@@ -147,10 +148,10 @@ public class BlendContext implements CompositeContext {
     private static int[] getRGBA(final int argb) {
         return new int[]{(argb >> 16) & 0xff, (argb >> 8) & 0xff, argb & 0xff, (argb >> 24) & 0xff};
     }
-   
+
 
     private static int[] doColor(final int[] src, final int[] dst) {
-        
+
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
@@ -174,7 +175,7 @@ public class BlendContext implements CompositeContext {
     }
 
     private static int[] doLuminosity(final int[] src, final int[] dst) {
-                
+
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
@@ -198,11 +199,11 @@ public class BlendContext implements CompositeContext {
     }
 
     private static int[] doHue(final int[] src, final int[] dst) {
-                
+
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
-        
+
         final double[] srcHSL = new double[3];
         rgbToHSL(src[0], src[1], src[2], srcHSL);
         final double[] dstHSL = new double[3];
@@ -215,11 +216,11 @@ public class BlendContext implements CompositeContext {
     }
 
     private static int[] doSaturation(final int[] src, final int[] dst) {
-                
+
         if (dst[0] == 255 && dst[1] == 255 && dst[2] == 255) {
             return new int[]{src[0], src[1], src[2]};
         }
-        
+
         final double[] srcHSL = new double[3];
         rgbToHSL(src[0], src[1], src[2], srcHSL);
         final double[] dstHSL = new double[3];

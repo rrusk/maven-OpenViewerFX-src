@@ -37,14 +37,13 @@ import org.jpedal.PdfDecoderInt;
 import org.jpedal.objects.layers.PdfLayerList;
 
 /**
- *
  * @author Simon
  */
 public interface GUILayersPanel {
     void reinitialise(PdfLayerList layersObject, PdfDecoderInt decode_pdf,
                       Object scrollPane, int currentPage);
-    
+
     void rescanPdfLayers();
-    
+
     void resetLayers();
 }

@@ -32,9 +32,11 @@
  */
 package org.jpedal.parser;
 
-public class T3Decoder extends BaseDecoder{
+public class T3Decoder extends BaseDecoder {
 
-	/**max width of type3 font*/
+    /**
+     * max width of type3 font
+     */
     int T3maxWidth;
     int T3maxHeight;
 
@@ -45,82 +47,86 @@ public class T3Decoder extends BaseDecoder{
     //    super.setParameters(isPageContent,renderPage, renderMode, extractionMode);
 
     //}
-    
-    /**shows if t3 glyph uses internal colour or current colour*/
+
+    /**
+     * shows if t3 glyph uses internal colour or current colour
+     */
     boolean ignoreColors;
 
-    public void setCommands(final CommandParser parser){
-        this.parser=parser;
+    public void setCommands(final CommandParser parser) {
+        this.parser = parser;
     }
 
 
     private void d1(final float urX, final float llX, final float wX, final float urY, final float llY, final float wY) {
 
-	    //flag to show we use text colour or colour in stream
-	    ignoreColors=true;
+        //flag to show we use text colour or colour in stream
+        ignoreColors = true;
 
 	    /**/
-	    //not fully implemented
-	    //float urY = Float.parseFloat(generateOpAsString(0,characterStream));
-	    //float urX = Float.parseFloat(generateOpAsString(1,characterStream));
-	    //float llY = Float.parseFloat(generateOpAsString(2,characterStream));
-	    //float llX = Float.parseFloat(generateOpAsString(3,characterStream));
-	    //float wY = Float.parseFloat(generateOpAsString(4,characterStream));
-	    //float wX = Float.parseFloat(generateOpAsString(5,characterStream));
-	    /**/
+        //not fully implemented
+        //float urY = Float.parseFloat(generateOpAsString(0,characterStream));
+        //float urX = Float.parseFloat(generateOpAsString(1,characterStream));
+        //float llY = Float.parseFloat(generateOpAsString(2,characterStream));
+        //float llX = Float.parseFloat(generateOpAsString(3,characterStream));
+        //float wY = Float.parseFloat(generateOpAsString(4,characterStream));
+        //float wX = Float.parseFloat(generateOpAsString(5,characterStream));
+        /**/
 
-	    //this.minX=(int)llX;
-	    //this.minY=(int)llY;
+        //this.minX=(int)llX;
+        //this.minY=(int)llY;
 
-	    //currentGraphicsState = new GraphicsState(0,0);/*remove values on contrutor%%*/
+        //currentGraphicsState = new GraphicsState(0,0);/*remove values on contrutor%%*/
 
-	    //setup image to draw on
-	    //current.init((int)(wX),(int)(urY-llY+1));
+        //setup image to draw on
+        //current.init((int)(wX),(int)(urY-llY+1));
 
-	    //wH=urY;
-	    //wW=llX;
+        //wH=urY;
+        //wW=llX;
 
-	    T3maxWidth=(int)wX;
-	    if(wX==0) {
+        T3maxWidth = (int) wX;
+        if (wX == 0) {
             T3maxWidth = (int) (llX - urX);
         } else {
             T3maxWidth = (int) wX; //Float.parseFloat(generateOpAsString(5,characterStream));
         }
 
-	    T3maxHeight=(int)wY;
-	    if(wY==0) {
+        T3maxHeight = (int) wY;
+        if (wY == 0) {
             T3maxHeight = (int) (urY - llY);
         } else {
             T3maxHeight = (int) wY; //Float.parseFloat(generateOpAsString(5,characterStream));
         }
-	}
-	////////////////////////////////////////////////////////////////////////
-	private void d0(final int w, final int y) {
+    }
 
-	    //flag to show we use text colour or colour in stream
-	    ignoreColors=false;
+    ////////////////////////////////////////////////////////////////////////
+    private void d0(final int w, final int y) {
 
-	    //float glyphX = Float.parseFloat((String) operand.elementAt(0));
-	    T3maxWidth=w;
-	    T3maxHeight=y;
+        //flag to show we use text colour or colour in stream
+        ignoreColors = false;
 
-	    //setup image to draw on
-	    //current.init((int)glyphX,(int)glyphY);
+        //float glyphX = Float.parseFloat((String) operand.elementAt(0));
+        T3maxWidth = w;
+        T3maxHeight = y;
 
-	}
-	public void processToken(final int commandID) {
-		switch(commandID){
+        //setup image to draw on
+        //current.init((int)glyphX,(int)glyphY);
 
-	        case Cmd.d0 :
-	            d0((int) parser.parseFloat(0),(int) parser.parseFloat(1));
-	            break;
-	
-	        case Cmd.d1 :
-	            d1(parser.parseFloat(1),parser.parseFloat(3),parser.parseFloat(5),
-	            		parser.parseFloat(0),parser.parseFloat(2),parser.parseFloat(4));
-	            break;
-	    }
-		
-	}
+    }
+
+    public void processToken(final int commandID) {
+        switch (commandID) {
+
+            case Cmd.d0:
+                d0((int) parser.parseFloat(0), (int) parser.parseFloat(1));
+                break;
+
+            case Cmd.d1:
+                d1(parser.parseFloat(1), parser.parseFloat(3), parser.parseFloat(5),
+                        parser.parseFloat(0), parser.parseFloat(2), parser.parseFloat(4));
+                break;
+        }
+
+    }
 
 }

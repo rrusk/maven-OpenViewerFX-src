@@ -33,12 +33,14 @@
 package org.jpedal.color;
 
 import com.idrsolutions.pdf.color.shading.ShadedPaint;
+
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.ObjectStore;
@@ -60,147 +62,148 @@ import org.jpedal.utils.LogWriter;
 /**
  * handle Pattern ColorSpace (there is also a shading class)
  */
-public class PatternColorSpace extends GenericColorSpace{
-    
+public class PatternColorSpace extends GenericColorSpace {
+
     public static boolean useMemoryEfficentPaint;
-    
+
     boolean newFlag;
-    
+
     //local copy so we can access File data
     private final PdfObjectReader currentPdfFile;
-    
+
     private boolean colorsReversed;
-    
+
     PatternObject PatternObj;
-    
+
     final GenericColorSpace patternColorSpace;
-    
+
     float[][] matrix;
-    
+
     PdfPaint strokCol;
-    
+
     /**
      * Just initialises variables
+     *
      * @param currentPdfFile
      * @param patternColorSpace
      */
-    public PatternColorSpace(final PdfObjectReader currentPdfFile, final GenericColorSpace patternColorSpace){
-        
+    public PatternColorSpace(final PdfObjectReader currentPdfFile, final GenericColorSpace patternColorSpace) {
+
         setType(ColorSpaces.Pattern);
-        
+
         this.currentPdfFile = currentPdfFile;
-        this.patternColorSpace=patternColorSpace;
-        
+        this.patternColorSpace = patternColorSpace;
+
         //default value for color
-        currentColor = new PdfColor(1.0f,1.0f,1.0f);
+        currentColor = new PdfColor(1.0f, 1.0f, 1.0f);
     }
-    
+
     /**
      * convert color value to pattern
      */
     @Override
-    public void setColor(final String[] value_loc, final int operandCount){
-        
-        if(patternColorSpace!=null){
-            
-            final int elementCount=value_loc.length-1;
-            final String[] colVals=new String[elementCount];
-            for(int i=0;i<elementCount;i++) {
-                colVals[i]=value_loc[elementCount-i];
+    public void setColor(final String[] value_loc, final int operandCount) {
+
+        if (patternColorSpace != null) {
+
+            final int elementCount = value_loc.length - 1;
+            final String[] colVals = new String[elementCount];
+            for (int i = 0; i < elementCount; i++) {
+                colVals[i] = value_loc[elementCount - i];
             }
-            
+
             patternColorSpace.setColor(colVals, elementCount);
-            strokCol=patternColorSpace.getColor();
+            strokCol = patternColorSpace.getColor();
         }
-        
-        PatternObj=getPatternObjectFromRefOrDirect(currentPdfFile, (byte[]) patterns.get(value_loc[0]));
-        
+
+        PatternObj = getPatternObjectFromRefOrDirect(currentPdfFile, (byte[]) patterns.get(value_loc[0]));
+
         //lookup table
-        final byte[] streamData=PatternObj.getDecodedStream();
-        
+        final byte[] streamData = PatternObj.getDecodedStream();
+
         //type of Pattern (shading or tiling)
-        final int shadingType= PatternObj.getInt(PdfDictionary.PatternType);
-        
+        final int shadingType = PatternObj.getInt(PdfDictionary.PatternType);
+
         // get optional matrix values
-        
-        final float[] inputs=PatternObj.getFloatArray(PdfDictionary.Matrix);
-        
-        if(inputs!=null){
-            
-            if(shadingType==1){
-                final float[][] Nmatrix={{inputs[0],inputs[1],0f},{inputs[2],inputs[3],0f},{0f,0f,1f}};
-                
-                if(!newFlag && inputs[5]<0){
-                        inputs[4]=0;
-                        inputs[5]=0;
+
+        final float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
+
+        if (inputs != null) {
+
+            if (shadingType == 1) {
+                final float[][] Nmatrix = {{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {0f, 0f, 1f}};
+
+                if (!newFlag && inputs[5] < 0) {
+                    inputs[4] = 0;
+                    inputs[5] = 0;
                 }
-                matrix=Nmatrix;
-            }else{
-                final float[][] Nmatrix={{inputs[0],inputs[1],0f},{inputs[2],inputs[3],0f},{inputs[4],inputs[5],1f}};
-                
+                matrix = Nmatrix;
+            } else {
+                final float[][] Nmatrix = {{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
+
                 colorsReversed = Nmatrix[2][0] < 0;
-                
+
 //                matrix=Matrix.multiply(Nmatrix,CTM); //comment out in order to match with spec
                 matrix = Nmatrix;
             }
         }
-        
-        if(!newFlag){
-            if(shadingType == 1) { //tiling
-                 currentColor = setupTilingNew(PatternObj,streamData);  
-            } else if(shadingType == 2) { //shading                
-                currentColor = setupShading(PatternObj,matrix);
+
+        if (!newFlag) {
+            if (shadingType == 1) { //tiling
+                currentColor = setupTilingNew(PatternObj, streamData);
+            } else if (shadingType == 2) { //shading
+                currentColor = setupShading(PatternObj, matrix);
             }
         }
     }
-    
-    static PatternObject getPatternObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
-    
-        final PatternObject colObj  = new PatternObject(new String(data));
 
-        if(data[0]=='<') {
+    static PatternObject getPatternObjectFromRefOrDirect(final PdfObjectReader currentPdfFile, final byte[] data) {
+
+        final PatternObject colObj = new PatternObject(new String(data));
+
+        if (data[0] == '<') {
             colObj.setStatus(PdfObject.UNDECODED_DIRECT);
         } else {
             colObj.setStatus(PdfObject.UNDECODED_REF);
         }
-        colObj.setUnresolvedData(data,PdfDictionary.Pattern);
-        
-        final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        colObj.setUnresolvedData(data, PdfDictionary.Pattern);
+
+        final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
         objectDecoder.checkResolved(colObj);
-        
+
         return colObj;
     }
-    
-    public BufferedImage getImageForPatternedShape(final GraphicsState gs){
-        
+
+    public BufferedImage getImageForPatternedShape(final GraphicsState gs) {
+
         float mm[][] = gs.CTM;
         final AffineTransform gsAffine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
-        
-        final byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
-        final int patternType= PatternObj.getInt(PdfDictionary.PatternType);
-        
-        if(patternType != 1){ //currently support only tiling, shading pattern not supported yet
+
+        final byte[] streamData = currentPdfFile.readStream(PatternObj, true, true, true, false, false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
+        final int patternType = PatternObj.getInt(PdfDictionary.PatternType);
+
+        if (patternType != 1) { //currently support only tiling, shading pattern not supported yet
             return null;
         }
-        
+
         AffineTransform affine = new AffineTransform();
 
         final float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
         if (inputs != null) {
             mm = new float[][]{{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
             affine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
-        }       
-        
+        }
+
         affine.concatenate(gsAffine);
         mm = getMatrix(affine);
-        
-        final boolean isRotated = affine.getShearX()!=0 || affine.getShearY()!=0;
-        
-        if(isRotated){
+
+        final boolean isRotated = affine.getShearX() != 0 || affine.getShearY() != 0;
+
+        if (isRotated) {
             affine = new AffineTransform();
             mm = new float[][]{{1f, 0f, 0f}, {0f, 1f, 0f}, {0f, 0f, 1f}};
         }
-        
+
         final float[] rawBBox = PatternObj.getFloatArray(PdfDictionary.BBox);
 
         final float xGap = Math.abs(rawBBox[2] - rawBBox[0]);
@@ -252,7 +255,7 @@ public class PatternColorSpace extends GenericColorSpace{
 
         imageW = imageW > 3000 ? 1500 : imageW;
         imageH = imageH > 3000 ? 1500 : imageH;
-        
+
         int iw = (int) (imageW);
         iw = iw < 1 ? 1 : iw;
         int ih = (int) (imageH);
@@ -265,7 +268,7 @@ public class PatternColorSpace extends GenericColorSpace{
         final ObjectStore localStore = new ObjectStore();
         final BufferedImage image;
         final DynamicVectorRenderer glyphDisplay;
-        
+
 //        iw = 1000;
 //        ih = 1000;
 
@@ -291,8 +294,8 @@ public class PatternColorSpace extends GenericColorSpace{
             glyphDisplay.paint(null, rdAffine, null);
 
         }
-        
-        return image;   
+
+        return image;
 //        //flip it for using in viewer
 ////        if(gsAffine.getScaleY()<0){
 ////            AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
@@ -322,21 +325,21 @@ public class PatternColorSpace extends GenericColorSpace{
 //        } catch (Exception ex) {
 //            ex.printStackTrace();
 //        }
-        
+
     }
 
-    private static float[][] getMatrix(final AffineTransform af){
-        return new float[][]{{(float)af.getScaleX(), (float)af.getShearX(), 0f}, {(float)af.getShearY(), (float)af.getScaleY(), 0f}, {(float)af.getTranslateX(), (float)af.getTranslateY(), 1f}};
+    private static float[][] getMatrix(final AffineTransform af) {
+        return new float[][]{{(float) af.getScaleX(), (float) af.getShearX(), 0f}, {(float) af.getShearY(), (float) af.getScaleY(), 0f}, {(float) af.getTranslateX(), (float) af.getTranslateY(), 1f}};
     }
-    
-    public BufferedImage getRawImage(final AffineTransform callerAffine){
-        final byte[] streamData=currentPdfFile.readStream(PatternObj,true,true,true, false,false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
+
+    public BufferedImage getRawImage(final AffineTransform callerAffine) {
+        final byte[] streamData = currentPdfFile.readStream(PatternObj, true, true, true, false, false, PatternObj.getCacheName(currentPdfFile.getObjectReader()));
         final ObjectStore localStore = new ObjectStore();
         //float[] inputs = PatternObj.getFloatArray(PdfDictionary.Matrix);
         final AffineTransform pattern = new AffineTransform();
         pattern.concatenate(callerAffine);
         final PatternDisplay glyphDisplay = decodePatternContent(PatternObj, getMatrix(pattern), streamData, localStore);
-        return glyphDisplay.getSingleImagePattern();        
+        return glyphDisplay.getSingleImagePattern();
     }
 
     private PdfPaint setupTilingNew(final PdfObject PatternObj, final byte[] streamData) {
@@ -351,23 +354,23 @@ public class PatternColorSpace extends GenericColorSpace{
         } else {
             mm = new float[][]{{1f, 0f, 0f}, {0f, 1f, 0f}, {0f, 0f, 1f}};
         }
-                
+
         final ObjectStore localStore = new ObjectStore();
         final BufferedImage image;
         PatternDisplay glyphDisplay;
-        
-        final boolean isRotated = affine.getShearX()!=0 || affine.getShearY()!=0;
-        
-        if(isRotated){
+
+        final boolean isRotated = affine.getShearX() != 0 || affine.getShearY() != 0;
+
+        if (isRotated) {
             rotatedAffine = affine;
             affine = new AffineTransform();
             mm = new float[][]{{1f, 0f, 0f}, {0f, 1f, 0f}, {0f, 0f, 1f}};
-        }else if(useMemoryEfficentPaint){
+        } else if (useMemoryEfficentPaint) {
             return new TilingPaint(PatternObj, streamData, this);
         }
-        
+
         //System.out.println("mm="+mm[0][0]+" "+mm[0][1]+" "+mm[1][0]+" "+mm[1][1]+" "+mm[2][0]+" "+mm[2][1]+" "+isRotated);
-        
+
         final float[] rawBBox = PatternObj.getFloatArray(PdfDictionary.BBox);
 
         final float xGap = Math.abs(rawBBox[2] - rawBBox[0]);
@@ -419,7 +422,7 @@ public class PatternColorSpace extends GenericColorSpace{
 
         imageW = imageW > 3000 ? 3000 : imageW;
         imageH = imageH > 3000 ? 3000 : imageH;
-        
+
         int iw = (int) (imageW);
         iw = iw < 1 ? 1 : iw;
         int ih = (int) (imageH);
@@ -429,19 +432,19 @@ public class PatternColorSpace extends GenericColorSpace{
         if (imageH < 1 && imageW < 2.5) {
             iw = 1;
         }
-        
+
         final Rectangle2D fRect = new Rectangle2D.Double(rawRect.getX(), rawRect.getY(), imageW, imageH);
         image = new BufferedImage(iw, ih, BufferedImage.TYPE_INT_ARGB);
 
         if (isRotated) {
-            
+
             glyphDisplay = decodePatternContent(PatternObj, null, streamData, localStore);
             BufferedImage sing = glyphDisplay.getSingleImagePattern();
-            
-            if(sing!=null){
+
+            if (sing != null) {
                 sing = RenderUtils.invertImage(sing);
                 return new ShearedTexturePaint(sing, fRect, rotatedAffine);
-            }else{
+            } else {
                 mm[2][0] = (float) (mm[2][0] - rawRect.getX());
                 mm[2][1] = (float) (mm[2][1] - rawRect.getY());
                 glyphDisplay = decodePatternContent(PatternObj, mm, streamData, localStore);
@@ -450,9 +453,9 @@ public class PatternColorSpace extends GenericColorSpace{
                 glyphDisplay.paint(null, null, null);
                 return new ShearedTexturePaint(image, fRect, rotatedAffine);
             }
-            
+
         } else {
-            
+
             mm[2][0] = (float) (mm[2][0] - rawRect.getX());
             mm[2][1] = (float) (mm[2][1] - rawRect.getY());
             glyphDisplay = decodePatternContent(PatternObj, mm, streamData, localStore);
@@ -462,43 +465,41 @@ public class PatternColorSpace extends GenericColorSpace{
             //System.out.println("texture "+fRect+" ");
             return new ShearedTexturePaint(image, fRect, rotatedAffine);
         }
-                 
+
     }
 
-   
-    
-    
+
     public PatternDisplay decodePatternContent(final PdfObject PatternObj, final float[][] matrix, final byte[] streamData, final ObjectStore localStore) {
-        
-        final PdfObject Resources=PatternObj.getDictionary(PdfDictionary.Resources);
-        
+
+        final PdfObject Resources = PatternObj.getDictionary(PdfDictionary.Resources);
+
         //decode and create graphic of glyph
-        
-        final PdfStreamDecoderForPattern glyphDecoder=new PdfStreamDecoderForPattern(currentPdfFile);
-        glyphDecoder.setParameters(false,true,7,0,false,false);
-        
-        glyphDecoder.setObjectValue(ValueTypes.ObjectStore,localStore);
-        
+
+        final PdfStreamDecoderForPattern glyphDecoder = new PdfStreamDecoderForPattern(currentPdfFile);
+        glyphDecoder.setParameters(false, true, 7, 0, false, false);
+
+        glyphDecoder.setObjectValue(ValueTypes.ObjectStore, localStore);
+
         //glyphDecoder.setMultiplier(multiplyer);
-        
+
         //T3Renderer glyphDisplay=new T3Display(0,false,20,localStore);
-        final PatternDisplay glyphDisplay=new PatternDisplay(0,false,20,localStore);
-       
-        try{
+        final PatternDisplay glyphDisplay = new PatternDisplay(0, false, 20, localStore);
+
+        try {
             glyphDecoder.setRenderer(glyphDisplay);
-            
-            if (Resources != null){
-                glyphDecoder.readResources(Resources,true);
+
+            if (Resources != null) {
+                glyphDecoder.readResources(Resources, true);
             }
             
             /*
              * setup matrix so scales correctly
              **/
-            final GraphicsState currentGraphicsState=new GraphicsState(0,0);
+            final GraphicsState currentGraphicsState = new GraphicsState(0, 0);
             glyphDecoder.setGS(currentGraphicsState);
             //multiply to get new CTM
-            if(matrix!=null) {
-                currentGraphicsState.CTM =matrix;
+            if (matrix != null) {
+                currentGraphicsState.CTM = matrix;
             }
             
             /*
@@ -511,38 +512,38 @@ public class PatternColorSpace extends GenericColorSpace{
             }
 
             glyphDecoder.decodePageContent(currentGraphicsState, streamData);
-            
+
         } catch (final PdfException e) {
-            LogWriter.writeLog("Exception: "+e.getMessage());
+            LogWriter.writeLog("Exception: " + e.getMessage());
         }
-        
+
         //flush as image now created
         return glyphDisplay;
     }
-    
+
     /**
      */
     private PdfPaint setupShading(final PdfObject PatternObj, final float[][] matrix) {
 
-        final PdfArrayIterator shadingArray=PatternObj.getMixedArray(PdfDictionary.Shading);
-    
-        final PdfObject Shading=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject(PatternObj.getObjectRefAsString()), currentPdfFile.getObjectReader(),shadingArray.getNextValueAsByte(true), PdfDictionary.Shading);
-        
-        final PdfArrayIterator ColorSpace=Shading.getMixedArray(PdfDictionary.ColorSpace);
-         
-        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
-        
-        return new ShadedPaint(Shading, isPrinting,newColorSpace, currentPdfFile,matrix,colorsReversed);
-        
+        final PdfArrayIterator shadingArray = PatternObj.getMixedArray(PdfDictionary.Shading);
+
+        final PdfObject Shading = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject(PatternObj.getObjectRefAsString()), currentPdfFile.getObjectReader(), shadingArray.getNextValueAsByte(true), PdfDictionary.Shading);
+
+        final PdfArrayIterator ColorSpace = Shading.getMixedArray(PdfDictionary.ColorSpace);
+
+        final GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+
+        return new ShadedPaint(Shading, isPrinting, newColorSpace, currentPdfFile, matrix, colorsReversed);
+
     }
 
     public PatternObject getPatternObj() {
         currentPdfFile.checkResolved(PatternObj);
         return PatternObj;
     }
-    
-    public PdfObjectReader getObjectReader(){
+
+    public PdfObjectReader getObjectReader() {
         return currentPdfFile;
     }
-    
+
 }

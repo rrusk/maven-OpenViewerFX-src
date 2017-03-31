@@ -36,23 +36,22 @@ import java.io.Serializable;
 
 /**
  * holds data so we can draw glyph on first appearance
- *
  */
-public class MarkerGlyph extends PdfGlyph implements Serializable{
+public class MarkerGlyph extends PdfGlyph implements Serializable {
 
     public final float a;
     public final float b;
     public final float c;
     public final float d;
     public final String fontName;
-    
-	public MarkerGlyph(final float a, final float b, final float c, final float d, final String fontName) {
 
-		this.a=a;
-		this.b=b;
-		this.c=c;                                                  
-		this.d=d;
-		this.fontName=fontName;
-		
-	}
+    public MarkerGlyph(final float a, final float b, final float c, final float d, final String fontName) {
+
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.d = d;
+        this.fontName = fontName;
+
+    }
 }

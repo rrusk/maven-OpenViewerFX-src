@@ -33,6 +33,7 @@
 package org.jpedal.external;
 
 import java.awt.Graphics2D;
+
 import org.jpedal.PdfDecoderInt;
 
 /**
@@ -40,5 +41,6 @@ import org.jpedal.PdfDecoderInt;
  */
 public interface CustomPrintHintingHandler {
     boolean preprint(Graphics2D g2, PdfDecoderInt pdf);
+
     boolean postprint(Graphics2D g2, PdfDecoderInt pdf);
 }

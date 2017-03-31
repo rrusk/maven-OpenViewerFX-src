@@ -34,6 +34,7 @@ package org.jpedal.io.types;
 
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
+
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
@@ -41,67 +42,66 @@ import org.jpedal.objects.raw.PdfObject;
  *
  */
 public class StringValue {
-    
-    
+
+
     public static int setStringConstantValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
 
-        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i+1, 47);
-        
-        final int keyStart=i;
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i + 1, 47);
+
+        final int keyStart = i;
 
         //move cursor to end of text
-        while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
+        while (raw[i] != 10 && raw[i] != 13 && raw[i] != 32 && raw[i] != 47 && raw[i] != 60 && raw[i] != 62) {
             i++;
         }
 
         //store value
-        pdfObject.setConstant(PDFkeyInt,keyStart,i-keyStart,raw);
-        
-        if(debugFastCode) {
-            System.out.println(padding + "Set constant in " + pdfObject + " to " + pdfObject.setConstant(PDFkeyInt, keyStart, i-keyStart, raw));
-        }
-        
-        return i-1;   // move back so loop works
-    }
-    
+        pdfObject.setConstant(PDFkeyInt, keyStart, i - keyStart, raw);
 
-    
+        if (debugFastCode) {
+            System.out.println(padding + "Set constant in " + pdfObject + " to " + pdfObject.setConstant(PDFkeyInt, keyStart, i - keyStart, raw));
+        }
+
+        return i - 1;   // move back so loop works
+    }
+
+
     public static int setStringKeyValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
 
-        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i+1, 47);
-        
-        final int keyStart=i;
+        i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i + 1, 47);
 
-        boolean isNull=false;
-        
+        final int keyStart = i;
+
+        boolean isNull = false;
+
         //move cursor to end of text (allow for null)
-        while(raw[i]!='R' && !isNull){
-            
+        while (raw[i] != 'R' && !isNull) {
+
             //allow for null for Parent
-            if(PDFkeyInt== PdfDictionary.Parent && StreamReaderUtils.isNull(raw,i)) {
+            if (PDFkeyInt == PdfDictionary.Parent && StreamReaderUtils.isNull(raw, i)) {
                 isNull = true;
             }
-            
+
             i++;
         }
 
-        if(!isNull){
-            setValue(pdfObject, 1+i-keyStart, raw, PDFkeyInt, keyStart);
+        if (!isNull) {
+            setValue(pdfObject, 1 + i - keyStart, raw, PDFkeyInt, keyStart);
         }
 
-        return i-1; // move back so loop works
+        return i - 1; // move back so loop works
     }
 
     static void setValue(final PdfObject pdfObject, final int keyLength, final byte[] raw, final int PDFkeyInt, final int keyStart) {
 
         //set value
-        final byte[] stringBytes=new byte[keyLength];
-        System.arraycopy(raw,keyStart,stringBytes,0,keyLength);
+        final byte[] stringBytes = new byte[keyLength];
+        System.arraycopy(raw, keyStart, stringBytes, 0, keyLength);
 
         //store value
-        pdfObject.setStringKey(PDFkeyInt,stringBytes);
+        pdfObject.setStringKey(PDFkeyInt, stringBytes);
 
-        if(debugFastCode) {
+        if (debugFastCode) {
             System.out.println(padding + "Set constant in " + pdfObject + " to " + new String(stringBytes));
         }
     }

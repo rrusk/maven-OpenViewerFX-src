@@ -41,34 +41,34 @@ import java.awt.image.BufferedImage;
  * general image functions used in several classes
  */
 public class ImageUtils {
-    
+
     public static BufferedImage rotateImage(final BufferedImage savedImage, final int angle) {
 
         final BufferedImage rotatedImage;
 
-        if(angle==180){
+        if (angle == 180) {
 
             final AffineTransform tx = AffineTransform.getScaleInstance(-1, -1);
             tx.translate(-savedImage.getWidth(null), -savedImage.getHeight(null));
             final AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
             rotatedImage = op.filter(savedImage, null);
 
-        }else{
+        } else {
 
             final int w = savedImage.getWidth();
             final int h = savedImage.getHeight();
-            rotatedImage = new BufferedImage(h,w,savedImage.getType());
+            rotatedImage = new BufferedImage(h, w, savedImage.getType());
             final Graphics2D g2 = rotatedImage.createGraphics();
 
-            g2.rotate(Math.toRadians(angle), w/2, h/2);
+            g2.rotate(Math.toRadians(angle), w / 2, h / 2);
 
-            final int diff=(w-h)/2;
+            final int diff = (w - h) / 2;
 
-            if(angle==90){
-                g2.drawImage(savedImage,diff,diff,null);
+            if (angle == 90) {
+                g2.drawImage(savedImage, diff, diff, null);
 
-            }else if(angle==270){
-                g2.drawImage(savedImage,-diff,-diff,null);
+            } else if (angle == 270) {
+                g2.drawImage(savedImage, -diff, -diff, null);
 
             }
         }
@@ -76,11 +76,11 @@ public class ImageUtils {
         return rotatedImage;
     }
 
-     public static BufferedImage invertImage(final BufferedImage savedImage) {
+    public static BufferedImage invertImage(final BufferedImage savedImage) {
 
         final BufferedImage invertedImage;
 
-       
+
         final AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
         tx.translate(0, -savedImage.getHeight(null));
         final AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);

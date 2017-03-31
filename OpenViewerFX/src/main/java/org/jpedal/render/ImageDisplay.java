@@ -38,6 +38,7 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.color.PdfPaint;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.glyph.PdfGlyph;
@@ -64,7 +65,7 @@ public class ImageDisplay extends G2Display {
     // save image in array to draw
     @Override
     public final int drawImage(final int pageNumber, final BufferedImage image, final GraphicsState gs, final boolean alreadyCached, final String name, final int previousUse) {
-        
+
         //track objects
         int iw = (int) gs.CTM[0][0];
         if (iw < 0) {
@@ -91,8 +92,8 @@ public class ImageDisplay extends G2Display {
         final int[] rectParams = {(int) gs.CTM[2][0], (int) gs.CTM[2][1], iw, ih};
         areas.addElement(rectParams);
 
-        blendMode=gs.getBMValue();
-        
+        blendMode = gs.getBMValue();
+
         renderImage(null, image, gs.getAlpha(GraphicsState.FILL), gs, gs.x, gs.y);
 
         return -1;
@@ -104,17 +105,17 @@ public class ImageDisplay extends G2Display {
     @Override
     public void drawClip(final GraphicsState currentGraphicsState, final Shape defaultClip, final boolean canBeCached) {
 
-        final Area clip=currentGraphicsState.getClippingShape();
+        final Area clip = currentGraphicsState.getClippingShape();
 
-        if(canBeCached && hasClips && lastClip==null&& clip==null){
+        if (canBeCached && hasClips && lastClip == null && clip == null) {
 
-        }else if (!canBeCached || lastClip==null || clip==null || !clip.equals(lastClip)){
+        } else if (!canBeCached || lastClip == null || clip == null || !clip.equals(lastClip)) {
 
             RenderUtils.renderClip(currentGraphicsState.getClippingShape(), null, defaultClip, g2);
 
-            lastClip=clip;
+            lastClip = clip;
 
-            hasClips=true;
+            hasClips = true;
 
         }
     }
@@ -123,10 +124,10 @@ public class ImageDisplay extends G2Display {
     public void drawEmbeddedText(final float[][] Trm, final int fontSize, final PdfGlyph embeddedGlyph,
                                  final Object javaGlyph, final int type, final GraphicsState gs, final double[] textTransform, final String glyf, final PdfFont currentFontData, final float glyfWidth) {
 
-        blendMode=gs.getBMValue();
+        blendMode = gs.getBMValue();
 
         AffineTransform at = null;
-        if(textTransform!=null) //can actually be null at line 199 
+        if (textTransform != null) //can actually be null at line 199
         {
             at = new AffineTransform(textTransform);
         }
@@ -154,7 +155,7 @@ public class ImageDisplay extends G2Display {
 
             g2.translate(Trm[2][0], Trm[2][1]);
 
-            if(at!=null) {
+            if (at != null) {
                 g2.transform(at);
             }
 
@@ -216,26 +217,26 @@ public class ImageDisplay extends G2Display {
     public final void drawShape(final PdfShape pdfShape, final GraphicsState gs, final int cmd) {
 
         final Shape currentShape = pdfShape.getShape();
-        
-        if((cmd==Cmd.F || cmd==Cmd.B) && gs.CTM[0][1]==0 && gs.CTM[1][0]==0){
+
+        if ((cmd == Cmd.F || cmd == Cmd.B) && gs.CTM[0][1] == 0 && gs.CTM[1][0] == 0) {
             final int x = currentShape.getBounds().x;
             final int y = currentShape.getBounds().y;
             final int w = currentShape.getBounds().width;
             final int h = currentShape.getBounds().height;
-            final int[] rectParams = {x,y,w,h};
+            final int[] rectParams = {x, y, w, h};
             areas.addElement(rectParams);
-        }else{
+        } else {
             areas.addElement(null);
         }
 
-        blendMode=gs.getBMValue();
+        blendMode = gs.getBMValue();
 
         renderShape(null, gs.getFillType(), gs.getStrokeColor(), gs.getNonstrokeColor(), gs.getStroke(),
                 currentShape, gs.getAlpha(GraphicsState.STROKE), gs.getAlpha(GraphicsState.FILL));
     }
 
     @Override
-    public void drawShape(final Object currentShape, final GraphicsState currentGraphicsState){
+    public void drawShape(final Object currentShape, final GraphicsState currentGraphicsState) {
         // Stub method to supress BaseDisplay message
     }
 

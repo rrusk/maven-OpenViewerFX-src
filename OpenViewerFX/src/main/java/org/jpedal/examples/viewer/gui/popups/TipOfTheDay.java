@@ -54,308 +54,311 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+
 import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.utils.BrowserLauncher;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 
 public class TipOfTheDay extends JDialog {
-	
-	private final List<String> tipPaths = new ArrayList<String>();
-	
-	private boolean tipLoadingFailed;
 
-	private int currentTip;
+    private final List<String> tipPaths = new ArrayList<String>();
 
-	private final JEditorPane tipPane = new JEditorPane();
+    private boolean tipLoadingFailed;
 
-	private final JCheckBox showTipsOnStartup = new JCheckBox(Messages.getMessage("PdfViewerTipOfDay.Show"));
-	
-	public TipOfTheDay(final Container parent, final String tipsRoot, final PropertiesFile propertiesFile){
-		super((JFrame)null, Messages.getMessage("PdfCustomGui.Tipoftheday"), true);
-		
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		
-		try {
-			populateTipsList(tipsRoot, tipPaths);
-		} catch (final IOException e) {
-			tipLoadingFailed = true;
-			LogWriter.writeLog("Exception "+e.getMessage());
-		}
-		
-		final Random r = new Random();
-		currentTip = r.nextInt(tipPaths.size());
-		
-		setSize(550, 350);
-		
-		init(propertiesFile);
-		
-		setLocationRelativeTo(parent);
-	}
+    private int currentTip;
 
-	private void init(final PropertiesFile propertiesFile) {
-		getContentPane().setLayout(new GridBagLayout());
-		final GridBagConstraints mainPanelConstraints = new GridBagConstraints();
+    private final JEditorPane tipPane = new JEditorPane();
 
-		mainPanelConstraints.gridx = 0;
-		mainPanelConstraints.gridy = 0;
-		mainPanelConstraints.fill = GridBagConstraints.HORIZONTAL; 
-		mainPanelConstraints.anchor = GridBagConstraints.PAGE_START;
-		mainPanelConstraints.weighty = 0;
-		mainPanelConstraints.weightx = 0;
-		mainPanelConstraints.insets = new Insets(10,10,0,10);
-		
+    private final JCheckBox showTipsOnStartup = new JCheckBox(Messages.getMessage("PdfViewerTipOfDay.Show"));
+
+    public TipOfTheDay(final Container parent, final String tipsRoot, final PropertiesFile propertiesFile) {
+        super((JFrame) null, Messages.getMessage("PdfCustomGui.Tipoftheday"), true);
+
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        try {
+            populateTipsList(tipsRoot, tipPaths);
+        } catch (final IOException e) {
+            tipLoadingFailed = true;
+            LogWriter.writeLog("Exception " + e.getMessage());
+        }
+
+        final Random r = new Random();
+        currentTip = r.nextInt(tipPaths.size());
+
+        setSize(550, 350);
+
+        init(propertiesFile);
+
+        setLocationRelativeTo(parent);
+    }
+
+    private void init(final PropertiesFile propertiesFile) {
+        getContentPane().setLayout(new GridBagLayout());
+        final GridBagConstraints mainPanelConstraints = new GridBagConstraints();
+
+        mainPanelConstraints.gridx = 0;
+        mainPanelConstraints.gridy = 0;
+        mainPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+        mainPanelConstraints.anchor = GridBagConstraints.PAGE_START;
+        mainPanelConstraints.weighty = 0;
+        mainPanelConstraints.weightx = 0;
+        mainPanelConstraints.insets = new Insets(10, 10, 0, 10);
+
 		/*
 		 * add the top panel to the Dialog, this is the image, and the title "Did you know ... ?"
 		 */
-		addTopPanel(mainPanelConstraints);
-		
-		mainPanelConstraints.fill = GridBagConstraints.BOTH; 
-		mainPanelConstraints.gridy = 1;
-		mainPanelConstraints.weighty = 1;
-		mainPanelConstraints.weightx = 1;
+        addTopPanel(mainPanelConstraints);
+
+        mainPanelConstraints.fill = GridBagConstraints.BOTH;
+        mainPanelConstraints.gridy = 1;
+        mainPanelConstraints.weighty = 1;
+        mainPanelConstraints.weightx = 1;
 		
 		/*
 		 * add the main JEditorPane to the Dialog which displays the html files
 		 */
-		addCenterTip(mainPanelConstraints);
+        addCenterTip(mainPanelConstraints);
 
-		mainPanelConstraints.fill = GridBagConstraints.HORIZONTAL; 
-		mainPanelConstraints.gridy = 2;
-		mainPanelConstraints.weighty = 0;
-		mainPanelConstraints.weightx = 0;
-		mainPanelConstraints.insets = new Insets(0,7,0,10);
+        mainPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+        mainPanelConstraints.gridy = 2;
+        mainPanelConstraints.weighty = 0;
+        mainPanelConstraints.weightx = 0;
+        mainPanelConstraints.insets = new Insets(0, 7, 0, 10);
 		
 		/*
 		 * add the JCheckBox to the Dialog which allows the user to enable/disable displaying on
 		 * startup
 		 */
-		addDisplayOnStartup(mainPanelConstraints,propertiesFile);
-		
-		mainPanelConstraints.gridy = 3;
-		mainPanelConstraints.insets = new Insets(0,0,10,10);
+        addDisplayOnStartup(mainPanelConstraints, propertiesFile);
+
+        mainPanelConstraints.gridy = 3;
+        mainPanelConstraints.insets = new Insets(0, 0, 10, 10);
 		
 		/*
 		 * add the navigation buttons at the bottom of the panel which allows the user to move
 		 * forwards/backwards through the tips, and also allows the Dialog to be closed.
 		 */
-		addBottomButtons(mainPanelConstraints);
-	}
+        addBottomButtons(mainPanelConstraints);
+    }
 
-	private void addDisplayOnStartup(final GridBagConstraints mainPanelConstraints, final PropertiesFile propertiesFile) {
-		final String propValue = propertiesFile.getValue("displaytipsonstartup");
-		if(!propValue.isEmpty()) {
+    private void addDisplayOnStartup(final GridBagConstraints mainPanelConstraints, final PropertiesFile propertiesFile) {
+        final String propValue = propertiesFile.getValue("displaytipsonstartup");
+        if (!propValue.isEmpty()) {
             showTipsOnStartup.setSelected(propValue.equals("true"));
         }
-		showTipsOnStartup.addActionListener(new ActionListener(){
-			@Override
+        showTipsOnStartup.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(final ActionEvent e) {
-				propertiesFile.setValue("displaytipsonstartup", String.valueOf(showTipsOnStartup.isSelected()));
-			}
-		});
-		getContentPane().add(showTipsOnStartup, mainPanelConstraints);
-	}
+                propertiesFile.setValue("displaytipsonstartup", String.valueOf(showTipsOnStartup.isSelected()));
+            }
+        });
+        getContentPane().add(showTipsOnStartup, mainPanelConstraints);
+    }
 
-	private void addBottomButtons(final GridBagConstraints mainPanelConstraints) {
-		final JPanel bottomPanel = new JPanel();
-		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
-		bottomPanel.add(Box.createHorizontalGlue());
-		
-		final JButton previousTip = new JButton(Messages.getMessage("PdfViewerTipOfDay.Previous"));
-		previousTip.addActionListener(new ActionListener(){
-			@Override
-            public void actionPerformed(final ActionEvent e) {
-				changeTip(-1);
-			}
-		});
-		bottomPanel.add(previousTip);
-		
-		bottomPanel.add(Box.createRigidArea(new Dimension(5,0)));
-		
-		final JButton nextTip = new JButton(Messages.getMessage("PdfViewerTipOfDay.Next"));
-		nextTip.addActionListener(new ActionListener(){
-			@Override
-            public void actionPerformed(final ActionEvent e) {
-				changeTip(1);
-			}
-		});
-		nextTip.setPreferredSize(previousTip.getPreferredSize());
-		bottomPanel.add(nextTip);
-		
-		bottomPanel.add(Box.createRigidArea(new Dimension(5,0)));
-		
-		final JButton close = new JButton(Messages.getMessage("PdfViewerButton.Close"));
-		close.addActionListener(new ActionListener(){
-			@Override
-            public void actionPerformed(final ActionEvent e) {
-				dispose();
-				setVisible(false);
-			}
-		});
-		close.setPreferredSize(previousTip.getPreferredSize());
-		
-		setFocusTraversalPolicy(new MyFocus(getFocusTraversalPolicy(), close));
-		
-		close.addKeyListener(new KeyListener() {
-			@Override
-            public void keyTyped(final KeyEvent event) {}
+    private void addBottomButtons(final GridBagConstraints mainPanelConstraints) {
+        final JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
+        bottomPanel.add(Box.createHorizontalGlue());
 
-			@Override
+        final JButton previousTip = new JButton(Messages.getMessage("PdfViewerTipOfDay.Previous"));
+        previousTip.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                changeTip(-1);
+            }
+        });
+        bottomPanel.add(previousTip);
+
+        bottomPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+
+        final JButton nextTip = new JButton(Messages.getMessage("PdfViewerTipOfDay.Next"));
+        nextTip.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                changeTip(1);
+            }
+        });
+        nextTip.setPreferredSize(previousTip.getPreferredSize());
+        bottomPanel.add(nextTip);
+
+        bottomPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+
+        final JButton close = new JButton(Messages.getMessage("PdfViewerButton.Close"));
+        close.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                dispose();
+                setVisible(false);
+            }
+        });
+        close.setPreferredSize(previousTip.getPreferredSize());
+
+        setFocusTraversalPolicy(new MyFocus(getFocusTraversalPolicy(), close));
+
+        close.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(final KeyEvent event) {
+            }
+
+            @Override
             public void keyPressed(final KeyEvent event) {
-				if (event.getKeyCode() == 10) {
-					dispose();
-					setVisible(false);
-				}
-			}
+                if (event.getKeyCode() == 10) {
+                    dispose();
+                    setVisible(false);
+                }
+            }
 
-			@Override
-            public void keyReleased(final KeyEvent event) {}
-		});
-		
-		bottomPanel.add(close);
-		
-		getContentPane().add(bottomPanel, mainPanelConstraints);
-	}
-	
-	private void changeTip(final int ammount) {
-		currentTip += ammount;
+            @Override
+            public void keyReleased(final KeyEvent event) {
+            }
+        });
+
+        bottomPanel.add(close);
+
+        getContentPane().add(bottomPanel, mainPanelConstraints);
+    }
+
+    private void changeTip(final int ammount) {
+        currentTip += ammount;
 		
 		/* wrap the current tip if needed */
-		if(currentTip == tipPaths.size()) {
+        if (currentTip == tipPaths.size()) {
             currentTip = 0;
-        } else if(currentTip == -1) {
+        } else if (currentTip == -1) {
             currentTip = tipPaths.size() - 1;
         }
-		
-		if(!tipLoadingFailed) {
-			try {
-				tipPane.setPage(getClass().getResource(tipPaths.get(currentTip)));
-			} catch (final IOException e) {
-				tipLoadingFailed = true;
-				LogWriter.writeLog("Exception "+e.getMessage());
-			}
-		}
-		
-		if (tipLoadingFailed) {
-			tipPane.setText("Error displaying tips, no tip to display");
-		}
-	}
 
-	private void populateTipsList(final String tipRoot, final List<String> items) throws IOException {
-		try {
-			final URL url = getClass().getResource(tipRoot); //"/org/jpedal/examples/viewer/res/tips"
+        if (!tipLoadingFailed) {
+            try {
+                tipPane.setPage(getClass().getResource(tipPaths.get(currentTip)));
+            } catch (final IOException e) {
+                tipLoadingFailed = true;
+                LogWriter.writeLog("Exception " + e.getMessage());
+            }
+        }
+
+        if (tipLoadingFailed) {
+            tipPane.setText("Error displaying tips, no tip to display");
+        }
+    }
+
+    private void populateTipsList(final String tipRoot, final List<String> items) throws IOException {
+        try {
+            final URL url = getClass().getResource(tipRoot); //"/org/jpedal/examples/viewer/res/tips"
 			
 			/*
 			 * allow for it in jar
 			 */
-			if(url.toString().startsWith("jar")){
-				final JarURLConnection conn = (JarURLConnection) url.openConnection();
-				final JarFile jar = conn.getJarFile();
-	
-				for (final Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
-					final JarEntry entry = e.nextElement();
-					final String name=entry.getName();
-					
-					if ((!entry.isDirectory()) && name.contains("/res/tips/") && name.endsWith(".html")) { // this
-						items.add('/' + name);
-					}
-				}
-			}else{ //IDE
-				final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-				
-				String inputLine;
-				
-				while ((inputLine = in.readLine()) != null) {
-					if (inputLine.indexOf('.') == -1) { // this is a directory
-						populateTipsList(tipRoot + '/' + inputLine, items);
-					} else if ((inputLine.endsWith(".htm")) || inputLine.endsWith(".html")) { // this is a file
-						items.add(tipRoot + '/' + inputLine);
-					}
-				}
-			
-			
-				in.close();
-			}
-		} catch (final IOException e) {
-			LogWriter.writeLog("Exception "+e.getMessage());
-			throw e;
-		}
-	}
-	
-	private void addCenterTip(final GridBagConstraints mainPanelConstraints) {
-		tipPane.setEditable(false);
-		tipPane.setAutoscrolls(true);
-		
-		tipPane.addHyperlinkListener(new HyperlinkListener() {
-			@Override
+            if (url.toString().startsWith("jar")) {
+                final JarURLConnection conn = (JarURLConnection) url.openConnection();
+                final JarFile jar = conn.getJarFile();
+
+                for (final Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements(); ) {
+                    final JarEntry entry = e.nextElement();
+                    final String name = entry.getName();
+
+                    if ((!entry.isDirectory()) && name.contains("/res/tips/") && name.endsWith(".html")) { // this
+                        items.add('/' + name);
+                    }
+                }
+            } else { //IDE
+                final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    if (inputLine.indexOf('.') == -1) { // this is a directory
+                        populateTipsList(tipRoot + '/' + inputLine, items);
+                    } else if ((inputLine.endsWith(".htm")) || inputLine.endsWith(".html")) { // this is a file
+                        items.add(tipRoot + '/' + inputLine);
+                    }
+                }
+
+
+                in.close();
+            }
+        } catch (final IOException e) {
+            LogWriter.writeLog("Exception " + e.getMessage());
+            throw e;
+        }
+    }
+
+    private void addCenterTip(final GridBagConstraints mainPanelConstraints) {
+        tipPane.setEditable(false);
+        tipPane.setAutoscrolls(true);
+
+        tipPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
             public void hyperlinkUpdate(final HyperlinkEvent e) {
-				if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-				
-                        try {
-                            BrowserLauncher.openURL(e.getURL().toExternalForm());
-                        } catch (final Exception ex) {
-                            Logger.getLogger(TipOfTheDay.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-				}
-			}
-		});
-		
-		final JScrollPane scrollPane = new JScrollPane();
-		scrollPane.getViewport().add(tipPane);
-		scrollPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-		
-		getContentPane().add(scrollPane, mainPanelConstraints);
-		
-		changeTip(0);
-	}
+                if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
 
-	private void addTopPanel(final GridBagConstraints mainPanelConstraints) {
-		final JPanel topPanel = new JPanel();
-		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
+                    try {
+                        BrowserLauncher.openURL(e.getURL().toExternalForm());
+                    } catch (final Exception ex) {
+                        Logger.getLogger(TipOfTheDay.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
 
-		final JLabel tipImage = new JLabel(new ImageIcon(getClass().getResource("/org/jpedal/examples/viewer/res/tip.png")));
-		topPanel.add(tipImage);
-		
-		final JLabel label = new JLabel(Messages.getMessage("PdfViewerTipOfDay.DidYouKnow"));
-		final Font font = label.getFont().deriveFont(16.0f);
-	    label.setFont(font);
-	    
-	    topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-	    
-		topPanel.add(label);
-		getContentPane().add(topPanel, mainPanelConstraints);
-	}
-	
+        final JScrollPane scrollPane = new JScrollPane();
+        scrollPane.getViewport().add(tipPane);
+        scrollPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+
+        getContentPane().add(scrollPane, mainPanelConstraints);
+
+        changeTip(0);
+    }
+
+    private void addTopPanel(final GridBagConstraints mainPanelConstraints) {
+        final JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
+
+        final JLabel tipImage = new JLabel(new ImageIcon(getClass().getResource("/org/jpedal/examples/viewer/res/tip.png")));
+        topPanel.add(tipImage);
+
+        final JLabel label = new JLabel(Messages.getMessage("PdfViewerTipOfDay.DidYouKnow"));
+        final Font font = label.getFont().deriveFont(16.0f);
+        label.setFont(font);
+
+        topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        topPanel.add(label);
+        getContentPane().add(topPanel, mainPanelConstraints);
+    }
+
     static class MyFocus extends FocusTraversalPolicy {
         final FocusTraversalPolicy original;
         final JButton close;
 
-        MyFocus(final FocusTraversalPolicy original, final JButton close){
+        MyFocus(final FocusTraversalPolicy original, final JButton close) {
             this.original = original;
             this.close = close;
 
         }
- 
+
         @Override
         public Component getComponentAfter(final Container arg0, final Component arg1) {
             return original.getComponentAfter(arg0, arg1);
         }
-        
+
         @Override
         public Component getComponentBefore(final Container arg0, final Component arg1) {
             return original.getComponentBefore(arg0, arg1);
         }
-        
+
         @Override
         public Component getFirstComponent(final Container arg0) {
             return original.getFirstComponent(arg0);
         }
-        
+
         @Override
         public Component getLastComponent(final Container arg0) {
             return original.getLastComponent(arg0);
         }
-        
+
         @Override
         public Component getDefaultComponent(final Container arg0) {
             return close;

@@ -35,38 +35,41 @@ package org.jpedal.objects.acroforms.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractButton;
+
 import org.jpedal.objects.acroforms.overridingImplementations.FixImageIcon;
 
 
 /**
  * class that implements the action listener interface to allow the down icon to be changed on the fly
- * 
+ *
  * @author chris
  */
-public class SwingDownIconListener implements ActionListener{
-	/*
+public class SwingDownIconListener implements ActionListener {
+    /*
 	 * stores the down icon images for use when more than one pressed icon needs to be used
 	 */
-	//private int width,height;
-	
-	/** takes in the down off buffered image and the down on buffered image
+    //private int width,height;
+
+    /**
+     * takes in the down off buffered image and the down on buffered image
      * each one can be null,
      */
-    public SwingDownIconListener() {}
-			
+    public SwingDownIconListener() {
+    }
+
     @Override
     public void actionPerformed(final ActionEvent e) {
-    	if(PDFListener.debugMouseActions) {
+        if (PDFListener.debugMouseActions) {
             System.out.println("SwingDownIconListener.actionPerformed()");
         }
-    	
-        final AbstractButton tmp=(AbstractButton) e.getSource();
-        
+
+        final AbstractButton tmp = (AbstractButton) e.getSource();
+
         //width = tmp.getWidth();
         //height = tmp.getHeight();
-        
-    	final FixImageIcon imgI = (FixImageIcon) tmp.getPressedIcon();
-//        imgI.setAttributes(width,height);//unneeded call
+
+        final FixImageIcon imgI = (FixImageIcon) tmp.getPressedIcon();
+//        imgI.setAttributes(width,height); //unneeded call
         imgI.swapImage(tmp.isSelected());
     }
 }

@@ -199,8 +199,12 @@ public class JDeliHelper {
 		return null;
 	}
         
-        public static BufferedImage getSGIImage(File data) throws Exception {
+    public static BufferedImage getSGIImage(File data) throws Exception {
 		return null;
+	}
+	
+	public static BufferedImage read(File f) throws Exception{
+		return ImageIO.read(f);
 	}
 	
 }

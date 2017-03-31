@@ -41,20 +41,20 @@ import org.jpedal.fonts.glyph.JavaFXSupport;
  * single listener to execute all GUI commands and call Commands to execute
  */
 public class CommandListenerFX implements CommandListener {
-	
+
     CommandListenerImpl commandListener;
-    
-	public CommandListenerFX(final Commands currentCommands) {
-       
+
+    public CommandListenerFX(final Commands currentCommands) {
+
         final JavaFXSupport fxSupport = ExternalHandlers.getFXHandler();
-        if(fxSupport!=null){
-            commandListener =  (CommandListenerImpl) fxSupport.getCommandHandler(currentCommands);
+        if (fxSupport != null) {
+            commandListener = (CommandListenerImpl) fxSupport.getCommandHandler(currentCommands);
         }
-	}
+    }
 
     @Override
-    public CommandListenerImpl getCommandListener(){
+    public CommandListenerImpl getCommandListener() {
         return commandListener;
     }
-    
+
 }

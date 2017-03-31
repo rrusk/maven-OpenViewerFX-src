@@ -42,14 +42,12 @@ public class Options {
      * {@link org.jpedal.external.ImageHandler} examples in
      * org.jpedal.examples.handlers and sample code to use commented out in
      * Viewer
-     *
      */
     public static final int ImageHandler = 1;
 
     /**
      * allows user to over-ride form creation code with own - needs to implement
      * {@link org.jpedal.objects.acroforms.creation.FormFactory}
-     *
      */
     public static final int FormFactory = 3;
 
@@ -57,7 +55,7 @@ public class Options {
      * used by Viewer - use not recommended
      */
     public static final int MultiPageUpdate = 4;
-    
+
     /**
      * used by NetBeans plugin
      */
@@ -84,7 +82,7 @@ public class Options {
      */
     public static final int ThumbnailHandler = 8;
 
-	public static final int JPedalActionHandler = 9;
+    public static final int JPedalActionHandler = 9;
 
     /**
      * pass in GUI in Viewers
@@ -142,11 +140,11 @@ public class Options {
      * and other info messages
      */
     public static final int RenderChangeListener = 21;
-    
+
     /**
      * ContentHandler
      */
-   // public static final int StructuredContentHandler = 22;
+    // public static final int StructuredContentHandler = 22;
 
     //public static final int ErrorTracker = 23;
 
@@ -154,27 +152,27 @@ public class Options {
 
     public static final int UniqueAnnotationHandler = 25;
 
-	public static final int CustomMouseHandler = 26;
-	
+    public static final int CustomMouseHandler = 26;
+
 //	public static final int ImageLibrary = 27;
-    
+
     public static final int USE_XFA = 28;
 
-    public static final int USE_XFA_IN_LEGACY_MODE=29;
+    public static final int USE_XFA_IN_LEGACY_MODE = 29;
 
     /* [AWI] Indicates that the UI is ready for Keyboard input (used for touchscreens with virtual keyboards). */
     public static final int KeyboardReadyHandler = 30;
-    
+
     public static final int ErrorTracker = 31;
-    
+
     public static final int SpeechEngine = 32;
-    
+
     public static final int JavaFX_ADDITIONAL_OBJECTS = 33;
-    
+
     public static final int FileAccess = 35;
-    
+
     public static final int DisplayOffsets = 37;
-    
+
     public static final int AdditionalHandler = 39;
 
 }

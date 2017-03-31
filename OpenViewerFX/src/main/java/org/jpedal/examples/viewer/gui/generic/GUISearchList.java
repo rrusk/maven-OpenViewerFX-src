@@ -40,26 +40,27 @@ public interface GUISearchList {
     int SEARCH_COMPLETE_SUCCESSFULLY = 2;
     int SEARCH_INCOMPLETE = 4;
     int SEARCH_PRODUCED_ERROR = 8;
-    
-	Map<Integer, Integer> getTextPages();
 
-	Map textAreas();
-	
-	/**
-	 * Find out the current amount of results found
-	 * @return the amount of search results found
-	 */
-	int getResultCount();
-	
-	void setSearchTerm(String term);
-	
-	String getSearchTerm();
-	
-	int getSelectedIndex();
-	
-	void setSelectedIndex(int index);
-	
-	//public int getStatus();
+    Map<Integer, Integer> getTextPages();
 
-	//public void setStatus(int status);
+    Map textAreas();
+
+    /**
+     * Find out the current amount of results found
+     *
+     * @return the amount of search results found
+     */
+    int getResultCount();
+
+    void setSearchTerm(String term);
+
+    String getSearchTerm();
+
+    int getSelectedIndex();
+
+    void setSelectedIndex(int index);
+
+    //public int getStatus();
+
+    //public void setStatus(int status);
 }

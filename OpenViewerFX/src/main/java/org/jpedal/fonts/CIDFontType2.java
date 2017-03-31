@@ -33,6 +33,7 @@
 package org.jpedal.fonts;
 
 import java.util.Map;
+
 import org.jpedal.fonts.tt.TTGlyphs;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.io.PdfObjectReader;
@@ -43,102 +44,108 @@ import org.jpedal.parser.PdfFontFactory;
 
 /**
  * handles truetype specifics
- *  */
+ */
 public class CIDFontType2 extends TrueType {
-    
-    /**get handles onto Reader so we can access the file*/
-    public CIDFontType2(final PdfObjectReader currentPdfFile, final String substituteFontFile) {
-        
-        isCIDFont=true;
-        TTstreamisCID=true;
-        
-        glyphs=new TTGlyphs();
-        
-        init(currentPdfFile);
-        
-        this.substituteFontFile=substituteFontFile;
-        
-    }
-    
-    /**get handles onto Reader so we can access the file*/
-    public CIDFontType2(final PdfObjectReader currentPdfFile, final boolean ttflag) {
-        
-        isCIDFont=true;
-        TTstreamisCID=ttflag;
-        
-        glyphs=new TTGlyphs();
-        
-        init(currentPdfFile);
-        
-    }
-    
-    /**read in a font and its details from the pdf file*/
-    @Override
-    public void createFont(final PdfObject pdfObject, final String fontID, final boolean renderPage, final ObjectStore objectStore, final Map<String, org.jpedal.fonts.glyph.PdfJavaGlyphs> substitutedFonts) throws Exception{
-        
-        fontTypes=StandardFonts.CIDTYPE2;
-        this.fontID=fontID;
-        
-        final PdfObject Descendent=pdfObject.getDictionary(PdfDictionary.DescendantFonts);
-        final PdfObject pdfFontDescriptor=Descendent.getDictionary(PdfDictionary.FontDescriptor);
-        
-        createCIDFont(pdfObject,Descendent);
-        
-        if (pdfFontDescriptor!= null) {
-            
-            final byte[] stream;
-            PdfObject FontFile2=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile2);
 
-            if(FontFile2==null){
-                FontFile2=pdfFontDescriptor.getDictionary(PdfDictionary.FontFile3);
+    /**
+     * get handles onto Reader so we can access the file
+     */
+    public CIDFontType2(final PdfObjectReader currentPdfFile, final String substituteFontFile) {
+
+        isCIDFont = true;
+        TTstreamisCID = true;
+
+        glyphs = new TTGlyphs();
+
+        init(currentPdfFile);
+
+        this.substituteFontFile = substituteFontFile;
+
+    }
+
+    /**
+     * get handles onto Reader so we can access the file
+     */
+    public CIDFontType2(final PdfObjectReader currentPdfFile, final boolean ttflag) {
+
+        isCIDFont = true;
+        TTstreamisCID = ttflag;
+
+        glyphs = new TTGlyphs();
+
+        init(currentPdfFile);
+
+    }
+
+    /**
+     * read in a font and its details from the pdf file
+     */
+    @Override
+    public void createFont(final PdfObject pdfObject, final String fontID, final boolean renderPage, final ObjectStore objectStore, final Map<String, org.jpedal.fonts.glyph.PdfJavaGlyphs> substitutedFonts) throws Exception {
+
+        fontTypes = StandardFonts.CIDTYPE2;
+        this.fontID = fontID;
+
+        final PdfObject Descendent = pdfObject.getDictionary(PdfDictionary.DescendantFonts);
+        final PdfObject pdfFontDescriptor = Descendent.getDictionary(PdfDictionary.FontDescriptor);
+
+        createCIDFont(pdfObject, Descendent);
+
+        if (pdfFontDescriptor != null) {
+
+            final byte[] stream;
+            PdfObject FontFile2 = pdfFontDescriptor.getDictionary(PdfDictionary.FontFile2);
+
+            if (FontFile2 == null) {
+                FontFile2 = pdfFontDescriptor.getDictionary(PdfDictionary.FontFile3);
             }
 
-            if(FontFile2!=null){
-                stream=currentPdfFile.readStream(FontFile2,true,true,false, false,false, FontFile2.getCacheName(currentPdfFile.getObjectReader()));
-                
-                if(stream!=null) {
-                    readEmbeddedFont(stream,null,hasEncoding);
+            if (FontFile2 != null) {
+                stream = currentPdfFile.readStream(FontFile2, true, true, false, false, false, FontFile2.getCacheName(currentPdfFile.getObjectReader()));
+
+                if (stream != null) {
+                    readEmbeddedFont(stream, null, hasEncoding);
                 }
             }
         }
-        
-        
+
+
         //allow for corrupted
-        final boolean isCorrupt=glyphs.isCorrupted();
-        
-        if(glyphs.isCorrupted()){
-            
-            final PdfFontFactory pdfFontFactory =new PdfFontFactory(currentPdfFile);
+        final boolean isCorrupt = glyphs.isCorrupted();
+
+        if (glyphs.isCorrupted()) {
+
+            final PdfFontFactory pdfFontFactory = new PdfFontFactory(currentPdfFile);
             pdfFontFactory.getFontSub(getBaseFontName());
-            isFontEmbedded=false;
-            
-            substituteFontFile= pdfFontFactory.getMapFont();
-            
-            if(substituteFontFile==null){
-                
+            isFontEmbedded = false;
+
+            substituteFontFile = pdfFontFactory.getMapFont();
+
+            if (substituteFontFile == null) {
+
                 glyphs.setFontEmbedded(false);
-                
+
                 //generic setup so we have Java fonts available
                 init(fontID, renderPage);
-                
+
             }
         }
-        
+
         //setup and substitute font
-        if(renderPage && !isFontEmbedded && substituteFontFile!=null){
+        if (renderPage && !isFontEmbedded && substituteFontFile != null) {
             this.substituteFontUsed(substituteFontFile);
-            isFontSubstituted=true;
-            this.isFontEmbedded=true;
-            
+            isFontSubstituted = true;
+            this.isFontEmbedded = true;
+
             glyphs.setFontEmbedded(true);
         }
-        
+
         //make sure a font set
         if (renderPage) {
             setFont(getFontName(), 1);
         }
 
         glyphs.setCorrupted(isCorrupt);
-        
+
     }
 }

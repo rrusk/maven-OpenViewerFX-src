@@ -34,22 +34,28 @@ package org.jpedal.constants;
 
 public class PDFflags {
 
-    /**see Table 3.20 in PDF spec for meaning of values returned*/
+    /**
+     * see Table 3.20 in PDF spec for meaning of values returned
+     */
     public static final Integer USER_ACCESS_PERMISSIONS = 1;
 
-    /**ask JPedal for status on password*/
+    /**
+     * ask JPedal for status on password
+     */
     public static final Integer VALID_PASSWORD_SUPPLIED = 2;
 
-    /**possible return keys from VALID_PASSWORD_SUPPLIED*/
+    /**
+     * possible return keys from VALID_PASSWORD_SUPPLIED
+     */
     public static final int NO_VALID_PASSWORD = 0;
     public static final int VALID_USER_PASSWORD = 1;
     public static final int VALID_OWNER_PASSWORD = 2;
 
-    public static final int IS_FILE_VIEWABLE=100;
+    public static final int IS_FILE_VIEWABLE = 100;
 
-    public static final int IS_FILE_ENCRYPTED=101;
+    public static final int IS_FILE_ENCRYPTED = 101;
 
-    public static final int IS_METADATA_ENCRYPTED=102;
+    public static final int IS_METADATA_ENCRYPTED = 102;
 
     public static final int IS_EXTRACTION_ALLOWED = 103;
 

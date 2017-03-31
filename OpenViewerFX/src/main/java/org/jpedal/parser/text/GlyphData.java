@@ -36,38 +36,39 @@ package org.jpedal.parser.text;
 import org.jpedal.fonts.PdfFont;
 
 /**
- *
  * @author markee
  */
 public class GlyphData {
 
-    private boolean firstTime=true;
-    
-    /**length of current text fragment*/
+    private boolean firstTime = true;
+
+    /**
+     * length of current text fragment
+     */
     private int textLength;
-    
+
     private int numOfPrefixes;
-    
+
     private float fontScale;
-    
-    private char lastChar,openChar;
-   
+
+    private char lastChar, openChar;
+
     private int fontSize;
-    
-    private int charSize=2;
-    
-    private String displayValue,unicodeValue;
-    
+
+    private int charSize = 2;
+
+    private String displayValue, unicodeValue;
+
     private boolean isHorizontal;
-    
+
     private boolean inText;
-    
+
     private char rawChar;
-    
+
     private float actualWidth;
-    
-    private int rawInt,valueForHTML=-1;
-    
+
+    private int rawInt, valueForHTML = -1;
+
     private int possibleVal;
 
     private char lastTextChar = 'x';
@@ -79,15 +80,15 @@ public class GlyphData {
     public void setRawInt(final int rawInt) {
         this.rawInt = rawInt;
     }
-    
-     public void setRaw(final int rawInt) {
+
+    public void setRaw(final int rawInt) {
         this.rawInt = rawInt;
-        this.rawChar=(char)rawInt;
+        this.rawChar = (char) rawInt;
     }
-    
-    private boolean isXMLExtraction=true;
-    
-    private float leading, width,spacingAdded;
+
+    private boolean isXMLExtraction = true;
+
+    private float leading, width, spacingAdded;
 
     public float getLeading() {
         return leading;
@@ -112,7 +113,7 @@ public class GlyphData {
     public void setSpacingAdded(final float spacingAdded) {
         this.spacingAdded = spacingAdded;
     }
-   
+
     /**
      * @return the displayValue
      */
@@ -140,49 +141,49 @@ public class GlyphData {
     public void setUnicodeValue(final String unicodeValue) {
         this.unicodeValue = unicodeValue;
     }
-    
-    void resetValues(){
+
+    void resetValues() {
         inText = false;
-        
-        isHorizontal=false;
-        
-        
+
+        isHorizontal = false;
+
+
     }
 
     void reset() {
-        
-        firstTime=true;
-        
+
+        firstTime = true;
+
         textLength = 0;
-        
+
         rawChar = ' ';
-        
+
         displayValue = "";
-        unicodeValue="";
-        
-        spacingAdded=0;
-        
+        unicodeValue = "";
+
+        spacingAdded = 0;
+
         leading = 0;
         width = 0;
-        
-        rawInt=0;
-        
-        actualWidth=0;
-        
-        valueForHTML=-1; //used by HTML to track chars which have ISSUES
-        
+
+        rawInt = 0;
+
+        actualWidth = 0;
+
+        valueForHTML = -1; //used by HTML to track chars which have ISSUES
+
         lastChar = ' ';
         openChar = ' ';
-        
-        numOfPrefixes=0;
+
+        numOfPrefixes = 0;
 
         lastTextChar = 'x';
-        
+
     }
-    
+
     void set(final String val) {
         displayValue = val;
-        unicodeValue=val;
+        unicodeValue = val;
     }
 
     boolean isText() {
@@ -190,7 +191,7 @@ public class GlyphData {
     }
 
     void setText(final boolean b) {
-        inText=b;
+        inText = b;
     }
 
     boolean isHorizontal() {
@@ -198,11 +199,11 @@ public class GlyphData {
     }
 
     void setHorizontal(final boolean b) {
-        isHorizontal=b;
+        isHorizontal = b;
     }
 
     void setXMLExtraction(final boolean xmlExtraction) {
-        this.isXMLExtraction=xmlExtraction;
+        this.isXMLExtraction = xmlExtraction;
     }
 
     boolean isXMLExtraction() {
@@ -214,8 +215,8 @@ public class GlyphData {
         width += value;
         leading += value; //keep count on leading
         spacingAdded += leading;
-        
-        rawChar=rc;
+
+        rawChar = rc;
     }
 
     void subtractLeading(final float value) {
@@ -224,8 +225,8 @@ public class GlyphData {
 
     void addToWidth(final float currentWidth) {
         textLength++; //counter on chars in data
-                
-           width += currentWidth;
+
+        width += currentWidth;
     }
 
     char getRawChar() {
@@ -233,7 +234,7 @@ public class GlyphData {
     }
 
     void setRawChar(final char c) {
-       rawChar=c;
+        rawChar = c;
     }
 
     /**
@@ -251,11 +252,11 @@ public class GlyphData {
     }
 
     void setActualWidth(final float actualWidth) {
-       this.actualWidth=actualWidth;
+        this.actualWidth = actualWidth;
     }
-    
+
     float getActualWidth() {
-       return actualWidth;
+        return actualWidth;
     }
 
     /**
@@ -271,13 +272,13 @@ public class GlyphData {
     public void setValueForHTML(final int valueForHTML) {
         this.valueForHTML = valueForHTML;
     }
-    
-     void setDefaultCharSize(final PdfFont currentFontData){
+
+    void setDefaultCharSize(final PdfFont currentFontData) {
         setCharSize(2);
-        if(currentFontData.isCIDFont() && !currentFontData.isSingleByte()){
+        if (currentFontData.isCIDFont() && !currentFontData.isSingleByte()) {
             setCharSize(4);
         }
-        
+
     }
 
     /**
@@ -295,19 +296,19 @@ public class GlyphData {
     }
 
     int getFontSize() {
-       return fontSize;
+        return fontSize;
     }
 
     void setFontSize(final int fontSize) {
-        this.fontSize=fontSize;
+        this.fontSize = fontSize;
     }
 
     void setLastChar(final char newChar) {
-       lastChar=newChar;
+        lastChar = newChar;
     }
-    
+
     char getLastChar() {
-       return lastChar;
+        return lastChar;
     }
 
     char getOpenChar() {
@@ -315,27 +316,27 @@ public class GlyphData {
     }
 
     void setOpenChar(final char rawChar) {
-        openChar=rawChar;
+        openChar = rawChar;
     }
 
     void updatePrefixCount(final char testChar) {
-        
-        if(testChar==40){
+
+        if (testChar == 40) {
             numOfPrefixes++;
-        }else if(testChar==41){ //')'=41
-            if(numOfPrefixes<=0){
-                inText=false; //unset text flag
-            }else {
+        } else if (testChar == 41) { //')'=41
+            if (numOfPrefixes <= 0) {
+                inText = false; //unset text flag
+            } else {
                 numOfPrefixes--;
             }
         }
     }
-    
+
     void setLastChar() {
-        if(lastChar==92 && rawChar==92){//checks if \ has been escaped in '\\'=92
-            lastChar=((char)120);
+        if (lastChar == 92 && rawChar == 92) { //checks if \ has been escaped in '\\'=92
+            lastChar = ((char) 120);
         } else {
-            lastChar=rawChar;
+            lastChar = rawChar;
         }
     }
 
@@ -348,11 +349,11 @@ public class GlyphData {
     }
 
     void setFirstTime(final boolean b) {
-        firstTime=b;
+        firstTime = b;
     }
 
     void setPossibleValue(final int val) {
-        possibleVal=val;
+        possibleVal = val;
     }
 
     int getPossibleValue() {
@@ -360,7 +361,7 @@ public class GlyphData {
     }
 
     public void setLastTextChar(final char lastTextChar) {
-        this.lastTextChar=lastTextChar;
+        this.lastTextChar = lastTextChar;
     }
 
     public char getLastTextChar() {

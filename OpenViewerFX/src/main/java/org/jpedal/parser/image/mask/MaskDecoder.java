@@ -1,16 +1,16 @@
- /*
- * ===========================================
- * Java Pdf Extraction Decoding Access Library
- * ===========================================
- *
- * Project Info:  http://www.idrsolutions.com
- * Help section for developers at http://www.idrsolutions.com/support/
- *
- * (C) Copyright 1997-2017 IDRsolutions and Contributors.
- *
- * This file is part of JPedal/JPDF2HTML5
- *
-     This library is free software; you can redistribute it and/or
+/*
+* ===========================================
+* Java Pdf Extraction Decoding Access Library
+* ===========================================
+*
+* Project Info:  http://www.idrsolutions.com
+* Help section for developers at http://www.idrsolutions.com/support/
+*
+* (C) Copyright 1997-2017 IDRsolutions and Contributors.
+*
+* This file is part of JPedal/JPDF2HTML5
+*
+    This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
     version 2.1 of the License, or (at your option) any later version.
@@ -25,15 +25,16 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
- *
- * ---------------
- * MaskDecoder.java
- * ---------------
- */
+*
+* ---------------
+* MaskDecoder.java
+* ---------------
+*/
 
 package org.jpedal.parser.image.mask;
 
 import java.awt.image.*;
+
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.io.ColorSpaceConvertor;
@@ -42,12 +43,11 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.parser.image.ImageCommands;
 import org.jpedal.parser.image.data.ImageData;
 
- /**
- *
+/**
  * @author markee
  */
 public class MaskDecoder {
-    
+
     /**
      * apply the Mask to image data directly as a component on argb
      *
@@ -56,114 +56,110 @@ public class MaskDecoder {
      * @return
      */
     public static byte[] applyMask(final ImageData imageData, final GenericColorSpace decodeColorData, final PdfObject newMask, final PdfObject XObject, final byte[] maskDataSream) {
-        
-        
-        int[] maskArray=XObject.getIntArray(PdfDictionary.Mask);
-        if(maskArray!=null){
-           maskArray=convertToRGB(maskArray,decodeColorData);
+
+
+        int[] maskArray = XObject.getIntArray(PdfDictionary.Mask);
+        if (maskArray != null) {
+            maskArray = convertToRGB(maskArray, decodeColorData);
         }
-       
-        
-        byte[] objectData=imageData.getObjectData();
+
+
+        byte[] objectData = imageData.getObjectData();
         
         /*
         * Image data
         */
-        final int w=imageData.getWidth();
-        final int h=imageData.getHeight();
-        int d=imageData.getDepth();
-        
-        if(objectData == null && d == 8){
-            objectData = new byte[w*h];
-        }else if( objectData != null && d == 1 && decodeColorData.getID() == ColorSpaces.DeviceGray){ //refer to case 25110
+        final int w = imageData.getWidth();
+        final int h = imageData.getHeight();
+        int d = imageData.getDepth();
+
+        if (objectData == null && d == 8) {
+            objectData = new byte[w * h];
+        } else if (objectData != null && d == 1 && decodeColorData.getID() == ColorSpaces.DeviceGray) { //refer to case 25110
             objectData = ColorSpaceConvertor.normaliseTo8Bit(d, w, h, objectData);
             d = 8;
         }
-        
+
         objectData = MaskDataDecoder.convertData(decodeColorData, objectData, w, h, imageData, d, 1, null);
-        
+
         XObject.setIntNumber(PdfDictionary.BitsPerComponent, 8);
-        
-        if(maskArray!=null){
-            objectData=applyMaskArray(w, h, objectData,maskArray);
-        }else{
-            objectData=applyMaskStream(objectData,maskDataSream,imageData, newMask, XObject);
+
+        if (maskArray != null) {
+            objectData = applyMaskArray(w, h, objectData, maskArray);
+        } else {
+            objectData = applyMaskStream(objectData, maskDataSream, imageData, newMask, XObject);
         }
-        
-        
+
+
 //        img= ColorSpaceConvertor.createARGBImage( XObject.getInt(PdfDictionary.Width), XObject.getInt(PdfDictionary.Height), objectData);
 //        
 //        try{
 //        ImageIO.write(img, "PNG", new java.io.File("/Users/markee/Desktop/mixed.png"));
 //        }catch(Exception e){}
-        
-        
+
+
         return objectData;
     }
-    
-    
-     
-     private static byte[] applyMaskArray(final int w, final int h, final byte[] objectData, final int[] maskArray) {
-         
-         final int pixels=w*h*4;
-         int rgbPtr=0;
-         final byte[] combinedData=new byte[w*h*4];
-         final int rawDataSize=objectData.length;
-         
-         final float[] diff=new float[3];
-         
-         if(maskArray!=null){
-             for(int a=0;a<3;a++){
-                 diff[a]=maskArray[1]-maskArray[0];
-                 if(diff[a]>1f){
-                     diff[a] /= 255f;
-                 }
-             }
-         }
-         
-         try{
-             for(int i=0;i<pixels;i += 4){
-                 
-                 
-                 //rgb
-                 if(rgbPtr+3<=rawDataSize && objectData[rgbPtr]==-1 && objectData[rgbPtr+1]==-1 && objectData[rgbPtr+2]==-1){ //transparent
-                     rgbPtr += 3;
-                     combinedData[i]=(byte)255;
-                     combinedData[i+1]=(byte)255;
-                     combinedData[i+2]=(byte)255;
-                     combinedData[i+3]=(byte)0;
-                 }else if(rgbPtr+3<=rawDataSize && objectData[rgbPtr]==0 && objectData[rgbPtr+1]==0 && objectData[rgbPtr+2]==0){ //transparent
-                     rgbPtr += 3;
-                     combinedData[i]=(byte)255;
-                     combinedData[i+1]=(byte)0;
-                     combinedData[i+2]=(byte)0;
-                     combinedData[i+3]=(byte)0;
-                 }else{
-                     for(int comp=0;comp<3;comp++){
-                         if(rgbPtr<rawDataSize){
-                             if(1==2 && diff[comp]>0){
-                                 combinedData[i+comp]=(byte) (objectData[rgbPtr]*diff[comp]);
-                             }else{
-                                 combinedData[i+comp]=objectData[rgbPtr];
-                             }
-                         }
-                         rgbPtr++;
-                     }
-                     
-                     //opacity
-                     combinedData[i+3]=(byte)255;                    
-                 }
-             }
-         }catch(final Exception e){
-             e.printStackTrace();
-         }
-         
+
+
+    private static byte[] applyMaskArray(final int w, final int h, final byte[] objectData, final int[] maskArray) {
+
+        final int pixels = w * h * 4;
+        int rgbPtr = 0;
+        final byte[] combinedData = new byte[w * h * 4];
+        final int rawDataSize = objectData.length;
+
+        final float[] diff = new float[3];
+
+        if (maskArray != null) {
+            for (int a = 0; a < 3; a++) {
+                diff[a] = maskArray[1] - maskArray[0];
+                if (diff[a] > 1f) {
+                    diff[a] /= 255f;
+                }
+            }
+        }
+
+        try {
+            for (int i = 0; i < pixels; i += 4) {
+
+
+                //rgb
+                if (rgbPtr + 3 <= rawDataSize && objectData[rgbPtr] == -1 && objectData[rgbPtr + 1] == -1 && objectData[rgbPtr + 2] == -1) { //transparent
+                    rgbPtr += 3;
+                    combinedData[i] = (byte) 255;
+                    combinedData[i + 1] = (byte) 255;
+                    combinedData[i + 2] = (byte) 255;
+                    combinedData[i + 3] = (byte) 0;
+                } else if (rgbPtr + 3 <= rawDataSize && objectData[rgbPtr] == 0 && objectData[rgbPtr + 1] == 0 && objectData[rgbPtr + 2] == 0) { //transparent
+                    rgbPtr += 3;
+                    combinedData[i] = (byte) 255;
+                    combinedData[i + 1] = (byte) 0;
+                    combinedData[i + 2] = (byte) 0;
+                    combinedData[i + 3] = (byte) 0;
+                } else {
+                    for (int comp = 0; comp < 3; comp++) {
+                        if (rgbPtr < rawDataSize) {
+                            if (1 == 2 && diff[comp] > 0) {
+                                combinedData[i + comp] = (byte) (objectData[rgbPtr] * diff[comp]);
+                            } else {
+                                combinedData[i + comp] = objectData[rgbPtr];
+                            }
+                        }
+                        rgbPtr++;
+                    }
+
+                    //opacity
+                    combinedData[i + 3] = (byte) 255;
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
         return combinedData;
     }
 
-    
-    
-    
 
     /**
      * apply the Mask streamto image data directly as a component on argb
@@ -171,335 +167,334 @@ public class MaskDecoder {
      * @param imageData
      * @return
      */
-    static byte[] applyMaskStream(byte[] objectData,byte[] maskData, final ImageData imageData,final PdfObject newMask, final PdfObject XObject) {
-        
+    static byte[] applyMaskStream(byte[] objectData, byte[] maskData, final ImageData imageData, final PdfObject newMask, final PdfObject XObject) {
+
         //objectData=imageData.getObjectData();
         
         /*
         * Image data
         */
-        final int w=imageData.getWidth();
-        final int h=imageData.getHeight();
+        final int w = imageData.getWidth();
+        final int h = imageData.getHeight();
         //int d=imageData.getDepth();
         
         /*
         * mask data (ASSUME single component at moment)
         */
-        final int maskW=newMask.getInt(PdfDictionary.Width);
-        final int maskH=newMask.getInt(PdfDictionary.Height);
-        int maskD=newMask.getInt(PdfDictionary.BitsPerComponent);
-        
-        final boolean isImageMask=newMask.getBoolean(PdfDictionary.ImageMask); //for example, see  Case 22754
-        if(isImageMask){
-           maskD=1;
+        final int maskW = newMask.getInt(PdfDictionary.Width);
+        final int maskH = newMask.getInt(PdfDictionary.Height);
+        int maskD = newMask.getInt(PdfDictionary.BitsPerComponent);
+
+        final boolean isImageMask = newMask.getBoolean(PdfDictionary.ImageMask); //for example, see  Case 22754
+        if (isImageMask) {
+            maskD = 1;
         }
-        
+
         //needs to be 'normalised to 8  bit'
-        if(maskD!=8){
-            maskData=ColorSpaceConvertor.normaliseTo8Bit(maskD, maskW, maskH, maskData);
+        if (maskD != 8) {
+            maskData = ColorSpaceConvertor.normaliseTo8Bit(maskD, maskW, maskH, maskData);
         }
-        
-        final float[] maskDecodeArray=newMask.getFloatArray(PdfDictionary.Decode);
-        if(maskDecodeArray!=null){
-            final float diff=maskDecodeArray[1]-maskDecodeArray[0];
-            if(diff==-1){
-                for(int i=0;i<maskData.length;i++){
-                    maskData[i]=(byte) (maskData[i]^255);
+
+        final float[] maskDecodeArray = newMask.getFloatArray(PdfDictionary.Decode);
+        if (maskDecodeArray != null) {
+            final float diff = maskDecodeArray[1] - maskDecodeArray[0];
+            if (diff == -1) {
+                for (int i = 0; i < maskData.length; i++) {
+                    maskData[i] = (byte) (maskData[i] ^ 255);
                 }
             }
         }
-       
+
         //add mask as a element so we now have argb
-        if(w==maskW && h==maskH){
+        if (w == maskW && h == maskH) {
             //System.out.println("Same size");
-            objectData=buildUnscaledByteArray(w, h, objectData, maskData);
-        }else if(w<maskW){ //mask bigger than image
+            objectData = buildUnscaledByteArray(w, h, objectData, maskData);
+        } else if (w < maskW) { //mask bigger than image
             //System.out.println("Mask bigger");
-            objectData=upScaleImageToMask(w, h, maskW,maskH,objectData, maskData);
-            
-            XObject.setIntNumber(PdfDictionary.Width,maskW);
-            XObject.setIntNumber(PdfDictionary.Height,maskH);
-            
-        }else{
+            objectData = upScaleImageToMask(w, h, maskW, maskH, objectData, maskData);
+
+            XObject.setIntNumber(PdfDictionary.Width, maskW);
+            XObject.setIntNumber(PdfDictionary.Height, maskH);
+
+        } else {
             //System.out.println("Image bigger");
-            objectData=upScaleMaskToImage(w, h, maskW,maskH,objectData, maskData);
+            objectData = upScaleMaskToImage(w, h, maskW, maskH, objectData, maskData);
         }
-        
-        
+
+
         XObject.setIntNumber(PdfDictionary.BitsPerComponent, 8);
-       
+
 //        BufferedImage img= ColorSpaceConvertor.createARGBImage( XObject.getInt(PdfDictionary.Width), XObject.getInt(PdfDictionary.Height), objectData);
 //        
 //        try{
 //        ImageIO.write(img, "PNG", new java.io.File("/Users/markee/Desktop/img.png"));
 //        }catch(Exception e){}
 //        
-        
-        
+
+
         return objectData;
     }
 
-    
+
     public static BufferedImage createMaskImage(final boolean isPrinting, final boolean isType3Font,
                                                 final byte[] data, final int w, final int h, final ImageData imageData,
                                                 final int d, final GenericColorSpace decodeColorData, final byte[] maskCol) {
-        
-        BufferedImage image=null;
-        
+
+        BufferedImage image = null;
+
         //see if black and back object
-        if(imageData.isDownsampled()){
+        if (imageData.isDownsampled()) {
             final DataBuffer db = new DataBufferByte(data, data.length);
-            
-            final int[] bands = {0,1,2,3};
-            image =new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
-            final Raster raster =Raster.createInterleavedRaster(db,w,h,w * 4,4,bands,null);
+
+            final int[] bands = {0, 1, 2, 3};
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            final Raster raster = Raster.createInterleavedRaster(db, w, h, w * 4, 4, bands, null);
             image.setData(raster);
-            
-        }else{
-            
+
+        } else {
+
             //remove empty images in some files
-            boolean isBlank=false,keepNonTransparent=false;
-            if(maskCol!=null && d==1 && decodeColorData.getID()==ColorSpaces.DeviceRGB && maskCol[0]==0 && maskCol[1]==0 && maskCol[2]==0){
-                
+            boolean isBlank = false, keepNonTransparent = false;
+            if (maskCol != null && d == 1 && decodeColorData.getID() == ColorSpaces.DeviceRGB && maskCol[0] == 0 && maskCol[1] == 0 && maskCol[2] == 0) {
+
                 //see if blank (assume true and disprove) and remove as totally see-through
-                isBlank=true;
-                for(int aa=0;aa<data.length;aa++){
-                    if(data[aa]!=-1){
-                        isBlank=false;
-                        aa=data.length;
+                isBlank = true;
+                for (int aa = 0; aa < data.length; aa++) {
+                    if (data[aa] != -1) {
+                        isBlank = false;
+                        aa = data.length;
                     }
                 }
-                
-                if(isPrinting && (imageData.getMode()==ImageCommands.ID || isType3Font || d==1)){ //avoid transparency if possible
-                    final WritableRaster raster =Raster.createPackedRaster(new DataBufferByte(data, data.length), w, h, 1, null);
-                    image =new BufferedImage(w,h,BufferedImage.TYPE_BYTE_BINARY);
+
+                if (isPrinting && (imageData.getMode() == ImageCommands.ID || isType3Font || d == 1)) { //avoid transparency if possible
+                    final WritableRaster raster = Raster.createPackedRaster(new DataBufferByte(data, data.length), w, h, 1, null);
+                    image = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_BINARY);
                     image.setData(raster);
-                    keepNonTransparent=true;
-                }else if(isBlank){
-                    image=null;
+                    keepNonTransparent = true;
+                } else if (isBlank) {
+                    image = null;
                     imageData.setRemoved(true);
-                    
-                }else{
-                    final byte[] newIndex={(maskCol[0]),(maskCol[1]), (maskCol[2]),(byte)255,(byte)255,(byte)255};
-                    image = ColorSpaceConvertor.convertIndexedToFlat(d,w, h, data, newIndex,true,true);
+
+                } else {
+                    final byte[] newIndex = {(maskCol[0]), (maskCol[1]), (maskCol[2]), (byte) 255, (byte) 255, (byte) 255};
+                    image = ColorSpaceConvertor.convertIndexedToFlat(d, w, h, data, newIndex, true, true);
                 }
             }
-            
-            if(!isBlank && !keepNonTransparent){ //done above so ignore
-                    
-                if(d==8 && imageData.isDownsampled()){ //never called
 
-                    final byte[] newIndex={(maskCol[0]),(maskCol[1]), (maskCol[2]),(byte)255,(byte)255,(byte)255};
-                    image = ColorSpaceConvertor.convertIndexedToFlat(d,w, h, data, newIndex, true,true);
+            if (!isBlank && !keepNonTransparent) { //done above so ignore
 
-                }else{// if(w<4000 && h<4000){   //needed for hires
-                    final byte[] newIndex={maskCol[0],maskCol[1],maskCol[2],(byte)255,(byte)255,(byte)255};
-                    image = ColorSpaceConvertor.convertIndexedToFlat(1,w, h, data, newIndex, true,false);
+                if (d == 8 && imageData.isDownsampled()) { //never called
+
+                    final byte[] newIndex = {(maskCol[0]), (maskCol[1]), (maskCol[2]), (byte) 255, (byte) 255, (byte) 255};
+                    image = ColorSpaceConvertor.convertIndexedToFlat(d, w, h, data, newIndex, true, true);
+
+                } else { // if(w<4000 && h<4000){   //needed for hires
+                    final byte[] newIndex = {maskCol[0], maskCol[1], maskCol[2], (byte) 255, (byte) 255, (byte) 255};
+                    image = ColorSpaceConvertor.convertIndexedToFlat(1, w, h, data, newIndex, true, false);
 
                 }
-            }           
+            }
         }
         return image;
-    }  
-    
-     
+    }
+
+
     private static byte[] buildUnscaledByteArray(final int w, final int h, final byte[] objectData, final byte[] maskData) {
-        
-        final int pixels=w*h*4;
-        int rgbPtr=0, aPtr=0;
-        final byte[] combinedData=new byte[w*h*4];
-        final int rawDataSize=objectData.length;
-        
-        try{
-            for(int i=0;i<pixels;i += 4){
-                
-                if(maskData[aPtr]==-1){
-                   
-                    for(int comp=0;comp<3;comp++){
-                        if(rgbPtr<rawDataSize){
-                            combinedData[i+comp]=(byte) 255;
+
+        final int pixels = w * h * 4;
+        int rgbPtr = 0, aPtr = 0;
+        final byte[] combinedData = new byte[w * h * 4];
+        final int rawDataSize = objectData.length;
+
+        try {
+            for (int i = 0; i < pixels; i += 4) {
+
+                if (maskData[aPtr] == -1) {
+
+                    for (int comp = 0; comp < 3; comp++) {
+                        if (rgbPtr < rawDataSize) {
+                            combinedData[i + comp] = (byte) 255;
                         }
                         rgbPtr++;
                     }
 
-                    combinedData[i+3]=(byte) 0;
-                }else{
-                
-                    
-                    for(int comp=0;comp<3;comp++){
-                        if(rgbPtr<rawDataSize){
-                            combinedData[i+comp]=objectData[rgbPtr];
+                    combinedData[i + 3] = (byte) 0;
+                } else {
+
+
+                    for (int comp = 0; comp < 3; comp++) {
+                        if (rgbPtr < rawDataSize) {
+                            combinedData[i + comp] = objectData[rgbPtr];
                         }
                         rgbPtr++;
                     }
 
-                    combinedData[i+3]=(byte) 255;
-               
+                    combinedData[i + 3] = (byte) 255;
+
                 }
-                
+
                 aPtr++;
-                
+
             }
-        }catch(final Exception e){
+        } catch (final Exception e) {
             e.printStackTrace();
         }
-        
+
         return combinedData;
     }
-    
-      
-    
+
+
     private static byte[] upScaleMaskToImage(final int w, final int h, final int maskW, final int maskH, final byte[] objectData, final byte[] maskData) {
-        
-        int rgbPtr=0, aPtr;
-        int i=0;
-        final float ratioW=maskW/(float)w;
-        final float ratioH=maskH/(float)h;
-        final byte[] combinedData=new byte[w*h*4];
-        
-        final int rawDataSize=objectData.length;
-        
-        try{
-            for(int iY=0;iY<h;iY++){
-                for(int iX=0;iX<w;iX++){
-                    
-                    aPtr=(((int)(iX*ratioW)))+(((int)(iY*ratioH))*w);
-                    
-                    if(maskData[aPtr]==-1){
-                        
+
+        int rgbPtr = 0, aPtr;
+        int i = 0;
+        final float ratioW = maskW / (float) w;
+        final float ratioH = maskH / (float) h;
+        final byte[] combinedData = new byte[w * h * 4];
+
+        final int rawDataSize = objectData.length;
+
+        try {
+            for (int iY = 0; iY < h; iY++) {
+                for (int iX = 0; iX < w; iX++) {
+
+                    aPtr = (((int) (iX * ratioW))) + (((int) (iY * ratioH)) * w);
+
+                    if (maskData[aPtr] == -1) {
+
                         //rgb
-                        for(int comp=0;comp<3;comp++){
-                            if(rgbPtr<rawDataSize){
-                                combinedData[i+comp]=(byte)255;
+                        for (int comp = 0; comp < 3; comp++) {
+                            if (rgbPtr < rawDataSize) {
+                                combinedData[i + comp] = (byte) 255;
                             }
                             rgbPtr++;
                         }
-                        
-                        
-                        combinedData[i+3]=(byte) 0;
-                    }else{
-                        
-                        
-                        for(int comp=0;comp<3;comp++){
-                            if(rgbPtr<rawDataSize){
-                                combinedData[i+comp]=objectData[rgbPtr];
+
+
+                        combinedData[i + 3] = (byte) 0;
+                    } else {
+
+
+                        for (int comp = 0; comp < 3; comp++) {
+                            if (rgbPtr < rawDataSize) {
+                                combinedData[i + comp] = objectData[rgbPtr];
                             }
                             rgbPtr++;
                         }
-                        
-                        combinedData[i+3]=(byte) 255;
-                        
+
+                        combinedData[i + 3] = (byte) 255;
+
                     }
-                    
+
                     i += 4;
-                    
+
                 }
             }
-        }catch(final Exception e){
+        } catch (final Exception e) {
             e.printStackTrace();
         }
         return combinedData;
     }
-    
-    
+
+
     private static byte[] upScaleImageToMask(final int w, final int h, final int maskW, final int maskH, final byte[] objectData, final byte[] maskData) {
-        
-        int rgbPtr, aPtr=0;
-        int i=0;
-        final float ratioW=w/(float)maskW;
-        final float ratioH=h/(float)maskH;
-        final byte[] combinedData=new byte[maskW*maskH*4];
-        final int rawDataSize=objectData.length;
-        
-        try{
-            for(int mY=0;mY<maskH;mY++){
-                for(int mX=0;mX<maskW;mX++){
-                    
-                    rgbPtr=(((int)(mX*ratioW))*3)+(((int)(mY*ratioH))*w*3);
-                    
-                    if(maskData[aPtr]==-1){
-                        
-                        for(int comp=0;comp<3;comp++){
-                            if(rgbPtr<rawDataSize){
-                                combinedData[i+comp]=(byte)255;
+
+        int rgbPtr, aPtr = 0;
+        int i = 0;
+        final float ratioW = w / (float) maskW;
+        final float ratioH = h / (float) maskH;
+        final byte[] combinedData = new byte[maskW * maskH * 4];
+        final int rawDataSize = objectData.length;
+
+        try {
+            for (int mY = 0; mY < maskH; mY++) {
+                for (int mX = 0; mX < maskW; mX++) {
+
+                    rgbPtr = (((int) (mX * ratioW)) * 3) + (((int) (mY * ratioH)) * w * 3);
+
+                    if (maskData[aPtr] == -1) {
+
+                        for (int comp = 0; comp < 3; comp++) {
+                            if (rgbPtr < rawDataSize) {
+                                combinedData[i + comp] = (byte) 255;
                             }
                             rgbPtr++;
                         }
-                        
-                        combinedData[i+3]=(byte) 0;
-                    }else{
-                        
-                        
-                        for(int comp=0;comp<3;comp++){
-                            if(rgbPtr<rawDataSize){
-                                combinedData[i+comp]=objectData[rgbPtr];
+
+                        combinedData[i + 3] = (byte) 0;
+                    } else {
+
+
+                        for (int comp = 0; comp < 3; comp++) {
+                            if (rgbPtr < rawDataSize) {
+                                combinedData[i + comp] = objectData[rgbPtr];
                             }
                             rgbPtr++;
                         }
-                        
-                        combinedData[i+3]=(byte) 255;
-                        
+
+                        combinedData[i + 3] = (byte) 255;
+
                     }
-                   
+
                     aPtr++;
-                    
+
                     i += 4;
-                    
+
                 }
             }
-        }catch(final Exception e){
+        } catch (final Exception e) {
             e.printStackTrace();
         }
-        
+
         return combinedData;
     }
 
     private static int[] convertToRGB(int[] intArray, final GenericColorSpace decodeColorData) {
-        
+
         byte[] index = decodeColorData.getIndexedMap();
-        if(index!=null){
-            
+        if (index != null) {
+
             int ptr;
-            index=decodeColorData.convertIndexToRGB(index);
-            
-            final int[] indexedArray=intArray;
-            intArray=new int[6];
-            
-            for(int values=0;values<2;values++){
-                
-                ptr=indexedArray[values];
-                
-                intArray[0+(3*values)]=(byte) (index[0+(3*ptr)] & 0xFF);
-                intArray[1+(3*values)]=(byte) (index[1+(3*ptr)] & 0xFF);
-                intArray[2+(3*values)]=(byte) (index[2+(3*ptr)] & 0xFF);               
-            }           
+            index = decodeColorData.convertIndexToRGB(index);
+
+            final int[] indexedArray = intArray;
+            intArray = new int[6];
+
+            for (int values = 0; values < 2; values++) {
+
+                ptr = indexedArray[values];
+
+                intArray[0 + (3 * values)] = (byte) (index[0 + (3 * ptr)] & 0xFF);
+                intArray[1 + (3 * values)] = (byte) (index[1 + (3 * ptr)] & 0xFF);
+                intArray[2 + (3 * values)] = (byte) (index[2 + (3 * ptr)] & 0xFF);
+            }
         }
-        final int comps=intArray.length/2;
-        
-        final int[] rgbArray=new int[6];
-        
-        final float[] rawColorData=new float[comps];
-        for(int values=0;values<2;values++){
-            for(int a=0;a<comps;a++){
-                rawColorData[a]=intArray[a*2];
-               
-                if(rawColorData[a]>1){
+        final int comps = intArray.length / 2;
+
+        final int[] rgbArray = new int[6];
+
+        final float[] rawColorData = new float[comps];
+        for (int values = 0; values < 2; values++) {
+            for (int a = 0; a < comps; a++) {
+                rawColorData[a] = intArray[a * 2];
+
+                if (rawColorData[a] > 1) {
                     rawColorData[a] /= 255f;
                 }
                 decodeColorData.setColor(rawColorData, comps);
             }
-            
-            final int foreground=decodeColorData.getColor().getRGB();
-            
-            for(int a=0;a<comps;a++){
-                rgbArray[0+(3*values)]=(byte) ((foreground>>16) & 0xFF);
-                rgbArray[1+(3*values)]=(byte) ((foreground>>8) & 0xFF);
-                rgbArray[2+(3*values)]=(byte) ((foreground) & 0xFF);
-                
+
+            final int foreground = decodeColorData.getColor().getRGB();
+
+            for (int a = 0; a < comps; a++) {
+                rgbArray[0 + (3 * values)] = (byte) ((foreground >> 16) & 0xFF);
+                rgbArray[1 + (3 * values)] = (byte) ((foreground >> 8) & 0xFF);
+                rgbArray[2 + (3 * values)] = (byte) ((foreground) & 0xFF);
+
             }
         }
-            
+
         return rgbArray;
     }
- 
+
 }

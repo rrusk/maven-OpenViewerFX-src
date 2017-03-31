@@ -39,11 +39,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ListView;
 import org.jpedal.objects.raw.FormObject;
 
-public class JavaFXListListener implements ChangeListener<Number>{
+public class JavaFXListListener implements ChangeListener<Number> {
     final ListView comp;
     final FormObject form;
-    
-    public JavaFXListListener(final ListView list, final FormObject form){
+
+    public JavaFXListListener(final ListView list, final FormObject form) {
         this.comp = list;
         this.form = form;
     }
@@ -51,7 +51,7 @@ public class JavaFXListListener implements ChangeListener<Number>{
     @Override
     public void changed(final ObservableValue<? extends Number> ov, final Number t, final Number t1) {
         final int selectionIndex = comp.getSelectionModel().getSelectedIndex();
-        form.setSelection(comp.getSelectionModel().getSelectedItems().toArray(),comp.getSelectionModel().getSelectedItem().toString(),new int[]{selectionIndex},selectionIndex);   
+        form.setSelection(comp.getSelectionModel().getSelectedItems().toArray(), comp.getSelectionModel().getSelectedItem().toString(), new int[]{selectionIndex}, selectionIndex);
     }
-    
+
 }

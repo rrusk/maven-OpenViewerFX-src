@@ -252,7 +252,7 @@ public class ObjectFactory {
                 return new PageObject(ref);
 
             case PdfDictionary.Params:
-                return new PdfObject(ref);
+                return new CollectionObject(ref);
 
             case PdfDictionary.ParentTree:
                 return new MCObject(ref);
@@ -290,6 +290,9 @@ public class ObjectFactory {
                 return new FormObject(ref, parentID);
 
             case PdfDictionary.Resources:
+                if (parentID == PdfDictionary.Navigator) {
+                    return new NamesObject(ref);
+                }
                 return new ResourcesObject(ref);
 
             case PdfDictionary.RichMediaContent:
@@ -304,12 +307,15 @@ public class ObjectFactory {
             case PdfDictionary.SMask:
                 return new MaskObject(ref);
 
+            case PdfDictionary.Strings:
+                return new NamesObject(ref);
+
             case PdfDictionary.Sort:
-                if(parentID==PdfDictionary.Collection){
+                if (parentID == PdfDictionary.Collection) {
                     return new CollectionObject(ref);
                 }
                 break;
-                
+
             case PdfDictionary.Sound:
                 return new SoundObject(ref);
 
@@ -318,6 +324,9 @@ public class ObjectFactory {
 
             case PdfDictionary.Style:
                 return new FontObject(ref);
+
+            case PdfDictionary.Thumb:
+                return new XObject(ref);
 
             case PdfDictionary.ToUnicode:
                 return new FontObject(ref);
@@ -619,7 +628,7 @@ public class ObjectFactory {
                 return new PageObject(ref, gen);
 
             case PdfDictionary.Params:
-                return new PdfObject(ref, gen);
+                return new CollectionObject(ref, gen);
 
             case PdfDictionary.ParentTree:
                 return new MCObject(ref, gen);
@@ -657,6 +666,9 @@ public class ObjectFactory {
                 return new FormObject(ref, gen);
 
             case PdfDictionary.Resources:
+                if (parentType == PdfDictionary.Navigator) {
+                    return new NamesObject(ref, gen);
+                }
                 return new ResourcesObject(ref, gen);
 
             case PdfDictionary.RichMediaContent:
@@ -671,17 +683,23 @@ public class ObjectFactory {
             case PdfDictionary.SMask:
                 return new MaskObject(ref, gen);
 
+            case PdfDictionary.Strings:
+                return new NamesObject(ref, gen);
+
             case PdfDictionary.Sort:
-                if(parentType==PdfDictionary.Collection){
+                if (parentType == PdfDictionary.Collection) {
                     return new CollectionObject(ref, gen);
                 }
                 break;
-                
+
             case PdfDictionary.Sound:
                 return new SoundObject(ref, gen);
 
             case PdfDictionary.StructTreeRoot:
                 return new MCObject(ref, gen);
+
+            case PdfDictionary.Thumb:
+                return new XObject(ref, gen);
 
             case PdfDictionary.TR:
                 return new MaskObject(ref, gen);

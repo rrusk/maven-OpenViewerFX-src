@@ -35,12 +35,18 @@ package org.jpedal.external;
 
 public interface RenderChangeListener {
 
-	/**Fired when rendering starts.*/
-	void renderingStarted(int pageNumber);
+    /**
+     * Fired when rendering starts.
+     */
+    void renderingStarted(int pageNumber);
 
-	/**Fired when rendering ends.*/
-	void renderingEnded(int pageNumber);
+    /**
+     * Fired when rendering ends.
+     */
+    void renderingEnded(int pageNumber);
 
-    /**called in MultiDisplay and called after decodeOtherPages(int pageNumber, int pageCount) */
-	void renderingWorkerFinished();
+    /**
+     * called in MultiDisplay and called after decodeOtherPages(int pageNumber, int pageCount)
+     */
+    void renderingWorkerFinished();
 }

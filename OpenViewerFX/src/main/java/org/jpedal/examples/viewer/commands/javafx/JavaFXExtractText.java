@@ -55,7 +55,7 @@ import org.jpedal.objects.PdfPageData;
 import org.jpedal.utils.Messages;
 
 /**
- * Class to Handle the popup dialogs created when user right clicks 
+ * Class to Handle the popup dialogs created when user right clicks
  * highlighted text and chooses text extraction.
  */
 public class JavaFXExtractText extends GUIExtractText {
@@ -82,12 +82,12 @@ public class JavaFXExtractText extends GUIExtractText {
 
         if (highlights == null) {
             currentGUI.showMessageDialog("There is no text selected.\nPlease highlight the text you wish to extract.", "No Text selected", FXMessageDialog.ERROR_MESSAGE);
-           
+
             return;
         }
 
         final BorderPane border = new BorderPane();
-        final FXDialog textExtractionOptions = new FXDialog((Stage)currentGUI.getFrame(), Modality.APPLICATION_MODAL, border, 300, 300);
+        final FXDialog textExtractionOptions = new FXDialog((Stage) currentGUI.getFrame(), Modality.APPLICATION_MODAL, border, 300, 300);
         textExtractionOptions.setTitle("Text Extraction Options");
 
         //Set up Radiobuttons
@@ -100,14 +100,14 @@ public class JavaFXExtractText extends GUIExtractText {
         wordList.setId("wordListExtraction");
         radButtons.getChildren().addAll(rectangle, table, wordList);
 
-        table.setPadding(new Insets(0,0,0,20));
-        wordList.setPadding(new Insets(0,0,0,45));
+        table.setPadding(new Insets(0, 0, 0, 20));
+        wordList.setPadding(new Insets(0, 0, 0, 45));
         border.setTop(radButtons);
 
         //Set up Selectedtext Area
         final TextArea selection = new TextArea();
         border.setCenter(selection);
-        
+
         //Setup bottom Radio Buttons and Bottom Buttons
         final VBox allBottom = new VBox();
         final HBox bottomButtons = new HBox(15);
@@ -130,10 +130,10 @@ public class JavaFXExtractText extends GUIExtractText {
         bottomButtons.setAlignment(Pos.BOTTOM_RIGHT);
         bottomButtons.getChildren().addAll(help, cancel, extractButton);
         allBottom.getChildren().addAll(bottomRadioButtons, bottomButtons);
-        
-        extractAsXML.setPadding(new Insets(0,0,0,10));
-        extractAsText.setPadding(new Insets(0,10,13,0));
-        bottomButtons.setPadding(new Insets(0,5,10,0));
+
+        extractAsXML.setPadding(new Insets(0, 0, 0, 10));
+        extractAsText.setPadding(new Insets(0, 10, 13, 0));
+        bottomButtons.setPadding(new Insets(0, 5, 10, 0));
 
         help.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -150,7 +150,7 @@ public class JavaFXExtractText extends GUIExtractText {
         final ChangeListener<Toggle> updateSelectionListener = new ChangeListener<Toggle>() {
             @Override
             public void changed(final ObservableValue<? extends Toggle> ov,
-                    final Toggle old_toggle, final Toggle new_toggle) {
+                                final Toggle old_toggle, final Toggle new_toggle) {
                 selection.setText(updateSelection(formatGroup.getSelectedToggle(), extractAsXML.isSelected(), decode_pdf, commonValues, currentGUI));
             }
         };
@@ -173,15 +173,15 @@ public class JavaFXExtractText extends GUIExtractText {
 
         selection.setText(updateSelection(formatGroup.getSelectedToggle(), extractAsXML.isSelected(), decode_pdf, commonValues, currentGUI));
         border.setBottom(allBottom);
-       
-        BorderPane.setMargin(selection, new Insets(10,10,10,10));
-        BorderPane.setMargin(radButtons, new Insets(10,10,10,10));
-        BorderPane.setMargin(bottomRadioButtons, new Insets(10,10,10,10));
-        BorderPane.setMargin(bottomButtons, new Insets(10,10,10,10));
-        
+
+        BorderPane.setMargin(selection, new Insets(10, 10, 10, 10));
+        BorderPane.setMargin(radButtons, new Insets(10, 10, 10, 10));
+        BorderPane.setMargin(bottomRadioButtons, new Insets(10, 10, 10, 10));
+        BorderPane.setMargin(bottomButtons, new Insets(10, 10, 10, 10));
+
         textExtractionOptions.show();
-       
-        
+
+
     }
 
     private static String updateSelection(final Toggle selected, final boolean isXML, final PdfDecoderInt decode_pdf, final Values commonValues, final GUIFactory currentGUI) {

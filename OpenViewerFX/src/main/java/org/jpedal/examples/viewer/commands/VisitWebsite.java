@@ -44,11 +44,11 @@ public class VisitWebsite {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             try {
-               
+
                 BrowserLauncher.openURL(Messages.getMessage("PdfViewer.VisitWebsite"));
-               
+
             } catch (final Exception e1) {
-                currentGUI.showMessageDialog(e1.getMessage()+' '+Messages.getMessage("PdfViewer.ErrorWebsite"));
+                currentGUI.showMessageDialog(e1.getMessage() + ' ' + Messages.getMessage("PdfViewer.ErrorWebsite"));
             }
         }
     }

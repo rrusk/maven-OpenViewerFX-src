@@ -39,17 +39,17 @@ public class MetadataObject extends PdfObject {
     }
 
     public MetadataObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
 
     @Override
     public boolean decompressStreamWhenRead() {
-		return true;
-	}
+        return true;
+    }
 
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.Metadata;
     }
 }

@@ -33,12 +33,13 @@
 package org.jpedal.io.types;
 
 import org.jpedal.constants.PDFflags;
+
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
+
 import static org.jpedal.io.ObjectDecoder.padding;
+
 import org.jpedal.io.PdfFileReader;
-import org.jpedal.io.PdfFilteredReader;
 import org.jpedal.io.security.DecryptionFactory;
-import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
@@ -46,7 +47,6 @@ import org.jpedal.objects.raw.PdfObject;
  *
  */
 public class Stream {
-
 
     public static void readStreamData(final PdfObject pdfObject, final int i, final byte[] raw, final int length, final PdfFileReader objectReader) {
 
@@ -57,9 +57,9 @@ public class Stream {
                 break;
             }
 
-            if (raw[xx] == 's' && raw[xx + 1] == 't' && raw[xx + 2] == 'r' &&
-                    raw[xx + 3] == 'e' && raw[xx + 4] == 'a' &&
-                    raw[xx + 5] == 'm') {
+            if (raw[xx] == 's' && raw[xx + 1] == 't' && raw[xx + 2] == 'r'
+                    && raw[xx + 3] == 'e' && raw[xx + 4] == 'a'
+                    && raw[xx + 5] == 'm') {
 
                 if (debugFastCode) {
                     System.out.println(padding + "1. Stream found afterwards");
@@ -85,36 +85,10 @@ public class Stream {
         }
 
         byte[] stream = null;
-        
-        /*
-         * see if JBIG encoded
-         */
-        final PdfArrayIterator maskFilters = pdfObject.getMixedArray(PdfDictionary.Filter);
-
-        //get type as need different handling
-        boolean isJBigEncoded = false;
-        int firstMaskValue = PdfDictionary.Unknown;
-        if (maskFilters != null && maskFilters.hasMoreTokens()) {
-
-            firstMaskValue = maskFilters.getNextValueAsConstant(true);
-
-            if (firstMaskValue == PdfFilteredReader.JBIG2Decode) {
-                isJBigEncoded = true;
-            }
-
-            while (maskFilters.hasMoreTokens() && !isJBigEncoded) {
-                firstMaskValue = maskFilters.getNextValueAsConstant(true);
-                if (firstMaskValue == PdfFilteredReader.JBIG2Decode) {
-                    isJBigEncoded = true;
-                }
-            }
-        }
-
 
         for (int a = j; a < count; a++) {
-            if ((data[a] == 115) && (data[a + 1] == 116) && (data[a + 2] == 114) &&
-                    (data[a + 3] == 101) && (data[a + 4] == 97) && (data[a + 5] == 109)) {
-
+            if ((data[a] == 115) && (data[a + 1] == 116) && (data[a + 2] == 114)
+                    && (data[a + 3] == 101) && (data[a + 4] == 97) && (data[a + 5] == 109)) {
 
                 //ignore these characters and first return
                 a += 6;
@@ -126,10 +100,10 @@ public class Stream {
                 if (data[a] == 13 && data[a + 1] == 10) //allow for double linefeed
                 {
                     a += 2;
-                }//see /PDFdata/baseline_screens/11jun/Agency discl. Wabash.pdf
-                else if (data[a] == 10 && data[a + 1] == 10 && data[a + 2] == 10 && data[a + 3] == -1 && firstMaskValue == PdfFilteredReader.DCTDecode) { //allow for double linefeed on jpeg
+                } //see /PDFdata/baseline_screens/11jun/Agency discl. Wabash.pdf
+                else if (data[a] == 10 && data[a + 1] == 10 && data[a + 2] == 10 && data[a + 3] == -1) { //allow for double linefeed on jpeg
                     a += 3;
-                } else if (data[a] == 10 && data[a + 1] == 10 && data[a + 2] == -1 && firstMaskValue == PdfFilteredReader.DCTDecode) { //allow for double linefeed on jpeg
+                } else if (data[a] == 10 && data[a + 1] == 10 && data[a + 2] == -1) { //allow for double linefeed on jpeg
                     a += 2;
                 } else if (data[a] == 10 || data[a] == 13) {
                     a++;
@@ -137,9 +111,8 @@ public class Stream {
 
                 final int start = a;
 
-
                 a--; //move pointer back 1 to allow for zero length stream
-                
+
                 /*
                  * if Length set and valid use it
                  */
@@ -157,7 +130,6 @@ public class Stream {
                     streamLength = setStreamLength;
 
                     //System.out.println("1.streamLength="+streamLength);
-
                     a = start + streamLength;
 
                     if (a < count && data[a] == 13 && (a + 1 < count) && data[a + 1] == 10) {
@@ -165,8 +137,8 @@ public class Stream {
                     }
 
                     //check validity
-                    if (count > (a + 9) && data[a] == 101 && data[a + 1] == 110 && data[a + 2] == 100 &&
-                            data[a + 3] == 115 && data[a + 4] == 116
+                    if (count > (a + 9) && data[a] == 101 && data[a + 1] == 110 && data[a + 2] == 100
+                            && data[a + 3] == 115 && data[a + 4] == 116
                             && data[a + 5] == 114 && data[a + 6] == 101 && data[a + 7] == 97 && data[a + 8] == 109) {
 
                     } else {
@@ -216,7 +188,7 @@ public class Stream {
                     }
 
                 } else {
-                    
+
                     /*workout length and check if length set*/
                     final int end;
 
@@ -242,14 +214,19 @@ public class Stream {
                 }
 
                 //lose trailing 10s or 13s
-                if (streamLength > 1 && !(decryption != null && decryption.getBooleanValue(PDFflags.IS_FILE_ENCRYPTED))) {// && !isValid){
+                if (streamLength > 1 && !(decryption != null && decryption.getBooleanValue(PDFflags.IS_FILE_ENCRYPTED))) { // && !isValid){
                     final int ptr = start + streamLength - 1;
 
-                    if (ptr < data.length && ptr > 0 && (data[ptr] == 10 || (data[ptr] == 13 && ((pdfObject != null && isJBigEncoded) || (ptr > 0 && data[ptr - 1] == 10))))) {
+                    // SUP-3495 with 10,13,10,e where 10 is genuine data
+                    final boolean ignoreOddCase = (count - ptr > 4 && data[ptr] == 10 && data[ptr + 1] == 13 && data[ptr + 2] == 10 && data[ptr + 3] == 'e');
+
+                    if (ptr < count && ((data[ptr] == 10 && !ignoreOddCase)
+                            || (data[ptr] == 13 && (ptr > 0 && data[ptr - 1] == 10)))) {
+
                         streamLength--;
                     }
                 }
-                
+
                 /*
                  * read stream into object from memory
                  */
@@ -267,7 +244,6 @@ public class Stream {
                 }
                 stream = new byte[streamLength];
                 System.arraycopy(data, start, stream, 0, streamLength);
-
 
                 a = count;
             }
@@ -291,5 +267,3 @@ public class Stream {
     }
 
 }
-
-

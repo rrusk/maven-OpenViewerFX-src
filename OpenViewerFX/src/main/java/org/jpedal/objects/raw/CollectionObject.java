@@ -35,30 +35,30 @@ package org.jpedal.objects.raw;
 import org.jpedal.utils.StringUtils;
 
 
-public class CollectionObject extends PdfObject{
-    
-    byte[] rawView, rawReorder, rawName, rawDesc, rawCreationDate, rawModDate;
-    
-    String View, Reorder, Name, Desc, CreationDate, ModDate;
-    
+public class CollectionObject extends PdfObject {
+
+    byte[] rawView, rawReorder, rawName, rawD, rawDesc, rawCreationDate, rawModDate, rawCheckSum;
+
+    String View, Reorder, Name, D, Desc, CreationDate, ModDate, CheckSum;
+
     protected PdfObject Schema, Folders, Sort, Navigator, Colors, Child, Next, CI, Thumb;
-    
-    int O, ID;
-    
+
+    int O, ID, Size;
+
     byte[] rawN;
 
     String N;
-    
-    boolean V = true, E = false;
-    
+
+    boolean V = true, E;
+
     private byte[][] S;
 
     private boolean[] A;
-    
+
     float[] Background, CardBackground, CardBorder, PrimaryText, SecondaryText;
-    
+
     int[] Free;
-    
+
     public CollectionObject(final String ref) {
         super(ref);
     }
@@ -66,98 +66,98 @@ public class CollectionObject extends PdfObject{
     public CollectionObject(final int ref, final int gen) {
         super(ref, gen);
     }
-        
-    @Override
-    public PdfObject getDictionary(final int id){
 
-        switch(id){
+    @Override
+    public PdfObject getDictionary(final int id) {
+
+        switch (id) {
 
             case PdfDictionary.Schema:
-        		return Schema;
-                
+                return Schema;
+
             case PdfDictionary.Folders:
-        		return Folders;
-            
+                return Folders;
+
             case PdfDictionary.Sort:
-        		return Sort;
-            
+                return Sort;
+
             case PdfDictionary.Navigator:
-        		return Navigator;
-            
+                return Navigator;
+
             case PdfDictionary.Colors:
-        		return Colors;
-               
+                return Colors;
+
             case PdfDictionary.Child:
-        		return Child;
-               
+                return Child;
+
             case PdfDictionary.Next:
-        		return Next;
-               
+                return Next;
+
             case PdfDictionary.CI:
-        		return CI;
-               
+                return CI;
+
             default:
                 return super.getDictionary(id);
         }
     }
-    
+
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
+        value.setID(id);
 
-        switch(id){
-            
+        switch (id) {
+
             case PdfDictionary.Schema:
-        		Schema=value;
-        	break;
+                Schema = value;
+                break;
 
             case PdfDictionary.Folders:
-        		Folders=value;
-        	break;
-            
+                Folders = value;
+                break;
+
             case PdfDictionary.Sort:
-        		Sort=value;
-        	break;
-            
+                Sort = value;
+                break;
+
             case PdfDictionary.Navigator:
-        		Navigator=value;
-        	break;
-            
+                Navigator = value;
+                break;
+
             case PdfDictionary.Colors:
-        		Colors=value;
-        	break;
-            
+                Colors = value;
+                break;
+
             case PdfDictionary.Child:
-        		Child=value;
-        	break;
-            
+                Child = value;
+                break;
+
             case PdfDictionary.Next:
-        		Next=value;
-        	break;
-            
+                Next = value;
+                break;
+
             case PdfDictionary.CI:
-        		CI=value;
-        	break;
-            
+                CI = value;
+                break;
+
             default:
                 super.setDictionary(id, value);
         }
     }
-    
+
     @Override
     public String getName(final int id) {
 
         switch (id) {
 
             case PdfDictionary.View:
-                if(View==null && rawView!=null) {
+                if (View == null && rawView != null) {
                     View = new String(rawView);
                 }
                 return View;
 
             case PdfDictionary.Reorder:
-                if(Reorder==null && rawReorder!=null) {
+                if (Reorder == null && rawReorder != null) {
                     Reorder = new String(rawReorder);
                 }
                 return Reorder;
@@ -189,110 +189,127 @@ public class CollectionObject extends PdfObject{
         }
     }
 
-    
+
     @Override
-    public boolean getBoolean(int id){
-        
-        switch(id){
+    public boolean getBoolean(int id) {
+
+        switch (id) {
             case PdfDictionary.E:
                 return E;
             case PdfDictionary.V:
                 return V;
         }
-        
+
         return super.getBoolean(id);
     }
-    
+
     @Override
-    public int getInt(int id){
-        
-        switch(id){
+    public int getInt(int id) {
+
+        switch (id) {
             case PdfDictionary.O:
                 return O;
             case PdfDictionary.ID:
                 return ID;
+            case PdfDictionary.Size:
+                return Size;
         }
-        
+
         return super.getInt(id);
     }
-    
+
     @Override
-    public int[] getIntArray(int id){
-        
-        switch(id){
+    public int[] getIntArray(int id) {
+
+        switch (id) {
             case PdfDictionary.Free:
                 return Free;
         }
-        
+
         return super.getIntArray(id);
     }
-    
+
     @Override
-    public String getTextStreamValue(int id){
-        
-        switch(id){
+    public String getTextStreamValue(int id) {
+
+        switch (id) {
             case PdfDictionary.N:
-                if(N==null && rawN!=null){
+                if (N == null && rawN != null) {
                     N = StringUtils.getTextString(rawN, false);
                 }
                 return N;
-                
+
             case PdfDictionary.Name:
-                if(Name==null && rawName!=null){
+                if (Name == null && rawName != null) {
                     Name = StringUtils.getTextString(rawName, false);
                 }
                 return Name;
-                
+
+            case PdfDictionary.D:
+                if (D == null && rawD != null) {
+                    D = StringUtils.getTextString(rawD, true);
+                }
+                return D;
+
             case PdfDictionary.Desc:
-                if(Desc==null && rawDesc!=null){
+                if (Desc == null && rawDesc != null) {
                     Desc = StringUtils.getTextString(rawDesc, false);
                 }
                 return Desc;
-                
+
             case PdfDictionary.CreationDate:
-                if(CreationDate==null && rawCreationDate!=null){
+                if (CreationDate == null && rawCreationDate != null) {
                     CreationDate = StringUtils.getTextString(rawCreationDate, false);
                 }
                 return CreationDate;
-                
+
             case PdfDictionary.ModDate:
-                if(ModDate==null && rawModDate!=null){
+                if (ModDate == null && rawModDate != null) {
                     ModDate = StringUtils.getTextString(rawModDate, false);
                 }
                 return ModDate;
+
+            case PdfDictionary.CheckSum:
+                if (CheckSum == null && rawCheckSum != null) {
+                    CheckSum = StringUtils.getTextString(rawCheckSum, false);
+                }
+                return CheckSum;
         }
-        
+
         return super.getTextStreamValue(id);
     }
-    
+
     @Override
-    public byte[] getTextStreamValueAsByte(int id){
-        
-        switch(id){
+    public byte[] getTextStreamValueAsByte(int id) {
+
+        switch (id) {
             case PdfDictionary.N:
                 return rawN;
-                
+
             case PdfDictionary.Name:
                 return rawName;
-                
+
+            case PdfDictionary.D:
+                return rawD;
+
             case PdfDictionary.Desc:
                 return rawDesc;
-                
+
             case PdfDictionary.CreationDate:
                 return rawCreationDate;
-                
+
             case PdfDictionary.ModDate:
                 return rawModDate;
         }
-        
+
         return super.getTextStreamValueAsByte(id);
     }
-    
-    
+
+
     @Override
-    public void setBoolean(int id, boolean value){
-        
-        switch(id){
+    public void setBoolean(int id, boolean value) {
+
+        switch (id) {
             case PdfDictionary.E:
                 E = value;
                 break;
@@ -303,15 +320,15 @@ public class CollectionObject extends PdfObject{
                 super.setBoolean(id, value);
                 break;
         }
-        
-        
+
+
     }
-    
+
     @Override
-    public void setIntArray(int id, int[] value){
-        
-        
-        switch(id){
+    public void setIntArray(int id, int[] value) {
+
+
+        switch (id) {
             case PdfDictionary.Free:
                 Free = value;
                 break;
@@ -320,88 +337,103 @@ public class CollectionObject extends PdfObject{
                 break;
         }
     }
-    
+
     @Override
-    public void setIntNumber(int id, int value){
-        
-        switch(id){
+    public void setIntNumber(int id, int value) {
+
+        switch (id) {
             case PdfDictionary.O:
                 O = value;
                 break;
             case PdfDictionary.ID:
                 ID = value;
                 break;
+            case PdfDictionary.Size:
+                Size = value;
+                break;
             default:
                 super.setIntNumber(id, value);
                 break;
         }
     }
-    
+
     @Override
-    public void setTextStreamValue(int id, String value){
-        
-        switch(id){
+    public void setTextStreamValue(int id, String value) {
+
+        switch (id) {
             case PdfDictionary.N:
                 N = value;
                 break;
-                
+
             case PdfDictionary.Name:
                 Name = value;
                 break;
-                
+
+            case PdfDictionary.D:
+                D = value;
+                break;
+
             case PdfDictionary.Desc:
                 Desc = value;
                 break;
-                
+
             case PdfDictionary.CreationDate:
                 CreationDate = value;
                 break;
-                
+
             case PdfDictionary.ModDate:
                 ModDate = value;
                 break;
-                
+
+            case PdfDictionary.CheckSum:
+                CheckSum = value;
+                break;
+
             default:
                 super.setTextStreamValue(id, value);
                 break;
         }
-        
-        
+
+
     }
-    
+
     @Override
-    public void setTextStreamValue(int id, byte[] value){
-        
-        switch(id){
+    public void setTextStreamValue(int id, byte[] value) {
+
+        switch (id) {
             case PdfDictionary.N:
                 rawN = value;
                 break;
-                
+
             case PdfDictionary.Name:
                 rawName = value;
                 break;
-                
+
+            case PdfDictionary.D:
+                rawD = value;
+                break;
+
             case PdfDictionary.Desc:
                 rawDesc = value;
                 break;
-                
+
             case PdfDictionary.CreationDate:
                 rawCreationDate = value;
                 break;
-                
+
             case PdfDictionary.ModDate:
                 rawModDate = value;
                 break;
-                
+
             default:
                 super.setTextStreamValue(id, value);
                 break;
         }
-        
-        
+
+
     }
-    
-    
+
+
     @Override
     public boolean[] getBooleanArray(final int id) {
 
@@ -487,27 +519,27 @@ public class CollectionObject extends PdfObject{
     public void setFloatArray(final int id, final float[] value) {
 
         switch (id) {
-            
+
             case PdfDictionary.Background:
                 Background = value;
                 break;
-                
+
             case PdfDictionary.CardBackground:
                 CardBackground = value;
                 break;
-                
+
             case PdfDictionary.CardBorder:
                 CardBorder = value;
                 break;
-                
+
             case PdfDictionary.PrimaryText:
                 PrimaryText = value;
                 break;
-                
+
             case PdfDictionary.SecondaryText:
                 SecondaryText = value;
                 break;
-                
+
             default:
                 super.setFloatArray(id, value);
         }

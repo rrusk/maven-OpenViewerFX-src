@@ -45,17 +45,16 @@ import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.acroforms.creation.GenericFormFactory;
 
 /**
- *
  * @author markee
  */
 public class JavaFXSupport {
 
     public PdfGlyph getGlyph(final Glyf currentGlyf, final FontFile2 fontTable, final Hmtx currentHmtx, final int idx, final float f, final TTVM vm, final String baseFontName) {
-        throw new UnsupportedOperationException("getGlyph Not supported yet."); 
+        throw new UnsupportedOperationException("getGlyph Not supported yet.");
     }
 
     public PdfGlyph getGlyph(final float[] x, final float[] y, final float[] x2, final float[] y2, final float[] x3, final float[] y3, final float ymin, final int end, final int[] commands) {
-       throw new UnsupportedOperationException("getGlyph Not supported yet."); 
+        throw new UnsupportedOperationException("getGlyph Not supported yet.");
     }
 
     public Object getCommandHandler(final Object currentCommands) {
@@ -67,7 +66,7 @@ public class JavaFXSupport {
     }
 
     public PdfClip getFXClip() {
-        throw new UnsupportedOperationException("getFXClipNot supported yet."); 
+        throw new UnsupportedOperationException("getFXClipNot supported yet.");
     }
 
     public static void renderGUIComponent(final int formType, final Object value, final Object guiComp) {

@@ -36,17 +36,19 @@ import org.jpedal.external.CustomMessageHandler;
 
 public class ExampleCustomMessageHandler implements CustomMessageHandler {
 
-    /**give verbose output so we can see what happens*/
+    /**
+     * give verbose output so we can see what happens
+     */
     boolean showMessage;
 
     @Override
-    public boolean showMessage(final Object message){
+    public boolean showMessage(final Object message) {
 
-        if(showMessage){
-            if(message instanceof String) {
+        if (showMessage) {
+            if (message instanceof String) {
                 System.out.println("Message=" + message);
-            } else{
-                System.out.println("Object is a component ="+message);
+            } else {
+                System.out.println("Object is a component =" + message);
             }
         }
 
@@ -55,13 +57,14 @@ public class ExampleCustomMessageHandler implements CustomMessageHandler {
 
     /**
      * input request and parameters passed in
+     *
      * @param args
      * @return null will call input - otherwise will use non-null value
      */
     @Override
     public String requestInput(final Object[] args) {
 
-        if(showMessage){
+        if (showMessage) {
             System.out.println("input requested - parameters passed in (String or components");
         }
 
@@ -71,13 +74,14 @@ public class ExampleCustomMessageHandler implements CustomMessageHandler {
     /**
      * Allow user to add own action to all dialog messages
      * and also bypass dialog messages
+     *
      * @param args
      * @return int value returnd by JOptionPane.showConfirmDialog
      */
     @Override
     public int requestConfirm(final Object[] args) {
 
-        if(showMessage){
+        if (showMessage) {
             System.out.println("input requested - parameters passed in (String or components");
         }
 

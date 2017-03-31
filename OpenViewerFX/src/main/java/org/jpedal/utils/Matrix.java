@@ -35,16 +35,18 @@ package org.jpedal.utils;
 import java.awt.geom.AffineTransform;
 
 /**
-provide matrix functionality used in PDF to calculate co-ords
+ * provide matrix functionality used in PDF to calculate co-ords
  */
 public class Matrix {
-    
-    /**multiply two 3 * 3 matrices together & return result*/
+
+    /**
+     * multiply two 3 * 3 matrices together & return result
+     */
     public static final float[][] multiply(final float[][] matrix1, final float[][] matrix2) {
-        
+
         //output matrix for results
         final float[][] output_matrix = new float[3][3];
-        
+
         //multiply
         for (int col = 0; col < 3; col++) {
             for (int row = 0; row < 3; row++) {
@@ -67,9 +69,11 @@ public class Matrix {
         return output_matrix;
     }
 
-    /**Calculates the inverse of a 3 * 3 matrix  return result*/
+    /**
+     * Calculates the inverse of a 3 * 3 matrix  return result
+     */
     public static final float[][] inverse(final float[][] input_matrix) {
-        
+
         final float d = (input_matrix[2][0] * input_matrix[0][1] * input_matrix[1][2] - input_matrix[2][0] * input_matrix[0][2] * input_matrix[1][1] - input_matrix[1][0] * input_matrix[0][1] * input_matrix[2][2] + input_matrix[1][0] * input_matrix[0][2] * input_matrix[2][1] + input_matrix[0][0] * input_matrix[1][1] * input_matrix[2][2] - input_matrix[0][0] * input_matrix[1][2] * input_matrix[2][1]);
         final float t00 = (input_matrix[1][1] * input_matrix[2][2] - input_matrix[1][2] * input_matrix[2][1]) / d;
         final float t01 = -(input_matrix[0][1] * input_matrix[2][2] - input_matrix[0][2] * input_matrix[2][1]) / d;
@@ -80,82 +84,94 @@ public class Matrix {
         final float t20 = (-input_matrix[2][0] * input_matrix[1][1] + input_matrix[1][0] * input_matrix[2][1]) / d;
         final float t21 = -(-input_matrix[2][0] * input_matrix[0][1] + input_matrix[0][0] * input_matrix[2][1]) / d;
         final float t22 = (-input_matrix[1][0] * input_matrix[0][1] + input_matrix[0][0] * input_matrix[1][1]) / d;
-        
+
         final float[][] output_matrix = new float[3][3];
-        
-        output_matrix[0][0] = t00; output_matrix[0][1] = t01; output_matrix[0][2] = t02;
-        output_matrix[1][0] = t10; output_matrix[1][1] = t11; output_matrix[1][2] = t12;
-        output_matrix[2][0] = t20; output_matrix[2][1] = t21; output_matrix[2][2] = t22;
-        
+
+        output_matrix[0][0] = t00;
+        output_matrix[0][1] = t01;
+        output_matrix[0][2] = t02;
+        output_matrix[1][0] = t10;
+        output_matrix[1][1] = t11;
+        output_matrix[1][2] = t12;
+        output_matrix[2][0] = t20;
+        output_matrix[2][1] = t21;
+        output_matrix[2][2] = t22;
+
         return output_matrix;
     }
-    
-    public static final float[][] concatenate(final float[][] m1, final float [][] m2){
+
+    public static final float[][] concatenate(final float[][] m1, final float[][] m2) {
         return multiply(m2, m1);
     }
-    
+
     /**
      * please call this function only on device bound transformation not good
      * for general use cases;
+     *
      * @param xform
-     * @return 
+     * @return
      */
-    public static float[][] toMatrix(final AffineTransform xform){
-        return new float[][]{{(float)xform.getScaleX(),(float)xform.getShearX(),0},
-            {(float)xform.getShearY(),(float)xform.getScaleY(),0},
-            {(float)xform.getTranslateX(),(float)xform.getTranslateY(),1}};
+    public static float[][] toMatrix(final AffineTransform xform) {
+        return new float[][]{{(float) xform.getScaleX(), (float) xform.getShearX(), 0},
+                {(float) xform.getShearY(), (float) xform.getScaleY(), 0},
+                {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}};
     }
-    
+
     /**
-     * transform a point i.e:(x,y) based on given matrix 
+     * transform a point i.e:(x,y) based on given matrix
+     *
      * @param mm
      * @param x
      * @param y
-     * @return 
+     * @return
      */
     public static float[] transformPoint(final float[][] mm, final float x, final float y) {
         final float x_ = mm[0][0] * x + mm[1][0] * y + mm[2][0];
         final float y_ = mm[0][1] * x + mm[1][1] * y + mm[2][1];
         return new float[]{x_, y_};
     }
-    
+
     //////////////////////////////////////////////////////////////////////////
-    
-    /**show matrix (used to debug)*/
-    public static final void show(final float[][] matrix1) {        
+
+    /**
+     * show matrix (used to debug)
+     */
+    public static final void show(final float[][] matrix1) {
         //show lines
         for (int row = 0; row < 3; row++) {
             LogWriter.writeLog(row + "((" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " ))");
-           // System.out.println( row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )" );
+            // System.out.println( row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )" );
         }
     }
-	
-	public static final void showBBox(final float [] BBox){
-		System.out.println("BBox: "+BBox[0]+" "+BBox[1]+" "+BBox[2]+" "+BBox[3]);
-	}
-    
-    /**show matrix (used to debug)*/
+
+    public static final void showBBox(final float[] BBox) {
+        System.out.println("BBox: " + BBox[0] + " " + BBox[1] + " " + BBox[2] + " " + BBox[3]);
+    }
+
+    /**
+     * show matrix (used to debug)
+     */
     public static final void show(final int[][] matrix1) {
-        
+
         //show lines
         for (int row = 0; row < 3; row++) {
             LogWriter.writeLog(row + "((" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " ))");
             //System.out.println( row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )" );
         }
     }
-    
+
     public static float[][] multiplyAny(final float[][] m1, final float[][] m2) {
         final int c0 = m1[0].length;
         final int r1 = m2.length;
-        if(c0 != r1) {
-            return null; 
+        if (c0 != r1) {
+            return null;
         }
         final int r0 = m1.length;
         final int c1 = m2[0].length;
         final float[][] mResult = new float[r0][c1];
-        for(int i = 0; i < r0; i++) {
-            for(int j = 0; j < c1; j++) {
-                for(int k = 0; k < c0; k++) {
+        for (int i = 0; i < r0; i++) {
+            for (int j = 0; j < c1; j++) {
+                for (int k = 0; k < c0; k++) {
                     mResult[i][j] += m1[i][k] * m2[k][j];
                 }
             }
@@ -163,5 +179,5 @@ public class Matrix {
         return mResult;
     }
 
-    
+
 }

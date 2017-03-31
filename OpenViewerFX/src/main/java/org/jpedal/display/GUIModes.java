@@ -36,5 +36,5 @@ package org.jpedal.display;
  * Define if we use Swing or JavaFX
  */
 public enum GUIModes {
-   SWING,JAVAFX 
+    SWING, JAVAFX
 }

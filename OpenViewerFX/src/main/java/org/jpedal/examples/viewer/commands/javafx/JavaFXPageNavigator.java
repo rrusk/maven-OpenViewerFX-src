@@ -33,7 +33,9 @@
 package org.jpedal.examples.viewer.commands.javafx;
 
 // Used for page turning mode
+
 import java.awt.Point;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.examples.viewer.Commands;
@@ -72,7 +74,7 @@ public class JavaFXPageNavigator {
      * Flag to prevent page changing is page changing currently taking place (prevent viewer freezing)
      */
     private static boolean pageChanging;
-    
+
     public static void gotoPage(String page, final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf) {
         int newPage;
 
@@ -112,7 +114,7 @@ public class JavaFXPageNavigator {
             }
 
         } catch (final Exception e) {
-            currentGUI.showMessageDialog('>' + page + "< " + Messages.getMessage("PdfViewerInvalidNumber.text")+' '+e);
+            currentGUI.showMessageDialog('>' + page + "< " + Messages.getMessage("PdfViewerInvalidNumber.text") + ' ' + e);
             newPage = commonValues.getCurrentPage();
             currentGUI.setPageCounterText(PageCounter.PAGECOUNTER2, String.valueOf(commonValues.getCurrentPage()));
         }
@@ -159,14 +161,14 @@ public class JavaFXPageNavigator {
     }
 
     public static void goFForwardPage(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
-        if (args == null && commonValues.getSelectedFile() != null){
-                if (commonValues.getPageCount() < commonValues.getCurrentPage() + 10) //						forward(commonValues.getPageCount()-commonValues.getCurrentPage());
-                {
-                    navigatePages(commonValues.getPageCount() - commonValues.getCurrentPage(), commonValues, decode_pdf, currentGUI);
-                } else {
-                    navigatePages(10, commonValues, decode_pdf, currentGUI);
-                }
-            }      
+        if (args == null && commonValues.getSelectedFile() != null) {
+            if (commonValues.getPageCount() < commonValues.getCurrentPage() + 10) //						forward(commonValues.getPageCount()-commonValues.getCurrentPage());
+            {
+                navigatePages(commonValues.getPageCount() - commonValues.getCurrentPage(), commonValues, decode_pdf, currentGUI);
+            } else {
+                navigatePages(10, commonValues, decode_pdf, currentGUI);
+            }
+        }
     }
 
     public static void goForwardPage(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
@@ -174,9 +176,8 @@ public class JavaFXPageNavigator {
             if (commonValues.getSelectedFile() != null) //					forward(1);
             {
                 navigatePages(1, commonValues, decode_pdf, currentGUI);
-            }
-            else if(decode_pdf.getPageCount() > 0){
-                if(commonValues.getPageCount() != decode_pdf.getPageCount()) {
+            } else if (decode_pdf.getPageCount() > 0) {
+                if (commonValues.getPageCount() != decode_pdf.getPageCount()) {
                     commonValues.setPageCount(decode_pdf.getPageCount());
                 }
                 navigatePages(1, commonValues, decode_pdf, currentGUI);
@@ -240,413 +241,413 @@ public class JavaFXPageNavigator {
             return;
         }
 
-        if(!pageChanging){
-			pageChanging = true;
-			//Facing modes need to move at least by 2 pages others page will not change
-			if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
+        if (!pageChanging) {
+            pageChanging = true;
+            //Facing modes need to move at least by 2 pages others page will not change
+            if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
 
-				if (count == -1 && commonValues.getCurrentPage() != 2) {
-					count = -2;
-				}
+                if (count == -1 && commonValues.getCurrentPage() != 2) {
+                    count = -2;
+                }
 
-				if (count == 1 && commonValues.getCurrentPage() != decode_pdf.getPageCount() - 1) {
-					count = 2;
-				}
-			}
+                if (count == 1 && commonValues.getCurrentPage() != decode_pdf.getPageCount() - 1) {
+                    count = 2;
+                }
+            }
 
-			//new page number
-			int updatedTotal = commonValues.getCurrentPage() + count;
-			if (count > 0) {
-				/*
+            //new page number
+            int updatedTotal = commonValues.getCurrentPage() + count;
+            if (count > 0) {
+                /*
 				 * example code to show how to check if page is now available
 				 */
-				//if loading on linearized thread, see if we can actually display
-				if (!decode_pdf.isPageAvailable(updatedTotal)) {
-					currentGUI.showMessageDialog("Page " + updatedTotal + " is not yet loaded");
-					pageChanging = false;
-					return;
-				}
+                //if loading on linearized thread, see if we can actually display
+                if (!decode_pdf.isPageAvailable(updatedTotal)) {
+                    currentGUI.showMessageDialog("Page " + updatedTotal + " is not yet loaded");
+                    pageChanging = false;
+                    return;
+                }
 
-				if (!Values.isProcessing()) { //lock to stop multiple accesses
+                if (!Values.isProcessing()) { //lock to stop multiple accesses
 
 					/*
 					 * if in range update count and decode next page. Decoded pages
 					 * are cached so will redisplay almost instantly
 					 */
-					if (updatedTotal <= commonValues.getPageCount()) {
+                    if (updatedTotal <= commonValues.getPageCount()) {
 
-						if (commonValues.isMultiTiff()) {
+                        if (commonValues.isMultiTiff()) {
 
-							//Update page number and draw new page
-							commonValues.setTiffImageToLoad((lastPageDecoded - 1) + count);
-							drawMultiPageTiff(commonValues, decode_pdf);
+                            //Update page number and draw new page
+                            commonValues.setTiffImageToLoad((lastPageDecoded - 1) + count);
+                            drawMultiPageTiff(commonValues, decode_pdf);
 
-							//Update Tiff page
-							commonValues.setCurrentPage(updatedTotal);
-							lastPageDecoded = commonValues.getTiffImageToLoad() + 1;
-							currentGUI.setPageNumber();
+                            //Update Tiff page
+                            commonValues.setCurrentPage(updatedTotal);
+                            lastPageDecoded = commonValues.getTiffImageToLoad() + 1;
+                            currentGUI.setPageNumber();
 
-							//Display new page
+                            //Display new page
                             //((PdfDecoder)decode_pdf).repaint();
-                            
-						} else {
+
+                        } else {
 							/*
 							 * adjust for double jump on facing
 							 */
-							if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
-								if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) {
-									//                                updatedTotal++;
+                            if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
+                                if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) {
+                                    //                                updatedTotal++;
 
-									if (updatedTotal > commonValues.getPageCount()) {
-										updatedTotal = commonValues.getPageCount();
-									}
+                                    if (updatedTotal > commonValues.getPageCount()) {
+                                        updatedTotal = commonValues.getPageCount();
+                                    }
 
-									if ((updatedTotal & 1) == 1 && updatedTotal != 1) {
-										updatedTotal--;
-									}
+                                    if ((updatedTotal & 1) == 1 && updatedTotal != 1) {
+                                        updatedTotal--;
+                                    }
 
-									if (decode_pdf.getDisplayView() == Display.FACING) {
-										count = ((updatedTotal) / 2) - ((commonValues.getCurrentPage()) / 2);
-									}
-								} else {
-									//                                updatedTotal++;
+                                    if (decode_pdf.getDisplayView() == Display.FACING) {
+                                        count = ((updatedTotal) / 2) - ((commonValues.getCurrentPage()) / 2);
+                                    }
+                                } else {
+                                    //                                updatedTotal++;
 
-									if ((updatedTotal & 1) == 0) {
-										updatedTotal--;
-									}
+                                    if ((updatedTotal & 1) == 0) {
+                                        updatedTotal--;
+                                    }
 
-									count = ((updatedTotal + 1) / 2) - ((commonValues.getCurrentPage() + 1) / 2);
-								}
-							}
+                                    count = ((updatedTotal + 1) / 2) - ((commonValues.getCurrentPage() + 1) / 2);
+                                }
+                            }
 
                             /*
 							 * animate if using drag in facing
 							 */
-							if (count == 1 && decode_pdf.getDisplayView() == Display.FACING
-									&& decode_pdf.getPages().getBoolean(Display.BoolValue.TURNOVER_ON)
-									&& decode_pdf.getPageCount() != 2
-									&& currentGUI.getPageTurnScalingAppropriate()
-									&& updatedTotal / 2 != commonValues.getCurrentPage() / 2
-									&& !decode_pdf.getPdfPageData().hasMultipleSizes()
-									&& !pageTurnAnimating) {
+                            if (count == 1 && decode_pdf.getDisplayView() == Display.FACING
+                                    && decode_pdf.getPages().getBoolean(Display.BoolValue.TURNOVER_ON)
+                                    && decode_pdf.getPageCount() != 2
+                                    && currentGUI.getPageTurnScalingAppropriate()
+                                    && updatedTotal / 2 != commonValues.getCurrentPage() / 2
+                                    && !decode_pdf.getPdfPageData().hasMultipleSizes()
+                                    && !pageTurnAnimating) {
 
-								float pageW = decode_pdf.getPdfPageData().getCropBoxWidth(1);
-								float pageH = decode_pdf.getPdfPageData().getCropBoxHeight(1);
-								if (decode_pdf.getPdfPageData().getRotation(1) % 180 == 90) {
-									final float temp = pageW;
-									pageW = pageH;
-									pageH = temp;
-								}
+                                float pageW = decode_pdf.getPdfPageData().getCropBoxWidth(1);
+                                float pageH = decode_pdf.getPdfPageData().getCropBoxHeight(1);
+                                if (decode_pdf.getPdfPageData().getRotation(1) % 180 == 90) {
+                                    final float temp = pageW;
+                                    pageW = pageH;
+                                    pageH = temp;
+                                }
 
-								final Point corner = new Point();
-								corner.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) - pageW);
-								corner.y = (int) (decode_pdf.getInsetH() + pageH);
+                                final Point corner = new Point();
+                                corner.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) - pageW);
+                                corner.y = (int) (decode_pdf.getInsetH() + pageH);
 
-								final Point cursor = new Point();
-								cursor.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) + pageW);
-								cursor.y = (int) (decode_pdf.getInsetH() + pageH);
+                                final Point cursor = new Point();
+                                cursor.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) + pageW);
+                                cursor.y = (int) (decode_pdf.getInsetH() + pageH);
 
-								final int newPage = updatedTotal;
-								final Thread animation = new Thread() {
-									@Override
-									public void run() {
-										// Fall animation
-										int velocity = 1;
+                                final int newPage = updatedTotal;
+                                final Thread animation = new Thread() {
+                                    @Override
+                                    public void run() {
+                                        // Fall animation
+                                        int velocity = 1;
 
-										//ensure cursor is not outside expected range
-										if (cursor.x <= corner.x) {
-											cursor.x = corner.x - 1;
-										}
+                                        //ensure cursor is not outside expected range
+                                        if (cursor.x <= corner.x) {
+                                            cursor.x = corner.x - 1;
+                                        }
 
-										//Calculate distance required
-										final double distX = (corner.x - cursor.x);
+                                        //Calculate distance required
+                                        final double distX = (corner.x - cursor.x);
 
-										//Loop through animation
-										while (cursor.getX() >= corner.getX()) {
+                                        //Loop through animation
+                                        while (cursor.getX() >= corner.getX()) {
 
-											//amount to move this time
-											double xMove = velocity * distX * 0.001;
+                                            //amount to move this time
+                                            double xMove = velocity * distX * 0.001;
 
-											//make sure always moves at least 1 pixel in each direction
-											if (xMove > -1) {
-												xMove = -1;
-											}
+                                            //make sure always moves at least 1 pixel in each direction
+                                            if (xMove > -1) {
+                                                xMove = -1;
+                                            }
 
-											cursor.setLocation(cursor.getX() + xMove, cursor.getY());
-											decode_pdf.setUserOffsets((int) cursor.getX(), (int) cursor.getY(), org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_RIGHT);
+                                            cursor.setLocation(cursor.getX() + xMove, cursor.getY());
+                                            decode_pdf.setUserOffsets((int) cursor.getX(), (int) cursor.getY(), org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_RIGHT);
 
-											//Double speed til moving 32/frame
-											if (velocity < 32) {
-												velocity *= 2;
-											}
+                                            //Double speed til moving 32/frame
+                                            if (velocity < 32) {
+                                                velocity *= 2;
+                                            }
 
-											//sleep til next frame
-											try {
-												Thread.sleep(50);
-											} catch (final Exception e) {
-												e.printStackTrace();
-											}
+                                            //sleep til next frame
+                                            try {
+                                                Thread.sleep(50);
+                                            } catch (final Exception e) {
+                                                e.printStackTrace();
+                                            }
 
-										}
+                                        }
 
-										//change page
-										commonValues.setCurrentPage(newPage);
-										currentGUI.setPageNumber();
-										decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
-										currentGUI.decodePage();
+                                        //change page
+                                        commonValues.setCurrentPage(newPage);
+                                        currentGUI.setPageNumber();
+                                        decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
+                                        currentGUI.decodePage();
 
-										//unlock corner drag
-										setPageTurnAnimating(false, currentGUI);
+                                        //unlock corner drag
+                                        setPageTurnAnimating(false, currentGUI);
 
-										//hide turnover
-										decode_pdf.setUserOffsets(0, 0, org.jpedal.external.OffsetOptions.INTERNAL_DRAG_BLANK);
-									}
-								};
+                                        //hide turnover
+                                        decode_pdf.setUserOffsets(0, 0, org.jpedal.external.OffsetOptions.INTERNAL_DRAG_BLANK);
+                                    }
+                                };
 
-								animation.setDaemon(true);
-								//lock corner drag
-								setPageTurnAnimating(true, currentGUI);
+                                animation.setDaemon(true);
+                                //lock corner drag
+                                setPageTurnAnimating(true, currentGUI);
 
-								animation.start();
-							}else{
-								commonValues.setCurrentPage(updatedTotal);
-								//							currentGUI.setPageNumber();
+                                animation.start();
+                            } else {
+                                commonValues.setCurrentPage(updatedTotal);
+                                //							currentGUI.setPageNumber();
 
-								if (decode_pdf.getDisplayView() == Display.CONTINUOUS
-										|| decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
+                                if (decode_pdf.getDisplayView() == Display.CONTINUOUS
+                                        || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
 
-									currentGUI.decodePage();
+                                    currentGUI.decodePage();
 
-									//Added here else number not updated
-									currentGUI.setPageNumber();
+                                    //Added here else number not updated
+                                    currentGUI.setPageNumber();
 
-									pageChanging = false;
-									return;
-								}
+                                    pageChanging = false;
+                                    return;
+                                }
 
-								currentGUI.resetStatusMessage("Loading Page " + commonValues.getCurrentPage());
+                                currentGUI.resetStatusMessage("Loading Page " + commonValues.getCurrentPage());
 								/*
 								 * reset as rotation may change!
 								 */
-								decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
+                                decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
 
-								//decode the page
-								if (commonValues.isPDF()) {
-									currentGUI.decodePage();
-								}
+                                //decode the page
+                                if (commonValues.isPDF()) {
+                                    currentGUI.decodePage();
+                                }
 
-								//if scaling to window reset screen to fit rotated page
-								//						if(currentGUI.getSelectedComboIndex(Commands.SCALING)<3)
-								//						currentGUI.zoom();
-							}
-						}
-					}
-				} else {
-					currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
-				}
+                                //if scaling to window reset screen to fit rotated page
+                                //						if(currentGUI.getSelectedComboIndex(Commands.SCALING)<3)
+                                //						currentGUI.zoom();
+                            }
+                        }
+                    }
+                } else {
+                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
+                }
 
-			} else {
-				//if loading on linearized thread, see if we can actually display
-				if (!decode_pdf.isPageAvailable(updatedTotal)) {
-					currentGUI.showMessageDialog("Page " + updatedTotal + " is not yet loaded");
-					pageChanging = false;
-					return;
-				}
+            } else {
+                //if loading on linearized thread, see if we can actually display
+                if (!decode_pdf.isPageAvailable(updatedTotal)) {
+                    currentGUI.showMessageDialog("Page " + updatedTotal + " is not yet loaded");
+                    pageChanging = false;
+                    return;
+                }
 
-				if (!Values.isProcessing()) { //lock to stop multiple accesses
+                if (!Values.isProcessing()) { //lock to stop multiple accesses
 
 					/*
 					 * if in range update count and decode next page. Decoded pages
 					 * are cached so will redisplay almost instantly
 					 */
-					if (updatedTotal >= 1) {
+                    if (updatedTotal >= 1) {
 
-						if (commonValues.isMultiTiff()) {
+                        if (commonValues.isMultiTiff()) {
 
-							//Update page number and draw new page
-							commonValues.setTiffImageToLoad((lastPageDecoded - 1) + count);
-							drawMultiPageTiff(commonValues, decode_pdf);
+                            //Update page number and draw new page
+                            commonValues.setTiffImageToLoad((lastPageDecoded - 1) + count);
+                            drawMultiPageTiff(commonValues, decode_pdf);
 
-							//Update Tiff page
-							commonValues.setCurrentPage(updatedTotal);
-							lastPageDecoded = commonValues.getTiffImageToLoad() + 1;
-							currentGUI.setPageNumber();
+                            //Update Tiff page
+                            commonValues.setCurrentPage(updatedTotal);
+                            lastPageDecoded = commonValues.getTiffImageToLoad() + 1;
+                            currentGUI.setPageNumber();
 
-						} else {
+                        } else {
 
 							/*
 							 * adjust for double jump on facing
 							 */
-							if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
-								if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) {
-									if (count == -1) {
-										updatedTotal--;
-									}
+                            if (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
+                                if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) || decode_pdf.getDisplayView() != Display.FACING) {
+                                    if (count == -1) {
+                                        updatedTotal--;
+                                    }
 
-									if (updatedTotal < 1) {
-										updatedTotal = 1;
-									}
+                                    if (updatedTotal < 1) {
+                                        updatedTotal = 1;
+                                    }
 
-									if ((updatedTotal & 1) == 1 && updatedTotal != 1) {
-										updatedTotal--;
-									}
+                                    if ((updatedTotal & 1) == 1 && updatedTotal != 1) {
+                                        updatedTotal--;
+                                    }
 
-									if (decode_pdf.getDisplayView() == Display.FACING) {
-										count = ((updatedTotal) / 2) - ((commonValues.getCurrentPage()) / 2);
-									}
-								} else {
-									if ((updatedTotal & 1) == 0) {
-										updatedTotal--;
-									}
+                                    if (decode_pdf.getDisplayView() == Display.FACING) {
+                                        count = ((updatedTotal) / 2) - ((commonValues.getCurrentPage()) / 2);
+                                    }
+                                } else {
+                                    if ((updatedTotal & 1) == 0) {
+                                        updatedTotal--;
+                                    }
 
-									if (decode_pdf.getDisplayView() == Display.FACING) {
-										count = ((updatedTotal + 1) / 2) - ((commonValues.getCurrentPage() + 1) / 2);
-									}
-								}
-							}
+                                    if (decode_pdf.getDisplayView() == Display.FACING) {
+                                        count = ((updatedTotal + 1) / 2) - ((commonValues.getCurrentPage() + 1) / 2);
+                                    }
+                                }
+                            }
 
                             /*
 							 * animate if using drag in facing
 							 */
-							if (count == -1 && decode_pdf.getDisplayView() == Display.FACING
-									&& decode_pdf.getPages().getBoolean(Display.BoolValue.TURNOVER_ON)
-									&& currentGUI.getPageTurnScalingAppropriate()
-									&& decode_pdf.getPageCount() != 2
-									&& (updatedTotal != commonValues.getCurrentPage() - 1 || updatedTotal == 1)
-									&& !decode_pdf.getPdfPageData().hasMultipleSizes()
-									&& !pageTurnAnimating) {
+                            if (count == -1 && decode_pdf.getDisplayView() == Display.FACING
+                                    && decode_pdf.getPages().getBoolean(Display.BoolValue.TURNOVER_ON)
+                                    && currentGUI.getPageTurnScalingAppropriate()
+                                    && decode_pdf.getPageCount() != 2
+                                    && (updatedTotal != commonValues.getCurrentPage() - 1 || updatedTotal == 1)
+                                    && !decode_pdf.getPdfPageData().hasMultipleSizes()
+                                    && !pageTurnAnimating) {
 
-								float pageW = decode_pdf.getPdfPageData().getCropBoxWidth(1);
-								float pageH = decode_pdf.getPdfPageData().getCropBoxHeight(1);
-								if (decode_pdf.getPdfPageData().getRotation(1) % 180 == 90) {
-									final float temp = pageW;
-									pageW = pageH;
-									pageH = temp;
-								}
+                                float pageW = decode_pdf.getPdfPageData().getCropBoxWidth(1);
+                                float pageH = decode_pdf.getPdfPageData().getCropBoxHeight(1);
+                                if (decode_pdf.getPdfPageData().getRotation(1) % 180 == 90) {
+                                    final float temp = pageW;
+                                    pageW = pageH;
+                                    pageH = temp;
+                                }
 
-								final Point corner = new Point();
-								corner.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) + pageW);
-								corner.y = (int) (decode_pdf.getInsetH() + pageH);
+                                final Point corner = new Point();
+                                corner.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) + pageW);
+                                corner.y = (int) (decode_pdf.getInsetH() + pageH);
 
-								final Point cursor = new Point();
-								cursor.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) - pageW);
-								cursor.y = (int) (decode_pdf.getInsetH() + pageH);
+                                final Point cursor = new Point();
+                                cursor.x = (int) ((decode_pdf.getVisibleRect().getWidth() / 2) - pageW);
+                                cursor.y = (int) (decode_pdf.getInsetH() + pageH);
 
-								final int newPage = updatedTotal;
-								final Thread animation = new Thread() {
-									@Override
-									public void run() {
-										// Fall animation
-										int velocity = 1;
+                                final int newPage = updatedTotal;
+                                final Thread animation = new Thread() {
+                                    @Override
+                                    public void run() {
+                                        // Fall animation
+                                        int velocity = 1;
 
-										//ensure cursor is not outside expected range
-										if (cursor.x >= corner.x) {
-											cursor.x = corner.x - 1;
-										}
+                                        //ensure cursor is not outside expected range
+                                        if (cursor.x >= corner.x) {
+                                            cursor.x = corner.x - 1;
+                                        }
 
-										//Calculate distance required
-										final double distX = (corner.x - cursor.x);
+                                        //Calculate distance required
+                                        final double distX = (corner.x - cursor.x);
 
-										//Loop through animation
-										while (cursor.getX() <= corner.getX()) {
+                                        //Loop through animation
+                                        while (cursor.getX() <= corner.getX()) {
 
-											//amount to move this time
-											double xMove = velocity * distX * 0.001;
+                                            //amount to move this time
+                                            double xMove = velocity * distX * 0.001;
 
-											//make sure always moves at least 1 pixel in each direction
-											if (xMove < 1) {
-												xMove = 1;
-											}
+                                            //make sure always moves at least 1 pixel in each direction
+                                            if (xMove < 1) {
+                                                xMove = 1;
+                                            }
 
-											cursor.setLocation(cursor.getX() + xMove, cursor.getY());
-											decode_pdf.setUserOffsets((int) cursor.getX(), (int) cursor.getY(), org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_LEFT);
+                                            cursor.setLocation(cursor.getX() + xMove, cursor.getY());
+                                            decode_pdf.setUserOffsets((int) cursor.getX(), (int) cursor.getY(), org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_LEFT);
 
-											//Double speed til moving 32/frame
-											if (velocity < 32) {
-												velocity *= 2;
-											}
+                                            //Double speed til moving 32/frame
+                                            if (velocity < 32) {
+                                                velocity *= 2;
+                                            }
 
-											//sleep til next frame
-											try {
-												Thread.sleep(50);
-											} catch (final Exception e) {
-												e.printStackTrace();
-											}
+                                            //sleep til next frame
+                                            try {
+                                                Thread.sleep(50);
+                                            } catch (final Exception e) {
+                                                e.printStackTrace();
+                                            }
 
-										}
+                                        }
 
-										//change page
-										commonValues.setCurrentPage(newPage);
-										currentGUI.setPageNumber();
-										decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
-										currentGUI.decodePage();
+                                        //change page
+                                        commonValues.setCurrentPage(newPage);
+                                        currentGUI.setPageNumber();
+                                        decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
+                                        currentGUI.decodePage();
 
-										//hide turnover
-										decode_pdf.setUserOffsets(0, 0, org.jpedal.external.OffsetOptions.INTERNAL_DRAG_BLANK);
+                                        //hide turnover
+                                        decode_pdf.setUserOffsets(0, 0, org.jpedal.external.OffsetOptions.INTERNAL_DRAG_BLANK);
 
-										//Unlock corner drag
-										setPageTurnAnimating(false, currentGUI);
-									}
-								};
+                                        //Unlock corner drag
+                                        setPageTurnAnimating(false, currentGUI);
+                                    }
+                                };
 
-								animation.setDaemon(true);
-								//lock corner drag
-								setPageTurnAnimating(true, currentGUI);
+                                animation.setDaemon(true);
+                                //lock corner drag
+                                setPageTurnAnimating(true, currentGUI);
 
-								animation.start();
-							}else{
-								commonValues.setCurrentPage(updatedTotal);
-								//							currentGUI.setPageNumber();
+                                animation.start();
+                            } else {
+                                commonValues.setCurrentPage(updatedTotal);
+                                //							currentGUI.setPageNumber();
 
-								if (decode_pdf.getDisplayView() == Display.CONTINUOUS
-										|| decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
+                                if (decode_pdf.getDisplayView() == Display.CONTINUOUS
+                                        || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
 
-									currentGUI.decodePage();
+                                    currentGUI.decodePage();
 
-									//Added here else number not updated
-									currentGUI.setPageNumber();
+                                    //Added here else number not updated
+                                    currentGUI.setPageNumber();
 
-									pageChanging = false;
-									return;
-								}
+                                    pageChanging = false;
+                                    return;
+                                }
 
-								currentGUI.resetStatusMessage("loading page " + commonValues.getCurrentPage());
+                                currentGUI.resetStatusMessage("loading page " + commonValues.getCurrentPage());
 
 								/*
 								 * reset as rotation may change!
 								 */
-								decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
+                                decode_pdf.setPageParameters(currentGUI.getScaling(), commonValues.getCurrentPage());
 
-								//would reset scaling on page change to default
-								//currentGUI.setScalingToDefault(); //set to 100%
-								if (commonValues.isPDF()) {
-									currentGUI.decodePage();
-								}
+                                //would reset scaling on page change to default
+                                //currentGUI.setScalingToDefault(); //set to 100%
+                                if (commonValues.isPDF()) {
+                                    currentGUI.decodePage();
+                                }
 
-								//if scaling to window reset screen to fit rotated page
-								//if(currentGUI.getSelectedComboIndex(Commands.SCALING)<3)
-								//	currentGUI.zoom();
-							}
-						}
-					}
-				} else {
-					currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
-				}
+                                //if scaling to window reset screen to fit rotated page
+                                //if(currentGUI.getSelectedComboIndex(Commands.SCALING)<3)
+                                //	currentGUI.zoom();
+                            }
+                        }
+                    }
+                } else {
+                    currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
+                }
 
-			}
+            }
 
-			//Ensure thumbnail scroll bar is updated when page changed
-			if (currentGUI.getThumbnailScrollBar() != null) {
+            //Ensure thumbnail scroll bar is updated when page changed
+            if (currentGUI.getThumbnailScrollBar() != null) {
                 currentGUI.setThumbnailScrollBarValue(commonValues.getCurrentPage() - 1);
-			}
+            }
 
-			//After changing page, ensure buttons are updated, redundent buttons are hidden
-			currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
+            //After changing page, ensure buttons are updated, redundent buttons are hidden
+            currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
 
-			currentGUI.setPageNumber();
+            currentGUI.setPageNumber();
 
-			pageChanging = false;
-		}
+            pageChanging = false;
+        }
     }
 
     public static void drawMultiPageTiff(final Values commonValues, final PdfDecoderInt decode_pdf) {
@@ -697,5 +698,5 @@ public class JavaFXPageNavigator {
     public static void setTiffHelper(final TiffHelper tiffHelp) {
         tiffHelper = tiffHelp;
     }
-    
+
 }

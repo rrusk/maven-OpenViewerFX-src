@@ -41,7 +41,7 @@ import java.awt.geom.PathIterator;
  */
 public class ShapeUtils {
 
-    
+
     public static boolean isSimpleOutline(final Shape path) {
 
         int count = 0;
@@ -57,13 +57,13 @@ public class ShapeUtils {
             count++;
 
             //If there is a curve, class as complex outline
-            if(value==PathIterator.SEG_CUBICTO || value==PathIterator.SEG_QUADTO){
+            if (value == PathIterator.SEG_CUBICTO || value == PathIterator.SEG_QUADTO) {
                 count = 6;
             }
 
 
         }
-        return count<6;
+        return count < 6;
     }
 
 }

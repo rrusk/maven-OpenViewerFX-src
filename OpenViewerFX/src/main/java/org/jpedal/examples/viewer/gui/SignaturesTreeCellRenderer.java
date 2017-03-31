@@ -31,6 +31,7 @@
  * ---------------
  */
 package org.jpedal.examples.viewer.gui;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -54,26 +55,26 @@ public class SignaturesTreeCellRenderer extends DefaultTreeCellRenderer {
                                                   final boolean expanded, final boolean leaf, final int row, final boolean hasFocus) {
 
         final DefaultMutableTreeNode node = ((DefaultMutableTreeNode) value);
-		value = node.getUserObject();
-		final int level = node.getLevel();
-		
+        value = node.getUserObject();
+        final int level = node.getLevel();
+
         final String s = value.toString();
         icon = null;
         Font treeFont = tree.getFont();
 
-        if(level== 2){
-        	final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-        	final String text=parent.getUserObject().toString();
-        	if(text.equals("The following signature fields are not signed")){
-        		final URL resource = getClass().getResource("/org/jpedal/examples/viewer/res/unlock.png");
-        		icon = new ImageIcon(resource);
-        	} else {
-        		final URL resource = getClass().getResource("/org/jpedal/examples/viewer/res/lock.gif");
-        		icon = new ImageIcon(resource);
-        		treeFont = new Font(treeFont.getFamily(), Font.BOLD, treeFont.getSize());
-        	}
+        if (level == 2) {
+            final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+            final String text = parent.getUserObject().toString();
+            if (text.equals("The following signature fields are not signed")) {
+                final URL resource = getClass().getResource("/org/jpedal/examples/viewer/res/unlock.png");
+                icon = new ImageIcon(resource);
+            } else {
+                final URL resource = getClass().getResource("/org/jpedal/examples/viewer/res/lock.gif");
+                icon = new ImageIcon(resource);
+                treeFont = new Font(treeFont.getFamily(), Font.BOLD, treeFont.getSize());
+            }
         }
-        
+
         setFont(treeFont);
         setText(s);
         setIcon(icon);
@@ -85,7 +86,7 @@ public class SignaturesTreeCellRenderer extends DefaultTreeCellRenderer {
             setForeground(tree.getForeground());
         }
         setEnabled(tree.isEnabled());
-        
+
         setOpaque(true);
 
         return this;

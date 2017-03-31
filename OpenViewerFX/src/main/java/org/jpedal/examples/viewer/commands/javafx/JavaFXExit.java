@@ -75,18 +75,18 @@ public class JavaFXExit {
          */
         //SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
-        if(decode_pdf.getDisplayView()==Display.PAGEFLOW){
+        if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
             decode_pdf.getPages().stopGeneratingPage();
         }
-        
+
         decode_pdf.closePdfFile();
 
         //needed to save recent files
         try {
             properties.setValue("lastDocumentPage", String.valueOf(commonValues.getCurrentPage()));
             if (properties.getValue("trackViewerSize").equalsIgnoreCase("true")) {
-                properties.setValue("startViewerWidth", String.valueOf(((Window)currentGUI.getFrame()).getWidth()));
-                properties.setValue("startViewerHeight", String.valueOf(((Window)currentGUI.getFrame()).getHeight()));
+                properties.setValue("startViewerWidth", String.valueOf(((Window) currentGUI.getFrame()).getWidth()));
+                properties.setValue("startViewerHeight", String.valueOf(((Window) currentGUI.getFrame()).getHeight()));
             }
 
             if (properties.getValue("trackScaling").equalsIgnoreCase("true")) {
@@ -102,7 +102,7 @@ public class JavaFXExit {
             }
 
             if (properties.getValue("trackSelectedSideTab").equalsIgnoreCase("true")) {
-                final TabPane tabs = (TabPane)currentGUI.getSideTabBar();
+                final TabPane tabs = (TabPane) currentGUI.getSideTabBar();
                 if (DecoderOptions.isRunningOnMac) {
                     properties.setValue("startSelectedSideTab", tabs.getTabs().get(tabs.getSelectionModel().getSelectedIndex()).getText());
                 } else {
@@ -122,11 +122,11 @@ public class JavaFXExit {
         //formClickTest needs this so that it does not exit after first test.
         if (org.jpedal.DevFlags.GUITESTINGINPROGRESS || !SharedViewer.exitOnClose) {
             currentGUI.dispose();
-          
+
         } else {
-            
+
             //Added this one for now to remove a delay being experienced.
-            if(SharedViewer.exitOnClose){
+            if (SharedViewer.exitOnClose) {
                 decode_pdf.dispose();
                 currentGUI.dispose();
 

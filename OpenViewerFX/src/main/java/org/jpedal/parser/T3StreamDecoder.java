@@ -41,18 +41,17 @@ import org.jpedal.objects.raw.PdfObject;
 
 public class T3StreamDecoder extends PdfStreamDecoder {
 
-    public T3StreamDecoder(final PdfObjectReader currentPdfFile, final boolean isPrinting) {
+    public T3StreamDecoder(final PdfObjectReader currentPdfFile) {
 
         super(currentPdfFile);
 
         parserOptions.isType3Font(true);
 
-        this.isPrinting=isPrinting;
     }
 
     public T3Size decodePageContent(final PdfObject glyphObj, final GraphicsState newGS) throws PdfException {
 
-        this.newGS=newGS;
+        this.newGS = newGS;
 
         return decodePageContent(glyphObj);
     }

@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.commands.generic;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.exception.PdfException;
@@ -45,7 +46,7 @@ import org.jpedal.utils.Messages;
 import org.jpedal.utils.Strip;
 
 /**
- * Class to Handle the popup dialogs created when user right clicks 
+ * Class to Handle the popup dialogs created when user right clicks
  * highlighted text and chooses text extraction.
  */
 public class GUIExtractText {

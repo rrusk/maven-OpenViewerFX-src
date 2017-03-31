@@ -42,47 +42,47 @@ import org.jpedal.examples.viewer.gui.generic.GUICombo;
 /**
  *
  */
-public class JavaFXCombo extends ComboBox<String> implements GUICombo{
+public class JavaFXCombo extends ComboBox<String> implements GUICombo {
 
     private int ID;
-	
-	public JavaFXCombo(final String[] qualityValues) {
-        final ObservableList<String> options =  FXCollections.observableArrayList(qualityValues);
+
+    public JavaFXCombo(final String[] qualityValues) {
+        final ObservableList<String> options = FXCollections.observableArrayList(qualityValues);
         getItems().addAll(options);
-	}
-    
+    }
+
     @Override
-    public void setName(final String name){
+    public void setName(final String name) {
         this.setId(name);
     }
-    
-	/**
-	 * @return the iD
-	 */
+
+    /**
+     * @return the iD
+     */
     @Override
-	public int getID() {
-		return ID;
-	}
-	
-	/**
-	 * @param id the iD to set
-	 */
-	@Override
+    public int getID() {
+        return ID;
+    }
+
+    /**
+     * @param id the iD to set
+     */
+    @Override
     public void setID(final int id) {
-		ID = id;
-	}
-    
+        ID = id;
+    }
+
     @Override
     public void setSelectedIndex(final int defaultSelection) {
         getSelectionModel().select(defaultSelection);
     }
 
     @Override
-    public void setToolTipText(final String tooltip){
+    public void setToolTipText(final String tooltip) {
         final Tooltip tTip = new Tooltip(tooltip);
         setTooltip(tTip);
     }
-    
+
     @Override
     public void setEnabled(final boolean value) {
         /*
@@ -94,13 +94,13 @@ public class JavaFXCombo extends ComboBox<String> implements GUICombo{
 
     @Override
     public void setSelectedItem(final Object index) {
-        setSelectedItem((String)index);
+        setSelectedItem((String) index);
     }
 
     public void setSelectedItem(final String index) {
         getSelectionModel().select(index);
     }
-    
+
     @Override
     public int getSelectedIndex() {
         return getSelectionModel().getSelectedIndex();
@@ -113,7 +113,7 @@ public class JavaFXCombo extends ComboBox<String> implements GUICombo{
 
     @Override
     public void setVisibility(final boolean set) {
-        
+
         setVisible(set);
     }
 }

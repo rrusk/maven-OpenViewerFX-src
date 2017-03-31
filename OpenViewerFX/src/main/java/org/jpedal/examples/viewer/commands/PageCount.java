@@ -42,13 +42,13 @@ public class PageCount {
     public static Object execute(final PdfDecoderInt decode_pdf) {
 
         final Object status;
-        
+
         if (decode_pdf == null) {
             status = -1;
         } else {
             status = decode_pdf.getPageCount();
         }
-        
+
         return status;
     }
 }

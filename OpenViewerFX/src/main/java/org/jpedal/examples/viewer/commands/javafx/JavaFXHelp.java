@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands.javafx;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -66,7 +67,6 @@ public class JavaFXHelp {
 
     /**
      * Shows a popup window which displays information for support.
-     *
      */
     private static void getHelpBox() {
 
@@ -83,13 +83,13 @@ public class JavaFXHelp {
         topSep.setOrientation(Orientation.HORIZONTAL);
         topSep.setVisible(false);
         final VBox vBox = new VBox();
-        
+
         final Separator btnSep = new Separator();
         btnSep.setPrefHeight(25);
         btnSep.setOrientation(Orientation.HORIZONTAL);
         btnSep.setVisible(false);
-        
-        vBox.getChildren().addAll(info, topSep, link,btnSep,OK); //add items to vBox container
+
+        vBox.getChildren().addAll(info, topSep, link, btnSep, OK); //add items to vBox container
         vBox.setAlignment(Pos.CENTER);
 
         final FXDialog newDialog = new FXDialog(null, Modality.APPLICATION_MODAL, vBox, 400, 200);
@@ -106,8 +106,8 @@ public class JavaFXHelp {
                 }
             }
         });
-        
-         OK.setOnAction(new EventHandler<ActionEvent>() {
+
+        OK.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent e) {
                 try {

@@ -33,27 +33,28 @@
 package org.jpedal.io.security;
 
 import java.security.Security;
+
 import org.jpedal.utils.LogWriter;
 
 public class SetSecurity {
-    
+
     private static String altSP;
     public static boolean useBouncyCastle;
-    
-    public static void init(){
-        
+
+    public static void init() {
+
         //allow user to over-ride
-        altSP=System.getProperty("org.jpedal.securityprovider");
-        
-        if(altSP==null) {
+        altSP = System.getProperty("org.jpedal.securityprovider");
+
+        if (altSP == null) {
             altSP = "org.bouncycastle.jce.provider.BouncyCastleProvider";
         }
-        
+
         try {
-            
+
             final Class c = Class.forName(altSP);
             final java.security.Provider provider = (java.security.Provider) c.newInstance();
-            
+
             Security.addProvider(provider);
             useBouncyCastle = true;
         } catch (final Exception e) {

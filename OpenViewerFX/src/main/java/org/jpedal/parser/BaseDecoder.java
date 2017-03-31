@@ -41,45 +41,47 @@ import org.jpedal.render.DynamicVectorRenderer;
 public class BaseDecoder {
 
     public boolean isHTML;
-    
-//    public static final int TextPrint=20;
-    public static final int GenerateGlyphOnRender=21;
 
-    protected ParserOptions parserOptions=new ParserOptions();
+    //    public static final int TextPrint=20;
+    public static final int GenerateGlyphOnRender = 21;
 
-    final GraphicsStates graphicsStates=new GraphicsStates(parserOptions);
+    protected ParserOptions parserOptions = new ParserOptions();
+
+    final GraphicsStates graphicsStates = new GraphicsStates(parserOptions);
 
     protected DynamicVectorRenderer current;
 
-    protected GraphicsState gs=new GraphicsState();
+    protected GraphicsState gs = new GraphicsState();
 
     protected float multiplyer = 1;
 
     protected int streamType;
 
-    public void setParams(final ParserOptions parserOptions){
-        this.parserOptions=parserOptions;
+    public void setParams(final ParserOptions parserOptions) {
+        this.parserOptions = parserOptions;
     }
 
-    /**custom up scale value for JPedal settings*/
+    /**
+     * custom up scale value for JPedal settings
+     */
     public void setMultiplyer(final float value) {
 
-        multiplyer=value;
+        multiplyer = value;
 
     }
 
     public void setStreamType(final int value) {
 
-        streamType=value;
-        
+        streamType = value;
+
     }
 
     public void setGS(final GraphicsState gs) {
-        this.gs=gs;
+        this.gs = gs;
     }
 
     public void setRenderer(final DynamicVectorRenderer current) {
-        this.current =current;
-        isHTML=current.isHTMLorSVG();        
+        this.current = current;
+        isHTML = current.isHTMLorSVG();
     }
 }

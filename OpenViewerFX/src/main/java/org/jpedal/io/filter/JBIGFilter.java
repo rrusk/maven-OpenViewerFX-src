@@ -36,6 +36,7 @@ package org.jpedal.io.filter;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.util.Map;
+
 import org.jpedal.io.ObjectStore;
 import org.jpedal.jbig2.io.JBIG2;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -46,9 +47,9 @@ public class JBIGFilter extends BaseFilter implements PdfFilter {
 
     public JBIGFilter(final PdfObject decodeParms) {
         super(decodeParms);
-        if(decodeParms!=null){
-            final PdfObject Globals=decodeParms.getDictionary(PdfDictionary.JBIG2Globals);
-            if(Globals!=null) {
+        if (decodeParms != null) {
+            final PdfObject Globals = decodeParms.getDictionary(PdfDictionary.JBIG2Globals);
+            if (Globals != null) {
                 globalData = Globals.getDecodedStream();
             }
         }
@@ -56,18 +57,18 @@ public class JBIGFilter extends BaseFilter implements PdfFilter {
 
     @Override
     public byte[] decode(final byte[] data) throws Exception {
-      final byte [] dataBytes;
-      
-      dataBytes=JBIG2.JBIGDecode(data, globalData, ObjectStore.temp_dir);
+        final byte[] dataBytes;
 
-      return dataBytes;  
+        dataBytes = JBIG2.JBIGDecode(data, globalData, ObjectStore.temp_dir);
+
+        return dataBytes;
     }
 
     @Override
     public void decode(final BufferedInputStream bis,
-            final BufferedOutputStream streamCache, final String cacheName,
-            final Map cachedObjects) throws Exception {
-            throw new Exception("JBIG should not be decoded in this way");
+                       final BufferedOutputStream streamCache, final String cacheName,
+                       final Map cachedObjects) throws Exception {
+        throw new Exception("JBIG should not be decoded in this way");
     }
 
 }

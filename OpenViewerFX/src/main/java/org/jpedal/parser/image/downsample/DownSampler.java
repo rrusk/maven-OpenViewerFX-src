@@ -1,4 +1,4 @@
- /*
+/*
  * ===========================================
  * Java Pdf Extraction Decoding Access Library
  * ===========================================
@@ -34,40 +34,44 @@ package org.jpedal.parser.image.downsample;
 
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
+import org.jpedal.images.SamplingFactory;
+import org.jpedal.parser.image.PdfImageTypes;
 import org.jpedal.parser.image.data.ImageData;
 
 /**
- *
  * @author markee
  */
 public class DownSampler {
-    
-    
+
     public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData,
-                                                    final ImageData imageData, final byte[] maskCol, final int sampling) {
-        
-        if(sampling>1){ //safety check
-            
+                                                    ImageData imageData, final byte[] maskCol, final int sampling) {
+
+        if (sampling > 1) { //safety check
+
             imageData.setIsDownsampled(true);
 
-            byte[] index=decodeColorData.getIndexedMap();
+            byte[] index = decodeColorData.getIndexedMap();
 
-            if(imageData.getDepth()==1 && (decodeColorData.getID()!=ColorSpaces.DeviceRGB || index==null)){
+            if (imageData.getDepth() == 1 && (decodeColorData.getID() != ColorSpaces.DeviceRGB || index == null)) {
 
+                imageData.setImageType(PdfImageTypes.Binary);
                 //make 1 bit indexed flat
-
-                if(index!=null) {
+                if (index != null) {
                     index = decodeColorData.convertIndexToRGB(index);
-                    decodeColorData.setIndex(index, index.length/3);
-                    decodeColorData=OneBitDownSampler.downSampleIndexed(sampling, imageData, index, decodeColorData);
+                    decodeColorData.setIndex(index, index.length / 3);
+                    decodeColorData = OneBitDownSampler.downSampleIndexed(sampling, imageData, index, decodeColorData);
 
-                }else if(maskCol!=null){
-                    decodeColorData=OneBitDownSampler.downSampleMask(sampling, imageData, maskCol, decodeColorData);
-                }else{
-                    decodeColorData=OneBitDownSampler.downSample(sampling, imageData, decodeColorData);
+                } else if (maskCol != null) {
+                    decodeColorData = OneBitDownSampler.downSampleMask(sampling, imageData, maskCol, decodeColorData);
+                } else {
+                    decodeColorData = OneBitDownSampler.downSample(sampling, imageData, decodeColorData);
                 }
-            }else if(imageData.getDepth()==8){
-                decodeColorData=EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
+            } else if (imageData.getDepth() == 8) {
+                decodeColorData = EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
+            }
+
+            if (SamplingFactory.kernelSharpen && imageData.getImageType().equals(PdfImageTypes.Binary)) {
+                imageData = KernelUtils.applyKernel(imageData);
             }
 
         }

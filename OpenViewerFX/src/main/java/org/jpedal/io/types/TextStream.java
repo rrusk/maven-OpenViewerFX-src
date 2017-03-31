@@ -33,8 +33,10 @@
 package org.jpedal.io.types;
 
 import org.jpedal.exception.PdfSecurityException;
+
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
+
 import org.jpedal.io.ObjectUtils;
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.security.DecryptionFactory;
@@ -46,43 +48,43 @@ import org.jpedal.utils.LogWriter;
  *
  */
 public class TextStream {
-    
+
     public static int readTextStream(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
-        
-            
+
+
         byte[] data;
-        try{
-            if(raw[i]!='<' && raw[i]!='(') {
+        try {
+            if (raw[i] != '<' && raw[i] != '(') {
                 i++;
             }
 
-            i=StreamReaderUtils.skipSpaces(raw,i);
+            i = StreamReaderUtils.skipSpaces(raw, i);
 
             //get next key to see if indirect
-            final boolean isRef=raw[i]!='<' && raw[i]!='(';
+            final boolean isRef = raw[i] != '<' && raw[i] != '(';
 
-            int j=i;
-            data=raw;
-            if(isRef){
+            int j = i;
+            data = raw;
+            if (isRef) {
 
                 final int[] values = StreamReaderUtils.readRefFromStream(raw, i);
                 final int number = values[0];
                 final int generation = values[1];
 
-                i=StreamReaderUtils.skipSpaces(raw,values[2]);
+                i = StreamReaderUtils.skipSpaces(raw, values[2]);
 
-                if(raw[i]!=82){ //we are expecting R to end ref
+                if (raw[i] != 82) { //we are expecting R to end ref
                     return raw.length;
                 }
 
                 //read the Dictionary data
-                data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
+                data = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
 
                 //allow for data in Linear object not yet loaded
-                if(data==null){
+                if (data == null) {
                     pdfObject.setFullyResolved(false);
 
-                    if(debugFastCode) {
+                    if (debugFastCode) {
                         System.out.println(padding + "Data not yet loaded");
                     }
 
@@ -92,69 +94,69 @@ public class TextStream {
                 }
 
                 //lose obj at start
-                if(data[0]=='('){
-                    j=0;
-                }else{
-                    j=3;
-                    while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111) {
+                if (data[0] == '(') {
+                    j = 0;
+                } else {
+                    j = 3;
+                    while (data[j - 1] != 106 && data[j - 2] != 98 && data[j - 3] != 111) {
                         j++;
                     }
 
-                    j=StreamReaderUtils.skipSpaces(data,j);
-                }               
+                    j = StreamReaderUtils.skipSpaces(data, j);
+                }
             }
 
             //move to start
-            while(data[j]!='(' && data[j]!='<'){
+            while (data[j] != '(' && data[j] != '<') {
                 j++;
             }
 
-            int start=j;
+            int start = j;
 
             j = skipToEnd(data, j);
 
             byte[] newString;
 
-            if(data[start]=='<'){
+            if (data[start] == '<') {
                 start++;
 
-                final int byteCount=(j-start)>>1;
-                newString=new byte[byteCount];
+                final int byteCount = (j - start) >> 1;
+                newString = new byte[byteCount];
 
-                int byteReached=0,topHex,bottomHex;
-                while(true){
+                int byteReached = 0, topHex, bottomHex;
+                while (true) {
 
-                    if(start==j) {
+                    if (start == j) {
                         break;
                     }
 
-                    start=StreamReaderUtils.skipSpaces(data,start);
+                    start = StreamReaderUtils.skipSpaces(data, start);
 
-                    topHex=toNumber(data[start]);
+                    topHex = toNumber(data[start]);
 
-                    start=StreamReaderUtils.skipSpaces(data,start+1);
+                    start = StreamReaderUtils.skipSpaces(data, start + 1);
 
-                    bottomHex=toNumber(data[start]);
+                    bottomHex = toNumber(data[start]);
 
                     start++;
 
                     //calc total
-                    newString[byteReached] = (byte)(bottomHex+(topHex<<4));
+                    newString[byteReached] = (byte) (bottomHex + (topHex << 4));
 
                     byteReached++;
 
                 }
 
-            }else{
+            } else {
                 //roll past (
-                if(data[start]=='(') {
+                if (data[start] == '(') {
                     start++;
                 }
 
                 boolean lbKeepReturns = false;
-                switch ( PDFkeyInt ) {
+                switch (PDFkeyInt) {
                     case PdfDictionary.Contents:
-                        lbKeepReturns = pdfObject.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.FreeText;
+                        lbKeepReturns = pdfObject.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.FreeText;
                         break;
                     case PdfDictionary.ID:
                         lbKeepReturns = true;
@@ -166,16 +168,16 @@ public class TextStream {
                         break;
                 }
 
-                newString = ObjectUtils.readEscapedValue(j,data, start,lbKeepReturns);
+                newString = ObjectUtils.readEscapedValue(j, data, start, lbKeepReturns);
             }
 
-            if(pdfObject.getObjectType()!= PdfDictionary.Encrypt && pdfObject.getObjectType()!= PdfDictionary.MCID){
+            if (pdfObject.getObjectType() != PdfDictionary.Encrypt && pdfObject.getObjectType() != PdfDictionary.MCID) {
 
                 try {
-                    if(!pdfObject.isInCompressedStream() || PDFkeyInt==PdfDictionary.Name || PDFkeyInt==PdfDictionary.Reason || PDFkeyInt==PdfDictionary.Location || PDFkeyInt==PdfDictionary.M){
-                        final DecryptionFactory decryption=objectReader.getDecryptionObject();
+                    if (!pdfObject.isInCompressedStream() || PDFkeyInt == PdfDictionary.Name || PDFkeyInt == PdfDictionary.Reason || PDFkeyInt == PdfDictionary.Location || PDFkeyInt == PdfDictionary.M) {
+                        final DecryptionFactory decryption = objectReader.getDecryptionObject();
 
-                        if(decryption!=null) {
+                        if (decryption != null) {
                             newString = decryption.decryptString(newString, pdfObject.getObjectRefAsString());
                         }
                     }
@@ -186,45 +188,45 @@ public class TextStream {
 
             pdfObject.setTextStreamValue(PDFkeyInt, newString);
 
-            if(debugFastCode) {
+            if (debugFastCode) {
                 System.out.println(padding + "TextStream=" + new String(newString) + " in pdfObject=" + pdfObject);
             }
-            
-            if(!isRef) {
+
+            if (!isRef) {
                 i = j;
             }
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-        
+
         return i;
     }
 
     static int skipToEnd(final byte[] data, int j) {
 
-        final byte startChar=data[j];
+        final byte startChar = data[j];
 
         //move to end (allow for ((text in brackets))
-        int bracketCount=1;
-        while(j<data.length){
+        int bracketCount = 1;
+        while (j < data.length) {
 
             j++;
 
-            if(startChar=='(' && (data[j]==')' || data[j]=='(') && !ObjectUtils.isEscaped(data, j)){
+            if (startChar == '(' && (data[j] == ')' || data[j] == '(') && !ObjectUtils.isEscaped(data, j)) {
                 //allow for non-escaped brackets
-                if(data[j]=='(') {
+                if (data[j] == '(') {
                     bracketCount++;
-                } else if(data[j]==')') {
+                } else if (data[j] == ')') {
                     bracketCount--;
                 }
 
-                if(bracketCount==0) {
+                if (bracketCount == 0) {
                     break;
                 }
             }
 
-            if(startChar=='<' && (data[j]=='>' || data[j]==0)) {
+            if (startChar == '<' && (data[j] == '>' || data[j] == 0)) {
                 break;
             }
         }
@@ -233,11 +235,11 @@ public class TextStream {
 
     private static int toNumber(int rawVal) {
 
-        if(rawVal >='A' && rawVal <='F'){
+        if (rawVal >= 'A' && rawVal <= 'F') {
             rawVal -= 55;
-        }else if(rawVal >='a' && rawVal <='f'){
+        } else if (rawVal >= 'a' && rawVal <= 'f') {
             rawVal -= 87;
-        }else if(rawVal >='0' && rawVal <='9'){
+        } else if (rawVal >= '0' && rawVal <= '9') {
             rawVal -= 48;
         }
 
@@ -245,18 +247,18 @@ public class TextStream {
     }
 
     public static int setTextStreamValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
-        
-        if(raw[i+1]==40 && raw[i+2]==41){ //allow for empty stream
+
+        if (raw[i + 1] == 40 && raw[i + 2] == 41) { //allow for empty stream
             i += 3;
             pdfObject.setTextStreamValue(PDFkeyInt, new byte[1]);
-            
-            if(raw[i]=='/') {
+
+            if (raw[i] == '/') {
                 i--;
             }
-        }else {
+        } else {
             i = TextStream.readTextStream(pdfObject, i, raw, PDFkeyInt, objectReader);
         }
-        
+
         return i;
     }
 }

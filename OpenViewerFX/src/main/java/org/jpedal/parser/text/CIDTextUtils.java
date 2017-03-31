@@ -39,11 +39,10 @@ import org.jpedal.fonts.tt.FontFile2;
 import org.jpedal.parser.ParserOptions;
 
 /**
- *
  * @author markee
  */
 public class CIDTextUtils {
-    
+
     static int getCIDCharValues(int i, final byte[] stream, final int streamLength, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions) {
         
         /*
@@ -52,110 +51,110 @@ public class CIDTextUtils {
          * (ie is there a 0 x 0y pattern)
          * (or do the 2 values on their own form valid settings)
          */
-        final boolean debug=false;
-        
-        float actualWidth=0;
-        
+        final boolean debug = false;
+
+        float actualWidth = 0;
+
         //lazy init if needed
-        if(StandardFonts.CMAP==null){
+        if (StandardFonts.CMAP == null) {
             StandardFonts.readCMAP();
         }
-        
-        int firstVal=glyphData.getRawInt();
+
+        int firstVal = glyphData.getRawInt();
         final String firstValue;
-        String newValue=null;
+        String newValue = null;
 
         //System.out.println(">>"+Integer.toHexString(firstVal));
 
         //if escaped roll on
-        if(firstVal==92){
-            
+        if (firstVal == 92) {
+
             i++;
-            
-            firstVal= stream[i] & 255;
-            
+
+            firstVal = stream[i] & 255;
+
             if ((streamLength > (i + 2)) && (Character.isDigit((char) stream[i]))) {
-                
+
                 //see how long number is
                 int numberCount = 1;
-                if (Character.isDigit((char)  stream[i+1])) {
+                if (Character.isDigit((char) stream[i + 1])) {
                     numberCount++;
-                    if (Character.isDigit((char)  stream[i+2])) {
+                    if (Character.isDigit((char) stream[i + 2])) {
                         numberCount++;
                     }
                 }
-                
+
                 // convert octal escapes
                 firstVal = TD.readEscapeValue(i, numberCount, 8, stream);
                 i = i + numberCount - 1;
-                
+
                 if (firstVal > 255) {
                     firstVal -= 256;
                 }
-                
-            }else if (firstVal == 'u') { //convert unicode of format uxxxx to char value
+
+            } else if (firstVal == 'u') { //convert unicode of format uxxxx to char value
                 firstVal = TD.readEscapeValue(i + 1, 4, 16, stream);
                 i += 4;
-                
+
             } else {
-                
+
                 firstVal = convertEscapeChar(firstVal);
             }
-            
+
             glyphData.setRaw(firstVal);
-            
-        }else{
-            firstVal=glyphData.getRawChar();
+
+        } else {
+            firstVal = glyphData.getRawChar();
         }
-        
+
         //get as 1 byte value
         firstValue = StandardFonts.CMAP[glyphData.getRawChar()];
-        
-        if(debug) {
-            System.out.println("1 byte values=" + (int) glyphData.getRawChar() + " val=" + firstValue + " isDouble=" + currentFontData.isCIDFont() + " currentFontData.hasDoubleBytes=" + currentFontData.hasDoubleBytes+ ' ' +currentFontData.isDoubleBytes());//+" "+(char)stream[i-2]+" "+(char)stream[i-1]+" "+(char)stream[i]+" "+(char)stream[i+1]+" "+(char)stream[i+2]+" "+(char)stream[i+3]);
+
+        if (debug) {
+            System.out.println("1 byte values=" + (int) glyphData.getRawChar() + " val=" + firstValue + " isDouble=" + currentFontData.isCIDFont() + " currentFontData.hasDoubleBytes=" + currentFontData.hasDoubleBytes + ' ' + currentFontData.isDoubleBytes()); //+" "+(char)stream[i-2]+" "+(char)stream[i-1]+" "+(char)stream[i]+" "+(char)stream[i+1]+" "+(char)stream[i+2]+" "+(char)stream[i+3]);
         }
         
         /*
          * read second byte if needed (we always read first time to see if double byte or single)
          */
-        final boolean isEmbedded =currentFontData.isFontEmbedded;
-        
+        final boolean isEmbedded = currentFontData.isFontEmbedded;
+
         //also check if mapped in Charstring
         //separates out
         // PDFdata/baseline_screens/customersDec2012/5771020130000784D.pdf and
         //PDFdata/sample_pdfs_html/general/JavaMagazine glassfish article.pdf
-        final boolean hasCharString=glyphData.getRawInt()>0 && currentFontData.CMapName!=null && currentFontData.getFontType()==StandardFonts.CIDTYPE0 && currentFontData.getGlyphData().getCharStrings().containsKey(String.valueOf(glyphData.getRawInt()));
-        
+        final boolean hasCharString = glyphData.getRawInt() > 0 && currentFontData.CMapName != null && currentFontData.getFontType() == StandardFonts.CIDTYPE0 && currentFontData.getGlyphData().getCharStrings().containsKey(String.valueOf(glyphData.getRawInt()));
+
         //ignore this case
-        if(currentFontData.CMapName!=null && currentFontData.CMapName.equals("OneByteIdentityH")){
+        if (currentFontData.CMapName != null && currentFontData.CMapName.equals("OneByteIdentityH")) {
             //System.out.println(currentFontData.CMapName);
-            
-        }else if(!hasCharString && (currentFontData.hasDoubleBytes || firstValue==null || currentFontData.isDoubleBytes()!=0 || (glyphData.getRawInt()>128 && glyphData.getRawInt()!=233))){
-            
+
+        } else if (!hasCharString && (currentFontData.hasDoubleBytes || firstValue == null || currentFontData.isDoubleBytes() != 0 || (glyphData.getRawInt() > 128 && glyphData.getRawInt() != 233))) {
+
             //flag incase we are wrong and need to switch back
-            final int iBefore=i;
-            
+            final int iBefore = i;
+
             i++;
-            
-            int secondVal= stream[i] & 255;
-            
-            boolean secondByteIsEscaped=false;
-            
+
+            int secondVal = stream[i] & 255;
+
+            boolean secondByteIsEscaped = false;
+
             //if escaped roll on as workaround hack
-            if(stream[i]==92){
+            if (stream[i] == 92) {
                 i++;
-                
-                secondByteIsEscaped=true;
-                
-                if(glyphData.getRawInt()==0){
-                    while(stream[i]==13 || (stream[i]==92 && stream[i-1]==13)){ //allow for garbage in stream
+
+                secondByteIsEscaped = true;
+
+                if (glyphData.getRawInt() == 0) {
+                    while (stream[i] == 13 || (stream[i] == 92 && stream[i - 1] == 13)) { //allow for garbage in stream
                         i++;
                     }
                 }
-                secondVal=stream[i] & 255;
-                
+                secondVal = stream[i] & 255;
+
                 if ((streamLength > (i + 2)) && (Character.isDigit((char) stream[i]))) {
-                    
+
                     //see how long number is
                     int numberCount = 1;
                     if (Character.isDigit((char) stream[i + 1])) {
@@ -164,143 +163,143 @@ public class CIDTextUtils {
                             numberCount++;
                         }
                     }
-                    
+
                     // convert octal escapes
                     secondVal = TD.readEscapeValue(i, numberCount, 8, stream);
                     i = i + numberCount - 1;
-                    
+
                     if (secondVal > 255) {
                         secondVal -= 256;
                     }
-                    
-                }else if (secondVal == 'u') { //convert unicode of format uxxxx to char value
+
+                } else if (secondVal == 'u') { //convert unicode of format uxxxx to char value
                     secondVal = TD.readEscapeValue(i + 1, 4, 16, stream);
                     i += 4;
-                    
+
                 } else {
-                    
+
                     secondVal = convertEscapeChar(secondVal);
                 }
             }
-            
-            final int secondByte=secondVal;
-            
-            final char combinedVal=(char)((glyphData.getRawChar()<<8)+secondVal);
-            
+
+            final int secondByte = secondVal;
+
+            final char combinedVal = (char) ((glyphData.getRawChar() << 8) + secondVal);
+
             //lookup in 2 byte version
             newValue = StandardFonts.CMAP[combinedVal];
-            
-            int isDouble=-1;
-            
+
+            int isDouble = -1;
+
             //if CIDtoGID use that first to see if double byte
-            if(currentFontData.isCIDFont() && currentFontData.getGlyphData().getTable(FontFile2.CMAP)==null){
-                final int first=currentFontData.getEncodedCMAPValue(firstVal);
-                final int second=currentFontData.getEncodedCMAPValue(secondVal);
-                final int combined=currentFontData.getEncodedCMAPValue(combinedVal);
-                if(combined<=0 && (first>0 || second>0)){
-                    newValue=null;
-                    isDouble=0;
+            if (currentFontData.isCIDFont() && currentFontData.getGlyphData().getTable(FontFile2.CMAP) == null) {
+                final int first = currentFontData.getEncodedCMAPValue(firstVal);
+                final int second = currentFontData.getEncodedCMAPValue(secondVal);
+                final int combined = currentFontData.getEncodedCMAPValue(combinedVal);
+                if (combined <= 0 && (first > 0 || second > 0)) {
+                    newValue = null;
+                    isDouble = 0;
                 }
             }
-            
-            if(isDouble==-1){
-                isDouble=currentFontData.isDoubleBytes(firstVal,secondByte, secondByteIsEscaped);
+
+            if (isDouble == -1) {
+                isDouble = currentFontData.isDoubleBytes(firstVal, secondByte, secondByteIsEscaped);
             }
-            
-            if(debug) {
+
+            if (debug) {
                 System.out.println("2 byte values=" + newValue + ' ' + " isDouble=" + isDouble + ' ' + combinedVal + ' ' + firstValue);
             }
-            
+
             //if no 2 byte value either default to 1 byte
-            if(isEmbedded  && (isDouble==1 || combinedVal<256 || newValue!=null)){// || (!secondByteIsEscaped && secondByte!=')'))){
+            if (isEmbedded && (isDouble == 1 || combinedVal < 256 || newValue != null)) { // || (!secondByteIsEscaped && secondByte!=')'))){
                 glyphData.setRawInt(combinedVal);
                 glyphData.setRawChar(combinedVal);
-                
-                if(debug) {
+
+                if (debug) {
                     System.out.println("use 2 values=" + Integer.toHexString(combinedVal) + " new value=" + newValue + " isEmbedded=" + isEmbedded + ' ' + (!secondByteIsEscaped && secondByte != ')'));
                 }
-                
-            }else if(!isEmbedded && isDouble==1 &&(newValue!=null || combinedVal<256 || (!secondByteIsEscaped && secondByte!=')'))){
+
+            } else if (!isEmbedded && isDouble == 1 && (newValue != null || combinedVal < 256 || (!secondByteIsEscaped && secondByte != ')'))) {
                 glyphData.setRawInt(combinedVal);
                 glyphData.setRawChar(combinedVal);
-                
-                if(debug) {
+
+                if (debug) {
                     System.out.println("use 2 values=" + combinedVal + ' ' + newValue);
                 }
-                
-            }else if(isDouble==0 && !isEmbedded && firstVal>128 && newValue!=null && firstValue==null){
+
+            } else if (isDouble == 0 && !isEmbedded && firstVal > 128 && newValue != null && firstValue == null) {
                 glyphData.setRawInt(combinedVal);
                 glyphData.setRawChar(combinedVal);
-                
-                if(debug) {
+
+                if (debug) {
                     System.out.println("TEST2 " + newValue + ' ' + StandardFonts.CMAP[secondByte]);
                 }
-                
-            }else if(isDouble==0 && !isEmbedded && firstVal>128 && newValue==null && firstValue!=null){
-                
-                i=iBefore;
+
+            } else if (isDouble == 0 && !isEmbedded && firstVal > 128 && newValue == null && firstValue != null) {
+
+                i = iBefore;
                 //glyphData.rawInt=combinedVal;
                 //rawChar=(char)f;
                 // newValue = String.valueOf(rawChar);
-                newValue=firstValue;
-                if(debug) {
+                newValue = firstValue;
+                if (debug) {
                     System.out.println("TEST2 " + newValue + ' ' + StandardFonts.CMAP[secondByte]);
                 }
-                
-            }else{
-                i=iBefore;
-                
-                if(debug) {
+
+            } else {
+                i = iBefore;
+
+                if (debug) {
                     System.out.println("reset " + newValue + ' ' + StandardFonts.CMAP[secondByte]);
                 }
             }
-            
-            if(!isEmbedded){
+
+            if (!isEmbedded) {
                 actualWidth = currentFontData.getDefaultWidth(glyphData.getRawInt());
-                
-                if(actualWidth==-1){
+
+                if (actualWidth == -1) {
                     actualWidth = currentFontData.getDefaultWidth(-1);
                 }
             }
-            
-        }else{
-            
-            actualWidth =-1;
-            
-            if((!isEmbedded) &&
-                (currentFontData.getFontType()==StandardFonts.CIDTYPE0 || currentFontData.getFontType()==StandardFonts.CIDTYPE2)){
-                    actualWidth = currentFontData.getDefaultWidth(glyphData.getRawInt());
-                    
-                    if(actualWidth==-1){
-                        actualWidth = currentFontData.getDefaultWidth(-1)/2;
-                    }
+
+        } else {
+
+            actualWidth = -1;
+
+            if ((!isEmbedded) &&
+                    (currentFontData.getFontType() == StandardFonts.CIDTYPE0 || currentFontData.getFontType() == StandardFonts.CIDTYPE2)) {
+                actualWidth = currentFontData.getDefaultWidth(glyphData.getRawInt());
+
+                if (actualWidth == -1) {
+                    actualWidth = currentFontData.getDefaultWidth(-1) / 2;
                 }
             }
-        
-        
+        }
+
+
         glyphData.setActualWidth(actualWidth);
-        
+
         //if no value ignore for moment
-        if(newValue!=null){
+        if (newValue != null) {
             glyphData.setDisplayValue(newValue);
-        }else{  //default if no value
+        } else {  //default if no value
             glyphData.setDisplayValue(String.valueOf(glyphData.getRawChar()));
         }
-        
-        if(parserOptions.isTextExtracted()){ //(not sure if this is correct - may need more samples)
+
+        if (parserOptions.isTextExtracted()) { //(not sure if this is correct - may need more samples)
             glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), glyphData.getRawChar()));
         }
-        
+
         //fix for \\) at end of stream
-        if(glyphData.getRawChar()==92) {
+        if (glyphData.getRawChar() == 92) {
             glyphData.setValueForHTML(92);
-            glyphData.setRawChar((char)120);
+            glyphData.setRawChar((char) 120);
         }
-        
-        if(debug) {
+
+        if (debug) {
             System.out.println("returns =" + glyphData.getDisplayValue() + ' ' + glyphData.getUnicodeValue() + " int=" + glyphData.getRawInt() + " actualWidth=" + actualWidth);
         }
-        
+
         return i;
     }
 

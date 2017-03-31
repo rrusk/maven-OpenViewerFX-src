@@ -42,17 +42,21 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.imageio.ImageIO;
+
 import static org.jpedal.examples.viewer.gui.GUI.*;
+
 import org.jpedal.utils.LogWriter;
 
 /**
  * This class controls everything to do with Swing Cursor objects
  */
 public class SwingCursor {
-    
+
     private String iconLocation = "/org/jpedal/examples/viewer/res/";
-    
-    /** grabbing cursor */
+
+    /**
+     * grabbing cursor
+     */
     private Cursor grabCursor;
     private Cursor grabbingCursor;
     private Cursor panCursor;
@@ -64,9 +68,10 @@ public class SwingCursor {
     private Cursor panCursorBR;
     private Cursor panCursorB;
     private Cursor panCursorBL;
-    
+
     /**
      * Get a stored Cursor
+     *
      * @param type in value specifying the cursor type
      * @return Cursor object for the specified type
      */
@@ -75,88 +80,88 @@ public class SwingCursor {
             case GRAB_CURSOR:
                 if (grabCursor == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"grab32.png"));
-                    grabCursor = kit.createCustomCursor(img, new Point(8,8),"grab");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "grab32.png"));
+                    grabCursor = kit.createCustomCursor(img, new Point(8, 8), "grab");
                 }
                 return grabCursor;
 
             case GRABBING_CURSOR:
                 if (grabbingCursor == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"grabbing32.png"));
-                    grabbingCursor = kit.createCustomCursor(img, new Point(8,8),"grabbing");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "grabbing32.png"));
+                    grabbingCursor = kit.createCustomCursor(img, new Point(8, 8), "grabbing");
                 }
                 return grabbingCursor;
 
             case PAN_CURSOR:
                 if (panCursor == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"pan32.png"));
-                    panCursor = kit.createCustomCursor(img, new Point(10,10),"pan");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "pan32.png"));
+                    panCursor = kit.createCustomCursor(img, new Point(10, 10), "pan");
                 }
                 return panCursor;
 
             case PAN_CURSORL:
                 if (panCursorL == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"panl32.png"));
-                    panCursorL = kit.createCustomCursor(img, new Point(11,10),"panl");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "panl32.png"));
+                    panCursorL = kit.createCustomCursor(img, new Point(11, 10), "panl");
                 }
                 return panCursorL;
 
             case PAN_CURSORTL:
                 if (panCursorTL == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"pantl32.png"));
-                    panCursorTL = kit.createCustomCursor(img, new Point(10,10),"pantl");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "pantl32.png"));
+                    panCursorTL = kit.createCustomCursor(img, new Point(10, 10), "pantl");
                 }
                 return panCursorTL;
 
             case PAN_CURSORT:
                 if (panCursorT == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"pant32.png"));
-                    panCursorT = kit.createCustomCursor(img, new Point(10,11),"pant");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "pant32.png"));
+                    panCursorT = kit.createCustomCursor(img, new Point(10, 11), "pant");
                 }
                 return panCursorT;
 
             case PAN_CURSORTR:
                 if (panCursorTR == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"pantr32.png"));
-                    panCursorTR = kit.createCustomCursor(img, new Point(10,10),"pantr");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "pantr32.png"));
+                    panCursorTR = kit.createCustomCursor(img, new Point(10, 10), "pantr");
                 }
                 return panCursorTR;
 
             case PAN_CURSORR:
                 if (panCursorR == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"panr32.png"));
-                    panCursorR = kit.createCustomCursor(img, new Point(10,10),"panr");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "panr32.png"));
+                    panCursorR = kit.createCustomCursor(img, new Point(10, 10), "panr");
                 }
                 return panCursorR;
 
             case PAN_CURSORBR:
                 if (panCursorBR == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"panbr32.png"));
-                    panCursorBR = kit.createCustomCursor(img, new Point(10,10),"panbr");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "panbr32.png"));
+                    panCursorBR = kit.createCustomCursor(img, new Point(10, 10), "panbr");
                 }
                 return panCursorBR;
 
             case PAN_CURSORB:
                 if (panCursorB == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"panb32.png"));
-                    panCursorB = kit.createCustomCursor(img, new Point(10,10),"panb");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "panb32.png"));
+                    panCursorB = kit.createCustomCursor(img, new Point(10, 10), "panb");
                 }
                 return panCursorB;
 
             case PAN_CURSORBL:
                 if (panCursorBL == null) {
                     final Toolkit kit = Toolkit.getDefaultToolkit();
-                    final Image img = kit.getImage(getURLForImage(iconLocation+"panbl32.png"));
-                    panCursorBL = kit.createCustomCursor(img, new Point(10,10),"panbl");
+                    final Image img = kit.getImage(getURLForImage(iconLocation + "panbl32.png"));
+                    panCursorBL = kit.createCustomCursor(img, new Point(10, 10), "panbl");
                 }
                 return panCursorBL;
 
@@ -165,68 +170,71 @@ public class SwingCursor {
 
         }
     }
-    
+
     /**
      * Specify the location to be used for cursor images
+     *
      * @param location String value presenting the directory that holds the cursor images
      */
-    public void setIconLocation(final String location){
+    public void setIconLocation(final String location) {
         iconLocation = location;
     }
-    
+
     /**
      * Retrieve the URL of the actual image to use f
+     *
      * @param path Preferred name and location
      * @return URL of file to use
      */
     public URL getURLForImage(String path) {
-        
+
         path = iconLocation + path;
-        
-        final String file = path.substring(path.lastIndexOf('/')+1);
+
+        final String file = path.substring(path.lastIndexOf('/') + 1);
         URL url;
-        
+
         //Check if file location provided
-        path = path.substring(0, path.indexOf('.'))+".gif";
+        path = path.substring(0, path.indexOf('.')) + ".gif";
         File p = new File(path);
         url = getClass().getResource(path);
 
         //It's a file location check for gif
-        if(p.exists()){
-        	try {
-        		url = p.toURI().toURL();
-        	} catch (final MalformedURLException e) {
-        		LogWriter.writeLog("Exception attempting get path for image " + e);
+        if (p.exists()) {
+            try {
+                url = p.toURI().toURL();
+            } catch (final MalformedURLException e) {
+                LogWriter.writeLog("Exception attempting get path for image " + e);
             }
         }
 
-        if(url==null){
-        	 path = path.substring(0, path.indexOf('.'))+".png";
-        	 p = new File(path);
-             url = getClass().getResource(path);
+        if (url == null) {
+            path = path.substring(0, path.indexOf('.')) + ".png";
+            p = new File(path);
+            url = getClass().getResource(path);
 
-           //It's a file location check for png
-        	 if(p.exists()){
-             	try {
-             		url = p.toURI().toURL();
-             	} catch (final MalformedURLException e) {
-             		LogWriter.writeLog("Exception attempting get path for image " + e);
+            //It's a file location check for png
+            if (p.exists()) {
+                try {
+                    url = p.toURI().toURL();
+                } catch (final MalformedURLException e) {
+                    LogWriter.writeLog("Exception attempting get path for image " + e);
                 }
             }
         }
 
-        if(url!=null){
-			return url;
-		}else{ //use default graphic
-            
-			 path = "/org/jpedal/examples/viewer/res/" +file;
-             url = getClass().getResource(path);
-			 return url;
+        if (url != null) {
+            return url;
+        } else { //use default graphic
+
+            path = "/org/jpedal/examples/viewer/res/" + file;
+            url = getClass().getResource(path);
+            return url;
         }
     }
-    
+
     /**
      * Get the cursor image as a buffered image for use in FX code
+     *
      * @param type int value representing the cursor type
      * @return BufferedImage of the image to use for the cursor
      */
@@ -237,8 +245,8 @@ public class SwingCursor {
                     return ImageIO.read(getURLForImage("grab32.png"));
                 } catch (final Exception e) {
 
-                    LogWriter.writeLog("Exception in getting image "+e);
-                    
+                    LogWriter.writeLog("Exception in getting image " + e);
+
                     return null;
                 }
             case GRABBING_CURSOR:
@@ -246,13 +254,13 @@ public class SwingCursor {
                     return ImageIO.read(getURLForImage("grabbing32.png"));
                 } catch (final Exception e) {
 
-                    LogWriter.writeLog("Exception in getting image "+e);
-                    
+                    LogWriter.writeLog("Exception in getting image " + e);
+
                     return null;
                 }
             default:
                 return null;
         }
     }
-    
+
 }

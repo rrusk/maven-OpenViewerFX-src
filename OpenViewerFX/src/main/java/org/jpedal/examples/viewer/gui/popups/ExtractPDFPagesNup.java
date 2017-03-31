@@ -40,6 +40,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import javax.print.attribute.standard.PageRanges;
 import javax.swing.*;
+
 import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.examples.viewer.utils.ItextFunctions;
 import org.jpedal.utils.LogWriter;
@@ -105,9 +106,9 @@ public class ExtractPDFPagesNup extends Save {
      * Create an interface to set the required values for N-upping the current
      * document
      *
-     * @param root_dir String representing the root directory to be displayed
-     * when saving
-     * @param end_page The last page in the document (page count)
+     * @param root_dir    String representing the root directory to be displayed
+     *                    when saving
+     * @param end_page    The last page in the document (page count)
      * @param currentPage The current displayed page
      */
     public ExtractPDFPagesNup(final String root_dir, final int end_page, final int currentPage) {

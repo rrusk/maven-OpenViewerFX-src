@@ -42,6 +42,7 @@ public interface CustomMessageHandler {
     /**
      * Allow user to add own action to all dialog messages
      * and also bypass dialog messages
+     *
      * @param message
      * @return true if you still want message displayed
      */
@@ -64,6 +65,7 @@ public interface CustomMessageHandler {
     /**
      * Allow user to add own action to all dialog messages
      * and also bypass dialog messages
+     *
      * @param args
      * @return null if you still want input requested and used
      */
@@ -81,6 +83,7 @@ public interface CustomMessageHandler {
     /**
      * Allow user to add own action to all dialog messages
      * and also bypass dialog messages
+     *
      * @param args
      * @return int value returnd by JOptionPane.showConfirmDialog -1 to popup JPedal menu
      */

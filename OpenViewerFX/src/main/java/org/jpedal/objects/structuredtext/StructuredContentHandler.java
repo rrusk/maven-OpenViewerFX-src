@@ -34,6 +34,7 @@ package org.jpedal.objects.structuredtext;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.render.DynamicVectorRenderer;
@@ -46,16 +47,22 @@ import org.w3c.dom.Node;
  */
 public class StructuredContentHandler {
 
-    /**store entries from BMC*/
+    /**
+     * store entries from BMC
+     */
     private final Map<Integer, String> markedContentProperties;
 
-    /**handle nested levels of marked content*/
+    /**
+     * handle nested levels of marked content
+     */
     int markedContentLevel;
 
-    /**stream of marked content*/
+    /**
+     * stream of marked content
+     */
     private StringBuffer markedContentSequence;
 
-    private static final boolean debug=false;
+    private static final boolean debug = false;
 
     private boolean contentExtracted;
 
@@ -63,60 +70,60 @@ public class StructuredContentHandler {
 
     final Map<Integer, String> keys;
     final Map<String, PdfObject> dictionaries;
-    Map<String,String> values;
+    Map<String, String> values;
 
     final boolean buildDirectly;
-    
+
     DynamicVectorRenderer current;
 
     Document doc;
 
     Element root;
 
-	//private float x1,y1,x2,y2;
+    //private float x1,y1,x2,y2;
     boolean isHTML;
-    
+
     public StructuredContentHandler(final Object markedContent) {
 
         //build either tree of lookuptable
-        if(markedContent instanceof Map){
-        	buildDirectly=false;
-            values=(Map<String, String>)markedContent;
-        }else{
-            buildDirectly=true;
-            doc=(Document)markedContent;
+        if (markedContent instanceof Map) {
+            buildDirectly = false;
+            values = (Map<String, String>) markedContent;
+        } else {
+            buildDirectly = true;
+            doc = (Document) markedContent;
             root = doc.createElement("TaggedPDF-doc");
-		    doc.appendChild(root);
+            doc.appendChild(root);
         }
-        
-        if(debug) {
+
+        if (debug) {
             System.out.println("BuildDirectly=" + buildDirectly);
         }
 
         //this.currentPdfFile=currentPdfFile;
 
-        markedContentProperties=new HashMap<Integer, String>();
+        markedContentProperties = new HashMap<Integer, String>();
         markedContentLevel = 0;
 
         markedContentSequence = new StringBuffer();
 
-        currentKey="";
+        currentKey = "";
 
-        
-        keys=new HashMap<Integer, String>();
-        
-        dictionaries=new HashMap<String, PdfObject>();
+
+        keys = new HashMap<Integer, String>();
+
+        dictionaries = new HashMap<String, PdfObject>();
 
     }
 
     public void DP(final PdfObject BDCobj) {
 
-        if(debug){
-            System.out.println("DP----------------------------------------------------------"+markedContentLevel);
+        if (debug) {
+            System.out.println("DP----------------------------------------------------------" + markedContentLevel);
 
             System.out.println(BDCobj);
 
-            System.out.println("BDCobj="+BDCobj);
+            System.out.println("BDCobj=" + BDCobj);
 
         }
 
@@ -133,27 +140,27 @@ public class StructuredContentHandler {
         markedContentLevel++;
 
         //only used in direct mode and breaks non-direct code so remove
-        if(buildDirectly) {
+        if (buildDirectly) {
             BDCobj.setIntNumber(PdfDictionary.MCID, -1);
         }
-        
-        final int MCID=BDCobj.getInt(PdfDictionary.MCID);
-        
+
+        final int MCID = BDCobj.getInt(PdfDictionary.MCID);
+
         //save key
 
-        if(MCID!=-1) {
+        if (MCID != -1) {
             keys.put(markedContentLevel, String.valueOf(MCID));
         }
-        
-        dictionaries.put(String.valueOf(markedContentLevel),BDCobj);
-    	
-        
-        if(debug){
-            System.out.println("BDC----------------------------------------------------------"+markedContentLevel+" MCID="+MCID);
-            System.out.println("BDCobj="+BDCobj);
+
+        dictionaries.put(String.valueOf(markedContentLevel), BDCobj);
+
+
+        if (debug) {
+            System.out.println("BDC----------------------------------------------------------" + markedContentLevel + " MCID=" + MCID);
+            System.out.println("BDCobj=" + BDCobj);
         }
-        
-        
+
+
     }
 
 
@@ -161,44 +168,44 @@ public class StructuredContentHandler {
 
         op = setBMCvalues(op);
 
-		if(buildDirectly){
-			//read any dictionay work out type
-			//PdfObject dict=(PdfObject) dictionaries.get(currentKey);
-			//boolean isBMC=dict==null;
+        if (buildDirectly) {
+            //read any dictionay work out type
+            //PdfObject dict=(PdfObject) dictionaries.get(currentKey);
+            //boolean isBMC=dict==null;
 
-			//add node with name for BMC
-			if(op!=null){
-				//System.out.println(op+" "+root.getElementsByTagName(op));
-				Element newRoot=(Element) root.getElementsByTagName(op).item(0);
-				
-				if(newRoot==null){
-					newRoot=doc.createElement(op);
-					root.appendChild(newRoot);
-				}
-				root=newRoot;
-			}
+            //add node with name for BMC
+            if (op != null) {
+                //System.out.println(op+" "+root.getElementsByTagName(op));
+                Element newRoot = (Element) root.getElementsByTagName(op).item(0);
+
+                if (newRoot == null) {
+                    newRoot = doc.createElement(op);
+                    root.appendChild(newRoot);
+                }
+                root = newRoot;
+            }
         }
-	}
+    }
 
     String setBMCvalues(String op) {
-        
+
         //stip off /
-        if(op.startsWith("/")) {
+        if (op.startsWith("/")) {
             op = op.substring(1);
         }
-        
+
         //if start of sequence, reinitialise settings
         if (markedContentLevel == 0 && !isHTML) {
             markedContentSequence = new StringBuffer();
         }
-        markedContentProperties.put(markedContentLevel,op);
+        markedContentProperties.put(markedContentLevel, op);
         markedContentLevel++;
-        if(debug) {
+        if (debug) {
             System.out.println("BMC----------------------------------------------------------level=" + markedContentLevel + " raw op=" + op);
         }
-        
+
         //save label and any dictionary
-        keys.put(markedContentLevel,op);
+        keys.put(markedContentLevel, op);
 
         return op;
     }
@@ -206,15 +213,15 @@ public class StructuredContentHandler {
 
     public void EMC() {
 
-    	setEMCValues();
-        
-        if(buildDirectly){
+        setEMCValues();
 
-			final PdfObject BDCobj= dictionaries.get(currentKey);
-			
-			final boolean isBMC=(BDCobj==null);
-			
-			if(debug) {
+        if (buildDirectly) {
+
+            final PdfObject BDCobj = dictionaries.get(currentKey);
+
+            final boolean isBMC = (BDCobj == null);
+
+            if (debug) {
                 System.out.println(isBMC + " " + currentKey + ' ' + BDCobj + " markedContentSequence=" + markedContentSequence);
             }
 
@@ -237,71 +244,71 @@ public class StructuredContentHandler {
 //                    }
 //                }
 //            }
-            
-			//add node with name for BMC
-			if(isBMC){
-				if(currentKey!=null){
-					
-					final Node child=doc.createTextNode(stripEscapeChars(markedContentSequence.toString()));
-					
-					root.appendChild(child);
 
-					final Node oldRoot=root.getParentNode();
-					if(oldRoot instanceof Element) {
+            //add node with name for BMC
+            if (isBMC) {
+                if (currentKey != null) {
+
+                    final Node child = doc.createTextNode(stripEscapeChars(markedContentSequence.toString()));
+
+                    root.appendChild(child);
+
+                    final Node oldRoot = root.getParentNode();
+                    if (oldRoot instanceof Element) {
                         root = (Element) oldRoot;
                     }
-				}
-			}else{
-				//get root key on dictionary (should only be 1)
-				//and create node
-				//Iterator keys=dict.keySet().iterator();
-				String S="p";//(String) keys.next();
-				
+                }
+            } else {
+                //get root key on dictionary (should only be 1)
+                //and create node
+                //Iterator keys=dict.keySet().iterator();
+                String S = "p"; //(String) keys.next();
+
 
                 //System.out.println("dict="+BDCobj.getObjectRefAsString());
-                
-				if(S==null) {
+
+                if (S == null) {
                     S = "p";
                 }
 
-				final Element tag = doc.createElement(S);
-				root.appendChild(tag);
+                final Element tag = doc.createElement(S);
+                root.appendChild(tag);
 
-				//add the text
-				final Node child=doc.createTextNode(markedContentSequence.toString());
-				tag.appendChild(child);
+                //add the text
+                final Node child = doc.createTextNode(markedContentSequence.toString());
+                tag.appendChild(child);
             }
 
-			//reset
-			markedContentSequence=new StringBuffer();
+            //reset
+            markedContentSequence = new StringBuffer();
 
 
-        }else{
-        	
-        	final String ContentSequence = markedContentSequence.toString();
+        } else {
 
-        	//System.out.println(currentKey+" "+markedContentSequence);
-            if(debug) {
+            final String ContentSequence = markedContentSequence.toString();
+
+            //System.out.println(currentKey+" "+markedContentSequence);
+            if (debug) {
                 System.out.println("write out " + currentKey + " text=" + markedContentSequence + '<');
             }
-            
-            final PdfObject BDCobj= (dictionaries.get(String.valueOf(markedContentLevel)));
-            
-           // System.out.println("BDCobj="+BDCobj+" currentKey="+currentKey);
-            
-           
+
+            final PdfObject BDCobj = (dictionaries.get(String.valueOf(markedContentLevel)));
+
+            // System.out.println("BDCobj="+BDCobj+" currentKey="+currentKey);
+
+
             //reset on MCID tag
-            int MCID=-1;
-            if(BDCobj!=null) {
+            int MCID = -1;
+            if (BDCobj != null) {
                 MCID = BDCobj.getInt(PdfDictionary.MCID);
             }
-            
-            if(MCID!=-1){
-            	values.put(String.valueOf(MCID),ContentSequence);
-            	//System.out.println(MCID+" "+ContentSequence);
-                markedContentSequence=new StringBuffer();
+
+            if (MCID != -1) {
+                values.put(String.valueOf(MCID), ContentSequence);
+                //System.out.println(MCID+" "+ContentSequence);
+                markedContentSequence = new StringBuffer();
             }
-            
+
             //remove used dictionary
             dictionaries.remove(String.valueOf(markedContentLevel));
 
@@ -311,63 +318,65 @@ public class StructuredContentHandler {
             markedContentLevel--;
         }
 
-        if(debug) {
+        if (debug) {
             System.out.println("EMC----------------------------------------------------------" + markedContentLevel);
         }
 
-        
+
     }
 
     void setEMCValues() {
-        
+
         //set flag to show some content
-        contentExtracted=true;
-        
+        contentExtracted = true;
+
         // add current structure to tree
-        currentKey= keys.get(markedContentLevel);
-        
+        currentKey = keys.get(markedContentLevel);
+
         //if no MCID use current level as key
-        if(currentKey==null) {
+        if (currentKey == null) {
             currentKey = String.valueOf(markedContentLevel);
         }
-        
-        if(debug) {
+
+        if (debug) {
             System.out.println("currentKey=" + currentKey + ' ' + keys);
         }
     }
 
-    /**store the actual text in the stream*/
+    /**
+     * store the actual text in the stream
+     */
     public void setText(final StringBuffer current_value, final float x1, final float y1, final float x2, final float y2) {
 
-    	if(markedContentSequence.length()==0){
-    		markedContentSequence=current_value;
-    		
-    		//lose space at start
-    		if(markedContentSequence.length()>0 && markedContentSequence.charAt(0)==' ') {
+        if (markedContentSequence.length() == 0) {
+            markedContentSequence = current_value;
+
+            //lose space at start
+            if (markedContentSequence.length() > 0 && markedContentSequence.charAt(0) == ' ') {
                 markedContentSequence.deleteCharAt(0);
             }
-    		
-    	}else{ //add space to tidy up
-    		
-    		//char c=' ',c2=' ';
 
-    		//if(current_value.length()>0)
-    		//	c=current_value.charAt(0);
+        } else { //add space to tidy up
 
-    		//int len=markedContentSequence.length()-1;
-    		//if(len>0)
-    		//	c2=markedContentSequence.charAt(len);
+            //char c=' ',c2=' ';
 
-    		//if(c2!='-' && c!='-' && c!='.')
-    		//	markedContentSequence.append(' ');
+            //if(current_value.length()>0)
+            //	c=current_value.charAt(0);
 
-    		//System.out.println("\nbit=>"+current_value+"<");
-    		//System.out.println("whole=>"+markedContentSequence+"<");
+            //int len=markedContentSequence.length()-1;
+            //if(len>0)
+            //	c2=markedContentSequence.charAt(len);
 
-    		markedContentSequence.append(current_value);
+            //if(c2!='-' && c!='-' && c!='.')
+            //	markedContentSequence.append(' ');
 
-    	}
-    	
+            //System.out.println("\nbit=>"+current_value+"<");
+            //System.out.println("whole=>"+markedContentSequence+"<");
+
+            markedContentSequence.append(current_value);
+
+        }
+
 //    	this.x1=x1;
 //    	this.y1=y1;
 //    	this.x2=x2;
@@ -376,29 +385,27 @@ public class StructuredContentHandler {
     }
 
 
-    
-    
     //delete escape chars such as \( but allow for \\
-	private static String stripEscapeChars(final String dict) {
-		char c,lastC=' ';
-		
-		final StringBuilder str=new StringBuilder(dict);
-		int length=str.length();
-		for(int ii=0;ii<length;ii++){
-			c=str.charAt(ii);
-			if(c=='\\' && lastC!='\\'){
-				str.deleteCharAt(ii);
-				length--;
-			}
-			lastC=c;
-				
-		}
-		
-		return str.toString();
-		
-	}
+    private static String stripEscapeChars(final String dict) {
+        char c, lastC = ' ';
 
-	public boolean hasContent() {
-		return contentExtracted;
-	}
+        final StringBuilder str = new StringBuilder(dict);
+        int length = str.length();
+        for (int ii = 0; ii < length; ii++) {
+            c = str.charAt(ii);
+            if (c == '\\' && lastC != '\\') {
+                str.deleteCharAt(ii);
+                length--;
+            }
+            lastC = c;
+
+        }
+
+        return str.toString();
+
+    }
+
+    public boolean hasContent() {
+        return contentExtracted;
+    }
 }

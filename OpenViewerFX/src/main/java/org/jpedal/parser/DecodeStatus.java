@@ -37,17 +37,21 @@ package org.jpedal.parser;
  */
 public class DecodeStatus {
 
-    /**indicate if last decodePage() call had any issues*/
-    public static final int PageDecodingSuccessful=1;
+    /**
+     * indicate if last decodePage() call had any issues
+     */
+    public static final int PageDecodingSuccessful = 1;
 
-    public static final int ImagesProcessed=2;
+    public static final int ImagesProcessed = 2;
 
-    public static final int NonEmbeddedCIDFonts=4;
+    public static final int NonEmbeddedCIDFonts = 4;
 
-    public static final int YCCKImages=8;
+    public static final int YCCKImages = 8;
 
-    /**whether any fonts will almost certainly need hinting turned on*/
-    public static final int TTHintingRequired=32;
-    
-    public static final int TooManyShapes=64;
+    /**
+     * whether any fonts will almost certainly need hinting turned on
+     */
+    public static final int TTHintingRequired = 32;
+
+    public static final int TooManyShapes = 64;
 }

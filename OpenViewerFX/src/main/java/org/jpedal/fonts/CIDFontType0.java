@@ -33,6 +33,7 @@
 package org.jpedal.fonts;
 
 import java.util.Map;
+
 import org.jpedal.fonts.glyph.PdfJavaGlyphs;
 import org.jpedal.fonts.glyph.T1Glyphs;
 import org.jpedal.io.ObjectStore;
@@ -43,43 +44,49 @@ import org.jpedal.objects.raw.PdfObject;
 
 /**
  * handles truetype specifics
- *  */
+ */
 public class CIDFontType0 extends Type1C {
-    
-    /**used to display non-embedded fonts*/
+
+    /**
+     * used to display non-embedded fonts
+     */
     private CIDFontType2 subFont;
-    
-    /**get handles onto Reader so we can access the file*/
+
+    /**
+     * get handles onto Reader so we can access the file
+     */
     public CIDFontType0(final PdfObjectReader currentPdfFile, final String substituteFontFile) {
-        
-        glyphs=new T1Glyphs(true);
-        
-        isCID=true;
-        
-        isCIDFont=true;
-        TTstreamisCID=true;
+
+        glyphs = new T1Glyphs(true);
+
+        isCID = true;
+
+        isCIDFont = true;
+        TTstreamisCID = true;
         init(currentPdfFile);
-        this.currentPdfFile=currentPdfFile;
-        
-        this.substituteFontFile=substituteFontFile;
-        
+        this.currentPdfFile = currentPdfFile;
+
+        this.substituteFontFile = substituteFontFile;
+
     }
-    
-    /**read in a font and its details from the pdf file*/
+
+    /**
+     * read in a font and its details from the pdf file
+     */
     @Override
-    public void createFont(final PdfObject pdfObject, final String fontID, final boolean renderPage, final ObjectStore objectStore, final Map<String, PdfJavaGlyphs> substitutedFonts) throws Exception{
-        
-        fontTypes=StandardFonts.CIDTYPE0;
-        this.fontID=fontID;
-        
-        final PdfObject Descendent=pdfObject.getDictionary(PdfDictionary.DescendantFonts);
-        final PdfObject pdfFontDescriptor=Descendent.getDictionary(PdfDictionary.FontDescriptor);
-        
-        createCIDFont(pdfObject,Descendent);
-        
-        
-        if (pdfFontDescriptor!= null){
-            
+    public void createFont(final PdfObject pdfObject, final String fontID, final boolean renderPage, final ObjectStore objectStore, final Map<String, PdfJavaGlyphs> substitutedFonts) throws Exception {
+
+        fontTypes = StandardFonts.CIDTYPE0;
+        this.fontID = fontID;
+
+        final PdfObject Descendent = pdfObject.getDictionary(PdfDictionary.DescendantFonts);
+        final PdfObject pdfFontDescriptor = Descendent.getDictionary(PdfDictionary.FontDescriptor);
+
+        createCIDFont(pdfObject, Descendent);
+
+
+        if (pdfFontDescriptor != null) {
+
 //            /**CIDSet*/
 //            PdfObject CIDSet=pdfFontDescriptor.getDictionary(PdfDictionary.CIDSet);
 //            System.out.println(pdfObject.getObjectRefAsString()+" "+Descendent.getObjectRefAsString());
@@ -116,12 +123,12 @@ public class CIDFontType0 extends Type1C {
 //                System.out.println("length="+(CIDSet.stream.length));
 //
 //            }length
-            
-            final float[] newFontBBox=pdfFontDescriptor.getFloatArray(PdfDictionary.FontBBox);
-            if(newFontBBox!=null) {
-                FontBBox=newFontBBox;
+
+            final float[] newFontBBox = pdfFontDescriptor.getFloatArray(PdfDictionary.FontBBox);
+            if (newFontBBox != null) {
+                FontBBox = newFontBBox;
             }
-            
+
             //set ascent and descent
 //            float value=pdfFontDescriptor.getFloatNumber(PdfDictionary.Ascent);
 //            if(value!=0)
@@ -130,18 +137,18 @@ public class CIDFontType0 extends Type1C {
 //            value=pdfFontDescriptor.getFloatNumber(PdfDictionary.Descent);
 //            if(value!=0)
 //                descent=value;
-            
+
             readEmbeddedFont(pdfFontDescriptor);
         }
-        
-        if(renderPage && !isFontEmbedded && substituteFontFile!=null){
-            
-            isFontSubstituted=true;
-            subFont=new CIDFontType2(currentPdfFile,TTstreamisCID);
-            
+
+        if (renderPage && !isFontEmbedded && substituteFontFile != null) {
+
+            isFontSubstituted = true;
+            subFont = new CIDFontType2(currentPdfFile, TTstreamisCID);
+
             subFont.substituteFontUsed(substituteFontFile);
-            this.isFontEmbedded=true;
-            
+            this.isFontEmbedded = true;
+
             glyphs.setFontEmbedded(true);
         }
 
@@ -149,22 +156,22 @@ public class CIDFontType0 extends Type1C {
         if (renderPage) {
             setFont(getBaseFontName(), 1);
         }
-        
+
     }
-    
-    
+
+
     /**
      * used by  non type3 font
      */
     @Override
-    public PdfJavaGlyphs getGlyphData(){
-        
-        if(subFont!=null) {
+    public PdfJavaGlyphs getGlyphData() {
+
+        if (subFont != null) {
             return subFont.getGlyphData();
         } else {
             return glyphs;
         }
-        
+
     }
-    
+
 }

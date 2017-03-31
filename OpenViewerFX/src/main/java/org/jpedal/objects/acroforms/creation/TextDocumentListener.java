@@ -35,6 +35,7 @@ package org.jpedal.objects.acroforms.creation;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
+
 import org.jpedal.objects.raw.FormObject;
 
 /**
@@ -47,29 +48,29 @@ public class TextDocumentListener implements DocumentListener {
     final FormObject form;
 
     TextDocumentListener(final JTextComponent textcomp, final FormObject form) {
-	this.textcomp = textcomp;
-	this.form = form;
+        this.textcomp = textcomp;
+        this.form = form;
     }
 
     @Override
     public void changedUpdate(final DocumentEvent e) {
-	updateFormValue();
+        updateFormValue();
     }
 
     @Override
     public void removeUpdate(final DocumentEvent e) {
-	updateFormValue();
+        updateFormValue();
     }
 
     @Override
     public void insertUpdate(final DocumentEvent e) {
-	updateFormValue();
+        updateFormValue();
     }
 
     /**
      * write value back to our Object from GUI widget
      */
     private void updateFormValue() {
-	form.updateValue(textcomp.getText(), false, false);  //last false is critical to stop it looping
+        form.updateValue(textcomp.getText(), false, false);  //last false is critical to stop it looping
     }
 }

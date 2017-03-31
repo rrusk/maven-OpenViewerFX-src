@@ -33,12 +33,11 @@
 package org.jpedal.fonts.glyph;
 
 /**
- * 
  * @author markee
- *
- * holds width and height for each glyph in unscaled units
+ *         <p>
+ *         holds width and height for each glyph in unscaled units
  */
 public class T3Size {
 
-	public int x,y;
+    public int x, y;
 }

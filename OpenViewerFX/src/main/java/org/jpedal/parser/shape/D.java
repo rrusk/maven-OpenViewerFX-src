@@ -38,7 +38,7 @@ import org.jpedal.parser.CommandParser;
 
 public class D {
 
-    
+
     public static void execute(final CommandParser parser, final GraphicsState gs) {
 
 
@@ -47,37 +47,37 @@ public class D {
         //and the dash array
         final int items = parser.getOperandCount();
 
-        if(items==1) {
+        if (items == 1) {
             values = parser.generateOpAsString(0, false);
-        } else{
+        } else {
             //concat values
             final StringBuilder list = new StringBuilder(15);
-            for (int i = items - 1; i > -1; i--){
+            for (int i = items - 1; i > -1; i--) {
                 list.append(parser.generateOpAsString(i, false));
                 list.append(' ');
             }
-            values=list.toString();
+            values = list.toString();
         }
 
         //allow for default
-        if ((values.equals("[ ] 0 "))|| (values.equals("[]0"))|| (values.equals("[] 0 "))) {
+        if ((values.equals("[ ] 0 ")) || (values.equals("[]0")) || (values.equals("[] 0 "))) {
             gs.setDashPhase(0);
             gs.setDashArray(new float[0]);
         } else {
 
             //get dash pattern
-            final int pointer=values.indexOf(']');
+            final int pointer = values.indexOf(']');
 
-            final String dash=values.substring(0,pointer);
-            final int phase=(int)Float.parseFloat(values.substring(pointer+1,values.length()).trim());
+            final String dash = values.substring(0, pointer);
+            final int phase = (int) Float.parseFloat(values.substring(pointer + 1, values.length()).trim());
 
             //put into dash array
             final float[] dash_array = PdfArray.convertToFloatArray(dash);
 
-            for(int aa=0;aa<dash_array.length;aa++){
+            for (int aa = 0; aa < dash_array.length; aa++) {
                 // System.out.println(aa+" "+dash_array[aa]);
 
-                if(dash_array[aa]<0.001) {
+                if (dash_array[aa] < 0.001) {
                     dash_array[aa] = 0;
                 }
             }
@@ -90,5 +90,5 @@ public class D {
         }
     }
 
-   
+
 }

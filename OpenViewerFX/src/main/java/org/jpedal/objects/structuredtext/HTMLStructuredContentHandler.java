@@ -38,46 +38,44 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.render.DynamicVectorRenderer;
 
 /**
- *
  * @author markee
  */
 public class HTMLStructuredContentHandler extends StructuredContentHandler {
 
-   
 
     public HTMLStructuredContentHandler(final Object markedContent, final DynamicVectorRenderer current) {
 
-            super(markedContent);
-            
-            this.current=current;
-            
-            isHTML=true;
-        
+        super(markedContent);
+
+        this.current = current;
+
+        isHTML = true;
+
     }
-    
+
     @Override
     public void BDC(final PdfObject BDCobj) {
-        
+
         super.BDC(BDCobj);
-        	
-        if(BDCobj!=null){
-            setHTMLTag(BDCobj,true);
+
+        if (BDCobj != null) {
+            setHTMLTag(BDCobj, true);
         }
     }
 
     private void setHTMLTag(final PdfObject BDCobj, final boolean isOpenTag) {
-        
 
-        final int MCID=BDCobj.getInt(PdfDictionary.MCID);
-        
-        final String param=values.get(String.valueOf(MCID));
-        
-        if(isOpenTag){
+
+        final int MCID = BDCobj.getInt(PdfDictionary.MCID);
+
+        final String param = values.get(String.valueOf(MCID));
+
+        if (isOpenTag) {
             current.writeCustom(DynamicVectorRenderer.TEXT_STRUCTURE_OPEN, param);
-       //     System.out.println("Open "+MCID+" "+param+" "+current);
-        }else{
+            //     System.out.println("Open "+MCID+" "+param+" "+current);
+        } else {
             current.writeCustom(DynamicVectorRenderer.TEXT_STRUCTURE_CLOSE, param);
-        //     System.out.println("Close "+MCID+" "+param+" "+current);
+            //     System.out.println("Close "+MCID+" "+param+" "+current);
         }
         
         /*
@@ -102,28 +100,28 @@ public class HTMLStructuredContentHandler extends StructuredContentHandler {
             }
         }/**/
     }
-    
+
     @Override
     public void BMC(final String op) {
 
         setBMCvalues(op);
 
-        final PdfObject BDCobj= dictionaries.get(String.valueOf(markedContentLevel));
-    	
-        if(BDCobj!=null){
-            setHTMLTag(BDCobj,true);
+        final PdfObject BDCobj = dictionaries.get(String.valueOf(markedContentLevel));
+
+        if (BDCobj != null) {
+            setHTMLTag(BDCobj, true);
         }
-	}
-    
+    }
+
     @Override
     public void EMC() {
 
         setEMCValues();
-        
-    	final PdfObject BDCobj= dictionaries.get(String.valueOf(markedContentLevel));
-    	
-        if(BDCobj!=null){
-            setHTMLTag(BDCobj,false);
+
+        final PdfObject BDCobj = dictionaries.get(String.valueOf(markedContentLevel));
+
+        if (BDCobj != null) {
+            setHTMLTag(BDCobj, false);
         }
     }
 }

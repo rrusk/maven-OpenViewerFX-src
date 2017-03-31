@@ -60,50 +60,57 @@ public interface ActionHandler {
 
     /**
      * A action when pressed in active area ?some others should now be ignored?
-     * @param e Object contained by the action
+     *
+     * @param e          Object contained by the action
      * @param formObject - Actual formObject containing data
-     * @param eventType - type of event (Keystroke, focus)
+     * @param eventType  - type of event (Keystroke, focus)
      */
     void A(Object e, FormObject formObject, int eventType);
 
     /**
      * E action when cursor enters active area
-     * @param e Object contained by the action
+     *
+     * @param e          Object contained by the action
      * @param formObject - Actual formObject containing data
      */
     void E(Object e, FormObject formObject);
 
     /**
      * X action when cursor exits active area
-     * @param e Object contained by the action
+     *
+     * @param e          Object contained by the action
      * @param formObject - Actual formObject containing data
      */
     void X(Object e, FormObject formObject);
 
     /**
      * D action when cursor button pressed inside active area
-     * @param e Object contained by the action
+     *
+     * @param e       Object contained by the action
      * @param formObj - Actual formObject containing data
      */
     void D(Object e, FormObject formObj);
 
     /**
      * U action when cursor button released inside active area
-     * @param e Object contained by the action
+     *
+     * @param e       Object contained by the action
      * @param formObj - Actual formObject containing data
      */
     void U(Object e, FormObject formObj);
 
     /**
      * Fo action on input focus
-     * @param e Object contained by the action
+     *
+     * @param e       Object contained by the action
      * @param formObj - Actual formObject containing data
      */
     void Fo(Object e, FormObject formObj);
 
     /**
      * Bl action when input focus lost
-     * @param e Object contained by the action
+     *
+     * @param e       Object contained by the action
      * @param formObj - Actual formObject containing data
      */
     void Bl(Object e, FormObject formObj);
@@ -111,36 +118,41 @@ public interface ActionHandler {
     /**
      * PO action when page containing is opened,
      * action O from page dictionary, and OpenAction in document catalog should be done first
+     *
      * @param pdfObject - of the opening page
-     * @param type  - the type of action
+     * @param type      - the type of action
      */
     void PO(PdfObject pdfObject, int type);
 
     /**
      * O action when page containing is opened,
+     *
      * @param pdfObject - of the opening page
-     * @param type  - the type of action
+     * @param type      - the type of action
      */
     void O(PdfObject pdfObject, int type);
 
     /**
      * PC action when page is closed
+     *
      * @param pdfObject - of the opening page
-     * @param type  - the type of action
+     * @param type      - the type of action
      */
     void PC(PdfObject pdfObject, int type);
 
     /**
      * PV action on viewing containing page
+     *
      * @param pdfObject - of the opening page
-     * @param type  - the type of action
+     * @param type      - the type of action
      */
     void PV(PdfObject pdfObject, int type);
 
     /**
      * PI action when no longer visible in viewer
+     *
      * @param pdfObject - of the opening page
-     * @param type  - the type of action
+     * @param type      - the type of action
      */
     void PI(PdfObject pdfObject, int type);
 
@@ -149,30 +161,34 @@ public interface ActionHandler {
      * keystroke in textfield or combobox
      * modifys the list box selection
      * (can access the keystroke for validity and reject or modify)
-     * @param e - Object contained by the action
-     * @param formObject  - Actual formObject containing data
-     * @param actionID - integer value of the actionID
+     *
+     * @param e          - Object contained by the action
+     * @param formObject - Actual formObject containing data
+     * @param actionID   - integer value of the actionID
      * @return the action
      */
     int K(Object e, FormObject formObject, int actionID);
 
     /**
      * F the display formatting of the field (e.g 2 decimal places) [javascript]
+     *
      * @param formObject - Actual formObject containing data
      */
     void F(FormObject formObject);
 
     /**
      * V action when fields value is changed [javascript]
-     * @param e - Object contained by the action
+     *
+     * @param e          - Object contained by the action
      * @param formObject - Actual formObject containing data
-     * @param actionID - integer value of the actionID
+     * @param actionID   - integer value of the actionID
      */
     void V(Object e, FormObject formObject, int actionID);
 
     /**
      * C action when another field changes (recalculate this field) [javascript]
      * should not be called other than from internal methods to action changes on other fields.
+     *
      * @param formObject - Actual formObject containing data
      */
     void C(FormObject formObject);
@@ -181,17 +197,18 @@ public interface ActionHandler {
 
     /**
      * setup hand cursor when hovering and reset, on exiting
+     *
      * @return hand cursor
      */
     Object setHoverCursor();
 
     void init(PdfDecoderInt panel, Javascript javascript, AcroRenderer defaultAcroRenderer);
-    
+
     //void setPageAccess(int pageHeight, int insetH);
 
-	PdfLayerList getLayerHandler();
+    PdfLayerList getLayerHandler();
 
-	void changeTo(String file, int page, Object location, Integer type, boolean storeView);
+    void changeTo(String file, int page, Object location, Integer type, boolean storeView);
 
 
     //allow Swing client to plug into Dest handling code returning page as may change

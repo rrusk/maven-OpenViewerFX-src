@@ -40,10 +40,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Semaphore;
+
 import org.jpedal.FileAccess;
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.constants.SpecialOptions;
+
 import static org.jpedal.display.Display.*;
+
 import org.jpedal.external.Options;
 import org.jpedal.external.RenderChangeListener;
 import org.jpedal.gui.GUIFactory;
@@ -63,88 +66,89 @@ import org.jpedal.utils.repositories.Vector_Int;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
 /**
- *
  * @author markee
  */
 public abstract class MultiPageDecoder {
 
-    private final Semaphore semaphore=new Semaphore(1);
+    private final Semaphore semaphore = new Semaphore(1);
 
     final GUIFactory gui;
-    
+
     //used to redraw multiple pages
     private Thread worker;
-     
-    public final Map<Integer, DynamicVectorRenderer> currentPageViews=new HashMap<Integer, DynamicVectorRenderer>();
-    
+
+    public final Map<Integer, DynamicVectorRenderer> currentPageViews = new HashMap<Integer, DynamicVectorRenderer>();
+
     private final FileAccess fileAccess;
 
     private final PdfObjectReader currentPdfFile;
-    
+
     private final AcroRenderer formRenderer;
 
     private int displayView;
-    
-    private Map<Integer, DynamicVectorRenderer> cachedPageViews=new WeakHashMap<Integer, DynamicVectorRenderer>();
+
+    private Map<Integer, DynamicVectorRenderer> cachedPageViews = new WeakHashMap<Integer, DynamicVectorRenderer>();
 
     private final MultiPagesDisplay display;
-    
+
     private RenderChangeListener customRenderChangeListener;
-    
+
     //facing mode drag pages
     private final BufferedImage[] facingDragCachedImages = new BufferedImage[4];
     private BufferedImage facingDragTempLeftImg, facingDragTempRightImg;
     private int facingDragTempLeftNo, facingDragTempRightNo;
 
     private final MultiDisplayOptions multiDisplayOptions;
-   
+
     public final PdfDecoderInt pdf;
-    
+
     private final PdfPageData pageData;
-    
+
     final DecoderOptions options;
-    
+
     final DisplayOffsets offsets;
-    
-    public MultiPageDecoder(final PdfDecoderInt pdf,final PdfPageData pageData,final MultiPagesDisplay display, final MultiDisplayOptions multiDisplayOptions, 
-            final DynamicVectorRenderer currentDisplay, final int pageNumber,final FileAccess fileAccess, 
-            final PdfObjectReader io, final AcroRenderer formRenderer,final DecoderOptions options) {
-       
+
+    public MultiPageDecoder(final PdfDecoderInt pdf, final PdfPageData pageData, final MultiPagesDisplay display, final MultiDisplayOptions multiDisplayOptions,
+                            final DynamicVectorRenderer currentDisplay, final int pageNumber, final FileAccess fileAccess,
+                            final PdfObjectReader io, final AcroRenderer formRenderer, final DecoderOptions options) {
+
         //Precaution incase incorrect PdfDecoderInt implementation is used
-        if(pdf.getExternalHandler()==null){
-            this.gui=null;
-        }else{
-            this.gui=(GUIFactory)pdf.getExternalHandler().getExternalHandler(Options.GUIContainer);
+        if (pdf.getExternalHandler() == null) {
+            this.gui = null;
+        } else {
+            this.gui = (GUIFactory) pdf.getExternalHandler().getExternalHandler(Options.GUIContainer);
         }
-        this.pdf=pdf;
-        this.pageData=pageData;
-       
-        this.display=display;
-        this.multiDisplayOptions=multiDisplayOptions;
-        this.fileAccess=fileAccess;
-        this.currentPdfFile=io;
-        this.formRenderer=formRenderer;
-        this.options=options;
-        
-        offsets=(DisplayOffsets) pdf.getExternalHandler(Options.DisplayOffsets);
+        this.pdf = pdf;
+        this.pageData = pageData;
+
+        this.display = display;
+        this.multiDisplayOptions = multiDisplayOptions;
+        this.fileAccess = fileAccess;
+        this.currentPdfFile = io;
+        this.formRenderer = formRenderer;
+        this.options = options;
+
+        offsets = (DisplayOffsets) pdf.getExternalHandler(Options.DisplayOffsets);
         
         /*cache current page*/
-        if(currentDisplay!=null) {
+        if (currentDisplay != null) {
             currentPageViews.put(pageNumber, currentDisplay);
         }
     }
-    
-    /**used to decode multiple pages on views*/
+
+    /**
+     * used to decode multiple pages on views
+     */
     public void decodeOtherPages(int pageNumber, final int pageCount, final int displayView) {
-        
-        this.displayView=displayView;
-        
-        if(debugLayout) {
+
+        this.displayView = displayView;
+
+        if (debugLayout) {
             System.out.println("start decodeOtherPages " + pageNumber + ' ' + pageCount);
         }
 
         //Ensure page range does not drop below one
-        if(pageNumber<1) {
+        if (pageNumber < 1) {
             pageNumber = 1;
         }
 
@@ -152,8 +156,8 @@ public abstract class MultiPageDecoder {
         multiDisplayOptions.setPageNumber(pageNumber);
 
         //Store the image to be used instead of filling the borders with white
-        if (displayView==FACING && multiDisplayOptions.isTurnoverOn()) {
-             final int lp;
+        if (displayView == FACING && multiDisplayOptions.isTurnoverOn()) {
+            final int lp;
             if (multiDisplayOptions.isSeparateCover()) {
                 lp = (oldPN / 2) * 2;
             } else {
@@ -161,49 +165,49 @@ public abstract class MultiPageDecoder {
             }
             if (offsets.getDragLeft()) {
                 facingDragTempLeftImg = facingDragCachedImages[0];
-                facingDragTempLeftNo = lp-2;
+                facingDragTempLeftNo = lp - 2;
                 facingDragTempRightImg = facingDragCachedImages[1];
-                facingDragTempRightNo = lp-1;
+                facingDragTempRightNo = lp - 1;
             } else {
                 facingDragTempLeftImg = facingDragCachedImages[2];
-                facingDragTempLeftNo = lp+2;
+                facingDragTempLeftNo = lp + 2;
                 facingDragTempRightImg = facingDragCachedImages[3];
-                facingDragTempRightNo = lp+3;
+                facingDragTempRightNo = lp + 3;
             }
         }
 
-        facingDragCachedImages[0]=null;
-        facingDragCachedImages[1]=null;
-        facingDragCachedImages[2]=null;
-        facingDragCachedImages[3]=null;
+        facingDragCachedImages[0] = null;
+        facingDragCachedImages[1] = null;
+        facingDragCachedImages[2] = null;
+        facingDragCachedImages[3] = null;
 
         calcDisplayedRange();
 
-        while(multiDisplayOptions.isRunning()){
+        while (multiDisplayOptions.isRunning()) {
             try {
                 Thread.sleep(100);
             } catch (final InterruptedException e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
-        
+
         //need in JavaFX to avoid illegalThreadState
-        if(worker!=null && worker.getState()==Thread.State.TERMINATED){
-            worker=null;
+        if (worker != null && worker.getState() == Thread.State.TERMINATED) {
+            worker = null;
         }
-        
+
         // restart if not display.running - uses pages to control loop so I hope will
         // pick up change
-        if(worker!=null && worker.getState()!=Thread.State.NEW){
+        if (worker != null && worker.getState() != Thread.State.NEW) {
             //still running
             //System.out.println(worker.getState()+" "+worker);
-        }else if ((worker == null || !multiDisplayOptions.isRunning())) {
+        } else if ((worker == null || !multiDisplayOptions.isRunning())) {
 
             multiDisplayOptions.setRunning(true);
-            
+
             worker = new Thread() {
                 @Override
-                public void run(){
+                public void run() {
 
                     try {
                         semaphore.acquire();
@@ -213,7 +217,7 @@ public abstract class MultiPageDecoder {
 
                     try {
 
-                        
+
                         if (debugLayout) {
                             System.out.println("START=========================Started decoding pages "
                                     + multiDisplayOptions.getStartViewPage() + ' ' + multiDisplayOptions.getEndViewPage());
@@ -221,33 +225,33 @@ public abstract class MultiPageDecoder {
 
                         decodeOtherPages();
 
-                        if(debugLayout) {
+                        if (debugLayout) {
                             System.out.println("END=========================Pages done");
                         }
 
                         multiDisplayOptions.setRunning(false);
 
                         //tell user object if exists that pages painted
-                        if(customRenderChangeListener!=null) {
+                        if (customRenderChangeListener != null) {
                             customRenderChangeListener.renderingWorkerFinished();
                         }
 
                     } catch (final Exception e) {
-                        
+
                         multiDisplayOptions.setRunning(false);
-                        
+
                         LogWriter.writeLog("Exception: " + e.getMessage());
-                    }catch(final Error err){
+                    } catch (final Error err) {
                         multiDisplayOptions.setRunning(false);
-                        
+
                         LogWriter.writeLog("Error: " + err.getMessage());
-                    }finally{
+                    } finally {
                         semaphore.release();
                     }
                 }
             };
             worker.setDaemon(true);
-            
+
             worker.start();
         }
     }
@@ -257,17 +261,17 @@ public abstract class MultiPageDecoder {
      */
     void decodeOtherPages() {
 
-        final int pageCount=pageData.getPageCount();
-        if(debugLayout) {
+        final int pageCount = pageData.getPageCount();
+        if (debugLayout) {
             System.out.println("decodeOtherPages called");
         }
 
         multiDisplayOptions.setIsGeneratingOtherPages(true);
 
-        int page = multiDisplayOptions.getStartViewPage(), originalStart = multiDisplayOptions.getStartViewPage(), originalEnd = multiDisplayOptions.getEndViewPage()+1;
+        int page = multiDisplayOptions.getStartViewPage(), originalStart = multiDisplayOptions.getStartViewPage(), originalEnd = multiDisplayOptions.getEndViewPage() + 1;
 
         //increase decoded range for facing with turnover
-        int firstFacing=1, lastFacing=1;
+        int firstFacing = 1, lastFacing = 1;
         if (multiDisplayOptions.isTurnoverOn() && displayView == FACING) {
             firstFacing = originalStart - 2;
             lastFacing = firstFacing + 6;
@@ -275,28 +279,28 @@ public abstract class MultiPageDecoder {
             if (firstFacing < 1) {
                 firstFacing = 1;
             }
-            if (lastFacing > pageCount+1) {
+            if (lastFacing > pageCount + 1) {
                 lastFacing = pageCount + 1;
             }
         }
-        int facingCount = lastFacing-firstFacing;
+        int facingCount = lastFacing - firstFacing;
 
-        resetPageCaches(multiDisplayOptions.getStartViewPage(), multiDisplayOptions.getEndViewPage()+1);
+        resetPageCaches(multiDisplayOptions.getStartViewPage(), multiDisplayOptions.getEndViewPage() + 1);
 
-        if(debugLayout){
-            System.out.println("decoding ------START " + originalStart + " END="+ originalEnd+" display.isGeneratingOtherPages="+multiDisplayOptions.isIsGeneratingOtherPages());
-            System.out.println(multiDisplayOptions.getStartViewPage() + " "+ multiDisplayOptions.getEndViewPage());
+        if (debugLayout) {
+            System.out.println("decoding ------START " + originalStart + " END=" + originalEnd + " display.isGeneratingOtherPages=" + multiDisplayOptions.isIsGeneratingOtherPages());
+            System.out.println(multiDisplayOptions.getStartViewPage() + " " + multiDisplayOptions.getEndViewPage());
         }
         while (multiDisplayOptions.isIsGeneratingOtherPages()) {
 
             // detect if restarted
-            if ((originalStart != multiDisplayOptions.getStartViewPage())&& (originalEnd != multiDisplayOptions.getEndViewPage())) {
-                if(debugLayout) {
+            if ((originalStart != multiDisplayOptions.getStartViewPage()) && (originalEnd != multiDisplayOptions.getEndViewPage())) {
+                if (debugLayout) {
                     System.out.println("Worker detected change to page range to " + multiDisplayOptions.getStartViewPage() + ' ' + multiDisplayOptions.getEndViewPage());
                 }
-                
+
                 page = multiDisplayOptions.getStartViewPage();
-                originalEnd = multiDisplayOptions.getEndViewPage()+1;
+                originalEnd = multiDisplayOptions.getEndViewPage() + 1;
 
                 // can be zero in facing mode
                 if (page == 0) {
@@ -312,11 +316,11 @@ public abstract class MultiPageDecoder {
                     if (firstFacing < 1) {
                         firstFacing = 1;
                     }
-                    if (lastFacing > pageCount+1) {
+                    if (lastFacing > pageCount + 1) {
                         lastFacing = pageCount + 1;
                     }
 
-                    facingCount = lastFacing-firstFacing;
+                    facingCount = lastFacing - firstFacing;
                 }
 
                 resetPageCaches(originalStart, originalEnd);
@@ -324,7 +328,7 @@ public abstract class MultiPageDecoder {
             }
 
             // exit if finished
-            if (multiDisplayOptions.isTurnoverOn() && displayView == FACING && facingCount==0) {
+            if (multiDisplayOptions.isTurnoverOn() && displayView == FACING && facingCount == 0) {
                 break;
             }
 
@@ -332,16 +336,16 @@ public abstract class MultiPageDecoder {
                 break;
             }
 
-            if(originalStart>originalEnd) {
+            if (originalStart > originalEnd) {
                 break;
             }
-            
-            if (page > 0 && page < pdf.getPageCount()+1) {
+
+            if (page > 0 && page < pdf.getPageCount() + 1) {
                 decodeMorePages(page, originalStart, originalEnd);
             }
-            
+
             //store thumbnail for turnover if in facing mode
-            if (displayView==FACING && multiDisplayOptions.isTurnoverOn()) {
+            if (displayView == FACING && multiDisplayOptions.isTurnoverOn()) {
                 int leftPage = multiDisplayOptions.getPageNumber();
                 if (multiDisplayOptions.isSeparateCover() && (leftPage & 1) == 1) {
                     leftPage--;
@@ -349,43 +353,43 @@ public abstract class MultiPageDecoder {
                 if (!multiDisplayOptions.isSeparateCover() && (leftPage & 1) == 0) {
                     leftPage--;
                 }
-                int ref = page-leftPage + 2;
-                if (!(ref > 1 && ref < 4 )){
+                int ref = page - leftPage + 2;
+                if (!(ref > 1 && ref < 4)) {
 
                     if (ref > 1) {
                         ref -= 2;
                     }
-                    
-                    final int[] pageW=multiDisplayOptions.getPageW();
-                    final int[] pageH=multiDisplayOptions.getPageH();
+
+                    final int[] pageW = multiDisplayOptions.getPageW();
+                    final int[] pageH = multiDisplayOptions.getPageH();
 //                    System.out.println("page + \" \" + ref = " + page + " " + ref);
-                    if(ref < 4 && ref > -1 && facingDragCachedImages[ref]==null) {
+                    if (ref < 4 && ref > -1 && facingDragCachedImages[ref] == null) {
 
                         final BufferedImage image = new BufferedImage(pageW[page], pageH[page], BufferedImage.TYPE_INT_ARGB);
                         final Graphics2D pg = (Graphics2D) image.getGraphics();
-                        
-                        final int displayRotation=display.getDisplayRotation();
-                        
-                        pg.rotate(displayRotation*Math.PI/180);
+
+                        final int displayRotation = display.getDisplayRotation();
+
+                        pg.rotate(displayRotation * Math.PI / 180);
                         try {
                             switch (displayRotation) {
                                 case 90:
-                                    pg.translate(0,-pageW[page]);
-                                    pg.drawImage(pdf.getPageAsImage(page),0,0,pageH[page]+1,pageW[page]+1,null);
+                                    pg.translate(0, -pageW[page]);
+                                    pg.drawImage(pdf.getPageAsImage(page), 0, 0, pageH[page] + 1, pageW[page] + 1, null);
                                     break;
                                 case 180:
-                                    pg.translate(-pageW[page],-pageH[page]);
-                                    pg.drawImage(pdf.getPageAsImage(page),0,0,pageW[page]+1, pageH[page]+1, null);
+                                    pg.translate(-pageW[page], -pageH[page]);
+                                    pg.drawImage(pdf.getPageAsImage(page), 0, 0, pageW[page] + 1, pageH[page] + 1, null);
                                     break;
                                 case 270:
                                     pg.translate(-pageH[page], 0);
-                                    pg.drawImage(pdf.getPageAsImage(page),0,0,pageH[page]+1, pageW[page]+1,null);
+                                    pg.drawImage(pdf.getPageAsImage(page), 0, 0, pageH[page] + 1, pageW[page] + 1, null);
                                     break;
                                 default:
-                                    pg.drawImage(pdf.getPageAsImage(page),0,0,pageW[page]+1, pageH[page]+1,null);
+                                    pg.drawImage(pdf.getPageAsImage(page), 0, 0, pageW[page] + 1, pageH[page] + 1, null);
                                     break;
                             }
-                        } catch(final Exception e) {
+                        } catch (final Exception e) {
                             LogWriter.writeLog("Exception: " + e.getMessage());
                         }
 
@@ -403,43 +407,43 @@ public abstract class MultiPageDecoder {
             }
         }
 
-        if(debugLayout) {
+        if (debugLayout) {
             System.out.println("decodeOtherPageinins------ENDED");
         }
     }
 
     public void decodeMorePages(final int page, final int originalStart, final int originalEnd) {
 
-        if(currentPageViews.get(page)==null){
+        if (currentPageViews.get(page) == null) {
 
             decodePage(page, originalStart, originalEnd);
         }
 
         repaint();
-        
+
     }
-    
+
     public void decodePage(final int page, final int originalStart, final int originalEnd) {
-        
-        final AcroRenderer formRenderer =pdf.getFormRenderer();
+
+        final AcroRenderer formRenderer = pdf.getFormRenderer();
         //Create form objects
-        if (displayView == CONTINUOUS || displayView == CONTINUOUS_FACING){
-            final PdfStreamDecoder current= (PdfStreamDecoder) currentPageViews.get(page);
-            
+        if (displayView == CONTINUOUS || displayView == CONTINUOUS_FACING) {
+            final PdfStreamDecoder current = (PdfStreamDecoder) currentPageViews.get(page);
+
             //if(currentOffset!=null)
             //     formRenderer.getCompData().setPageValues(pdf.getScaling(), displayRotation,(int)getIndent(),0,0,pdf.getDisplayView(),currentOffset.widestPageNR,currentOffset.widestPageR);
-            
-            formRenderer.createDisplayComponentsForPage(page,current);
-            
-            
-            if(pdf.getSpecialMode()!= SpecialOptions.NONE &&
-                    pdf.getSpecialMode()!= SpecialOptions.SINGLE_PAGE &&
-                    page!=pdf.getPageCount()) {
-              
+
+            formRenderer.createDisplayComponentsForPage(page, current);
+
+
+            if (pdf.getSpecialMode() != SpecialOptions.NONE &&
+                    pdf.getSpecialMode() != SpecialOptions.SINGLE_PAGE &&
+                    page != pdf.getPageCount()) {
+
                 formRenderer.createDisplayComponentsForPage(page + 1, current);
             }
-            
-            
+
+
         }
         /* get pdf object id for page to decode */
         final String currentPageOffset = pdf.getIO().getReferenceforPage(page);
@@ -450,9 +454,9 @@ public abstract class MultiPageDecoder {
          * decode the file if not already decoded and stored
          */
         if (currentPageOffset != null || (formRenderer.isXFA() && formRenderer.useXFA())) {
-            final Integer key= page;
+            final Integer key = page;
             final Object currentView = currentPageViews.get(key);
-            if (currentView == null  && multiDisplayOptions.isIsGeneratingOtherPages()) {
+            if (currentView == null && multiDisplayOptions.isIsGeneratingOtherPages()) {
                 if (debugLayout) {
                     System.out.println("recreate page");
                 }
@@ -462,55 +466,55 @@ public abstract class MultiPageDecoder {
             }
         }
     }
-    
-    
+
+
     private void getPageView(final String currentPageOffset, final int pageNumber) {
 
-        final PdfObject pdfObject=new PageObject(currentPageOffset);
+        final PdfObject pdfObject = new PageObject(currentPageOffset);
 
         //ensure set (needed for XFA)
         pdfObject.setPageNumber(pageNumber);
 
         currentPdfFile.readObject(pdfObject);
 
-        final PdfObject Resources=pdfObject.getDictionary(PdfDictionary.Resources);
+        final PdfObject Resources = pdfObject.getDictionary(PdfDictionary.Resources);
 
         final DynamicVectorRenderer currentDisplay = getNewDisplay(pageNumber);
-            
-        int val=0;
-        
-        if(pdf.getDisplayView()==Display.CONTINUOUS && pdf.getDisplayView()==Display.CONTINUOUS_FACING) {
+
+        int val = 0;
+
+        if (pdf.getDisplayView() == Display.CONTINUOUS && pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
             val = 1;
         }
-        
-        final PdfStreamDecoder current=formRenderer.getStreamDecoder(currentPdfFile, fileAccess.getRes().getPdfLayerList(),true);
+
+        final PdfStreamDecoder current = formRenderer.getStreamDecoder(currentPdfFile, fileAccess.getRes().getPdfLayerList(), true);
 
         /*
          * draw acroform data onto Panel
          */
         if (formRenderer != null && pdf.isForm()) {
             //  formRenderer.getCompData().setPageValues(scaling, displayRotation,0,0,0,pdf.getDisplayView(),currentOffset.widestPageNR,currentOffset.widestPageR);
-            formRenderer.createDisplayComponentsForPage(pageNumber,current);
+            formRenderer.createDisplayComponentsForPage(pageNumber, current);
         }
 
-        current.setParameters(true, true, 7, val, false,pdf.getExternalHandler().getMode().equals(GUIModes.JAVAFX));
+        current.setParameters(true, true, 7, val, false, pdf.getExternalHandler().getMode().equals(GUIModes.JAVAFX));
         current.setXMLExtraction(pdf.isXMLExtraction());
         pdf.getExternalHandler().addHandlers(current);
 
         current.setObjectValue(ValueTypes.Name, fileAccess.getFilename());
         current.setObjectValue(ValueTypes.ObjectStore, pdf.getObjectStore());
-        current.setObjectValue(ValueTypes.PDFPageData,pageData);
+        current.setObjectValue(ValueTypes.PDFPageData, pageData);
         current.setIntValue(ValueTypes.PageNum, pageNumber);
         current.setRenderer(currentDisplay);
 
         try {
 
-            currentDisplay.init(pageData.getMediaBoxWidth(pageNumber), pageData.getMediaBoxHeight(pageNumber),options.getPageColor());
+            currentDisplay.init(pageData.getMediaBoxWidth(pageNumber), pageData.getMediaBoxHeight(pageNumber), options.getPageColor());
 
             currentDisplay.setValue(DynamicVectorRenderer.ALT_BACKGROUND_COLOR, options.getPageColor().getRGB());
-            if(options.getTextColor()!=null){
+            if (options.getTextColor() != null) {
                 currentDisplay.setValue(DynamicVectorRenderer.ALT_FOREGROUND_COLOR, options.getTextColor().getRGB());
-                if(options.getChangeTextAndLine()) {
+                if (options.getChangeTextAndLine()) {
                     currentDisplay.setValue(DynamicVectorRenderer.FOREGROUND_INCLUDE_LINEART, 1);
                 } else {
                     currentDisplay.setValue(DynamicVectorRenderer.FOREGROUND_INCLUDE_LINEART, 0);
@@ -518,22 +522,22 @@ public abstract class MultiPageDecoder {
 
 
             }
-            fileAccess.getRes().setupResources(current, false, Resources,pageNumber,currentPdfFile);
+            fileAccess.getRes().setupResources(current, false, Resources, pageNumber, currentPdfFile);
 
             current.decodePageContent(pdfObject);
 
             final TextLines textLines = pdf.getTextLines();
             //All data loaded so now get all line areas for page
-            if(textLines!=null){
+            if (textLines != null) {
                 final Vector_Rectangle_Int vr = (Vector_Rectangle_Int) current.getObjectValue(ValueTypes.TextAreas);
                 vr.trim();
                 final int[][] pageTextAreas = vr.get();
 
-                final Vector_Int vi =  (Vector_Int) current.getObjectValue(ValueTypes.TextDirections);
+                final Vector_Int vi = (Vector_Int) current.getObjectValue(ValueTypes.TextDirections);
                 vi.trim();
                 final int[] pageTextDirections = vi.get();
 
-                for(int k=0; k!=pageTextAreas.length; k++){
+                for (int k = 0; k != pageTextAreas.length; k++) {
                     textLines.addToLineAreas(pageTextAreas[k], pageTextDirections[k], pageNumber);
                 }
             }
@@ -544,10 +548,10 @@ public abstract class MultiPageDecoder {
             LogWriter.writeLog("Exception: " + err.getMessage());
         }
 
-        currentPageViews.put(pageNumber,currentDisplay);
-        
+        currentPageViews.put(pageNumber, currentDisplay);
+
         display.setCurrentDisplay(currentDisplay);
-        
+
     }
 
     /**
@@ -612,23 +616,23 @@ public abstract class MultiPageDecoder {
      */
     private synchronized void calcDisplayedRange() {
 
-        final int pageCount=pageData.getPageCount();
+        final int pageCount = pageData.getPageCount();
 
-        if(debugLayout) {
+        if (debugLayout) {
             System.out.println("calcDisplayedRange pageNumber=" + multiDisplayOptions.getPageNumber() + " mode=" + displayView);
         }
 
-        if(displayView==SINGLE_PAGE) {
+        if (displayView == SINGLE_PAGE) {
             return;
         }
 
         display.getDisplayedRectangle();
 
-        if(displayView==FACING){
+        if (displayView == FACING) {
 
-          multiDisplayOptions.calcDisplayRangeForFacing();
-        
-        }else{
+            multiDisplayOptions.calcDisplayRangeForFacing();
+
+        } else {
 
 
             //// START SI'S PAGE COUNTER ////////////
@@ -640,27 +644,27 @@ public abstract class MultiPageDecoder {
             //// END SI'S PAGE COUNTER ////////////
 
             //update page number
-            if(newPage!=-1 && gui!=null)// && customSwingHandle!=null)
+            if (newPage != -1 && gui != null)// && customSwingHandle!=null)
             {
-                gui.setPage(newPage);//( (org.jpedal.gui.GUIFactory) customSwingHandle).setPage(newPage);
+                gui.setPage(newPage); // ( (org.jpedal.gui.GUIFactory) customSwingHandle).setPage(newPage);
             }
         }
 
         //Ensure end page is not set beyond the total count of pages
-        if(multiDisplayOptions.getEndViewPage()>pageCount) {
-            multiDisplayOptions.setEndViewPage(pageCount); 
+        if (multiDisplayOptions.getEndViewPage() > pageCount) {
+            multiDisplayOptions.setEndViewPage(pageCount);
         }
 
-        if(displayView!=FACING) {
+        if (displayView != FACING) {
             display.refreshDisplay();      //refresh display to fix backbuffer background color issue
         }
     }
 
     public void flushPageCaches() {
         currentPageViews.clear();
-          
+
         cachedPageViews.clear();
-        
+
     }
 
     public DynamicVectorRenderer getCurrentPageView(final int i) {
@@ -668,115 +672,115 @@ public abstract class MultiPageDecoder {
     }
 
     public void dispose() {
-        this.cachedPageViews=null;
+        this.cachedPageViews = null;
     }
 
     private int updatePageDisplayed() {
-        
-        int newPage=-1;
-        final int pageCount=pageData.getPageCount();
 
-        final int[] yReached=multiDisplayOptions.getyReached();
-        
+        int newPage = -1;
+        final int pageCount = pageData.getPageCount();
+
+        final int[] yReached = multiDisplayOptions.getyReached();
+
         final int[] pageH = multiDisplayOptions.getPageH();
-        final int ry=display.getRy();
-        final int rh=display.getRh();
+        final int ry = display.getRy();
+        final int rh = display.getRh();
         //final int insetH=display.getInsetH();
-        
-        final boolean debug=false;
+
+        final boolean debug = false;
         int largestH = 0;
         int firstVisiblePage = 0;
         int lastVisiblePage = 0;
         for (int i = 1; i <= pageCount; i += 1) {
-            
-            final int pageTop=yReached[i];
-            final int pageBottom=yReached[i]+pageH[i];
-            final int viewBottom=ry+rh;
-            if(debug){
-                System.out.println(display.getInsetH()+" "+i+ ' ' +" pageTop="+pageTop+" pageBottom="+pageBottom+" viewTop="+ ry +" viewBottom="+ viewBottom);
+
+            final int pageTop = yReached[i];
+            final int pageBottom = yReached[i] + pageH[i];
+            final int viewBottom = ry + rh;
+            if (debug) {
+                System.out.println(display.getInsetH() + " " + i + ' ' + " pageTop=" + pageTop + " pageBottom=" + pageBottom + " viewTop=" + ry + " viewBottom=" + viewBottom);
             }
-            if( pageTop<=viewBottom && pageBottom>= ry){
+            if (pageTop <= viewBottom && pageBottom >= ry) {
                 //in view
-                
-                if(debug){
+
+                if (debug) {
                     System.out.println("in view ");
                 }
-            }else{
-                
+            } else {
+
                 continue;
             }
-            
+
             //If not set yet, set to first page by default
             if (newPage == -1) {
                 newPage = i;
-                firstVisiblePage=i;
+                firstVisiblePage = i;
             }
             lastVisiblePage = i;
-            
-            final int midPt=ry+(rh/2);
-            int gap=midPt-yReached[i];
-            if(debug){
-                System.out.println("gap="+gap);
+
+            final int midPt = ry + (rh / 2);
+            int gap = midPt - yReached[i];
+            if (debug) {
+                System.out.println("gap=" + gap);
             }
-            if (gap<0 || gap>pageH[i]){
-                gap=0;
+            if (gap < 0 || gap > pageH[i]) {
+                gap = 0;
             }
-            
-            int gap2=yReached[i]+pageH[i]-midPt;
-            if(debug){
-                System.out.println("gap2="+gap2);
+
+            int gap2 = yReached[i] + pageH[i] - midPt;
+            if (debug) {
+                System.out.println("gap2=" + gap2);
             }
-            if (gap2<0 || gap2>pageH[i]){
-                gap2=0;
+            if (gap2 < 0 || gap2 > pageH[i]) {
+                gap2 = 0;
             }
-            
-            if(gap2>gap){
-                gap=gap2;
+
+            if (gap2 > gap) {
+                gap = gap2;
             }
-            
-            if (gap>0 && gap > largestH) {
-                largestH =gap;
+
+            if (gap > 0 && gap > largestH) {
+                largestH = gap;
                 newPage = i;
-                
-                if(debug){
-                    System.out.println(i+" gap now="+largestH);
+
+                if (debug) {
+                    System.out.println(i + " gap now=" + largestH);
                 }
-                
+
                 //break; //Stop if found first whole page
             }
-            
-            if(debug){
-                System.out.println(i+" reached "+yReached[i]+ ' ' +ry);
+
+            if (debug) {
+                System.out.println(i + " reached " + yReached[i] + ' ' + ry);
             }
         }
-        
+
         //If still not set set page 1 as a default
         if (newPage == -1) {
             newPage = 1;
             firstVisiblePage = 1;
             lastVisiblePage = 1;
         }
-        
+
         multiDisplayOptions.setStartViewPage(firstVisiblePage);
         //allow for  2 page doc with both pages onscreen
         multiDisplayOptions.setEndViewPage(lastVisiblePage);
-        
+
         if (debugLayout) {
             System.out.println("page range start=" + multiDisplayOptions.getStartViewPage() + " end=" + multiDisplayOptions.getEndViewPage());
         }
-        
+
         //Ensure end page is not set beyond the total count of pages
         if (multiDisplayOptions.getEndViewPage() > pageCount) {
             multiDisplayOptions.setEndViewPage(pageCount);
         }
-        
+
         return newPage;
     }
-    
+
     public void resetCachedFacingImages() {
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             facingDragCachedImages[i] = null;
-        }       
+        }
     }
 
     public BufferedImage[] getFacingDragImages() {
@@ -794,13 +798,13 @@ public abstract class MultiPageDecoder {
     public int getFacingDragTempLeftNo() {
         return facingDragTempLeftNo;
     }
-    
+
     public int getFacingDragTempRightNo() {
         return facingDragTempRightNo;
     }
 
     public void setCustomRenderChangeListener(final RenderChangeListener customRenderChangeListener) {
-        this.customRenderChangeListener=customRenderChangeListener;
+        this.customRenderChangeListener = customRenderChangeListener;
     }
 
     public void repaint() {
@@ -808,6 +812,6 @@ public abstract class MultiPageDecoder {
     }
 
     public DynamicVectorRenderer getNewDisplay(final int pageNumber) {
-        throw new UnsupportedOperationException(this+ "Not supported yet."); 
+        throw new UnsupportedOperationException(this + "Not supported yet.");
     }
 }

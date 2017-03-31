@@ -33,9 +33,11 @@
 package org.jpedal.examples.viewer.commands;
 
 import org.jpedal.PdfDecoderInt;
+
 import static org.jpedal.examples.viewer.Commands.FIRST_DOCUMENT_SEARCH_RESULT_NOW_SHOWN;
 import static org.jpedal.examples.viewer.Commands.SEARCH_NOT_FOUND;
 import static org.jpedal.examples.viewer.Commands.SEARCH_RETURNED_TO_START;
+
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.gui.generic.GUISearchList;
 import org.jpedal.examples.viewer.gui.generic.GUISearchWindow;
@@ -50,13 +52,13 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 public class NextResults {
 
     public static Object execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
-       
+
         Object status = null;
-        
+
         GUISearchList results = null;
-        
+
         if (args == null) {
-            
+
             results = searchFrame.getResults(commonValues.getCurrentPage());
 
             int index = results.getSelectedIndex();
@@ -112,95 +114,95 @@ public class NextResults {
             currentGUI.setResults(results);
             results.setSelectedIndex(index);
 
-           
-                final float scaling = currentGUI.getScaling();
-                        //int inset = currentGUI.getPDFDisplayInset();
 
-                final int id = results.getSelectedIndex();
-                
-                if (!commonValues.getAllHighlightsShown()) {
-                    decode_pdf.getTextLines().clearHighlights();
-                }
+            final float scaling = currentGUI.getScaling();
+            //int inset = currentGUI.getPDFDisplayInset();
 
-                if (id != -1) {
-                    final Integer key = id;
-                    final Integer newPage = results.getTextPages().get(key);
+            final int id = results.getSelectedIndex();
 
-                    if (newPage != null) {
-                        final int nextPage = newPage;
-                        // move to new page
-                        if (commonValues.getCurrentPage() != nextPage) {
-                            commonValues.setCurrentPage(nextPage);
+            if (!commonValues.getAllHighlightsShown()) {
+                decode_pdf.getTextLines().clearHighlights();
+            }
 
-                            currentGUI.resetStatusMessage(Messages.getMessage("PdfViewer.LoadingPage") + ' ' + commonValues.getCurrentPage());
+            if (id != -1) {
+                final Integer key = id;
+                final Integer newPage = results.getTextPages().get(key);
 
-                            // reset as rotation may change!
-                            decode_pdf.setPageParameters(scaling, commonValues.getCurrentPage());
+                if (newPage != null) {
+                    final int nextPage = newPage;
+                    // move to new page
+                    if (commonValues.getCurrentPage() != nextPage) {
+                        commonValues.setCurrentPage(nextPage);
 
-                            // decode the page
-                            currentGUI.decodePage();
+                        currentGUI.resetStatusMessage(Messages.getMessage("PdfViewer.LoadingPage") + ' ' + commonValues.getCurrentPage());
 
+                        // reset as rotation may change!
+                        decode_pdf.setPageParameters(scaling, commonValues.getCurrentPage());
+
+                        // decode the page
+                        currentGUI.decodePage();
+
+                    }
+
+                    while (Values.isProcessing()) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (final InterruptedException e) {
+                            e.printStackTrace();
                         }
+                        //Ensure page has been processed else highlight may be incorrect
+                    }
 
-                        while (Values.isProcessing()) {
-                            try {
-                                Thread.sleep(500);
-                            } catch (final InterruptedException e) {
-                                e.printStackTrace();  
-                            }
-                            //Ensure page has been processed else highlight may be incorrect
-                        }
+                    //int pageOfHighlight = ((Integer) results.getTextPages().get(key)).intValue();
 
-                                //int pageOfHighlight = ((Integer) results.getTextPages().get(key)).intValue();
-                        
-                        if ((currPage != null && currPage != nextPage) && (commonValues.getAllHighlightsShown())){
-                                final Vector_Rectangle_Int storageVector = new Vector_Rectangle_Int();
+                    if ((currPage != null && currPage != nextPage) && (commonValues.getAllHighlightsShown())) {
+                        final Vector_Rectangle_Int storageVector = new Vector_Rectangle_Int();
 
-                                //Integer allKeys = new Integer(id)
-                                Integer kInteger;
-                                for (int k = 0; k != results.getResultCount(); k++) {
+                        //Integer allKeys = new Integer(id)
+                        Integer kInteger;
+                        for (int k = 0; k != results.getResultCount(); k++) {
 
-                                    kInteger = k;
-                                    //int currentPage = ((Integer)newPage).intValue();
-                                    if (results.getTextPages().get(kInteger) == nextPage) {
+                            kInteger = k;
+                            //int currentPage = ((Integer)newPage).intValue();
+                            if (results.getTextPages().get(kInteger) == nextPage) {
 
-                                        final Object h = searchFrame.getTextRectangles().get(kInteger);
+                                final Object h = searchFrame.getTextRectangles().get(kInteger);
 
-                                        if (h instanceof int[]) {
-                                            storageVector.addElement((int[]) h);
-                                        }
-                                        if (h instanceof int[][]) {
-                                            final int[][] areas = (int[][]) h;
-                                            for (int i = 0; i != areas.length; i++) {
-                                                storageVector.addElement(areas[i]);
-                                            }
-                                        }
+                                if (h instanceof int[]) {
+                                    storageVector.addElement((int[]) h);
+                                }
+                                if (h instanceof int[][]) {
+                                    final int[][] areas = (int[][]) h;
+                                    for (int i = 0; i != areas.length; i++) {
+                                        storageVector.addElement(areas[i]);
                                     }
                                 }
-
-                                storageVector.trim();
-                                final int[][] finalHighlight;
-                                finalHighlight = storageVector.get();
-                                decode_pdf.getTextLines().addHighlights(finalHighlight, true, nextPage);
-                        }
-
-                        if (!commonValues.getAllHighlightsShown()) {
-                            final Object highlight = results.textAreas().get(key);
-                            if (highlight instanceof int[]) {
-                                decode_pdf.getTextLines().addHighlights(new int[][]{(int[]) highlight}, true, nextPage);
-                            } else {
-                                decode_pdf.getTextLines().addHighlights((int[][]) highlight, true, nextPage);
                             }
-
                         }
-                        
-                        decode_pdf.getPages().refreshDisplay();
-                        
-                        decode_pdf.repaintPane(commonValues.getCurrentPage());
-                       
+
+                        storageVector.trim();
+                        final int[][] finalHighlight;
+                        finalHighlight = storageVector.get();
+                        decode_pdf.getTextLines().addHighlights(finalHighlight, true, nextPage);
                     }
+
+                    if (!commonValues.getAllHighlightsShown()) {
+                        final Object highlight = results.textAreas().get(key);
+                        if (highlight instanceof int[]) {
+                            decode_pdf.getTextLines().addHighlights(new int[][]{(int[]) highlight}, true, nextPage);
+                        } else {
+                            decode_pdf.getTextLines().addHighlights((int[][]) highlight, true, nextPage);
+                        }
+
+                    }
+
+                    decode_pdf.getPages().refreshDisplay();
+
+                    decode_pdf.repaintPane(commonValues.getCurrentPage());
+
                 }
-            
+            }
+
             currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
         }
 
@@ -208,8 +210,8 @@ public class NextResults {
                 && results.getSelectedIndex() == 0) {
             status = FIRST_DOCUMENT_SEARCH_RESULT_NOW_SHOWN;
         }
-        
+
         return status;
-        
+
     }
 }

@@ -40,11 +40,11 @@ public class FXDisplayForRasterizing extends FXDisplay {
 
     public FXDisplayForRasterizing(final int pageNumber, final boolean addBackground, final int defaultSize, final ObjectStore newObjectRef) {
 
-		super(pageNumber, addBackground, defaultSize, newObjectRef);
+        super(pageNumber, addBackground, defaultSize, newObjectRef);
 
-		//setupArrays(defaultSize);
-		areas = new Vector_Rectangle_Int(defaultSize);
-	}
-    
-    
+        //setupArrays(defaultSize);
+        areas = new Vector_Rectangle_Int(defaultSize);
+    }
+
+
 }

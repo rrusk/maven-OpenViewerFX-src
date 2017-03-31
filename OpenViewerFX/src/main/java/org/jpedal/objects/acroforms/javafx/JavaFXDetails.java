@@ -39,14 +39,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 class JavaFXDetails {
 
- //   private String publicKey;
-    
+    //   private String publicKey;
+
 //    private final TableView<Model> table1 = new TableView<Model>();
 
     public static void setValues() {
 
 //        this.publicKey = publicKey;
-        
+
 //        final ObservableList<Model> data = FXCollections.observableArrayList(
 //                new Model(String.valueOf(version)),
 //                new Model(hashAlgorithm),
@@ -66,7 +66,7 @@ class JavaFXDetails {
                 new PropertyValueFactory<Model, String>(""));
 
     }
-    
+
     public static final class Model {
 
         private final SimpleStringProperty one;
@@ -84,7 +84,6 @@ class JavaFXDetails {
         }
 
     }
-    
- 
+
 
 }

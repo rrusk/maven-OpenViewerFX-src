@@ -42,10 +42,10 @@ public class CurrentPage {
 
     public static Object execute(final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
-        Object status=-1;
+        Object status = -1;
 
         if (decode_pdf != null) {
-            status=currentGUI.getValues().getCurrentPage();
+            status = currentGUI.getValues().getCurrentPage();
         }
 
         return status;

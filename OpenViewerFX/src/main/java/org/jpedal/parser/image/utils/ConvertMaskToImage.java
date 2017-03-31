@@ -33,6 +33,7 @@
 package org.jpedal.parser.image.utils;
 
 import java.awt.image.*;
+
 import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -65,10 +66,10 @@ public class ConvertMaskToImage {
                     d1 = (byte) (255 * (maskDecode[1]));
                 }
             }
-        }else{ //correct values for null MaskDecode //see 15Jan/21330.pdf
-            d0=(byte)255;
-            d1=0;
-            opacity=(byte)0;
+        } else { //correct values for null MaskDecode //see 15Jan/21330.pdf
+            d0 = (byte) 255;
+            d1 = 0;
+            opacity = (byte) 0;
         }
 
         //use black/white colour
@@ -86,7 +87,7 @@ public class ConvertMaskToImage {
         final byte[] objData = new byte[length];
 
         //create ARGB data from 1bit data and opacity
-        ColorSpaceConvertor.flatten1bpc(w, data, 3,maskIndex, true, length, opacity, objData);
+        ColorSpaceConvertor.flatten1bpc(w, data, 3, maskIndex, true, length, opacity, objData);
 
         //build image
         image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);

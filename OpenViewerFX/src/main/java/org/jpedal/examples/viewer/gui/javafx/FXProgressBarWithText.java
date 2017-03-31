@@ -46,50 +46,62 @@ import javafx.scene.text.Text;
  * +------------+
  * |||| 10%     |
  * +------------+
- *    ^ progress value
- * 
+ * ^ progress value
+ *
  * @author Simon
  */
-public class FXProgressBarWithText extends StackPane{
+public class FXProgressBarWithText extends StackPane {
     private final Text message;
     private final ProgressBar progress;
 
     public FXProgressBarWithText() {
         message = new Text();
         progress = new ProgressBar();
-        
+
         progress.prefWidthProperty().bind(this.widthProperty());
         progress.prefHeightProperty().bind(this.heightProperty());
-        
+
         message.setFont(Font.font(null, FontWeight.SEMI_BOLD, 14));
-        
+
         this.getChildren().addAll(progress, message);
 
         StackPane.setAlignment(message, Pos.CENTER);
         StackPane.setAlignment(progress, Pos.CENTER);
-        
+
     }
-    
+
     /**
      * Convenience method to set the progress bar value
+     *
      * @param val new value (between 0.0 and 1.0)
      */
-    public void setProgress(final double val){
+    public void setProgress(final double val) {
         progress.setProgress(val);
     }
-    
+
     /**
      * Convenience method to set the text
+     *
      * @param text new String
      */
-    public void setText(final String text){
+    public void setText(final String text) {
         message.setText(text);
     }
-    
+
+    /**
+     * Convenience method to get the Text object used in the progress bar
+     *
+     * @return Text node used to display the message
+     */
     public Text getMessage() {
         return message;
     }
 
+    /**
+     * Convenience method to get the progress bar
+     *
+     * @return ProgressBar node used to display the progress
+     */
     public ProgressBar getProgress() {
         return progress;
     }

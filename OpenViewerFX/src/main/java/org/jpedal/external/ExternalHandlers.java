@@ -34,6 +34,7 @@ package org.jpedal.external;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
+
 import org.jpedal.FileAccess;
 import org.jpedal.display.GUIModes;
 import org.jpedal.fonts.glyph.JavaFXSupport;
@@ -41,6 +42,7 @@ import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.actions.ActionHandler;
+import org.jpedal.objects.acroforms.actions.EmptyActionHandler;
 import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.acroforms.creation.SwingFormCreator;
 import org.jpedal.objects.javascript.ExpressionEngine;
@@ -57,55 +59,55 @@ import org.jpedal.utils.LogWriter;
 public class ExternalHandlers {
 
     private static final ClassLoader loader;
-    
+
     private static JavaFXSupport javaFXSupport;
-    
-    private static final String fxClassName="org.jpedal.fonts.glyph.javafx.JavaFXSupportImpl";
-    
+
+    private static final String fxClassName = "org.jpedal.fonts.glyph.javafx.JavaFXSupportImpl";
+
     private static final boolean isXFAPresent;
-    
+
     private static final boolean ULCSupport;
-    
+
     static {
-        
+
         loader = ExternalHandlers.class.getClassLoader();
         /*
          * javafx
          */
-        final String fxClassPath="org/jpedal/fonts/glyph/javafx/JavaFXSupportImpl.class";
-        
-        if(loader.getResource(fxClassPath)!=null){
+        final String fxClassPath = "org/jpedal/fonts/glyph/javafx/JavaFXSupportImpl.class";
+
+        if (loader.getResource(fxClassPath) != null) {
             try {
-                javaFXSupport=(JavaFXSupport) loader.loadClass(fxClassName).newInstance();
+                javaFXSupport = (JavaFXSupport) loader.loadClass(fxClassName).newInstance();
             } catch (final Exception ex) {
-                
-                javaFXSupport=null;
-                
-                LogWriter.writeLog("[PDF] Unable to instance FX "+ex);
+
+                javaFXSupport = null;
+
+                LogWriter.writeLog("[PDF] Unable to instance FX " + ex);
             }
         }
         
         /*
          * ulc
          */
-        ULCSupport = loader.getResourceAsStream("com/ulcjava/base/application/ULCTextComponent.class")!=null;
+        ULCSupport = loader.getResourceAsStream("com/ulcjava/base/application/ULCTextComponent.class") != null;
         
         /*
          * xfa
          */
-        final String xfaClassPath="org/jpedal/objects/acroforms/AcroRendererXFA.class";
-        
-        isXFAPresent=loader.getResource(xfaClassPath)!=null;
+        final String xfaClassPath = "org/jpedal/objects/acroforms/AcroRendererXFA.class";
+
+        isXFAPresent = loader.getResource(xfaClassPath) != null;
     }
 
     public static boolean isXFAPresent() {
-       return isXFAPresent;
+        return isXFAPresent;
     }
-    
+
     public static boolean isITextPresent() {
-       return false;
+        return false;
     }
-    
+
     public static JavaFXSupport getFXHandler() {
         return javaFXSupport;
     }
@@ -113,92 +115,94 @@ public class ExternalHandlers {
     public static boolean isULCPresent() {
         return ULCSupport;
     }
-    
+
     FormFactory userFormFactory;
-    
+
     AdditonalHandler additionalHandler;
-    
-    /**default renderer for acroforms*/
+
+    /**
+     * default renderer for acroforms
+     */
     AcroRenderer formRenderer;
-    
+
     //Option to append the error thrown due to lack of CID jar to page decode report
     public static boolean throwMissingCIDError;
-    
+
     private DynamicVectorRenderer customDVR;
-    
+
     ImageHandler customImageHandler;
-    
-    private ActionHandler userActionHandler;
-    
+
+    private ActionHandler userActionHandler = new EmptyActionHandler();
+
 //    ImageHelper images;
-    
+
     private Object customSwingHandle;
-    
+
     private Object customPluginHandle;
-    
+
     private ExpressionEngine userExpressionEngine;
-    
+
     boolean useXFA;
-     
+
     /**
      * needs to be accessed in several locations so declared here
      */
     private Javascript javascript;
-    
+
     //custom class for flagging painting
     RenderChangeListener customRenderChangeListener;
-    
+
     GlyphTracker customGlyphTracker;
-    
+
     ShapeTracker customShapeTracker;
 
     private boolean alwaysUseXFA;
 
     private Map jpedalActionHandlers;
-    
+
     CustomPrintHintingHandler customPrintHintingHandler;
-    
-    ColorHandler customColorHandler;//new ExampleColorHandler();
-    
-    ErrorTracker customErrorTracker;//new ExampleColorHandler();
-    
+
+    ColorHandler customColorHandler; //new ExampleColorHandler();
+
+    ErrorTracker customErrorTracker; //new ExampleColorHandler();
+
     private CustomFormPrint customFormPrint;
-    
+
     private CustomMessageHandler customMessageHandler;
-    
+
     //copy for callback
     Object swingGUI;
-    
-    private GUIModes modeSelected=GUIModes.SWING;
 
-    public ExternalHandlers(){
-    
-        if(isXFAPresent){
-            useXFA=true;
+    private GUIModes modeSelected = GUIModes.SWING;
+
+    public ExternalHandlers() {
+
+        if (isXFAPresent) {
+            useXFA = true;
         }
     }
-   
+
     public ExternalHandlers(final GUIModes mode) {
-        this.modeSelected=mode;
-        
-        if(isXFAPresent){
-            useXFA=true;
+        this.modeSelected = mode;
+
+        if (isXFAPresent) {
+            useXFA = true;
         }
     }
-    
+
     public void addHandlers(final PdfStreamDecoder streamDecoder) {
-        
+
         streamDecoder.setObjectValue(ValueTypes.ImageHandler, customImageHandler);
-        
-        streamDecoder.setObjectValue(Options.GlyphTracker,customGlyphTracker);
+
+        streamDecoder.setObjectValue(Options.GlyphTracker, customGlyphTracker);
         streamDecoder.setObjectValue(Options.ShapeTracker, customShapeTracker);
-        
-        if(customErrorTracker!=null) {
+
+        if (customErrorTracker != null) {
             streamDecoder.setObjectValue(Options.ErrorTracker, customErrorTracker);
         }
     }
-    
-    
+
+
     /**
      * allows external helper classes to be added to JPedal to alter default functionality -
      * not part of the API and should be used in conjunction with IDRsolutions only
@@ -209,157 +213,157 @@ public class ExternalHandlers {
      * @param type
      */
     public void addExternalHandler(final Object newHandler, final int type) {
-        
+
         switch (type) {
 
             case Options.AdditionalHandler:
-                
-                additionalHandler=(AdditonalHandler) newHandler;
-                
+
+                additionalHandler = (AdditonalHandler) newHandler;
+
                 break;
-                
+
             case Options.USE_XFA_IN_LEGACY_MODE:
-                
-                alwaysUseXFA=((Boolean)newHandler);
-                
+
+                alwaysUseXFA = ((Boolean) newHandler);
+
                 break;
 
             case Options.USE_XFA:
-                
-                useXFA=((Boolean)newHandler);
-                
+
+                useXFA = ((Boolean) newHandler);
+
                 break;
-            
-            
+
+
             case Options.PluginHandler:
                 customPluginHandle = newHandler;
                 break;
-                        
+
             case Options.MultiPageUpdate:
                 customSwingHandle = newHandler;
                 break;
-                
-           case Options.ErrorTracker:
+
+            case Options.ErrorTracker:
                 customErrorTracker = (ErrorTracker) newHandler;
                 break;
-                    
+
             case Options.ExpressionEngine:
                 userExpressionEngine = (ExpressionEngine) newHandler;
                 break;
-                
-                //            case Options.LinkHandler:
-                //
-                //                if (formRenderer != null)
-                //                    formRenderer.resetHandler(newHandler, this,Options.LinkHandler);
-                //
-                //                break;
-                
+
+            //            case Options.LinkHandler:
+            //
+            //                if (formRenderer != null)
+            //                    formRenderer.resetHandler(newHandler, this,Options.LinkHandler);
+            //
+            //                break;
+
             case Options.FormFactory:
-                userFormFactory=((FormFactory) newHandler);
+                userFormFactory = ((FormFactory) newHandler);
                 break;
-                
+
             case Options.GUIContainer:
                 swingGUI = newHandler;
                 break;
-                
+
             case Options.ImageHandler:
                 customImageHandler = (ImageHandler) newHandler;
                 break;
-                
+
             case Options.ColorHandler:
                 customColorHandler = (ColorHandler) newHandler;
                 break;
-                
+
             case Options.GlyphTracker:
                 customGlyphTracker = (GlyphTracker) newHandler;
                 break;
-                
+
             case Options.ShapeTracker:
                 customShapeTracker = (ShapeTracker) newHandler;
                 break;
-                
-                //            case Options.Renderer:
-                //                //cast and assign here
-                //                break;
-                
-                //            case Options.FormFactory:
-                //                formRenderer.setFormFactory((FormFactory) newHandler);
-                //                break;
-                //
-                //            case Options.MultiPageUpdate:
-                //                customSwingHandle = newHandler;
-                //                break;
-                //
-                
+
+            //            case Options.Renderer:
+            //                //cast and assign here
+            //                break;
+
+            //            case Options.FormFactory:
+            //                formRenderer.setFormFactory((FormFactory) newHandler);
+            //                break;
+            //
+            //            case Options.MultiPageUpdate:
+            //                customSwingHandle = newHandler;
+            //                break;
+            //
+
             case Options.CustomFormPrint:
-                customFormPrint=(CustomFormPrint)newHandler;
+                customFormPrint = (CustomFormPrint) newHandler;
                 break;
-                
+
 //            case Options.ImageLibrary:
 //                images= (ImageHelper) newHandler;
 //                break;
-                //            case Options.ExpressionEngine:
-                //
-                //                userExpressionEngine = newHandler;
-                //
-                //                if (Javascript.debugActionHandler)
-                //                    System.out.println("User expression engine set to " + userExpressionEngine + ' ' + newHandler);
-                //
-                //                setJavascript();
-                //                break;
-                
-                //
-                //            case Options.LinkHandler:
-                //
-                //                if (formRenderer != null)
-                //                    formRenderer.resetHandler(newHandler, this,Options.LinkHandler);
-                //
-                //                break;
-                //
-                //            case Options.FormsActionHandler:
-                //
-                //                if (formRenderer != null)
-                //                    formRenderer.resetHandler(newHandler, this,Options.FormsActionHandler);
-                //
-                //                break;
-                //
-                //
+            //            case Options.ExpressionEngine:
+            //
+            //                userExpressionEngine = newHandler;
+            //
+            //                if (Javascript.debugActionHandler)
+            //                    System.out.println("User expression engine set to " + userExpressionEngine + ' ' + newHandler);
+            //
+            //                setJavascript();
+            //                break;
+
+            //
+            //            case Options.LinkHandler:
+            //
+            //                if (formRenderer != null)
+            //                    formRenderer.resetHandler(newHandler, this,Options.LinkHandler);
+            //
+            //                break;
+            //
+            //            case Options.FormsActionHandler:
+            //
+            //                if (formRenderer != null)
+            //                    formRenderer.resetHandler(newHandler, this,Options.FormsActionHandler);
+            //
+            //                break;
+            //
+            //
             case Options.JPedalActionHandler:
                 jpedalActionHandlers = (Map) newHandler;
                 break;
-                
+
             case Options.CustomMessageOutput:
                 customMessageHandler = (CustomMessageHandler) newHandler;
                 break;
-                
-            
+
+
             case Options.RenderChangeListener:
                 customRenderChangeListener = (RenderChangeListener) newHandler;
                 break;
-                
+
             case Options.CustomPrintHintingHandler:
                 customPrintHintingHandler = (CustomPrintHintingHandler) newHandler;
                 break;
-                
+
             case Options.CustomOutput:
                 customDVR = (DynamicVectorRenderer) newHandler;
                 break;
-                
-              
+
+
             case Options.FormsActionHandler:
                 userActionHandler = (ActionHandler) newHandler;
                 break;
-                
-             
+
+
             default:
-                if(additionalHandler!=null){
-                    additionalHandler.addExternalHandler(newHandler,type);
-                }else{
-                    throw new IllegalArgumentException("Unknown type="+type);
+                if (additionalHandler != null) {
+                    additionalHandler.addExternalHandler(newHandler, type);
+                } else {
+                    throw new IllegalArgumentException("Unknown type=" + type);
                 }
         }
     }
-    
+
     /**
      * allows external helper classes to be accessed if needed - also allows user to access SwingGUI if running
      * full Viewer package - not all Options available to get - please contact IDRsolutions if you are looking to
@@ -368,106 +372,106 @@ public class ExternalHandlers {
      * @param type
      */
     public Object getExternalHandler(final int type) {
-        
+
         switch (type) {
-             
+
             case Options.FormFactory:
                 return formRenderer.getFormFactory();
-            
+
             case Options.MultiPageUpdate:
                 return customSwingHandle;
-                
+
             case Options.PluginHandler:
                 return customPluginHandle;
-                
+
             case Options.ExpressionEngine:
                 return userExpressionEngine;
-                
-           case Options.ErrorTracker:
+
+            case Options.ErrorTracker:
                 return customErrorTracker;
-                
+
             case Options.ImageHandler:
                 return customImageHandler;
-                
+
             case Options.ColorHandler:
                 return customColorHandler;
-                
+
             case Options.GlyphTracker:
                 return customGlyphTracker;
-                
+
             case Options.CustomPrintHintingHandler:
                 return customPrintHintingHandler;
-            
+
             case Options.ShapeTracker:
                 return customShapeTracker;
-                
+
             case Options.CustomFormPrint:
                 return customFormPrint;
-                
+
 //            case Options.ImageLibrary:
 //                return images;
-                
+
             case Options.GUIContainer:
                 return swingGUI;
-                
-                //                case Options.Renderer:
-                //                    return null;
-                //
-                //                case Options.FormFactory:
-                //                    return formRenderer.getFormFactory();
-                //
-                //                case Options.MultiPageUpdate:
-                //                    return customSwingHandle;
-                //
-                //                case Options.ExpressionEngine:
-                //                    return userExpressionEngine;
-                //
+
+            //                case Options.Renderer:
+            //                    return null;
+            //
+            //                case Options.FormFactory:
+            //                    return formRenderer.getFormFactory();
+            //
+            //                case Options.MultiPageUpdate:
+            //                    return customSwingHandle;
+            //
+            //                case Options.ExpressionEngine:
+            //                    return userExpressionEngine;
+            //
             case Options.JPedalActionHandler:
                 return jpedalActionHandlers;
-                
+
             case Options.CustomMessageOutput:
                 return customMessageHandler;
-                
-                //                case Options.Display:
-                //                    return pages;
-                //
-                //                case Options.CurrentOffset:
-                //                    return currentOffset;
-                //
+
+            //                case Options.Display:
+            //                    return pages;
+            //
+            //                case Options.CurrentOffset:
+            //                    return currentOffset;
+            //
             case Options.CustomOutput:
                 return customDVR;
-                
+
             case Options.RenderChangeListener:
                 return customRenderChangeListener;
-                
+
             case Options.JPedalActionHandlers:
                 return jpedalActionHandlers;
-            
-            
+
+
             default:
-                
-                if(type==Options.UniqueAnnotationHandler){
+
+                if (type == Options.UniqueAnnotationHandler) {
                     return null;
-                }else if(additionalHandler!=null){
-                    return additionalHandler.getExternalHandler(type);    
-                }else {
+                } else if (additionalHandler != null) {
+                    return additionalHandler.getExternalHandler(type);
+                } else {
                     throw new IllegalArgumentException("Unknown type " + type);
                 }
-                
+
         }
     }
-    
+
     /**
      * Allow user to access javascript object if needed
      */
     public Javascript getJavaScript() {
         return javascript;
     }
-    
+
     public FormFactory getUserFormFactory() {
         return userFormFactory;
     }
-    
+
     public void dispose() {
 
         //AdditionalHandler
@@ -531,86 +535,87 @@ public class ExternalHandlers {
             formRenderer.dispose();
         }
         formRenderer = null;
-        
+
         userActionHandler = null;
     }
-    
+
     /**
      * Allow user to access Forms renderer object if needed
      */
     public AcroRenderer getFormRenderer() {
         return formRenderer;
     }
-    
+
     /**
      * Allow user to access Forms Action Handler object if needed
      */
     public ActionHandler getFormActionHandler() {
         return userActionHandler;
     }
-    
+
     public void setJavaScript(final Javascript javascript) {
-        this.javascript=javascript;
+        this.javascript = javascript;
     }
-    
+
     /**
      * allow user to explicitly disable XFAsupport in XFA version
      * Otherwise should not be used
-     * @param useXFA 
+     *
+     * @param useXFA
      */
     public void useXFA(final boolean useXFA) {
-        this.useXFA=useXFA;
+        this.useXFA = useXFA;
     }
-    
-    private static final String xfaClassName="org.jpedal.objects.acroforms.AcroRendererXFA";
-    
+
+    private static final String xfaClassName = "org.jpedal.objects.acroforms.AcroRendererXFA";
+
     public void openPdfFile(final ExpressionEngine userExpressionEngine) {
-        
+
         initObjects(userExpressionEngine, new SwingFormCreator());
-        
+
     }
-    
+
     public static BufferedImage decode(final PdfObject pdfObject, final PdfObjectReader currentPdfFile, final PdfObject XObject, final int subtype, final int width, final int height, final int offsetImage, final float pageScaling) {
-        
-        if(isXFAPresent){
-            
+
+        if (isXFAPresent) {
+
             try {
-                final AcroRenderer formRenderer=(AcroRenderer) loader.loadClass(xfaClassName).newInstance();
-                
+                final AcroRenderer formRenderer = (AcroRenderer) loader.loadClass(xfaClassName).newInstance();
+
                 return formRenderer.decode(pdfObject, currentPdfFile, XObject, subtype, width, height, offsetImage, pageScaling);
-            
+
             } catch (final Exception ex) {
-                LogWriter.writeLog("[PDF] Unable to instance XFA "+ex);
+                LogWriter.writeLog("[PDF] Unable to instance XFA " + ex);
             }
-            
+
         }
-            return null;
-        
+        return null;
+
 
     }
 
     void initObjects(final ExpressionEngine userExpressionEngine1, final SwingFormCreator formCreator) {
-        
-        if(isXFAPresent){
+
+        if (isXFAPresent) {
             try {
-                formRenderer=(AcroRenderer) loader.loadClass(xfaClassName).newInstance();
+                formRenderer = (AcroRenderer) loader.loadClass(xfaClassName).newInstance();
             } catch (final Exception ex) {
-                LogWriter.writeLog("[PDF] Unable to instance XFA "+ex);
-                
+                LogWriter.writeLog("[PDF] Unable to instance XFA " + ex);
+
                 formRenderer = new AcroRenderer();
             }
-          
-        }else{
-          formRenderer = new AcroRenderer();
+
+        } else {
+            formRenderer = new AcroRenderer();
         }
-        
+
         formRenderer.useXFAIfAvailable(useXFA);
-        
+
         formRenderer.init(formCreator);
-        
+
         formRenderer.alwaysuseXFA(alwaysUseXFA);
-        final FormFactory userFormFactory= this.userFormFactory;
-        if(userFormFactory!=null) {
+        final FormFactory userFormFactory = this.userFormFactory;
+        if (userFormFactory != null) {
             formRenderer.setFormFactory(userFormFactory);
         }
         /*
@@ -618,19 +623,20 @@ public class ExternalHandlers {
          */
         javascript = new Javascript(userExpressionEngine1, formRenderer);
     }
-    
+
     /**
      * show if we are Swing or JavaFX
      */
     public void setMode(final GUIModes mode) {
-        modeSelected=mode;
-}
-    
+        modeSelected = mode;
+    }
+
     /**
      * show if we are Swing or JavaFX
-     * @return 
+     *
+     * @return
      */
-    public GUIModes getMode() {    
+    public GUIModes getMode() {
         return modeSelected;
     }
 

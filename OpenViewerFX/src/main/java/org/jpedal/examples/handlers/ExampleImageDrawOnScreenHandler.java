@@ -37,6 +37,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.GraphicsState;
@@ -51,18 +52,18 @@ public class ExampleImageDrawOnScreenHandler implements org.jpedal.external.Imag
     //tell JPedal if it ignores its own Image code or not
     @Override
     public boolean alwaysIgnoreGenericHandler() {
-        return false;  
-    }//pass in raw data for image handling - if valid image returned it will be used.
+        return false;
+    } // Pass in raw data for image handling - if valid image returned it will be used.
     //if alwaysIgnoreGenericHandler() is true JPedal code always ignored. If false, JPedal code used if null
 
     @Override
     public BufferedImage processImageData(final GraphicsState gs, final PdfObject XObject) {
-        return null;  
+        return null;
     }
 
     @Override
     public boolean imageHasBeenScaled() {
-        return false;  
+        return false;
     }
 
     @Override
@@ -72,108 +73,108 @@ public class ExampleImageDrawOnScreenHandler implements org.jpedal.external.Imag
 
         //this is the draw code from DynamicVectorRenderer as at 11th June 2007
 
-        final double[] values=new double[6];
+        final double[] values = new double[6];
         upside_down.getMatrix(values);
 
-        final boolean isSlightlyRotated=(values[0]*values[1]!=0)||(values[2]*values[3]!=0);
+        final boolean isSlightlyRotated = (values[0] * values[1] != 0) || (values[2] * values[3] != 0);
 
         //accelerate large bw images non-rotated
         //accelerate large bw images non-rotated (use for all images for moment)
-				if(isSlightlyRotated || image.getWidth()<800 || renderDirect){ //image.getType()!=12 || CTM[0][0]<0 || CTM[1][1]<0 || CTM[1][0]<0 || CTM[0][1]<0)
-                    g2.drawImage(image,upside_down,null);
-                }else{ //speedup large straightforward images
+        if (isSlightlyRotated || image.getWidth() < 800 || renderDirect) { //image.getType()!=12 || CTM[0][0]<0 || CTM[1][1]<0 || CTM[1][0]<0 || CTM[0][1]<0)
+            g2.drawImage(image, upside_down, null);
+        } else { //speedup large straightforward images
 
-                    double dy=0,dx=0;
+            double dy = 0, dx = 0;
 
-                    //if already turned, tweak transform
-					
-                    //int count=values.length;
-                    //for(int jj=0;jj<count;jj++)
-                    //System.out.println(jj+"=="+values[jj]);
+            //if already turned, tweak transform
+
+            //int count=values.length;
+            //for(int jj=0;jj<count;jj++)
+            //System.out.println(jj+"=="+values[jj]);
 
 //					System.out.println(image.getWidth());
 //					System.out.println(image.getHeight());
 //					System.out.println(values[4]*image.getHeight()/image.getWidth());
 
-                    upside_down=new AffineTransform(values);
-                    
-					boolean imageProcessed=true;
+            upside_down = new AffineTransform(values);
 
-						try{
-							final AffineTransformOp invert =new AffineTransformOp(upside_down,ColorSpaces.hints);
+            boolean imageProcessed = true;
 
-							image=invert.filter(image,null);
-						}catch(final Exception ee){
-							imageProcessed=false;
-							ee.printStackTrace();
-						}catch(final Error err){
-							imageProcessed=false;
+            try {
+                final AffineTransformOp invert = new AffineTransformOp(upside_down, ColorSpaces.hints);
 
-							LogWriter.writeLog("Exception e "+err.getMessage());
-						}
-					
-					if(imageProcessed){
+                image = invert.filter(image, null);
+            } catch (final Exception ee) {
+                imageProcessed = false;
+                ee.printStackTrace();
+            } catch (final Error err) {
+                imageProcessed = false;
 
-                        Shape rawClip=null;
+                LogWriter.writeLog("Exception e " + err.getMessage());
+            }
 
-                        if(isPrinting && dy==0){ //adjust to fit
-                            final double[] affValues=new double[6];
-                            g2.getTransform().getMatrix(affValues);
+            if (imageProcessed) {
 
-                            //for(int i=0;i<6;i++)
-                            //System.out.println(i+"="+affValues[i]);
+                Shape rawClip = null;
 
-                            dx=affValues[4]/affValues[0];
-                            if(dx>0) {
-                                dx = -dx;
-                            }
+                if (isPrinting && dy == 0) { //adjust to fit
+                    final double[] affValues = new double[6];
+                    g2.getTransform().getMatrix(affValues);
 
-                            dy=affValues[5]/affValues[3];
+                    //for(int i=0;i<6;i++)
+                    //System.out.println(i+"="+affValues[i]);
 
-                            if(dy>0) {
-                                dy = -dy;
-                            }
-
-                            dy=-(dy+image.getHeight());
-
-
-                        }
-
-                        //stop part pixels causing black lines
-                        if(dy!=0){
-                            rawClip=g2.getClip();
-
-                            final int xDiff;
-                            final double xScale=g2.getTransform().getScaleX();
-                            if(xScale<1) {
-                                xDiff = (int) (1 / xScale);
-                            } else {
-                                xDiff = (int) (xScale + 0.5d);
-                            }
-                            final int yDiff;
-                            final double yScale=g2.getTransform().getScaleY();
-                            if(yScale<1) {
-                                yDiff = (int) (1 / yScale);
-                            } else {
-                                yDiff = (int) (yScale + 0.5d);
-                            }
-
-                            g2.clipRect((int)dx,(int)(dy+1.5),image.getWidth()-xDiff,image.getHeight()-yDiff);
-                            
-                        }
-                        g2.drawImage(image,(int)dx, (int) dy,null);
-
-                        //put it back
-                        if(rawClip!=null) {
-                            g2.setClip(rawClip);
-                        }
-                    }else {
-                        g2.drawImage(image, upside_down, null);
+                    dx = affValues[4] / affValues[0];
+                    if (dx > 0) {
+                        dx = -dx;
                     }
-				
+
+                    dy = affValues[5] / affValues[3];
+
+                    if (dy > 0) {
+                        dy = -dy;
+                    }
+
+                    dy = -(dy + image.getHeight());
+
+
+                }
+
+                //stop part pixels causing black lines
+                if (dy != 0) {
+                    rawClip = g2.getClip();
+
+                    final int xDiff;
+                    final double xScale = g2.getTransform().getScaleX();
+                    if (xScale < 1) {
+                        xDiff = (int) (1 / xScale);
+                    } else {
+                        xDiff = (int) (xScale + 0.5d);
+                    }
+                    final int yDiff;
+                    final double yScale = g2.getTransform().getScaleY();
+                    if (yScale < 1) {
+                        yDiff = (int) (1 / yScale);
+                    } else {
+                        yDiff = (int) (yScale + 0.5d);
+                    }
+
+                    g2.clipRect((int) dx, (int) (dy + 1.5), image.getWidth() - xDiff, image.getHeight() - yDiff);
+
+                }
+                g2.drawImage(image, (int) dx, (int) dy, null);
+
+                //put it back
+                if (rawClip != null) {
+                    g2.setClip(rawClip);
+                }
+            } else {
+                g2.drawImage(image, upside_down, null);
+            }
+
         }
 
-        return true;  
+        return true;
     }
 
 }

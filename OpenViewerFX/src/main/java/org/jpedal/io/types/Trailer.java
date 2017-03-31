@@ -33,6 +33,7 @@
 package org.jpedal.io.types;
 
 import java.io.IOException;
+
 import org.jpedal.io.RandomAccessBuffer;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.FastByteArrayOutputStream;
@@ -41,44 +42,44 @@ import org.jpedal.utils.repositories.FastByteArrayOutputStream;
  *
  */
 public class Trailer {
-    
-    private static final byte[] EOFpattern = { 37, 37, 69, 79, 70 }; //pattern %%EOF
-    
-    private static final byte[] trailerpattern = { 't','r','a','i','l','e','r' }; //pattern %%EOF
-    
+
+    private static final byte[] EOFpattern = {37, 37, 69, 79, 70}; //pattern %%EOF
+
+    private static final byte[] trailerpattern = {'t', 'r', 'a', 'i', 'l', 'e', 'r'}; //pattern %%EOF
+
     public static byte[] readTrailer(int bufSize, int pointer, final int eof, final RandomAccessBuffer pdf_datafile) {
-        
+
         int charReached = 0, charReached2 = 0, trailerCount = 0;
         final int end = 4;
         
         /*read in the bytes, using the startRef as our terminator*/
         final FastByteArrayOutputStream bis = new FastByteArrayOutputStream();
-        
+
         while (true) {
             
             /* adjust buffer if less than 1024 bytes left in file */
             if (pointer + bufSize > eof) {
                 bufSize = eof - pointer;
             }
-            
-            if(bufSize==0) {
+
+            if (bufSize == 0) {
                 break;
             }
-            
-            final byte[] buffer=new byte[bufSize];
-            
+
+            final byte[] buffer = new byte[bufSize];
+
             try {
                 pdf_datafile.seek(pointer);
                 pdf_datafile.read(buffer); //get next chars
             } catch (final IOException e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
-            
+
             boolean endFound = false;
             
             /* write out and lookf for startref at end */
             for (int i = 0; i < bufSize; i++) {
-                
+
                 final byte currentByte = buffer[i];
                 
                 /* check for startref at end - reset if not */
@@ -94,39 +95,39 @@ public class Trailer {
                 } else {
                     charReached2 = 0;
                 }
-                
+
                 if (charReached2 == 7) {
                     trailerCount++;
                     charReached2 = 0;
                 }
-                
+
                 if (charReached == end || trailerCount == 2) { //located %%EOF and get last few bytes
-                    
+
                     for (int j = 0; j < i + 1; j++) {
                         bis.write(buffer[j]);
                     }
-                    
+
                     i = bufSize;
                     endFound = true;
-                    
+
                 }
             }
-            
+
             //write out block if whole block used
             if (!endFound) {
                 bis.write(buffer);
             }
-            
+
             //update pointer
             pointer += bufSize;
-            
+
             if (charReached == end || trailerCount == 2) {
                 break;
             }
         }
-        
+
         return bis.toByteArray();
-        
+
     }
 }
 

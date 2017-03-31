@@ -47,6 +47,7 @@ import javax.swing.JTextArea;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.MouseInputAdapter;
+
 import org.jpedal.objects.acroforms.actions.SwingListener;
 import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -56,23 +57,23 @@ import org.jpedal.utils.StringUtils;
 /**
  * provide PDF popup for Annotations
  */
-public class PdfSwingPopup extends JInternalFrame{
+public class PdfSwingPopup extends JInternalFrame {
     /**
      *
      */
     private static final long serialVersionUID = 796302916236391896L;
-    
+
     PopupTitleBar titleBar;
-	PopupContentArea contentArea;
-	
-	final FormObject formObject;
-	
+    PopupContentArea contentArea;
+
+    final FormObject formObject;
+
     @SuppressWarnings("UnusedParameters")
     public PdfSwingPopup(final FormObject popupObj, final int cropBoxWidth, final SwingListener listener) {
 
         formObject = popupObj;
         //float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
-        
+
         float[] col;
         final String titleString;
         String contentString;
@@ -85,8 +86,8 @@ public class PdfSwingPopup extends JInternalFrame{
             col = new float[]{255, 255, 0};
             titleString = "";
             contentString = "";
-        }else{
-            
+        } else {
+
             //Set color from the popup object
             col = popupObj.getFloatArray(PdfDictionary.C);
 
@@ -99,21 +100,21 @@ public class PdfSwingPopup extends JInternalFrame{
             if (col == null) {
                 col = new float[]{255, 255, 0};
             }
-            
-            
+
+
             final StringBuilder titleBuilder = new StringBuilder();
-            
+
             final String subject = parentObj.getTextStreamValue(PdfDictionary.Subj);
             if (subject != null) {
                 titleBuilder.append(subject);
                 titleBuilder.append('\t');
             }
-            
+
             //read in date for title bar
             final String modifiedDate = parentObj.getTextStreamValue(PdfDictionary.M);
             if (modifiedDate != null) {
                 final StringBuilder date = new StringBuilder(modifiedDate);
-                date.delete(0, 2);//delete D:
+                date.delete(0, 2); //delete D:
                 date.insert(10, ':');
                 date.insert(13, ':');
                 date.insert(16, ' ');
@@ -127,20 +128,20 @@ public class PdfSwingPopup extends JInternalFrame{
                 date.insert(2, '/');
                 date.insert(5, '/');
                 date.insert(10, ' ');
-                
+
                 titleBuilder.append(date);
             }
-            
+
             //setup title text for popup
-            
+
             final String autherName = popupObj.getTextStreamValue(PdfDictionary.T);
             if (autherName != null) {
                 titleBuilder.append('\n');
                 titleBuilder.append(autherName);
             }
-            
+
             titleString = titleBuilder.toString();
-            
+
             //main body text on contents is always a text readable form of the form or the content of the popup window.
             contentString = parentObj.getTextStreamValue(PdfDictionary.Contents);
             if (contentString == null) {
@@ -151,7 +152,7 @@ public class PdfSwingPopup extends JInternalFrame{
             }
 
         }
-        
+
         //remove title bar from internalframe so its looks as we want
         ((javax.swing.plaf.basic.BasicInternalFrameUI) this.getUI()).setNorthPane(null);
 
@@ -169,14 +170,14 @@ public class PdfSwingPopup extends JInternalFrame{
         contentArea.setWrapStyleWord(true);
         contentArea.setLineWrap(true);
         add(contentArea, BorderLayout.CENTER);
-        
+
         contentArea.addKeyListener(new PopupContentsUpdater());
-        
+
         contentArea.addMouseListener(listener);
-        
+
         //Set to false by listener but should be true
         contentArea.setOpaque(true);
-        
+
         //set the font sizes so that they look more like adobes popups
         final Font titFont = titleBar.getFont();
 
@@ -218,15 +219,15 @@ public class PdfSwingPopup extends JInternalFrame{
             }
         });
     }
-    
+
     @Override
-    public void updateUI(){
+    public void updateUI() {
         super.updateUI();
         //remove title bar from internalframe so its looks as we want
         ((javax.swing.plaf.basic.BasicInternalFrameUI) this.getUI()).setNorthPane(null);
     }
-    
-    public void setColor(final float[] col){
+
+    public void setColor(final float[] col) {
         //setup background color
         Color bgColor = null;
         if (col != null) {
@@ -243,48 +244,48 @@ public class PdfSwingPopup extends JInternalFrame{
             titleBar.setBackground(bgColor);
         }
     }
-    
+
     //Done this way so our listener to immediately tell if popup and drag accordingly
     private class PopupTitleBar extends JTextArea {
-        
-        public PopupTitleBar(final String title){
+
+        public PopupTitleBar(final String title) {
             super(title);
-            
+
             final PopupDragListener listener = new PopupDragListener();
             //add our drag listener so it acts like an internal frame
             addMouseMotionListener(listener);
             addMouseListener(listener);
         }
     }
-    
-        //Done this way so our listener to immediately tell if popup and drag accordingly
+
+    //Done this way so our listener to immediately tell if popup and drag accordingly
     private class PopupContentArea extends JTextArea {
-        
-        public PopupContentArea(final String contents){
+
+        public PopupContentArea(final String contents) {
             super(contents);
-            
+
             final PopupContentsUpdater listener = new PopupContentsUpdater();
             //add our drag listener so it acts like an internal frame
             addKeyListener(listener);
         }
     }
-    
+
     private class PopupDragListener extends MouseInputAdapter {
         Point clickStart;
-        
+
         @Override
         public void mouseDragged(final MouseEvent e) {
-            if(clickStart==null){
+            if (clickStart == null) {
                 clickStart = e.getPoint();
             }
             //move the popup as the user drags the mouse
             final Point pt = e.getPoint();
             final Point curLoc = getLocation();
-            final int x = pt.x-clickStart.x;
-            final int y = pt.y-clickStart.y;
+            final int x = pt.x - clickStart.x;
+            final int y = pt.y - clickStart.y;
             curLoc.translate(x, y);
             setLocation(curLoc);
-            
+
             final float[] rect = formObject.getFloatArray(PdfDictionary.Rect);
             rect[0] += (x / formObject.getCurrentScaling());
             rect[2] += (x / formObject.getCurrentScaling());
@@ -292,49 +293,49 @@ public class PdfSwingPopup extends JInternalFrame{
             rect[3] -= (y / formObject.getCurrentScaling());
             formObject.setFloatArray(PdfDictionary.Rect, rect);
         }
-        
+
         @Override
         public void mousePressed(final MouseEvent e) {
             clickStart = e.getPoint();
         }
-        
+
         @Override
         public void mouseReleased(final MouseEvent e) {
             clickStart = null;
         }
     }
-    
-    private class PopupContentsUpdater extends KeyAdapter{
-        
+
+    private class PopupContentsUpdater extends KeyAdapter {
+
         @Override
-        public void keyReleased(final KeyEvent e){
+        public void keyReleased(final KeyEvent e) {
             PdfObject parentObj = formObject.getParentPdfObj();
 
             if (parentObj == null) {
                 parentObj = formObject;
             }
-            
+
             parentObj.setTextStreamValue(PdfDictionary.Contents, StringUtils.toBytes(contentArea.getText()));
         }
     }
-    
+
     @Override
     /*
      * Set the font for the popup window.
      * The font is modified in size for the title and the content.
      */
-    public void setFont(final Font f){
-    	super.setFont(f);
+    public void setFont(final Font f) {
+        super.setFont(f);
 
-    	final int fontSize = f.getSize();
+        final int fontSize = f.getSize();
 
-    	if(titleBar!=null) {
+        if (titleBar != null) {
             titleBar.setFont(titleBar.getFont().deriveFont((float) fontSize - 1));
         }
-    	
-    	if(contentArea!=null && titleBar!=null) {
+
+        if (contentArea != null && titleBar != null) {
             contentArea.setFont(titleBar.getFont().deriveFont((float) fontSize - 2));
         }
 
     }
-    }
+}

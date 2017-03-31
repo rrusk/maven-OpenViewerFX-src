@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer.commands;
 
 import java.net.URL;
+
 import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.MouseMode;
 import org.jpedal.gui.GUIFactory;
@@ -48,10 +49,10 @@ public class TextSelect {
             //Disable Pan Mode
             currentGUI.getMenuItems().setCheckMenuItemSelected(Commands.PANMODE, false);
             currentGUI.getButtons().getButton(Commands.SNAPSHOT).setEnabled(true);
-            
+
             //Set mouse mode
             mouseMode.setMouseMode(MouseMode.MOUSE_MODE_TEXT_SELECT);
-            
+
             //Update buttons
             final URL url = currentGUI.getGUICursor().getURLForImage("mouse_select.png");
             if (url != null) {

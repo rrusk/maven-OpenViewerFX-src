@@ -37,6 +37,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.color.ShearedTexturePaint;
@@ -53,28 +54,28 @@ import org.jpedal.parser.image.PDFObjectToImage;
 import org.jpedal.render.DynamicVectorRenderer;
 
 public class F {
-    
-    
+
+
     public static void execute(final int tokenNumber, final boolean isStar, final int formLevel, final PdfShape currentDrawShape, final GraphicsState gs,
-            final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final DynamicVectorRenderer current, final ParserOptions parserOptions, final float multiplyer) {
-  
+                               final PdfObjectCache cache, final PdfObjectReader currentPdfFile, final DynamicVectorRenderer current, final ParserOptions parserOptions, final float multiplyer) {
+
         //ignore transparent white if group set
-        if((formLevel>1 && cache.groupObj!=null && !cache.groupObj.getBoolean(PdfDictionary.K) && gs.getAlphaMax(GraphicsState.FILL)>0.99f && (gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceCMYK))
-            
-            && (gs.nonstrokeColorSpace.getColor().getRGB()==-1)) {
-                currentDrawShape.resetPath();
-                return;
-            }
+        if ((formLevel > 1 && cache.groupObj != null && !cache.groupObj.getBoolean(PdfDictionary.K) && gs.getAlphaMax(GraphicsState.FILL) > 0.99f && (gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceCMYK))
+
+                && (gs.nonstrokeColorSpace.getColor().getRGB() == -1)) {
+            currentDrawShape.resetPath();
+            return;
+        }
         
         
         /*
          * if SMask with this color, we need to ignore
          *  (only case of white with BC of 1,1,1 at present for 11jun/12.pdf)
          */
-        if(gs.SMask!=null && gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceCMYK){
-            
-            final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
-            if(gs.nonstrokeColorSpace.getColor().getRGB()==-16777216 && BC!=null && BC[0]==1.0f) {
+        if (gs.SMask != null && gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceCMYK) {
+
+            final float[] BC = gs.SMask.getFloatArray(PdfDictionary.BC);
+            if (gs.nonstrokeColorSpace.getColor().getRGB() == -16777216 && BC != null && BC[0] == 1.0f) {
                 currentDrawShape.resetPath();
                 return;
             }
@@ -84,141 +85,141 @@ public class F {
          * if SMask with this color, we need to ignore
          *  (only case of white with BC of 1,1,1 at present for 11jun/4.pdf)
          */
-        if(gs.SMask!=null && gs.nonstrokeColorSpace.getID() == ColorSpaces.ICC){
-        
-            final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
-            if(gs.nonstrokeColorSpace.getColor().getRGB()==-16777216 && BC!=null && BC[0]==0.0f) {
+        if (gs.SMask != null && gs.nonstrokeColorSpace.getID() == ColorSpaces.ICC) {
+
+            final float[] BC = gs.SMask.getFloatArray(PdfDictionary.BC);
+            if (gs.nonstrokeColorSpace.getColor().getRGB() == -16777216 && BC != null && BC[0] == 0.0f) {
                 currentDrawShape.resetPath();
                 return;
             }
         }
-        
+
         //replace F with image if soft mask set (see randomHouse/9781609050917_DistX.pdf)
-        if(gs.SMask!=null && gs.SMask.getDictionary(PdfDictionary.G)!=null && 
-                (gs.nonstrokeColorSpace.getID()==ColorSpaces.DeviceRGB || gs.nonstrokeColorSpace.getID()==ColorSpaces.DeviceCMYK)){
-            
-            if (isStar){
+        if (gs.SMask != null && gs.SMask.getDictionary(PdfDictionary.G) != null &&
+                (gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceRGB || gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceCMYK)) {
+
+            if (isStar) {
                 currentDrawShape.setEVENODDWindingRule();
-            }else {
+            } else {
                 currentDrawShape.setNONZEROWindingRule();
             }
-            
+
             currentDrawShape.closeShape();
-            final Shape currentShape =currentDrawShape.generateShapeFromPath(gs.CTM,gs.getLineWidth(), Cmd.F);
-            
-            if(currentShape == null){
-                createSMaskFill(gs,currentPdfFile, current, parserOptions,formLevel, multiplyer);
-            }else{
+            final Shape currentShape = currentDrawShape.generateShapeFromPath(gs.CTM, gs.getLineWidth(), Cmd.F);
+
+            if (currentShape == null) {
+                createSMaskFill(gs, currentPdfFile, current, parserOptions, formLevel, multiplyer);
+            } else {
                 final BufferedImage result = getSmaskAppliedImage(gs, currentPdfFile, parserOptions, formLevel, multiplyer);
-                final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
+                final PdfObject maskObj = gs.SMask.getDictionary(PdfDictionary.G);
                 currentPdfFile.checkResolved(maskObj);
-                final float[] BBox= maskObj.getFloatArray(PdfDictionary.BBox);
-                final int fx=(int)(BBox[0]+0.5f);
-                final int fy=(int)(BBox[1]+0.5f);
-                
+                final float[] BBox = maskObj.getFloatArray(PdfDictionary.BBox);
+                final int fx = (int) (BBox[0] + 0.5f);
+                final int fy = (int) (BBox[1] + 0.5f);
+
                 final Rectangle rect = new Rectangle(fx, fy, result.getWidth(), result.getHeight());
-                
+
                 final GraphicsState gs1 = gs.deepCopy();
                 gs1.setNonstrokeColor(new ShearedTexturePaint(result, rect, new AffineTransform(gs.CTM[0][0], gs.CTM[0][1], gs.CTM[1][0], gs.CTM[1][1], gs.CTM[2][0], gs.CTM[2][1])));
-                gs1.setFillType(GraphicsState.FILL);               
+                gs1.setFillType(GraphicsState.FILL);
                 gs1.setStrokeColor(gs.strokeColorSpace.getColor());
-                
-                current.drawShape(currentDrawShape,gs1, Cmd.F);
-                                
+
+                current.drawShape(currentDrawShape, gs1, Cmd.F);
+
             }
 
             currentDrawShape.resetPath();
-            
+
             return;
         }
-        
+
         // (see randomHouse/9781609050917_DistX.pdf)
 //if(gs.SMask!=null && (gs.SMask.getGeneralType(PdfDictionary.SMask)==PdfDictionary.None || gs.SMask.getGeneralType(PdfDictionary.SMask)==PdfDictionary.Multiply) && gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceRGB && gs.getOPM()==1.0f && gs.nonstrokeColorSpace.getColor().getRGB()==-16777216){
-        
-        if(gs.SMask!=null && gs.SMask.getGeneralType(PdfDictionary.SMask)!=PdfDictionary.None && gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceRGB && gs.getOPM()==1.0f && gs.nonstrokeColorSpace.getColor().getRGB()==-16777216){
+
+        if (gs.SMask != null && gs.SMask.getGeneralType(PdfDictionary.SMask) != PdfDictionary.None && gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceRGB && gs.getOPM() == 1.0f && gs.nonstrokeColorSpace.getColor().getRGB() == -16777216) {
             currentDrawShape.resetPath();
             return;
         }
-        
-        if(parserOptions.isLayerVisible()){
-            
+
+        if (parserOptions.isLayerVisible()) {
+
             //set Winding rule
-            if (isStar){
+            if (isStar) {
                 currentDrawShape.setEVENODDWindingRule();
-            }else {
+            } else {
                 currentDrawShape.setNONZEROWindingRule();
             }
-            
+
             currentDrawShape.closeShape();
-            
-            Shape currentShape=null;
-            Object fxPath=null;
+
+            Shape currentShape = null;
+            Object fxPath = null;
             
             /*
              * fx alternative
              */
-            if(parserOptions.useJavaFX()){
-                fxPath=currentDrawShape.getPath();
-            }else{
+            if (parserOptions.useJavaFX()) {
+                fxPath = currentDrawShape.getPath();
+            } else {
                 //generate swing shape and stroke and status. Type required to check if EvenOdd rule emulation required.
-                currentShape =currentDrawShape.generateShapeFromPath(gs.CTM,gs.getLineWidth(), Cmd.F);
+                currentShape = currentDrawShape.generateShapeFromPath(gs.CTM, gs.getLineWidth(), Cmd.F);
             }
-            
-            boolean hasShape=currentShape!=null || fxPath!=null;
-            
+
+            boolean hasShape = currentShape != null || fxPath != null;
+
             //track for user if required
-            final ShapeTracker customShapeTracker=parserOptions.getCustomShapeTraker();
-            if(customShapeTracker!=null){
-                
-                if(isStar) {
+            final ShapeTracker customShapeTracker = parserOptions.getCustomShapeTraker();
+            if (customShapeTracker != null) {
+
+                if (isStar) {
                     customShapeTracker.addShape(tokenNumber, Cmd.Fstar, currentShape, gs.nonstrokeColorSpace.getColor(), gs.strokeColorSpace.getColor());
                 } else {
                     customShapeTracker.addShape(tokenNumber, Cmd.F, currentShape, gs.nonstrokeColorSpace.getColor(), gs.strokeColorSpace.getColor());
                 }
-                
+
             }
-            
+
             //do not paint white CMYK in overpaint mode
-            if(hasShape && gs.getAlpha(GraphicsState.FILL)<1 &&
-                    gs.nonstrokeColorSpace.getID()==ColorSpaces.DeviceN && gs.getOPM()==1.0f &&
-                    gs.nonstrokeColorSpace.getColor().getRGB()==-16777216 ){
-                
+            if (hasShape && gs.getAlpha(GraphicsState.FILL) < 1 &&
+                    gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceN && gs.getOPM() == 1.0f &&
+                    gs.nonstrokeColorSpace.getColor().getRGB() == -16777216) {
+
                 //System.out.println(gs.getNonStrokeAlpha());
                 //System.out.println(nonstrokeColorSpace.getAlternateColorSpace()+" "+nonstrokeColorSpace.getColorComponentCount()+" "+nonstrokeColorSpace.pantoneName);
-                boolean ignoreTransparent =true; //assume true and disprove
-                final float[] raw=gs.nonstrokeColorSpace.getRawValues();
-                
-                if(raw!=   null){
-                    final int count=raw.length;
-                    for(int ii=0;ii<count;ii++){
-                        
+                boolean ignoreTransparent = true; //assume true and disprove
+                final float[] raw = gs.nonstrokeColorSpace.getRawValues();
+
+                if (raw != null) {
+                    final int count = raw.length;
+                    for (int ii = 0; ii < count; ii++) {
+
                         //System.out.println(ii+"="+raw[ii]+" "+count);
-                        
-                        if(raw[ii]>0){
-                            ignoreTransparent =false;
-                            ii=count;
+
+                        if (raw[ii] > 0) {
+                            ignoreTransparent = false;
+                            ii = count;
                         }
                     }
                 }
-                
-                if(ignoreTransparent){
-                    hasShape=false;
+
+                if (ignoreTransparent) {
+                    hasShape = false;
                 }
             }
-            
+
             //save for later
-            if (hasShape && parserOptions.isRenderPage()){
+            if (hasShape && parserOptions.isRenderPage()) {
                 gs.setStrokeColor(gs.strokeColorSpace.getColor());
                 gs.setNonstrokeColor(gs.nonstrokeColorSpace.getColor());
                 gs.setFillType(GraphicsState.FILL);
-                
-                if(parserOptions.useJavaFX()){
-                    current.drawShape(fxPath,gs);
-                }else{
-                    current.drawShape(currentDrawShape,gs, Cmd.F);
 
-                    if (current.isHTMLorSVG() && cache.groupObj==null) {
-                        current.eliminateHiddenText(currentShape, gs, currentDrawShape.getSegmentCount(),false);
+                if (parserOptions.useJavaFX()) {
+                    current.drawShape(fxPath, gs);
+                } else {
+                    current.drawShape(currentDrawShape, gs, Cmd.F);
+
+                    if (current.isHTMLorSVG() && cache.groupObj == null) {
+                        current.eliminateHiddenText(currentShape, gs, currentDrawShape.getSegmentCount(), false);
                     }
                 }
             }
@@ -226,40 +227,40 @@ public class F {
         //always reset flag
         currentDrawShape.setClip(false);
         currentDrawShape.resetPath(); // flush all path ops stored
-        
+
     }
-    
-    
+
+
     private static BufferedImage getSmaskAppliedImage(final GraphicsState gs, final PdfObjectReader currentPdfFile,
-            final ParserOptions parserOptions, final int formLevel, final float multiplyer) {
-         final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
+                                                      final ParserOptions parserOptions, final int formLevel, final float multiplyer) {
+        final PdfObject maskObj = gs.SMask.getDictionary(PdfDictionary.G);
         currentPdfFile.checkResolved(maskObj);
-        final float[] BBox= maskObj.getFloatArray(PdfDictionary.BBox);
-        final int fx=(int)(BBox[0]+0.5f);
-        final int fy=(int)(BBox[1]+0.5f);
-        final int fw=(int)(BBox[2]+0.5f);
-        final int fh=(int)(BBox[3]+0.5f);
-        
-        final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions,formLevel, multiplyer,false,1f);
-        
+        final float[] BBox = maskObj.getFloatArray(PdfDictionary.BBox);
+        final int fx = (int) (BBox[0] + 0.5f);
+        final int fy = (int) (BBox[1] + 0.5f);
+        final int fw = (int) (BBox[2] + 0.5f);
+        final int fh = (int) (BBox[3] + 0.5f);
+
+        final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions, formLevel, multiplyer, false, 1f);
+
         final PdfPaint prev = gs.nonstrokeColorSpace.getColor();
         final int prevInt = prev.getRGB();
-        		
-        final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
+
+        final float[] BC = gs.SMask.getFloatArray(PdfDictionary.BC);
         int brgb = 0;
-		boolean hasBC = false;
-        if(BC!=null){
+        boolean hasBC = false;
+        if (BC != null) {
             gs.nonstrokeColorSpace.setColor(BC, BC.length);
             brgb = gs.nonstrokeColorSpace.getColor().getRGB();
-            gs.nonstrokeColorSpace.setColor(prev);			
-			hasBC = true;
-        }       
+            gs.nonstrokeColorSpace.setColor(prev);
+            hasBC = true;
+        }
         final int pa = (prevInt >>> 24);
 //		int ba = ((brgb >> 24) & 0xff);
         final int br = ((brgb >> 16) & 0xff);
         final int bg = ((brgb >> 8) & 0xff);
         final int bb = (brgb & 0xff);
-		
+
         final BufferedImage result = new BufferedImage(smaskImage.getWidth(), smaskImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
         final int[] sPixels = ((DataBufferInt) smaskImage.getRaster().getDataBuffer()).getData();
         final int[] dPixels = ((DataBufferInt) result.getRaster().getDataBuffer()).getData();
@@ -268,71 +269,70 @@ public class F {
             final int sa = ((sargb >>> 24) & 0xff);
             int sr = ((sargb >> 16) & 0xff);
             int sg = ((sargb >> 8) & 0xff);
-            int sb = (sargb & 0xff);            
-			if(hasBC){
-				if (sa == 0) {
-					sr = br;
-					sg = bg;
-					sb = bb;
-				} else if (sa < 255) {
-					final int alpha_ = 255 - sa;
-					sr = (sr * sa + br * alpha_) >> 8;
-					sg = (sg * sa + bg * alpha_) >> 8;
-					sb = (sb * sa + bb * alpha_) >> 8;
-				}
-			}
-            
+            int sb = (sargb & 0xff);
+            if (hasBC) {
+                if (sa == 0) {
+                    sr = br;
+                    sg = bg;
+                    sb = bb;
+                } else if (sa < 255) {
+                    final int alpha_ = 255 - sa;
+                    sr = (sr * sa + br * alpha_) >> 8;
+                    sg = (sg * sa + bg * alpha_) >> 8;
+                    sb = (sb * sa + bb * alpha_) >> 8;
+                }
+            }
+
             int y = (sr * 77) + (sg * 152) + (sb * 28);
-			y = ( pa * y ) >> 16;
+            y = (pa * y) >> 16;
             dPixels[i] = (y << 24) | (prevInt & 0xffffff);
         }
-		
+
         smaskImage.flush();
         return result;
     }
-    
-    
-    
+
+
     /**
      * make image from SMask and colour in with fill colour to simulate effect
      */
     private static void createSMaskFill(final GraphicsState gs, final PdfObjectReader currentPdfFile,
-            final DynamicVectorRenderer current, final ParserOptions parserOptions, final int formLevel, final float multiplyer) {
-        
-        final PdfObject maskObj=gs.SMask.getDictionary(PdfDictionary.G);
+                                        final DynamicVectorRenderer current, final ParserOptions parserOptions, final int formLevel, final float multiplyer) {
+
+        final PdfObject maskObj = gs.SMask.getDictionary(PdfDictionary.G);
         currentPdfFile.checkResolved(maskObj);
-        final float[] BBox;//size
-        BBox= maskObj.getFloatArray(PdfDictionary.BBox);
+        final float[] BBox; //size
+        BBox = maskObj.getFloatArray(PdfDictionary.BBox);
         
         /*get dimensions as an image*/
-        int fx=(int)(BBox[0]+0.5f);
-        final int fy=(int)(BBox[1]+0.5f);
-        final int fw=(int)(BBox[2]+0.5f);
-        final int fh=(int)(BBox[3]+0.5f);
-        
+        int fx = (int) (BBox[0] + 0.5f);
+        final int fy = (int) (BBox[1] + 0.5f);
+        final int fw = (int) (BBox[2] + 0.5f);
+        final int fh = (int) (BBox[3] + 0.5f);
+
         //check x,y offsets and factor in
-        if(fx<0) {
+        if (fx < 0) {
             fx = 0;
         }
         
         /*
          * get the SMAsk
          */
-        final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions,formLevel, multiplyer,false,1f);
+        final BufferedImage smaskImage = PDFObjectToImage.getImageFromPdfObject(maskObj, fx, fw, fy, fh, currentPdfFile, parserOptions, formLevel, multiplyer, false, 1f);
         
         
         /*
          * draw the shape as image
          */
         final GraphicsState gs1 = gs.deepCopy();
-        gs1.CTM=new float[][]{{smaskImage.getWidth(),0,1},{0,-smaskImage.getHeight(),1},{0,0,0}};
-        gs1.x=fx;
-        gs1.y=fy;
-        
+        gs1.CTM = new float[][]{{smaskImage.getWidth(), 0, 1}, {0, -smaskImage.getHeight(), 1}, {0, 0, 0}};
+        gs1.x = fx;
+        gs1.y = fy;
+
         //add as image
-        gs1.CTM[2][0]= gs1.x;
-        gs1.CTM[2][1]= gs1.y;
-        
+        gs1.CTM[2][0] = gs1.x;
+        gs1.CTM[2][1] = gs1.y;
+
         //old method useful for testing purposes
         if (1 == 2) {
             gs1.setBMValue(PdfDictionary.SMask);
@@ -342,18 +342,18 @@ public class F {
 
         //now do the smasking in image
         final BufferedImage result;
-        
+
         final PdfPaint prev = gs.nonstrokeColorSpace.getColor();
         final int prevInt = prev.getRGB();
-        
-        final float[] BC=gs.SMask.getFloatArray(PdfDictionary.BC);
+
+        final float[] BC = gs.SMask.getFloatArray(PdfDictionary.BC);
         int brgb = 0;
-        if(BC!=null){
+        if (BC != null) {
             gs.nonstrokeColorSpace.setColor(BC, BC.length);
             brgb = gs.nonstrokeColorSpace.getColor().getRGB();
             gs.nonstrokeColorSpace.setColor(prev);
-        }       
-            
+        }
+
         final int br = ((brgb >> 16) & 0xff);
         final int bg = ((brgb >> 8) & 0xff);
         final int bb = (brgb & 0xff);
@@ -366,7 +366,7 @@ public class F {
             int sa = ((sargb >>> 24) & 0xff);
             int sr = ((sargb >> 16) & 0xff);
             int sg = ((sargb >> 8) & 0xff);
-            int sb = (sargb & 0xff);            
+            int sb = (sargb & 0xff);
             if (sa == 0) {
                 sr = br;
                 sg = bg;
@@ -380,12 +380,12 @@ public class F {
             final int y = (sr * 77) + (sg * 152) + (sb * 28);
             sa = (sa * y) >> 16;
             dPixels[i] = (sa << 24) | (prevInt & 0xffffff);
-        }        
-       
-        current.drawImage(parserOptions.getPageNumber(),result, gs1,false, "F", -1);
-        
+        }
+
+        current.drawImage(parserOptions.getPageNumber(), result, gs1, false, "F", -1);
+
         smaskImage.flush();
-        
+
     }
-    
+
 }

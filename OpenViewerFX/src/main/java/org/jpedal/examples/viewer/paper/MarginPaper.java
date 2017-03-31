@@ -41,8 +41,8 @@ public class MarginPaper extends Paper {
     public void setMinImageableArea(final double x, final double y, final double w, final double h) {
         this.minX = x;
         this.minY = y;
-        this.maxRX = x+w;
-        this.maxBY = y+h;
+        this.maxRX = x + w;
+        this.maxBY = y + h;
         super.setImageableArea(minX, minY, maxRX, maxBY);
     }
 
@@ -55,10 +55,10 @@ public class MarginPaper extends Paper {
         if (y < minY) {
             y = minY;
         }
-        if (x+w > maxRX) {
+        if (x + w > maxRX) {
             w = maxRX - x;
         }
-        if (y+h > maxBY) {
+        if (y + h > maxBY) {
             h = maxBY - y;
         }
 

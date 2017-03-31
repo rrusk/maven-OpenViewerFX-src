@@ -45,7 +45,6 @@ import org.jpedal.objects.PdfClip;
 import org.jpedal.objects.PdfShape;
 
 /**
- *
  * @author markee
  */
 public class JavaFXSupportImpl extends JavaFXSupport {
@@ -63,29 +62,29 @@ public class JavaFXSupportImpl extends JavaFXSupport {
         } else {
             currentGlyph = new TTGlyphFX(currentGlyf, fontTable, currentHmtx, idx, unitsPerEm, baseFontName);
         }
-        
+
         return currentGlyph;
     }
-    
+
     @Override
     public PdfGlyph getGlyph(final float[] x, final float[] y, final float[] x2, final float[] y2, final float[] x3, final float[] y3,
                              final float ymin, final int end, final int[] commands) {
-       return new T1GlyphFX(x,y,x2,y2,x3,y3,ymin,end,commands);
+        return new T1GlyphFX(x, y, x2, y2, x3, y3, ymin, end, commands);
     }
-    
+
     @Override
     public Object getCommandHandler(final Object currentCommands) {
-        return new JavaFXCommandListener((Commands)currentCommands);
+        return new JavaFXCommandListener((Commands) currentCommands);
     }
-                
+
     @Override
     public PdfShape getFXShape() {
         return new JavaFXShape();
     }
-    
+
     @Override
     public PdfClip getFXClip() {
         return new FXClip();
     }
-    
+
 }

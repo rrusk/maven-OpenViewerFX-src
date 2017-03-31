@@ -33,7 +33,6 @@
 package org.jpedal.external;
 
 /**
- *
  * @author markee
  */
 @SuppressWarnings("ALL")
@@ -50,5 +49,5 @@ public interface ErrorTracker {
     public void finishedPageDecoding(int rawPage);
 
     public void startedPageDecoding(int rawPage);
-    
+
 }

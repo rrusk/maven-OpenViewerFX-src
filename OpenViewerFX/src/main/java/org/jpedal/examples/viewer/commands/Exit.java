@@ -36,6 +36,7 @@ import java.awt.Component;
 import java.awt.Window;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.display.GUIThumbnailPanel;
@@ -59,7 +60,7 @@ public class Exit {
         if (args == null) {
             if (Printer.isPrinting()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerStillPrinting.text"));
-            }else{
+            } else {
                 exit(thumbnails, currentGUI, commonValues, decode_pdf, properties);
             }
         }
@@ -78,7 +79,7 @@ public class Exit {
         /*
          * create the dialog
          */
-        if(LogWriter.isRunningFromIDE){
+        if (LogWriter.isRunningFromIDE) {
             final int choice;
             if (!org.jpedal.DevFlags.GUITESTINGINPROGRESS && currentGUI.confirmClose()) {
                 choice = javax.swing.JOptionPane.showConfirmDialog(null, new javax.swing.JLabel(Messages.getMessage("PdfViewerExiting")),
@@ -91,12 +92,12 @@ public class Exit {
                 return;
             }
 
-            if(decode_pdf.getDisplayView()==Display.PAGEFLOW){
+            if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
                 decode_pdf.getPages().stopGeneratingPage();
             }
         }
 
-        
+
         // cleanup
         decode_pdf.closePdfFile();
 
@@ -104,8 +105,8 @@ public class Exit {
         try {
             properties.setValue("lastDocumentPage", String.valueOf(commonValues.getCurrentPage()));
             if (properties.getValue("trackViewerSize").equalsIgnoreCase("true")) {
-                properties.setValue("startViewerWidth", String.valueOf(((Component)currentGUI.getFrame()).getWidth()));
-                properties.setValue("startViewerHeight", String.valueOf(((Component)currentGUI.getFrame()).getHeight()));
+                properties.setValue("startViewerWidth", String.valueOf(((Component) currentGUI.getFrame()).getWidth()));
+                properties.setValue("startViewerHeight", String.valueOf(((Component) currentGUI.getFrame()).getHeight()));
             }
 
             if (properties.getValue("trackScaling").equalsIgnoreCase("true")) {
@@ -121,7 +122,7 @@ public class Exit {
             }
 
             if (properties.getValue("trackSelectedSideTab").equalsIgnoreCase("true")) {
-                final JTabbedPane tabs = (JTabbedPane)currentGUI.getSideTabBar();
+                final JTabbedPane tabs = (JTabbedPane) currentGUI.getSideTabBar();
                 if (DecoderOptions.isRunningOnMac) {
                     properties.setValue("startSelectedSideTab", tabs.getTitleAt(tabs.getSelectedIndex()));
                 } else {
@@ -140,17 +141,17 @@ public class Exit {
 
         //formClickTest needs this so that it does not exit after first test.
         if (org.jpedal.DevFlags.GUITESTINGINPROGRESS || !SharedViewer.exitOnClose) {
-            
-            ((Component)currentGUI.getFrame()).setVisible(false);
+
+            ((Component) currentGUI.getFrame()).setVisible(false);
             if (currentGUI.getFrame() instanceof JFrame) {
                 ((Window) currentGUI.getFrame()).dispose();
             }
-            
+
             decode_pdf.dispose();
             currentGUI.dispose();
 
         } else {
-            ((Component)currentGUI.getFrame()).setVisible(false);
+            ((Component) currentGUI.getFrame()).setVisible(false);
             if (currentGUI.getFrame() instanceof JFrame) {
                 ((Window) currentGUI.getFrame()).dispose();
             }

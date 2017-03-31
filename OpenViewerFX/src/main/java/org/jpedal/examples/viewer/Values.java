@@ -33,334 +33,391 @@
 package org.jpedal.examples.viewer;
 
 import java.awt.image.BufferedImage;
+
 import org.jpedal.utils.LogWriter;
 
 
-/**provides access to values used by multiple classes*/
+/**
+ * provides access to values used by multiple classes
+ */
 public class Values {
-    
-    
+
+
     public static boolean openingTransferedFile;
-    
+
     private boolean allHighlightsShown;
-    
-    /**image if file tiff or png or jpg*/
+
+    /**
+     * image if file tiff or png or jpg
+     */
     private BufferedImage img;
-    
-    /**Multi page tiff image loading*/
+
+    /**
+     * Multi page tiff image loading
+     */
     private int tiffImageToLoad;
-    
-    /**Normal mode (works for webstart, application)*/
+
+    /**
+     * Normal mode (works for webstart, application)
+     */
     public static final int RUNNING_NORMAL = 0;
     public static final int RUNNING_APPLET = 1;
     public static final int RUNNING_WEBSTART = 2;
     public static final int RUNNING_JSP = 3;
     public static final int RUNNING_PLUGIN = 4;
-    
-    /**atomic lock for open thread*/
+
+    /**
+     * atomic lock for open thread
+     */
     private boolean fileIsURL;
-    
-    /**flag to show if an encryption library is available*/
+
+    /**
+     * flag to show if an encryption library is available
+     */
     private boolean isEncryptOnClasspath;
-    
-    /**flag to show if file opened is PDF or not*/
-    private boolean isPDF=true;
-    
-    /**flag to show if the file opened is a Tiff with multiple pages or not*/
+
+    /**
+     * flag to show if file opened is PDF or not
+     */
+    private boolean isPDF = true;
+
+    /**
+     * flag to show if the file opened is a Tiff with multiple pages or not
+     */
     private boolean isMultiTiff;
-    
-    /**allow common code to be aware if applet or webstart or JSP*/
+
+    /**
+     * allow common code to be aware if applet or webstart or JSP
+     */
     private int modeOfOperation;
-    
-    /**size of file for display*/
+
+    /**
+     * size of file for display
+     */
     private long size;
-    
-    /**directory to load files from*/
-    private  String inputDir;
-    
-    /**current page number*/
+
+    /**
+     * directory to load files from
+     */
+    private String inputDir;
+
+    /**
+     * current page number
+     */
     private int currentPage = 1;
-    
-    /**name of current file being decoded*/
+
+    /**
+     * name of current file being decoded
+     */
     private String selectedFile;
-    
-    /**flag to show that form values have been altered by user*/
+
+    /**
+     * flag to show that form values have been altered by user
+     */
     private boolean formsChanged;
 
     public int m_x1, m_y1, m_x2, m_y2;
-    
-    /**offsets to viewport if used*/
-    public int dx,dy;
-    
-    /**scaling on viewport if used*/
-    public double viewportScale=1;
-    
-    /**height of the viewport. Because everything is draw upside down we need this
-     * to get true y value*/
+
+    /**
+     * offsets to viewport if used
+     */
+    public int dx, dy;
+
+    /**
+     * scaling on viewport if used
+     */
+    public double viewportScale = 1;
+
+    /**
+     * height of the viewport. Because everything is draw upside down we need this
+     * to get true y value
+     */
     public int maxViewY;
-    
-    /**number of pages in current pdf
-     * (inclusive so 2 page doc would have 2 with first page as 1)*/
+
+    /**
+     * number of pages in current pdf
+     * (inclusive so 2 page doc would have 2 with first page as 1)
+     */
     private int pageCount = 1;
     private int maxNoOfMultiViewers;
-    
-    /**boolean lock to stop multiple access*/
+
+    /**
+     * boolean lock to stop multiple access
+     */
     public static boolean isProcessing;
-    
+
     private boolean isSearching;
-    
-    public Values(){
-        
-        String altSP=System.getProperty("org.jpedal.securityprovider");
-        
+
+    public Values() {
+
+        String altSP = System.getProperty("org.jpedal.securityprovider");
+
         try {
-            if(altSP==null) {
+            if (altSP == null) {
                 altSP = "/org/bouncycastle/";
             }
-            
+
             isEncryptOnClasspath = getClass().getResource(altSP) != null;
-        }catch(final Exception e){
-            LogWriter.writeLog("Exception in encryption "+e);
-            
-            isEncryptOnClasspath=false;
-        }catch(final Error e){
-            LogWriter.writeLog("Exception in encryption "+e);
-            
-            isEncryptOnClasspath=false;
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception in encryption " + e);
+
+            isEncryptOnClasspath = false;
+        } catch (final Error e) {
+            LogWriter.writeLog("Exception in encryption " + e);
+
+            isEncryptOnClasspath = false;
         }
     }
-    
+
     /**
-     *flag to show isProcessing so Viewer can lock actions while decoding page
+     * flag to show isProcessing so Viewer can lock actions while decoding page
+     *
      * @return the isProcessing flag
      */
     public static boolean isProcessing() {
         return isProcessing;
     }
-    
+
     /**
      * set to show decoding page
+     *
      * @param isProcessing value of the decoding page
      */
     public static void setProcessing(final boolean isProcessing) {
         Values.isProcessing = isProcessing;
     }
-    
+
     /**
      * Set to show a search is being performed
-     * @param isSearching 
+     *
+     * @param isSearching
      */
-    public void setIsSearching(final boolean isSearching){
+    public void setIsSearching(final boolean isSearching) {
         this.isSearching = isSearching;
     }
-    
+
     /**
      * Flag to show if a search is currently being performed
+     *
      * @return True is currently searching
      */
-    public boolean isSearching(){
+    public boolean isSearching() {
         return isSearching;
     }
-    
-    
+
+
     public boolean isEncrypOnClasspath() {
         return isEncryptOnClasspath;
     }
-    
+
     /**
      * show if file is type PDF
-     * @return the isPDF 
+     *
+     * @return the isPDF
      */
     public boolean isPDF() {
         return isPDF;
     }
-    
-    public static void setOpeningTransferedFile(final boolean b){
+
+    public static void setOpeningTransferedFile(final boolean b) {
         openingTransferedFile = b;
     }
-    
-    public static boolean getOpeningTransferedFile(){
+
+    public static boolean getOpeningTransferedFile() {
         return openingTransferedFile;
     }
-    
+
     /**
      * set flag to show if file is PDF or other
+     *
      * @param isPDF To find if file is PDF or other
      */
     public void setPDF(final boolean isPDF) {
         this.isPDF = isPDF;
     }
-    
+
     /**
-     *get current page number (1 - pageCount)
+     * get current page number (1 - pageCount)
+     *
      * @return the currentPage
      */
     public int getCurrentPage() {
         return currentPage;
     }
-    
+
     /**
      * set current page number (1 - pageCount)
+     *
      * @param currentPage The new currentPage
      */
     public void setCurrentPage(final int currentPage) {
         this.currentPage = currentPage;
     }
-    
+
     /**
      * get directory to use as input root
+     *
      * @return the inputDir
      */
     public String getInputDir() {
-        
-        if(inputDir==null) {
+
+        if (inputDir == null) {
             inputDir = System.getProperty("user.dir");
         }
-        
+
         return inputDir;
     }
-    
+
     /**
      * set directory to use as input root
+     *
      * @param inputDir The new directory used as input root
      */
     public void setInputDir(final String inputDir) {
         this.inputDir = inputDir;
     }
-    
+
     /**
      * get current filename
+     *
      * @return the selectedFile
      */
     public String getSelectedFile() {
         return selectedFile;
     }
-    
+
     /**
      * set current filename
+     *
      * @param selectedFile The current filename
      */
     public void setSelectedFile(final String selectedFile) {
         this.selectedFile = selectedFile;
     }
-    
+
     /**
-     * 
      * @param b is a boolean and sets fileIsURL
      */
-    public void setFileIsURL(final boolean b){
+    public void setFileIsURL(final boolean b) {
         fileIsURL = b;
     }
+
     /**
-     * 
      * @return boolean fileIsURL
      */
-    public boolean getFileIsURL(){
+    public boolean getFileIsURL() {
         return fileIsURL;
     }
-    
+
     /**
      * @return if user has edited forms
      */
     public boolean isFormsChanged() {
         return formsChanged;
     }
-    
+
     /**
      * set user has edited forms
+     *
      * @param formsChanged the value of edited forms
      */
     public void setFormsChanged(final boolean formsChanged) {
         this.formsChanged = formsChanged;
     }
-    
+
     /**
      * get number of pages
+     *
      * @return the number of pages
      */
     public int getPageCount() {
         return pageCount;
     }
-    
+
     /**
      * set number of pages
+     *
      * @param pageCount The new number of pages
      */
     public void setPageCount(final int pageCount) {
         this.pageCount = pageCount;
     }
-    
+
     /**
      * get current file size in kilobytes
+     *
      * @return the size of the file in kilobytes
      */
     public long getFileSize() {
         return size;
     }
-    
+
     /**
      * set current file size in kilobytes
+     *
      * @param size The new size of the file in kilobytes
      */
     public void setFileSize(final long size) {
         this.size = size;
     }
 
-    
+
     /**
      * get modeOfOperation (RUNNING_NORMAL,RUNNING_APPLET,RUNNING_WEBSTART,RUNNING_JSP)
+     *
      * @return the modeOfOperation
      */
     public int getModeOfOperation() {
         return modeOfOperation;
     }
-    
+
     /**
      * set modeOfOperation (RUNNING_NORMAL,RUNNING_APPLET,RUNNING_WEBSTART,RUNNING_JSP)
+     *
      * @param modeOfOperation The new modeOfOperation
      */
     public void setModeOfOperation(final int modeOfOperation) {
         this.modeOfOperation = modeOfOperation;
     }
-    
+
     public boolean isMultiTiff() {
         return isMultiTiff;
     }
-    
+
     public void setMultiTiff(final boolean isMultiTiff) {
         this.isMultiTiff = isMultiTiff;
     }
-    
-    public int getTiffImageToLoad(){
+
+    public int getTiffImageToLoad() {
         return tiffImageToLoad;
     }
-    
-    public void setTiffImageToLoad(final int x){
+
+    public void setTiffImageToLoad(final int x) {
         tiffImageToLoad = x;
     }
-    
+
     public void setMaxMiltiViewers(final int maxNoOfMultiViewers) {
         this.maxNoOfMultiViewers = maxNoOfMultiViewers;
     }
-    
+
     public int getMaxMiltiViewers() {
         return maxNoOfMultiViewers;
     }
-    
-    public void setAllHighlightsShown(final boolean b){
+
+    public void setAllHighlightsShown(final boolean b) {
         allHighlightsShown = b;
     }
-    
-    public boolean getAllHighlightsShown(){
+
+    public boolean getAllHighlightsShown() {
         return allHighlightsShown;
     }
-    
-    public void setBufferedImg(final BufferedImage img){
+
+    public void setBufferedImg(final BufferedImage img) {
         this.img = img;
     }
-    
-    public BufferedImage getBufferedImg(){
+
+    public BufferedImage getBufferedImg() {
         return img;
     }
-  
+
 }

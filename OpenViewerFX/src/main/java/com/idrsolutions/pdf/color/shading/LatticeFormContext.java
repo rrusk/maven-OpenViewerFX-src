@@ -43,13 +43,14 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
+
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
 /**
  *
- * 
+ *
  */
 public class LatticeFormContext implements PaintContext {
 
@@ -60,7 +61,7 @@ public class LatticeFormContext implements PaintContext {
     private final int verticesPerRow;
     private final int colCompCount;
     private final float[] decodeArr;
-//    private final float[][] CTM;
+    //    private final float[][] CTM;
     private final float[][] matrix;
     private final ArrayList<Point2D> triangles;
     private final ArrayList<Color> triColors;
@@ -83,9 +84,9 @@ public class LatticeFormContext implements PaintContext {
         verticesPerRow = shadingObject.getInt(PdfDictionary.VerticesPerRow);
         decodeArr = shadingObject.getFloatArray(PdfDictionary.Decode);
         colCompCount = shadingColorSpace.getColorComponentCount();
-        final boolean hasSmallBits = bitsPerComponent<8 || bitsPerCoordinate<8;
-        reader = new BitReader(shadingObject.getDecodedStream(),hasSmallBits);
-        
+        final boolean hasSmallBits = bitsPerComponent < 8 || bitsPerCoordinate < 8;
+        reader = new BitReader(shadingObject.getDecodedStream(), hasSmallBits);
+
         this.background = background;
         this.matrix = matrix;
         this.pageHeight = pageHeight;
@@ -112,7 +113,7 @@ public class LatticeFormContext implements PaintContext {
             pList.add(p);
             final float[] cc = {1f, 1f, 1f, 1f};
             for (int z = 0; z < colCompCount; z++) {
-                cc[z] =  reader.getFloat(bitsPerComponent);
+                cc[z] = reader.getFloat(bitsPerComponent);
             }
             final Color c = new Color(cc[0], cc[1], cc[2], cc[3]);
             cList.add(c);
@@ -171,7 +172,7 @@ public class LatticeFormContext implements PaintContext {
             final double y = t.getY();
             final float b = 0;
             final float c = 0;
-            double xx = (x) + (c * y) + tx ;
+            double xx = (x) + (c * y) + tx;
             double yy = (b * x) + y + ty;
             // convert the points to integer for better performance
             xx = (int) xx;
@@ -206,7 +207,7 @@ public class LatticeFormContext implements PaintContext {
         }
         return new Point2D.Double(x, y);
     }
-    
+
 //    private float getFloat(int bits) {
 //        float number = 0.0f;
 //        switch (bits) {
@@ -257,7 +258,7 @@ public class LatticeFormContext implements PaintContext {
 
         final int rastSize = (w * h * 4);
         final int[] data = new int[rastSize];
-        
+
         if (background != null) {
             shadingColorSpace.setColor(background, 4);
             final Color c = (Color) shadingColorSpace.getColor();
@@ -277,7 +278,7 @@ public class LatticeFormContext implements PaintContext {
             for (int x = 0; x < w; x++) {
 //                float pdfX = xStart + x;
 //                float pdfY = pageHeight - (yStart + y);
-                final float[] xy = PixelFactory.convertPhysicalToPDF(false, x, y, offX, offY, 1/scaling, xStart, yStart, 0, pageHeight);
+                final float[] xy = PixelFactory.convertPhysicalToPDF(false, x, y, offX, offY, 1 / scaling, xStart, yStart, 0, pageHeight);
                 final float pdfX = xy[0];
                 final float pdfY = xy[1];
                 int sc = 0; //shape counts

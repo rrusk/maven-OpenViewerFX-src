@@ -41,27 +41,27 @@ import java.util.Map;
  * custom optimised cloning code for speed
  */
 public class ObjectCloneFactory {
-    
-    public static byte[] cloneArray(final byte[] array){
-        
-        if(array==null) {
+
+    public static byte[] cloneArray(final byte[] array) {
+
+        if (array == null) {
             return null;
         }
-        
-        final int count=array.length;
-        
-        final byte[] returnValue=new byte[count];
-        
-        System.arraycopy(array,0,returnValue,0,count);
-        
+
+        final int count = array.length;
+
+        final byte[] returnValue = new byte[count];
+
+        System.arraycopy(array, 0, returnValue, 0, count);
+
         return returnValue;
-        
+
     }
-    
+
     public static byte[][] cloneDoubleArray(final byte[][] byteDArray) {
-        if(byteDArray == null){
+        if (byteDArray == null) {
             return null;
-        }else {
+        } else {
             final byte[][] tmp = new byte[byteDArray.length][];
             for (int b = 0; b < byteDArray.length; b++) {
                 tmp[b] = byteDArray[b].clone();
@@ -69,29 +69,29 @@ public class ObjectCloneFactory {
             return tmp;
         }
     }
-    
+
     public static BufferedImage deepCopy(final BufferedImage bi) {
-        if(bi==null) {
+        if (bi == null) {
             return null;
         }
-        
+
         final ColorModel cm = bi.getColorModel();
         final boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         final WritableRaster raster = bi.copyData(null);
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
-    
+
     public static Map<String, String> cloneMap(final Map<String, String> optValues) {
-        if(optValues!=null){
+        if (optValues != null) {
             try {
                 final Map<String, String> tmpMap = optValues.getClass().newInstance();
                 tmpMap.putAll(optValues);
                 return tmpMap;
             } catch (final Exception e) {
-                LogWriter.writeLog("Exception: "+e.getMessage());
+                LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
-        
+
         return null;
     }
 }

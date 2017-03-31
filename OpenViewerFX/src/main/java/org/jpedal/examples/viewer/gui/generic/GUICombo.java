@@ -32,30 +32,32 @@
  */
 package org.jpedal.examples.viewer.gui.generic;
 
-/**abstract version of ComboBox*/
+/**
+ * abstract version of ComboBox
+ */
 
 public interface GUICombo {
 
-	void setSelectedIndex(int defaultSelection);
+    void setSelectedIndex(int defaultSelection);
 
-	void setEditable(boolean b);
+    void setEditable(boolean b);
 
-	void setID(int id);
+    void setID(int id);
 
-	void setToolTipText(String tooltip);
+    void setToolTipText(String tooltip);
 
-	void setEnabled(boolean value);
+    void setEnabled(boolean value);
 
-	int getSelectedIndex();
+    int getSelectedIndex();
 
-	void setSelectedItem(Object index);
+    void setSelectedItem(Object index);
 
-	Object getSelectedItem();
-    
+    Object getSelectedItem();
+
     int getID();
-    
+
     void setVisibility(boolean set);
-    
+
     void setName(String name);
 
 }

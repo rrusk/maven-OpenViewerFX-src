@@ -84,7 +84,7 @@ public class General extends javax.swing.JPanel {
         issuedToBox.setBounds(80, 10, 310, 20);
         add(validFromBox);
         validFromBox.setBounds(80, 40, 310, 20);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

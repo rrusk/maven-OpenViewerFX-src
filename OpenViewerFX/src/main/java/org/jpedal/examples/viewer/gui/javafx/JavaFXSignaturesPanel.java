@@ -34,6 +34,7 @@
 package org.jpedal.examples.viewer.gui.javafx;
 
 import java.util.Iterator;
+
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -49,7 +50,6 @@ import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
 /**
- *
  * @author Simon
  */
 public class JavaFXSignaturesPanel extends Tab {
@@ -58,89 +58,95 @@ public class JavaFXSignaturesPanel extends Tab {
     final Image lock;
     static final String signedText = "The following have digitally counter-signed this document";
     static final String blankText = "The following signature fields are not signed";
-    
-    public JavaFXSignaturesPanel(){
+
+    public JavaFXSignaturesPanel() {
         final VBox content = new VBox();
         signatureTree = new TreeView<String>();
         unlock = new Image(getClass().getResource("/org/jpedal/examples/viewer/res/unlock.png").toExternalForm());
         lock = new Image(getClass().getResource("/org/jpedal/examples/viewer/res/lock.gif").toExternalForm());
-        
+
         signatureTree.setCellFactory(new Callback<TreeView<String>, TreeCell<String>>() {
-            @Override 
+            @Override
             public TreeCell<String> call(final TreeView<String> p) {
                 return new SignaturesCell();
             }
         });
-        
+
         content.getChildren().add(signatureTree);
-        
+
         setContent(content);
-        
+
     }
-    
-    public void reinitialise(final PdfDecoderInt decode_pdf, final Iterator<FormObject> signatureObjects){
+
+    /**
+     * Reinitialise and replace existing signature values with the newly provided ones
+     *
+     * @param decode_pdf       PdfDecoderInt object for the current PDF
+     * @param signatureObjects Iterator holding FormObjects of the files signature objects
+     */
+    public void reinitialise(final PdfDecoderInt decode_pdf, final Iterator<FormObject> signatureObjects) {
         signatureTree.setRoot(null);
-        
+
         final TreeItem<String> root = new TreeItem<String>("Signatures");
         final TreeItem<String> signed = new TreeItem<String>(signedText);
         final TreeItem<String> blank = new TreeItem<String>(blankText);
-        
-        
+
+
         // using getParent() == null was causing duplicate nodes to appear, so using manual checks instead
         boolean addedSigned = false;
         boolean addedBlank = false;
-        
-        
-        while (signatureObjects.hasNext()){
+
+
+        while (signatureObjects.hasNext()) {
             final FormObject formObj = signatureObjects.next();
-            
+
             final PdfObject sigObject = formObj.getDictionary(PdfDictionary.V);
-            
+
             decode_pdf.getIO().checkResolved(sigObject);
-            
-            if(sigObject == null){
-                if(!addedBlank){
+
+            if (sigObject == null) {
+                if (!addedBlank) {
                     addedBlank = true;
                     root.getChildren().add(blank);
                 }
                 final TreeItem<String> blankNode = new TreeItem<String>(formObj.getTextStreamValue(PdfDictionary.T) + " on page " + formObj.getPageNumber());
                 blank.getChildren().add(blankNode);
-                
-            }else{
-                if(!addedSigned){
-                    addedSigned=true;
+
+            } else {
+                if (!addedSigned) {
+                    addedSigned = true;
                     root.getChildren().add(signed);
                 }
                 final String name = sigObject.getTextStreamValue(PdfDictionary.Name);
-                
+
                 final TreeItem<String> owner = new TreeItem<String>("Signed by " + name);
                 signed.getChildren().add(owner);
-                
+
                 final TreeItem<String> type = new TreeItem<String>("Type");
                 owner.getChildren().add(type);
-                
+
                 String filter = null;
-                
+
                 final PdfArrayIterator filters = sigObject.getMixedArray(PdfDictionary.Filter);
-                
-                if(filters != null && filters.hasMoreTokens()) {
+
+                if (filters != null && filters.hasMoreTokens()) {
                     filter = filters.getNextValueAsString(true);
                 }
-                    
+
                 final TreeItem<String> filterNode = new TreeItem<String>("Filter " + filter);
                 type.getChildren().add(filterNode);
-                
+
                 final String subFilter = sigObject.getName(PdfDictionary.SubFilter);
-                
+
                 final TreeItem<String> subFilterNode = new TreeItem<String>("Sub Filter: " + subFilter);
                 type.getChildren().add(subFilterNode);
-                
+
                 final TreeItem<String> details = new TreeItem<String>("Details");
                 owner.getChildren().add(details);
-                
+
                 final String rawDate = sigObject.getTextStreamValue(PdfDictionary.M);
-                
-                if(rawDate != null){
+
+                if (rawDate != null) {
                     final StringBuilder date = new StringBuilder(rawDate);
 
                     date.delete(0, 2);
@@ -150,46 +156,46 @@ public class JavaFXSignaturesPanel extends Tab {
                     date.insert(13, ':');
                     date.insert(16, ':');
                     date.insert(19, ' ');
-                    
+
                     final TreeItem<String> time = new TreeItem<String>("Time: " + date);
                     details.getChildren().add(time);
-                }else{
+                } else {
                     final TreeItem<String> time = new TreeItem<String>("Time: unset");
                     details.getChildren().add(time);
                 }
-                
+
                 final String reason = sigObject.getTextStreamValue(PdfDictionary.Reason);
-                
+
                 final TreeItem<String> reasonNode = new TreeItem<String>("Reason: " + reason);
                 details.getChildren().add(reasonNode);
-                
+
                 final String location = sigObject.getTextStreamValue(PdfDictionary.Location);
 
                 final TreeItem<String> locationNode = new TreeItem<String>("Location: " + location);
                 details.getChildren().add(locationNode);
-                
-                final TreeItem<String> field = new TreeItem<String>("Field: " + formObj.getTextStreamValue(PdfDictionary.T)+ " on page " + formObj.getPageNumber());
+
+                final TreeItem<String> field = new TreeItem<String>("Field: " + formObj.getTextStreamValue(PdfDictionary.T) + " on page " + formObj.getPageNumber());
                 details.getChildren().add(field);
             }
         }
         signatureTree.setRoot(root);
     }
-    
-    private class SignaturesCell extends TreeCell<String>{
+
+    private class SignaturesCell extends TreeCell<String> {
         @Override
-        public void updateItem(final String item, final boolean empty){
+        public void updateItem(final String item, final boolean empty) {
             super.updateItem(item, empty);
-            if(empty){
+            if (empty) {
                 setText(null);
                 setGraphic(null);
-            }else{
+            } else {
                 final TreeItem<String> parent = getTreeItem().getParent();
 
                 final String parentText = parent != null ? parent.getValue() : "";
 
-                if(parentText.equals(signedText)){
+                if (parentText.equals(signedText)) {
                     setGraphic(new ImageView(lock));
-                }else if(parentText.equals(blankText)){
+                } else if (parentText.equals(blankText)) {
                     setGraphic(new ImageView(unlock));
                 }
                 setText(item);

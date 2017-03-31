@@ -34,61 +34,60 @@
 package org.jpedal.parser.text;
 
 /**
- *
  * @author markee
  */
 class CharReader {
 
-    
+
     static int getNextValue(int i, final byte[] stream, final GlyphData glyphData, final boolean isCID) {
-        
+
         int rawInt;
-        
+
         //extract the next binary index value and convert to char, losing any returns
-        while(true){
-            
+        while (true) {
+
             glyphData.setLastChar();
-            
+
             rawInt = stream[i];
             if (rawInt < 0) {
                 rawInt = 256 + rawInt;
             }
-            
-            glyphData.setRawChar((char)rawInt);
-            
+
+            glyphData.setRawChar((char) rawInt);
+
             //eliminate escaped tabs and returns
-            if(glyphData.getRawChar()==92 &&(stream[i+1]==13 || stream[i+1]==10)){ // '\\'=92
+            if (glyphData.getRawChar() == 92 && (stream[i + 1] == 13 || stream[i + 1] == 10)) { // '\\'=92
                 i++;
                 rawInt = stream[i];
                 if (rawInt < 0) {
                     rawInt = 256 + rawInt;
                 }
                 glyphData.setRawChar((char) rawInt);
-                
+
             }
-            
+
             glyphData.setRawInt(rawInt);
-            
+
             //stop any returns in data stream getting through (happens in ghostscript)
-            if((glyphData.getRawChar()!=10 || (isCID && glyphData.getOpenChar()!='<')) && glyphData.getRawChar()!=13) {
+            if ((glyphData.getRawChar() != 10 || (isCID && glyphData.getOpenChar() != '<')) && glyphData.getRawChar() != 13) {
                 break;
             }
-            
+
             i++;
         }
         
         /*flag if we have entered/exited text block*/
         if (glyphData.isText()) {
             //non CID deliminator (allow for escaped deliminator)
-            final char testChar=glyphData.getRawChar();
-            if ((testChar==40 || testChar==41) && glyphData.getLastChar() != 92) {  // '\\'=92 ')'=41
+            final char testChar = glyphData.getRawChar();
+            if ((testChar == 40 || testChar == 41) && glyphData.getLastChar() != 92) {  // '\\'=92 ')'=41
                 glyphData.updatePrefixCount(testChar);
-            } else if (testChar == 62 && glyphData.getOpenChar() == 60 ){  // ie <01>tj  '<'=60 '<'=62
+            } else if (testChar == 62 && glyphData.getOpenChar() == 60) {  // ie <01>tj  '<'=60 '<'=62
                 glyphData.setText(false); //unset text flag
             }
         }
-        
+
         return i;
-    }    
+    }
 
 }

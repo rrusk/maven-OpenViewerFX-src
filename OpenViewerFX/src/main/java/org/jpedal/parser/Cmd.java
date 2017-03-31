@@ -202,253 +202,253 @@ public class Cmd {
     public static final int T3_COMMAND = 6;
 
     @SuppressWarnings("OverlyLongMethod")
-    public static int getCommandType(final int commandID){
+    public static int getCommandType(final int commandID) {
 
-        int type=-1;
+        int type = -1;
 
-        switch(commandID){
-            case Cmd.BDC :
-                type=TEXT_COMMAND;
+        switch (commandID) {
+            case Cmd.BDC:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.BMC :
-                type=TEXT_COMMAND;
+            case Cmd.BMC:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.BT :
-                type=TEXT_COMMAND;
+            case Cmd.BT:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.DP :
-                type=TEXT_COMMAND;
+            case Cmd.DP:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.EMC :
-                type=TEXT_COMMAND;
+            case Cmd.EMC:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.ET :
-                type=TEXT_COMMAND;
+            case Cmd.ET:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.MP :
-                type=TEXT_COMMAND;
+            case Cmd.MP:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tc :
-                type=TEXT_COMMAND;
+            case Cmd.Tc:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tw :
-                type=TEXT_COMMAND;
+            case Cmd.Tw:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tz :
-                type=TEXT_COMMAND;
+            case Cmd.Tz:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.TL :
-                type=TEXT_COMMAND;
+            case Cmd.TL:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tf :
-                type=TEXT_COMMAND;
+            case Cmd.Tf:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tr :
-                type=TEXT_COMMAND;
+            case Cmd.Tr:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Ts :
-                type=TEXT_COMMAND;
+            case Cmd.Ts:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.TD :
-                type=TEXT_COMMAND;
+            case Cmd.TD:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Td :
-                type=TEXT_COMMAND;
+            case Cmd.Td:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tm :
-                type=TEXT_COMMAND;
+            case Cmd.Tm:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tstar :
-                type=TEXT_COMMAND;
+            case Cmd.Tstar:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.Tj :
-                type=TEXT_COMMAND;
+            case Cmd.Tj:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.TJ :
-                type=TEXT_COMMAND;
+            case Cmd.TJ:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.quote :
-                type=TEXT_COMMAND;
+            case Cmd.quote:
+                type = TEXT_COMMAND;
                 break;
-            case Cmd.doubleQuote :
-                type=TEXT_COMMAND;
+            case Cmd.doubleQuote:
+                type = TEXT_COMMAND;
                 break;
 
-            case Cmd.rg :
-                type=COLOR_COMMAND;
+            case Cmd.rg:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.RG :
-                type=COLOR_COMMAND;
+            case Cmd.RG:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.SCN :
-                type=COLOR_COMMAND;
+            case Cmd.SCN:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.scn :
-                type=COLOR_COMMAND;
+            case Cmd.scn:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.SC :
-                type=COLOR_COMMAND;
+            case Cmd.SC:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.sc :
-                type=COLOR_COMMAND;
+            case Cmd.sc:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.cs :
-                type=COLOR_COMMAND;
+            case Cmd.cs:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.CS :
-                type=COLOR_COMMAND;
+            case Cmd.CS:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.g :
-                type=COLOR_COMMAND;
+            case Cmd.g:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.G :
-                type=COLOR_COMMAND;
+            case Cmd.G:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.k :
-                type=COLOR_COMMAND;
+            case Cmd.k:
+                type = COLOR_COMMAND;
                 break;
-            case Cmd.K :
-                type=COLOR_COMMAND;
+            case Cmd.K:
+                type = COLOR_COMMAND;
                 break;
 
             case Cmd.sh:
-                type=SHADING_COMMAND;
+                type = SHADING_COMMAND;
                 break;
 
-            case Cmd.B :
-                type=SHAPE_COMMAND;
+            case Cmd.B:
+                type = SHAPE_COMMAND;
                 break;
-            case Cmd.b :
-                type=SHAPE_COMMAND;
+            case Cmd.b:
+                type = SHAPE_COMMAND;
                 break;
-            case Cmd.bstar :
-                type=SHAPE_COMMAND;
+            case Cmd.bstar:
+                type = SHAPE_COMMAND;
                 break;
-            case Cmd.Bstar :
-                type=SHAPE_COMMAND;
-                break;
-
-            case Cmd.c :
-                type=SHAPE_COMMAND;
+            case Cmd.Bstar:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.d :
-                type=SHAPE_COMMAND;
+            case Cmd.c:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.F :
-                type=SHAPE_COMMAND;
+            case Cmd.d:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.f :
-                type=SHAPE_COMMAND;
+            case Cmd.F:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.Fstar :
-                type=SHAPE_COMMAND;
+            case Cmd.f:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.fstar :
-                type=SHAPE_COMMAND;
+            case Cmd.Fstar:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.h :
-                type=SHAPE_COMMAND;
+            case Cmd.fstar:
+                type = SHAPE_COMMAND;
+                break;
+
+            case Cmd.h:
+                type = SHAPE_COMMAND;
                 break;
 
             case Cmd.i:
-                type=SHAPE_COMMAND;
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.J :
-                type=SHAPE_COMMAND;
+            case Cmd.J:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.j :
-                type=SHAPE_COMMAND;
+            case Cmd.j:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.l :
-                type=SHAPE_COMMAND;
+            case Cmd.l:
+                type = SHAPE_COMMAND;
                 break;
 
             case Cmd.M:
-                type=SHAPE_COMMAND;
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.m :
-                type=SHAPE_COMMAND;
+            case Cmd.m:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.n :
-                type=SHAPE_COMMAND;
+            case Cmd.n:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.re :
-                type=SHAPE_COMMAND;
+            case Cmd.re:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.S :
-                type=SHAPE_COMMAND;
+            case Cmd.S:
+                type = SHAPE_COMMAND;
                 break;
-            case Cmd.s :
-                type=SHAPE_COMMAND;
+            case Cmd.s:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.v :
-                type=SHAPE_COMMAND;
+            case Cmd.v:
+                type = SHAPE_COMMAND;
                 break;
 
             case Cmd.w:
-                type=SHAPE_COMMAND;
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.Wstar :
-                type=SHAPE_COMMAND;
+            case Cmd.Wstar:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.W :
-                type=SHAPE_COMMAND;
+            case Cmd.W:
+                type = SHAPE_COMMAND;
                 break;
-            case Cmd.y :
-                type=SHAPE_COMMAND;
-                break;
-
-
-            case Cmd.cm :
-                type=GS_COMMAND;
+            case Cmd.y:
+                type = SHAPE_COMMAND;
                 break;
 
-            case Cmd.Do :
-                type=IMAGE_COMMAND;
+
+            case Cmd.cm:
+                type = GS_COMMAND;
                 break;
 
-            case Cmd.q :
-                type=GS_COMMAND;
+            case Cmd.Do:
+                type = IMAGE_COMMAND;
                 break;
 
-            case Cmd.Q :
-                type=GS_COMMAND;
+            case Cmd.q:
+                type = GS_COMMAND;
+                break;
+
+            case Cmd.Q:
+                type = GS_COMMAND;
                 break;
 
             case Cmd.BI:
-                type=IMAGE_COMMAND;
+                type = IMAGE_COMMAND;
                 break;
 
-            case Cmd.ID :
-                type=IMAGE_COMMAND;
+            case Cmd.ID:
+                type = IMAGE_COMMAND;
                 break;
 
-            case Cmd.gs :
-                type=GS_COMMAND;
+            case Cmd.gs:
+                type = GS_COMMAND;
                 break;
 
-            case Cmd.d0 :
-                type=T3_COMMAND;
+            case Cmd.d0:
+                type = T3_COMMAND;
                 break;
 
-            case Cmd.d1 :
-                type=T3_COMMAND;
+            case Cmd.d1:
+                type = T3_COMMAND;
                 break;
         }
 
@@ -456,7 +456,9 @@ public class Cmd {
 
     }
 
-    /**identify if command*/
+    /**
+     * identify if command
+     */
     @SuppressWarnings("OverlyLongMethod")
     protected static int getCommandID(final int value) {
         int id = -1;
@@ -695,7 +697,9 @@ public class Cmd {
         return id;
     }
 
-    /**convert command into string*/
+    /**
+     * convert command into string
+     */
     @SuppressWarnings("OverlyLongMethod")
     protected static String getCommandAsString(final int value) {
         String id = "";

@@ -41,47 +41,47 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Preset vectors -
-     *
+     * <p>
      * Vectors are stored as two F2Dot14 numbers stored in an int, with the x component taking up the high 16 bits and
      * the y component taking up the bottom 16. The hypotenuse must be 1 in length. (0x4000 in F2Dot14)
      */
-    public static final int x_axis=0x40000000;
-	public static final int y_axis=0x00004000;
+    public static final int x_axis = 0x40000000;
+    public static final int y_axis = 0x00004000;
 
     /**
      * Preset round states -
-     *
+     * <p>
      * The spec defines a way of interpreting an item from the stack to form a round state consisting of period, phase
      * and threshold for use in the SROUND instruction. This format is used instead of storing each aspect of the round
      * state individually.
      */
-    public static final int hg =0x68;             //Half Grid
-    public static final int g  =0x48;             //Grid
-    public static final int dg =0x08;             //Double Grid
-    public static final int dtg=0x44;             //Down to Grid
-    public static final int utg=0x40;             //Up to Grid
-    public static final int off=-1;               //None
+    public static final int hg = 0x68;             //Half Grid
+    public static final int g = 0x48;             //Grid
+    public static final int dg = 0x08;             //Double Grid
+    public static final int dtg = 0x44;             //Down to Grid
+    public static final int utg = 0x40;             //Up to Grid
+    public static final int off = -1;               //None
 
     //Controls whether MIRP will flip CVT entries to match the actual distance
-	public boolean autoFlip=true;
+    public boolean autoFlip = true;
 
     //The maximum difference between the measured distance and the cvt entry if the entry is to be used for MIRP
-	public int controlValueTableCutIn =68;
+    public int controlValueTableCutIn = 68;
 
     //Lowest number in relative numbering system used by DELTA instructions
-	public int deltaBase=9;
+    public int deltaBase = 9;
 
     //Determines the magnitude of movements by DELTA instructions
-	public int deltaShift=3;
+    public int deltaShift = 3;
 
     //Vector which defines the direction of movement (for almost all instructions)
-	public int freedomVector=x_axis;
+    public int freedomVector = x_axis;
 
     //Vector which defines the direction of measurement (usually)
-    public int projectionVector=x_axis;
+    public int projectionVector = x_axis;
 
     //Vector which defines the direction of measurement when dealing with points original positions in GC, MD, MDRP and MIRP
-    public int dualProjectionVector=x_axis;
+    public int dualProjectionVector = x_axis;
 
     //Allows you to disable instructions entirely for glyph programs.
     public int instructControl;
@@ -90,16 +90,16 @@ public class TTGraphicsState implements Cloneable, Serializable {
 //    public boolean scanControl=false;
 
     //Used by some functions to repeat actions. It's always reset to 1 after it's used.
-    public int loop=1;
+    public int loop = 1;
 
     //Sets the minimum distance to which a value will be rounded in MIRP and MDRP
-    public int minimumDistance=1;
+    public int minimumDistance = 1;
 
     //Contains the components required to round variables
-    public int roundState=g;
+    public int roundState = g;
 
     //Grid period for rounding - 1 usually, sqrt(2)/2 for 45 degrees
-    public double gridPeriod=1.0;
+    public double gridPeriod = 1.0;
 
     //Reference points
     public int rp0;
@@ -108,15 +108,16 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     //The cutIn is the difference below which a distance will be replaced with the widthValue in MDRP and MIRP
     public int singleWidthCutIn;
-	public int singleWidthValue;
+    public int singleWidthValue;
 
     //Zone pointers
-	public int zp0=TTVM.GLYPH_ZONE;
-	public int zp1=TTVM.GLYPH_ZONE;
-	public int zp2=TTVM.GLYPH_ZONE;
+    public int zp0 = TTVM.GLYPH_ZONE;
+    public int zp1 = TTVM.GLYPH_ZONE;
+    public int zp2 = TTVM.GLYPH_ZONE;
 
     /**
      * Create a copy of this object.
+     *
      * @return Copy reference
      * @throws CloneNotSupportedException
      */
@@ -127,6 +128,7 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Rounds a double according to the round state variable.
+     *
      * @param n Number to round
      * @return Rounded number
      */
@@ -140,9 +142,9 @@ public class TTGraphicsState implements Cloneable, Serializable {
         //Get period
         int p = (roundState >> 6) & 3;
         final double period;
-        if (p==0) {
+        if (p == 0) {
             period = gridPeriod / 2;
-        } else if (p==1) {
+        } else if (p == 1) {
             period = gridPeriod;
         } else {
             period = gridPeriod * 2;
@@ -170,7 +172,7 @@ public class TTGraphicsState implements Cloneable, Serializable {
         p = roundState & 15;
 
         //special case - use largest number smaller than period
-        if (p==0) {
+        if (p == 0) {
             double result = phase;
             while (result < n) {
                 result += period;
@@ -178,19 +180,19 @@ public class TTGraphicsState implements Cloneable, Serializable {
             return result;
         }
 
-        final double threshold = ((p-4) * period) / 8;
+        final double threshold = ((p - 4) * period) / 8;
 
         //Round
         n -= phase;
         double lower = 0;
         if (n > 0) {
             n += threshold;
-            while (lower+period <= n) {
+            while (lower + period <= n) {
                 lower += period;
             }
         } else {
             n -= threshold;
-            while (lower-period >= n) {
+            while (lower - period >= n) {
                 lower -= period;
             }
         }
@@ -211,6 +213,7 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Rounds a F26Dot6 number according to the round state variable.
+     *
      * @param f26dot6 Number to round
      * @return Rounded number
      */
@@ -223,6 +226,7 @@ public class TTGraphicsState implements Cloneable, Serializable {
     /**
      * Takes an F26Dot6 distance along the projection vector and calculates the shift along the freedom vector IN ACTUAL
      * SPACE required.
+     *
      * @param distance Move required along PV
      * @return F26Dot6 shifts needed in x and y
      */
@@ -237,8 +241,8 @@ public class TTGraphicsState implements Cloneable, Serializable {
         final double fvWorth = TTVM.getDoubleFromF26Dot6(getCoordsOnVector(projectionVector, fv[0], fv[1]));
         if (fvWorth != 0) {
             final double mul = TTVM.getDoubleFromF26Dot6(distance);
-            fv[0] = (int)((fv[0]*mul)/fvWorth);
-            fv[1] = (int)((fv[1]*mul)/fvWorth);
+            fv[0] = (int) ((fv[0] * mul) / fvWorth);
+            fv[1] = (int) ((fv[1] * mul) / fvWorth);
         } else {
             fv[0] = 0;
             fv[1] = 0;
@@ -248,6 +252,7 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Get the F2Dot14 components of a vector.
+     *
      * @param vector vector to get
      * @return array of x and y components
      */
@@ -258,6 +263,7 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Create a vector from two F2Dot14 numbers.
+     *
      * @param x x component
      * @param y y component
      * @return newly created vector
@@ -268,9 +274,10 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Get the coordinates of a point on a vector.
+     *
      * @param vector Vector to measure against
-     * @param x F26Dot6 x coordinate
-     * @param y F26Dot6 y coordinate
+     * @param x      F26Dot6 x coordinate
+     * @param y      F26Dot6 y coordinate
      * @return F26Dot6 coordinate on vector
      */
     static int getCoordsOnVector(final int vector, final int x, final int y) {
@@ -278,15 +285,15 @@ public class TTGraphicsState implements Cloneable, Serializable {
 //        double xProj = TTVM.getDoubleFromF2Dot14(pv[0]) * TTVM.getDoubleFromF26Dot6(x);
 //        double yProj = TTVM.getDoubleFromF2Dot14(pv[1]) * TTVM.getDoubleFromF26Dot6(y);
 //        return TTVM.storeDoubleAsF26Dot6(xProj + yProj);
-        final long xProj = pv[0] * (long)x;
-        final long yProj = pv[1] * (long)y;
+        final long xProj = pv[0] * (long) x;
+        final long yProj = pv[1] * (long) y;
         long bigResult = xProj + yProj;
         final boolean roundUp = (bigResult & 0x3FFF) >= 0x7F;
         bigResult >>= 14;
         if (roundUp) {
             bigResult++;
         }
-        return (int)bigResult;
+        return (int) bigResult;
     }
 
     /**
@@ -301,30 +308,36 @@ public class TTGraphicsState implements Cloneable, Serializable {
         freedomVector = x_axis;
         roundState = g;
         loop = 1;
-        controlValueTableCutIn=68;
+        controlValueTableCutIn = 68;
     }
 
     private static String getVectorAsString(final int vector) {
         final int[] v = getVectorComponents(vector);
-        return TTVM.getDoubleFromF2Dot14(v[0])+", "+TTVM.getDoubleFromF2Dot14(v[1]);
+        return TTVM.getDoubleFromF2Dot14(v[0]) + ", " + TTVM.getDoubleFromF2Dot14(v[1]);
     }
 
     public String getRoundStateAsString() {
-        switch(roundState) {
-            case g:     return "Grid";
-            case hg:    return "HalfGrid";
-            case dg:    return "DoubleGrid";
-            case dtg:   return "DownToGrid";
-            case utg:   return "UpToGrid";
-            case off:   return "Off";
+        switch (roundState) {
+            case g:
+                return "Grid";
+            case hg:
+                return "HalfGrid";
+            case dg:
+                return "DoubleGrid";
+            case dtg:
+                return "DownToGrid";
+            case utg:
+                return "UpToGrid";
+            case off:
+                return "Off";
         }
 
         //Get period
         int p = (roundState >> 6) & 3;
         final String period;
-        if (p==0) {
+        if (p == 0) {
             period = "Period:HalfPixel";
-        } else if (p==1) {
+        } else if (p == 1) {
             period = "Period:OnePixel";
         } else {
             period = "Period:TwoPixels";
@@ -351,10 +364,10 @@ public class TTGraphicsState implements Cloneable, Serializable {
         //Get threshold
         p = roundState & 15;
         final String threshold;
-        if (p==0) {
+        if (p == 0) {
             threshold = "Threshold:Period-1";
         } else {
-            threshold = "(" + (p-4) + "/8)" + "*Period";
+            threshold = "(" + (p - 4) + "/8)" + "*Period";
         }
 
         return '(' + period + ',' + phase + ',' + threshold + ')';
@@ -362,14 +375,15 @@ public class TTGraphicsState implements Cloneable, Serializable {
 
     /**
      * Returns a string containing details of the graphics state.
+     *
      * @return TTGraphicsState details
      */
     @Override
     public String toString() {
         return "org.jpedal.fonts.tt.hinting.TTGraphicsState[" +
-                "zp0=" + (zp0==TTVM.GLYPH_ZONE ? "GLYPH" : "TWILIGHT") +
-                ",zp1=" + (zp1==TTVM.GLYPH_ZONE ? "GLYPH" : "TWILIGHT") +
-                ",zp2=" + (zp2==TTVM.GLYPH_ZONE ? "GLYPH" : "TWILIGHT") +
+                "zp0=" + (zp0 == TTVM.GLYPH_ZONE ? "GLYPH" : "TWILIGHT") +
+                ",zp1=" + (zp1 == TTVM.GLYPH_ZONE ? "GLYPH" : "TWILIGHT") +
+                ",zp2=" + (zp2 == TTVM.GLYPH_ZONE ? "GLYPH" : "TWILIGHT") +
                 ",rp0=" + rp0 +
                 ",rp1=" + rp1 +
                 ",rp2=" + rp2 +

@@ -33,8 +33,10 @@
 package org.jpedal.parser.shape;
 
 import com.idrsolutions.pdf.color.shading.ShadedPaint;
+
 import java.awt.Rectangle;
 import java.awt.Shape;
+
 import org.jpedal.color.ColorspaceFactory;
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.color.PdfPaint;
@@ -58,17 +60,17 @@ public class SH {
                                final boolean isPrinting, final int pageNum,
                                final PdfObjectReader currentPdfFile,
                                final PdfPageData pageData, final DynamicVectorRenderer current) {
-        byte[] shadingData= (byte[]) cache.get(PdfObjectCache.LocalShadings, shadingObject);
-        if(shadingData==null){
-            shadingData= (byte[]) cache.get(PdfObjectCache.GlobalShadings, shadingObject);
+        byte[] shadingData = (byte[]) cache.get(PdfObjectCache.LocalShadings, shadingObject);
+        if (shadingData == null) {
+            shadingData = (byte[]) cache.get(PdfObjectCache.GlobalShadings, shadingObject);
         }
-        
-        final PdfObject Shading=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject("1 0 R"), currentPdfFile.getObjectReader(),shadingData, PdfDictionary.Shading);
-        
-        //workout shape
-        Shape shadeShape=null;
 
-        if(shadeShape==null) {
+        final PdfObject Shading = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new ShadingObject("1 0 R"), currentPdfFile.getObjectReader(), shadingData, PdfDictionary.Shading);
+
+        //workout shape
+        Shape shadeShape = null;
+
+        if (shadeShape == null) {
             shadeShape = gs.getClippingShape();
         }
 
@@ -81,23 +83,23 @@ public class SH {
             //            shadeShape = new Rectangle(pageData.getMediaBoxX(pageNum), pageData.getMediaBoxY(pageNum), pageData.getMediaBoxWidth(pageNum), pageData.getMediaBoxHeight(pageNum));
         }
 
-        
-        if (current.isHTMLorSVG() && cache.groupObj==null) {
+
+        if (current.isHTMLorSVG() && cache.groupObj == null) {
             current.eliminateHiddenText(shadeShape, gs, 7, true);
         }
 
         /*
          * generate the appropriate shading and then colour in the current clip with it
          */
-        try{
-            
-            final PdfArrayIterator ColorSpace=Shading.getMixedArray(PdfDictionary.ColorSpace);
+        try {
 
-            final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
-            
+            final PdfArrayIterator ColorSpace = Shading.getMixedArray(PdfDictionary.ColorSpace);
+
+            final GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+
             newColorSpace.setPrinting(isPrinting);
-            
-            final PdfPaint shading=new ShadedPaint(Shading, isPrinting,newColorSpace, currentPdfFile,gs.CTM,false);
+
+            final PdfPaint shading = new ShadedPaint(Shading, isPrinting, newColorSpace, currentPdfFile, gs.CTM, false);
             
             /*
              * shade the current clip
@@ -110,7 +112,7 @@ public class SH {
 
             current.drawShape(new SwingShape(shadeShape), gs, Cmd.F);
 
-        }catch(final Exception e){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
     }

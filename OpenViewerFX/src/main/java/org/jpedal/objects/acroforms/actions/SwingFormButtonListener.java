@@ -53,27 +53,27 @@ public class SwingFormButtonListener implements MouseListener {
      * sets up the captions to change when needed
      */
     public SwingFormButtonListener(final String normalCaption, final String rolloverCaption, final String downCaption) {
-    	if(showMethods) {
+        if (showMethods) {
             System.out.println("SwingFormButtonListener.SwingFormButtonListener(string string string)");
         }
-    	
-    	int captions = 0;
+
+        int captions = 0;
         //set up the captions to work for rollover and down presses of the mouse
         captionChanger = new HashMap<String, String>();
-        if (rolloverCaption != null && !rolloverCaption.isEmpty()){
+        if (rolloverCaption != null && !rolloverCaption.isEmpty()) {
             captionChanger.put("rollover", rolloverCaption);
             captions++;
         }
-        if (downCaption != null && !downCaption.isEmpty()){
+        if (downCaption != null && !downCaption.isEmpty()) {
             captionChanger.put("down", downCaption);
             captions++;
         }
-        if(normalCaption!=null  && !normalCaption.isEmpty()){
-        	captionChanger.put("normal", normalCaption);
-        	captions++;
+        if (normalCaption != null && !normalCaption.isEmpty()) {
+            captionChanger.put("normal", normalCaption);
+            captions++;
         }
-        
-        if(captions==0) {
+
+        if (captions == 0) {
             captionChanger = null;
         }
     }
@@ -86,11 +86,11 @@ public class SwingFormButtonListener implements MouseListener {
         }
 
         if ((captionChanger != null && e.getSource() instanceof AbstractButton) &&
-             (captionChanger.containsKey("rollover"))) {
-                ((AbstractButton) e.getSource()).setText(captionChanger.get("rollover"));
-            }
+                (captionChanger.containsKey("rollover"))) {
+            ((AbstractButton) e.getSource()).setText(captionChanger.get("rollover"));
         }
-    
+    }
+
 
     @Override
     public void mouseExited(final MouseEvent e) {
@@ -100,16 +100,16 @@ public class SwingFormButtonListener implements MouseListener {
         }
 
         if ((captionChanger != null && e.getSource() instanceof AbstractButton) &&
-             (captionChanger.containsKey("normal"))) {
-                ((AbstractButton) e.getSource()).setText(captionChanger.get("normal"));
-            }
+                (captionChanger.containsKey("normal"))) {
+            ((AbstractButton) e.getSource()).setText(captionChanger.get("normal"));
         }
-    
+    }
+
 
     @Override
     public void mouseClicked(final MouseEvent e) {
         //noinspection PointlessBooleanExpression
-        if(PDFListener.debugMouseActions || showMethods) {
+        if (PDFListener.debugMouseActions || showMethods) {
             System.out.println("SwingFormButtonListener.mouseClicked()");
         }
     }
@@ -122,11 +122,11 @@ public class SwingFormButtonListener implements MouseListener {
         }
 
         if ((captionChanger != null && e.getSource() instanceof AbstractButton) &&
-             (captionChanger.containsKey("down"))) {
-                ((AbstractButton) e.getSource()).setText(captionChanger.get("down"));
-            }
+                (captionChanger.containsKey("down"))) {
+            ((AbstractButton) e.getSource()).setText(captionChanger.get("down"));
         }
-    
+    }
+
 
     @Override
     public void mouseReleased(final MouseEvent e) {
@@ -138,7 +138,7 @@ public class SwingFormButtonListener implements MouseListener {
         if (captionChanger != null && e.getSource() instanceof AbstractButton) {
             if (captionChanger.containsKey("rollover")) {
                 ((AbstractButton) e.getSource()).setText(captionChanger.get("rollover"));
-            } else if (captionChanger.containsKey("normal")){
+            } else if (captionChanger.containsKey("normal")) {
                 ((AbstractButton) e.getSource()).setText(captionChanger.get("normal"));
             }
         }

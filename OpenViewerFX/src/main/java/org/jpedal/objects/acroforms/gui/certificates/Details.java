@@ -170,7 +170,7 @@ public class Details extends javax.swing.JPanel {
 
         add(jScrollPane2);
         jScrollPane2.setBounds(10, 190, 380, 120);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

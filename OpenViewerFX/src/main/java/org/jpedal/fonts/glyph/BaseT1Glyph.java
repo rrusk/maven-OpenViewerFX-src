@@ -31,47 +31,48 @@
  * ---------------
  */
 package org.jpedal.fonts.glyph;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p>defines the current shape which is created by command stream</p> 
+ * <p>defines the current shape which is created by command stream</p>
  * <p><b>This class is NOT part of the API</b></p>.
  * Shapes can be drawn onto pdf or used as a clip on other image/shape/text.
  * Shape is built up by storing commands and then turning these commands into a
  * shape. Has to be done this way as Winding rule is not necessarily
  * declared at start.
-  */
-public abstract class BaseT1Glyph extends PdfGlyph implements Serializable
-{
-	
-    protected float  glyfwidth=1000f;
+ */
+public abstract class BaseT1Glyph extends PdfGlyph implements Serializable {
+
+    protected float glyfwidth = 1000f;
 
     protected boolean isStroked;
 
-    protected final Map<String, String> strokedPositions=new HashMap<String, String>();
+    protected final Map<String, String> strokedPositions = new HashMap<String, String>();
 
-    public BaseT1Glyph(){}
-    
+    public BaseT1Glyph() {
+    }
+
     @Override
     public void setStrokedOnly(final boolean flag) {
-        isStroked=flag;
+        isStroked = flag;
 
     }
 
     @Override
     public void setWidth(final float width) {
-		this.glyfwidth=width;
-		
-	}
+        this.glyfwidth = width;
+
+    }
 
     /* (non-Javadoc)
      * @see org.jpedal.fonts.PdfGlyph#getmaxWidth()
      */
     @Override
     public float getmaxWidth() {
-    	
+
         return glyfwidth;
     }
 }

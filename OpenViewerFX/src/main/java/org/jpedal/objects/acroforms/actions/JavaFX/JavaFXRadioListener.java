@@ -39,18 +39,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ToggleButton;
 import org.jpedal.objects.raw.FormObject;
 
-public class JavaFXRadioListener implements ChangeListener<Boolean>{
-   final ToggleButton comp;
-   final FormObject form;
+public class JavaFXRadioListener implements ChangeListener<Boolean> {
+    final ToggleButton comp;
+    final FormObject form;
 
-   public JavaFXRadioListener(final ToggleButton comp, final FormObject form){
-       this.comp = comp;
-       this.form = form;
+    public JavaFXRadioListener(final ToggleButton comp, final FormObject form) {
+        this.comp = comp;
+        this.form = form;
 
-   }
-   @Override
-   public void changed(final ObservableValue<? extends Boolean> ov, final Boolean t, final Boolean t1) {
-       form.updateValue(comp.getText(), comp.isSelected(), false);
-   }
+    }
+
+    @Override
+    public void changed(final ObservableValue<? extends Boolean> ov, final Boolean t, final Boolean t1) {
+        form.updateValue(comp.getText(), comp.isSelected(), false);
+    }
 
 }

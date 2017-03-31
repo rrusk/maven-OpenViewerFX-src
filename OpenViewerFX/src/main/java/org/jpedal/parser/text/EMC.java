@@ -41,16 +41,16 @@ public class EMC {
     public static void execute(final DynamicVectorRenderer current, final GraphicsState gs, final ParserOptions parserOptions) {
 
         //remove any clip
-        if(parserOptions.layerClips.contains(parserOptions.getLayerLevel())){
+        if (parserOptions.layerClips.contains(parserOptions.getLayerLevel())) {
             gs.setClippingShape(null);
-            current.drawClip(gs,null,true);
+            current.drawClip(gs, null, true);
         }
 
         parserOptions.getLayerVisibility().remove(parserOptions.getLayerLevel());
-        parserOptions.setLayerLevel(parserOptions.getLayerLevel()-1);
+        parserOptions.setLayerLevel(parserOptions.getLayerLevel() - 1);
 
         //reset flag
-        final boolean flag=(parserOptions.layers == null || parserOptions.getLayerLevel() == 0 || parserOptions.getLayerVisibility().contains(parserOptions.getLayerLevel()));
+        final boolean flag = (parserOptions.layers == null || parserOptions.getLayerLevel() == 0 || parserOptions.getLayerVisibility().contains(parserOptions.getLayerLevel()));
 
         parserOptions.setIsLayerVisible(flag);
     }

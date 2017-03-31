@@ -42,16 +42,16 @@ import org.jpedal.parser.PdfObjectCache;
  *
  */
 public class K {
-    
-    
+
+
     public static void execute(final boolean isLowerCase, final GraphicsState gs, final CommandParser parser, final PdfObjectCache cache) {
 
         //set flag to show which color (stroke/nonstroke)
-        final boolean isStroke=!isLowerCase;
+        final boolean isStroke = !isLowerCase;
 
-        float[] operand=parser.getValuesAsFloat();
+        float[] operand = parser.getValuesAsFloat();
 
-        final int operandCount=operand.length;
+        final int operandCount = operand.length;
 
 
         /* allow for less than 4 values
@@ -60,38 +60,38 @@ public class K {
         if (operandCount > 3) {
 
 
-            final float[] tempValues=new float[operandCount];
-            for(int ii=0;ii<operandCount;ii++) {
+            final float[] tempValues = new float[operandCount];
+            for (int ii = 0; ii < operandCount; ii++) {
                 tempValues[operandCount - ii - 1] = operand[ii];
             }
-            operand=tempValues;
+            operand = tempValues;
 
             //set colour and make sure in correct colorspace
-            if(isStroke){
+            if (isStroke) {
                 if (gs.strokeColorSpace.getID() != ColorSpaces.DeviceCMYK) {
                     gs.strokeColorSpace = new DeviceCMYKColorSpace();
                 }
 
-                gs.strokeColorSpace.setColor(operand,operandCount);
+                gs.strokeColorSpace.setColor(operand, operandCount);
 
                 //track colorspace use
-                cache.put(PdfObjectCache.ColorspacesUsed, gs.strokeColorSpace.getID(),"x");
+                cache.put(PdfObjectCache.ColorspacesUsed, gs.strokeColorSpace.getID(), "x");
 
-            }else{
+            } else {
                 if (gs.nonstrokeColorSpace.getID() != ColorSpaces.DeviceCMYK) {
                     gs.nonstrokeColorSpace = new DeviceCMYKColorSpace();
                 }
 
-                gs.nonstrokeColorSpace.setColor(operand,operandCount);
+                gs.nonstrokeColorSpace.setColor(operand, operandCount);
 
                 //track colorspace use
-                cache.put(PdfObjectCache.ColorspacesUsed, gs.nonstrokeColorSpace.getID(),"x");
+                cache.put(PdfObjectCache.ColorspacesUsed, gs.nonstrokeColorSpace.getID(), "x");
 
             }
         }
     }
 
-   
+
 }
 
 

@@ -37,36 +37,36 @@ import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.raw.FormObject;
 
-public class AFDate extends JSFunction{
+public class AFDate extends JSFunction {
 
 
     public AFDate(final AcroRenderer acro, final FormObject formObject) {
-        super(acro,formObject);
+        super(acro, formObject);
     }
 
     @Override
     public int execute(final String js, final String[] args, final int type, final int event, final char keyPressed) {
 
-        if(event!=ActionHandler.FOCUS_EVENT){
-            JSFunction.debug("Not called on key event event="+event+" js="+js);
+        if (event != ActionHandler.FOCUS_EVENT) {
+            JSFunction.debug("Not called on key event event=" + event + " js=" + js);
             return 0;
         }
 
-        final Object[] errArgs=new Object[2];
-        errArgs[0]=formObject.getObjectRefAsString();
-        errArgs[1]=stripQuotes(args[1]);
-        
-        final String validatedValue= validateMask(args,":.,/ -",true);
+        final Object[] errArgs = new Object[2];
+        errArgs[0] = formObject.getObjectRefAsString();
+        errArgs[1] = stripQuotes(args[1]);
 
-        if(validatedValue!=null && !validatedValue.isEmpty()){ //with date we also test its valid date
+        final String validatedValue = validateMask(args, ":.,/ -", true);
+
+        if (validatedValue != null && !validatedValue.isEmpty()) { //with date we also test its valid date
 
             //of course mask is not a perfect match :-(
             //(ie MM is month, not minutes)
-           // String dateMask = getJavaDateMask(args);
+            // String dateMask = getJavaDateMask(args);
 
             //we need to bounce into date and out to string
             //and compare as Date happily excepts 32nd Feb 2006, and other invalid values
-           // SimpleDateFormat testDate =new SimpleDateFormat(dateMask);
+            // SimpleDateFormat testDate =new SimpleDateFormat(dateMask);
 
 //            try {
 //                Date convertedDate =testDate.parse(validatedValue);
@@ -76,20 +76,20 @@ public class AFDate extends JSFunction{
 //                validatedValue=null;
 //                
 //            }
-            
+
         }
 
         //will reset if null
-        if(validatedValue==null){
-            maskAlert(ErrorCodes.JSInvalidDateFormat,errArgs);//chris unformat
+        if (validatedValue == null) {
+            maskAlert(ErrorCodes.JSInvalidDateFormat, errArgs); //chris unformat
             execute(js, args, type, event, keyPressed);
-        }else{
+        } else {
 
             formObject.setLastValidValue(validatedValue);
-            formObject.updateValue(validatedValue,false, true);
+            formObject.updateValue(validatedValue, false, true);
 
         }
-        
+
         return 0;
     }
 

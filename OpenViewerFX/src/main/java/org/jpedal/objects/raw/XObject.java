@@ -34,112 +34,112 @@ package org.jpedal.objects.raw;
 
 public class XObject extends PdfObject {
 
-	byte[] rawIntent, rawOC;
-	
-	String Intent,OC;
-	
-	private int[] Mask;
+    byte[] rawIntent, rawOC;
 
-	boolean ImageMask,K;
-	
-	int Height=1, Width=1;
-	
-	private PdfObject Group,MaskObj, OCObject, OPI, XObject;
-	
+    String Intent, OC;
+
+    private int[] Mask;
+
+    boolean ImageMask, K;
+
+    int Height = 1, Width = 1;
+
+    private PdfObject Group, MaskObj, OCObject, OPI, XObject;
+
     public XObject(final String ref) {
         super(ref);
     }
 
     public XObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
 
     public XObject(final int type) {
-    	super(type);
-	}
-    
+        super(type);
+    }
+
     @Override
-    public boolean getBoolean(final int id){
+    public boolean getBoolean(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.ImageMask:
-        	return ImageMask;
-        	
-        case PdfDictionary.K:
-        	return K; 	
-       
+            case PdfDictionary.ImageMask:
+                return ImageMask;
+
+            case PdfDictionary.K:
+                return K;
+
             default:
-            	return super.getBoolean(id);
+                return super.getBoolean(id);
         }
 
     }
-    
+
     @Override
-    public void setBoolean(final int id, final boolean value){
+    public void setBoolean(final int id, final boolean value) {
 
-        switch(id){
+        switch (id) {
 
-        case PdfDictionary.ImageMask:
-        	ImageMask=value;
-        	break;
-        
-        case PdfDictionary.K:
-        	K=value;
-        	break;
-        
-        	
+            case PdfDictionary.ImageMask:
+                ImageMask = value;
+                break;
+
+            case PdfDictionary.K:
+                K = value;
+                break;
+
+
             default:
                 super.setBoolean(id, value);
         }
     }
-    
+
     @Override
     public int[] getIntArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Mask:
                 return deepCopy(Mask);
 
             default:
-            	return super.getIntArray(id);
+                return super.getIntArray(id);
         }
     }
 
     @Override
     public void setIntArray(final int id, final int[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Mask:
-            	Mask=value;
-            break;
+                Mask = value;
+                break;
 
             default:
-            	super.setIntArray(id, value);
+                super.setIntArray(id, value);
         }
     }
 
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.Group:
-        		return Group;
+            case PdfDictionary.Group:
+                return Group;
 
-	        case PdfDictionary.Mask:
-	        	return MaskObj;
+            case PdfDictionary.Mask:
+                return MaskObj;
 
             case PdfDictionary.OC:
                 return OCObject;
 
-	        case PdfDictionary.OPI:
-	        	return OPI;
-	
+            case PdfDictionary.OPI:
+                return OPI;
+
             case PdfDictionary.XObject:
                 return XObject;
 
@@ -149,89 +149,89 @@ public class XObject extends PdfObject {
     }
 
     @Override
-    public void setIntNumber(final int id, final int value){
+    public void setIntNumber(final int id, final int value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.Height:
-	            Height=value;
-	        break;
-        
-	        case PdfDictionary.Width:
-	            Width=value;
-	        break;
-        
+            case PdfDictionary.Height:
+                Height = value;
+                break;
+
+            case PdfDictionary.Width:
+                Width = value;
+                break;
+
             default:
-            	super.setIntNumber(id, value);
+                super.setIntNumber(id, value);
         }
     }
 
     @Override
-    public int getInt(final int id){
+    public int getInt(final int id) {
 
-        switch(id){
+        switch (id) {
 
-        	case PdfDictionary.Height:
-            return Height;
-         
-	        case PdfDictionary.Width:
-	            return Width;
-	          
+            case PdfDictionary.Height:
+                return Height;
+
+            case PdfDictionary.Width:
+                return Width;
+
             default:
-            	return super.getInt(id);
+                return super.getInt(id);
         }
     }
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-        if(value!=null){
+        if (value != null) {
             value.setID(id);
         }
-    	
-        switch(id){
 
-	        case PdfDictionary.Group:
-	        	Group=value;
-	        break;
+        switch (id) {
 
-	        case PdfDictionary.Mask:
-	        	MaskObj=value;
-	        break;
+            case PdfDictionary.Group:
+                Group = value;
+                break;
+
+            case PdfDictionary.Mask:
+                MaskObj = value;
+                break;
 
             case PdfDictionary.OC:
-                OCObject=value;
-            break;
-            
+                OCObject = value;
+                break;
+
             case PdfDictionary.OPI:
-	        	OPI=value;
-			break;
-			
+                OPI = value;
+                break;
+
             case PdfDictionary.XObject:
-            	XObject=value;
-    		break;
-            
+                XObject = value;
+                break;
+
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
 
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
-            
+
             case PdfDictionary.Intent:
-                rawIntent=value;
-            break;
+                rawIntent = value;
+                break;
 
             case PdfDictionary.OC:
-	        	rawOC=value;
-			break;
-            
+                rawOC = value;
+                break;
+
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
 
@@ -241,26 +241,26 @@ public class XObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Intent:
 
-            //setup first time
-            if(Intent==null && rawIntent!=null) {
-                Intent = new String(rawIntent);
-            }
+                //setup first time
+                if (Intent == null && rawIntent != null) {
+                    Intent = new String(rawIntent);
+                }
 
-            return Intent;
+                return Intent;
 
             case PdfDictionary.OC:
 
-            //setup first time
-            if(OC==null && rawOC!=null) {
-                OC = new String(rawOC);
-            }
+                //setup first time
+                if (OC == null && rawOC != null) {
+                    OC = new String(rawOC);
+                }
 
-            return OC;
-               
+                return OC;
+
             default:
                 return super.getName(id);
 
@@ -269,6 +269,6 @@ public class XObject extends PdfObject {
 
     @Override
     public int getObjectType() {
-		return PdfDictionary.XObject;
-	}
+        return PdfDictionary.XObject;
+    }
 }

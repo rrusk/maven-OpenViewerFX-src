@@ -43,13 +43,14 @@ public class ClipUtils {
 
     /**
      * Increases clip size without altering input area
+     *
      * @param clip The clipping areas that needs increasing
      * @return Area for the modified clip size
      */
-    public static Area convertPDFClipToJavaClip(final Area clip){
+    public static Area convertPDFClipToJavaClip(final Area clip) {
 
         if (clip != null) {
-        //Increase clips size by 1 pixel in all direction as pdf clip includes bounds,
+            //Increase clips size by 1 pixel in all direction as pdf clip includes bounds,
             //java only handles inside of bounds
             final double sx = (clip.getBounds2D().getWidth() + 2) / clip.getBounds2D().getWidth();
             final double sy = (clip.getBounds2D().getHeight() + 2) / clip.getBounds2D().getHeight();

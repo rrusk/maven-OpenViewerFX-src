@@ -34,9 +34,11 @@ package org.jpedal.render;
 
 
 import com.idrsolutions.pdf.color.shading.ShadingFactory;
+
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
@@ -75,30 +77,30 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
 
 public class FXDisplay extends GUIDisplay {
-    
-    
+
+
     private int xx, yy;
 
     final Group pdfContent = new Group();
 
-   // private final ObservableList children=pdfContent.getChildren();
+    // private final ObservableList children=pdfContent.getChildren();
 
-    private final java.util.List<Node> collection=new ArrayList<Node>(2000);
-    
+    private final java.util.List<Node> collection = new ArrayList<Node>(2000);
+
     public FXDisplay(final int pageNumber, final boolean addBackground, final int defaultSize, final ObjectStore newObjectRef) {
 
-        this.rawPageNumber =pageNumber;
+        this.rawPageNumber = pageNumber;
         this.objectStoreRef = newObjectRef;
-        this.addBackground=addBackground;
-        
+        this.addBackground = addBackground;
+
         setupArrays(defaultSize);
 
     }
-    
+
     public void setInset(final DynamicVectorRenderer currentDisplay, final int x, final int y) {
-            ((FXDisplay)currentDisplay).setInset(x, y);   
+        ((FXDisplay) currentDisplay).setInset(x, y);
     }
-    
+
     public void setInset(final int x, final int y) {
         xx = x;
         yy = y;
@@ -107,14 +109,14 @@ public class FXDisplay extends GUIDisplay {
 
     public FXDisplay(final int pageNumber, final ObjectStore newObjectRef, final boolean isPrinting) {
 
-        this.rawPageNumber =pageNumber;
+        this.rawPageNumber = pageNumber;
         this.objectStoreRef = newObjectRef;
-        this.isPrinting=isPrinting;
-        
+        this.isPrinting = isPrinting;
+
         setupArrays(defaultSize);
 
     }
-    
+
     /**
      * Add output to correct area so we can assemble later.
      * Can also be used for any specific code features (ie setting a value)
@@ -122,42 +124,43 @@ public class FXDisplay extends GUIDisplay {
     @Override
     public synchronized void writeCustom(final int section, final Object str) {
 
-        switch(section){
-            
+        switch (section) {
+
             case FLUSH:
                 flush();
                 break;
-                
+
             default:
                 super.writeCustom(section, str);
         }
     }
-    
+
     /* remove all page objects and flush queue */
     private void flush() {
-        
-       // children.clear();
+
+        // children.clear();
         pageObjects.clear();
         objectType.clear();
         areas.clear();
-        
+
         currentItem = 0;
     }
-    
-     
+
+
     /*Method to add Shape, Text or image to main display on page over PDF - will be flushed on redraw*/
     @Override
     public void drawAdditionalObjectsOverPage(final int[] type, final java.awt.Color[] colors, final Object[] obj) throws PdfException {
-        
-        if(obj==null){
-            return ;
+
+        if (obj == null) {
+            return;
         }
-        
-        if(Platform.isFxApplicationThread()){
+
+        if (Platform.isFxApplicationThread()) {
             drawUserContent(type, obj, colors);
-        }else{
-            Platform.runLater(new Runnable(){
-                @Override public void run() {
+        } else {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
                     try {
                         drawUserContent(type, obj, colors);
                     } catch (final PdfException e) {
@@ -165,98 +168,98 @@ public class FXDisplay extends GUIDisplay {
                     }
                 }
             });
-        }   
+        }
     }
-    
+
     /* save image in array to draw */
     @Override
     public int drawImage(final int pageNumber, final BufferedImage image,
-    final GraphicsState currentGraphicsState,
-    final boolean alreadyCached, final String name, final int previousUse) {
+                         final GraphicsState currentGraphicsState,
+                         final boolean alreadyCached, final String name, final int previousUse) {
 
-        this.rawPageNumber =pageNumber;
-        final float[][] CTM=currentGraphicsState.CTM;
+        this.rawPageNumber = pageNumber;
+        final float[][] CTM = currentGraphicsState.CTM;
 
         final WritableImage fxImage = SwingFXUtils.toFXImage(image, null);
-        
-        final float imageW=(float) fxImage.getWidth();
-        final float imageH=(float) fxImage.getHeight();
-        
+
+        final float imageW = (float) fxImage.getWidth();
+        final float imageH = (float) fxImage.getHeight();
+
         final ImageView im1View = new ImageView(fxImage);
-        
+
         // Stores the affine used on the image to use on the clip later
-        final float[] affine = {CTM[0][0]/imageW,CTM[0][1]/imageW,
-                -CTM[1][0]/imageH,-CTM[1][1]/imageH,
-                CTM[2][0]+CTM[1][0],CTM[2][1]+CTM[1][1]};
-            
+        final float[] affine = {CTM[0][0] / imageW, CTM[0][1] / imageW,
+                -CTM[1][0] / imageH, -CTM[1][1] / imageH,
+                CTM[2][0] + CTM[1][0], CTM[2][1] + CTM[1][1]};
+
         im1View.getTransforms().setAll(Transform.affine(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]));
-        
+
         setClip(currentGraphicsState, affine, im1View);
         setBlendMode(currentGraphicsState, im1View);
 
         addToScene(im1View);
-        
+
         final float WidthModifier = 1;
         final float HeightModifier = 1;
-        
+
         //ignore in this case /PDFdata/baseline_screens/customers3/1773_A2.pdf
-        if(CTM[0][0]>0 && CTM[0][0]<0.05 && CTM[0][1]!=0 && CTM[1][0]!=0 && CTM[1][1]!=0){
+        if (CTM[0][0] > 0 && CTM[0][0] < 0.05 && CTM[0][1] != 0 && CTM[1][0] != 0 && CTM[1][1] != 0) {
             areas.addElement(null);
-        }else{
-            w=(int)(CTM[0][0]*WidthModifier);
-            if(w==0) {
+        } else {
+            w = (int) (CTM[0][0] * WidthModifier);
+            if (w == 0) {
                 w = (int) (CTM[0][1] * WidthModifier);
             }
-            h=(int)(CTM[1][1]*HeightModifier);
-            if(h==0) {
+            h = (int) (CTM[1][1] * HeightModifier);
+            if (h == 0) {
                 h = (int) (CTM[1][0] * HeightModifier);
             }
-            
+
             //fix negative height on Ghostscript image in printing
-            final int x1=(int)currentGraphicsState.x;
-            int y1=(int)currentGraphicsState.y;
-            final int w1=w;
-            int h1=h;
-            if(h1<0){
+            final int x1 = (int) currentGraphicsState.x;
+            int y1 = (int) currentGraphicsState.y;
+            final int w1 = w;
+            int h1 = h;
+            if (h1 < 0) {
                 y1 += h1;
-                h1=-h1;
+                h1 = -h1;
             }
-            
-            if(h1==0) {
+
+            if (h1 == 0) {
                 h1 = 1;
             }
-            
-            final int[] rectParams = {x1,y1,w1,h1};
-            
+
+            final int[] rectParams = {x1, y1, w1, h1};
+
             areas.addElement(rectParams);
             objectType.addElement(DynamicVectorRenderer.IMAGE);
         }
-        
-        final boolean cacheInMemory=(image.getWidth()<100 && image.getHeight()<100) || image.getHeight()==1;
-        if(!cacheInMemory){
+
+        final boolean cacheInMemory = (image.getWidth() < 100 && image.getHeight() < 100) || image.getHeight() == 1;
+        if (!cacheInMemory) {
             pageObjects.addElement(null);
-        }else {
+        } else {
             pageObjects.addElement(image);
         }
 
-        if(rawKey==null){
-            objectStoreRef.saveStoredImageAsBytes(pageNumber+"_HIRES_"+currentItem,image,false);
-            imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem);
-        }else{
-            objectStoreRef.saveStoredImageAsBytes(pageNumber+"_HIRES_"+currentItem+ '_' +rawKey,image,false);
-            imageIDtoName.put(currentItem,pageNumber+"_HIRES_"+currentItem+ '_' +rawKey);
+        if (rawKey == null) {
+            objectStoreRef.saveStoredImageAsBytes(pageNumber + "_HIRES_" + currentItem, image, false);
+            imageIDtoName.put(currentItem, pageNumber + "_HIRES_" + currentItem);
+        } else {
+            objectStoreRef.saveStoredImageAsBytes(pageNumber + "_HIRES_" + currentItem + '_' + rawKey, image, false);
+            imageIDtoName.put(currentItem, pageNumber + "_HIRES_" + currentItem + '_' + rawKey);
         }
-        
+
         currentItem++;
-        
-        return currentItem-1;
+
+        return currentItem - 1;
     }
-    
+
     /*save shape in array to draw*/
     @Override
     public void drawShape(final Object rawShape, final GraphicsState currentGraphicsState) {
 
-        final Shape currentShape=(javafx.scene.shape.Shape)rawShape;
+        final Shape currentShape = (javafx.scene.shape.Shape) rawShape;
 
         final float[] affine = {currentGraphicsState.CTM[0][0], currentGraphicsState.CTM[0][1], currentGraphicsState.CTM[1][0], currentGraphicsState.CTM[1][1], currentGraphicsState.CTM[2][0], currentGraphicsState.CTM[2][1]};
         // Fixes Pages from FDB-B737-FRM_nowatermark.pdf
@@ -264,32 +267,32 @@ public class FXDisplay extends GUIDisplay {
 //           affine[3] = 1; //
 //        }
         currentShape.getTransforms().add(javafx.scene.transform.Transform.affine(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]));
-        
+
         //if Pattern, convert to Image with Pattern on instead
-        if(currentGraphicsState.nonstrokeColorSpace.getID()==ColorSpaces.Pattern){            
+        if (currentGraphicsState.nonstrokeColorSpace.getID() == ColorSpaces.Pattern) {
             drawPatternedShape(currentGraphicsState, (Path) currentShape);
-        }else{
-            setFXParams(currentShape,currentGraphicsState.getFillType(),currentGraphicsState, changeLineArtAndText);
+        } else {
+            setFXParams(currentShape, currentGraphicsState.getFillType(), currentGraphicsState, changeLineArtAndText);
 
             setClip(currentGraphicsState, affine, currentShape);
             setBlendMode(currentGraphicsState, currentShape);
 
             addToScene(currentShape);
         }
-        final int[] shapeBounds = {(int)currentShape.getBoundsInLocal().getMinX(), (int)currentShape.getBoundsInLocal().getMinY()
-                , (int)currentShape.getBoundsInLocal().getWidth(), (int)currentShape.getBoundsInLocal().getHeight()};
-        
+        final int[] shapeBounds = {(int) currentShape.getBoundsInLocal().getMinX(), (int) currentShape.getBoundsInLocal().getMinY(),
+                (int) currentShape.getBoundsInLocal().getWidth(), (int) currentShape.getBoundsInLocal().getHeight()};
+
         pageObjects.addElement(currentShape);
         objectType.addElement(DynamicVectorRenderer.SHAPE);
         areas.addElement(shapeBounds);
         currentItem++;
 
     }
-    
-    private void drawPatternedShape(final GraphicsState currentGraphicsState, final Path currentShape){
-        final PatternColorSpace patternCS=(PatternColorSpace)currentGraphicsState.nonstrokeColorSpace;
+
+    private void drawPatternedShape(final GraphicsState currentGraphicsState, final Path currentShape) {
+        final PatternColorSpace patternCS = (PatternColorSpace) currentGraphicsState.nonstrokeColorSpace;
         final Bounds bounds = currentShape.getBoundsInParent();
-        
+
         final PatternObject patternObj = patternCS.getPatternObj();
         final int patternType = patternObj.getInt(PdfDictionary.PatternType);
         if (patternType == 1) { //tiling pattern
@@ -305,16 +308,16 @@ public class FXDisplay extends GUIDisplay {
 //        final double yPos=currentShape.getBoundsInParent().getMinY();
 //        double pw = currentShape.getBoundsInLocal().getWidth();
 //        double ph = currentShape.getBoundsInLocal().getHeight();  
-            final ImagePattern pattern = new ImagePattern(fxImage, 0, 0, iw, ih,false);
+            final ImagePattern pattern = new ImagePattern(fxImage, 0, 0, iw, ih, false);
             currentShape.setStroke(new Color(0, 0, 0, 0));
             currentShape.setFill(pattern);
-            
+
         } else {
             currentShape.setFill(getShadingPaint(patternObj, patternCS, bounds));
         }
-        
+
         addToScene(currentShape);
-        
+
 //        if(true) return;
 //        final PatternColorSpace fillCS=(PatternColorSpace)currentGraphicsState.nonstrokeColorSpace;
 //        //get Image as BufferedImage and convert to javafx WritableImage
@@ -332,17 +335,17 @@ public class FXDisplay extends GUIDisplay {
 //        patternView.setY(yPos+1);        
         //addToScene(patternView, currentShape);
     }
-    
+
     private static Paint getShadingPaint(final PatternObject patternObj, final PatternColorSpace patternCS, final Bounds bounds) {
-       
+
         final PdfObjectReader currentPdfFile = patternCS.getObjectReader();
-        final PdfObject shading=patternObj.getDictionary(PdfDictionary.Shading);
-        final PdfArrayIterator ColorSpace=shading.getMixedArray(PdfDictionary.ColorSpace);
-        final GenericColorSpace newColorSpace= ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
- 
-        float[][] matrix = {{1,0,0},{0,1,0},{0,0,1}};
-        final float[] inputs=patternObj.getFloatArray(PdfDictionary.Matrix);
-        if(inputs!=null){
+        final PdfObject shading = patternObj.getDictionary(PdfDictionary.Shading);
+        final PdfArrayIterator ColorSpace = shading.getMixedArray(PdfDictionary.ColorSpace);
+        final GenericColorSpace newColorSpace = ColorspaceFactory.getColorSpaceInstance(currentPdfFile, ColorSpace);
+
+        float[][] matrix = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        final float[] inputs = patternObj.getFloatArray(PdfDictionary.Matrix);
+        if (inputs != null) {
             matrix = new float[][]{{inputs[0], inputs[1], 0f}, {inputs[2], inputs[3], 0f}, {inputs[4], inputs[5], 1f}};
         }
 
@@ -351,7 +354,7 @@ public class FXDisplay extends GUIDisplay {
 
         final PdfObject functionObj = shading.getDictionary(PdfDictionary.Function);
         final PdfArrayIterator keys = shading.getMixedArray(PdfDictionary.Function);
-        PDFFunction [] function = null;
+        PDFFunction[] function = null;
         if (functionObj != null) {
             function = new PDFFunction[1];
             function[0] = FunctionFactory.getFunction(functionObj, currentPdfFile);
@@ -363,11 +366,11 @@ public class FXDisplay extends GUIDisplay {
 
             if (keys != null) {
                 final PdfObject[] subFunction = new PdfObject[functionCount];
- 
+
                 for (int i = 0; i < functionCount; i++) {
-                    
-                    subFunction[i]=ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, keys.getNextValueAsByte(true));
-                    
+
+                    subFunction[i] = ColorspaceFactory.getFunctionObjectFromRefOrDirect(currentPdfFile, keys.getNextValueAsByte(true));
+
                 }
                 function = new PDFFunction[subFunction.length];
                 for (int i1 = 0, imax = subFunction.length; i1 < imax; i1++) {
@@ -375,7 +378,7 @@ public class FXDisplay extends GUIDisplay {
                 }
             }
         }
-        
+
         if (shadingType == 2) {
             return getAxialPaint(newColorSpace, background, shading, matrix, function, bounds);
         } else {
@@ -385,85 +388,85 @@ public class FXDisplay extends GUIDisplay {
     }
 
     private static Paint getAxialPaint(final GenericColorSpace shadingColorSpace, final float[] background, final PdfObject shadingObject, final float[][] mm, final PDFFunction[] function, final Bounds bounds) {
-        
+
         float[] domain = shadingObject.getFloatArray(PdfDictionary.Domain);
         if (domain == null) {
             domain = new float[]{0.0f, 1.0f};
         }
-        boolean [] extension = shadingObject.getBooleanArray(PdfDictionary.Extend);
+        boolean[] extension = shadingObject.getBooleanArray(PdfDictionary.Extend);
         if (extension == null) {
             extension = new boolean[]{false, false};
         }
-        
-        Color bgColor = new Color(0,0,0,0);
-        
-        if(background != null){
+
+        Color bgColor = new Color(0, 0, 0, 0);
+
+        if (background != null) {
             shadingColorSpace.setColor(background, 4);
             shadingColorSpace.getColor();
             final PdfPaint pp = shadingColorSpace.getColor();
             final int rgb = pp.getRGB();
-            bgColor = new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
+            bgColor = new Color(((rgb >> 16) & 0xff) / 255.0, ((rgb >> 8) & 0xff) / 255.0, (rgb & 0xff) / 255.0, 1);
         }
-        
+
         Color colorE0 = bgColor;
         Color colorE1 = bgColor;
-                        
+
         final float[] coords = shadingObject.getFloatArray(PdfDictionary.Coords);
 
         float x0 = coords[0];
         float y0 = coords[1];
         float x1 = coords[2];
         float y1 = coords[3];
-        
+
         float[] temp = Matrix.transformPoint(mm, x0, y0);
         x0 = temp[0];
         y0 = temp[1];
-        
+
         temp = Matrix.transformPoint(mm, x1, y1);
         x1 = temp[0];
         y1 = temp[1];
-       
+
         final float t0 = domain[0];
         final float t1 = domain[1];
-       
+
         final Color colorT0 = calculateColor(t0, shadingColorSpace, function);
         final Color colorT1 = calculateColor(t1, shadingColorSpace, function);
-        
+
         colorE0 = extension[0] ? colorT0 : colorE0;
         colorE1 = extension[1] ? colorT1 : colorE1;
-        
-        final Stop[] stops = {new Stop(0,colorE0),new Stop(0.01, colorT0), new Stop(0.99, colorT1), new Stop(1,colorE1)};
+
+        final Stop[] stops = {new Stop(0, colorE0), new Stop(0.01, colorT0), new Stop(0.99, colorT1), new Stop(1, colorE1)};
 //        Stop[] stops = new Stop[]{new Stop(0.1, colorT0), new Stop(0.9, colorT1)};
-        if(1==2){
+        if (1 == 2) {
             Matrix.show(mm);
             final double bx = bounds.getMinX();
             final double by = bounds.getMinY();
             final double mx = bounds.getMaxX();
             final double my = bounds.getMaxY();
 
-            System.out.println(bx+by+mx+my);
+            System.out.println(bx + by + mx + my);
         }
         return new LinearGradient(x0, y0, x1, y1, false, CycleMethod.NO_CYCLE, stops);
     }
-    
+
     private static Color calculateColor(final float val, final GenericColorSpace shadingColorSpace, final PDFFunction[] function) {
         final float[] colValues = ShadingFactory.applyFunctions(function, new float[]{val});
         shadingColorSpace.setColor(colValues, colValues.length);
         final PdfPaint pp = shadingColorSpace.getColor();
         final int rgb = pp.getRGB();
-        return new Color(((rgb>>16)&0xff)/255.0, ((rgb>>8)&0xff)/255.0, (rgb&0xff)/255.0,1);
-    }    
+        return new Color(((rgb >> 16) & 0xff) / 255.0, ((rgb >> 8) & 0xff) / 255.0, (rgb & 0xff) / 255.0, 1);
+    }
 
-    protected void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, final boolean allowColorChange){
+    protected void setFXParams(final Shape currentShape, final int fillType, final GraphicsState currentGraphicsState, final boolean allowColorChange) {
 
         // Removes the default black stroke on shapes
         currentShape.setStroke(null);
-        
+
         if (fillType == GraphicsState.FILL || fillType == GraphicsState.FILLSTROKE) {
-            
+
             //get fill colour
-            int fillCol=currentGraphicsState.nonstrokeColorSpace.getColor().getRGB();
-            
+            int fillCol = currentGraphicsState.nonstrokeColorSpace.getColor().getRGB();
+
             if (allowColorChange) {
                 //If we have an alt text color, its within threshold and not an additional item, use alt color
                 if (textColor != null && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(fillCol)) {
@@ -474,66 +477,67 @@ public class FXDisplay extends GUIDisplay {
             final int r = ((fillCol >> 16) & 255);    //red
             final int g = ((fillCol >> 8) & 255);     //green
             final int b = ((fillCol) & 255);          //blue
-            final double a=currentGraphicsState.getAlpha(GraphicsState.FILL);     //alpha
-        
-            currentShape.setFill(javafx.scene.paint.Color.rgb(r,g,b,a));
+            final double a = currentGraphicsState.getAlpha(GraphicsState.FILL);     //alpha
+
+            currentShape.setFill(javafx.scene.paint.Color.rgb(r, g, b, a));
         }
-        
+
         if (fillType == GraphicsState.STROKE) {
 
             //get fill colour
-            int strokeCol=currentGraphicsState.strokeColorSpace.getColor().getRGB();
-            
+            int strokeCol = currentGraphicsState.strokeColorSpace.getColor().getRGB();
+
             if (allowColorChange) {
                 //If we have an alt text color, its within threshold and not an additional item, use alt color
                 if (textColor != null && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(strokeCol)) {
                     strokeCol = textColor.getRGB();
                 }
             }
-            
+
             //get value as rgb and set current colour used in fill
             final int r = ((strokeCol >> 16) & 255);    //red
             final int g = ((strokeCol >> 8) & 255);     //green
             final int b = ((strokeCol) & 255);          //blue
-            final double a=currentGraphicsState.getAlpha(GraphicsState.STROKE);     //alpha
-        
-            currentShape.setStroke(javafx.scene.paint.Color.rgb(r,g,b,a));
+            final double a = currentGraphicsState.getAlpha(GraphicsState.STROKE);     //alpha
+
+            currentShape.setStroke(javafx.scene.paint.Color.rgb(r, g, b, a));
             currentGraphicsState.applyFXStroke(currentShape);
         }
     }
 
     @Override
     public void drawCustom(final Object value) {
-	 
-            addToScene((Node) value);
+
+        addToScene((Node) value);
     }
-    
+
     /**
      * store glyph info
-     * @param Trm the Trm matrix (x,y is Trm[2][0], Trm[2][1]), other values are width (usually Trm[0][0] unless
-     * rotated when could be Trm[0][1]) and height (usually Trm[1][1] or sometimes Trm[1][0]) Trm is defined in PDF
-     * specification
-     * @param fontSize The font size of the drawn text
-     * @param embeddedGlyph For displaying rendered test
-     * @param javaGlyph Is of type object used to draw text
-     * @param type The type of text rendering
-     * @param gs The graphics state to use
-     * @param textScaling An array of text scaling
-     * @param glyf Is of type String used to draw text in the Viewer
+     *
+     * @param Trm             the Trm matrix (x,y is Trm[2][0], Trm[2][1]), other values are width (usually Trm[0][0] unless
+     *                        rotated when could be Trm[0][1]) and height (usually Trm[1][1] or sometimes Trm[1][0]) Trm is defined in PDF
+     *                        specification
+     * @param fontSize        The font size of the drawn text
+     * @param embeddedGlyph   For displaying rendered test
+     * @param javaGlyph       Is of type object used to draw text
+     * @param type            The type of text rendering
+     * @param gs              The graphics state to use
+     * @param textScaling     An array of text scaling
+     * @param glyf            Is of type String used to draw text in the Viewer
      * @param currentFontData font of the current decoded page in the Viewer
-     * @param glyfWidth The width of drawn text
+     * @param glyfWidth       The width of drawn text
      */
     @Override
     public void drawEmbeddedText(final float[][] Trm, final int fontSize, final PdfGlyph embeddedGlyph,
-        final Object javaGlyph, final int type, final GraphicsState gs, final double[] textScaling, final String glyf, final PdfFont currentFontData, final float glyfWidth) {
-          
+                                 final Object javaGlyph, final int type, final GraphicsState gs, final double[] textScaling, final String glyf, final PdfFont currentFontData, final float glyfWidth) {
+
         //lock out type3
-        if(type==DynamicVectorRenderer.TYPE3) {
+        if (type == DynamicVectorRenderer.TYPE3) {
             return;
         }
-        
+
         //case one - text is using Java to draw it
-        if(embeddedGlyph == null && javaGlyph == null){
+        if (embeddedGlyph == null && javaGlyph == null) {
             final Text t = new Text(glyf);
             // Get the affine
 
@@ -546,115 +550,115 @@ public class FXDisplay extends GUIDisplay {
             /*
              * Set the text color (fill and stroke)
              */
-            setFXParams(t, GraphicsState.FILL, gs, textColor!=null);
-            
+            setFXParams(t, GraphicsState.FILL, gs, textColor != null);
+
             // If the stroke is needed, fill it in
-            if((gs.getTextRenderType() & GraphicsState.STROKE) == GraphicsState.STROKE ){
-                setFXParams(t, GraphicsState.STROKE, gs, textColor!=null);
+            if ((gs.getTextRenderType() & GraphicsState.STROKE) == GraphicsState.STROKE) {
+                setFXParams(t, GraphicsState.STROKE, gs, textColor != null);
             }
-            
+
             setBlendMode(gs, t);
 
             // Set the affines
-            if(type!=DynamicVectorRenderer.TRUETYPE){
-                final double r=1d / fontSize;
-                t.getTransforms().add(Transform.affine(textScaling[0]*r,textScaling[1]*r,textScaling[2]*r,textScaling[3]*r,Trm[2][0],Trm[2][1]));        
-            }else{
-                final double r=1d / fontSize;
-                t.getTransforms().setAll(Transform.affine(Trm[0][0]*r,Trm[0][1]*r,Trm[1][0]*r,Trm[1][1]*r,Trm[2][0],Trm[2][1]));          
+            if (type != DynamicVectorRenderer.TRUETYPE) {
+                final double r = 1d / fontSize;
+                t.getTransforms().add(Transform.affine(textScaling[0] * r, textScaling[1] * r, textScaling[2] * r, textScaling[3] * r, Trm[2][0], Trm[2][1]));
+            } else {
+                final double r = 1d / fontSize;
+                t.getTransforms().setAll(Transform.affine(Trm[0][0] * r, Trm[0][1] * r, Trm[1][0] * r, Trm[1][1] * r, Trm[2][0], Trm[2][1]));
             }
-            
-            final float[] transform= {Trm[0][0],Trm[1][0],Trm[0][1],Trm[1][1],Trm[2][0],Trm[2][1]};
-            
+
+            final float[] transform = {Trm[0][0], Trm[1][0], Trm[0][1], Trm[1][1], Trm[2][0], Trm[2][1]};
+
             final Shape clip = gs.getFXClippingShape();
-        
-            if(clip!=null && !clip.contains(Trm[2][0],Trm[2][1])){
-                 setClip(gs, transform, t);
+
+            if (clip != null && !clip.contains(Trm[2][0], Trm[2][1])) {
+                setClip(gs, transform, t);
             }
-        
+
             pageObjects.addElement(t);
             addToScene(t);
-            
-        }else { //case two - text is using our font engine
-            
+
+        } else { //case two - text is using our font engine
+
             // System.out.println("embeddedGlyph = "+ embeddedGlyph+" "+at+" "+Trm[0][0]);
 
-            final Path path=(Path) embeddedGlyph.getPath();
+            final Path path = (Path) embeddedGlyph.getPath();
 
-            if(path==null){
-                if(LogWriter.isRunningFromIDE){
-                    System.out.println("Null FX path in "+embeddedGlyph);
+            if (path == null) {
+                if (LogWriter.isRunningFromIDE) {
+                    System.out.println("Null FX path in " + embeddedGlyph);
                 }
-                
+
                 return;
             }
-            
+
             path.setFillRule(FillRule.EVEN_ODD);
-            
-           
-            if(type!=DynamicVectorRenderer.TRUETYPE){
-                  path.getTransforms().setAll(Transform.affine(textScaling[0],textScaling[1],textScaling[2],textScaling[3],textScaling[4],textScaling[5]));        
-            }else{
-                final double r=1d/100d;
-                
-                if(!TTGlyph.useHinting) {
+
+
+            if (type != DynamicVectorRenderer.TRUETYPE) {
+                path.getTransforms().setAll(Transform.affine(textScaling[0], textScaling[1], textScaling[2], textScaling[3], textScaling[4], textScaling[5]));
+            } else {
+                final double r = 1d / 100d;
+
+                if (!TTGlyph.useHinting) {
                     path.getTransforms().setAll(Transform.affine(textScaling[0], textScaling[1], textScaling[2], textScaling[3], textScaling[4], textScaling[5]));
                 } else {
                     path.getTransforms().setAll(Transform.affine(textScaling[0] * r, textScaling[1] * r, textScaling[2] * r, textScaling[3] * r, textScaling[4], textScaling[5]));
                 }
             }
 
-            setFXParams(path,gs.getTextRenderType(),gs, textColor!=null);
+            setFXParams(path, gs.getTextRenderType(), gs, textColor != null);
             setBlendMode(gs, path);
-            
-            final float[] transform= {Trm[0][0],Trm[1][0],Trm[0][1],Trm[1][1],Trm[2][0],Trm[2][1]};
-           
+
+            final float[] transform = {Trm[0][0], Trm[1][0], Trm[0][1], Trm[1][1], Trm[2][0], Trm[2][1]};
+
             final Shape clip = gs.getFXClippingShape();
-        
-            if(clip!=null && !clip.contains(Trm[2][0],Trm[2][1])){
-                 setClip(gs, transform, path);
+
+            if (clip != null && !clip.contains(Trm[2][0], Trm[2][1])) {
+                setClip(gs, transform, path);
             }
             pageObjects.addElement(path);
-            addToScene(path);     
+            addToScene(path);
         }
         objectType.addElement(type);
-        
-        if(type<0){
+
+        if (type < 0) {
             areas.addElement(null);
-        }else{
-            if(javaGlyph!=null){
-                final int[] rectParams = {(int)(Trm[2][0]),(int)Trm[2][1],fontSize,fontSize};
+        } else {
+            if (javaGlyph != null) {
+                final int[] rectParams = {(int) (Trm[2][0]), (int) Trm[2][1], fontSize, fontSize};
                 areas.addElement(rectParams);
-                
-            }else{
+
+            } else {
                 /*now text*/
-                int realSize=fontSize;
-                if(realSize<0) {
+                int realSize = fontSize;
+                if (realSize < 0) {
                     realSize = -realSize;
                 }
-                final int[] area= {(int)(Trm[2][0]),(int)Trm[2][1],realSize,realSize};
-                
+                final int[] area = {(int) (Trm[2][0]), (int) Trm[2][1], realSize, realSize};
+
                 areas.addElement(area);
             }
         }
-        
+
         currentItem++;
     }
-    
+
     /**
      * When Transform.affine() is applied to the image, it's applied to the clip as well.
      * This causes the clip to be transformed into the incorrect position.
-     * 
+     * <p>
      * This code essentially un-transforms the clip so it clips correctly again.
      */
-    private static void setClip(final GraphicsState currentGraphicsState, final float[] affine, final Node baseNode){
+    private static void setClip(final GraphicsState currentGraphicsState, final float[] affine, final Node baseNode) {
 
         final Shape clip = currentGraphicsState.getFXClippingShape();
-        if(clip != null){
+        if (clip != null) {
             try {
                 // Lock out specific matrices from being reversed
-                if(!Arrays.equals(affine, new float[]{1,0,0,-1,0,0})){
-                    
+                if (!Arrays.equals(affine, new float[]{1, 0, 0, -1, 0, 0})) {
+
                     // Side note: initialising a straight up Affine uses the doubles in a different order
                     final Affine inverseAff = Transform.affine(affine[0], affine[1], affine[2], affine[3], affine[4], affine[5]).createInverse();
                     clip.getTransforms().add(inverseAff);
@@ -667,39 +671,38 @@ public class FXDisplay extends GUIDisplay {
                  * PDFdata\test_data\Hand_Test\jj.PDF
                  * PDFdata\test_data\sample_pdfs\CIDs\Article7.pdf
                 * */
-                
+
                 //remove hacky fix with clip to make 23700 work correctly
 //               boolean applyClip = clip.getBoundsInLocal().getMinX()>baseNode.getBoundsInLocal().getMinX() && 
 //                        baseNode.getBoundsInLocal().getMaxY() > clip.getBoundsInLocal().getMaxY();
 //              
 //                if (applyClip) {  
-                 
-                    baseNode.setClip(clip);
+
+                baseNode.setClip(clip);
 //                }
-                  
 
 
             } catch (final NonInvertibleTransformException ex) {
                 ex.printStackTrace();
             }
-                
+
         }
     }
 
     public Group getFXPane() {
-        
-      //  System.out.println("getFXPane "+this);
-        if(collection!=null && !collection.isEmpty()){
-         //   pdfContent.getChildren().removeAll(collection);
+
+        //  System.out.println("getFXPane "+this);
+        if (collection != null && !collection.isEmpty()) {
+            //   pdfContent.getChildren().removeAll(collection);
             pdfContent.getChildren().addAll(collection);
             collection.clear();
         }
         return pdfContent;
     }
-    
-    protected static void setBlendMode(final GraphicsState gs, final Node n){
-        
-        switch(gs.getBMValue()){
+
+    protected static void setBlendMode(final GraphicsState gs, final Node n) {
+
+        switch (gs.getBMValue()) {
             case PdfDictionary.Multiply:
                 n.setBlendMode(BlendMode.MULTIPLY);
                 break;
@@ -738,43 +741,43 @@ public class FXDisplay extends GUIDisplay {
                 break;
         }
     }
-    
-     /**
+
+    /**
      * Adds items to scene, ensuring we are on the FX thread
+     *
      * @param items All the nodes that are added to the Scene
      */
-    private void addToScene(final Node items){
+    private void addToScene(final Node items) {
         collection.add(items);
-        
+
     }
 
     /**
-     * 
      * @param defaultSize The size of the array
      */
-    private void setupArrays(final int defaultSize){
-        areas=new Vector_Rectangle_Int(defaultSize);
-        objectType=new Vector_Int(defaultSize);
-        pageObjects=new Vector_Object(defaultSize);
-        
+    private void setupArrays(final int defaultSize) {
+        areas = new Vector_Rectangle_Int(defaultSize);
+        objectType = new Vector_Int(defaultSize);
+        pageObjects = new Vector_Object(defaultSize);
+
         currentItem = 0;
     }
 
     @Override
     public void paintBackground(final java.awt.Shape dirtyRegion) {
-        
+
         if (addBackground) {
-             
+
             final Path background = new Path();
-            
+
             background.getElements().add(new MoveTo(xx, yy));
-            background.getElements().add(new LineTo(xx, yy+(int) (h * scaling)));
-            background.getElements().add(new LineTo(xx+ (int) (w * scaling), yy+(int) (h * scaling)));
-            background.getElements().add(new LineTo(xx+ (int) (w * scaling), yy));
+            background.getElements().add(new LineTo(xx, yy + (int) (h * scaling)));
+            background.getElements().add(new LineTo(xx + (int) (w * scaling), yy + (int) (h * scaling)));
+            background.getElements().add(new LineTo(xx + (int) (w * scaling), yy));
             background.getElements().add(new LineTo(xx, yy));
-            
-            background.setFill(new Color(backgroundColor.getRed()/255.0f, backgroundColor.getGreen()/255.0f, backgroundColor.getBlue()/255.0f, 1.0f));
-           addToScene(background);
+
+            background.setFill(new Color(backgroundColor.getRed() / 255.0f, backgroundColor.getGreen() / 255.0f, backgroundColor.getBlue() / 255.0f, 1.0f));
+            addToScene(background);
         }
     }
 }

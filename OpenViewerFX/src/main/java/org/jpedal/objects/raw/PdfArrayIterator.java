@@ -33,6 +33,7 @@
 package org.jpedal.objects.raw;
 
 import java.util.Arrays;
+
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.io.types.StreamReaderUtils;
 import org.jpedal.utils.NumberUtils;
@@ -304,7 +305,7 @@ public class PdfArrayIterator {
     public int getTokenCount() {
         return this.tokenCount;
     }
-    
+
 //    @Override
 //    public String toString(){
 //        

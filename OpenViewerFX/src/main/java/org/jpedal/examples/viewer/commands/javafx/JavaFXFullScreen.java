@@ -42,10 +42,10 @@ import org.jpedal.gui.GUIFactory;
 public class JavaFXFullScreen {
 
     private static boolean toggler = true;
-    
+
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
-            ((Stage)currentGUI.getFrame()).setFullScreen(toggler);
+            ((Stage) currentGUI.getFrame()).setFullScreen(toggler);
             toggler = !toggler;
         }
     }

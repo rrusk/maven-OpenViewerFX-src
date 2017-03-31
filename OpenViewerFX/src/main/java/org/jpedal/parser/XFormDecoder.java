@@ -35,6 +35,7 @@ package org.jpedal.parser;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ExternalHandlers;
@@ -50,20 +51,21 @@ import org.jpedal.utils.Matrix;
 public class XFormDecoder {
     /**
      * recursive subroutine so in actual body of PdfStreamDecoder so it can recall decodeStream
+     *
      * @param pdfStreamDecoder
      * @param dataPointer
      */
     static void processXForm(final PdfStreamDecoder pdfStreamDecoder, final int dataPointer, final PdfObject XObject, final Shape defaultClip, final CommandParser parser) {
 
-        final boolean debug=false;
+        final boolean debug = false;
 
-        if(debug) {
+        if (debug) {
             System.out.println("processImage " + dataPointer + ' ' + XObject.getObjectRefAsString() + ' ' + defaultClip);
         }
 
-        final String oldFormName= pdfStreamDecoder.formName;
+        final String oldFormName = pdfStreamDecoder.formName;
 
-        final String name=parser.generateOpAsString(0, true);
+        final String name = parser.generateOpAsString(0, true);
 
         //Removed to fix issue with render to g2
         //name is not unique if in form so we add form level to separate out
@@ -74,9 +76,9 @@ public class XFormDecoder {
 
         try {
 
-            if(ImageCommands.trackImages){
+            if (ImageCommands.trackImages) {
                 //add details to string so we can pass back
-                if(pdfStreamDecoder.imagesInFile ==null) {
+                if (pdfStreamDecoder.imagesInFile == null) {
                     pdfStreamDecoder.imagesInFile = name + " Form";
                 } else {
                     pdfStreamDecoder.imagesInFile = name + " Form\n" + pdfStreamDecoder.imagesInFile;
@@ -90,12 +92,12 @@ public class XFormDecoder {
             final byte[] objectData = pdfStreamDecoder.currentPdfFile.readStream(XObject, true, true, false, false, false, XObject.getCacheName(pdfStreamDecoder.currentPdfFile.getObjectReader()));
             if (objectData != null) {
 
-                final String oldIndent= PdfStreamDecoder.indent;
+                final String oldIndent = PdfStreamDecoder.indent;
                 PdfStreamDecoder.indent += "   ";
 
                 //set value and see if Transform matrix
-                float[] transformMatrix=new float[6];
-                float[] matrix=XObject.getFloatArray(PdfDictionary.Matrix);
+                float[] transformMatrix = new float[6];
+                float[] matrix = XObject.getFloatArray(PdfDictionary.Matrix);
 
                 /*
                  * see if we should ignore scaling because we have already scaled in
@@ -116,59 +118,59 @@ public class XFormDecoder {
                         Bheight = (pdfStreamDecoder.BBox[3] - pdfStreamDecoder.BBox[1]) / matrix[3];
                     }
 
-                    if (Bwidth == (formBBox[2] - formBBox[0]) && Bheight == (formBBox[3] - formBBox[1]) && matrix[4]==0 && matrix[5]==0) {
+                    if (Bwidth == (formBBox[2] - formBBox[0]) && Bheight == (formBBox[3] - formBBox[1]) && matrix[4] == 0 && matrix[5] == 0) {
                         matrix = null;
                     }
 
                 }
 
-                final boolean isIdentity=matrix==null || XForm.isIdentity(matrix);
-                if(matrix!=null) {
+                final boolean isIdentity = matrix == null || XForm.isIdentity(matrix);
+                if (matrix != null) {
                     transformMatrix = matrix;
                 }
 
                 final float[][] CTM;
                 final float[][] oldCTM;
 
-                final int currentDepth= pdfStreamDecoder.graphicsStates.getDepth();
+                final int currentDepth = pdfStreamDecoder.graphicsStates.getDepth();
 
                 //allow for stroke line width being altered by scaling
-                float lineWidthInForm=-1; //negative values not used
+                float lineWidthInForm = -1; //negative values not used
 
 
                 //save current
-                final float[][] currentCTM=new float[3][3];
-                for(int i=0;i<3;i++) {
+                final float[][] currentCTM = new float[3][3];
+                for (int i = 0; i < 3; i++) {
                     System.arraycopy(pdfStreamDecoder.gs.CTM[i], 0, currentCTM[i], 0, 3);
                 }
 
                 oldCTM = currentCTM;
 
-                CTM= pdfStreamDecoder.gs.CTM;
+                CTM = pdfStreamDecoder.gs.CTM;
 
-                float[][] scaleF= pdfStreamDecoder.gs.scaleFactor;
+                float[][] scaleF = pdfStreamDecoder.gs.scaleFactor;
 
-                if(matrix!=null && !isIdentity) {
+                if (matrix != null && !isIdentity) {
 
-                    final float[][] scaleFactor={{transformMatrix[0],transformMatrix[1],0},
-                        {transformMatrix[2],transformMatrix[3],0},
-                        {transformMatrix[4],transformMatrix[5],1}};
+                    final float[][] scaleFactor = {{transformMatrix[0], transformMatrix[1], 0},
+                            {transformMatrix[2], transformMatrix[3], 0},
+                            {transformMatrix[4], transformMatrix[5], 1}};
 
-                    scaleF=scaleFactor;
-                    pdfStreamDecoder.gs.CTM= Matrix.multiply(scaleFactor, CTM);
+                    scaleF = scaleFactor;
+                    pdfStreamDecoder.gs.CTM = Matrix.multiply(scaleFactor, CTM);
 
                     //work out line width
-                    lineWidthInForm=transformMatrix[0]* pdfStreamDecoder.gs.getLineWidth();
+                    lineWidthInForm = transformMatrix[0] * pdfStreamDecoder.gs.getLineWidth();
 
                     if (lineWidthInForm == 0) {
                         lineWidthInForm = transformMatrix[1] * pdfStreamDecoder.gs.getLineWidth();
                     }
 
-                    if(lineWidthInForm<0) {
+                    if (lineWidthInForm < 0) {
                         lineWidthInForm = -lineWidthInForm;
                     }
 
-                    if(debug) {
+                    if (debug) {
                         System.out.println("setMatrix " + pdfStreamDecoder.gs.CTM[0][0] + ' ' + pdfStreamDecoder.gs.CTM[0][1] + ' ' + pdfStreamDecoder.gs.CTM[1][0] + ' ' + pdfStreamDecoder.gs.CTM[1][1] + ' ' + pdfStreamDecoder.gs.CTM[2][0] + ' ' + pdfStreamDecoder.gs.CTM[2][1]);
                     }
                 }
@@ -177,30 +179,30 @@ public class XFormDecoder {
                 pdfStreamDecoder.formLevel++;
 
                 //track name so we can make unique key for image name
-                if(pdfStreamDecoder.formLevel ==1) {
+                if (pdfStreamDecoder.formLevel == 1) {
                     pdfStreamDecoder.formName = name;
-                } else if(pdfStreamDecoder.formLevel <20) //stop memory issue on silly files
+                } else if (pdfStreamDecoder.formLevel < 20) //stop memory issue on silly files
                 {
                     pdfStreamDecoder.formName = pdfStreamDecoder.formName + '_' + name;
                 }
 
                 //preserve colors
-                final int mainStrokeColorData =  pdfStreamDecoder.gs.strokeColorSpace.getColor().getRGB();
+                final int mainStrokeColorData = pdfStreamDecoder.gs.strokeColorSpace.getColor().getRGB();
                 final int mainnonStrokeColorData = pdfStreamDecoder.gs.nonstrokeColorSpace.getColor().getRGB();
 
                 //set form line width if appropriate
-                if(lineWidthInForm>0) {
+                if (lineWidthInForm > 0) {
                     pdfStreamDecoder.gs.setLineWidth(lineWidthInForm);
                 }
 
                 //set gs max to current so child gs values can not exceed
-                final float maxStrokeValue= pdfStreamDecoder.gs.getAlphaMax(GraphicsState.STROKE);
-                final float maxFillValue= pdfStreamDecoder.gs.getAlphaMax(GraphicsState.FILL);
-                final float currentFillValue= pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL);
+                final float maxStrokeValue = pdfStreamDecoder.gs.getAlphaMax(GraphicsState.STROKE);
+                final float maxFillValue = pdfStreamDecoder.gs.getAlphaMax(GraphicsState.FILL);
+                final float currentFillValue = pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL);
                 pdfStreamDecoder.gs.setMaxAlpha(GraphicsState.STROKE, pdfStreamDecoder.gs.getAlpha(GraphicsState.STROKE));
 
                 //if(pdfStreamDecoder.formLevel ==1) {
-                if(pdfStreamDecoder.formLevel<3 && currentFillValue<maxFillValue){
+                if (pdfStreamDecoder.formLevel < 3 && currentFillValue < maxFillValue) {
                     pdfStreamDecoder.gs.setMaxAlpha(GraphicsState.FILL, currentFillValue);
                 }
 
@@ -209,43 +211,42 @@ public class XFormDecoder {
                 final PdfObjectCache mainCache = pdfStreamDecoder.cache.copy();   //setup cache
                 pdfStreamDecoder.cache.reset(mainCache);   //copy in data
 
-                final PdfObject Resources= XObject.getDictionary(PdfDictionary.Resources);
-                if(Resources!=null) {
+                final PdfObject Resources = XObject.getDictionary(PdfDictionary.Resources);
+                if (Resources != null) {
                     pdfStreamDecoder.readResources(Resources, false);
                 }
 
-                pdfStreamDecoder.cache.groupObj= XObject.getDictionary(PdfDictionary.Group);
+                pdfStreamDecoder.cache.groupObj = XObject.getDictionary(PdfDictionary.Group);
                 pdfStreamDecoder.currentPdfFile.checkResolved(pdfStreamDecoder.cache.groupObj);
 
                 /*
                  * see if bounding box and set
                  */
-                final float[] BBox= XObject.getFloatArray(PdfDictionary.BBox);
-                Area clip=null;
-                boolean clipChanged=false;
-                
+                final float[] BBox = XObject.getFloatArray(PdfDictionary.BBox);
+                Area clip = null;
+                boolean clipChanged = false;
+
 
                 //this code breaks 11jun/169351.pdf so added as possible fix
-                if(BBox!=null && BBox[2]>1 && BBox[3]>1 && pdfStreamDecoder.gs.getClippingShape()==null && pdfStreamDecoder.gs.CTM[0][1]==0 && pdfStreamDecoder.gs.CTM[1][0]==0 && pdfStreamDecoder.gs.CTM[2][1]!=0 && pdfStreamDecoder.gs.CTM[2][0]<0){
-                    if(debug) {
+                if (BBox != null && BBox[2] > 1 && BBox[3] > 1 && pdfStreamDecoder.gs.getClippingShape() == null && pdfStreamDecoder.gs.CTM[0][1] == 0 && pdfStreamDecoder.gs.CTM[1][0] == 0 && pdfStreamDecoder.gs.CTM[2][1] != 0 && pdfStreamDecoder.gs.CTM[2][0] < 0) {
+                    if (debug) {
                         System.out.println("setClip1 ");
                     }
 
                     clip = XForm.setClip(defaultClip, BBox, pdfStreamDecoder.gs, pdfStreamDecoder.current);
-                    clipChanged=true;
+                    clipChanged = true;
 
 
                     //System.out.println(BBox[0]+" "+BBox[1]+" "+BBox[2]+" "+BBox[3]);
                     //Matrix.show(gs.CTM);
-                }
-                else if(BBox!=null && BBox[0]==0 && BBox[1]==0 && BBox[2]>1 && BBox[3]>1 && BBox[2]!=BBox[3]   && (pdfStreamDecoder.gs.CTM[0][0]>0.99 || pdfStreamDecoder.gs.CTM[2][1]<-1) && (pdfStreamDecoder.gs.CTM[2][0]<-1 || pdfStreamDecoder.gs.CTM[2][0]>1) && pdfStreamDecoder.gs.CTM[2][1]!=0 ){//)  && BBox[2]>1 && BBox[3]>1 ){//if(BBox!=null && matrix==null && BBox[0]==0 && BBox[1]==0){
+                } else if (BBox != null && BBox[0] == 0 && BBox[1] == 0 && BBox[2] > 1 && BBox[3] > 1 && BBox[2] != BBox[3] && (pdfStreamDecoder.gs.CTM[0][0] > 0.99 || pdfStreamDecoder.gs.CTM[2][1] < -1) && (pdfStreamDecoder.gs.CTM[2][0] < -1 || pdfStreamDecoder.gs.CTM[2][0] > 1) && pdfStreamDecoder.gs.CTM[2][1] != 0) { //)  && BBox[2]>1 && BBox[3]>1 ){ //if(BBox!=null && matrix==null && BBox[0]==0 && BBox[1]==0){
 
-                    if(debug) {
+                    if (debug) {
                         System.out.println("setClip2");
                     }
 
                     clip = XForm.setClip(defaultClip, BBox, pdfStreamDecoder.gs, pdfStreamDecoder.current);
-                    clipChanged=true;
+                    clipChanged = true;
                 }
 
                 //attempt to fix odd customers3/slides1.pdf text off page issue
@@ -254,63 +255,63 @@ public class XFormDecoder {
                 //if(formLevel==1 && gs.CTM[0][0]!=0 && gs.CTM[0][0]!=gs.CTM[0][1] && gs.CTM[0][0]!=1 && currentTextState.Tm[0][0]==1 && gs.CTM[1][1]<1f && (gs.CTM[1][1]>0.92f || gs.CTM[0][1]!=0) && currentTextState.Tm[2][1]<0){
                 //adjusted again to fix 15jan/21130.pdf
                 //else if(BBox!=null && BBox[0]==0 && BBox[1]==0 && BBox[2]>1 && BBox[3]>1 && (pdfStreamDecoder.formLevel>0 || pdfStreamDecoder.gs.getClippingShape()!=null)){
-                
-                else if(BBox!=null && BBox[0]==0 && BBox[1]==0 && BBox[2]>1 && BBox[3]>1 && !(pdfStreamDecoder.gs.CTM[2][0]<0) && (pdfStreamDecoder.formLevel>0 || pdfStreamDecoder.gs.getClippingShape()!=null)){
+
+                else if (BBox != null && BBox[0] == 0 && BBox[1] == 0 && BBox[2] > 1 && BBox[3] > 1 && !(pdfStreamDecoder.gs.CTM[2][0] < 0) && (pdfStreamDecoder.formLevel > 0 || pdfStreamDecoder.gs.getClippingShape() != null)) {
                     //&& (gs.CTM[0][0]>0.99 || gs.CTM[2][1]<-1) && (gs.CTM[2][0]<-1 || gs.CTM[2][0]>1) && gs.CTM[2][1]!=0 ){
 
-                    if(debug) {
+                    if (debug) {
                         System.out.println("setClip3");
                     }
 
                     clip = XForm.setClip(defaultClip, BBox, pdfStreamDecoder.gs, pdfStreamDecoder.current);
-                    clipChanged=true;
-                }else if(pdfStreamDecoder.formLevel >1 && BBox!=null && BBox[0]>50 && BBox[1]>50 && pdfStreamDecoder.gs.getClippingShape()!=null && (BBox[0]-1)> pdfStreamDecoder.gs.getClippingShape().getBounds().x &&
-                        (BBox[1]-1)> pdfStreamDecoder.gs.getClippingShape().getBounds().y ){
+                    clipChanged = true;
+                } else if (pdfStreamDecoder.formLevel > 1 && BBox != null && BBox[0] > 50 && BBox[1] > 50 && pdfStreamDecoder.gs.getClippingShape() != null && (BBox[0] - 1) > pdfStreamDecoder.gs.getClippingShape().getBounds().x &&
+                        (BBox[1] - 1) > pdfStreamDecoder.gs.getClippingShape().getBounds().y) {
 
                     // System.out.println("XX form="+formLevel);
                     // System.out.println(BBox[0]+" "+BBox[1]+" "+BBox[2]+" "+BBox[3]);
                     //  System.out.println(gs.getClippingShape().getBounds()+" "+defaultClip);
-                    if(debug) {
+                    if (debug) {
                         System.out.println("setClip4");
                     }
 
                     clip = XForm.setClip(defaultClip, BBox, pdfStreamDecoder.gs, pdfStreamDecoder.current);
-                    clipChanged=true;
-                }else if(BBox!=null && BBox[2]>1 && BBox[3]>1 && pdfStreamDecoder.gs.getClippingShape()==null && pdfStreamDecoder.gs.CTM[0][1]>0 && pdfStreamDecoder.gs.CTM[1][0]<0 && pdfStreamDecoder.gs.CTM[0][0]==0 && pdfStreamDecoder.gs.CTM[1][1]==0){
-                    if(debug) {
+                    clipChanged = true;
+                } else if (BBox != null && BBox[2] > 1 && BBox[3] > 1 && pdfStreamDecoder.gs.getClippingShape() == null && pdfStreamDecoder.gs.CTM[0][1] > 0 && pdfStreamDecoder.gs.CTM[1][0] < 0 && pdfStreamDecoder.gs.CTM[0][0] == 0 && pdfStreamDecoder.gs.CTM[1][1] == 0) {
+                    if (debug) {
                         System.out.println("setClip5");
                     }
 
                     clip = XForm.setClip(defaultClip, BBox, pdfStreamDecoder.gs, pdfStreamDecoder.current);
-                    clipChanged=true;
-                    
-                }else if(debug){
+                    clipChanged = true;
+
+                } else if (debug) {
                     System.out.println("no Clip set");
-                    
+
                 }
 
-                if(objectData.length>0){
+                if (objectData.length > 0) {
 
                     final PdfObject newSMask = XForm.getSMask(BBox, pdfStreamDecoder.gs, pdfStreamDecoder.currentPdfFile); //check for soft mask we need to apply
 
-                    final int blendMode= pdfStreamDecoder.gs.getBMValue();
+                    final int blendMode = pdfStreamDecoder.gs.getBMValue();
 
                     /*
                      * option to include Form as image if extracting images
                      */
-                    if((pdfStreamDecoder.parserOptions.getExtractionMode() & PdfDecoderInt.RASTERIZE_FORMS)==PdfDecoderInt.RASTERIZE_FORMS){
+                    if ((pdfStreamDecoder.parserOptions.getExtractionMode() & PdfDecoderInt.RASTERIZE_FORMS) == PdfDecoderInt.RASTERIZE_FORMS) {
                         processXFormAsImage(XObject, pdfStreamDecoder);
-                        }
+                    }
 
-                    if(newSMask!=null || blendMode!=PdfDictionary.Normal){
+                    if (newSMask != null || blendMode != PdfDictionary.Normal) {
                         processXFormWithMaskOrBlend(debug, newSMask, pdfStreamDecoder, blendMode, XObject, name);
-                    }else{
+                    } else {
 
-                        if(debug) {
+                        if (debug) {
                             System.out.println("decode");
                         }
 
-                        final int BM= pdfStreamDecoder.gs.getBMValue();
+                        final int BM = pdfStreamDecoder.gs.getBMValue();
 
                         pdfStreamDecoder.decodeStreamIntoObjects(objectData, false);
 
@@ -321,9 +322,9 @@ public class XFormDecoder {
                 }
 
                 //restore clip if changed
-                if(clipChanged){
+                if (clipChanged) {
                     pdfStreamDecoder.gs.setClippingShape(clip);
-                    pdfStreamDecoder.current.drawClip(pdfStreamDecoder.gs, clip, false) ;
+                    pdfStreamDecoder.current.drawClip(pdfStreamDecoder.gs, clip, false);
                 }
 
                 //restore settings
@@ -335,16 +336,16 @@ public class XFormDecoder {
                 //
                 //restore old matrix or set default
                 //fixes 12dec/81564885_1355243032.pdf
-                if(oldCTM!=null){
-                    pdfStreamDecoder.gs.CTM=oldCTM;
-                }else if(pdfStreamDecoder.gs.CTM[0][0]==1f && pdfStreamDecoder.gs.CTM[1][1]==1f){
-                    pdfStreamDecoder.gs.CTM=new float[][]{{1,0,0},{0,1,0},{0,0,1}};
+                if (oldCTM != null) {
+                    pdfStreamDecoder.gs.CTM = oldCTM;
+                } else if (pdfStreamDecoder.gs.CTM[0][0] == 1f && pdfStreamDecoder.gs.CTM[1][1] == 1f) {
+                    pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
                 }
 
-                pdfStreamDecoder.gs.scaleFactor=scaleF;
+                pdfStreamDecoder.gs.scaleFactor = scaleF;
 
                 /*restore old colorspace*/
-                pdfStreamDecoder.gs.resetColorSpaces(mainStrokeColorData,mainnonStrokeColorData);
+                pdfStreamDecoder.gs.resetColorSpaces(mainStrokeColorData, mainnonStrokeColorData);
 
                 //put back original state
                 pdfStreamDecoder.cache.restore(mainCache);
@@ -353,47 +354,47 @@ public class XFormDecoder {
                 pdfStreamDecoder.gs.setMaxAlpha(GraphicsState.STROKE, maxStrokeValue);
                 pdfStreamDecoder.gs.setMaxAlpha(GraphicsState.FILL, maxFillValue);
 
-                PdfStreamDecoder.indent=oldIndent;
+                PdfStreamDecoder.indent = oldIndent;
             }
 
         } catch (final Error e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
-            
-            pdfStreamDecoder.parserOptions.imagesProcessedFully=false;
+
+            pdfStreamDecoder.parserOptions.imagesProcessedFully = false;
             pdfStreamDecoder.errorTracker.addPageFailureMessage("Error " + e + " in DO");
 
-            if (ExternalHandlers.throwMissingCIDError && e.getMessage()!=null && e.getMessage().contains("kochi")) {
+            if (ExternalHandlers.throwMissingCIDError && e.getMessage() != null && e.getMessage().contains("kochi")) {
                 throw e;
             }
         } catch (final PdfException e) {
 
             LogWriter.writeLog("Exception " + e);
-            
-            pdfStreamDecoder.parserOptions.imagesProcessedFully=false;
+
+            pdfStreamDecoder.parserOptions.imagesProcessedFully = false;
             pdfStreamDecoder.errorTracker.addPageFailureMessage("Error " + e + " in DO");
         }
 
-        pdfStreamDecoder.formName =oldFormName;
+        pdfStreamDecoder.formName = oldFormName;
 
     }
 
     static void processXFormWithMaskOrBlend(final boolean debug, final PdfObject newSMask, final PdfStreamDecoder pdfStreamDecoder, final int blendMode, final PdfObject XObject, final String name) {
         // || gs.getAlpha(GraphicsState.FILL)<1f){
 
-        if(debug) {
+        if (debug) {
             System.out.println("createMaskForm " + newSMask);
         }
-        
-        if(newSMask==null && !pdfStreamDecoder.current.isHTMLorSVG()){ //needs to be normal for actual Mask
+
+        if (newSMask == null && !pdfStreamDecoder.current.isHTMLorSVG()) { //needs to be normal for actual Mask
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.STROKE, pdfStreamDecoder.gs.getAlpha(GraphicsState.STROKE), PdfDictionary.Normal);
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.FILL, pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL), PdfDictionary.Normal);
         }
 
-        final boolean useTransparancy=newSMask!=null || blendMode!=PdfDictionary.Normal || pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL)==1f;
+        final boolean useTransparancy = newSMask != null || blendMode != PdfDictionary.Normal || pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL) == 1f;
 
-        MaskUtils.createMaskForm(XObject, name, newSMask, pdfStreamDecoder.gs, pdfStreamDecoder.current, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer, useTransparancy,blendMode);
+        MaskUtils.createMaskForm(XObject, name, newSMask, pdfStreamDecoder.gs, pdfStreamDecoder.current, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer, useTransparancy, blendMode);
 
-        if(newSMask==null && !pdfStreamDecoder.current.isHTMLorSVG()){ //needs to be normal for actual Mask
+        if (newSMask == null && !pdfStreamDecoder.current.isHTMLorSVG()) { //needs to be normal for actual Mask
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.STROKE, pdfStreamDecoder.gs.getAlpha(GraphicsState.STROKE), blendMode);
             pdfStreamDecoder.current.setGraphicsState(GraphicsState.FILL, pdfStreamDecoder.gs.getAlpha(GraphicsState.FILL), blendMode);
         }
@@ -401,16 +402,16 @@ public class XFormDecoder {
 
     static void processXFormAsImage(final PdfObject XObject, final PdfStreamDecoder pdfStreamDecoder) {
         final float[] BBox;
-        BBox= XObject.getFloatArray(PdfDictionary.BBox);
+        BBox = XObject.getFloatArray(PdfDictionary.BBox);
 
         //int fx=(int)BBox[0];
-        final int fy=(int)BBox[1];
-        final int fw=(int)BBox[2];
-        final int fh=(int)(BBox[3]);
+        final int fy = (int) BBox[1];
+        final int fw = (int) BBox[2];
+        final int fh = (int) (BBox[3]);
 
         //get the form as an image
-        final BufferedImage currentImage= MaskUtils.createTransparentForm(XObject, fy, fw, fh, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer);
-        final String imgName='R'+ pdfStreamDecoder.formName;
+        final BufferedImage currentImage = MaskUtils.createTransparentForm(XObject, fy, fw, fh, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer);
+        final String imgName = 'R' + pdfStreamDecoder.formName;
         //store  final image on disk & in memory
         pdfStreamDecoder.pdfImages.setImageInfo(imgName, pdfStreamDecoder.parserOptions.getPageNumber(), pdfStreamDecoder.gs.CTM[2][0], pdfStreamDecoder.gs.CTM[2][1], fw, fh);
         //save the image (R and normal so works with existing code)

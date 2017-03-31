@@ -58,7 +58,7 @@ public class FontObject extends PdfObject {
 
     int CIDToGIDMapAsConstant = PdfDictionary.Unknown;
 
-    int FirstChar, LastChar = 255, Flags, MissingWidth, DW = -1, StemV, Supplement;
+    int AvgWidth = -1, FirstChar, LastChar = 255, Flags, MissingWidth, DW = -1, StemV, Supplement;
 
     float Ascent, Descent;
 
@@ -143,6 +143,10 @@ public class FontObject extends PdfObject {
                 Ascent = value;
                 break;
 
+            case PdfDictionary.AvgWidth:
+                AvgWidth = value;
+                break;
+
             case PdfDictionary.Descent:
                 Descent = value;
                 break;
@@ -184,6 +188,9 @@ public class FontObject extends PdfObject {
     public int getInt(final int id) {
 
         switch (id) {
+
+            case PdfDictionary.AvgWidth:
+                return AvgWidth;
 
             case PdfDictionary.DW:
                 return DW;

@@ -37,10 +37,14 @@ package org.jpedal.io;
  */
 public class TextTokens {
 
-    /**holds content*/
+    /**
+     * holds content
+     */
     private final byte[] content;
 
-    /**pointers to position to see if finished*/
+    /**
+     * pointers to position to see if finished
+     */
     private final int length;
     private int currentCharPointer;
 
@@ -49,9 +53,9 @@ public class TextTokens {
      */
     public TextTokens(final byte[] rawText) {
 
-        content=rawText;
-        length=rawText.length;
-        currentCharPointer=0;
+        content = rawText;
+        length = rawText.length;
+        currentCharPointer = 0;
 
     }
 
@@ -64,43 +68,46 @@ public class TextTokens {
 
     /**
      * read the next double char
+     *
      * @param keepReturns
-     * @return 
+     * @return
      */
     public char nextUnicodeToken(final boolean keepReturns) {
 
-        int first,second=0;
+        int first, second = 0;
 
-        first=nextToken();
-        
+        first = nextToken();
+
         //allow for 2 byte return char first and then check both as single
         //Added for file sample_pdfs_html/12jul/1997.pdf (popup characters incorrect)
-        if(this.hasMoreTokens()){
-            second=nextToken();
-            final int combined=((first<<8)+second);
-        
-            if(combined==13 && keepReturns ) {
+        if (this.hasMoreTokens()) {
+            second = nextToken();
+            final int combined = ((first << 8) + second);
+
+            if (combined == 13 && keepReturns) {
                 return (char) combined;
             }
         }
-        
-        if(first==13 && keepReturns && this.hasMoreTokens()) {
+
+        if (first == 13 && keepReturns && this.hasMoreTokens()) {
             first = nextToken();
         }
 
-        if(this.hasMoreTokens()){
-            if(second==13 && keepReturns && this.hasMoreTokens()) {
+        if (this.hasMoreTokens()) {
+            if (second == 13 && keepReturns && this.hasMoreTokens()) {
                 second = nextToken();
             }
         }
 
-        return (char) ((first<<8)+second);
+        return (char) ((first << 8) + second);
     }
 
-    /** get the char*/
-    private char getChar(final int pointer){
+    /**
+     * get the char
+     */
+    private char getChar(final int pointer) {
 
-        final int number=(content[pointer] & 0xFF);
+        final int number = (content[pointer] & 0xFF);
 
         return (char) number;
     }
@@ -110,7 +117,7 @@ public class TextTokens {
      */
     public char nextToken() {
 
-        final char nextChar=getChar(currentCharPointer);
+        final char nextChar = getChar(currentCharPointer);
         currentCharPointer++;
 
         return nextChar;
@@ -122,12 +129,12 @@ public class TextTokens {
     public boolean isUnicode() {
 
         //test if unicode by reading first 2 values
-        if((length>=2)&&(nextToken()==254)&&(nextToken()==255)){
+        if ((length >= 2) && (nextToken() == 254) && (nextToken() == 255)) {
 
             return true;
-        }else {
+        } else {
             //its not unicode to put pointer back to start
-            this.currentCharPointer=0;
+            this.currentCharPointer = 0;
             return false;
         }
     }

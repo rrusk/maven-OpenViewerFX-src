@@ -41,7 +41,7 @@ import org.jpedal.utils.Messages;
  * previous document or the next document in the Viewer.
  */
 public class NavigateDocuments {
-    
+
     public static void executePrevDoc(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             if (org.jpedal.examples.viewer.utils.Printer.isPrinting()) {
@@ -50,7 +50,7 @@ public class NavigateDocuments {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
             } else {
                 final String fileToOpen = currentGUI.getRecentDocument().getPreviousDocument();
-                currentGUI.openFile(fileToOpen);                   
+                currentGUI.openFile(fileToOpen);
             }
         }
     }
@@ -64,8 +64,8 @@ public class NavigateDocuments {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerDecodeWait.message"));
             } else {
                 final String fileToOpen = currentGUI.getRecentDocument().getNextDocument();
-                currentGUI.openFile(fileToOpen);                 
+                currentGUI.openFile(fileToOpen);
             }
         }
-    }  
+    }
 }

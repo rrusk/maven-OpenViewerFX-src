@@ -40,17 +40,18 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
 @SuppressWarnings("MagicConstant")
 public class JPedalBorderFactory {
-	
-	private static final boolean printouts = false;
-	//private final static boolean debugUnimplemented = false;
 
-	/**
+    private static final boolean printouts = false;
+    //private final static boolean debugUnimplemented = false;
+
+    /**
      * setup the border style
      */
     public static Border createBorderStyle(final PdfObject BS, final Color borderColor, final Color borderBackgroundColor, final float scaling) {
@@ -67,11 +68,11 @@ public class JPedalBorderFactory {
 
         if (borderBackgroundColor == null && printouts) {
 //		    borderBackgroundColor = new Color(0,0,0,0);
-                System.out.println("background border color null");
-            }
-        
+            System.out.println("background border color null");
+        }
+
         if (borderColor == null) {
-//		    borderColor = new Color(0,0,0,0);//transparent
+//		    borderColor = new Color(0,0,0,0); //transparent
             if (printouts) {
                 System.out.println("border color null");
             }
@@ -81,75 +82,75 @@ public class JPedalBorderFactory {
         Border insideBorder = null;
 
         //set border width or default of 1 if no value
-        int w=-1;
-        if(BS!=null) {
+        int w = -1;
+        if (BS != null) {
             w = BS.getInt(PdfDictionary.W);
         }
-        if(w<0) {
+        if (w < 0) {
             w = 1;
         }
-        
-        final float ws = w*scaling;
-        w = (int)(ws+0.5);
-        
-        int style=PdfDictionary.S;
-        
-        if(BS!=null){
-        	style=BS.getNameAsConstant(PdfDictionary.S);
-        	if(style==PdfDictionary.Unknown) {
+
+        final float ws = w * scaling;
+        w = (int) (ws + 0.5);
+
+        int style = PdfDictionary.S;
+
+        if (BS != null) {
+            style = BS.getNameAsConstant(PdfDictionary.S);
+            if (style == PdfDictionary.Unknown) {
                 style = PdfDictionary.S;
             }
-        	
-        	final int xfaBorderStyle=BS.getNameAsConstant(PdfDictionary.X);
-        	if(xfaBorderStyle!=-1){
-        		//if we have an extra border, inside and outside,
-        		//then half the border size so that we keep within our allowed space.
-        		w /= 2;
-        	}
+
+            final int xfaBorderStyle = BS.getNameAsConstant(PdfDictionary.X);
+            if (xfaBorderStyle != -1) {
+                //if we have an extra border, inside and outside,
+                //then half the border size so that we keep within our allowed space.
+                w /= 2;
+            }
         }
-        
-        switch(style){
-        case PdfDictionary.U:
-            insideBorder = BorderFactory.createMatteBorder(0, 0, w, 0, borderColor);//underline field
-            break;
-            
-        case PdfDictionary.I:
-            insideBorder = BorderFactory.createEtchedBorder(borderColor, borderBackgroundColor);//inset below page
-        	break;
-            
-        case PdfDictionary.B:
-            insideBorder = BorderFactory.createBevelBorder(BevelBorder.LOWERED, borderColor, borderBackgroundColor);//beveled above page
-            break;
-            
-        case PdfDictionary.S:
-            insideBorder = BorderFactory.createLineBorder(borderColor, w);//solid
-            break;
-            
-        case PdfDictionary.D:
 
-            final PdfArrayIterator dashPattern = BS.getMixedArray(PdfDictionary.D);
+        switch (style) {
+            case PdfDictionary.U:
+                insideBorder = BorderFactory.createMatteBorder(0, 0, w, 0, borderColor); //underline field
+                break;
 
-            int current_line_dash_phase =0;
-            float[] current_line_dash_array=new float[1]; 
-            final int count=dashPattern.getTokenCount();
+            case PdfDictionary.I:
+                insideBorder = BorderFactory.createEtchedBorder(borderColor, borderBackgroundColor); //inset below page
+                break;
 
-            if(count>0){
-               current_line_dash_array=dashPattern.getNextValueAsFloatArray();
-            }
+            case PdfDictionary.B:
+                insideBorder = BorderFactory.createBevelBorder(BevelBorder.LOWERED, borderColor, borderBackgroundColor); //beveled above page
+                break;
 
-            if(count>1){
-              current_line_dash_phase=dashPattern.getNextValueAsInteger();
-            }
+            case PdfDictionary.S:
+                insideBorder = BorderFactory.createLineBorder(borderColor, w); //solid
+                break;
 
-            if(w<0) {
-                w = 1;
-            }
+            case PdfDictionary.D:
 
-            final Stroke current_stroke = new BasicStroke( w, 0, 0, 1, current_line_dash_array, current_line_dash_phase );
+                final PdfArrayIterator dashPattern = BS.getMixedArray(PdfDictionary.D);
 
-            insideBorder=new DashBorder(current_stroke,borderColor);
-            break;
-           
+                int current_line_dash_phase = 0;
+                float[] current_line_dash_array = new float[1];
+                final int count = dashPattern.getTokenCount();
+
+                if (count > 0) {
+                    current_line_dash_array = dashPattern.getNextValueAsFloatArray();
+                }
+
+                if (count > 1) {
+                    current_line_dash_phase = dashPattern.getNextValueAsInteger();
+                }
+
+                if (w < 0) {
+                    w = 1;
+                }
+
+                final Stroke current_stroke = new BasicStroke(w, 0, 0, 1, current_line_dash_array, current_line_dash_phase);
+
+                insideBorder = new DashBorder(current_stroke, borderColor);
+                break;
+
         }
         
         /* if an X in the BS then thats out XFABorder-
@@ -158,29 +159,29 @@ public class JPedalBorderFactory {
          * E - even
          */
         //preperation for new XFA adding 2 borders
-        Border outsideBorder = new EmptyBorder(0,0,0,0);//default
-        
-        if(BS!=null){
-        	final int xfaBorderStyle=BS.getNameAsConstant(PdfDictionary.X);
-        	if(xfaBorderStyle!=-1){
-        		final Border xfaBorder = BorderFactory.createLineBorder(borderColor, w);//solid
-	        	switch(xfaBorderStyle){
-	        	case PdfDictionary.R:
-	        		outsideBorder = xfaBorder;//correct on compare
-	        		break;
-	        		
+        Border outsideBorder = new EmptyBorder(0, 0, 0, 0); //default
+
+        if (BS != null) {
+            final int xfaBorderStyle = BS.getNameAsConstant(PdfDictionary.X);
+            if (xfaBorderStyle != -1) {
+                final Border xfaBorder = BorderFactory.createLineBorder(borderColor, w); //solid
+                switch (xfaBorderStyle) {
+                    case PdfDictionary.R:
+                        outsideBorder = xfaBorder; //correct on compare
+                        break;
+
 //	        	case PdfDictionary.L:
-//	        		outsideBorder = insideBorder;//to check
+//	        		outsideBorder = insideBorder; //to check
 //	        		insideBorder = xfaBorder;
 //	        		break;
 //	        	case PdfDictionary.E:
 //	        		//??even may need rodoing, as it may not appear ontop of.
 //	        		insideBorder = xfaBorder;
 //	        		break;
-	        	}
-        	}
+                }
+            }
         }
-        
+
         return new CompoundBorder(outsideBorder, insideBorder);
     }
 

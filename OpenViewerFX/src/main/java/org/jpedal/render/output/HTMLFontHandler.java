@@ -41,15 +41,14 @@ import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.LogWriter;
 
 /**
- *
  * @author markee
  */
 public class HTMLFontHandler {
 
     public HTMLFontHandler() {
     }
-    
-   public static void processFont(final PdfFont restoredFont, final DynamicVectorRenderer current, final PdfObject newFont, final PdfObjectReader currentPdfFile) {
+
+    public static void processFont(final PdfFont restoredFont, final DynamicVectorRenderer current, final PdfObject newFont, final PdfObjectReader currentPdfFile) {
 
         final String fontName = restoredFont.getFontName();
 

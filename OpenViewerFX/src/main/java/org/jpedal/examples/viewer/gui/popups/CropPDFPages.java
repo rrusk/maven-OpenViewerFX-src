@@ -40,53 +40,49 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.*;
+
 import org.jpedal.utils.Messages;
 
-public class CropPDFPages extends Save
-{
+public class CropPDFPages extends Save {
 
     final ButtonGroup buttonGroup1 = new ButtonGroup();
 
     final JToggleButton jToggleButton3 = new JToggleButton();
-	
-	final JToggleButton jToggleButton2 = new JToggleButton();
-	
-	final JSpinner bottomMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
-	final JSpinner topMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
-	final JSpinner leftMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
-	final JSpinner rightMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
-	
-	final JCheckBox applyToCurrent = new JCheckBox();
-	
-	final JRadioButton printAll=new JRadioButton();
-	final JRadioButton printCurrent=new JRadioButton();
-	final JRadioButton printPages=new JRadioButton();
-	
-	final JTextField pagesBox=new JTextField();
-	
-	public CropPDFPages( final String root_dir, final int end_page, final int currentPage )
-	{
-		super(root_dir, end_page, currentPage);
-			
-		try
-		{
-			jbInit();
-		}
-		catch( final Exception e )
-		{
-			e.printStackTrace();
-		}
-	}
 
-	///////////////////////////////////////////////////////////////////////
+    final JToggleButton jToggleButton2 = new JToggleButton();
 
-    private void jbInit() throws Exception{
-		
-		final JLabel textAndFont = new JLabel(Messages.getMessage("PdfViewerLabel.CropMargins"));
-		textAndFont.setFont( new java.awt.Font( "Dialog", Font.BOLD, 14 ) );
-		textAndFont.setDisplayedMnemonic( '0' );
-		textAndFont.setBounds( new Rectangle( 13, 13, 220, 26 ) );
-		
+    final JSpinner bottomMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
+    final JSpinner topMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
+    final JSpinner leftMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
+    final JSpinner rightMargin = new JSpinner(new SpinnerNumberModel(0.00, 0.00, 1000.00, 1.00));
+
+    final JCheckBox applyToCurrent = new JCheckBox();
+
+    final JRadioButton printAll = new JRadioButton();
+    final JRadioButton printCurrent = new JRadioButton();
+    final JRadioButton printPages = new JRadioButton();
+
+    final JTextField pagesBox = new JTextField();
+
+    public CropPDFPages(final String root_dir, final int end_page, final int currentPage) {
+        super(root_dir, end_page, currentPage);
+
+        try {
+            jbInit();
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+
+    private void jbInit() throws Exception {
+
+        final JLabel textAndFont = new JLabel(Messages.getMessage("PdfViewerLabel.CropMargins"));
+        textAndFont.setFont(new java.awt.Font("Dialog", Font.BOLD, 14));
+        textAndFont.setDisplayedMnemonic('0');
+        textAndFont.setBounds(new Rectangle(13, 13, 220, 26));
+
         final JLabel jLabel1 = new JLabel(Messages.getMessage("PdfViewerLabel.Top"));
         jLabel1.setBounds(140, 50, 70, 15);
 
@@ -96,7 +92,7 @@ public class CropPDFPages extends Save
         jLabel5.setBounds(25, 100, 50, 15);
 
         leftMargin.setBounds(70, 95, 60, 23);
-        
+
         final JLabel jLabel6 = new javax.swing.JLabel(Messages.getMessage("PdfViewerLabel.Right"));
         jLabel6.setBounds(295, 100, 70, 15);
 
@@ -104,7 +100,7 @@ public class CropPDFPages extends Save
 
         final JLabel jLabel7 = new javax.swing.JLabel(Messages.getMessage("PdfViewerLabel.Bottom"));
         jLabel7.setBounds(140, 150, 110, 15);
-        
+
         bottomMargin.setBounds(200, 145, 60, 23);
 
         applyToCurrent.setSelected(true);
@@ -113,54 +109,56 @@ public class CropPDFPages extends Save
 
         final JButton jButton1 = new javax.swing.JButton(Messages.getMessage("PdfViewerButton.Set2Zero"));
         jButton1.setBounds(310, 185, 130, 23);
-		jButton1.addActionListener(new ActionListener() {
-			@Override
+        jButton1.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(final ActionEvent e) {
-				leftMargin.setValue(0);
-				rightMargin.setValue(0);
-				topMargin.setValue(0);
-				bottomMargin.setValue(0);
-			}
-		});
-		
-		pageRangeLabel.setText(Messages.getMessage("PdfViewerPageRange.text"));
-		pageRangeLabel.setBounds( new Rectangle( 13, 220, 199, 26 ) );
-		
-		printAll.setText(Messages.getMessage("PdfViewerRadioButton.All"));
-		printAll.setBounds( new Rectangle( 23, 250, 75, 22 ) );
-		
-		printCurrent.setText(Messages.getMessage("PdfViewerRadioButton.CurrentPage"));
-		printCurrent.setBounds( new Rectangle( 23, 270, 100, 22 ) );
-		printCurrent.setSelected(true);
-		
-		printPages.setText(Messages.getMessage("PdfViewerRadioButton.Pages"));
-		printPages.setBounds( new Rectangle( 23, 292, 70, 22 ) );
-		
-		pagesBox.setBounds( new Rectangle( 95, 292, 230, 22 ) );
-		pagesBox.addKeyListener(new KeyListener(){
-			@Override
-            public void keyPressed(final KeyEvent arg0) {}
+                leftMargin.setValue(0);
+                rightMargin.setValue(0);
+                topMargin.setValue(0);
+                bottomMargin.setValue(0);
+            }
+        });
 
-			@Override
+        pageRangeLabel.setText(Messages.getMessage("PdfViewerPageRange.text"));
+        pageRangeLabel.setBounds(new Rectangle(13, 220, 199, 26));
+
+        printAll.setText(Messages.getMessage("PdfViewerRadioButton.All"));
+        printAll.setBounds(new Rectangle(23, 250, 75, 22));
+
+        printCurrent.setText(Messages.getMessage("PdfViewerRadioButton.CurrentPage"));
+        printCurrent.setBounds(new Rectangle(23, 270, 100, 22));
+        printCurrent.setSelected(true);
+
+        printPages.setText(Messages.getMessage("PdfViewerRadioButton.Pages"));
+        printPages.setBounds(new Rectangle(23, 292, 70, 22));
+
+        pagesBox.setBounds(new Rectangle(95, 292, 230, 22));
+        pagesBox.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(final KeyEvent arg0) {
+            }
+
+            @Override
             public void keyReleased(final KeyEvent arg0) {
-				if(pagesBox.getText().isEmpty()) {
+                if (pagesBox.getText().isEmpty()) {
                     printCurrent.setSelected(true);
                 } else {
                     printPages.setSelected(true);
                 }
-				
-			}
 
-			@Override
-            public void keyTyped(final KeyEvent arg0) {}
-		});
+            }
 
-		final JTextArea pagesInfo=new JTextArea(Messages.getMessage("PdfViewerMessage.PageNumberOrRange")+ '\n' +
-				Messages.getMessage("PdfViewerMessage.PageRangeExample"));
-		pagesInfo.setBounds(new Rectangle(23,325,400,40));
-		pagesInfo.setOpaque(false);
-				
-		this.add(jLabel1);
+            @Override
+            public void keyTyped(final KeyEvent arg0) {
+            }
+        });
+
+        final JTextArea pagesInfo = new JTextArea(Messages.getMessage("PdfViewerMessage.PageNumberOrRange") + '\n' +
+                Messages.getMessage("PdfViewerMessage.PageRangeExample"));
+        pagesInfo.setBounds(new Rectangle(23, 325, 400, 40));
+        pagesInfo.setOpaque(false);
+
+        this.add(jLabel1);
         this.add(bottomMargin);
         this.add(jLabel5);
         this.add(topMargin);
@@ -169,31 +167,30 @@ public class CropPDFPages extends Save
         this.add(jLabel7);
         this.add(jLabel6);
         this.add(applyToCurrent);
-        this.add(jButton1);		
-		
-		this.add( printAll, null );
-		this.add( printCurrent, null );
-		
-		this.add( printPages, null );
-		this.add( pagesBox, null );
-		this.add( pagesInfo, null );
-		
-		this.add( textAndFont, null );
-		this.add( changeButton, null );
-		this.add( pageRangeLabel, null );
-		
-		this.add( jToggleButton2, null );
-		this.add( jToggleButton3, null );
-		
-		buttonGroup1.add( printAll );
-		buttonGroup1.add( printCurrent );
-		buttonGroup1.add( printPages );
-	}
-	
-	@Override
-    public final Dimension getPreferredSize()
-	{
-		return new Dimension( 440, 400 );
-	}
-	
+        this.add(jButton1);
+
+        this.add(printAll, null);
+        this.add(printCurrent, null);
+
+        this.add(printPages, null);
+        this.add(pagesBox, null);
+        this.add(pagesInfo, null);
+
+        this.add(textAndFont, null);
+        this.add(changeButton, null);
+        this.add(pageRangeLabel, null);
+
+        this.add(jToggleButton2, null);
+        this.add(jToggleButton3, null);
+
+        buttonGroup1.add(printAll);
+        buttonGroup1.add(printCurrent);
+        buttonGroup1.add(printPages);
+    }
+
+    @Override
+    public final Dimension getPreferredSize() {
+        return new Dimension(440, 400);
+    }
+
 }

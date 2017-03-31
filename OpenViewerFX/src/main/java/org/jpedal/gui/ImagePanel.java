@@ -31,6 +31,7 @@
  * ---------------
  */
 package org.jpedal.gui;
+
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -42,40 +43,41 @@ import javax.swing.JPanel;
  * It provides a display for a  Bufferedimage which we used to debug software
  */
 @SuppressWarnings("UnusedDeclaration")
-public class ImagePanel extends JPanel
-{
-	
-	/**image to display*/
-	BufferedImage image;
-	public ImagePanel( final BufferedImage image )
-	{
-		if(image!=null) {
+public class ImagePanel extends JPanel {
+
+    /**
+     * image to display
+     */
+    BufferedImage image;
+
+    public ImagePanel(final BufferedImage image) {
+        if (image != null) {
             this.image = image;
         }
-		this.setPreferredSize( new Dimension( image.getWidth(), image.getHeight() ) );
-	}
-	
-	////////////////////////////////////////////////////////////////////////
-	/**
-	 * update screen display
-	 */
+        this.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * update screen display
+     */
     @Override
-    public final void paintComponent( final Graphics g )
-	{
-		super.paintComponent( g );
-		final Graphics2D g2 = (Graphics2D)g;
-		g2.drawImage( image, 0, 0, this );
-	}
+    public final void paintComponent(final Graphics g) {
+        super.paintComponent(g);
+        final Graphics2D g2 = (Graphics2D) g;
+        g2.drawImage(image, 0, 0, this);
+    }
 
-	public BufferedImage getImage() {
-		return image;
-	}
+    public BufferedImage getImage() {
+        return image;
+    }
 
-	public void setImage(final BufferedImage image) {
-		if(image!=null){
-			this.image = image;
-			this.setPreferredSize( new Dimension( image.getWidth(), image.getHeight() ) );
-			this.repaint();
-		}
-	}
+    public void setImage(final BufferedImage image) {
+        if (image != null) {
+            this.image = image;
+            this.setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
+            this.repaint();
+        }
+    }
 }

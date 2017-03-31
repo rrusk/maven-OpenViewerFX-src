@@ -44,12 +44,12 @@ public class CheckNode extends DefaultMutableTreeNode {
         this(userObject, true, false);
     }
 
-    public CheckNode(final String userObject, final boolean allowsChildren
-            , final boolean isSelected) {
+    public CheckNode(final String userObject, final boolean allowsChildren,
+                     final boolean isSelected) {
         super(userObject, allowsChildren);
         this.isSelected = isSelected;
 
-        text=userObject;
+        text = userObject;
     }
 
     public String getText() {

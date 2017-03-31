@@ -33,7 +33,6 @@
 package org.jpedal.external;
 
 /**
- *
  * @author markee
  */
 public interface AdditonalHandler {
@@ -41,5 +40,5 @@ public interface AdditonalHandler {
     Object getExternalHandler(int type);
 
     void addExternalHandler(Object newHandler, int type);
-    
+
 }

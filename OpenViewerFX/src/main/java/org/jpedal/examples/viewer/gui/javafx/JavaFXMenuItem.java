@@ -38,28 +38,28 @@ import javafx.scene.control.MenuItem;
 /**
  *
  */
-public class JavaFXMenuItem extends MenuItem implements JavaFXID{
-    
-	private int ID;
-	
-	public JavaFXMenuItem(final String text) {
-		super(text);
-	}
-	
-	/**
-	 * @return the iD
-	 */
-	@Override
+public class JavaFXMenuItem extends MenuItem implements JavaFXID {
+
+    private int ID;
+
+    public JavaFXMenuItem(final String text) {
+        super(text);
+    }
+
+    /**
+     * @return the iD
+     */
+    @Override
     public int getID() {
-		return ID;
-	}
-	
-	/**
-	 * @param id the iD to set
-	 */
-	@Override
+        return ID;
+    }
+
+    /**
+     * @param id the iD to set
+     */
+    @Override
     public void setID(final int id) {
-		ID = id;
-	}
+        ID = id;
+    }
 
 }

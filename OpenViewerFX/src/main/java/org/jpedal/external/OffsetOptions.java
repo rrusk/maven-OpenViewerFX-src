@@ -37,9 +37,9 @@ package org.jpedal.external;
  */
 public class OffsetOptions {
 
-    public static final int DISPLAY =0 ;
+    public static final int DISPLAY = 0;
 
-    public static final int PRINTING =1 ;
+    public static final int PRINTING = 1;
 
     /**
      * Internal values - please do not use.

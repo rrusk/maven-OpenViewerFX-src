@@ -39,6 +39,7 @@ import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.stream.ImageInputStream;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.security.DecryptionFactory;
 import org.jpedal.objects.Javascript;
@@ -51,454 +52,459 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.StringUtils;
 
 /**
- *  Provide access to data of PDF file on disk
+ * Provide access to data of PDF file on disk
  */
 public class PdfObjectReader {
-    
-    private PdfFileReader objectReader=new PdfFileReader();
-    
+
+    private PdfFileReader objectReader = new PdfFileReader();
+
     /**
      * holds pdf id (ie 4 0 R) which stores each object
      */
     final Map<Integer, String> pagesReferences = new HashMap<Integer, String>();
-    
+
     /**
      * page lookup table using objects as key
      */
     private PageLookup pageLookup = new PageLookup();
 
     private String tempFileName;
-    
-    /**names lookup table*/
+
+    /**
+     * names lookup table
+     */
     private NameLookup nameLookup;
-    
-    /**names lookup table*/
+
+    /**
+     * names lookup table
+     */
     private PageLabels pageLabels;
-    
+
     RandomAccessBuffer pdf_datafile;
-    
-    /**Collection object*/
-//    private PdfObject collectionObj;
-    
+
+    /**
+     * Collection object
+     */
+    private PdfObject collectionObj;
+
     PdfObject pageObj;
-    
-    public PdfObjectReader() {}
-    
+
+    public PdfObjectReader() {
+    }
+
     /**
      * set password as well
+     *
      * @param password
      */
     public PdfObjectReader(String password) {
 
-        if(password==null) {
+        if (password == null) {
             password = "";
         }
-        
+
         objectReader.setPassword(password);
     }
-    
+
     public PdfObjectReader(final Certificate certificate, final PrivateKey key) {
-        
-        objectReader.setCertificate(certificate,key);
-        
+
+        objectReader.setCertificate(certificate, key);
+
     }
-    
+
     /**
      * reference for Page object
+     *
      * @param page
      * @return String ref (ie 1 0 R)
      * pdfObject=new PageObject(currentPageOffset);
      * currentPdfFile.readObject(pdfObject);
      */
-    public String getReferenceforPage(final int page){
+    public String getReferenceforPage(final int page) {
         return pagesReferences.get(page);
     }
-    
+
     /**
      * close the file
      */
-    public final void closePdfFile()
-    {
-        try
-        {
+    public final void closePdfFile() {
+        try {
             objectReader.closeFile();
-            
-            if(pdf_datafile!=null) {
+
+            if (pdf_datafile != null) {
                 pdf_datafile.close();
             }
-            
+
             //ensure temp file deleted
-            if(tempFileName!=null){
-                final File fileToDelete=new File(tempFileName);
+            if (tempFileName != null) {
+                final File fileToDelete = new File(tempFileName);
                 fileToDelete.delete();
-                tempFileName=null;
+                tempFileName = null;
             }
-        }catch( final Exception e ){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception " + e + " closing file");
         }
     }
-    
+
     /**
      * allow user to access SOME PDF objects
      * currently PdfDictionary.Encryption
      */
     public PdfObject getPDFObject(final int key) {
-        
-        switch(key){
-            
+
+        switch (key) {
+
             case PdfDictionary.Encrypt:
                 return objectReader.encyptionObj;
-                
-//            case PdfDictionary.Collection:
-//                return collectionObj;
-                
+
+            case PdfDictionary.Collection:
+                return collectionObj;
+
             default:
                 throw new RuntimeException("Access to " + key + " not supported");
         }
     }
-    
+
     public PdfFileReader getObjectReader() {
         return objectReader;
     }
-    
+
     /**
      * convert page number to label (or null if no value)
+     *
      * @param pageNumber
      * @return Label as String or null
      */
     public String convertPageNumberToLabel(final int pageNumber) {
-        
+
         //see if decoded
-        if(pageLabels==null) {
+        if (pageLabels == null) {
             return null;
         } else {
             return pageLabels.get(pageNumber);
-        }   
+        }
     }
-    
+
     /**
      * convert name into object ref
      */
     public String convertNameToRef(final String value) {
-        
+
         //see if decoded
-        if(nameLookup==null) {
+        if (nameLookup == null) {
             return null;
         } else {
             return (String) nameLookup.get(value);
         }
-        
+
     }
-    
+
     /**
      * get Names lookup table
      */
     public NameLookup getNamesLookup() {
-        
+
         //see if decoded
-        if(nameLookup==null) {
+        if (nameLookup == null) {
             return null;
         } else {
             return nameLookup;
         }
-        
+
     }
 
     /**
      * given a ref, what is the page
+     *
      * @param ref - PDF object reference
      * @return - page number with  being first page
      */
     public int convertObjectToPageNumber(final String ref) {
-        
+
         return pageLookup.convertObjectToPageNumber(ref);
     }
-    
+
     public void setLookup(final String currentPageOffset, final int tempPageCount) {
         pageLookup.put(currentPageOffset, tempPageCount);
         pagesReferences.put(tempPageCount, currentPageOffset);
     }
-    
-    public void dispose(){
-        
+
+    public void dispose() {
+
         //this.objData=null;
         //this.lastRef=null;
-        
-//        collectionObj = null;
-        
-        pageLabels=null;
-        
-        nameLookup=null;
-        
+
+        collectionObj = null;
+
+        pageLabels = null;
+
+        nameLookup = null;
+
         //this.fields=null;
-        
-        if(objectReader!=null) {
+
+        if (objectReader != null) {
             objectReader.dispose();
         }
-        objectReader=null;
-        
-        if(pageLookup!=null) {
+        objectReader = null;
+
+        if (pageLookup != null) {
             pageLookup.dispose();
         }
-        pageLookup=null;
-        
+        pageLookup = null;
+
     }
-    
+
     /**
      * open pdf file<br> Only files allowed (not http)
      * so we can handle Random Access of pdf
      */
-    public final void openPdfFile( final InputStream in) throws PdfException
-    {
-        
-        try
-        {
-            
+    public final void openPdfFile(final InputStream in) throws PdfException {
+
+        try {
+
             //use byte[] directly if small otherwise use Memory Map
-            pdf_datafile = new RandomAccessMemoryMapBuffer(in );
-            
+            pdf_datafile = new RandomAccessMemoryMapBuffer(in);
+
             objectReader.init(pdf_datafile);
-            
+
             //this.eof = pdf_datafile.length();
             //pdf_datafile = new RandomAccessFile( filename, "r" );
-            
-        }catch( final Exception e ){
-            
+
+        } catch (final Exception e) {
+
             LogWriter.writeLog("Exception " + e + " accessing file");
-            
-            throw new PdfException( "Exception " + e + " accessing file" );
+
+            throw new PdfException("Exception " + e + " accessing file");
         }
-        
+
     }
-    
+
     /**
      * open pdf file<br> Only files allowed (not http)
      * so we can handle Random Access of pdf
      */
-    public final void openPdfFile(final ImageInputStream iis ) throws PdfException
-    {
-        
+    public final void openPdfFile(final ImageInputStream iis) throws PdfException {
+
         final RandomAccessBuffer pdf_datafile;
-        
-        try
-        {
-            
+
+        try {
+
             //use byte[] directly if small otherwise use Memory Map
             pdf_datafile = new ImageInputStreamFileBuffer(iis);
-            
+
             //pdf_datafile = new RandomAccessFileBuffer( filename, "r" );
             //pdf_datafile = new RandomAccessFCTest( new FileInputStream(filename));
-            
+
             objectReader.init(pdf_datafile);
-            
+
             //this.eof = pdf_datafile.length();
-            
-        }catch( final Exception e ){
+
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception " + e + " accessing file");
-            
-            throw new PdfException( "Exception " + e + " accessing file" );
+
+            throw new PdfException("Exception " + e + " accessing file");
         }
-        
+
     }
-    
+
     public void checkParentForResources(final PdfObject pdfObject) {
         
         /*
          * if no resource, check parent for one
          * (in theory should recurse up whole tree)
          */
-        if(pdfObject.getDictionary(PdfDictionary.Resources)==null){
-            
-            final String parent=pdfObject.getStringKey(PdfDictionary.Parent);
-            
-            if(parent!=null){
-                final PdfObject parentObj=new PageObject(parent);
+        if (pdfObject.getDictionary(PdfDictionary.Resources) == null) {
+
+            final String parent = pdfObject.getStringKey(PdfDictionary.Parent);
+
+            if (parent != null) {
+                final PdfObject parentObj = new PageObject(parent);
                 readObject(parentObj);
-                
-                final PdfObject resObj=parentObj.getDictionary(PdfDictionary.Resources);
-                
-                if(resObj!=null){
-                    pdfObject.setDictionary(PdfDictionary.Resources,resObj);
+
+                final PdfObject resObj = parentObj.getDictionary(PdfDictionary.Resources);
+
+                if (resObj != null) {
+                    pdfObject.setDictionary(PdfDictionary.Resources, resObj);
                 }
             }
         }
     }
-    
+
     /**
      * open pdf file<br> Only files allowed (not http)
      * so we can handle Random Access of pdf
      */
-    public final void openPdfFile( final String filename ) throws PdfException
-    {
-        
+    public final void openPdfFile(final String filename) throws PdfException {
+
         final RandomAccessBuffer pdf_datafile;
-        
-        try
-        {
-            
-            pdf_datafile = new RandomAccessFileBuffer( filename, "r" );
+
+        try {
+
+            pdf_datafile = new RandomAccessFileBuffer(filename, "r");
             //pdf_datafile = new RandomAccessFCTest( new FileInputStream(filename));
-            
+
             objectReader.init(pdf_datafile);
-            
+
             //this.eof = pdf_datafile.length();
-            
-        }catch( final Exception e ){
+
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception " + e + " accessing file");
-            
-            throw new PdfException( "Exception " + e + " accessing file" );
+
+            throw new PdfException("Exception " + e + " accessing file");
         }
-        
+
     }
-    
+
     /**
      * open pdf file using a byte stream - By default files under 16384 bytes are cached to disk
      * but this can be altered by setting PdfFileReader.alwaysCacheInMemory to a maximimum size or -1 (always keep in memory)
      */
-    public final void openPdfFile( final byte[] data ) throws PdfException
-    {
-        
+    public final void openPdfFile(final byte[] data) throws PdfException {
+
         final RandomAccessBuffer pdf_datafile;
-        
-        try
-        {
+
+        try {
             //use byte[] directly if small otherwise use Memory Map
-            if(PdfFileReader.alwaysCacheInMemory ==-1 || data.length<PdfFileReader.alwaysCacheInMemory) {
+            if (PdfFileReader.alwaysCacheInMemory == -1 || data.length < PdfFileReader.alwaysCacheInMemory) {
                 pdf_datafile = new RandomAccessDataBuffer(data);
-            } else{ //cache as file and access via RandomAccess
-                
+            } else { //cache as file and access via RandomAccess
+
                 //pdf_datafile = new RandomAccessMemoryMapBuffer( data ); old version very slow
-                
+
                 try {
-                    
-                    final File file=File.createTempFile("page",".bin", new File(ObjectStore.temp_dir));
-                    tempFileName=file.getAbsolutePath();
-                    
-                    final java.io.FileOutputStream a =new java.io.FileOutputStream(file);
-                    
+
+                    final File file = File.createTempFile("page", ".bin", new File(ObjectStore.temp_dir));
+                    tempFileName = file.getAbsolutePath();
+
+                    final java.io.FileOutputStream a = new java.io.FileOutputStream(file);
+
                     a.write(data);
                     a.flush();
                     a.close();
-                    
-                    pdf_datafile = new RandomAccessFileBuffer( tempFileName,"r");
+
+                    pdf_datafile = new RandomAccessFileBuffer(tempFileName, "r");
                 } catch (final Exception e) {
-                    throw new RuntimeException("Unable to create temporary file in "+ObjectStore.temp_dir+ ' ' +e);
+                    throw new RuntimeException("Unable to create temporary file in " + ObjectStore.temp_dir + ' ' + e);
                 }
             }
-            
+
             objectReader.init(pdf_datafile);
-            
+
             //eof = pdf_datafile.length();
             //pdf_datafile = new RandomAccessFile( filename, "r" );
-            
-        }catch( final Exception e ){
-            
+
+        } catch (final Exception e) {
+
             LogWriter.writeLog("Exception " + e + " accessing file");
-            
-            throw new PdfException( "Exception " + e + " accessing file" );
+
+            throw new PdfException("Exception " + e + " accessing file");
         }
     }
-    
-    /**handle onto JS object*/
+
+    /**
+     * handle onto JS object
+     */
     private Javascript javascript;
-    
-    /**pass in Javascript object from JPedal*/
+
+    /**
+     * pass in Javascript object from JPedal
+     */
     public void setJavaScriptObject(final Javascript javascript) {
-        this.javascript=javascript;
+        this.javascript = javascript;
     }
-    
+
     public void checkResolved(final PdfObject pdfObject) {
-        final ObjectDecoder objectDecoder=new ObjectDecoder(this.objectReader);
+        final ObjectDecoder objectDecoder = new ObjectDecoder(this.objectReader);
         objectDecoder.checkResolved(pdfObject);
     }
-    
+
     public void setJavascriptForObject(final FormObject formObject, final int parentType, final int actionType) {
         final String JSscript;
-        
-        final PdfObject actionObj ;
+
+        final PdfObject actionObj;
         final PdfObject JSobj;
-        
-        final PdfObject additionalObject=formObject.getDictionary(parentType);
-        
-        final ObjectDecoder objectDecoder=new ObjectDecoder(this.objectReader);
+
+        final PdfObject additionalObject = formObject.getDictionary(parentType);
+
+        final ObjectDecoder objectDecoder = new ObjectDecoder(this.objectReader);
         objectDecoder.checkResolved(additionalObject);
-        
-        if(additionalObject==null) {
+
+        if (additionalObject == null) {
             return;
         }
-        
-        if(actionType==parentType){
+
+        if (actionType == parentType) {
             actionObj = additionalObject;
-        }else {
-            if(actionType==PdfDictionary.C2) //special case
+        } else {
+            if (actionType == PdfDictionary.C2) //special case
             {
                 actionObj = additionalObject.getDictionary(PdfDictionary.C);
             } else {
                 actionObj = additionalObject.getDictionary(actionType);
             }
         }
-        
-        if(actionObj==null){
+
+        if (actionObj == null) {
             //				throw new RuntimeException("Failed on actionType="+actionType+" "+formObject.getPDFRef()+
             //						"\nformObject="+formObject+" parentObject="+additionalObject+
             //						"\nadditionalObject="+additionalObject.getTextStreamValue(PdfDictionary.T)
             //						+"\nadditionalObject="+formObject.getTextStreamValue(PdfDictionary.T));
-        }else{
-            
+        } else {
+
             objectDecoder.checkResolved(actionObj);
-            
-            JSobj=actionObj.getDictionary(PdfDictionary.JS);
-            
-            if(JSobj!=null){
-                
-                final byte[] data=JSobj.getDecodedStream();
-                JSscript= StringUtils.getTextString(data, true);
-                
-            }else{
-                JSscript=actionObj.getTextStreamValue(PdfDictionary.JS);
+
+            JSobj = actionObj.getDictionary(PdfDictionary.JS);
+
+            if (JSobj != null) {
+
+                final byte[] data = JSobj.getDecodedStream();
+                JSscript = StringUtils.getTextString(data, true);
+
+            } else {
+                JSscript = actionObj.getTextStreamValue(PdfDictionary.JS);
             }
-            
+
             //store
-            if(JSscript!=null){
+            if (JSscript != null) {
                 //use name to reference Js if name is null use ref. seems to be slower, but better on abacus/L295KantoonVaadt.pdf
                 String name = formObject.getTextStreamValue(PdfDictionary.T);
-                if(name==null) {
+                if (name == null) {
                     name = formObject.getObjectRefAsString();
                 }
-                javascript.storeJavascript(name,JSscript,actionType);
-                
+                javascript.storeJavascript(name, JSscript, actionType);
+
                 //old version
                 //                javascript.storeJavascript(formObject.getObjectRefAsString(),JSscript,actionType);
             }
         }
     }
-    
+
     public byte[] readStream(final PdfObject obj, final boolean cacheValue, final boolean decompress, final boolean keepRaw, final boolean isMetaData, final boolean isCompressedStream, final String cacheFile) {
-        
+
         return this.objectReader.readStream(obj, cacheValue, decompress, keepRaw, isMetaData, isCompressedStream, cacheFile);
     }
-    
+
     public void readObject(final PdfObject pdfObject) {
         objectReader.readObject(pdfObject);
     }
-    
+
     /**
      * return type of encryption as Enum in EncryptionUsed
      */
     public EncryptionUsed getEncryptionType() {
-        
-        final PdfFileReader objectReader= this.objectReader;
-        final DecryptionFactory decryption=objectReader.getDecryptionObject();
-        
-        if(decryption==null){
+
+        final PdfFileReader objectReader = this.objectReader;
+        final DecryptionFactory decryption = objectReader.getDecryptionObject();
+
+        if (decryption == null) {
             return EncryptionUsed.NO_ENCRYPTION;
-        }else if(decryption.hasPassword()){
+        } else if (decryption.hasPassword()) {
             return EncryptionUsed.PASSWORD;
-        }else  //cert by process of elimination
+        } else  //cert by process of elimination
         {
             return EncryptionUsed.CERTIFICATE;
         }
-        
+
     }
 
     public void readDocumentMetaData(final PdfObject pdfObject, final Javascript jsHandler) {
@@ -506,36 +512,36 @@ public class PdfObjectReader {
         //check read as may be used for Dest
         PdfObject nameObj = pdfObject.getDictionary(PdfDictionary.Names);
         if (nameObj != null) {
-            nameLookup=new NameLookup(this.objectReader);
+            nameLookup = new NameLookup(this.objectReader);
             nameLookup.readNames(nameObj, jsHandler, false);
         } else {
             nameObj = pdfObject.getDictionary(PdfDictionary.Dests);
 
             if (nameObj != null) {
-                nameLookup=new NameLookup(this.objectReader);
+                nameLookup = new NameLookup(this.objectReader);
                 nameLookup.readNames(nameObj, jsHandler, false);
             }
         }
-        
+
         //any PageLabels
         pageObj = pdfObject.getDictionary(PdfDictionary.PageLabels);
-        
+
         //any collection
-//        collectionObj = pdfObject.getDictionary(PdfDictionary.Collection);
-       
+        collectionObj = pdfObject.getDictionary(PdfDictionary.Collection);
+
     }
-    
+
     public void readPageLabels(final int pageCount) {
-        
-        if(pageObj!=null){            
-            pageLabels=new PageLabels(this.objectReader,pageCount);
-            try{
+
+        if (pageObj != null) {
+            pageLabels = new PageLabels(this.objectReader, pageCount);
+            try {
                 pageLabels.readLabels(pageObj);
-            }catch(final Exception e){
+            } catch (final Exception e) {
                 //issue with values so use raw logical sequence
-                pageLabels=null;
+                pageLabels = null;
                 LogWriter.writeLog(e.toString());
-            }            
+            }
         }
     }
 

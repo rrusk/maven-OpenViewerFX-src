@@ -74,6 +74,6 @@ public interface PdfShape {
     boolean isClosed();
 
     void setShape(Shape currentShape);
-    
+
     Shape getShape();
 }

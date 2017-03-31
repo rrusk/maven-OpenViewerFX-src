@@ -36,86 +36,87 @@ import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript;
 import org.jpedal.objects.raw.FormObject;
 
-public class AFSimple extends JSFunction{
-    
+public class AFSimple extends JSFunction {
+
 
     public AFSimple(final AcroRenderer acro, final FormObject formObject) {
-        super(acro,formObject);
+        super(acro, formObject);
     }
 
     @Override
     public int execute(final String js, final String[] args, final int type, final int eventType, final char keyPressed) {
-    	
-        if(args==null ){
-            debug("Unknown implementation in "+js);
 
-        }else if(args.length<1){
+        if (args == null) {
+            debug("Unknown implementation in " + js);
+
+        } else if (args.length < 1) {
             debug("Values length is less than 1");
-        }else{
+        } else {
 
-            if(type==JSFunction.CALCULATE){
-            	//check if our calculate flag is true or not
-            	if(JpedalDefaultJavascript.calculate>0){
-	            	
-	                String result="";
-	
-	                int currentItem=1;
-	
-	                //get first value which is command
-	                String nextValue=args[currentItem];
-	
-	                final int objType=convertToValue(nextValue);
-	
-	                if(objType!=-1){
-	
-	                    currentItem++;
-	                    nextValue=args[currentItem];
-	
-	                    final String rest="";
-	                    if(nextValue.startsWith("new Array")){
-	
-	                        result = processArray(nextValue,objType);
-	
-	                    }else {
+            if (type == JSFunction.CALCULATE) {
+                //check if our calculate flag is true or not
+                if (JpedalDefaultJavascript.calculate > 0) {
+
+                    String result = "";
+
+                    int currentItem = 1;
+
+                    //get first value which is command
+                    String nextValue = args[currentItem];
+
+                    final int objType = convertToValue(nextValue);
+
+                    if (objType != -1) {
+
+                        currentItem++;
+                        nextValue = args[currentItem];
+
+                        final String rest = "";
+                        if (nextValue.startsWith("new Array")) {
+
+                            result = processArray(nextValue, objType);
+
+                        } else {
                             debug("Unknown params " + rest + " in " + js);
                         }
-	
-	                }else {
+
+                    } else {
                         debug("Unknown command " + nextValue + " in " + js);
                     }
-	
-	
-	                //write back
-                    formObject.updateValue(result,false, true);
+
+
+                    //write back
+                    formObject.updateValue(result, false, true);
                     formObject.setLastValidValue(result);
 
-            	}
-            }else {
+                }
+            } else {
                 debug("Unknown command " + args[0] + " in " + js);
             }
         }
-        
+
         return 0;
     }
 
     /**
      * get string name as int value if recognised
+     *
      * @param rawValue
      * @return
      */
     private static int convertToValue(final String rawValue) {
 
-        int value=-1; //default no match
+        int value = -1; //default no match
 
-        if(rawValue.equals("\"SUM\"")) {
+        if (rawValue.equals("\"SUM\"")) {
             value = SUM;
-        } else if(rawValue.equals("\"AVG\"")) {
+        } else if (rawValue.equals("\"AVG\"")) {
             value = AVG;
-        } else if(rawValue.equals("\"PRD\"")) {
+        } else if (rawValue.equals("\"PRD\"")) {
             value = PRD;
-        } else if(rawValue.equals("\"MIN\"")) {
+        } else if (rawValue.equals("\"MIN\"")) {
             value = MIN;
-        } else if(rawValue.equals("\"MAX\"")) {
+        } else if (rawValue.equals("\"MAX\"")) {
             value = MAX;
         }
 

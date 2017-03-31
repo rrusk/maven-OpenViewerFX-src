@@ -37,7 +37,7 @@ import org.jpedal.objects.raw.PdfObject;
 public class CCITT2D extends CCITT1D {
 
     int changingElemSize;
-    boolean is2D =true;
+    boolean is2D = true;
 
     public CCITT2D(final byte[] rawData, final int width, final int height, final PdfObject DecodeParms) {
 
@@ -53,7 +53,7 @@ public class CCITT2D extends CCITT1D {
 
         decode2DRun();
 
-        final byte[] output= createOutputFromBitset();
+        final byte[] output = createOutputFromBitset();
 
         //by default blackIs1 is false so black pixels do not need to be set
         // invert image if needed -
@@ -66,7 +66,7 @@ public class CCITT2D extends CCITT1D {
         return output;
     }
 
-    int bitOffset,currIndex;
+    int bitOffset, currIndex;
 
     private void decode2DRun() {
         //setup cur and prev
@@ -83,15 +83,15 @@ public class CCITT2D extends CCITT1D {
 
         final int[] currentChangeElement = new int[2];
 
-        for( int lines = 0;lines < height;lines++ ){
+        for (int lines = 0; lines < height; lines++) {
 
 
-            if(isByteAligned && bitReached >0){
+            if (isByteAligned && bitReached > 0) {
 
                 //get bits over 8 and align to byte boundary
-                final int iPart = (bitReached)%8;
-                final int iDrop = 8-(iPart);
-                if(iPart>0){
+                final int iPart = (bitReached) % 8;
+                final int iDrop = 8 - (iPart);
+                if (iPart > 0) {
                     bitReached += iDrop;
                 }
             }
@@ -105,7 +105,7 @@ public class CCITT2D extends CCITT1D {
             set2D(prev, curr, changingElemSize, currentChangeElement);
 
             // Add the changing element beyond the current scanline for the other color too to stop errors
-            if( curr.length != currIndex ) {
+            if (curr.length != currIndex) {
                 curr[currIndex++] = bitOffset;
             }
 
@@ -122,43 +122,43 @@ public class CCITT2D extends CCITT1D {
         currIndex = 0;
         bitOffset = 0;
 
-        int entry,code,bits=0,a0=-1;
+        int entry, code, bits = 0, a0 = -1;
 
-        while( bitOffset < width){
+        while (bitOffset < width) {
 
             //read new value (does not always change both parts)
-            getNextChangingElement( a0, isWhite, currentChangeElement, prev,changingElemSize );
+            getNextChangingElement(a0, isWhite, currentChangeElement, prev, changingElemSize);
 
-            int bitCode=get1DBits(7);
+            int bitCode = get1DBits(7);
             bitReached += 7;
 
-            entry =(code2D[bitCode] & 255 );  //lookup next value
+            entry = (code2D[bitCode] & 255);  //lookup next value
 
             // Get the code and the number of bits used up in command
-            code = ( entry & 0x78 ) >>> 3;
+            code = (entry & 0x78) >>> 3;
 
-            if(!is2D) {
+            if (!is2D) {
                 bits = entry & 0x07;
-            } else if(code!=11) //and roll on if not vertical by set amount
+            } else if (code != 11) //and roll on if not vertical by set amount
             {
                 updatePointer(7 - (entry & 7));
             }
 
             int pixelCount;
 
-            switch(code){ //4 different code cases
+            switch (code) { //4 different code cases
                 case 0:// // Pass
 
-                    pixelCount=currentChangeElement[1] - bitOffset;
-                    if( !isWhite ){ //fill in any bits
-                        out.set(outPtr,outPtr+pixelCount,true);
+                    pixelCount = currentChangeElement[1] - bitOffset;
+                    if (!isWhite) { //fill in any bits
+                        out.set(outPtr, outPtr + pixelCount, true);
                     }
                     outPtr += pixelCount; //update ptr
                     bitOffset = currentChangeElement[1]; //and update pointers
                     a0 = currentChangeElement[1]; //and update pointers
 
                     // Set pointer to consume the correct number of bits.
-                    if(!is2D) {
+                    if (!is2D) {
                         bitReached -= (7 - bits);
                     }
 
@@ -166,23 +166,23 @@ public class CCITT2D extends CCITT1D {
 
                 case 1: // Horizontal run of black/white or white/black
 
-                    if(!is2D) {
+                    if (!is2D) {
                         bitReached -= (7 - bits);
                     }
 
                     //white then black run if isWhite or black/white
                     //(we do not need to set white pixels, just ignore so routines slightly different)
-                    if( isWhite ){ //white then black
+                    if (isWhite) { //white then black
                         pixelCount = getWhiteRunCodeWord();
                         outPtr += pixelCount;
                         bitOffset += pixelCount;
                         curr[currIndex++] = bitOffset;
                         pixelCount = getBlackRunCodeWord();
-                        out.set(outPtr,outPtr+pixelCount,true);
+                        out.set(outPtr, outPtr + pixelCount, true);
                         outPtr += pixelCount;
-                    }else{ //  black run and then a white run after
+                    } else { //  black run and then a white run after
                         pixelCount = getBlackRunCodeWord();
-                        out.set(outPtr,outPtr+pixelCount,true);
+                        out.set(outPtr, outPtr + pixelCount, true);
                         outPtr += pixelCount;
                         bitOffset += pixelCount;
                         curr[currIndex++] = bitOffset;
@@ -198,70 +198,70 @@ public class CCITT2D extends CCITT1D {
                 case 11: //other cases
 
 
-                    final int nextValue=get1DBits(3);
+                    final int nextValue = get1DBits(3);
                     bitReached += 3;
 
-                    if( nextValue != 7 ) {
+                    if (nextValue != 7) {
                         throw new RuntimeException("Unexpected value " + nextValue);
                     }
 
                     int zeroBits = 0;
                     boolean isDone = false;
-                    while( !isDone ){
-                        while( true){
+                    while (!isDone) {
+                        while (true) {
 
-                            bitCode=get1DBits(1);
+                            bitCode = get1DBits(1);
                             bitReached += 1;
 
-                            if(bitCode==1) {
+                            if (bitCode == 1) {
                                 break;
                             }
 
                             zeroBits++;
                         }
 
-                        if( zeroBits > 5 ){
+                        if (zeroBits > 5) {
 
                             // Zeros before exit code
                             zeroBits -= 6;
-                            if( !isWhite && zeroBits > 0) {
+                            if (!isWhite && zeroBits > 0) {
                                 curr[currIndex++] = bitOffset;
                             }
 
                             // Zeros before the exit code
                             bitOffset += zeroBits;
-                            if( zeroBits > 0 ) {
+                            if (zeroBits > 0) {
                                 isWhite = true;
                             }
 
                             // Read in the bit which specifies the color of this run
-                            bitCode=get1DBits(1);
+                            bitCode = get1DBits(1);
                             bitReached += 1;
 
-                            if( bitCode == 0 ){
-                                if( !isWhite ) {
+                            if (bitCode == 0) {
+                                if (!isWhite) {
                                     curr[currIndex++] = bitOffset;
                                 }
                                 isWhite = true;
-                            }else{
-                                if( isWhite ) {
+                            } else {
+                                if (isWhite) {
                                     curr[currIndex++] = bitOffset;
                                 }
                                 isWhite = false;
                             }
                             isDone = true;
                         }
-                        if( zeroBits == 5 ){ //finishes on white
-                            if( !isWhite ) {
+                        if (zeroBits == 5) { //finishes on white
+                            if (!isWhite) {
                                 curr[currIndex++] = bitOffset;
                             }
                             bitOffset += zeroBits;
 
                             isWhite = true;
-                        }else{  //finishes on black
+                        } else {  //finishes on black
                             bitOffset += zeroBits;
                             curr[currIndex++] = bitOffset;
-                            out.set(outPtr,outPtr+1,true);
+                            out.set(outPtr, outPtr + 1, true);
                             outPtr += 1;
                             ++bitOffset;
 
@@ -273,19 +273,19 @@ public class CCITT2D extends CCITT1D {
 
                 default:  // Vertical
 
-                    curr[currIndex++] = currentChangeElement[0] + ( code - 5 );
+                    curr[currIndex++] = currentChangeElement[0] + (code - 5);
 
                     // We write the current color till a1 - 1 pos, since a1 is where the next color starts
-                    pixelCount=currentChangeElement[0] + ( code - 5 ) - bitOffset;
-                    if( !isWhite ){
-                        out.set(outPtr,outPtr+pixelCount,true);
+                    pixelCount = currentChangeElement[0] + (code - 5) - bitOffset;
+                    if (!isWhite) {
+                        out.set(outPtr, outPtr + pixelCount, true);
                     }
                     outPtr += pixelCount;
-                    a0 = currentChangeElement[0] + ( code - 5 );
+                    a0 = currentChangeElement[0] + (code - 5);
                     bitOffset = a0;
                     isWhite = !isWhite; //switch color
 
-                    if(!is2D) {
+                    if (!is2D) {
                         bitReached -= (7 - bits);
                     }
 
@@ -295,7 +295,7 @@ public class CCITT2D extends CCITT1D {
     }
 
     // Initial black run look up table, uses the first 4 bits of a code
-    static final int[] initBlack ={3226, 6412, 200, 168, 38, 38, 134, 134, 100, 100, 100,100, 68, 68, 68, 68};
+    static final int[] initBlack = {3226, 6412, 200, 168, 38, 38, 134, 134, 100, 100, 100, 100, 68, 68, 68, 68};
 
     private static final byte[] code2D =
             {
@@ -339,7 +339,7 @@ public class CCITT2D extends CCITT1D {
                     1552, 1584, 1584, 2000, 2000, 2032, 2032, 976, 976,
                     1008, 1008, 1040, 1040, 1072, 1072, 1296, 1296, 1328,
                     1328, 718, 718, 718, 718, 456, 456, 456, 456, 456,
-                    456, 456, 456,  456, 456, 456, 456, 456, 456, 456, 456,
+                    456, 456, 456, 456, 456, 456, 456, 456, 456, 456, 456,
                     456, 456, 456, 456, 456, 456, 456, 456, 456, 456, 456,
                     456, 456, 456, 456, 456, 326, 326, 326, 326, 326, 326,
                     326, 326, /* 264 - 271*/ 326, 326, 326, 326, 326, 326, 326, 326, 326,
@@ -369,7 +369,7 @@ public class CCITT2D extends CCITT1D {
             };
 
     // Additional make up codes for both White and Black runs
-    static final int[] additionalMakeup ={28679, 28679, 31752, 32777, 33801, 34825,35849, 36873, 29703, 29703,30727, 30727, 37897, 38921,39945, 40969};
+    static final int[] additionalMakeup = {28679, 28679, 31752, 32777, 33801, 34825, 35849, 36873, 29703, 29703, 30727, 30727, 37897, 38921, 39945, 40969};
 
     // The main 10 bit white runs lookup table
     static final int[] white =
@@ -487,56 +487,56 @@ public class CCITT2D extends CCITT1D {
                     232, 232, 232, 232, 232, 232,
             };
 
-    static final int[] twoBitBlack ={292, 260, 226, 226};
+    static final int[] twoBitBlack = {292, 260, 226, 226};
 
 
     // Returns run length of black pixels
-    int getBlackRunCodeWord(){
+    int getBlackRunCodeWord() {
 
-        int entry, bits, code, length =0;
+        int entry, bits, code, length = 0;
         boolean isBlack = true;
 
-        while( isBlack ){
+        while (isBlack) {
 
-            int bitCode=get1DBits(4);
+            int bitCode = get1DBits(4);
             bitReached += 4;
 
             entry = initBlack[bitCode];
 
             // Get the fields from the entry
-            bits = ( entry >>> 1 ) & 15;
-            code = ( entry >>> 5 ) & 0x07ff;
+            bits = (entry >>> 1) & 15;
+            code = (entry >>> 5) & 0x07ff;
 
-            switch(code){
+            switch (code) {
                 case 100:
 
-                    bitCode=get1DBits(9);
+                    bitCode = get1DBits(9);
                     bitReached += 9;
 
                     entry = black[bitCode];
 
                     // Get the fields from the entry
-                    bits = ( entry >>> 1 ) & 0x000f;
-                    code = ( entry >>> 5 ) & 0x07ff;
-                    if( bits == 12 ){
+                    bits = (entry >>> 1) & 0x000f;
+                    code = (entry >>> 5) & 0x07ff;
+                    if (bits == 12) {
                         // Additional makeup codes
-                        updatePointer( 5 );
+                        updatePointer(5);
 
-                        bitCode=get1DBits(4);
+                        bitCode = get1DBits(4);
                         bitReached += 4;
 
 
                         entry = additionalMakeup[bitCode];
-                        bits = ( entry >>> 1 ) & 0x07;
-                        code = ( entry >>> 4 ) & 0x0fff;
+                        bits = (entry >>> 1) & 0x07;
+                        code = (entry >>> 4) & 0x0fff;
                         length += code;
-                        updatePointer( 4 - bits );
-                    }else if( bits == 15 ) {
+                        updatePointer(4 - bits);
+                    } else if (bits == 15) {
                         throw new RuntimeException(("CCITT unexpected EOL"));
                     } else {
                         length += code;
-                        updatePointer( 9 - bits );
-                        if( (entry & 0x0001) == 0 )  //is Terminating
+                        updatePointer(9 - bits);
+                        if ((entry & 0x0001) == 0)  //is Terminating
                         {
                             isBlack = false;
                         }
@@ -545,15 +545,15 @@ public class CCITT2D extends CCITT1D {
 
                 case 200:
 
-                    bitCode=get1DBits(2);
+                    bitCode = get1DBits(2);
                     bitReached += 2;
 
                     // Is a Terminating code
                     entry = twoBitBlack[bitCode];
-                    code = ( entry >>> 5 ) & 0x07ff;
+                    code = (entry >>> 5) & 0x07ff;
                     length += code;
-                    bits = ( entry >>> 1 ) & 0x0f;
-                    updatePointer( 2 - bits );
+                    bits = (entry >>> 1) & 0x0f;
+                    updatePointer(2 - bits);
                     isBlack = false;
 
                     break;
@@ -562,7 +562,7 @@ public class CCITT2D extends CCITT1D {
 
                     // Is a Terminating code
                     length += code;
-                    updatePointer( 4 - bits );
+                    updatePointer(4 - bits);
                     isBlack = false;
                     break;
             }
@@ -571,39 +571,39 @@ public class CCITT2D extends CCITT1D {
     }
 
     // Returns run length
-    int getWhiteRunCodeWord(){
+    int getWhiteRunCodeWord() {
 
-        int current, entry, bits, twoBits, code,length = 0;
+        int current, entry, bits, twoBits, code, length = 0;
 
         boolean isWhite = true;
-        while( isWhite ){
+        while (isWhite) {
             current = get1DBits(10);
             bitReached += 10;
 
             entry = white[current];
 
             // Get the  fields from the entry
-            bits = ( entry >>> 1 ) & 0x0f;
-            if( bits == 12 ){ // Additional Make up code
+            bits = (entry >>> 1) & 0x0f;
+            if (bits == 12) { // Additional Make up code
                 // Get the next 2 bits
 
-                twoBits=get1DBits(2);
+                twoBits = get1DBits(2);
                 bitReached += 2;
 
                 // Consolidate the 2 new bits and last 2 bits into 4 bits
-                current = ( ( current << 2 ) & 0x000c ) | twoBits;
+                current = ((current << 2) & 0x000c) | twoBits;
                 entry = additionalMakeup[current];
-                bits = ( entry >>> 1 ) & 7;
-                code = ( entry >>> 4 ) & 0x0fff;
+                bits = (entry >>> 1) & 7;
+                code = (entry >>> 4) & 0x0fff;
                 length += code;
-                updatePointer( 4 - bits );
-            }else if( bits == 0 || bits == 15) {
+                updatePointer(4 - bits);
+            } else if (bits == 0 || bits == 15) {
                 throw new RuntimeException("CCITT Error in getWhiteRunCodeWord");
-            }else{
-                code = ( entry >>> 5 ) & 0x07ff;
+            } else {
+                code = (entry >>> 5) & 0x07ff;
                 length += code;
-                updatePointer( 10 - bits );
-                if((entry & 0x0001) == 0 ) {
+                updatePointer(10 - bits);
+                if ((entry & 0x0001) == 0) {
                     isWhite = false;
                 }
             }
@@ -611,36 +611,34 @@ public class CCITT2D extends CCITT1D {
         return length;
     }
 
-    private static void getNextChangingElement(final int a0, final boolean isWhite, final int[] ret, final int[] prevChangingElems, final int changingElemSize){
+    private static void getNextChangingElement(final int a0, final boolean isWhite, final int[] ret, final int[] prevChangingElems, final int changingElemSize) {
 
         // If the previous match was at an odd element, we still
         // have to search the preceeding element.
         int start = 0;
 
-        if( isWhite ) {
+        if (isWhite) {
             start &= ~0x1; // Search even numbered elements
         } else {
             start |= 0x1; // Search odd numbered elements
         }
 
         int i = start;
-        for( ;i < changingElemSize;i += 2 ){
+        for (; i < changingElemSize; i += 2) {
             final int temp = prevChangingElems[i];
-            if( temp > a0 )
-            {
+            if (temp > a0) {
                 ret[0] = temp;
                 break;
             }
         }
-        if( i + 1 < changingElemSize ) {
+        if (i + 1 < changingElemSize) {
             ret[1] = prevChangingElems[i + 1];
         }
 
     }
 
     // Move pointer backwards by given amount of bits
-    private void updatePointer( final int bitsToMoveBack )
-    {
+    private void updatePointer(final int bitsToMoveBack) {
 
         bitReached -= bitsToMoveBack;
 

@@ -44,6 +44,7 @@ import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import javax.swing.*;
+
 import org.jpedal.fonts.tt.BaseTTGlyph;
 import org.jpedal.fonts.tt.FontFile2;
 import org.jpedal.fonts.tt.Maxp;
@@ -76,7 +77,7 @@ public class TTVM implements Serializable {
      * scatter graph to see what's happening. Again, I'd recommend isolating the glyph in TTGlyph's constructor before
      * using this flag!
      */
-     private static final boolean printCoordsAfterEachInstruction = false;
+    private static final boolean printCoordsAfterEachInstruction = false;
 
     /**
      * This flag makes it such that the full coordinates are printed out immediately after the watch point is changed.
@@ -85,11 +86,12 @@ public class TTVM implements Serializable {
      */
 
     private static boolean watchAPoint = true;
+
     static {
-        watchAPoint = false;//off by default
+        watchAPoint = false; //off by default
     }
 
-    private static final int watchPoint=53;
+    private static final int watchPoint = 53;
     private int watchX, watchY;
 
     //Variables used by debugger
@@ -98,7 +100,7 @@ public class TTVM implements Serializable {
     private boolean[] programToDebugIsData;
     private JFrame debugWindow;
     private TTGraphicsState dGS;
-    private JComponent stateDisplay,debugGlyphDisplay;
+    private JComponent stateDisplay, debugGlyphDisplay;
     private JCheckBox showInterpolatedShadow;
     private boolean stepInto, debuggerRunningInBackground;
     private static JList currentInstructionList;
@@ -113,7 +115,6 @@ public class TTVM implements Serializable {
      * Prints the name and a brief description of an instruction when it is executed.
      */
     private boolean printOut;
-
 
 
     //Font-wide programs
@@ -361,7 +362,7 @@ public class TTVM implements Serializable {
             "DEPTH     - Returns depth of stack",
             "CINDEX    - Copy Indexed element to top of stack",
             "MINDEX    - Move Indexed element to top of stack",
-            "ALIGNPTS  - Move points along fv to average of their pv positions","",
+            "ALIGNPTS  - Move points along fv to average of their pv positions", "",
             "UTP       - Untouch point",
             "LOOPCALL  - Call a function many times",
             "CALL      - Call a function",
@@ -443,7 +444,7 @@ public class TTVM implements Serializable {
             "S45ROUND  - Sets the round state for working at 45degrees",
             "JROT      - Jump Relative On True",
             "JROF      - Jump Relative On False",
-            "ROFF      - Set round state to off","",
+            "ROFF      - Set round state to off", "",
             "RUTG      - Set round state to up to grid",
             "RDTG      - Set round state to down to grid",
             "SANGW     - deprecated",
@@ -474,7 +475,7 @@ public class TTVM implements Serializable {
         graphicsState = new TTGraphicsState();
 
         preProgram = readProgramTable(currentFontFile, FontFile2.PREP);
-        fontProgram= readProgramTable(currentFontFile, FontFile2.FPGM);
+        fontProgram = readProgramTable(currentFontFile, FontFile2.FPGM);
 
         storage = new int[maxp.getMaxStorage()];
         functions = new HashMap<Integer, int[]>();
@@ -500,19 +501,20 @@ public class TTVM implements Serializable {
      * Sets the scale variables for a font - if it's changed, the CVT needs to be rescaled, and the PreProgram
      * (sometimes called CVT program) must be run again. As it's always called before a glyph is processed, it's also
      * the ideal place to ensure that the font program has been run before anything else.
+     *
      * @param scaler The value to multiply any unscaled values by
-     * @param ppem The number of pixels per em square
+     * @param ppem   The number of pixels per em square
      * @param ptSize The point size of the text
      */
     public void setScaleVars(final double scaler, final double ppem, final double ptSize) {
 
         scalerRun = false;
-        this.ppem = (int)(ppem+0.5);
+        this.ppem = (int) (ppem + 0.5);
         this.ptSize = ptSize;
 
         if (!fontProgramRun) {
             execute(fontProgram, graphicsState);   //Defines functions
-            fontProgramRun=true;
+            fontProgramRun = true;
         }
 
         if (scaler != this.scaler) {
@@ -526,25 +528,26 @@ public class TTVM implements Serializable {
 
     /**
      * Takes the information about a glyph specified and modifies it according to the instructions provided.
+     *
      * @param instructions The instructions to execute
-     * @param glyfX A list of scaled X coordinates for the points
-     * @param glyfY A list of scaled Y coordinates for the points
-     * @param curves Whether each point is on the curve or not
-     * @param contours Whether each point is the last in a contour
+     * @param glyfX        A list of scaled X coordinates for the points
+     * @param glyfY        A list of scaled Y coordinates for the points
+     * @param curves       Whether each point is on the curve or not
+     * @param contours     Whether each point is the last in a contour
      */
     public void processGlyph(final int[] instructions, final int[] glyfX, final int[] glyfY, final boolean[] curves, final boolean[] contours) {
 
         if (printCoordsAfterEachInstruction || watchAPoint) {
-            printOut=true;
+            printOut = true;
         }
 
         x[GLYPH_ZONE] = glyfX;
-        x[ORIGINAL+GLYPH_ZONE] = new int[glyfX.length];
-        System.arraycopy(x[GLYPH_ZONE],0,x[ORIGINAL+GLYPH_ZONE],0,x[GLYPH_ZONE].length);
+        x[ORIGINAL + GLYPH_ZONE] = new int[glyfX.length];
+        System.arraycopy(x[GLYPH_ZONE], 0, x[ORIGINAL + GLYPH_ZONE], 0, x[GLYPH_ZONE].length);
 
         y[GLYPH_ZONE] = glyfY;
-        y[ORIGINAL+GLYPH_ZONE] = new int[glyfY.length];
-        System.arraycopy(y[GLYPH_ZONE],0,y[ORIGINAL+GLYPH_ZONE],0,y[GLYPH_ZONE].length);
+        y[ORIGINAL + GLYPH_ZONE] = new int[glyfY.length];
+        System.arraycopy(y[GLYPH_ZONE], 0, y[ORIGINAL + GLYPH_ZONE], 0, y[GLYPH_ZONE].length);
 
         curve[GLYPH_ZONE] = curves;
         contour[GLYPH_ZONE] = contours;
@@ -570,9 +573,9 @@ public class TTVM implements Serializable {
         } else {
             //If glyph create a copy so any changes are only for this glyph
             try {
-                gs = (TTGraphicsState)graphicsState.clone();
+                gs = (TTGraphicsState) graphicsState.clone();
                 gs.resetForGlyph();
-            } catch(final CloneNotSupportedException e) {
+            } catch (final CloneNotSupportedException e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
 
                 gs = new TTGraphicsState();
@@ -598,7 +601,7 @@ public class TTVM implements Serializable {
         execute(instructions, gs);
 
         if (printCoordsAfterEachInstruction || watchAPoint) {
-            printOut=false;
+            printOut = false;
         }
 
         if (showDebugWindow) {
@@ -615,11 +618,12 @@ public class TTVM implements Serializable {
 
     /**
      * Execute a section of code
+     *
      * @param program The code to execute
-     * @param gs The graphics state to use
+     * @param gs      The graphics state to use
      */
     private void execute(final int[] program, final TTGraphicsState gs) {
-        if (program==null) {
+        if (program == null) {
             return;
         }
 
@@ -684,10 +688,11 @@ public class TTVM implements Serializable {
 
     /**
      * Process a command
-     * @param code The command to process
+     *
+     * @param code           The command to process
      * @param currentPointer The location in the program (passed in so can be modified and passed out)
-     * @param program The program
-     * @param gs The graphics state to use
+     * @param program        The program
+     * @param gs             The graphics state to use
      * @return The (possibly modified) location in the program
      */
     @SuppressWarnings("OverlyLongMethod")
@@ -698,9 +703,9 @@ public class TTVM implements Serializable {
         int originalPointer = currentPointer;
 
         //If it's reading data find how much to read & redirect to first command
-        int bytesToRead=0;
+        int bytesToRead = 0;
         if (code >= 0xB0 && code <= 0xBF) {
-            bytesToRead = code %8;
+            bytesToRead = code % 8;
             code -= bytesToRead;
             bytesToRead++;
         }
@@ -711,7 +716,7 @@ public class TTVM implements Serializable {
 
         try {
 
-            switch(code) {
+            switch (code) {
                 case SVTCAy:
                     gs.freedomVector = TTGraphicsState.y_axis;
                     gs.projectionVector = TTGraphicsState.y_axis;
@@ -893,7 +898,7 @@ public class TTVM implements Serializable {
                     break;
 
                 case SZP0: {
-                   // final int value = stack.pop();
+                    // final int value = stack.pop();
 //                    if (value > 1 || value < 0) {
 //                        System.out.println("ZP0 set incorrectly!");
 //                    }
@@ -916,7 +921,7 @@ public class TTVM implements Serializable {
 //                        System.out.println("ZP2 set incorrectly!");
 //                    }
 
-                   // gs.zp2 = value;
+                    // gs.zp2 = value;
                     break;
                 }
                 case SZPS: {
@@ -973,9 +978,9 @@ public class TTVM implements Serializable {
                         } else if (curr == NPUSHW) {
                             currentPointer++;
                             currentPointer += program[currentPointer] * 2;
-                        } else if (curr >= PUSHB && curr <= PUSHB+7) {
+                        } else if (curr >= PUSHB && curr <= PUSHB + 7) {
                             currentPointer += (curr + 1) - PUSHB;
-                        } else if (curr >= PUSHW && curr <= PUSHW+7) {
+                        } else if (curr >= PUSHW && curr <= PUSHW + 7) {
                             currentPointer += ((curr + 1) - PUSHW) * 2;
                         }
                     } while (curr != EIF || nest != 0);
@@ -1127,9 +1132,9 @@ public class TTVM implements Serializable {
                         } else if (curr == NPUSHW) {
                             currentPointer++;
                             currentPointer += program[currentPointer] * 2;
-                        } else if (curr >= PUSHB && curr <= PUSHB+7) {
+                        } else if (curr >= PUSHB && curr <= PUSHB + 7) {
                             currentPointer += (curr + 1) - PUSHB;
-                        } else if (curr >= PUSHW && curr <= PUSHW+7) {
+                        } else if (curr >= PUSHW && curr <= PUSHW + 7) {
                             currentPointer += ((curr + 1) - PUSHW) * 2;
                         }
                     } while (curr != ENDF);
@@ -1354,8 +1359,8 @@ public class TTVM implements Serializable {
                     final int[] fv = TTGraphicsState.getVectorComponents(gs.freedomVector);
                     for (int i = 0; i < gs.loop; i++) {
                         final int point = stack.pop();
-                        x[gs.zp2][point] += (magnitude * getDoubleFromF2Dot14(fv[0])/64);
-                        y[gs.zp2][point] += (magnitude * getDoubleFromF2Dot14(fv[1])/64);
+                        x[gs.zp2][point] += (magnitude * getDoubleFromF2Dot14(fv[0]) / 64);
+                        y[gs.zp2][point] += (magnitude * getDoubleFromF2Dot14(fv[1]) / 64);
                         if (fv[0] != 0) {
                             touched[gs.zp2][point][0] = true;
                         }
@@ -1414,7 +1419,7 @@ public class TTVM implements Serializable {
 
                     //move to rp0 + d
                     final int[] shift = gs.getFVMoveforPVDistance(d -
-                            (TTGraphicsState.getCoordsOnVector(gs.projectionVector,x[gs.zp1][p],y[gs.zp1][p])-TTGraphicsState.getCoordsOnVector(gs.projectionVector,x[gs.zp0][gs.rp0],y[gs.zp0][gs.rp0])));
+                            (TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p], y[gs.zp1][p]) - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][gs.rp0], y[gs.zp0][gs.rp0])));
                     x[gs.zp1][p] += shift[0];
                     y[gs.zp1][p] += shift[1];
 
@@ -1438,7 +1443,7 @@ public class TTVM implements Serializable {
 
                     //move to rp0 + d
                     final int[] shift = gs.getFVMoveforPVDistance(d -
-                            (TTGraphicsState.getCoordsOnVector(gs.projectionVector,x[gs.zp1][p],y[gs.zp1][p])-TTGraphicsState.getCoordsOnVector(gs.projectionVector,x[gs.zp0][gs.rp0],y[gs.zp0][gs.rp0])));
+                            (TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p], y[gs.zp1][p]) - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][gs.rp0], y[gs.zp0][gs.rp0])));
                     x[gs.zp1][p] += shift[0];
                     y[gs.zp1][p] += shift[1];
 
@@ -1741,9 +1746,9 @@ public class TTVM implements Serializable {
                             } else if (curr == NPUSHW) {
                                 currentPointer++;
                                 currentPointer += program[currentPointer] * 2;
-                            } else if (curr >= PUSHB && curr <= PUSHB+7) {
+                            } else if (curr >= PUSHB && curr <= PUSHB + 7) {
                                 currentPointer += (curr + 1) - PUSHB;
-                            } else if (curr >= PUSHW && curr <= PUSHW+7) {
+                            } else if (curr >= PUSHW && curr <= PUSHW + 7) {
                                 currentPointer += ((curr + 1) - PUSHW) * 2;
                             }
                         } while ((curr != ELSE && curr != EIF) || nest != 0);
@@ -2453,13 +2458,13 @@ public class TTVM implements Serializable {
                             System.out.println("I 0x" + Integer.toHexString(code) + " finished");
                         }
 
-                    } else if(LogWriter.isRunningFromIDE){
+                    } else if (LogWriter.isRunningFromIDE) {
                         System.out.println("Unknown truetype opcode 0x" + Integer.toHexString(code) + " at line " + currentPointer);
                     }
             }
-        } catch(final Exception e) {
+        } catch (final Exception e) {
 
-            LogWriter.writeLog("Exception: " + e.getMessage()+ " at line "+currentPointer+"- hinting turned off");
+            LogWriter.writeLog("Exception: " + e.getMessage() + " at line " + currentPointer + "- hinting turned off");
 
             BaseTTGlyph.useHinting = false;
             BaseTTGlyph.redecodePage = true;
@@ -2468,7 +2473,7 @@ public class TTVM implements Serializable {
         if (showDebugWindow && debugWindow != null && debugWindow.isVisible()) {
             instructionsExecuted += currentPointer + 1 - originalPointer;
 
-            if (debugPointer==-1) {
+            if (debugPointer == -1) {
                 return debugPointer;
             }
         }
@@ -2492,32 +2497,33 @@ public class TTVM implements Serializable {
 
         if (direction == IUPx) {
             points = x[GLYPH_ZONE];
-            original = x[ORIGINAL+GLYPH_ZONE];
-            for (int i =0; i<this.touched[GLYPH_ZONE].length; i++) {
+            original = x[ORIGINAL + GLYPH_ZONE];
+            for (int i = 0; i < this.touched[GLYPH_ZONE].length; i++) {
                 touched[i] = this.touched[GLYPH_ZONE][i][0];
             }
         } else {
             points = y[GLYPH_ZONE];
-            original = y[ORIGINAL+GLYPH_ZONE];
-            for (int i =0; i<this.touched[GLYPH_ZONE].length; i++) {
+            original = y[ORIGINAL + GLYPH_ZONE];
+            for (int i = 0; i < this.touched[GLYPH_ZONE].length; i++) {
                 touched[i] = this.touched[GLYPH_ZONE][i][1];
             }
         }
 
         //go through contours
-        int contourStart=0;
+        int contourStart = 0;
         while (contourStart < points.length) {
 
             //get info on touched points
             final int[] touchedPointNumbers = new int[original.length];
-            int touchedCount=0, point=0;
+            int touchedCount = 0, point = 0;
             do {
-                if (touched[contourStart+point]) {
-                    touchedPointNumbers[touchedCount] = contourStart+point;
+                if (touched[contourStart + point]) {
+                    touchedPointNumbers[touchedCount] = contourStart + point;
                     touchedCount++;
                 }
                 point++;
-            } while(!contour[GLYPH_ZONE][contourStart+point-1] && (contourStart+point) < contour[GLYPH_ZONE].length);
+            }
+            while (!contour[GLYPH_ZONE][contourStart + point - 1] && (contourStart + point) < contour[GLYPH_ZONE].length);
 
 
             //process points
@@ -2525,7 +2531,7 @@ public class TTVM implements Serializable {
 
                 //If only one touched point, shift all points in contour to match
                 final int shift = points[touchedPointNumbers[0]] - original[touchedPointNumbers[0]];
-                for (int i=contourStart; i<contourStart+point; i++) {
+                for (int i = contourStart; i < contourStart + point; i++) {
                     if (!touched[i]) {
                         points[i] += shift;
                     }
@@ -2533,13 +2539,13 @@ public class TTVM implements Serializable {
             } else if (touchedCount > 1) {
 
                 //Loop through pairs interpolating the points between them
-                for (int i=0; i<touchedCount; i++) {
-                    if (i+1 >= touchedCount) {
+                for (int i = 0; i < touchedCount; i++) {
+                    if (i + 1 >= touchedCount) {
                         //Special case for between the last and first touched points
-                        interpolateRange(touchedPointNumbers[i]+1,   contourStart+point-1,       touchedPointNumbers[i],     touchedPointNumbers[0],     points,original);
-                        interpolateRange(contourStart,               touchedPointNumbers[0]-1,   touchedPointNumbers[i],     touchedPointNumbers[0],     points,original);
+                        interpolateRange(touchedPointNumbers[i] + 1, contourStart + point - 1, touchedPointNumbers[i], touchedPointNumbers[0], points, original);
+                        interpolateRange(contourStart, touchedPointNumbers[0] - 1, touchedPointNumbers[i], touchedPointNumbers[0], points, original);
                     } else {
-                        interpolateRange(touchedPointNumbers[i]+1,   touchedPointNumbers[i+1]-1, touchedPointNumbers[i],     touchedPointNumbers[i+1],   points,original);
+                        interpolateRange(touchedPointNumbers[i] + 1, touchedPointNumbers[i + 1] - 1, touchedPointNumbers[i], touchedPointNumbers[i + 1], points, original);
                     }
                 }
             }
@@ -2555,11 +2561,11 @@ public class TTVM implements Serializable {
      * originally between those of the two reference points, the relationship is maintained. If not, it is shifted by
      * the same shift which has been applied to the nearest of the two reference points.
      *
-     * @param start The first point to be interpolated
-     * @param end The last point to be interpolated
-     * @param ref1 The first reference point
-     * @param ref2 The second reference point
-     * @param points The current coordinates of all points
+     * @param start    The first point to be interpolated
+     * @param end      The last point to be interpolated
+     * @param ref1     The first reference point
+     * @param ref2     The second reference point
+     * @param points   The current coordinates of all points
      * @param original The original coordinates of all points
      */
     private static void interpolateRange(final int start, final int end, final int ref1, final int ref2, final int[] points, final int[] original) {
@@ -2576,7 +2582,7 @@ public class TTVM implements Serializable {
         }
 
         //Go through points
-        for (int i=start; i<=end; i++) {
+        for (int i = start; i <= end; i++) {
 
             //If below/left of both reference points shift by the bottom/left point
             if (original[i] < original[lowerRef]) {
@@ -2588,17 +2594,17 @@ public class TTVM implements Serializable {
 
                 //If between the reference points interpolate the new value
             } else {
-                final double pos = (double)(original[i] - original[lowerRef])/(original[higherRef] - original[lowerRef]);
-                points[i] = points[lowerRef] + (int)(pos * (points[higherRef] - points[lowerRef]));
+                final double pos = (double) (original[i] - original[lowerRef]) / (original[higherRef] - original[lowerRef]);
+                points[i] = points[lowerRef] + (int) (pos * (points[higherRef] - points[lowerRef]));
             }
         }
     }
 
 
-
     /**
      * Doesn't currently do anything - should compensate for large dot sizes on some printers
-     * @param num Number to compensate
+     *
+     * @param num             Number to compensate
      * @param characteristics Type of compensation to use
      * @return Compensated number
      */
@@ -2609,14 +2615,15 @@ public class TTVM implements Serializable {
 
     /**
      * Reads data from the Input Stream and puts it on the stack
-     * @param number How many items to read
-     * @param readWord Whether you're reading a word or a byte
+     *
+     * @param number         How many items to read
+     * @param readWord       Whether you're reading a word or a byte
      * @param currentPointer The current location in the stream
-     * @param program The current input stream
+     * @param program        The current input stream
      * @return The final location in the stream
      */
     private int readFromIS(final int number, final boolean readWord, int currentPointer, final int[] program) {
-        for (int i=0; i<number; i++) {
+        for (int i = 0; i < number; i++) {
             final int data;
 
             currentPointer++;
@@ -2639,72 +2646,78 @@ public class TTVM implements Serializable {
     /**
      * Takes two Uint8s containing 8 bits of data each and converts them to
      * a signed integer.
+     *
      * @param high first int
-     * @param low second int
+     * @param low  second int
      * @return signed int
      */
     protected static int getIntFrom2Uint8(final int high, final int low) {
         return ((high << 8) + low) +        //main concatenation
-                ((high >> 7 & 1)*-65536);   //account for negative option
+                ((high >> 7 & 1) * -65536);   //account for negative option
     }
 
     /**
      * Takes a F26Dot6 number and returns the value as a double.
+     *
      * @param a F26Dot6 value
      * @return Double value
      */
     protected static double getDoubleFromF26Dot6(final int a) {
-        return (double)a/64;
+        return (double) a / 64;
     }
 
     /**
      * Takes a F2Dot14 number and returns the value as a double.
+     *
      * @param a F2Dot14 value
      * @return Double value
      */
     protected static double getDoubleFromF2Dot14(final int a) {
-        return (double)a/0x4000;
+        return (double) a / 0x4000;
     }
 
     /**
      * Takes a double and returns the value as a F26Dot6 number.
+     *
      * @param a Double value
      * @return F26Dot6 value
      */
     protected static int storeDoubleAsF26Dot6(final double a) {
-        return (int)((a*64)+0.5);
+        return (int) ((a * 64) + 0.5);
     }
 
     /**
      * Takes a double and returns the value as a F2Dot14 number.
+     *
      * @param a Double value
      * @return F2Dot14 value
      */
     protected static int storeDoubleAsF2Dot14(final double a) {
-        return (int)((a*16384)+0.5);
+        return (int) ((a * 16384) + 0.5);
     }
 
 
     /**
      * Reads a program from a table in the font file.
+     *
      * @param currentFontFile Font file to use
-     * @param table Table ID
+     * @param table           Table ID
      * @return The program
      */
     private static int[] readProgramTable(final FontFile2 currentFontFile, final int table) {
         int[] program = {};
 
         //move to start and check exists
-        final int startPointer=currentFontFile.selectTable(table);
+        final int startPointer = currentFontFile.selectTable(table);
 
         //read table
-        if(startPointer==0){
+        if (startPointer == 0) {
             LogWriter.writeLog("No program table found: " + table);
-        }else{
+        } else {
             final int len = currentFontFile.getOffset(table);
             program = new int[len];
             for (int i = 0; i < len; i++) {
-                program[i] =currentFontFile.getNextUint8();
+                program[i] = currentFontFile.getNextUint8();
             }
         }
 
@@ -2725,12 +2738,13 @@ public class TTVM implements Serializable {
 
         /**
          * Adds an item to the top of the stack, expanding the stack if needed
+         *
          * @param a New item for stack
          */
         public void push(final int a) {
             if (pointer >= stack.length) {
-                final int[] newStack = new int[(int)(stack.length*1.5)];
-                System.arraycopy(stack,0,newStack,0,stack.length);
+                final int[] newStack = new int[(int) (stack.length * 1.5)];
+                System.arraycopy(stack, 0, newStack, 0, stack.length);
                 stack = newStack;
 
             }
@@ -2741,6 +2755,7 @@ public class TTVM implements Serializable {
 
         /**
          * Removes an item from the top of the stack
+         *
          * @return removed item
          */
         public int pop() {
@@ -2761,24 +2776,26 @@ public class TTVM implements Serializable {
 
         /**
          * Accesses an element further down the stack
+         *
          * @param key The number (from the top down) of the item to access
-         * @return  The item
+         * @return The item
          */
         public int elementAt(final int key) {
-            return stack[pointer-key];
+            return stack[pointer - key];
         }
 
         /**
          * Removes an item from the stack
+         *
          * @param key The number (from the top down) of the item to remove
          * @return The removed item
          */
         public int remove(final int key) {
-            final int valPos = pointer-key;
+            final int valPos = pointer - key;
             final int result = stack[valPos];
             final int[] newStack = new int[stack.length];
             System.arraycopy(stack, 0, newStack, 0, valPos);
-            System.arraycopy(stack, valPos+1, newStack, valPos, (stack.length-valPos)-1);
+            System.arraycopy(stack, valPos + 1, newStack, valPos, (stack.length - valPos) - 1);
             stack = newStack;
             pointer--;
             return result;
@@ -2786,16 +2803,16 @@ public class TTVM implements Serializable {
 
         /**
          * DEBUG METHOD -
-         *
+         * <p>
          * Print out the top 5 elements on the stack
          */
         public void print() {
             System.out.println("stack: ");
             int i;
-            for (i=pointer-1; i>=0 && i >=pointer-5; i--) {
-                System.out.println(i+": "+stack[i]);
+            for (i = pointer - 1; i >= 0 && i >= pointer - 5; i--) {
+                System.out.println(i + ": " + stack[i]);
             }
-            if (i>0) {
+            if (i > 0) {
                 System.out.println("...");
             }
             System.out.println("");
@@ -2804,7 +2821,7 @@ public class TTVM implements Serializable {
         public String[] toStringArray() {
             final String[] result = new String[pointer];
 
-            for (int i=pointer-1; i >= 0; i--) {
+            for (int i = pointer - 1; i >= 0; i--) {
                 result[(pointer - i) - 1] = (pointer - i) - 1 + ": " + stack[i] + "       (" + NumberFormat.getNumberInstance().format(stack[i] / 64d) + ')';
             }
 
@@ -2814,7 +2831,7 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Sets up the Hinting Debugger.
      */
     private void runDebugger() {
@@ -2824,7 +2841,7 @@ public class TTVM implements Serializable {
         }
 
         debugWindow = new JFrame("TrueType Hinting Debugger");
-        debugWindow.setSize(1000,700);
+        debugWindow.setSize(1000, 700);
         debugWindow.setLayout(new BorderLayout());
 
 
@@ -2881,7 +2898,7 @@ public class TTVM implements Serializable {
         });
         buttonPanel.add(backButton);
 
-        debugWindow.add(BorderLayout.NORTH,buttonPanel);
+        debugWindow.add(BorderLayout.NORTH, buttonPanel);
 
         /*
          * Left panel
@@ -2904,16 +2921,16 @@ public class TTVM implements Serializable {
                 return new Dimension(w, h);
             }
         };
-        codePane.setMinimumSize(new Dimension(150,100));
+        codePane.setMinimumSize(new Dimension(150, 100));
 
         //Label
         currentCode = new JLabel("Glyph program");
 
         //Add to panel
-        instructionPanel.add(BorderLayout.CENTER,codePane);
-        instructionPanel.add(BorderLayout.SOUTH,currentCode);
+        instructionPanel.add(BorderLayout.CENTER, codePane);
+        instructionPanel.add(BorderLayout.SOUTH, currentCode);
 
-        debugWindow.add(BorderLayout.WEST,instructionPanel);
+        debugWindow.add(BorderLayout.WEST, instructionPanel);
 
         /*
          * Centre panel
@@ -2925,17 +2942,17 @@ public class TTVM implements Serializable {
         debugGlyphDisplay = new JComponent() {
             @Override
             public void paint(final Graphics g) {
-                final Graphics2D g2 = (Graphics2D)g;
+                final Graphics2D g2 = (Graphics2D) g;
 
                 //Calculate Scale
                 final int w = getWidth();
                 final int h = getHeight();
 
-                int minX=Integer.MAX_VALUE;
-                int minY=Integer.MAX_VALUE;
-                int maxX=Integer.MIN_VALUE;
-                int maxY=Integer.MIN_VALUE;
-                for (int i=0; i<x[GLYPH_ZONE].length; i++) {
+                int minX = Integer.MAX_VALUE;
+                int minY = Integer.MAX_VALUE;
+                int maxX = Integer.MIN_VALUE;
+                int maxY = Integer.MIN_VALUE;
+                for (int i = 0; i < x[GLYPH_ZONE].length; i++) {
                     int val = x[GLYPH_ZONE][i];
                     if (val > maxX) {
                         maxX = val;
@@ -2955,22 +2972,22 @@ public class TTVM implements Serializable {
 
                 int xRange = maxX - minX;
                 int yRange = maxY - minY;
-                double xScale = (double)w / xRange;
-                double yScale = (double)h / yRange;
+                double xScale = (double) w / xRange;
+                double yScale = (double) h / yRange;
                 double scale = xScale < yScale ? xScale : yScale;
 
                 //add buffer area
                 final int borderWidth = 15;
-                minX -= (borderWidth/scale);
-                maxX += (borderWidth/scale);
-                minY -= (borderWidth/scale);
-                maxY += (borderWidth/scale);
+                minX -= (borderWidth / scale);
+                maxX += (borderWidth / scale);
+                minY -= (borderWidth / scale);
+                maxY += (borderWidth / scale);
 
                 //recalculate scale
                 xRange = maxX - minX;
                 yRange = maxY - minY;
-                xScale = (double)w / xRange;
-                yScale = (double)h / yRange;
+                xScale = (double) w / xRange;
+                yScale = (double) h / yRange;
                 scale = xScale < yScale ? xScale : yScale;
 
 
@@ -2983,36 +3000,36 @@ public class TTVM implements Serializable {
 
                 //Fill with white
                 g2.setPaint(Color.WHITE);
-                g2.fillRect(minX,minY,(int)(w/scale),(int)(h/scale));
+                g2.fillRect(minX, minY, (int) (w / scale), (int) (h / scale));
 
 
                 //Draw axes
-                g2.setPaint(new Color(180,180,255));
-                g2.drawLine(0, minY, 0, (int)(h/scale));
-                g2.drawLine(minX, 0, (int)(w/scale), 0);
+                g2.setPaint(new Color(180, 180, 255));
+                g2.drawLine(0, minY, 0, (int) (h / scale));
+                g2.drawLine(minX, 0, (int) (w / scale), 0);
 
 
                 //Draw points
-                final int len = (int)(3 / scale);
-                for (int i=0; i<x[GLYPH_ZONE].length; i++) {
+                final int len = (int) (3 / scale);
+                for (int i = 0; i < x[GLYPH_ZONE].length; i++) {
                     final int xVal = x[GLYPH_ZONE][i];
                     final int yVal = y[GLYPH_ZONE][i];
 
                     //Point
                     if (curve[GLYPH_ZONE][i]) {
                         g2.setPaint(Color.BLACK);
-                        final Shape s = new Ellipse2D.Double(xVal-(2/scale),yVal-(2/scale),(4/scale),(4/scale));
+                        final Shape s = new Ellipse2D.Double(xVal - (2 / scale), yVal - (2 / scale), (4 / scale), (4 / scale));
                         g2.fill(s);
                     } else {
                         g2.setPaint(Color.RED);
-                        g2.drawLine(xVal-len, yVal-len, xVal+len, yVal+len);
-                        g2.drawLine(xVal+len, yVal-len, xVal-len, yVal+len);
+                        g2.drawLine(xVal - len, yVal - len, xVal + len, yVal + len);
+                        g2.drawLine(xVal + len, yVal - len, xVal - len, yVal + len);
                     }
 
                     //Number
                     final AffineTransform store = g2.getTransform();
                     g2.translate(xVal, yVal);
-                    g2.scale(1/scale,-1/scale);
+                    g2.scale(1 / scale, -1 / scale);
                     g2.drawString(String.valueOf(i), 3, -3);
 
                     g2.setTransform(store);
@@ -3032,8 +3049,8 @@ public class TTVM implements Serializable {
                     System.arraycopy(contour[GLYPH_ZONE], 0, contourStore, 0, c);
                     interpolateUntouchedPoints(IUPy);
                     interpolateUntouchedPoints(IUPx);
-                    final GeneralPath shape = getPathFromPoints(x[GLYPH_ZONE],y[GLYPH_ZONE],curve[GLYPH_ZONE],contour[GLYPH_ZONE]);
-                    g2.setPaint(new Color(255,0,0,100));
+                    final GeneralPath shape = getPathFromPoints(x[GLYPH_ZONE], y[GLYPH_ZONE], curve[GLYPH_ZONE], contour[GLYPH_ZONE]);
+                    g2.setPaint(new Color(255, 0, 0, 100));
                     g2.draw(shape);
                     g2.setPaint(new Color(0, 0, 0, 30));
                     g2.fill(shape);
@@ -3045,33 +3062,33 @@ public class TTVM implements Serializable {
 
 
                 //Draw glyph
-                final GeneralPath shape = getPathFromPoints(x[GLYPH_ZONE],y[GLYPH_ZONE],curve[GLYPH_ZONE],contour[GLYPH_ZONE]);
+                final GeneralPath shape = getPathFromPoints(x[GLYPH_ZONE], y[GLYPH_ZONE], curve[GLYPH_ZONE], contour[GLYPH_ZONE]);
 
-                g2.setPaint(new Color(100,100,255,100));
+                g2.setPaint(new Color(100, 100, 255, 100));
                 g2.fill(shape);
                 g2.setPaint(Color.BLACK);
                 g2.draw(shape);
 
                 //Draw Twilight points
                 g2.setPaint(Color.BLUE);
-                for (int i=0; i<x[TWILIGHT_ZONE].length; i++) {
+                for (int i = 0; i < x[TWILIGHT_ZONE].length; i++) {
                     final int xVal = x[TWILIGHT_ZONE][i];
                     final int yVal = y[TWILIGHT_ZONE][i];
 
                     if (xVal != 0 || yVal != 0) {
                         //Point
                         if (curve[TWILIGHT_ZONE][i]) {
-                            final Shape s = new Ellipse2D.Double(xVal-(2/scale),yVal-(2/scale),(4/scale),(4/scale));
+                            final Shape s = new Ellipse2D.Double(xVal - (2 / scale), yVal - (2 / scale), (4 / scale), (4 / scale));
                             g2.fill(s);
                         } else {
-                            g2.drawLine(xVal-len, yVal-len, xVal+len, yVal+len);
-                            g2.drawLine(xVal+len, yVal-len, xVal-len, yVal+len);
+                            g2.drawLine(xVal - len, yVal - len, xVal + len, yVal + len);
+                            g2.drawLine(xVal + len, yVal - len, xVal - len, yVal + len);
                         }
 
                         //Number
                         final AffineTransform store = g2.getTransform();
                         g2.translate(xVal, yVal);
-                        g2.scale(1/scale,-1/scale);
+                        g2.scale(1 / scale, -1 / scale);
                         g2.drawString(String.valueOf(i), 3, -3);
 
                         g2.setTransform(store);
@@ -3119,24 +3136,24 @@ public class TTVM implements Serializable {
 
                 //add buffer area
                 final int borderWidth = 15;
-                minX -= (borderWidth/scale);
-                maxX += (borderWidth/scale);
-                minY -= (borderWidth/scale);
-                maxY += (borderWidth/scale);
+                minX -= (borderWidth / scale);
+                maxX += (borderWidth / scale);
+                minY -= (borderWidth / scale);
+                maxY += (borderWidth / scale);
 
                 //recalculate scale
                 xRange = maxX - minX;
                 yRange = maxY - minY;
-                xScale = (double)w / xRange;
-                yScale = (double)h / yRange;
+                xScale = (double) w / xRange;
+                yScale = (double) h / yRange;
                 scale = xScale < yScale ? xScale : yScale;
 
                 eX = (eX / scale) + minX;
                 eY = h - eY;
                 eY = ((eY / scale) + minY);
 
-                debugXLabel.setText("  X: "+eX);
-                debugYLabel.setText("  Y: "+eY);
+                debugXLabel.setText("  X: " + eX);
+                debugYLabel.setText("  Y: " + eY);
             }
 
             @Override
@@ -3165,7 +3182,7 @@ public class TTVM implements Serializable {
         /*
          * Right panel
          */
-        final JPanel dataPanel = new JPanel(){
+        final JPanel dataPanel = new JPanel() {
             @Override
             public Dimension getPreferredSize() {
                 final Dimension pref = super.getPreferredSize();
@@ -3181,8 +3198,8 @@ public class TTVM implements Serializable {
                 return new Dimension(w, h);
             }
         };
-        dataPanel.setMinimumSize(new Dimension(200,100));
-        dataPanel.setMaximumSize(new Dimension(200,1000000));
+        dataPanel.setMinimumSize(new Dimension(200, 100));
+        dataPanel.setMaximumSize(new Dimension(200, 1000000));
         dataPanel.setLayout(new BorderLayout());
         dataPanel.setBorder(new javax.swing.border.LineBorder(Color.BLACK));
 
@@ -3224,45 +3241,45 @@ public class TTVM implements Serializable {
         stateDisplay = new JComponent() {
             @Override
             public void paint(final Graphics g) {
-                final Graphics2D g2 = (Graphics2D)g;
+                final Graphics2D g2 = (Graphics2D) g;
 
                 g2.setPaint(Color.WHITE);
-                g2.fillRect(0,0,81,81);
+                g2.fillRect(0, 0, 81, 81);
                 g2.setPaint(Color.BLACK);
-                g2.drawRect(0,0,81,81);
+                g2.drawRect(0, 0, 81, 81);
                 g2.setPaint(Color.GRAY);
-                g2.drawOval(0,0,81,81);
+                g2.drawOval(0, 0, 81, 81);
 
-                g2.drawLine(0,40,5,40);
-                g2.drawLine(81,40,76,40);
-                g2.drawLine(40,0,40,5);
-                g2.drawLine(40,81,40,76);
+                g2.drawLine(0, 40, 5, 40);
+                g2.drawLine(81, 40, 76, 40);
+                g2.drawLine(40, 0, 40, 5);
+                g2.drawLine(40, 81, 40, 76);
 
-                g2.drawLine(12,12,15,15);
-                g2.drawLine(69,12,66,15);
-                g2.drawLine(12,69,15,66);
-                g2.drawLine(69,69,66,66);
+                g2.drawLine(12, 12, 15, 15);
+                g2.drawLine(69, 12, 66, 15);
+                g2.drawLine(12, 69, 15, 66);
+                g2.drawLine(69, 69, 66, 66);
 
                 //freedom vector
-                g2.setPaint(new Color(0,100,0));
+                g2.setPaint(new Color(0, 100, 0));
                 int[] vec = TTGraphicsState.getVectorComponents(dGS.freedomVector);
-                g2.drawLine(40,40,40+((vec[0]*40)/16384),40-((vec[1]*40)/16384));
+                g2.drawLine(40, 40, 40 + ((vec[0] * 40) / 16384), 40 - ((vec[1] * 40) / 16384));
                 g2.drawString("Freedom Vector", 84, 13);
-                g2.drawString("("+(vec[0]/16384d)+", "+(vec[1]/16384d)+ ')',98,23);
+                g2.drawString("(" + (vec[0] / 16384d) + ", " + (vec[1] / 16384d) + ')', 98, 23);
 
                 //dual projection vector
                 g2.setPaint(Color.BLUE);
                 vec = TTGraphicsState.getVectorComponents(dGS.dualProjectionVector);
-                g2.drawLine(41,41,41+((vec[0]*40)/16384),41-((vec[1]*40)/16384));
+                g2.drawLine(41, 41, 41 + ((vec[0] * 40) / 16384), 41 - ((vec[1] * 40) / 16384));
                 g2.drawString("Dual Projection Vector", 84, 65);
-                g2.drawString("("+(vec[0]/16384d)+", "+(vec[1]/16384d)+ ')',98,75);
+                g2.drawString("(" + (vec[0] / 16384d) + ", " + (vec[1] / 16384d) + ')', 98, 75);
 
                 //projection vector
                 g2.setPaint(Color.MAGENTA);
                 vec = TTGraphicsState.getVectorComponents(dGS.projectionVector);
-                g2.drawLine(41,41,41+((vec[0]*40)/16384),41-((vec[1]*40)/16384));
+                g2.drawLine(41, 41, 41 + ((vec[0] * 40) / 16384), 41 - ((vec[1] * 40) / 16384));
                 g2.drawString("Projection Vector", 84, 39);
-                g2.drawString("("+(vec[0]/16384d)+", "+(vec[1]/16384d)+ ')',98,49);
+                g2.drawString("(" + (vec[0] / 16384d) + ", " + (vec[1] / 16384d) + ')', 98, 49);
 
                 //Separator
                 g2.setPaint(Color.GRAY);
@@ -3285,7 +3302,7 @@ public class TTVM implements Serializable {
 
                 //Instruct Control
                 g2.setPaint(Color.BLACK);
-                g2.drawString("Instruct Control: "+dGS.instructControl, 414, 13);
+                g2.drawString("Instruct Control: " + dGS.instructControl, 414, 13);
 
                 //Auto Flip
                 g2.drawString("Auto Flip: " + dGS.autoFlip, 414, 30);
@@ -3316,15 +3333,15 @@ public class TTVM implements Serializable {
                 g2.drawString("Single Width Value: " + dGS.singleWidthValue, 558, 75);
             }
         };
-        stateDisplay.setMinimumSize(new Dimension(700,81));
-        stateDisplay.setPreferredSize(new Dimension(700,81));
-        stateDisplay.setMaximumSize(new Dimension(700,81));
+        stateDisplay.setMinimumSize(new Dimension(700, 81));
+        stateDisplay.setPreferredSize(new Dimension(700, 81));
+        stateDisplay.setMaximumSize(new Dimension(700, 81));
         statePanel.add(BorderLayout.WEST, stateDisplay);
 
         final JPanel mousePanel = new JPanel();
-        mousePanel.setLayout(new GridLayout(0,1));
+        mousePanel.setLayout(new GridLayout(0, 1));
 
-        debugXLabel = new JLabel("  X: "){
+        debugXLabel = new JLabel("  X: ") {
             @Override
             public Dimension getPreferredSize() {
                 final Dimension pref = super.getPreferredSize();
@@ -3356,23 +3373,23 @@ public class TTVM implements Serializable {
 
 
         try {
-            dGS = (TTGraphicsState)graphicsState.clone();
-        } catch(final CloneNotSupportedException e) {
+            dGS = (TTGraphicsState) graphicsState.clone();
+        } catch (final CloneNotSupportedException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
         stack = new Stack();
 
         final int twilightCount = maxp.getMaxTwilightPoints();
-        System.arraycopy(x[ORIGINAL+GLYPH_ZONE],0,x[GLYPH_ZONE],0,x[GLYPH_ZONE].length);
+        System.arraycopy(x[ORIGINAL + GLYPH_ZONE], 0, x[GLYPH_ZONE], 0, x[GLYPH_ZONE].length);
         x[TWILIGHT_ZONE] = new int[twilightCount];
-        x[ORIGINAL+TWILIGHT_ZONE] = new int[twilightCount];
-        System.arraycopy(y[ORIGINAL+GLYPH_ZONE],0,y[GLYPH_ZONE],0,y[GLYPH_ZONE].length);
+        x[ORIGINAL + TWILIGHT_ZONE] = new int[twilightCount];
+        System.arraycopy(y[ORIGINAL + GLYPH_ZONE], 0, y[GLYPH_ZONE], 0, y[GLYPH_ZONE].length);
         y[TWILIGHT_ZONE] = new int[twilightCount];
-        y[ORIGINAL+TWILIGHT_ZONE] = new int[twilightCount];
-        System.arraycopy(touched[ORIGINAL+GLYPH_ZONE],0,touched[GLYPH_ZONE],0,touched[GLYPH_ZONE].length);
+        y[ORIGINAL + TWILIGHT_ZONE] = new int[twilightCount];
+        System.arraycopy(touched[ORIGINAL + GLYPH_ZONE], 0, touched[GLYPH_ZONE], 0, touched[GLYPH_ZONE].length);
         touched[TWILIGHT_ZONE] = new boolean[twilightCount][2];
-        touched[ORIGINAL+TWILIGHT_ZONE] = new boolean[twilightCount][2];
+        touched[ORIGINAL + TWILIGHT_ZONE] = new boolean[twilightCount][2];
 
         refreshDebugger(true);
         debugWindow.setVisible(true);
@@ -3380,20 +3397,22 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Returns the midpoint of two values. Used when creating paths from points.
+     *
      * @param a
      * @param b
      * @return
      */
     private static int midPt(final int a, final int b) {
-		return a + (b - a)/2;
-	}
+        return a + (b - a) / 2;
+    }
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Creates paths for a given set of points, making sure not to modify any of the values passed in.
+     *
      * @param x
      * @param y
      * @param curve
@@ -3401,210 +3420,210 @@ public class TTVM implements Serializable {
      * @return
      */
     private static GeneralPath getPathFromPoints(final int[] x, final int[] y, final boolean[] curve, final boolean[] contour) {
-        final int ptCount=x.length;
+        final int ptCount = x.length;
         final int[] pX = new int[ptCount];
-        System.arraycopy(x,0,pX,0,ptCount);
+        System.arraycopy(x, 0, pX, 0, ptCount);
         final int[] pY = new int[ptCount];
-        System.arraycopy(y,0,pY,0,ptCount);
+        System.arraycopy(y, 0, pY, 0, ptCount);
         final boolean[] endOfContour = new boolean[ptCount];
-        System.arraycopy(contour,0,endOfContour,0,ptCount);
+        System.arraycopy(contour, 0, endOfContour, 0, ptCount);
         final boolean[] onCurve = new boolean[ptCount];
-        System.arraycopy(curve,0,onCurve,0,ptCount);
+        System.arraycopy(curve, 0, onCurve, 0, ptCount);
 
-        int start=0, firstPt=-1;
-        for(int ii=0;ii<ptCount;ii++){
+        int start = 0, firstPt = -1;
+        for (int ii = 0; ii < ptCount; ii++) {
 
-            if(endOfContour[ii]){
+            if (endOfContour[ii]) {
 
-                if(firstPt!=-1 && (!onCurve[start] || !onCurve[ii]) ){ //last point not on curve and we have a first point
+                if (firstPt != -1 && (!onCurve[start] || !onCurve[ii])) { //last point not on curve and we have a first point
 
-                    final int diff=firstPt-start;
+                    final int diff = firstPt - start;
                     int newPos;
 
                     //make a deep copy of values
-                    final int pXlength=pX.length;
-                    final int[] old_pX=new int[pXlength];
-                    System.arraycopy(pX,0,old_pX,0,pXlength);
+                    final int pXlength = pX.length;
+                    final int[] old_pX = new int[pXlength];
+                    System.arraycopy(pX, 0, old_pX, 0, pXlength);
 
-                    final int[] old_pY=new int[pXlength];
-                    System.arraycopy(pY,0,old_pY,0,pXlength);
+                    final int[] old_pY = new int[pXlength];
+                    System.arraycopy(pY, 0, old_pY, 0, pXlength);
 
-                    final boolean[] old_onCurve=new boolean[pXlength];
-                    System.arraycopy(onCurve,0,old_onCurve,0,pXlength);
+                    final boolean[] old_onCurve = new boolean[pXlength];
+                    System.arraycopy(onCurve, 0, old_onCurve, 0, pXlength);
 
                     //rotate values to ensure point at start
-                    for(int oldPos=start;oldPos<ii+1;oldPos++){
+                    for (int oldPos = start; oldPos < ii + 1; oldPos++) {
 
-                        newPos=oldPos+diff;
-                        if(newPos>ii) {
+                        newPos = oldPos + diff;
+                        if (newPos > ii) {
                             newPos -= (ii - start + 1);
                         }
-                        pX[oldPos]=old_pX[newPos];
-                        pY[oldPos]=old_pY[newPos];
-                        onCurve[oldPos]=old_onCurve[newPos];
+                        pX[oldPos] = old_pX[newPos];
+                        pY[oldPos] = old_pY[newPos];
+                        onCurve[oldPos] = old_onCurve[newPos];
 
                     }
                 }
 
                 //reset values
-                start=ii+1;
-                firstPt=-1;
+                start = ii + 1;
+                firstPt = -1;
 
-            }else if(onCurve[ii] && firstPt==-1){ //track first point
-                firstPt=ii;
+            } else if (onCurve[ii] && firstPt == -1) { //track first point
+                firstPt = ii;
             }
 
         }
 
-        boolean isFirstDraw=true;
+        boolean isFirstDraw = true;
 
-        final GeneralPath current_path =new GeneralPath(Path2D.WIND_NON_ZERO);
+        final GeneralPath current_path = new GeneralPath(Path2D.WIND_NON_ZERO);
 
-        final int c= pX.length;
-        int fc=-1;
+        final int c = pX.length;
+        int fc = -1;
 
         //find first end contour
-        for(int jj=0;jj<c;jj++){
-            if(endOfContour[jj]){
-                fc=jj+1;
-                jj=c;
+        for (int jj = 0; jj < c; jj++) {
+            if (endOfContour[jj]) {
+                fc = jj + 1;
+                jj = c;
             }
         }
 
-        int x1,y1,x2=0,y2=0,x3=0,y3=0;
+        int x1, y1, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
 
-        x1=pX[0];
-        y1=pY[0];
+        x1 = pX[0];
+        y1 = pY[0];
 
-        current_path.moveTo(x1,y1);
+        current_path.moveTo(x1, y1);
 
-        int xs=0,ys=0,lc=0;
-        boolean isEnd=false;
+        int xs = 0, ys = 0, lc = 0;
+        boolean isEnd = false;
 
-        for (int j = 0; j <ptCount; j++) {
+        for (int j = 0; j < ptCount; j++) {
 
-            final int p=j%fc;
-            int p1=(j+1)%fc;
-            int p2=(j+2)%fc;
-            int pm1=(j-1)%fc;
+            final int p = j % fc;
+            int p1 = (j + 1) % fc;
+            int p2 = (j + 2) % fc;
+            int pm1 = (j - 1) % fc;
 
             /* special cases
              *
              *round up to last point at end
              *First point
              */
-            if(j==0) {
+            if (j == 0) {
                 pm1 = fc - 1;
             }
-            if(p1<lc) {
+            if (p1 < lc) {
                 p1 += lc;
             }
-            if(p2<lc) {
+            if (p2 < lc) {
                 p2 += lc;
             }
 
             //allow for wrap around on contour
-            if(endOfContour[j]){
-                isEnd=true;
+            if (endOfContour[j]) {
+                isEnd = true;
 
-                if(onCurve[fc]){
-                    xs=pX[fc];
-                    ys=pY[fc];
-                }else{
-                    xs=pX[j+1];
-                    ys=pY[j+1];
+                if (onCurve[fc]) {
+                    xs = pX[fc];
+                    ys = pY[fc];
+                } else {
+                    xs = pX[j + 1];
+                    ys = pY[j + 1];
                 }
 
                 //remember start point
-                lc=fc;
+                lc = fc;
                 //find next contour
-                for(int jj=j+1;jj<c;jj++){
-                    if(endOfContour[jj]){
-                        fc=jj+1;
-                        jj=c;
+                for (int jj = j + 1; jj < c; jj++) {
+                    if (endOfContour[jj]) {
+                        fc = jj + 1;
+                        jj = c;
                     }
                 }
             }
 
-            if(lc==fc && onCurve[p]){
-                j=c;
-            }else{
+            if (lc == fc && onCurve[p]) {
+                j = c;
+            } else {
 
-                if(onCurve[p] && onCurve[p1]){ //straight line
-                    x3=pX[p1];
-                    y3=pY[p1];
-                    current_path.lineTo(x3,y3);
+                if (onCurve[p] && onCurve[p1]) { //straight line
+                    x3 = pX[p1];
+                    y3 = pY[p1];
+                    current_path.lineTo(x3, y3);
 
-                    isFirstDraw=false;
+                    isFirstDraw = false;
                     //curves
-                }else if(j<(c-3) &&((fc-lc)>1 || fc==lc)){
-                    boolean checkEnd=false;
-                    if(onCurve[p] && !onCurve[p1] && onCurve[p2] ){ //2 points + control
+                } else if (j < (c - 3) && ((fc - lc) > 1 || fc == lc)) {
+                    boolean checkEnd = false;
+                    if (onCurve[p] && !onCurve[p1] && onCurve[p2]) { //2 points + control
 
-                        x1=pX[p];
-                        y1=pY[p];
-                        x2=pX[p1];
-                        y2=pY[p1];
-                        x3=pX[p2];
-                        y3=pY[p2];
+                        x1 = pX[p];
+                        y1 = pY[p];
+                        x2 = pX[p1];
+                        y2 = pY[p1];
+                        x3 = pX[p2];
+                        y3 = pY[p2];
                         j++;
-                        checkEnd=true;
+                        checkEnd = true;
 
-                    }else if(onCurve[p] && !onCurve[p1] && !onCurve[p2]){ //1 point + 2 control
+                    } else if (onCurve[p] && !onCurve[p1] && !onCurve[p2]) { //1 point + 2 control
 
-                        x1=pX[p];
-                        y1=pY[p];
-                        x2=pX[p1];
-                        y2=pY[p1];
-                        x3=midPt(pX[p1], pX[p2]);
-                        y3=midPt(pY[p1], pY[p2]);
+                        x1 = pX[p];
+                        y1 = pY[p];
+                        x2 = pX[p1];
+                        y2 = pY[p1];
+                        x3 = midPt(pX[p1], pX[p2]);
+                        y3 = midPt(pY[p1], pY[p2]);
                         j++;
 
-                        checkEnd=true;
+                        checkEnd = true;
 
-                    }else if(!onCurve[p] && !onCurve[p1] && (!endOfContour[p2] ||fc-p2==1)){ // 2 control + 1 point (final check allows for last point to complete loop
+                    } else if (!onCurve[p] && !onCurve[p1] && (!endOfContour[p2] || fc - p2 == 1)) { // 2 control + 1 point (final check allows for last point to complete loop
 
-                        x1=midPt(pX[pm1], pX[p]);
-                        y1=midPt(pY[pm1], pY[p]);
-                        x2=pX[p];
-                        y2=pY[p];
+                        x1 = midPt(pX[pm1], pX[p]);
+                        y1 = midPt(pY[pm1], pY[p]);
+                        x2 = pX[p];
+                        y2 = pY[p];
 
-                        x3=midPt(pX[p], pX[p1]);
-                        y3=midPt(pY[p], pY[p1]);
+                        x3 = midPt(pX[p], pX[p1]);
+                        y3 = midPt(pY[p], pY[p1]);
 
-                    }else if(!onCurve[p] && onCurve[p1]){ // 1 control + 2 point
+                    } else if (!onCurve[p] && onCurve[p1]) { // 1 control + 2 point
 
-                        x1=midPt(pX[pm1], pX[p]);
-                        y1=midPt(pY[pm1], pY[p]);
-                        x2=pX[p];
-                        y2=pY[p];
-                        x3=pX[p1];
-                        y3=pY[p1];
+                        x1 = midPt(pX[pm1], pX[p]);
+                        y1 = midPt(pY[pm1], pY[p]);
+                        x2 = pX[p];
+                        y2 = pY[p];
+                        x3 = pX[p1];
+                        y3 = pY[p1];
                     }
 
-                    if(isFirstDraw){
-                        current_path.moveTo(x1,y1);
-                        isFirstDraw=false;
+                    if (isFirstDraw) {
+                        current_path.moveTo(x1, y1);
+                        isFirstDraw = false;
                     }
 
-                    if (!(endOfContour[p] && p > 0 && endOfContour[p-1])) {
+                    if (!(endOfContour[p] && p > 0 && endOfContour[p - 1])) {
                         current_path.curveTo(x1, y1, x2, y2, x3, y3);
                     }
 
                     /*if end after curve, roll back so we pick up the end*/
-                    if( checkEnd && endOfContour[j]){
+                    if (checkEnd && endOfContour[j]) {
 
-                        isEnd=true;
+                        isEnd = true;
 
-                        xs=pX[fc];
-                        ys=pY[fc];
+                        xs = pX[fc];
+                        ys = pY[fc];
                         //remmeber start point
-                        lc=fc;
+                        lc = fc;
                         //find next contour
-                        for(int jj=j+1;jj<c;jj++){
-                            if(endOfContour[jj]){
-                                fc=jj+1;
-                                jj=c;
+                        for (int jj = j + 1; jj < c; jj++) {
+                            if (endOfContour[jj]) {
+                                fc = jj + 1;
+                                jj = c;
                             }
                         }
                     }
@@ -3615,9 +3634,9 @@ public class TTVM implements Serializable {
                 }
 
 
-                if(isEnd){
-                    current_path.moveTo(xs,ys);
-                    isEnd=false;
+                if (isEnd) {
+                    current_path.moveTo(xs, ys);
+                    isEnd = false;
                 }
             }
         }
@@ -3626,9 +3645,10 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Runs the debugger such that it is at a specified point in the current code. This may be less than the current
      * number, in which case the glyph program is restarted and run to that point.
+     *
      * @param targetPointer
      */
     private void runDebuggerTo(final int targetPointer) {
@@ -3642,8 +3662,8 @@ public class TTVM implements Serializable {
         if (targetInstr >= 0) {
             int add = 0;
             if (targetInstr >= programToDebug.length) {
-                add = targetInstr - (programToDebug.length-1);
-                targetInstr = programToDebug.length-1;
+                add = targetInstr - (programToDebug.length - 1);
+                targetInstr = programToDebug.length - 1;
             }
 
             while (programToDebugIsData[targetInstr]) {
@@ -3683,7 +3703,7 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Restarts the debugger, resetting all relevant data structures.
      */
     private void restartDebugger() {
@@ -3691,21 +3711,21 @@ public class TTVM implements Serializable {
         stack = new Stack();
 
         try {
-            dGS = (TTGraphicsState)graphicsState.clone();
-        } catch(final CloneNotSupportedException e) {
+            dGS = (TTGraphicsState) graphicsState.clone();
+        } catch (final CloneNotSupportedException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
         final int twilightCount = maxp.getMaxTwilightPoints();
-        System.arraycopy(x[ORIGINAL+GLYPH_ZONE],0,x[GLYPH_ZONE],0,x[GLYPH_ZONE].length);
+        System.arraycopy(x[ORIGINAL + GLYPH_ZONE], 0, x[GLYPH_ZONE], 0, x[GLYPH_ZONE].length);
         x[TWILIGHT_ZONE] = new int[twilightCount];
-        x[ORIGINAL+TWILIGHT_ZONE] = new int[twilightCount];
-        System.arraycopy(y[ORIGINAL+GLYPH_ZONE],0,y[GLYPH_ZONE],0,y[GLYPH_ZONE].length);
+        x[ORIGINAL + TWILIGHT_ZONE] = new int[twilightCount];
+        System.arraycopy(y[ORIGINAL + GLYPH_ZONE], 0, y[GLYPH_ZONE], 0, y[GLYPH_ZONE].length);
         y[TWILIGHT_ZONE] = new int[twilightCount];
-        y[ORIGINAL+TWILIGHT_ZONE] = new int[twilightCount];
-        System.arraycopy(touched[ORIGINAL+GLYPH_ZONE],0,touched[GLYPH_ZONE],0,touched[GLYPH_ZONE].length);
+        y[ORIGINAL + TWILIGHT_ZONE] = new int[twilightCount];
+        System.arraycopy(touched[ORIGINAL + GLYPH_ZONE], 0, touched[GLYPH_ZONE], 0, touched[GLYPH_ZONE].length);
         touched[TWILIGHT_ZONE] = new boolean[twilightCount][2];
-        touched[ORIGINAL+TWILIGHT_ZONE] = new boolean[twilightCount][2];
+        touched[ORIGINAL + TWILIGHT_ZONE] = new boolean[twilightCount][2];
 
         if (!codeStack.isEmpty()) {
             programToDebug = codeStack.get(0);
@@ -3721,8 +3741,9 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Process the current instruction, update the display, and move the debugger onto the next.
+     *
      * @param stepIntoCall
      */
     private void advanceDebugger(final boolean stepIntoCall) {
@@ -3748,22 +3769,24 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Return the storage as a string array for displaying.
+     *
      * @return
      */
     private String[] getStorageAsArray() {
         final String[] result = new String[storage.length];
-        for (int i=0; i<storage.length; i++) {
-            result[i] = i+": "+storage[i]+"       ("+ NumberFormat.getNumberInstance().format(storage[i] / 64d)+ ')';
+        for (int i = 0; i < storage.length; i++) {
+            result[i] = i + ": " + storage[i] + "       (" + NumberFormat.getNumberInstance().format(storage[i] / 64d) + ')';
         }
         return result;
     }
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Refreshes the debugger's display components.
+     *
      * @param programHasChanged
      */
     private void refreshDebugger(final boolean programHasChanged) {
@@ -3774,14 +3797,14 @@ public class TTVM implements Serializable {
         final int start = debugPointer;
         int end = debugPointer;
 
-        while (end+1 < programToDebug.length && programToDebugIsData[end+1]) {
+        while (end + 1 < programToDebug.length && programToDebugIsData[end + 1]) {
             end++;
         }
 
         currentInstructionList.setSelectionInterval(start, end);
 
         if (start != 0) {
-            int forward = end+3;
+            int forward = end + 3;
             if (forward >= programToDebug.length) {
                 forward = programToDebug.length - 1;
             }
@@ -3805,8 +3828,9 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Set the program (or function etc) currently displayed.
+     *
      * @param code
      * @param pointer
      * @param updateDisplay
@@ -3844,12 +3868,12 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Prints out all of the coordinates in a form well suited to pasting into a spreadsheet
      */
     private void printCoords() {
-        for (int i=0; i<x[GLYPH_ZONE].length; i++) {
-            System.out.print(i+"\t"+x[GLYPH_ZONE][i]+ '\t' +y[GLYPH_ZONE][i]+ '\t' +x[ORIGINAL+GLYPH_ZONE][i]+ '\t' +y[ORIGINAL+GLYPH_ZONE][i]);
+        for (int i = 0; i < x[GLYPH_ZONE].length; i++) {
+            System.out.print(i + "\t" + x[GLYPH_ZONE][i] + '\t' + y[GLYPH_ZONE][i] + '\t' + x[ORIGINAL + GLYPH_ZONE][i] + '\t' + y[ORIGINAL + GLYPH_ZONE][i]);
             System.out.println("");
             if (contour[GLYPH_ZONE][i]) {
                 System.out.println();
@@ -3862,8 +3886,9 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Prints out a set of instructions without executing them. It's not a quick method, as it uses reflection to do so!
+     *
      * @param program Instructions to print
      */
     public static void print(final int[] program) {
@@ -3880,8 +3905,9 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Converts an array of instructions in bytecode into a human-readable string array for display.
+     *
      * @param program
      * @return
      */
@@ -3894,10 +3920,10 @@ public class TTVM implements Serializable {
 
         final StringBuilder depth = new StringBuilder();
         final int[] notFoundCount = new int[0xFFFF];
-        for (int n=0; n<program.length; n++){
+        for (int n = 0; n < program.length; n++) {
             boolean found = false;
             int test = program[n];
-            if (test >= MDRP && test <= MDRP+0x1F) {
+            if (test >= MDRP && test <= MDRP + 0x1F) {
                 test = MDRP;
             }
             if (test >= 0xE0 && test <= 0xFF) {
@@ -3915,62 +3941,62 @@ public class TTVM implements Serializable {
                         continue;
                     }
 
-                    if (declaredField.getInt(declaredField)==test) {
+                    if (declaredField.getInt(declaredField) == test) {
                         if ("ENDF".equals(declaredField.getName()) || "ELSE".equals(declaredField.getName()) || "EIF".equals(declaredField.getName())) {
                             depth.delete(0, 2);
                         }
 
-                        result[n] = (n+": "+depth+ declaredField.getName());
+                        result[n] = (n + ": " + depth + declaredField.getName());
                         if ("NPUSHB".equals(declaredField.getName())) {
                             n++;
                             final int count = program[n];
-                            result[n] =(depth+"  count: "+count);
-                            for (int j=0; j<count; j++) {
+                            result[n] = (depth + "  count: " + count);
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                result[n]=(depth+"   "+program[n]);
+                                result[n] = (depth + "   " + program[n]);
                             }
                         } else if ("NPUSHW".equals(declaredField.getName())) {
                             n++;
                             final int count = program[n];
-                            result[n]=(depth+"  count: "+count);
-                            for (int j=0; j<count; j++) {
+                            result[n] = (depth + "  count: " + count);
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                final int word = getIntFrom2Uint8(program[n], program[n+1]);
-                                result[n]=(depth+"   (first half of number)");
+                                final int word = getIntFrom2Uint8(program[n], program[n + 1]);
+                                result[n] = (depth + "   (first half of number)");
                                 n++;
-                                result[n]=(depth+"   "+word);
+                                result[n] = (depth + "   " + word);
                             }
                         } else if (program[n] >= 0xb0 && program[n] <= 0xb7) {
-                            final int count = (program[n]-0xAF);
-                            for (int j=0; j<count; j++) {
+                            final int count = (program[n] - 0xAF);
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                result[n]=(depth+"   "+program[n]);
+                                result[n] = (depth + "   " + program[n]);
                             }
                         } else if (program[n] >= 0xb8 && program[n] <= 0xbF) {
-                            final int count = (program[n]-0xb7);
-                            for (int j=0; j<count; j++) {
+                            final int count = (program[n] - 0xb7);
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                final int word = getIntFrom2Uint8(program[n], program[n+1]);
-                                result[n]=(depth+"   (first half of number)");
+                                final int word = getIntFrom2Uint8(program[n], program[n + 1]);
+                                result[n] = (depth + "   (first half of number)");
                                 n++;
-                                result[n]=(depth+"   "+word);
+                                result[n] = (depth + "   " + word);
                             }
                         } else if ("FDEF".equals(declaredField.getName()) || "IDEF".equals(declaredField.getName()) || "ELSE".equals(declaredField.getName()) || "IF".equals(declaredField.getName())) {
                             depth.append("  ");
                         }
                         found = true;
                     }
-                } catch(final IllegalAccessException e) {
+                } catch (final IllegalAccessException e) {
                     LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
             if (!found) {
                 notFoundCount[program[n]]++;
-                System.out.println(depth+"0x"+Integer.toHexString(program[n])+"    (Unimplemented)");
+                System.out.println(depth + "0x" + Integer.toHexString(program[n]) + "    (Unimplemented)");
             }
         }
 
-        for (int i=0; i<0xFF; i++) {
+        for (int i = 0; i < 0xFF; i++) {
             if (notFoundCount[i] > 0) {
                 System.out.println(Integer.toHexString(i) + " not found " + notFoundCount[i] + " times.");
             }
@@ -3981,8 +4007,9 @@ public class TTVM implements Serializable {
 
     /**
      * DEBUG METHOD -
-     *
+     * <p>
      * Converts an instruction stream into a boolean array indicating whether a line is an instruction or data.
+     *
      * @param program
      * @return
      */
@@ -3993,10 +4020,10 @@ public class TTVM implements Serializable {
 
         final boolean[] result = new boolean[program.length];
 
-        for (int n=0; n<program.length; n++){
+        for (int n = 0; n < program.length; n++) {
             boolean found = false;
             int test = program[n];
-            if (test >= MDRP && test <= MDRP+0x1F) {
+            if (test >= MDRP && test <= MDRP + 0x1F) {
                 test = MDRP;
             }
             if (test >= 0xE0 && test <= 0xFF) {
@@ -4013,45 +4040,45 @@ public class TTVM implements Serializable {
                         continue;
                     }
 
-                    if (declaredField.getInt(declaredField)==test) {
+                    if (declaredField.getInt(declaredField) == test) {
 
                         result[n] = false;
                         if ("NPUSHB".equals(declaredField.getName())) {
                             n++;
                             final int count = program[n];
                             result[n] = true;
-                            for (int j=0; j<count; j++) {
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                result[n]=true;
+                                result[n] = true;
                             }
                         } else if ("NPUSHW".equals(declaredField.getName())) {
                             n++;
                             final int count = program[n];
-                            result[n]=true;
-                            for (int j=0; j<count; j++) {
+                            result[n] = true;
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                result[n]=true;
+                                result[n] = true;
                                 n++;
-                                result[n]=true;
+                                result[n] = true;
                             }
                         } else if (program[n] >= 0xb0 && program[n] <= 0xb7) {
-                            final int count = (program[n]-0xAF);
-                            for (int j=0; j<count; j++) {
+                            final int count = (program[n] - 0xAF);
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                result[n]=true;
+                                result[n] = true;
                             }
                         } else if (program[n] >= 0xb8 && program[n] <= 0xbF) {
-                            final int count = (program[n]-0xb7);
-                            for (int j=0; j<count; j++) {
+                            final int count = (program[n] - 0xb7);
+                            for (int j = 0; j < count; j++) {
                                 n++;
-                                result[n]=true;
+                                result[n] = true;
                                 n++;
-                                result[n]=true;
+                                result[n] = true;
                             }
                         }
                         found = true;
                     }
-                } catch(final IllegalAccessException e) {
+                } catch (final IllegalAccessException e) {
                     LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }

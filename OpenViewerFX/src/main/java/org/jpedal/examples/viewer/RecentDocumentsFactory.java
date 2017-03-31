@@ -37,20 +37,20 @@ import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
 
 public interface RecentDocumentsFactory {
-    
+
     String getPreviousDocument();
 
     String getNextDocument();
-    
+
     void updateRecentDocuments(String[] recentDocs);
-    
+
     void enableRecentDocuments(boolean enable);
-    
+
     void clearRecentDocuments(PropertiesFile properties);
-    
+
     void addToFileList(String selectedFile);
-    
+
     void createMenuItems(String fileNameToAdd, int position, GUIFactory currentGUI,
                          Values commonValues);
-    
+
 }

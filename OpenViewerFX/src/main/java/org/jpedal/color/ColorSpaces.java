@@ -34,10 +34,11 @@ package org.jpedal.color;
 
 import java.awt.RenderingHints;
 import java.lang.reflect.Field;
+
 import org.jpedal.utils.LogWriter;
 
 public class ColorSpaces {
-    
+
     public static final int ICC = 1247168582;
     public static final int CalGray = 391471749;
     public static final int DeviceGray = 1568372915;
@@ -49,11 +50,13 @@ public class ColorSpaces {
     public static final int DeviceRGB = 1785221209;
     public static final int CalRGB = 1008872003;
     public static final int DeviceCMYK = 1498837125;
-    
-    /**hint for conversion ops*/
+
+    /**
+     * hint for conversion ops
+     */
     public static final RenderingHints hints;
-    
-    
+
+
     static {
         hints =
                 new RenderingHints(
@@ -74,109 +77,112 @@ public class ColorSpaces {
         hints.put(
                 RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        
+
     }
-    
-    /**method to convert a name to an ID values*/
+
+    /**
+     * method to convert a name to an ID values
+     */
     @SuppressWarnings("UnusedDeclaration")
-    public static final int convertNameToID(final String name){
-        
-        int id=-1;
-        
+    public static final int convertNameToID(final String name) {
+
+        int id = -1;
+
         if ((name.contains("Indexed"))) {
-            id=Indexed;
+            id = Indexed;
         } else if ((name.contains("Separation"))) {
-            id=Separation;
+            id = Separation;
         } else if (name.contains("DeviceN")) {
-            id=DeviceN;
+            id = DeviceN;
         } else if (name.contains("DeviceCMYK") || name.contains("CMYK")) {
-            id=DeviceCMYK;
+            id = DeviceCMYK;
         } else if (name.contains("CalGray")) {
-            id=CalGray;
+            id = CalGray;
         } else if (name.contains("CalRGB")) {
-            id=CalRGB;
+            id = CalRGB;
         } else if (name.contains("Lab")) {
-            id=Lab;
+            id = Lab;
         } else if (name.contains("ICCBased")) {
-            id=ICC;
+            id = ICC;
         } else if (name.contains("Pattern")) {
-            id=Pattern;
+            id = Pattern;
         } else if (name.contains("DeviceRGB") || name.contains("RGB")) {
-            id=DeviceRGB;
+            id = DeviceRGB;
         } else if (name.contains("DeviceGray") || name.indexOf('G') != -1) {
-            id=DeviceGray;
+            id = DeviceGray;
         }
-        
+
         return id;
     }
-    
+
     /**
      * use reflection to show actual Constant for Key or return null if no value
+     *
      * @param parameterConstant
      * @return String or null
      */
     public static String showAsConstant(final int parameterConstant) {
-        
+
         final Field[] ts = ColorSpaces.class.getFields();
-        int count=ts.length;
-        String type=null;
-        
-        for(int ii=0;ii<count;ii++){
-            try{
+        int count = ts.length;
+        String type = null;
+
+        for (int ii = 0; ii < count; ii++) {
+            try {
                 //if(ts[ii] instanceof Integer){
-                final int t=ts[ii].getInt(new ColorSpaces());
-                
-                if(t==parameterConstant){
-                    type="ColorSpaces."+ts[ii].getName();
-                    count=ii;
+                final int t = ts[ii].getInt(new ColorSpaces());
+
+                if (t == parameterConstant) {
+                    type = "ColorSpaces." + ts[ii].getName();
+                    count = ii;
                 }
                 //}
-            }catch(final IllegalAccessException e){
-                LogWriter.writeLog("Exception: "+e.getMessage());
-            }catch(final IllegalArgumentException ee){
-                LogWriter.writeLog("Exception: "+ee.getMessage());
+            } catch (final IllegalAccessException e) {
+                LogWriter.writeLog("Exception: " + e.getMessage());
+            } catch (final IllegalArgumentException ee) {
+                LogWriter.writeLog("Exception: " + ee.getMessage());
             }
         }
-        
+
         return type;
     }
-    
+
     /**
      * turn ID into string (without reflection as I want it FAST
      */
     public static String IDtoString(final int id) {
-        
+
         switch (id) {
             case ICC:
                 return "ICC";
-                
+
             case CalGray:
                 return "CalGray";
-                
+
             case DeviceGray:
                 return "DeviceGray";
-                
+
             case DeviceN:
                 return "DeviceN";
-                
+
             case Separation:
                 return "Separation";
-                
+
             case Pattern:
                 return "Pattern";
-                
+
             case Lab:
                 return "Lab";
-                
+
             case Indexed:
                 return "Indexed";
-                
+
             case DeviceRGB:
                 return "DeviceRGB";
-                
+
             case CalRGB:
                 return "CalRGB";
-                
+
             case DeviceCMYK:
                 return "DeviceCMYK";
         }

@@ -41,6 +41,7 @@ import java.awt.image.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.function.PDFFunction;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -48,7 +49,6 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
 /**
- *
  * @author suda
  */
 public class TensorContext implements PaintContext {
@@ -60,7 +60,7 @@ public class TensorContext implements PaintContext {
     private int bitsPerFlag;
     private int colCompCount;
     private float[] decodeArr;
-//    private final float[][] CTM;
+    //    private final float[][] CTM;
     private ArrayList<Point2D> pp; //patch points
     private ArrayList<Color> pc; // patch colors
     private final ArrayList<Shape67> shapes;
@@ -353,8 +353,8 @@ public class TensorContext implements PaintContext {
 
         final List<Shape67> foundList = new ArrayList<Shape67>();
         for (final Shape67 sh : shapes) {
-            if (sh.getMinX()<rect2D.getMaxX() 
-                    && sh.getMinY()<rect2D.getMaxY() 
+            if (sh.getMinX() < rect2D.getMaxX()
+                    && sh.getMinY() < rect2D.getMaxY()
                     && sh.getShape().intersects(rect2D)) {
                 foundList.add(sh);
             }

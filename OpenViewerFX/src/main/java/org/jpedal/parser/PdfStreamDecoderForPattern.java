@@ -42,23 +42,23 @@ public class PdfStreamDecoderForPattern extends PdfStreamDecoder {
     public PdfStreamDecoderForPattern(final PdfObjectReader currentPdfFile) {
         super(currentPdfFile);
 
-        streamType=ValueTypes.PATTERN;
+        streamType = ValueTypes.PATTERN;
 
     }
 
     /**
-     *
-     *  objects off the page, stitch into a stream and
+     * objects off the page, stitch into a stream and
      * decode and put into our data object. Could be altered
      * if you just want to read the stream
+     *
      * @param pageStream
      * @throws org.jpedal.exception.PdfException
      */
     @SuppressWarnings("UnusedReturnValue")
     public final T3Size decodePageContent(final GraphicsState newGS, final byte[] pageStream) throws PdfException {
 
-        this.newGS=newGS;
-        this.pageStream=pageStream;
+        this.newGS = newGS;
+        this.pageStream = pageStream;
 
         return decodePageContent(null);
     }

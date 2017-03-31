@@ -36,6 +36,7 @@ import java.awt.CompositeContext;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+
 import org.jpedal.color.CompositeUtil;
 import org.jpedal.objects.raw.PdfDictionary;
 

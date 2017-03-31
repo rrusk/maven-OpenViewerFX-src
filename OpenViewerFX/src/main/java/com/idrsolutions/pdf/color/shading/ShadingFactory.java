@@ -36,31 +36,31 @@ import org.jpedal.function.PDFFunction;
 
 
 /**
- * provides factory method to decode 
+ * provides factory method to decode
  * shading into required value
  */
 public class ShadingFactory {
-        
+
     public static float[] applyFunctions(final PDFFunction[] function, final float[] values) {
 
-        final int functionLength= function.length;
+        final int functionLength = function.length;
         final float[] colValues;
-        if(functionLength==1){
-            colValues= function[0].compute(values);
-        }else{
+        if (functionLength == 1) {
+            colValues = function[0].compute(values);
+        } else {
 
-            final Object[] multiValues=new Object[functionLength];
-            int count=0;
-            for(int f=0;f<functionLength;f++){
-                final float[] returnVal= function[f].compute(values);
+            final Object[] multiValues = new Object[functionLength];
+            int count = 0;
+            for (int f = 0; f < functionLength; f++) {
+                final float[] returnVal = function[f].compute(values);
                 count += returnVal.length;
-                multiValues[f]=returnVal;
+                multiValues[f] = returnVal;
             }
 
-            colValues=new float[count];
-            int ptr=0;
-            for(int f=0;f<functionLength;f++){
-                final float[] returnVal= (float[]) multiValues[f];
+            colValues = new float[count];
+            int ptr = 0;
+            for (int f = 0; f < functionLength; f++) {
+                final float[] returnVal = (float[]) multiValues[f];
 
                 for (final float aReturnVal : returnVal) {
                     colValues[ptr] = aReturnVal;
@@ -71,6 +71,6 @@ public class ShadingFactory {
         }
         return colValues;
     }
-    
-   
+
+
 }

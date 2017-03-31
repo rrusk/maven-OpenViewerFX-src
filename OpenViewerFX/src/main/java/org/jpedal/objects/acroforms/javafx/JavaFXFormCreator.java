@@ -37,17 +37,16 @@ import org.jpedal.objects.acroforms.creation.FormFactory;
 import org.jpedal.objects.acroforms.creation.SwingFormCreator;
 
 /**
- *
  * @author markee
  */
 public class JavaFXFormCreator extends SwingFormCreator {
-    
+
     @Override
     public GUIData getData() {
         return new JavaFXData();
     }
-    
-    
+
+
     /**
      * create appropriate FormFactory
      */

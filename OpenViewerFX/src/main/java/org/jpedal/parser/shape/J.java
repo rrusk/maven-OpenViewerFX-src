@@ -33,6 +33,7 @@
 package org.jpedal.parser.shape;
 
 import java.awt.BasicStroke;
+
 import org.jpedal.objects.GraphicsState;
 
 public class J {
@@ -70,5 +71,5 @@ public class J {
             //set value
             gs.setCapStyle(style);
         }
-    }   
+    }
 }

@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -51,7 +52,7 @@ import org.jpedal.utils.Messages;
  * page umber, the page data and a string of text sent into
  * itext function stampText()
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class StampText {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
@@ -63,7 +64,7 @@ public class StampText {
             } else {
                 //get values from user
                 final StampTextToPDFPages stampText = new StampTextToPDFPages(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int stampTextChoice = stampText.display((Component)currentGUI.getFrame(), Messages.getMessage("PdfViewerStampText.text"));
+                final int stampTextChoice = stampText.display((Component) currentGUI.getFrame(), Messages.getMessage("PdfViewerStampText.text"));
 
                 //get parameters and call if YES
                 if (stampTextChoice == JOptionPane.OK_OPTION) {

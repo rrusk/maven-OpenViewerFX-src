@@ -33,6 +33,7 @@
 package org.jpedal.objects;
 
 import java.io.Serializable;
+
 import org.jpedal.objects.html.HtmlPageData;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.Vector_Int;
@@ -41,589 +42,610 @@ import org.jpedal.utils.repositories.Vector_Object;
 /**
  * store data relating to page sizes set in PDF (MediaBox, CropBox, rotation)
  */
-public class PdfPageData implements Serializable{
+public class PdfPageData implements Serializable {
 
-	//private boolean valuesSet=false;
+    //private boolean valuesSet=false;
 
-	private int lastPage=-1;
+    private int lastPage = -1;
 
-	private int pagesRead=-1;
+    private int pagesRead = -1;
 
-	private int pageCount=1; //number of pages
+    private int pageCount = 1; //number of pages
 
-	private int maxPageCount = -1;
+    private int maxPageCount = -1;
 
 //    private float[] defaultMediaBox=null;
 
-	/** any rotation on page (defined in degress) */
-	private int rotation;
+    /**
+     * any rotation on page (defined in degress)
+     */
+    private int rotation;
 
-	/** max media string for page */
-	private final Vector_Object mediaBoxes = new Vector_Object(500);
-	private final Vector_Object cropBoxes = new Vector_Object(500);
+    /**
+     * max media string for page
+     */
+    private final Vector_Object mediaBoxes = new Vector_Object(500);
+    private final Vector_Object cropBoxes = new Vector_Object(500);
 
-	private HtmlPageData htmlData;
+    private HtmlPageData htmlData;
 
-	private Vector_Int rotations;
+    private Vector_Int rotations;
 
-	/** current x and y read from page info */
-	private float cropBoxX = -99999, cropBoxY = -1,
-			cropBoxW = -1, cropBoxH = -1;
+    /**
+     * current x and y read from page info
+     */
+    private float cropBoxX = -99999, cropBoxY = -1,
+            cropBoxW = -1, cropBoxH = -1;
 
-	/** current x and y read from page info */
-	private float mediaBoxX=-1, mediaBoxY, mediaBoxW, mediaBoxH;
+    /**
+     * current x and y read from page info
+     */
+    private float mediaBoxX = -1, mediaBoxY, mediaBoxW, mediaBoxH;
 
-	/** whether the document has varying page sizes and rotation */
-	private boolean hasMultipleSizes, hasMultipleSizesSet;
+    /**
+     * whether the document has varying page sizes and rotation
+     */
+    private boolean hasMultipleSizes, hasMultipleSizesSet;
 
-	/** string representation of crop box */
-	private float scalingValue = 1f;
+    /**
+     * string representation of crop box
+     */
+    private float scalingValue = 1f;
 
-	private float[] mediaBox,cropBox;
+    private float[] mediaBox, cropBox;
 
-	/**where co-ords start so we can code for PDF and XFA*/
-	private PageOrigins pageOrigin = PageOrigins.BOTTOM_LEFT;
+    /**
+     * where co-ords start so we can code for PDF and XFA
+     */
+    private PageOrigins pageOrigin = PageOrigins.BOTTOM_LEFT;
 
-	public PdfPageData(){}
+    public PdfPageData() {
+    }
 
-	/**
-	 * make sure a value set for crop and media box (used internally to trap 'odd' settings and insure setup correctly)
-	 * @param pageNumber Page to be displayed
-	 */
-	public void checkSizeSet(final int pageNumber) {
+    /**
+     * make sure a value set for crop and media box (used internally to trap 'odd' settings and insure setup correctly)
+     *
+     * @param pageNumber Page to be displayed
+     */
+    public void checkSizeSet(final int pageNumber) {
 
-		if(pageNumber>pageCount) {
-			pageCount = pageNumber;
-		}
+        if (pageNumber > pageCount) {
+            pageCount = pageNumber;
+        }
 
-		//use default
+        //use default
 //        if(mediaBox ==null)
 //            mediaBox = defaultMediaBox;
 //              System.out.println("CropBox "+pageNumber+" > "+cropBox);
-		//value we keep
-		if(cropBox!=null &&
-				(cropBox[0]!=mediaBox[0] || cropBox[1]!=mediaBox[1] || cropBox[2]!=mediaBox[2] || cropBox[3]!=mediaBox[3])){
+        //value we keep
+        if (cropBox != null &&
+                (cropBox[0] != mediaBox[0] || cropBox[1] != mediaBox[1] || cropBox[2] != mediaBox[2] || cropBox[3] != mediaBox[3])) {
 
-			mediaBoxes.setElementAt(mediaBox, pageNumber);
+            mediaBoxes.setElementAt(mediaBox, pageNumber);
 
-			if(cropBox[0]>=mediaBox[0] && cropBox[1]>=mediaBox[1] && (cropBox[2]-cropBox[0])<=(mediaBox[2]-mediaBox[0])  && (cropBox[3]-cropBox[1])<=(mediaBox[3]-mediaBox[1])) {
-				cropBoxes.setElementAt(cropBox, pageNumber);
-			}
+            if (cropBox[0] >= mediaBox[0] && cropBox[1] >= mediaBox[1] && (cropBox[2] - cropBox[0]) <= (mediaBox[2] - mediaBox[0]) && (cropBox[3] - cropBox[1]) <= (mediaBox[3] - mediaBox[1])) {
+                cropBoxes.setElementAt(cropBox, pageNumber);
+            }
 
-		}else if(mediaBox!=null)// &&
+        } else if (mediaBox != null)// &&
 //                (defaultMediaBox[0]!=mediaBox[0] || defaultMediaBox[1]!=mediaBox[1] || defaultMediaBox[2]!=mediaBox[2] || defaultMediaBox[3]!=mediaBox[3])) //if matches default don't save
-		{
-			mediaBoxes.setElementAt(mediaBox, pageNumber);
-		}
+        {
+            mediaBoxes.setElementAt(mediaBox, pageNumber);
+        }
 
-		//track which pages actually read
-		if(pagesRead<pageNumber) {
-			pagesRead = pageNumber;
-		}
-
-
-		lastPage=-1;
-		mediaBox=null;
-		cropBox=null;
-	}
+        //track which pages actually read
+        if (pagesRead < pageNumber) {
+            pagesRead = pageNumber;
+        }
 
 
-	/**
-	 * @return height of mediaBox
-	 * @param pageNumber Page to be displayed
-	 */
-	public final int getMediaBoxHeight(final int pageNumber) {
+        lastPage = -1;
+        mediaBox = null;
+        cropBox = null;
+    }
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
 
-		return (int)mediaBoxH;
-	}
+    /**
+     * @param pageNumber Page to be displayed
+     * @return height of mediaBox
+     */
+    public final int getMediaBoxHeight(final int pageNumber) {
 
-	/**
-	 * @return mediaBox y value
-	 * @param pageNumber Page to be displayed
-	 */
-	public final int getMediaBoxY(final int pageNumber) {
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        return (int) mediaBoxH;
+    }
 
-		return (int)mediaBoxY;
-	}
+    /**
+     * @param pageNumber Page to be displayed
+     * @return mediaBox y value
+     */
+    public final int getMediaBoxY(final int pageNumber) {
 
-	/**
-	 * @return mediaBox x value
-	 * @param pageNumber Page to be displayed
-	 */
-	public final int getMediaBoxX(final int pageNumber) {
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        return (int) mediaBoxY;
+    }
 
-		return (int)mediaBoxX;
-	}
+    /**
+     * @param pageNumber Page to be displayed
+     * @return mediaBox x value
+     */
+    public final int getMediaBoxX(final int pageNumber) {
 
-	/**
-	 * set string with raw values and assign values to crop and media size
-	 * @param mediaBox row values of PDF page data
-	 */
-	public void setMediaBox(final float[] mediaBox) {
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		this.mediaBox=mediaBox;
-		cropBox=null;
+        return (int) mediaBoxX;
+    }
+
+    /**
+     * set string with raw values and assign values to crop and media size
+     *
+     * @param mediaBox row values of PDF page data
+     */
+    public void setMediaBox(final float[] mediaBox) {
+
+        this.mediaBox = mediaBox;
+        cropBox = null;
 
 //         if(defaultMediaBox==null)
 //            defaultMediaBox=mediaBox;
 
-	}
+    }
 
-	/**
-	 * set crop with values and align with media box
-	 * @param cropBox crop values of PDF page data
-	 */
-	public void setCropBox(final float[] cropBox) {
+    /**
+     * set crop with values and align with media box
+     *
+     * @param cropBox crop values of PDF page data
+     */
+    public void setCropBox(final float[] cropBox) {
 
-		if(cropBox!=null) {
-			this.cropBox = cropBox;
-		} else {
-			this.cropBox = mediaBox;
-		}
+        if (cropBox != null) {
+            this.cropBox = cropBox;
+        } else {
+            this.cropBox = mediaBox;
+        }
 
-		//If mediaBox is set and crop box leaves this area
-		//we should limit the cropBox by the mediaBox
-		final boolean testAlteredCrop = true;
-		if(testAlteredCrop && (mediaBox!=null && !(mediaBox.length<4))){
-			if(this.cropBox[0]<mediaBox[0]) {
-				this.cropBox[0] = mediaBox[0];
-			}
+        //If mediaBox is set and crop box leaves this area
+        //we should limit the cropBox by the mediaBox
+        final boolean testAlteredCrop = true;
+        if (testAlteredCrop && (mediaBox != null && !(mediaBox.length < 4))) {
+            if (this.cropBox[0] < mediaBox[0]) {
+                this.cropBox[0] = mediaBox[0];
+            }
 
-			if(this.cropBox[1]<mediaBox[1]) {
-				this.cropBox[1] = mediaBox[1];
-			}
+            if (this.cropBox[1] < mediaBox[1]) {
+                this.cropBox[1] = mediaBox[1];
+            }
 
-			if(this.cropBox[2]>mediaBox[2]) {
-				this.cropBox[2] = mediaBox[2];
-			}
+            if (this.cropBox[2] > mediaBox[2]) {
+                this.cropBox[2] = mediaBox[2];
+            }
 
-			if(this.cropBox[3]>mediaBox[3]) {
-				this.cropBox[3] = mediaBox[3];
-			}
-		}
-	}
+            if (this.cropBox[3] > mediaBox[3]) {
+                this.cropBox[3] = mediaBox[3];
+            }
+        }
+    }
 
-	public void setPageRotation(final int value, final int pageNumber) {
+    public void setPageRotation(final int value, final int pageNumber) {
 
-		int raw_rotation = value;
+        int raw_rotation = value;
 
-		//convert negative
-		if (raw_rotation < 0) {
-			raw_rotation = 360 + raw_rotation;
-		}
+        //convert negative
+        if (raw_rotation < 0) {
+            raw_rotation = 360 + raw_rotation;
+        }
 
-		//only create if we need and set value
-		if(raw_rotation !=0 || rotations!=null){
-			if(rotations==null){
-				if(pageNumber<2000) {
-					rotations = new Vector_Int(2000);
-				} else {
-					rotations = new Vector_Int(pageNumber * 2);
-				}
-			}
+        //only create if we need and set value
+        if (raw_rotation != 0 || rotations != null) {
+            if (rotations == null) {
+                if (pageNumber < 2000) {
+                    rotations = new Vector_Int(2000);
+                } else {
+                    rotations = new Vector_Int(pageNumber * 2);
+                }
+            }
 
-			rotations.setElementAt(raw_rotation,pageNumber);
+            rotations.setElementAt(raw_rotation, pageNumber);
 
-		}
-	}
+        }
+    }
 
-	/**
-	 * @return width of media box
-	 * @param pageNumber Page to be displayed
-	 */
-	public final int getMediaBoxWidth(final int pageNumber) {
+    /**
+     * @param pageNumber Page to be displayed
+     * @return width of media box
+     */
+    public final int getMediaBoxWidth(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return (int)mediaBoxW;
-	}
+        return (int) mediaBoxW;
+    }
 
-	/**
-	 * @return mediaBox string found in PDF file
-	 * @param currentPage the new current page
-	 */
-	public String getMediaValue(final int currentPage) {
+    /**
+     * @param currentPage the new current page
+     * @return mediaBox string found in PDF file
+     */
+    public String getMediaValue(final int currentPage) {
 
-		final StringBuilder returnValue=new StringBuilder();
+        final StringBuilder returnValue = new StringBuilder();
 
-		float[] mediaBox=null;
+        float[] mediaBox = null;
 
-		if(mediaBoxes !=null) {
-			mediaBox = (float[]) mediaBoxes.elementAt(currentPage);
-		}
+        if (mediaBoxes != null) {
+            mediaBox = (float[]) mediaBoxes.elementAt(currentPage);
+        }
 
-		if(mediaBox!=null){
+        if (mediaBox != null) {
 
-			for(int j=0;j<4;j++){
-				returnValue.append(mediaBox[j]);
-				returnValue.append(' ');
-			}
-		}
+            for (int j = 0; j < 4; j++) {
+                returnValue.append(mediaBox[j]);
+                returnValue.append(' ');
+            }
+        }
 
-		return returnValue.toString();
-	}
+        return returnValue.toString();
+    }
 
-	/**
-	 * @return cropBox string found in PDF file
-	 * @param currentPage the new current page
-	 */
-	public String getCropValue(final int currentPage) {
+    /**
+     * @param currentPage the new current page
+     * @return cropBox string found in PDF file
+     */
+    public String getCropValue(final int currentPage) {
 
-		float[] cropBox=null;
+        float[] cropBox = null;
 
-		//use default
-		if(cropBoxes!=null) {
-			cropBox = (float[]) cropBoxes.elementAt(currentPage);
-		}
+        //use default
+        if (cropBoxes != null) {
+            cropBox = (float[]) cropBoxes.elementAt(currentPage);
+        }
 
-		if(cropBox==null) {
-			cropBox = (float[]) mediaBoxes.elementAt(currentPage);
-		}
+        if (cropBox == null) {
+            cropBox = (float[]) mediaBoxes.elementAt(currentPage);
+        }
 
 //		if(cropBox==null)
 //        	cropBox=defaultMediaBox;
 
-		final StringBuilder returnValue=new StringBuilder();
+        final StringBuilder returnValue = new StringBuilder();
 
-		for(int j=0;j<4;j++){
-			returnValue.append(cropBox[j]);
-			returnValue.append(' ');
-		}
+        for (int j = 0; j < 4; j++) {
+            returnValue.append(cropBox[j]);
+            returnValue.append(' ');
+        }
 
-		return returnValue.toString();
-	}
+        return returnValue.toString();
+    }
 
-	/**
-	 * @return Scaled x value for cropBox
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getScaledCropBoxX(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled x value for cropBox
+     */
+    public int getScaledCropBoxX(final int pageNumber) {
 
-		//check values correctly set
-		try {
-			setSizeForPage(pageNumber);
-		} catch (final Exception e) {
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(cropBoxX * scalingValue);
-	}
+        return roundFloat(cropBoxX * scalingValue);
+    }
 
-	/**
-	 * @return Scaled cropBox width
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getScaledCropBoxWidth(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled cropBox width
+     */
+    public int getScaledCropBoxWidth(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(cropBoxW*scalingValue);
-	}
+        return roundFloat(cropBoxW * scalingValue);
+    }
 
-	/**
-	 * @return Scaled y value for cropox
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getScaledCropBoxY(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled y value for cropox
+     */
+    public int getScaledCropBoxY(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(cropBoxY*scalingValue);
-	}
+        return roundFloat(cropBoxY * scalingValue);
+    }
 
-	/**
-	 * @return Scaled cropBox height
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getScaledCropBoxHeight(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled cropBox height
+     */
+    public int getScaledCropBoxHeight(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(cropBoxH*scalingValue);
-	}
+        return roundFloat(cropBoxH * scalingValue);
+    }
 
 
-	/**
-	 * @return x value for cropBox
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getCropBoxX(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return x value for cropBox
+     */
+    public int getCropBoxX(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return (int)cropBoxX;
-	}
+        return (int) cropBoxX;
+    }
 
-	/**
-	 * @return x value for cropBox
-	 * @param pageNumber the page to be displayed
-	 */
-	public float getCropBoxX2D(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return x value for cropBox
+     */
+    public float getCropBoxX2D(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return cropBoxX;
-	}
+        return cropBoxX;
+    }
 
-	/**
-	 * @return cropBox width
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getCropBoxWidth(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return cropBox width
+     */
+    public int getCropBoxWidth(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			//tell user and log
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            //tell user and log
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return (int)cropBoxW;
-	}
+        return (int) cropBoxW;
+    }
 
-	/**
-	 * return cropBox width
-	 * @param pageNumber the page to be displayed
-	 */
-	public float getCropBoxWidth2D(final int pageNumber) {
+    /**
+     * return cropBox width
+     *
+     * @param pageNumber the page to be displayed
+     */
+    public float getCropBoxWidth2D(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return cropBoxW;
-	}
+        return cropBoxW;
+    }
 
-	/**
-	 * @return y value for cropox
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getCropBoxY(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return y value for cropox
+     */
+    public int getCropBoxY(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return (int)cropBoxY;
-	}
+        return (int) cropBoxY;
+    }
 
-	/**
-	 * @return y value for cropox
-	 * @param pageNumber the page to be displayed
-	 */
-	public float getCropBoxY2D(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return y value for cropox
+     */
+    public float getCropBoxY2D(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return cropBoxY;
-	}
+        return cropBoxY;
+    }
 
-	/**
-	 * @return cropBox height
-	 * @param pageNumber the page to be displayed
-	 */
-	public int getCropBoxHeight(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return cropBox height
+     */
+    public int getCropBoxHeight(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return (int)cropBoxH;
-	}
+        return (int) cropBoxH;
+    }
 
-	/**
-	 * @return cropBox height
-	 * @param pageNumber the page to be displayed
-	 */
-	public float getCropBoxHeight2D(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return cropBox height
+     */
+    public float getCropBoxHeight2D(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return cropBoxH;
-	}
+        return cropBoxH;
+    }
 
-	/**see if current figures generated for this page and setup if not*/
-	private synchronized void setSizeForPage(final int pageNumber) throws Exception{
+    /**
+     * see if current figures generated for this page and setup if not
+     */
+    private synchronized void setSizeForPage(final int pageNumber) throws Exception {
 
-		if(pageNumber==lastPage) {
-			return;
-		}
+        if (pageNumber == lastPage) {
+            return;
+        }
 
-		if(pageNumber>pageCount) {
-			pageCount = pageNumber;
-		}
+        if (pageNumber > pageCount) {
+            pageCount = pageNumber;
+        }
 
 		 /*calculate values if first call for this page*/
-		if(pageNumber>pagesRead){
+        if (pageNumber > pagesRead) {
 
-			//set values if no value
-			mediaBoxX=0;
-			mediaBoxY=0;
-			mediaBoxW = 0;
-			mediaBoxH = 0;
+            //set values if no value
+            mediaBoxX = 0;
+            mediaBoxY = 0;
+            mediaBoxW = 0;
+            mediaBoxH = 0;
 
-			//set values if no value
-			cropBoxX=0;
-			cropBoxY=0;
-			cropBoxW = 0;
-			cropBoxH = 0;
+            //set values if no value
+            cropBoxX = 0;
+            cropBoxY = 0;
+            cropBoxW = 0;
+            cropBoxH = 0;
 
-			lastPage=pageNumber;
+            lastPage = pageNumber;
 
-		}else if(pageNumber>0 && lastPage!=pageNumber && (maxPageCount==-1 || pageNumber<=maxPageCount)){
+        } else if (pageNumber > 0 && lastPage != pageNumber && (maxPageCount == -1 || pageNumber <= maxPageCount)) {
 
-			lastPage=pageNumber;
+            lastPage = pageNumber;
 
 //			 boolean usingDefault=false;
 
-			final float[] cropBox=(float[])cropBoxes.elementAt(pageNumber);
-			final float[] mediaBox=(float[])mediaBoxes.elementAt(pageNumber);
+            final float[] cropBox = (float[]) cropBoxes.elementAt(pageNumber);
+            final float[] mediaBox = (float[]) mediaBoxes.elementAt(pageNumber);
 //			 if(mediaBox==null && defaultMediaBox!=null){
 //				 mediaBox=defaultMediaBox;
 //				 usingDefault=true;
 //			 }
 
-			//set rotation
-			if(rotations!=null) {
-				rotation = rotations.elementAt(pageNumber);
-			}
+            //set rotation
+            if (rotations != null) {
+                rotation = rotations.elementAt(pageNumber);
+            }
 
-			while(rotation>=360) {
-				rotation -= 360;
-			}
+            while (rotation >= 360) {
+                rotation -= 360;
+            }
 
-			//set values if no value
-			mediaBoxX=0;
-			mediaBoxY=0;
-			mediaBoxW = 800;
-			mediaBoxH = 800;
+            //set values if no value
+            mediaBoxX = 0;
+            mediaBoxY = 0;
+            mediaBoxW = 800;
+            mediaBoxH = 800;
 
-			if(mediaBox!=null){
-				mediaBoxX=mediaBox[0];
-				mediaBoxY=mediaBox[1];
-				mediaBoxW=mediaBox[2]-mediaBoxX;
-				mediaBoxH=mediaBox[3]-mediaBoxY;
+            if (mediaBox != null) {
+                mediaBoxX = mediaBox[0];
+                mediaBoxY = mediaBox[1];
+                mediaBoxW = mediaBox[2] - mediaBoxX;
+                mediaBoxH = mediaBox[3] - mediaBoxY;
 
-				if(mediaBoxY>0 && mediaBoxH==-mediaBoxY){
-					mediaBoxH = -mediaBoxH;
-					mediaBoxY=0;
-				}
-			}
+                if (mediaBoxY > 0 && mediaBoxH == -mediaBoxY) {
+                    mediaBoxH = -mediaBoxH;
+                    mediaBoxY = 0;
+                }
+            }
 
-			if(cropBox!=null){
+            if (cropBox != null) {
 
-				cropBoxX=cropBox[0];
-				cropBoxY=cropBox[1];
-				cropBoxW=cropBox[2];
-				cropBoxH=cropBox[3];
+                cropBoxX = cropBox[0];
+                cropBoxY = cropBox[1];
+                cropBoxW = cropBox[2];
+                cropBoxH = cropBox[3];
 
-				if(cropBoxX>cropBoxW){
-					final float temp = cropBoxX;
-					cropBoxX = cropBoxW;
-					cropBoxW = temp;
-				}
-				if(cropBoxY>cropBoxH){
-					final float temp = cropBoxY;
-					cropBoxY = cropBoxH;
-					cropBoxH = temp;
-				}
+                if (cropBoxX > cropBoxW) {
+                    final float temp = cropBoxX;
+                    cropBoxX = cropBoxW;
+                    cropBoxW = temp;
+                }
+                if (cropBoxY > cropBoxH) {
+                    final float temp = cropBoxY;
+                    cropBoxY = cropBoxH;
+                    cropBoxH = temp;
+                }
 
-				cropBoxW -= cropBoxX;
-				cropBoxH -= cropBoxY;
+                cropBoxW -= cropBoxX;
+                cropBoxH -= cropBoxY;
 
-				if(cropBoxY>0 && cropBoxH==-cropBoxY){
-					cropBoxH = -cropBoxH;
-					cropBoxY=0;
-				}
+                if (cropBoxY > 0 && cropBoxH == -cropBoxY) {
+                    cropBoxH = -cropBoxH;
+                    cropBoxY = 0;
+                }
 
-			}else{
-				cropBoxX = mediaBoxX;
-				cropBoxY = mediaBoxY;
-				cropBoxW = mediaBoxW;
-				cropBoxH = mediaBoxH;
-			}
+            } else {
+                cropBoxX = mediaBoxX;
+                cropBoxY = mediaBoxY;
+                cropBoxW = mediaBoxW;
+                cropBoxH = mediaBoxH;
+            }
 //			 }
 
-			//fix for odd file with negative height
-			if(cropBoxH<0){
-				cropBoxY += cropBoxH;
-				cropBoxH=-cropBoxH;
-			}
-			if(cropBoxW<0){
-				cropBoxX += cropBoxW;
-				cropBoxW=-cropBoxW;
-			}
+            //fix for odd file with negative height
+            if (cropBoxH < 0) {
+                cropBoxY += cropBoxH;
+                cropBoxH = -cropBoxH;
+            }
+            if (cropBoxW < 0) {
+                cropBoxX += cropBoxW;
+                cropBoxW = -cropBoxW;
+            }
 
 //			if(usingDefault && !valuesSet){
 //
@@ -639,253 +661,259 @@ public class PdfPageData implements Serializable{
 //
 //				 valuesSet=true;
 //			}
-		}else if(pageNumber<=0 || (maxPageCount!=-1 && pageNumber>maxPageCount)){
-			throw new Exception("Attempted to find page outside of page range 1 - "+maxPageCount+"  Page number requested:"+pageNumber);
-		}
-	}
+        } else if (pageNumber <= 0 || (maxPageCount != -1 && pageNumber > maxPageCount)) {
+            throw new Exception("Attempted to find page outside of page range 1 - " + maxPageCount + "  Page number requested:" + pageNumber);
+        }
+    }
 
-	/**
-	 * Get the scaling value currently being used
-	 * @return scalingValue
-	 */
-	public float getScalingValue() {
-		return scalingValue;
-	}
+    /**
+     * Get the scaling value currently being used
+     *
+     * @return scalingValue
+     */
+    public float getScalingValue() {
+        return scalingValue;
+    }
 
 
-	/**
-	 * Scaling value to apply to all values
-	 * @param scalingValue The new scaling value
-	 */
-	public void setScalingValue(final float scalingValue) {
-		this.scalingValue = scalingValue;
-	}
+    /**
+     * Scaling value to apply to all values
+     *
+     * @param scalingValue The new scaling value
+     */
+    public void setScalingValue(final float scalingValue) {
+        this.scalingValue = scalingValue;
+    }
 
-	private static int roundFloat(final float origValue){
-		int roundedValue = (int)origValue;
+    private static int roundFloat(final float origValue) {
+        int roundedValue = (int) origValue;
 
-		final boolean useCustomRounding = true;
-		if(useCustomRounding){
-			final float frac = origValue - roundedValue;
-			if(frac>0.3) {
-				roundedValue += 1;
-			}
-		}
-		return roundedValue;
+        final boolean useCustomRounding = true;
+        if (useCustomRounding) {
+            final float frac = origValue - roundedValue;
+            if (frac > 0.3) {
+                roundedValue += 1;
+            }
+        }
+        return roundedValue;
 
-	}
+    }
 
-	/**
-	 * get page count
-	 * @return number of pages
-	 */
-	public final int getPageCount(){
-		return pageCount;
-	}
+    /**
+     * get page count
+     *
+     * @return number of pages
+     */
+    public final int getPageCount() {
+        return pageCount;
+    }
 
-	/** @return rotation value (for outside class)
-	 * @param pageNumber the page to be displayed
-	 */
-	public final int getRotation(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return rotation value (for outside class)
+     */
+    public final int getRotation(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return rotation;
-	}
+        return rotation;
+    }
 
-	/**
-	 * @return Scaled height of mediaBox
-	 * @param pageNumber the page to be displayed
-	 */
-	public final int getScaledMediaBoxHeight(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled height of mediaBox
+     */
+    public final int getScaledMediaBoxHeight(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(mediaBoxH*scalingValue);
-	}
+        return roundFloat(mediaBoxH * scalingValue);
+    }
 
-	/**
-	 * @return Scaled width of media box
-	 * @param pageNumber the page to be displayed
-	 */
-	public final int getScaledMediaBoxWidth(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled width of media box
+     */
+    public final int getScaledMediaBoxWidth(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(mediaBoxW*scalingValue);
-	}
+        return roundFloat(mediaBoxW * scalingValue);
+    }
 
-	/**
-	 * @return Scaled mediaBox x value
-	 * @param pageNumber the page to be displayed
-	 */
-	public final int getScaledMediaBoxX(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled mediaBox x value
+     */
+    public final int getScaledMediaBoxX(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(mediaBoxX*scalingValue);
-	}
+        return roundFloat(mediaBoxX * scalingValue);
+    }
 
-	/**
-	 * @return Scaled mediaBox y value
-	 * @param pageNumber the page to be displayed
-	 */
-	public final int getScaledMediaBoxY(final int pageNumber) {
+    /**
+     * @param pageNumber the page to be displayed
+     * @return Scaled mediaBox y value
+     */
+    public final int getScaledMediaBoxY(final int pageNumber) {
 
-		//check values correctly set
-		try{
-			setSizeForPage(pageNumber);
-		}catch(final Exception e){
-			LogWriter.writeLog("Exception: " + e.getMessage());
-		}
+        //check values correctly set
+        try {
+            setSizeForPage(pageNumber);
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
 
-		return roundFloat(mediaBoxY*scalingValue);
-	}
+        return roundFloat(mediaBoxY * scalingValue);
+    }
 
     public int getScaledTotalDoubleWidth() {
         int total = 0;
-        if(getPageCount()==2){
+        if (getPageCount() == 2) {
             total = getScaledCropBoxWidth(1);
-            if(total<getScaledCropBoxWidth(2)){
+            if (total < getScaledCropBoxWidth(2)) {
                 total = getScaledCropBoxWidth(2);
             }
-        }else{
+        } else {
             for (int i = 1; i <= getPageCount(); i++) {
-                if(i==1){
+                if (i == 1) {
                     total += getScaledCropBoxWidth(i);
-                }else{
-                    if ((i & 1) == 0) {//left page
+                } else {
+                    if ((i & 1) == 0) { //left page
                         int page = getScaledCropBoxWidth(i);
-                        if(i<getPageCount() && page<getScaledCropBoxWidth(i+1)){
-                            page = getScaledCropBoxWidth(i+1);
+                        if (i < getPageCount() && page < getScaledCropBoxWidth(i + 1)) {
+                            page = getScaledCropBoxWidth(i + 1);
                         }
                         total += page;
-                        
+
                     }
                 }
             }
         }
         return total;
     }
-    
+
     public int getScaledTotalDoubleHeight() {
         int total = 0;
-        if(getPageCount()==2){
+        if (getPageCount() == 2) {
             total = getScaledCropBoxHeight(1);
-            if(total<getScaledCropBoxHeight(2)){
+            if (total < getScaledCropBoxHeight(2)) {
                 total = getScaledCropBoxHeight(2);
             }
-        }else{
+        } else {
             for (int i = 1; i <= getPageCount(); i++) {
-                if(i==1){
+                if (i == 1) {
                     total += getScaledCropBoxHeight(i);
-                }else{
-                    if ((i & 1) == 0) {//left page
+                } else {
+                    if ((i & 1) == 0) { //left page
                         int page = getScaledCropBoxHeight(i);
-                        if(i<getPageCount() && page<getScaledCropBoxHeight(i+1)){
-                            page = getScaledCropBoxHeight(i+1);
+                        if (i < getPageCount() && page < getScaledCropBoxHeight(i + 1)) {
+                            page = getScaledCropBoxHeight(i + 1);
                         }
                         total += page;
-                        
+
                     }
                 }
             }
         }
         return total;
     }
-    
+
     public int getScaledTotalSingleHeight() {
         int total = 0;
-        for(int i=1; i<=getPageCount(); i++){
+        for (int i = 1; i <= getPageCount(); i++) {
             total += getScaledCropBoxHeight(i);
         }
         return total;
     }
 
-    
+
     public int getScaledTotalSingleWidth() {
         int total = 0;
-        for(int i=1; i<=getPageCount(); i++){
+        for (int i = 1; i <= getPageCount(); i++) {
             total += getScaledCropBoxWidth(i);
         }
         return total;
     }
-    
-	public boolean hasMultipleSizes() {
-		//return if already calculated
-		if (hasMultipleSizesSet) {
-			return hasMultipleSizes;
-		}
 
-		//scan all pages and if we find one different, disable page turn
-		final int pageCount= this.pageCount;
-		final int pageW=getCropBoxWidth(1);
-		final int pageH=getCropBoxHeight(1);
-		final int pageR=getRotation(1);
+    public boolean hasMultipleSizes() {
+        //return if already calculated
+        if (hasMultipleSizesSet) {
+            return hasMultipleSizes;
+        }
 
-		if(pageCount>1){
-			for(int jj=2;jj<pageCount+1;jj++){
+        //scan all pages and if we find one different, disable page turn
+        final int pageCount = this.pageCount;
+        final int pageW = getCropBoxWidth(1);
+        final int pageH = getCropBoxHeight(1);
+        final int pageR = getRotation(1);
 
-				if(pageW!=getCropBoxWidth(jj)|| pageH!=getCropBoxHeight(jj) ||
-						pageR!=getRotation(jj)){
-					jj=pageCount;
-					hasMultipleSizes = true;
-				}
-			}
-		}
-		hasMultipleSizesSet = true;
-		return hasMultipleSizes;
-	}
+        if (pageCount > 1) {
+            for (int jj = 2; jj < pageCount + 1; jj++) {
 
-	/**
-	 * set page co-ord system to different location
-	 * @param newPageOrigin New location of page co-ord
-	 */
-	public void setOrigin(final PageOrigins newPageOrigin) {
-		this.pageOrigin = newPageOrigin;
-	}
+                if (pageW != getCropBoxWidth(jj) || pageH != getCropBoxHeight(jj) ||
+                        pageR != getRotation(jj)) {
+                    jj = pageCount;
+                    hasMultipleSizes = true;
+                }
+            }
+        }
+        hasMultipleSizesSet = true;
+        return hasMultipleSizes;
+    }
 
-	/**
-	 * allow page to start at different locations (bottom left is default)
-	 * @return Start location of the page
-	 */
-	public PageOrigins getOrigin() {
-		//marks test code
-		//pageOrigin= PageOrigins.TOP_LEFT;
+    /**
+     * set page co-ord system to different location
+     *
+     * @param newPageOrigin New location of page co-ord
+     */
+    public void setOrigin(final PageOrigins newPageOrigin) {
+        this.pageOrigin = newPageOrigin;
+    }
 
-		return pageOrigin;
-	}
+    /**
+     * allow page to start at different locations (bottom left is default)
+     *
+     * @return Start location of the page
+     */
+    public PageOrigins getOrigin() {
+        //marks test code
+        //pageOrigin= PageOrigins.TOP_LEFT;
 
-	public void setPageCount(final int count){
-		maxPageCount = count;
-	}
+        return pageOrigin;
+    }
 
-	public HtmlPageData getHTMLData() {
+    public void setPageCount(final int count) {
+        maxPageCount = count;
+    }
 
-		if(htmlData==null){
-			htmlData=new HtmlPageData();
-		}
+    public HtmlPageData getHTMLData() {
 
-		return htmlData;
-	}
+        if (htmlData == null) {
+            htmlData = new HtmlPageData();
+        }
+
+        return htmlData;
+    }
 }

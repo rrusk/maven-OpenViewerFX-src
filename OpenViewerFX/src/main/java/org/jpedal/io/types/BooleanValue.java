@@ -39,25 +39,25 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class BooleanValue {
 
-    
+
     public static int set(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt) {
-        
+
         final int keyStart;
-        
+
         i++;
-        
+
         i = StreamReaderUtils.skipSpacesOrOtherCharacter(raw, i, 47);
-        
-        keyStart=i;
-        
+
+        keyStart = i;
+
         //move cursor to end of text
-        while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62){
+        while (raw[i] != 10 && raw[i] != 13 && raw[i] != 32 && raw[i] != 47 && raw[i] != 60 && raw[i] != 62) {
             //System.out.println("key="+raw[i]+" "+(char)raw[i]);
             i++;
         }
-        
-        i--;// move back so loop works
-        
+
+        i--; // move back so loop works
+
         //store value
         if (raw[keyStart] == 't' && raw[keyStart + 1] == 'r' && raw[keyStart + 2] == 'u' && raw[keyStart + 3] == 'e') {
             pdfObject.setBoolean(PDFkeyInt, true);
@@ -70,10 +70,10 @@ public class BooleanValue {
         } else {
             throw new RuntimeException("Unexpected value for Boolean value for" + PDFkeyInt);
         }
-        
+
         return i;
     }
-    
+
 }
 
 

@@ -33,8 +33,8 @@
 package org.jpedal.objects;
 
 /**
- *define enums to describe different co-ordinate systems
+ * define enums to describe different co-ordinate systems
  */
 public enum PageOrigins {
-    BOTTOM_LEFT,TOP_LEFT
+    BOTTOM_LEFT, TOP_LEFT
 }

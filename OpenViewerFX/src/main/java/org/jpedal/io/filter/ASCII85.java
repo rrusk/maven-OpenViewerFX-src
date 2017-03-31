@@ -36,22 +36,28 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Map;
+
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
 public class ASCII85 extends BaseFilter implements PdfFilter {
 
-    /** lookup for hex multiplication */
-    private static final long[] hex_indices = { 256 * 256 * 256, 256 * 256, 256, 1 };
+    /**
+     * lookup for hex multiplication
+     */
+    private static final long[] hex_indices = {256 * 256 * 256, 256 * 256, 256, 1};
 
-    /** lookup for ASCII85 decode */
-    private static final long[] base_85_indices = { 85 * 85 * 85 * 85, 85 * 85 * 85, 85 * 85, 85, 1 };
+    /**
+     * lookup for ASCII85 decode
+     */
+    private static final long[] base_85_indices = {85 * 85 * 85 * 85, 85 * 85 * 85, 85 * 85, 85, 1};
 
     public ASCII85(final PdfObject decodeParms) {
         super(decodeParms);
     }
 
     // ////////////////////////////////////////////////
+
     /**
      * ascii85decode using our own implementation
      */
@@ -70,7 +76,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
         }
 
         //fix for odd file
-        if(returns==5 && special_cases==0 && ((data_size-returns) % 5)==4){
+        if (returns == 5 && special_cases == 0 && ((data_size - returns) % 5) == 4) {
             data_size++;
         }
 
@@ -80,7 +86,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
 
         // buffer to hold data
         final byte[] temp_data = new byte[data_size - returns + 1 + (special_cases * 3)];
-        int ii,next;
+        int ii, next;
 
         // translate each set of 5 to 4 bytes (note lookup tables)
 
@@ -110,7 +116,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
                 int cut = 4;
                 for (ii = 0; ii < 5; ii++) {
 
-                    if(i<valuesRead.length) {
+                    if (i < valuesRead.length) {
                         next = valuesRead[i];
                     }
 
@@ -124,8 +130,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
                     }
                     i++;
 
-                    if(next == 126 && valuesRead[i] == 62)
-                    {
+                    if (next == 126 && valuesRead[i] == 62) {
                         cut = ii - 1;
                     }
 
@@ -139,7 +144,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
                     temp_data[output_pointer] = (byte) ((value / hex_indices[i3]) & 255);
                     output_pointer++;
                 }
-                i--;// correction as loop will also increment
+                i--; // correction as loop will also increment
             }
         }
 
@@ -156,9 +161,9 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
     @Override
     public void decode(final BufferedInputStream bis, final BufferedOutputStream streamCache, final String cacheName, final Map<String, String> cachedObjects) {
 
-        this.bis=bis;
-        this.streamCache=streamCache;
-        this.cachedObjects=cachedObjects;
+        this.bis = bis;
+        this.streamCache = streamCache;
+        this.cachedObjects = cachedObjects;
 
         long value;
         int nextValue;
@@ -181,7 +186,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
                     }
 
                 } else if ((bis.available() >= 4) && (nextValue > 32)
-                    && (nextValue < 118)) {
+                        && (nextValue < 118)) {
 
                     //lastValue = nextValue;
 
@@ -206,7 +211,7 @@ public class ASCII85 extends BaseFilter implements PdfFilter {
                         //lastValue = nextValue;
                         // System.out.println(nextValue+" "+(char)nextValue);
                         if (((nextValue > 32) && (nextValue < 118))
-                            || (nextValue == 126)) {
+                                || (nextValue == 126)) {
                             value += ((nextValue - 33) * base_85_indices[ii]);
                         }
                     }

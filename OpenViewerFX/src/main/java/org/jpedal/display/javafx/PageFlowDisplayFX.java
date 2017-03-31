@@ -36,6 +36,7 @@ package org.jpedal.display.javafx;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -57,39 +58,39 @@ import org.jpedal.text.TextLines;
 import org.jpedal.utils.Messages;
 
 public class PageFlowDisplayFX implements Display {
-    
+
     final PageFlowFX pageFlowFX;
     final JavaFxGUI fxGUI;
-    
+
     public PageFlowDisplayFX(final GUIFactory currentGUI, final PdfDecoderInt pdf) {
-        
-        fxGUI = (JavaFxGUI)currentGUI;
-        
+
+        fxGUI = (JavaFxGUI) currentGUI;
+
         pageFlowFX = new PageFlowFX(pdf, true);
-        
+
         //Update page number on navbar
         pageFlowFX.getPageNumber().addListener(new ChangeListener<Object>() {
             @Override
             public void changed(final ObservableValue o, final Object oldVal, final Object newVal) {
-                fxGUI.setPage((int)pageFlowFX.getPageNumber().doubleValue());
+                fxGUI.setPage((int) pageFlowFX.getPageNumber().doubleValue());
                 if (pageFlowFX.isUpdateMemory()) {
                     fxGUI.showMessageDialog(pageFlowFX.getMemoryMessage());
                 }
             }
         });
-        
+
         pageFlowFX.setCursors(fxGUI.getGUICursor().getCursorImageForFX(GUI.GRAB_CURSOR), fxGUI.getGUICursor().getCursorImageForFX(GUI.GRABBING_CURSOR));
 
-        ((Pane)pdf).getChildren().clear();
-        
+        ((Pane) pdf).getChildren().clear();
+
         final ListChangeListener<Node> lcl = new ListChangeListener<Node>() {
 
             @Override
             public void onChanged(final ListChangeListener.Change change) {
-                
+
                 final double width = fxGUI.getDisplayPane().getItems().get(1).getBoundsInLocal().getWidth();
                 final double height = fxGUI.getDisplayPane().getItems().get(1).getBoundsInLocal().getHeight();
-                
+
                 pageFlowFX.setMinSize(width, height);
             }
         };
@@ -97,19 +98,19 @@ public class PageFlowDisplayFX implements Display {
         final double width = fxGUI.getDisplayPane().getItems().get(1).getBoundsInLocal().getWidth();
         final double height = fxGUI.getDisplayPane().getItems().get(1).getBoundsInLocal().getHeight();
         pageFlowFX.setMinSize(width, height);
-        
+
         try {
             fxGUI.getDisplayPane().getItems().add(pageFlowFX);
             fxGUI.getDisplayPane().getItems().remove(fxGUI.getPageContainer());
-            
+
             //Enable Memory Bar
             fxGUI.enableCursor(true, false);
             fxGUI.enableMemoryBar(true, true);
             fxGUI.setMultibox(new int[]{});
-            
+
         } catch (final IllegalArgumentException e) {
 
-            fxGUI.showMessageDialog(Messages.getMessage("PdfViewer.PageFlowIllegalArgument")+e);
+            fxGUI.showMessageDialog(Messages.getMessage("PdfViewer.PageFlowIllegalArgument") + e);
 
             if (Platform.isFxApplicationThread()) {
 
@@ -127,15 +128,15 @@ public class PageFlowDisplayFX implements Display {
             }
         }
     }
-    
+
     @Override
     public double getIndent() {
-        throw new UnsupportedOperationException("getIndent Not supported yet."); 
+        throw new UnsupportedOperationException("getIndent Not supported yet.");
     }
 
     @Override
     public int[] getCursorBoxOnScreenAsArray() {
-        throw new UnsupportedOperationException("getCursorBoxOnScreenAsArray Not supported yet."); 
+        throw new UnsupportedOperationException("getCursorBoxOnScreenAsArray Not supported yet.");
     }
 
     @Override
@@ -242,7 +243,7 @@ public class PageFlowDisplayFX implements Display {
     public void dispose() {
         /*Could probably go somewhere better when other other viewmodes are
         implemented, or when bugs becomes apparent, but for now it works.**/
-        fxGUI.getDisplayPane().getItems().add(fxGUI.getPageContainer());    
+        fxGUI.getDisplayPane().getItems().add(fxGUI.getPageContainer());
         fxGUI.getDisplayPane().getItems().remove(pageFlowFX);
     }
 
@@ -251,9 +252,9 @@ public class PageFlowDisplayFX implements Display {
     }
 
     @Override
-    public void setAccelerationAlwaysRedraw(final boolean enable){
+    public void setAccelerationAlwaysRedraw(final boolean enable) {
     }
-    
+
     @Override
     public void setObjectValue(final int type, final Object newValue) {
     }
@@ -284,7 +285,7 @@ public class PageFlowDisplayFX implements Display {
 
     @Override
     public Rectangle getDisplayedRectangle() {
-        throw new UnsupportedOperationException("getDisplayedRectangle Not supported yet."); 
+        throw new UnsupportedOperationException("getDisplayedRectangle Not supported yet.");
     }
-    
+
 }

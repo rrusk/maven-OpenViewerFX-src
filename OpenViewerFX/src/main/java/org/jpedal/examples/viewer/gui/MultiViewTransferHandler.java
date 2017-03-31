@@ -44,8 +44,10 @@ import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
+
 import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.Values;
+import org.jpedal.examples.viewer.commands.OpenFile;
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
@@ -53,28 +55,28 @@ import org.jpedal.utils.SwingWorker;
 
 public class MultiViewTransferHandler extends BaseTransferHandler {
 
-	private int fileCount;
-	
-	public MultiViewTransferHandler(final Values commonValues, final GUIFactory currentGUI, final Commands currentCommands) {
-		super(commonValues, currentGUI, currentCommands);
-	}
+    private int fileCount;
 
-	@Override
+    public MultiViewTransferHandler(final Values commonValues, final GUIFactory currentGUI, final Commands currentCommands) {
+        super(commonValues, currentGUI, currentCommands);
+    }
+
+    @Override
     public boolean importData(final JComponent src, final Transferable transferable) {
-		try {
-			final Object dragImport = getImport(transferable);
+        try {
+            final Object dragImport = getImport(transferable);
 
-			if (dragImport instanceof String) {
-				final String url = (String) dragImport;
-				System.out.println(url);
-				final String testURL = url.toLowerCase();
-				if (testURL.startsWith("http:/")) {
-					currentCommands.handleTransferedFile(testURL);
-					return true;
-				} else if (testURL.startsWith("file:/")) {
-					final String[] urls = url.split("file:/");
-					
-					final List<File> files = new LinkedList<File>();
+            if (dragImport instanceof String) {
+                final String url = (String) dragImport;
+                System.out.println(url);
+                final String testURL = url.toLowerCase();
+                if (testURL.startsWith("http:/")) {
+                    currentCommands.handleTransferedFile(testURL);
+                    return true;
+                } else if (testURL.startsWith("file:/")) {
+                    final String[] urls = url.split("file:/");
+
+                    final List<File> files = new LinkedList<File>();
                     for (final String file : urls) {
                         if (!file.isEmpty()) {
                             final File file2 = new File(new URL("file:/" + file).getFile());
@@ -82,60 +84,60 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
                             files.add(file2);
                         }
                     }
-					
-					return openFiles(files);
-				}
-			} else if (dragImport instanceof List) {
-				final List files = (List) dragImport;
-				
-				return openFiles(files);
-			}
-		} catch (final Exception e) {
-			LogWriter.writeLog("Exception attempting to import data " + e);
-        }
-		
-		return false;
-	}
 
-	private boolean openFiles(final List files) {
-		fileCount = 0;
-		final List<String> flattenedFiles = getFlattenedFiles(files, new ArrayList<String>());
-		
-		if (fileCount == commonValues.getMaxMiltiViewers()) {
-			currentGUI.showMessageDialog("You have choosen to import more files than your current set " + 
-					"maximum (" + commonValues.getMaxMiltiViewers() + ").  Only the first " + 
-					commonValues.getMaxMiltiViewers() + " files will be imported.\nYou can change this value " +
-							"in View | Preferences", 
-					"Maximum number of files reached", JOptionPane.INFORMATION_MESSAGE);
-		}
-		
-		final List[] filterdFiles = filterFiles(flattenedFiles);
-		final List allowedFiles = filterdFiles[0];
-		final List disAllowedFiles = filterdFiles[1];
-		
-		final int noOfDisAllowedFiles = disAllowedFiles.size();
-		final int noOfAllowedFiles = allowedFiles.size();
-		
-		if(noOfDisAllowedFiles > 0) {
-			final StringBuilder unOpenableFiles = new StringBuilder();
+                    return openFiles(files);
+                }
+            } else if (dragImport instanceof List) {
+                final List files = (List) dragImport;
+
+                return openFiles(files);
+            }
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception attempting to import data " + e);
+        }
+
+        return false;
+    }
+
+    private boolean openFiles(final List files) {
+        fileCount = 0;
+        final List<String> flattenedFiles = getFlattenedFiles(files, new ArrayList<String>());
+
+        if (fileCount == commonValues.getMaxMiltiViewers()) {
+            currentGUI.showMessageDialog("You have choosen to import more files than your current set " +
+                            "maximum (" + commonValues.getMaxMiltiViewers() + ").  Only the first " +
+                            commonValues.getMaxMiltiViewers() + " files will be imported.\nYou can change this value " +
+                            "in View | Preferences",
+                    "Maximum number of files reached", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        final List[] filterdFiles = filterFiles(flattenedFiles);
+        final List allowedFiles = filterdFiles[0];
+        final List disAllowedFiles = filterdFiles[1];
+
+        final int noOfDisAllowedFiles = disAllowedFiles.size();
+        final int noOfAllowedFiles = allowedFiles.size();
+
+        if (noOfDisAllowedFiles > 0) {
+            final StringBuilder unOpenableFiles = new StringBuilder();
             for (final Object disAllowedFile : disAllowedFiles) {
                 final String file = (String) disAllowedFile;
                 final String fileName = new File(file).getName();
                 unOpenableFiles.append(fileName).append('\n');
             }
-			
-			final int result = currentGUI.showConfirmDialog("You have selected " + flattenedFiles.size() +
-					" files to open.  The following file(s) cannot be opened\nas they are not valid PDFs " +
-					"or images.\n" + unOpenableFiles + "\nWould you like to open the remaining " +
-					noOfAllowedFiles + " files?", "File Import", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-			
-			if (result == JOptionPane.NO_OPTION) {
-				return false;
-			}
-		} 
-		
-		final SwingWorker worker = new SwingWorker() {
-			@Override
+
+            final int result = currentGUI.showConfirmDialog("You have selected " + flattenedFiles.size() +
+                    " files to open.  The following file(s) cannot be opened\nas they are not valid PDFs " +
+                    "or images.\n" + unOpenableFiles + "\nWould you like to open the remaining " +
+                    noOfAllowedFiles + " files?", "File Import", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+            if (result == JOptionPane.NO_OPTION) {
+                return false;
+            }
+        }
+
+        final SwingWorker worker = new SwingWorker() {
+            @Override
             public Object construct() {
                 for (final Object allowedFile : allowedFiles) {
                     final String file = (String) allowedFile;
@@ -143,7 +145,7 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
                     try {
                         currentCommands.handleTransferedFile(file);
                     } catch (final Exception e) {
-                        LogWriter.writeLog("Exception e "+e.getMessage());
+                        LogWriter.writeLog("Exception e " + e.getMessage());
 
                         final int result;
                         if (allowedFiles.size() == 1) {
@@ -155,13 +157,13 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
 
                         }
 
-                        final JInternalFrame[] allFrames = ((JDesktopPane)currentGUI.getMultiViewerFrames()).getAllFrames();
+                        final JInternalFrame[] allFrames = ((JDesktopPane) currentGUI.getMultiViewerFrames()).getAllFrames();
                         for (final JInternalFrame internalFrame : allFrames) {
                             if (internalFrame.getTitle().equals(commonValues.getSelectedFile())) {
                                 try {
                                     internalFrame.setClosed(true);
                                 } catch (final PropertyVetoException e1) {
-                                    LogWriter.writeLog("Exception "+e1+" attempting getframes");
+                                    LogWriter.writeLog("Exception " + e1 + " attempting getframes");
                                 }
                                 break;
                             }
@@ -172,10 +174,10 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
                         }
                     }
                 }
-				return null;
-			}
-		};
-		worker.start();
+                return null;
+            }
+        };
+        worker.start();
 
 //				
 //				SwingUtilities.invokeLater(new Runnable() {
@@ -196,34 +198,29 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
 //						currentGUI.getMultiViewerFrames().repaint();
 //					}
 //				});
-		
-		return true;
-	}
 
-	private static List[] filterFiles(final List<String> flattenedFiles) {
-		final List<String> allowedFiles = new LinkedList<String>();
-		final List<String> disAllowedFiles = new LinkedList<String>();
+        return true;
+    }
+
+    private static List[] filterFiles(final List<String> flattenedFiles) {
+        final List<String> allowedFiles = new LinkedList<String>();
+        final List<String> disAllowedFiles = new LinkedList<String>();
 
         for (final String flattenedFile : flattenedFiles) {
-            final String file = (flattenedFile);
-            final String testFile = file.toLowerCase();
 
-            final boolean isValid = ((testFile.endsWith(".pdf")) || (testFile.endsWith(".fdf")) ||
-                    (testFile.endsWith(".tif")) || (testFile.endsWith(".tiff")) ||
-                    (testFile.endsWith(".png")) || (testFile.endsWith(".jpg")) ||
-                    (testFile.endsWith(".jpeg")));
+            final boolean isValid = OpenFile.isSupportedFileExtension(flattenedFile.toLowerCase());
 
             if (isValid) {
-                allowedFiles.add(file);
+                allowedFiles.add(flattenedFile);
             } else {
-                disAllowedFiles.add(file);
+                disAllowedFiles.add(flattenedFile);
             }
         }
-		
-		return new List[] { allowedFiles, disAllowedFiles };
-	}
 
-	private List<String> getFlattenedFiles(final List files, final List<String> flattenedFiles) {
+        return new List[]{allowedFiles, disAllowedFiles};
+    }
+
+    private List<String> getFlattenedFiles(final List files, final List<String> flattenedFiles) {
         for (final Object file1 : files) {
             if (fileCount == commonValues.getMaxMiltiViewers()) {
                 return flattenedFiles;
@@ -239,9 +236,9 @@ public class MultiViewTransferHandler extends BaseTransferHandler {
                 fileCount++;
             }
         }
-		
-		return flattenedFiles;
-	}
+
+        return flattenedFiles;
+    }
 
 //	protected void openTransferedFile(String file) {
 //		String testFile = file.toLowerCase();

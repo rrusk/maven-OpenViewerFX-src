@@ -45,34 +45,34 @@ public class CFF extends Table {
 
     boolean hasCFFdata;
 
-    CFF(final FontFile2 currentFontFile, final boolean isCID, final boolean remappedCFFFont){
+    CFF(final FontFile2 currentFontFile, final boolean isCID, final boolean remappedCFFFont) {
 
-        glyphs=new T1Glyphs(isCID);
+        glyphs = new T1Glyphs(isCID);
         glyphs.setRemappedCFFFont(remappedCFFFont);
 
-        if(isCID) {
+        if (isCID) {
             glyphs.init(65536, true);
         }
-        
+
         //move to start and check exists
-		final int startPointer=currentFontFile.selectTable(FontFile2.CFF);
+        final int startPointer = currentFontFile.selectTable(FontFile2.CFF);
 
         //read 'cff' table
-		if(startPointer!=0){
+        if (startPointer != 0) {
 
             try {
-                final int length=currentFontFile.getTableSize(FontFile2.CFF);
+                final int length = currentFontFile.getTableSize(FontFile2.CFF);
 
-                final byte[] data=currentFontFile.readBytes(startPointer, length) ;
+                final byte[] data = currentFontFile.readBytes(startPointer, length);
 
                 //initialise glyphs
-                new Type1C(data,null,glyphs);
+                new Type1C(data, null, glyphs);
 
-                hasCFFdata=true;
+                hasCFFdata = true;
             } catch (final Exception e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
-		}
+        }
     }
 
     public boolean hasCFFData() {

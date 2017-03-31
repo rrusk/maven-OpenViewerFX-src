@@ -34,6 +34,7 @@ package org.jpedal.parser.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
+
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfPageData;
 import org.jpedal.objects.PdfShape;
@@ -45,35 +46,35 @@ public class N {
 
     public static void execute(final PdfShape currentDrawShape, final GraphicsState gs, final int formLevel, final Shape defaultClip, final ParserOptions parserOptions, final DynamicVectorRenderer current, final PdfPageData pageData) {
 
-        final boolean useJavaFX=parserOptions.useJavaFX();
-        final boolean renderPage=parserOptions.isRenderPage();
+        final boolean useJavaFX = parserOptions.useJavaFX();
+        final boolean renderPage = parserOptions.isRenderPage();
 
         if (currentDrawShape.isClip()) {
 
             //create clipped shape
             currentDrawShape.closeShape();
 
-            if(useJavaFX) {
+            if (useJavaFX) {
                 gs.updateClip(currentDrawShape.getPath());
-            }else{
+            } else {
                 gs.updateClip(new Area(currentDrawShape.generateShapeFromPath(gs.CTM, 0, Cmd.n)));
             }
-            
-            if(formLevel==0){
-                final int pageNum=parserOptions.getPageNumber();
-                gs.checkWholePageClip(pageData.getMediaBoxHeight(pageNum)+pageData.getMediaBoxY(pageNum));
+
+            if (formLevel == 0) {
+                final int pageNum = parserOptions.getPageNumber();
+                gs.checkWholePageClip(pageData.getMediaBoxHeight(pageNum) + pageData.getMediaBoxY(pageNum));
             }
 
             //always reset flag
             currentDrawShape.setClip(false);
 
             //save for later
-            if (renderPage){
-                current.drawClip(gs,defaultClip,false) ;
+            if (renderPage) {
+                current.drawClip(gs, defaultClip, false);
             }
         }
 
         currentDrawShape.resetPath(); // flush all path ops stored
 
-    }   
+    }
 }

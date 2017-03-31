@@ -35,6 +35,7 @@ package org.jpedal.external;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.IOException;
+
 import org.jpedal.exception.PdfException;
 
 @SuppressWarnings("ALL")

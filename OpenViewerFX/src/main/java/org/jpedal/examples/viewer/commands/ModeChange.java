@@ -35,9 +35,12 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import java.awt.Dimension;
+
 import javafx.application.Platform;
 import javafx.stage.Stage;
+
 import javax.swing.SwingUtilities;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.examples.viewer.Commands;
@@ -47,45 +50,44 @@ import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.gui.GUIFactory;
 
 /**
- *
  * @author markee
  */
 class ModeChange {
-    
+
     static void changeModeInSwing(final int mode, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI, final Values commonValues) {
-                          
+
         if (SwingUtilities.isEventDispatchThread()) {
-            
+
             currentGUI.setDisplayView(mode, Display.DISPLAY_CENTERED);
-            
+
             chooseMode(decode_pdf, commonValues, currentGUI);
-            
+
             currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-            
+
             if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
                 selectCurrentGui(currentGUI);
             } else {
                 ((GUI) currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
                 ((Component) currentGUI.getFrame()).setMinimumSize(new Dimension(0, 0));
             }
-            
+
         } else {
             currentGUI.setCommandInThread(true);
             final Runnable doPaintComponent = new Runnable() {
-                
+
                 @Override
                 public void run() {
                     currentGUI.setDisplayView(mode, Display.DISPLAY_CENTERED);
-                    
+
                     chooseMode(decode_pdf, commonValues, currentGUI);
-                    
+
                     currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-                    
-                    if(decode_pdf.getDisplayView()==Display.PAGEFLOW){
+
+                    if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
                         selectCurrentGui(currentGUI);
-                    }else{                    
-                    ((GUI)currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
-                    ((Component)currentGUI.getFrame()).setMinimumSize(new Dimension(0, 0));                  
+                    } else {
+                        ((GUI) currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
+                        ((Component) currentGUI.getFrame()).setMinimumSize(new Dimension(0, 0));
                     }
                     currentGUI.setExecutingCommand(false);
                 }
@@ -93,77 +95,77 @@ class ModeChange {
             SwingUtilities.invokeLater(doPaintComponent);
         }
     }
-    
+
     static void changeModeInJavaFX(final int mode, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
-                                    
+
         if (Platform.isFxApplicationThread()) {
-            
+
             currentGUI.setDisplayView(mode, Display.DISPLAY_CENTERED);
-            
+
             currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-            ((GUI)currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
-           final Stage stage = (Stage) currentGUI.getFrame();
+            ((GUI) currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
+            final Stage stage = (Stage) currentGUI.getFrame();
             if (stage != null) {
                 ((Stage) currentGUI.getFrame()).setMinWidth(0);
                 ((Stage) currentGUI.getFrame()).setMinHeight(0);
             }
-            
+
         } else {
             currentGUI.setCommandInThread(true);
             final Runnable doPaintComponent = new Runnable() {
-                
+
                 @Override
                 public void run() {
                     currentGUI.setDisplayView(mode, Display.DISPLAY_CENTERED);
-                    
+
                     currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
-                    
-                    if(decode_pdf.getDisplayView()==Display.PAGEFLOW){
+
+                    if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
                         selectCurrentGui(currentGUI);
-                    }else{ 
-                    
-                    ((GUI)currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
-                    
-                    ((Stage)currentGUI.getFrame()).setMinWidth(0);
-                    ((Stage)currentGUI.getFrame()).setMinHeight(0);
-                    } 
+                    } else {
+
+                        ((GUI) currentGUI).setSelectedComboIndex(Commands.ROTATION, 0);
+
+                        ((Stage) currentGUI.getFrame()).setMinWidth(0);
+                        ((Stage) currentGUI.getFrame()).setMinHeight(0);
+                    }
                 }
             };
             Platform.runLater(doPaintComponent);
         }
     }
- 
-    static void chooseMode(final PdfDecoderInt decode_pdf, final Values commonValues, final GUIFactory currentGUI){
-        
-        if(decode_pdf.getDisplayView()==Display.FACING){
-                
-                //Ensure value is set correctly
-                final boolean separateCoverOn = currentGUI.getProperties().getValue("separateCoverOn").equalsIgnoreCase("true");
-                decode_pdf.getPages().setBoolean(Display.BoolValue.SEPARATE_COVER, separateCoverOn);
-                
-                int p = commonValues.getCurrentPage();
-                if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) && ((p & 1) == 1 && p != 1)) {
-                    p--;
-                } else if (!decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) && ((p & 1) == 0)) {
-                    p--;
-                }
-                commonValues.setCurrentPage(p);
-                currentGUI.setPage(p);
-                
-                currentGUI.decodePage();//ensure all pages appear
-            } else if (decode_pdf.getDisplayView()==Display.CONTINUOUS_FACING){
-                
-                int p = commonValues.getCurrentPage();
-                if ((p & 1) == 1 && p != 1) {
-                    p--;
-                }
-                commonValues.setCurrentPage(p);
-                currentGUI.setPage(p);
+
+    static void chooseMode(final PdfDecoderInt decode_pdf, final Values commonValues, final GUIFactory currentGUI) {
+
+        if (decode_pdf.getDisplayView() == Display.FACING) {
+
+            //Ensure value is set correctly
+            final boolean separateCoverOn = currentGUI.getProperties().getValue("separateCoverOn").equalsIgnoreCase("true");
+            decode_pdf.getPages().setBoolean(Display.BoolValue.SEPARATE_COVER, separateCoverOn);
+
+            int p = commonValues.getCurrentPage();
+            if (decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) && ((p & 1) == 1 && p != 1)) {
+                p--;
+            } else if (!decode_pdf.getPages().getBoolean(Display.BoolValue.SEPARATE_COVER) && ((p & 1) == 0)) {
+                p--;
             }
+            commonValues.setCurrentPage(p);
+            currentGUI.setPage(p);
+
+            currentGUI.decodePage(); // Ensure all pages appear
+        } else if (decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
+
+            int p = commonValues.getCurrentPage();
+            if ((p & 1) == 1 && p != 1) {
+                p--;
+            }
+            commonValues.setCurrentPage(p);
+            currentGUI.setPage(p);
+        }
     }
-    
-    static void selectCurrentGui(final GUIFactory currentGUI){
-        currentGUI.decodePage();//ensure all pages appear
+
+    static void selectCurrentGui(final GUIFactory currentGUI) {
+        currentGUI.decodePage(); // Ensure all pages appear
         if (((GUI) currentGUI).getSelectedComboIndex(Commands.SCALING) != 0) {
             ((GUI) currentGUI).setSelectedComboIndex(Commands.SCALING, 0);
             ((GUI) currentGUI).getSelectedComboItem(Commands.SCALING);
@@ -188,5 +190,5 @@ class ModeChange {
             }
         }
     }
-    
+
 }

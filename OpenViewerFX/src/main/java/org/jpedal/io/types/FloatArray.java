@@ -38,29 +38,28 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.NumberUtils;
 
 /**
- *
  * @author markee
  */
 public class FloatArray extends Array {
-    
+
     public FloatArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
-        super(pdfFileReader, i,  PdfDictionary.VALUE_IS_FLOAT_ARRAY, raw);
+        super(pdfFileReader, i, PdfDictionary.VALUE_IS_FLOAT_ARRAY, raw);
     }
 
     @Override
     void fillArray(final int elementCount, final PdfObject pdfObject) {
-        
+
         final float[] finalByteValues = new float[elementCount];
         byte[] data;
-        
-        for(int a=0;a<elementCount;a++){
-            data=valuesRead.get(a);
-            finalByteValues[a]=NumberUtils.parseFloat(0, data.length, data); 
+
+        for (int a = 0; a < elementCount; a++) {
+            data = valuesRead.get(a);
+            finalByteValues[a] = NumberUtils.parseFloat(0, data.length, data);
         }
-        
+
         pdfObject.setFloatArray(PDFkeyInt, finalByteValues);
-        
-               
+
+
     }
-    
+
 }

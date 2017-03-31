@@ -43,67 +43,77 @@ import java.util.Set;
  * as it is visible to all classes.
  * <p>Provided for debugging and NOT officially part of the API
  */
-public class LogWriter
-{
-    
-    /**allow user to scan log output*/
+public class LogWriter {
+
+    /**
+     * allow user to scan log output
+     */
     public static LogScanner logScanner;
-    
-    /**amount of debugging detail we put in log*/
+
+    /**
+     * amount of debugging detail we put in log
+     */
     public static boolean debug;
-    
-    /**filename of logfile*/
+
+    /**
+     * filename of logfile
+     */
     public static String log_name;
-    
-    /**flag we can set to signal code being tested*/
+
+    /**
+     * flag we can set to signal code being tested
+     */
     public static boolean testing;
-    
-    /**if we echo to console. VERY USEFUL for debugging*/
+
+    /**
+     * if we echo to console. VERY USEFUL for debugging
+     */
     private static boolean verbose;
-    
-    /**Set of filters passed by -Dorg.jpedal.inclusiveLogFilters JVM argument.
+
+    /**
+     * Set of filters passed by -Dorg.jpedal.inclusiveLogFilters JVM argument.
      * Is null if the argument doesn't exist.
      */
     private static final Set<String> filterValues = getFilterSet();
-    
-    public static final boolean isRunningFromIDE=System.getProperty("debugInIDE")!=null &&
+
+    public static final boolean isRunningFromIDE = System.getProperty("debugInIDE") != null &&
             System.getProperty("debugInIDE").equalsIgnoreCase("true") &&
             LogWriter.class.getResource("LogWriter.class").toString().startsWith("file:");
     //public static final boolean isRunningFromIDE=true;
-    
+
     /**
      * Creates a set of filter values from JVM argument -Dorg.jpedal.inclusiveLogFilters.
      * The arguments are passed in as comma-separated values.
      *
      * @return null if the argument is not found, otherwise a HashSet of the contained values
      */
-    private static Set<String> getFilterSet(){
+    private static Set<String> getFilterSet() {
         final String filters = System.getProperty("org.jpedal.inclusiveLogFilters");
         Set<String> filterSet = null;
-        
-        if(filters != null){
+
+        if (filters != null) {
             filterSet = new HashSet<String>(Arrays.asList(filters.toLowerCase().split("[,]")));
         }
-        
+
         return filterSet;
     }
-   
+
     public static final void writeLog(final String message) {
 
         if (isRunningFromIDE && message.contains("Exception")) {
-            System.out.println("[Exception] "+ message);
+            System.out.println("[Exception] " + message);
 
             try {
                 throw new RuntimeException("Exception thrown at");
             } catch (final RuntimeException e) {
                 e.printStackTrace(System.out);
             }
-        
-        }else if (verbose || logScanner != null) {
+
+        } else if (verbose || logScanner != null) {
             writeMessage(message);
         }
     }
-    
+
     ///////////////////////////////////////////////
     private static void writeMessage(final String message) {
 
@@ -129,7 +139,7 @@ public class LogWriter
             }
         }
 
-    //implement your own version of org.jpedal.utils.LogScanner
+        //implement your own version of org.jpedal.utils.LogScanner
         //and set will then allow you to track any error messages
         if (logScanner != null) {
             logScanner.message(message);
@@ -147,7 +157,7 @@ public class LogWriter
                 log_file = new PrintWriter(new FileWriter(log_name, true));
 
                 if (!testing) {
-                    log_file.println(TimeNow.getTimeNow() + ' ' + message);		//write date to the log
+                    log_file.println(TimeNow.getTimeNow() + ' ' + message);        //write date to the log
                 }
                 log_file.println(message);
                 log_file.flush();
@@ -157,47 +167,47 @@ public class LogWriter
             }
 
         }
-       
+
     }
-    
+
     //////////////////////////////////////////////
+
     /**
      * setup log file and check it is readable
      * also sets command line options
      */
-    public static final void setupLogFile(final String command_line_values)
-    {
-        
-        if( command_line_values != null )
-        {
-            
+    public static final void setupLogFile(final String command_line_values) {
+
+        if (command_line_values != null) {
+
             //verbose mode echos to screen
-            if( command_line_values.indexOf('v') != -1 )
-            {
+            if (command_line_values.indexOf('v') != -1) {
                 verbose = true;
-                writeLog( "Verbose on" );
-            }else {
+                writeLog("Verbose on");
+            } else {
                 verbose = false;
             }
-            
+
         }
-        
+
         //write out info
-        if(!testing){
-            writeLog( "Software started - " + TimeNow.getTimeNow() );
+        if (!testing) {
+            writeLog("Software started - " + TimeNow.getTimeNow());
         }
-        writeLog( "=======================================================" );
+        writeLog("=======================================================");
     }
-    
+
     ///////////////////////////////////////////////////////////
-    /** write out logging information for forms,
+
+    /**
+     * write out logging information for forms,
      * <b>print</b> is a boolean flag, if true prints to the screen
      */
     public static void writeFormLog(final String message, final boolean print) {
-        if(print) {
-            System.out.println("[forms] "+message);
+        if (print) {
+            System.out.println("[forms] " + message);
         }
-        
-        writeLog("[forms] "+message);
+
+        writeLog("[forms] " + message);
     }
 }

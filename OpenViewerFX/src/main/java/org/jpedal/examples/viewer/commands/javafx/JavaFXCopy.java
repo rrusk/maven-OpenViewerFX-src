@@ -44,7 +44,7 @@ import org.jpedal.gui.GUIFactory;
  * Copies the text a user has selected/highlighted.
  */
 public class JavaFXCopy extends GUICopy {
-    
+
     public static void execute(final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final Values commonValues) {
         final String copyText = copySelectedText(decode_pdf, currentGUI, commonValues);
         final Clipboard clipboard = Clipboard.getSystemClipboard();
@@ -52,5 +52,5 @@ public class JavaFXCopy extends GUICopy {
         content.putString(copyText);
         clipboard.setContent(content);
     }
-    
+
 }

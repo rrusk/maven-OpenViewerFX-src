@@ -40,10 +40,10 @@ import org.jpedal.objects.raw.FormObject;
 /**
  * generic version for no javascript engine which just implements AF commands in Java
  */
-public class DefaultParser implements ExpressionEngine
-{
+public class DefaultParser implements ExpressionEngine {
 
-    public DefaultParser() {}
+    public DefaultParser() {
+    }
 
     AcroRenderer acro;
 
@@ -53,17 +53,17 @@ public class DefaultParser implements ExpressionEngine
     @Override
     public int execute(final FormObject form, final int type, final String code, final int eventType, final char keyPressed) {
 
-        int messageCode=ActionHandler.NOMESSAGE;
+        int messageCode = ActionHandler.NOMESSAGE;
 
-        if(code instanceof String){
+        if (code instanceof String) {
             final String js = code;
 
             //convert into args array
-            final String[] args=JSFunction.convertToArray(js);
+            final String[] args = JSFunction.convertToArray(js);
 
-            final String command=args[0];
+            final String command = args[0];
 
-            if(command.startsWith("AF")) {
+            if (command.startsWith("AF")) {
                 messageCode = handleAFCommands(form, command, js, args, eventType, keyPressed);
             }
 
@@ -74,6 +74,7 @@ public class DefaultParser implements ExpressionEngine
 
     /**
      * java implementation to provide these functions
+     *
      * @param command
      * @param js
      * @param args
@@ -83,39 +84,39 @@ public class DefaultParser implements ExpressionEngine
      */
     protected int handleAFCommands(final FormObject formObject, final String command, final String js, final String[] args, final int eventType, final char keyPressed) {
 
-        int messageCode=ActionHandler.NOMESSAGE;
+        int messageCode = ActionHandler.NOMESSAGE;
 
         //Workout type
-        int type=JSFunction.UNKNOWN;
+        int type = JSFunction.UNKNOWN;
 
-        if(js.contains("_Keystroke")){
-            type=JSFunction.KEYSTROKE;
-        }else if(js.contains("_Validate")){
-            type=JSFunction.VALIDATE;
-        }else if(js.contains("_Format")){
-            type=JSFunction.FORMAT;
-        }else if(js.contains("_Calculate")){
-            type=JSFunction.CALCULATE;
+        if (js.contains("_Keystroke")) {
+            type = JSFunction.KEYSTROKE;
+        } else if (js.contains("_Validate")) {
+            type = JSFunction.VALIDATE;
+        } else if (js.contains("_Format")) {
+            type = JSFunction.FORMAT;
+        } else if (js.contains("_Calculate")) {
+            type = JSFunction.CALCULATE;
         }
 
-        if(eventType!=ActionHandler.FOCUS_EVENT && (type==JSFunction.VALIDATE || type==JSFunction.FORMAT)){
-            JSFunction.debug("Not called on key event "+js);
+        if (eventType != ActionHandler.FOCUS_EVENT && (type == JSFunction.VALIDATE || type == JSFunction.FORMAT)) {
+            JSFunction.debug("Not called on key event " + js);
             return messageCode;
         }
 
-        if(js.startsWith("AFSpecial_")) {
+        if (js.startsWith("AFSpecial_")) {
             new AFSpecial(acro, formObject).execute(js, args, type, eventType, keyPressed);
-        } else if(command.startsWith("AFPercent_")) {
+        } else if (command.startsWith("AFPercent_")) {
             new AFPercent(acro, formObject).execute(js, args, type, eventType, keyPressed);
-        } else if(command.startsWith("AFSimple_")) {
+        } else if (command.startsWith("AFSimple_")) {
             new AFSimple(acro, formObject).execute(js, args, type, eventType, keyPressed);
-        } else if(command.startsWith("AFDate_")) {
+        } else if (command.startsWith("AFDate_")) {
             new AFDate(acro, formObject).execute(js, args, type, eventType, keyPressed);
-        } else if(js.startsWith("AFNumber_")) {
+        } else if (js.startsWith("AFNumber_")) {
             messageCode = new AFNumber(acro, formObject).execute(js, args, type, eventType, keyPressed);
-        } else if(js.startsWith("AFRange_")) {
+        } else if (js.startsWith("AFRange_")) {
             new AFRange(acro, formObject).execute(js, args, type, eventType, keyPressed);
-        } else if(js.startsWith("AFTime_")) {
+        } else if (js.startsWith("AFTime_")) {
             new AFTime(acro, formObject).execute(js, args, type, eventType, keyPressed);
         } else {
             JSFunction.debug("Unknown command " + js);
@@ -149,17 +150,20 @@ public class DefaultParser implements ExpressionEngine
     }
 
     @Override
-    public void dispose(){
+    public void dispose() {
 
         flush();
     }
 
     @Override
     public void setAcroRenderer(final AcroRenderer acro) {
-        this.acro=acro;
+        this.acro = acro;
     }
 
-    /** make sure the contaxt has been exited */
-    public void flush() {}
+    /**
+     * make sure the contaxt has been exited
+     */
+    public void flush() {
+    }
 
 }

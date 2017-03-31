@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer.gui.javafx;
 
 import java.io.File;
+
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -53,8 +54,8 @@ import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.render.FXDisplay;
 
 /**
- * Class to handle JavaFX Mouse Events that take place on the Pane 
- * which holds the PDF content (PdfDecoderFX).
+ * Class to handle JavaFX Mouse Events that take place on the Pane which holds
+ * the PDF content (PdfDecoderFX).
  */
 public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandler {
 
@@ -69,12 +70,11 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
 
     //Track dragging as FX uses click after drag when it should not
     private boolean dragging;
-    
+
     //Custom mouse function
     private static JavaFXMouseFunctionality customMouseFunctions;
 
     //private boolean scrollPageChanging;
-
     //current cursor position
     private double cx, cy;
 
@@ -85,7 +85,7 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
     private MouseMode mouseMode = new MouseMode();
 
     public JavaFXMouseListener(final PdfDecoderFX decode_pdf, final GUIFactory currentGUI,
-            final Values commonValues, final Commands currentCommands) {
+                               final Values commonValues, final Commands currentCommands) {
 
         this.decode_pdf = decode_pdf;
         this.currentGUI = currentGUI;
@@ -103,7 +103,7 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
         /*
          * track and display screen co-ordinates and support links
          */
-        
+
         //Motion Listener Code.
         decode_pdf.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
@@ -118,16 +118,16 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
             public void handle(final MouseEvent e) {
                 mouseMoved(e);
             }
-        }); 
+        });
 
         //Mouse Listener Code.
         decode_pdf.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(final MouseEvent e) {
                 //FX calls clicked even if dragged. This should not happen.
-                if(dragging){
+                if (dragging) {
                     dragging = false;
-                }else{
+                } else {
                     mouseClicked(e);
                 }
             }
@@ -162,7 +162,7 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
                 mouseReleased(e);
             }
         });
-        
+
         /*
          * Controls for dragging a PDF into the scene
          * Using the dragboard, which extends the clipboard class, 
@@ -175,15 +175,14 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
                 mouseDragOver(event);
             }
         });
-        
+
         decode_pdf.setOnDragDropped(new EventHandler<DragEvent>() {
             @Override
             public void handle(final DragEvent event) {
                 mouseDragDropped(event);
             }
         });
-        
-        
+
         //Mouse Wheel Listener Code.
         if (GUI.debugFX) {
             System.out.println("addMouseWheelListener in JavaFXMouseListener.java not yet implemented for JavaFX");
@@ -220,11 +219,11 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
             }
         }
     }
-    
-	public static void setCustomMouseFunctions(final JavaFXMouseFunctionality cmf) {
-		customMouseFunctions = cmf;
-	}
-    
+
+    public static void setCustomMouseFunctions(final JavaFXMouseFunctionality cmf) {
+        customMouseFunctions = cmf;
+    }
+
     private void mouseDragDropped(final DragEvent e) {
         final Dragboard db = e.getDragboard();
         boolean success = false;
@@ -259,12 +258,12 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
             e.consume();
         }
     }
-    
+
     private void mouseClicked(final MouseEvent e) {
         switch (mouseMode.getMouseMode()) {
 
             case MouseMode.MOUSE_MODE_TEXT_SELECT:
-                if (decode_pdf.isOpen()){
+                if (decode_pdf.isOpen()) {
                     selectionFunctions.mouseClicked(e);
                 }
                 break;
@@ -283,17 +282,17 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
             customMouseFunctions.mouseClicked(e);
         }
     }
-    
+
     private void mouseEntered(final MouseEvent e) {
-        
+
         currentGUI.enableMemoryBar(true, false);
         currentGUI.enableCursor(true, true);
-        currentGUI.setMultibox(new int[]{GUI.CURSOR,1});
-        
+        currentGUI.setMultibox(new int[]{GUI.CURSOR, 1});
+
         switch (mouseMode.getMouseMode()) {
 
             case MouseMode.MOUSE_MODE_TEXT_SELECT:
-			//Text selection does nothing here
+                //Text selection does nothing here
                 //selectionFunctions.mouseEntered(e);
                 break;
 
@@ -311,7 +310,7 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
             customMouseFunctions.mouseEntered(e);
         }
     }
-    
+
     private void mousePressed(final MouseEvent e) {
 
         //Start dragging
@@ -357,12 +356,12 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
                 //final int[] values = updateXY((int) e.getX(), (int) e.getY(), decode_pdf, commonValues);
                 //x = values[0];
                 //y = values[1];
-               
+
                 if (!currentCommands.extractingAsImage && decode_pdf.isOpen()) {
                     final int pagenumber = decode_pdf.getPageNumber();
                     final int crx = decode_pdf.getPdfPageData().getCropBoxX(pagenumber);
                     final int cry = decode_pdf.getPdfPageData().getCropBoxY(pagenumber);
-                    getObjectUnderneath((int)cx+crx, (int)cy+cry);
+                    getObjectUnderneath((int) cx + crx, (int) cy + cry);
                 }
 
                 selectionFunctions.mouseMoved(e);
@@ -409,12 +408,12 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
             }
         }
     }
-    
+
     private void mouseExited(final MouseEvent e) {
-        
+
         currentGUI.enableCursor(true, false);
         currentGUI.enableMemoryBar(true, true);
-        currentGUI.setMultibox(new int[]{GUI.CURSOR,0});
+        currentGUI.setMultibox(new int[]{GUI.CURSOR, 0});
 
         switch (mouseMode.getMouseMode()) {
 
@@ -437,6 +436,12 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
         }
     }
 
+    /**
+     * Returns an double array containing the current location of the cursor
+     *
+     * @return double array of length 2, index 0 holds the x value, index 1
+     * holds the y value
+     */
     public double[] getCursorLocation() {
         return new double[]{cx, cy};
     }
@@ -446,12 +451,11 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
         pageTurnFunctions.checkLinks(mouseClicked, pdfObjectReader, cx, cy);
     }
 
+    /**
+     * Used to keep updating the page coordinates when the mouse is over a form
+     */
     public void updateCordsFromFormComponent(final MouseEvent e) {
-       // Region component = (Region) e.getSource();
 
-        //double x = component.getBoundsInLocal().getMinX() + e.getX();
-        //double y = component.getBoundsInLocal().getMinX() + e.getY();
-        //Point p = selectionFunctions.getCoordsOnPage(x, y, commonValues.getCurrentPage());
         final double x = (int) e.getX();
         final double y = (int) e.getY();
 
@@ -459,7 +463,10 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
     }
 
     /**
-     * update current page co-ordinates on screen
+     * Update current page co-ordinates on screen
+     *
+     * @param x int value of the current x coordinate
+     * @param y int value of the current y coordinate
      */
     public void updateCoords(final double x, final double y) {
 
@@ -470,31 +477,31 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
 
             if (JavaFXMouseSelector.activateMultipageHighlight && (decode_pdf.getDisplayView() == Display.FACING || decode_pdf.getDisplayView() == Display.CONTINUOUS || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING)) {
 
-                if ((decode_pdf.getDisplayView() == Display.FACING) &&
-                     (decode_pdf.getPageNumber() < decode_pdf.getPageCount())) {
-                        //Width of page on left so we can show the correct coords on right page
-                        final int xOffset = decode_pdf.getPdfPageData().getCropBoxWidth(decode_pdf.getPageNumber());
-                        if (cx >= xOffset) {
-                            cx -= xOffset;
-                        }
+                if ((decode_pdf.getDisplayView() == Display.FACING)
+                        && (decode_pdf.getPageNumber() < decode_pdf.getPageCount())) {
+                    //Width of page on left so we can show the correct coords on right page
+                    final int xOffset = decode_pdf.getPdfPageData().getCropBoxWidth(decode_pdf.getPageNumber());
+                    if (cx >= xOffset) {
+                        cx -= xOffset;
                     }
+                }
             } else {
                 cx = 0;
                 cy = 0;
             }
         }
-        
+
         // We adjust the PDF to (0,0) of decode_pdf, so add on the cropbox x/y account for this
         final int pagenumber = decode_pdf.getPageNumber();
         final int crx = decode_pdf.getPdfPageData().getCropBoxX(pagenumber);
         final int cry = decode_pdf.getPdfPageData().getCropBoxY(pagenumber);
         final Bounds pdfBounds = decode_pdf.getBoundsInLocal();
-        
+
         if ((Values.isProcessing()) || (commonValues.getSelectedFile() == null)) {
             currentGUI.setCoordText("  X: " + " Y: " + ' ' + ' '); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         } else if (cx >= 0 && cy >= 0 && cx <= pdfBounds.getMaxX() - currentGUI.getDropShadowDepth() && cy <= pdfBounds.getMaxY() - currentGUI.getDropShadowDepth()) {
             //Make sure we only display coords when we're inside the decode_pdf Pane display area.
-            currentGUI.setCoordText("  X: " + (cx+crx) + " Y: " + (cy+cry) + ' ' + ' ' + message); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            currentGUI.setCoordText("  X: " + (cx + crx) + " Y: " + (cy + cry) + ' ' + ' ' + message); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
 
@@ -503,11 +510,11 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
      */
     protected void scrollAndUpdateCoords(final MouseEvent e) {
         //scroll if user hits side
-       // int interval = decode_pdf.getScrollInterval();
-       // Rectangle visible_test = new Rectangle(adjustForAlignment((int) e.getX(), decode_pdf), e.getY(), interval, interval);
+        // int interval = decode_pdf.getScrollInterval();
+        // Rectangle visible_test = new Rectangle(adjustForAlignment((int) e.getX(), decode_pdf), e.getY(), interval, interval);
         if (GUI.debugFX) {
             //System.out.println("getVisibleRect and scrollRectToVisible is not implemented yet in JavaFXMouseListener.java");
-            
+
             /*
              * if((currentGUI.allowScrolling())&&(!decode_pdf.getVisibleRect().contains(visible_test))){
              * ((PdfDecoder)decode_pdf).scrollRectToVisible(visible_test); }
@@ -515,7 +522,6 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
         }
 
         //int page = commonValues.getCurrentPage();
-
         //Point p = selectionFunctions.getCoordsOnPage(e.getX(), e.getY(), page);
         final int x = (int) e.getX();
         final int y = (int) e.getY();
@@ -524,12 +530,13 @@ public class JavaFXMouseListener extends MouseSelector implements GUIMouseHandle
 
     /**
      * This method is not currently used as we change cursor via the CSS.
+     *
      * @param x
-     * @param y 
+     * @param y
      */
     private void getObjectUnderneath(final int x, final int y) {
         if (decode_pdf.getDisplayView() == Display.SINGLE_PAGE) {
-            final int type = ((FXDisplay)decode_pdf.getDynamicRenderer()).getObjectUnderneath(x, y);
+            final int type = ((FXDisplay) decode_pdf.getDynamicRenderer()).getObjectUnderneath(x, y);
             switch (type) {
                 case -1:
                     decode_pdf.setCursor(Cursor.DEFAULT);

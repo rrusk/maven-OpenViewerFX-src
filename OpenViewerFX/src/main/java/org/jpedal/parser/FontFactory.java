@@ -39,23 +39,23 @@ import org.jpedal.io.PdfObjectReader;
 
 public class FontFactory {
 
-    public static PdfFont createFont(final int fontType, final PdfObjectReader currentPdfFile, final String subFont, final boolean isPrinting) {
+    public static PdfFont createFont(final int fontType, final PdfObjectReader currentPdfFile, final String subFont) {
 
-        switch(fontType){
+        switch (fontType) {
             case StandardFonts.TYPE1:
-                return new org.jpedal.fonts.Type1C(currentPdfFile,subFont);
+                return new org.jpedal.fonts.Type1C(currentPdfFile, subFont);
 
             case StandardFonts.TRUETYPE:
-                return new org.jpedal.fonts.TrueType(currentPdfFile,subFont);
+                return new org.jpedal.fonts.TrueType(currentPdfFile, subFont);
 
             case StandardFonts.TYPE3:
-                return new org.jpedal.fonts.Type3(currentPdfFile, isPrinting);
-            
+                return new org.jpedal.fonts.Type3(currentPdfFile);
+
             case StandardFonts.CIDTYPE0:
-                return new org.jpedal.fonts.CIDFontType0(currentPdfFile,subFont);
+                return new org.jpedal.fonts.CIDFontType0(currentPdfFile, subFont);
 
             case StandardFonts.CIDTYPE2:
-                return new org.jpedal.fonts.CIDFontType2(currentPdfFile,subFont);
+                return new org.jpedal.fonts.CIDFontType2(currentPdfFile, subFont);
 
             default:
 

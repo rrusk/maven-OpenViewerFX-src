@@ -37,14 +37,21 @@ import java.io.IOException;
 
 public interface RandomAccessBuffer {
 
-  long getFilePointer() throws IOException;
-  void seek(long pos) throws IOException;
-  @SuppressWarnings("UnusedDeclaration")
-  int read() throws IOException;
-  String readLine() throws IOException;
-  long length() throws IOException;
-  void close() throws IOException;
-  @SuppressWarnings("UnusedReturnValue")
-  int read(byte[] b) throws IOException;
-  byte[] getPdfBuffer();
+    long getFilePointer() throws IOException;
+
+    void seek(long pos) throws IOException;
+
+    @SuppressWarnings("UnusedDeclaration")
+    int read() throws IOException;
+
+    String readLine() throws IOException;
+
+    long length() throws IOException;
+
+    void close() throws IOException;
+
+    @SuppressWarnings("UnusedReturnValue")
+    int read(byte[] b) throws IOException;
+
+    byte[] getPdfBuffer();
 }

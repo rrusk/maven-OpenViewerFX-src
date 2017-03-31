@@ -33,16 +33,20 @@
 package org.jpedal.io;
 
 /**
- *Used to log errors in printing
+ * Used to log errors in printing
  */
 public class DefaultErrorTracker implements org.jpedal.external.ErrorTracker {
 
 
-    /**flag used to show if printing worked*/
-    public boolean pageSuccessful=true;
+    /**
+     * flag used to show if printing worked
+     */
+    public boolean pageSuccessful = true;
 
-    /**Any printer errors*/
-    private String pageErrorMessages="";
+    /**
+     * Any printer errors
+     */
+    private String pageErrorMessages = "";
 
     /*
      * flag to show if printing failed
@@ -66,8 +70,8 @@ public class DefaultErrorTracker implements org.jpedal.external.ErrorTracker {
      */
     @Override
     public void addPageFailureMessage(final String value) {
-        pageSuccessful=false;
-        pageErrorMessages=pageErrorMessages+value+ '\n';
+        pageSuccessful = false;
+        pageErrorMessages = pageErrorMessages + value + '\n';
     }
 
     @Override
@@ -83,7 +87,7 @@ public class DefaultErrorTracker implements org.jpedal.external.ErrorTracker {
 
     @Override
     public void finishedPageDecoding(final int rawPage) {
-        
+
     }
 
     @Override

@@ -43,6 +43,7 @@ import javax.swing.TransferHandler;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.jpedal.examples.viewer.Commands;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.gui.GUIFactory;
@@ -55,70 +56,70 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class BaseTransferHandler extends TransferHandler {
-	protected final Commands currentCommands;
-	protected final GUIFactory currentGUI;
-	protected final Values commonValues;
+    protected final Commands currentCommands;
+    protected final GUIFactory currentGUI;
+    protected final Values commonValues;
 
-	public BaseTransferHandler(final Values commonValues, final GUIFactory currentGUI, final Commands currentCommands) {
-		this.commonValues = commonValues;
-		this.currentGUI = currentGUI;
-		this.currentCommands = currentCommands;
-	}
+    public BaseTransferHandler(final Values commonValues, final GUIFactory currentGUI, final Commands currentCommands) {
+        this.commonValues = commonValues;
+        this.currentGUI = currentGUI;
+        this.currentCommands = currentCommands;
+    }
 
-	@Override
+    @Override
     public boolean canImport(final JComponent dest, final DataFlavor[] flavors) {
-		return true;
-	}
+        return true;
+    }
 
-	protected Object getImport(final Transferable transferable) throws Exception{
-		final DataFlavor[] flavors = transferable.getTransferDataFlavors();
-		DataFlavor listFlavor = null;
-		final int lastFlavor = flavors.length - 1;
-	
-		// Check the flavors and see if we find one we like.
-		// If we do, save it.
-		for (int f = 0; f <= lastFlavor; f++) {
-			if (flavors[f].isFlavorJavaFileListType()) {
-				listFlavor = flavors[f];
-			}
-		}
-		
-		// Ok, now try to display the content of the drop.
-		try {
-			final DataFlavor bestTextFlavor = DataFlavor.selectBestTextFlavor(flavors);
-			if (bestTextFlavor != null) { // this could be a file from a web page being dragged in
-				final Reader r = bestTextFlavor.getReaderForText(transferable);
-				
-				String textData = readTextDate(r);
+    protected Object getImport(final Transferable transferable) throws Exception {
+        final DataFlavor[] flavors = transferable.getTransferDataFlavors();
+        DataFlavor listFlavor = null;
+        final int lastFlavor = flavors.length - 1;
 
-	            // need to remove all the 0 characters that will appear in the String when importing on Linux
-	            textData = removeChar(textData, (char) 0);
-	
-	            if(textData.contains("ftp:/")) {
-                	currentGUI.showMessageDialog("Files cannot be opened via FTP");
-                	return null;
+        // Check the flavors and see if we find one we like.
+        // If we do, save it.
+        for (int f = 0; f <= lastFlavor; f++) {
+            if (flavors[f].isFlavorJavaFileListType()) {
+                listFlavor = flavors[f];
+            }
+        }
+
+        // Ok, now try to display the content of the drop.
+        try {
+            final DataFlavor bestTextFlavor = DataFlavor.selectBestTextFlavor(flavors);
+            if (bestTextFlavor != null) { // this could be a file from a web page being dragged in
+                final Reader r = bestTextFlavor.getReaderForText(transferable);
+
+                String textData = readTextDate(r);
+
+                // need to remove all the 0 characters that will appear in the String when importing on Linux
+                textData = removeChar(textData, (char) 0);
+
+                if (textData.contains("ftp:/")) {
+                    currentGUI.showMessageDialog("Files cannot be opened via FTP");
+                    return null;
                 }
-	            
-	            textData = getURL(textData);
-	            
-	            // replace URL spaces
-	            textData = textData.replaceAll("%20", " ");
-	            
-				return textData;
-	
-	        } else if (listFlavor != null) { // this is most likely a file being dragged in
-				return transferable.getTransferData(listFlavor);		
-			}
-		} catch (final Exception e) {
-			LogWriter.writeLog("Caught exception decoding transfer:"+e.getMessage());
-			
-			return null;
-		}
-		
-		return null;
-	}
-	
-	private static String removeChar(final String s, final char c) {
+
+                textData = getURL(textData);
+
+                // replace URL spaces
+                textData = textData.replaceAll("%20", " ");
+
+                return textData;
+
+            } else if (listFlavor != null) { // this is most likely a file being dragged in
+                return transferable.getTransferData(listFlavor);
+            }
+        } catch (final Exception e) {
+            LogWriter.writeLog("Caught exception decoding transfer:" + e.getMessage());
+
+            return null;
+        }
+
+        return null;
+    }
+
+    private static String removeChar(final String s, final char c) {
         final StringBuilder r = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) != c) {
@@ -129,14 +130,15 @@ public class BaseTransferHandler extends TransferHandler {
     }
 
     /**
-	 * Returns the URL from the text data acquired from the transferable object.
-	 * @param textData text data acquired from the transferable.
-	 * @return the URL of the file to open
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 */
-	private static String getURL(String textData) throws ParserConfigurationException, SAXException, IOException {
+     * Returns the URL from the text data acquired from the transferable object.
+     *
+     * @param textData text data acquired from the transferable.
+     * @return the URL of the file to open
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    private static String getURL(String textData) throws ParserConfigurationException, SAXException, IOException {
         if (!textData.startsWith("http://") && !textData.startsWith("file://")) { // its not a url so it must be a file
             final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             final DocumentBuilder db = dbf.newDocumentBuilder();
@@ -144,46 +146,48 @@ public class BaseTransferHandler extends TransferHandler {
 
             final Element a = (Element) doc.getElementsByTagName("a").item(0);
             textData = getHrefAttribute(a);
-        }            
-		
-		return textData;
-	}
+        }
 
-	/**
-	 * Acquire text data from a reader. <br/><br/>
-	 * Firefox this will be some html containing an "a" element with the "href" attribute linking to the to the PDF. <br/><br/>
-	 * IE a simple one line String containing the URL will be returned
-	 * @param r the reader to read from
-	 * @return the text data from the reader
-	 * @throws IOException
-	 */
-	private static String readTextDate(final Reader r) throws IOException {
-		final BufferedReader br = new BufferedReader(r);
-		
-		final StringBuilder textData = new StringBuilder();
-		String line = br.readLine();
-		while (line != null) {
-			textData.append(line);
-			line = br.readLine();
-		}
-		br.close();
-		
-		return textData.toString();
-	}
+        return textData;
+    }
 
-	/**
-	 * Returns the URL held in the href attribute from an element
-	 * @param element the element containing the href attribute
-	 * @return the URL held in the href attribute
-	 */
-	private static String getHrefAttribute(final Element element) {
-		final NamedNodeMap attrs = element.getAttributes();
-	
-		final Node nameNode = attrs.getNamedItem("href");
-		if (nameNode != null) {
-			return nameNode.getNodeValue();
-		}
-		
-		return null;
-	}
+    /**
+     * Acquire text data from a reader. <br/><br/>
+     * Firefox this will be some html containing an "a" element with the "href" attribute linking to the to the PDF. <br/><br/>
+     * IE a simple one line String containing the URL will be returned
+     *
+     * @param r the reader to read from
+     * @return the text data from the reader
+     * @throws IOException
+     */
+    private static String readTextDate(final Reader r) throws IOException {
+        final BufferedReader br = new BufferedReader(r);
+
+        final StringBuilder textData = new StringBuilder();
+        String line = br.readLine();
+        while (line != null) {
+            textData.append(line);
+            line = br.readLine();
+        }
+        br.close();
+
+        return textData.toString();
+    }
+
+    /**
+     * Returns the URL held in the href attribute from an element
+     *
+     * @param element the element containing the href attribute
+     * @return the URL held in the href attribute
+     */
+    private static String getHrefAttribute(final Element element) {
+        final NamedNodeMap attrs = element.getAttributes();
+
+        final Node nameNode = attrs.getNamedItem("href");
+        if (nameNode != null) {
+            return nameNode.getNodeValue();
+        }
+
+        return null;
+    }
 }

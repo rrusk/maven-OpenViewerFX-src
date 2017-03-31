@@ -34,6 +34,7 @@ package org.jpedal.parser.shape;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
+
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.PdfShape;
@@ -42,15 +43,15 @@ import org.jpedal.parser.ParserOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 
 public class B {
-    
+
     public static Shape execute(final boolean isStar, final boolean isLowerCase, final GraphicsState gs, final int formLevel, final PdfShape currentDrawShape, final DynamicVectorRenderer current, final ParserOptions parserOptions) {
 
-        final boolean useJavaFX=parserOptions.useJavaFX();
-        final boolean renderPage=parserOptions.isRenderPage();
+        final boolean useJavaFX = parserOptions.useJavaFX();
+        final boolean renderPage = parserOptions.isRenderPage();
 
-        Shape currentShape=null;
-        
-        if(parserOptions.isLayerVisible()){
+        Shape currentShape = null;
+
+        if (parserOptions.isLayerVisible()) {
             //set Winding rule
             if (isStar) {
                 currentDrawShape.setEVENODDWindingRule();
@@ -63,55 +64,55 @@ public class B {
                 currentDrawShape.closeShape();
             }
 
-            
-            Object fxPath=null;
 
-            if(useJavaFX){
-                fxPath=currentDrawShape.getPath();
-            }else{
+            Object fxPath = null;
+
+            if (useJavaFX) {
+                fxPath = currentDrawShape.getPath();
+            } else {
                 //generate swing shape and stroke and status. Type required to check if EvenOdd rule emulation required.
-                currentShape =currentDrawShape.generateShapeFromPath(gs.CTM,gs.getLineWidth(),Cmd.B);
-            
+                currentShape = currentDrawShape.generateShapeFromPath(gs.CTM, gs.getLineWidth(), Cmd.B);
+
                 //hack which fixes blocky text on Customers3/demo_3.pdf in Swing
-                if(currentShape!=null && currentShape.getBounds2D().getWidth()<1 && currentShape.getBounds2D().getHeight()<1){
+                if (currentShape != null && currentShape.getBounds2D().getWidth() < 1 && currentShape.getBounds2D().getHeight() < 1) {
                     currentDrawShape.resetPath();
                     return null;
                 }
             }
 
-            final boolean hasShape=currentShape!=null || fxPath!=null;
-            
+            final boolean hasShape = currentShape != null || fxPath != null;
+
 
             //only curently implemented in Swing (fixes /PDFdata/test_data/baseline_screens/debug3/535B-X-test.pdf)
-            if(!useJavaFX && !isLowerCase && formLevel > 2 &&  hasShape && currentDrawShape.isClosed() && gs.getClippingShape()!=null && gs.nonstrokeColorSpace.getID()== ColorSpaces.DeviceCMYK && gs.nonstrokeColorSpace.getColor().getRGB()==-1 && gs.getAlpha(GraphicsState.STROKE)==0){
+            if (!useJavaFX && !isLowerCase && formLevel > 2 && hasShape && currentDrawShape.isClosed() && gs.getClippingShape() != null && gs.nonstrokeColorSpace.getID() == ColorSpaces.DeviceCMYK && gs.nonstrokeColorSpace.getColor().getRGB() == -1 && gs.getAlpha(GraphicsState.STROKE) == 0) {
 
-                final Area a=gs.getClippingShape();
+                final Area a = gs.getClippingShape();
                 a.subtract(new Area(currentShape));
-                currentShape=a;
-               
+                currentShape = a;
+
                 //temp hack to make new code work as old
                 currentDrawShape.setShape(currentShape);
 
             }
 
             //save for later
-            if (renderPage && hasShape){
+            if (renderPage && hasShape) {
 
                 gs.setStrokeColor(gs.strokeColorSpace.getColor());
                 gs.setNonstrokeColor(gs.nonstrokeColorSpace.getColor());
 
-                if(gs.nonstrokeColorSpace.getColor().getRGB()==-16777216 && (gs.getAlpha(GraphicsState.STROKE)==0)){
+                if (gs.nonstrokeColorSpace.getColor().getRGB() == -16777216 && (gs.getAlpha(GraphicsState.STROKE) == 0)) {
                     gs.setFillType(GraphicsState.STROKE);
-                }else {
+                } else {
                     gs.setFillType(GraphicsState.FILLSTROKE);
                 }
 
-                if(useJavaFX){
-                    current.drawShape(fxPath,gs);
-                }else{
+                if (useJavaFX) {
+                    current.drawShape(fxPath, gs);
+                } else {
                     current.drawShape(currentDrawShape, gs, Cmd.B);
                     if (current.isHTMLorSVG()) {
-                        current.eliminateHiddenText(currentShape,gs,currentDrawShape.getSegmentCount(), false);
+                        current.eliminateHiddenText(currentShape, gs, currentDrawShape.getSegmentCount(), false);
                     }
                 }
             }

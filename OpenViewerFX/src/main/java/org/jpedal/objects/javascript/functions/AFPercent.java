@@ -37,55 +37,55 @@ import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.raw.FormObject;
 import org.jpedal.sun.PrintfFormat;
 
-public class AFPercent extends AFNumber{
+public class AFPercent extends AFNumber {
 
     public AFPercent(final AcroRenderer acro, final FormObject formObject) {
-        super(acro,formObject);
+        super(acro, formObject);
     }
 
 
     @Override
     public int execute(final String js, final String[] args, final int type, final int event, final char keyPressed) {
 
-        int messageCode= ActionHandler.NOMESSAGE;
+        int messageCode = ActionHandler.NOMESSAGE;
 
-        if(args==null ){
-            debug("Unknown implementation in "+js);
+        if (args == null) {
+            debug("Unknown implementation in " + js);
 
-        }else if(args.length<1){
+        } else if (args.length < 1) {
             debug("Values length is less than 1");
-        }else{
+        } else {
 
             //settings
             int decCount = JSFunction.getStaticDecimalCount();
-			if(decCount==-1) {
+            if (decCount == -1) {
                 decCount = Integer.parseInt(args[1]);
             }
-			
-			int gapFormat = JSFunction.getStaticGapFormat();
-			if(gapFormat==-1) {
+
+            int gapFormat = JSFunction.getStaticGapFormat();
+            if (gapFormat == -1) {
                 gapFormat = Integer.parseInt(args[2]);
             }
 
-            if(type==KEYSTROKE){
+            if (type == KEYSTROKE) {
 
-                messageCode=validateNumber( type, event, decCount, gapFormat, 0,"",true);
+                messageCode = validateNumber(type, event, decCount, gapFormat, 0, "", true);
 
-            }else if(type==FORMAT){
+            } else if (type == FORMAT) {
 
                 //current form value
                 String currentVal;
 
-                currentVal=(String)formObject.getFormValue();
+                currentVal = (String) formObject.getFormValue();
 
-                float number=0;
-                String mask="";
+                float number = 0;
+                String mask = "";
 
-                if(currentVal!=null && !currentVal.isEmpty()){
-                    final StringBuffer numValu = convertStringToNumber(currentVal,gapFormat);
+                if (currentVal != null && !currentVal.isEmpty()) {
+                    final StringBuffer numValu = convertStringToNumber(currentVal, gapFormat);
 
                     //reset if no number or validate
-                    if(numValu.length()>0) {
+                    if (numValu.length() > 0) {
                         number = Float.parseFloat(numValu.toString()) * 100;
                     }
 
@@ -93,18 +93,18 @@ public class AFPercent extends AFNumber{
                     mask = mask + '%' + gapFormat + '.' + decCount + 'f';
 
                     //apply mask and add % to end
-                    currentVal = new PrintfFormat(mask).sprintf(number)+ '%';
-                    
-                }else {
+                    currentVal = new PrintfFormat(mask).sprintf(number) + '%';
+
+                } else {
                     currentVal = "";
                 }
 
                 //write back
                 formObject.setLastValidValue(currentVal);
-                formObject.updateValue(currentVal,false, true);
+                formObject.updateValue(currentVal, false, true);
 
 
-            }else {
+            } else {
                 debug("Unknown type " + args[0] + " in " + js);
             }
         }

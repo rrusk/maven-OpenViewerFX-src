@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.constants.JPedalSettings;
 import org.jpedal.exception.PdfException;
@@ -44,7 +45,7 @@ import org.jpedal.exception.PdfException;
 public class SetDisplayBackground {
 
     /**
-     * @param args object array containing arguments, args[0] should be an integer
+     * @param args       object array containing arguments, args[0] should be an integer
      * @param decode_pdf PdfDecoderInt object representing the PdfObject currently open
      */
     public static void execute(final Object[] args, final PdfDecoderInt decode_pdf) {

@@ -46,13 +46,13 @@ import org.jpedal.examples.viewer.gui.generic.GUICombo;
  */
 public class JavaFXCommandListener extends CommandListenerImpl implements EventHandler<ActionEvent> {
 
-    
+
     final Commands currentCommands;
-    
-    public JavaFXCommandListener(final Commands currentCommands){
+
+    public JavaFXCommandListener(final Commands currentCommands) {
         this.currentCommands = currentCommands;
     }
-    
+
     @Override
     public void handle(final ActionEvent t) {
 
@@ -67,12 +67,12 @@ public class JavaFXCommandListener extends CommandListenerImpl implements EventH
         } else {
             ID = ((JavaFXID) source).getID();
         }
-           if (!SharedViewer.closeCalled) {
+        if (!SharedViewer.closeCalled) {
             currentCommands.executeCommand(ID, null);
         } else {
             throw new RuntimeException("No resource to open document, call to close() disposes viewer resources");
         }
 
     }
-    
+
 }

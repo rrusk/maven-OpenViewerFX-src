@@ -33,6 +33,7 @@
 package org.jpedal.render;
 
 import com.idrsolutions.pdf.color.blends.BlendMode;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.jpedal.color.PdfColor;
 import org.jpedal.color.PdfPaint;
 import org.jpedal.exception.PdfException;
@@ -59,22 +61,30 @@ import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
 public abstract class BaseDisplay implements DynamicVectorRenderer {
 
-    /**holds object type*/
+    /**
+     * holds object type
+     */
     protected Vector_Int objectType;
 
-    /**default array size*/
-    protected static final int defaultSize=5000;
+    /**
+     * default array size
+     */
+    protected static final int defaultSize = 5000;
 
     protected int type;
 
     boolean isType3Font;
-    
-    public int currentTokenNumber=-1;
 
-    /**set flag to show if we add a background*/
+    public int currentTokenNumber = -1;
+
+    /**
+     * set flag to show if we add a background
+     */
     protected boolean addBackground = true;
 
-    /**holds rectangular outline to test in redraw*/
+    /**
+     * holds rectangular outline to test in redraw
+     */
     protected Vector_Rectangle_Int areas;
 
     protected ObjectStore objectStoreRef;
@@ -87,15 +97,17 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     //used to track end of PDF page in display
     //must NEVER be made static
-    protected int endItem=-1;
+    protected int endItem = -1;
 
     Area lastClip;
 
     boolean hasClips;
 
-    int blendMode=PdfDictionary.Normal;
+    int blendMode = PdfDictionary.Normal;
 
-    /**shows if colours over-ridden for type3 font*/
+    /**
+     * shows if colours over-ridden for type3 font
+     */
     boolean colorsLocked;
 
     Graphics2D g2;
@@ -103,8 +115,10 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     //used by type3 fonts as identifier
     String rawKey;
 
-    /**global colours if set*/
-    PdfPaint fillCol,strokeCol;
+    /**
+     * global colours if set
+     */
+    PdfPaint fillCol, strokeCol;
 
     public int rawPageNumber;
 
@@ -118,17 +132,23 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     double cropX, cropH;
 
-    float scaling=1, lastScaling;
+    float scaling = 1, lastScaling;
 
-    /**initial Q & D object to hold data*/
+    /**
+     * initial Q & D object to hold data
+     */
     protected Vector_Object pageObjects;
 
-    protected final Map<Integer, String> imageIDtoName=new HashMap<Integer, String>(10);
+    protected final Map<Integer, String> imageIDtoName = new HashMap<Integer, String>(10);
 
-    /**real size of pdf page */
+    /**
+     * real size of pdf page
+     */
     int w, h;
 
-    /**background color*/
+    /**
+     * background color
+     */
     protected Color backgroundColor = Color.WHITE;
     protected static Color textColor;
     protected static int colorThresholdToReplace = 255;
@@ -136,23 +156,25 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     protected boolean changeLineArtAndText;
 
-    /**allow user to control*/
+    /**
+     * allow user to control
+     */
     public static RenderingHints userHints;
 
     @Override
     public void setG2(final Graphics2D g2) {
-    	this.g2 = g2;
-    	//If user hints has been defined use these values.
-    	if(userHints!=null){
-    		this.g2.setRenderingHints(userHints);
-    	}
+        this.g2 = g2;
+        //If user hints has been defined use these values.
+        if (userHints != null) {
+            this.g2.setRenderingHints(userHints);
+        }
     }
 
     @Override
     public void init(final int width, final int height, final Color backgroundColor) {
-    	w = width;
-    	h = height;
-    	this.backgroundColor = backgroundColor;
+        w = width;
+        h = height;
+        this.backgroundColor = backgroundColor;
     }
 
     protected void paintBackground(final Shape dirtyRegion) {
@@ -168,19 +190,19 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     }
 
 
-    protected static boolean checkColorThreshold(final int col){
+    protected static boolean checkColorThreshold(final int col) {
 
-    	final int r = (col)&0xFF;
-		final int g = (col>>8)&0xFF;
-		final int b = (col>>16)&0xFF;
+        final int r = (col) & 0xFF;
+        final int g = (col >> 8) & 0xFF;
+        final int b = (col >> 16) & 0xFF;
 
         return r <= colorThresholdToReplace && g <= colorThresholdToReplace && b <= colorThresholdToReplace;
     }
 
     void renderEmbeddedText(final int text_fill_type, final Object rawglyph, final int glyphType,
-	    final AffineTransform glyphAT, final Rectangle textHighlight,
-	    PdfPaint strokePaint, PdfPaint fillPaint,
-	    final float strokeOpacity, final float fillOpacity, final int lineWidth) {
+                            final AffineTransform glyphAT, final Rectangle textHighlight,
+                            PdfPaint strokePaint, PdfPaint fillPaint,
+                            final float strokeOpacity, final float fillOpacity, final int lineWidth) {
 
         //ensure stroke only shows up
         float strokeOnlyLine = 0;
@@ -207,13 +229,13 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
             if ((text_fill_type & GraphicsState.FILL) == GraphicsState.FILL) {
 
-            	//If we have an alt text color, its within threshold and not an additional item, use alt color
-            	if(textColor!=null && (itemToRender==-1 || (endItem==-1 || itemToRender<=endItem)) && checkColorThreshold(fillPaint.getRGB())){
-            		fillPaint = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-            	}
+                //If we have an alt text color, its within threshold and not an additional item, use alt color
+                if (textColor != null && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(fillPaint.getRGB())) {
+                    fillPaint = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
+                }
 
 //                fillPaint.setScaling(cropX, cropH, scaling, 0, 0);
-                fillPaint.setScaling(cropX, cropH, scaling, (float)glyphAT.getTranslateX(),(float)glyphAT.getTranslateY());
+                fillPaint.setScaling(cropX, cropH, scaling, (float) glyphAT.getTranslateX(), (float) glyphAT.getTranslateY());
 
                 if (customColorHandler != null) {
                     customColorHandler.setPaint(g2, fillPaint, rawPageNumber, isPrinting);
@@ -236,8 +258,8 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
 
                 //pass down color for drawing text
-                if(glyphType==DynamicVectorRenderer.TYPE3 && !glyph.ignoreColors()){
-                    glyph.setT3Colors(strokePaint, fillPaint,false);
+                if (glyphType == DynamicVectorRenderer.TYPE3 && !glyph.ignoreColors()) {
+                    glyph.setT3Colors(strokePaint, fillPaint, false);
                 }
 
                 glyph.render(GraphicsState.FILL, g2, scaling, false);
@@ -256,10 +278,10 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
             } else if ((text_fill_type & GraphicsState.STROKE) == GraphicsState.STROKE) {
 
                 if (strokePaint != null) {
-                	//If we have an alt text color, its within threshold and not an additional item, use alt color
-                	if(textColor!=null && (itemToRender==-1 || (endItem==-1 || itemToRender<=endItem)) && checkColorThreshold(strokePaint.getRGB())){
-                		strokePaint = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-                	}
+                    //If we have an alt text color, its within threshold and not an additional item, use alt color
+                    if (textColor != null && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(strokePaint.getRGB())) {
+                        strokePaint = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
+                    }
                     strokePaint.setScaling(cropX, cropH, scaling, 0, 0);
                 }
 
@@ -299,131 +321,131 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     }
 
     void renderShape(final Shape defaultClip, final int fillType, PdfPaint strokeCol, PdfPaint fillCol,
-	    final Stroke shapeStroke, Shape currentShape, final float strokeOpacity,
-	    final float fillOpacity) {
+                     final Stroke shapeStroke, Shape currentShape, final float strokeOpacity,
+                     final float fillOpacity) {
 
-    	boolean clipChanged=false;
+        boolean clipChanged = false;
 
-	final Shape clip = g2.getClip();
+        final Shape clip = g2.getClip();
 
-	final Composite comp = g2.getComposite();
+        final Composite comp = g2.getComposite();
 
-    
+
         //check for 1 x 1 complex shape (after scaling) and replace with dot
-        if(type ==DISPLAY_SCREEN && !isPrinting && currentShape.getBounds().getWidth()*scaling==1 &&
-                currentShape.getBounds().getHeight()*scaling==1 && ((BasicStroke)shapeStroke).getLineWidth()*scaling<1) {
+        if (type == DISPLAY_SCREEN && !isPrinting && currentShape.getBounds().getWidth() * scaling == 1 &&
+                currentShape.getBounds().getHeight() * scaling == 1 && ((BasicStroke) shapeStroke).getLineWidth() * scaling < 1) {
             currentShape = new Rectangle(currentShape.getBounds().x, currentShape.getBounds().y, 1, 1);
         }
-        
-    
-	//stroke and fill (do fill first so we don't overwrite Stroke)
-	if (fillType == GraphicsState.FILL || fillType == GraphicsState.FILLSTROKE) {
-                // Fill color is null if the shape is a pattern
-		if (fillCol != null){
-                    if((fillCol.getRGB()!=-1) &&
-                            //If we have an alt text color, are changing line art as well, its within threshold and not an additional item, use alt color
 
-                         (changeLineArtAndText && textColor != null && !fillCol.isPattern() && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(fillCol.getRGB()))) {
-                            fillCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
 
-                    }
+        //stroke and fill (do fill first so we don't overwrite Stroke)
+        if (fillType == GraphicsState.FILL || fillType == GraphicsState.FILLSTROKE) {
+            // Fill color is null if the shape is a pattern
+            if (fillCol != null) {
+                if ((fillCol.getRGB() != -1) &&
+                        //If we have an alt text color, are changing line art as well, its within threshold and not an additional item, use alt color
 
-        	    fillCol.setScaling(cropX, cropH, scaling, 0, 0);
+                        (changeLineArtAndText && textColor != null && !fillCol.isPattern() && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(fillCol.getRGB()))) {
+                    fillCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
+
                 }
 
-	    if (customColorHandler != null) {
-	    	customColorHandler.setPaint(g2, fillCol, rawPageNumber, isPrinting);
-	    } else if (DecoderOptions.Helper != null) {
-            DecoderOptions.Helper.setPaint(g2, fillCol, rawPageNumber, isPrinting);
-	    } else {
-	    	g2.setPaint(fillCol);
-	    }
-
-        renderComposite(fillOpacity);
-
-	    try{
-            //thin lines do not appear unless we use fillRect
-            final double iw=currentShape.getBounds2D().getWidth();
-            final double ih=currentShape.getBounds2D().getHeight();
-
-            if((ih==0d || iw==0d) && ((BasicStroke)g2.getStroke()).getLineWidth()<=1.0f){
-                g2.fillRect(currentShape.getBounds().x,currentShape.getBounds().y,currentShape.getBounds().width,currentShape.getBounds().height);
-            }else {
-                g2.fill(currentShape);
+                fillCol.setScaling(cropX, cropH, scaling, 0, 0);
             }
 
-        }catch(final Exception e){
-	    	LogWriter.writeLog("Exception " + e + " filling shape");
-        }
-
-	    g2.setComposite(comp);
-	}
-
-	if ((fillType == GraphicsState.STROKE) || (fillType == GraphicsState.FILLSTROKE)) {
-
-	    //set values for drawing the shape
-	    final Stroke currentStroke = g2.getStroke();
-
-	    //fix for using large width on point to draw line
-	    if (currentShape.getBounds2D().getWidth() < 1.0f && ((BasicStroke) shapeStroke).getLineWidth() > 10) {
-	    	g2.setStroke(new BasicStroke(1));
-	    } else {
-            //Adjust line width to 1 if less than 1
-            //ignore if using T3Display (such as ap image generation in html / svg conversion
-            if(enhanceFractionalLines && ((((BasicStroke)shapeStroke).getLineWidth()*scaling<1) &&
-                    !isPrinting && !(this instanceof T3Display))){
-                g2.setStroke(new BasicStroke(1/scaling,((BasicStroke)shapeStroke).getEndCap(), ((BasicStroke)shapeStroke).getLineJoin(), ((BasicStroke)shapeStroke).getMiterLimit(), ((BasicStroke)shapeStroke).getDashArray(), ((BasicStroke)shapeStroke).getDashPhase()));
-            }else{
-                g2.setStroke(shapeStroke);
+            if (customColorHandler != null) {
+                customColorHandler.setPaint(g2, fillCol, rawPageNumber, isPrinting);
+            } else if (DecoderOptions.Helper != null) {
+                DecoderOptions.Helper.setPaint(g2, fillCol, rawPageNumber, isPrinting);
+            } else {
+                g2.setPaint(fillCol);
             }
+
+            renderComposite(fillOpacity);
+
+            try {
+                //thin lines do not appear unless we use fillRect
+                final double iw = currentShape.getBounds2D().getWidth();
+                final double ih = currentShape.getBounds2D().getHeight();
+
+                if ((ih == 0d || iw == 0d) && ((BasicStroke) g2.getStroke()).getLineWidth() <= 1.0f) {
+                    g2.fillRect(currentShape.getBounds().x, currentShape.getBounds().y, currentShape.getBounds().width, currentShape.getBounds().height);
+                } else {
+                    g2.fill(currentShape);
+                }
+
+            } catch (final Exception e) {
+                LogWriter.writeLog("Exception " + e + " filling shape");
+            }
+
+            g2.setComposite(comp);
         }
 
-	  //If we have an alt text color, are changing line art, its within threshold and not an additional item, use alt color
-	    if(changeLineArtAndText && textColor!=null && !strokeCol.isPattern() && (itemToRender==-1 || (endItem==-1 || itemToRender<=endItem)) && checkColorThreshold(strokeCol.getRGB())){
-    		strokeCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
-    	}
+        if ((fillType == GraphicsState.STROKE) || (fillType == GraphicsState.FILLSTROKE)) {
 
-	    strokeCol.setScaling(cropX, cropH, scaling, 0, 0);
+            //set values for drawing the shape
+            final Stroke currentStroke = g2.getStroke();
 
-	    if (customColorHandler != null) {
-	    	customColorHandler.setPaint(g2, strokeCol, rawPageNumber, isPrinting);
-	    } else if (DecoderOptions.Helper != null) {
-            DecoderOptions.Helper.setPaint(g2, strokeCol, rawPageNumber, isPrinting);
-	    } else {
-	    	g2.setPaint(strokeCol);
-	    }
+            //fix for using large width on point to draw line
+            if (currentShape.getBounds2D().getWidth() < 1.0f && ((BasicStroke) shapeStroke).getLineWidth() > 10) {
+                g2.setStroke(new BasicStroke(1));
+            } else {
+                //Adjust line width to 1 if less than 1
+                //ignore if using T3Display (such as ap image generation in html / svg conversion
+                if (enhanceFractionalLines && ((((BasicStroke) shapeStroke).getLineWidth() * scaling < 1) &&
+                        !isPrinting && !(this instanceof T3Display))) {
+                    g2.setStroke(new BasicStroke(1 / scaling, ((BasicStroke) shapeStroke).getEndCap(), ((BasicStroke) shapeStroke).getLineJoin(), ((BasicStroke) shapeStroke).getMiterLimit(), ((BasicStroke) shapeStroke).getDashArray(), ((BasicStroke) shapeStroke).getDashPhase()));
+                } else {
+                    g2.setStroke(shapeStroke);
+                }
+            }
 
-	    renderComposite(strokeOpacity);
+            //If we have an alt text color, are changing line art, its within threshold and not an additional item, use alt color
+            if (changeLineArtAndText && textColor != null && !strokeCol.isPattern() && (itemToRender == -1 || (endItem == -1 || itemToRender <= endItem)) && checkColorThreshold(strokeCol.getRGB())) {
+                strokeCol = new PdfColor(textColor.getRed(), textColor.getGreen(), textColor.getBlue());
+            }
 
-            if(!isPrinting && clip != null && clip.getBounds2D().getWidth()%1 > 0.65f && clip.getBounds2D().getHeight()%1 > 0.1f){
-                if(currentShape.getBounds().getWidth() == clip.getBounds().getWidth()){
+            strokeCol.setScaling(cropX, cropH, scaling, 0, 0);
+
+            if (customColorHandler != null) {
+                customColorHandler.setPaint(g2, strokeCol, rawPageNumber, isPrinting);
+            } else if (DecoderOptions.Helper != null) {
+                DecoderOptions.Helper.setPaint(g2, strokeCol, rawPageNumber, isPrinting);
+            } else {
+                g2.setPaint(strokeCol);
+            }
+
+            renderComposite(strokeOpacity);
+
+            if (!isPrinting && clip != null && clip.getBounds2D().getWidth() % 1 > 0.65f && clip.getBounds2D().getHeight() % 1 > 0.1f) {
+                if (currentShape.getBounds().getWidth() == clip.getBounds().getWidth()) {
                     g2.setClip(ClipUtils.convertPDFClipToJavaClip(new Area(clip)));  //use null or visible screen area
-                    clipChanged=true;
+                    clipChanged = true;
                 }
-	    }
-
-	    //breaks printing so disabled there      
-        if(!isPrinting && clip != null){
-            final Double height = clip.getBounds2D().getHeight();
-            final Double width = clip.getBounds2D().getWidth();
-            if ((height < 1 && height > 0) || (width < 1 && width > 0)) {
-                g2.setClip(defaultClip);  //use null or visible screen area
-                clipChanged = true;
             }
+
+            //breaks printing so disabled there
+            if (!isPrinting && clip != null) {
+                final Double height = clip.getBounds2D().getHeight();
+                final Double width = clip.getBounds2D().getWidth();
+                if ((height < 1 && height > 0) || (width < 1 && width > 0)) {
+                    g2.setClip(defaultClip);  //use null or visible screen area
+                    clipChanged = true;
+                }
+            }
+
+            g2.draw(currentShape);
+            g2.setStroke(currentStroke);
+            g2.setComposite(comp);
         }
 
-	    g2.draw(currentShape);
-	    g2.setStroke(currentStroke);
-	    g2.setComposite(comp);
-	}
-
-	if(clipChanged) {
-        g2.setClip(clip);
-    }
+        if (clipChanged) {
+            g2.setClip(clip);
+        }
     }
 
     void renderImage(final AffineTransform imageAf, BufferedImage image, final float alpha,
-            final GraphicsState currentGraphicsState, final float x, final float y) {
+                     final GraphicsState currentGraphicsState, final float x, final float y) {
 
         final boolean renderDirect = (currentGraphicsState != null);
 
@@ -513,7 +535,7 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
                 }
             }
         }
-        
+
         //Draw image as normal
         g2.drawImage(image, upside_down, null);
 
@@ -530,9 +552,9 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     @Override
     public void setScalingValues(final double cropX, final double cropH, final float scaling) {
 
-	this.cropX = cropX;
-	this.cropH = cropH;
-	this.scaling = scaling;
+        this.cropX = cropX;
+        this.cropH = cropH;
+        this.scaling = scaling;
 
     }
 
@@ -546,28 +568,28 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
      */
     @Override
     public byte[] serializeToByteArray(final Set<String> fontsAlreadyOnClient) throws IOException {
-	return new byte[0];
+        return new byte[0];
     }
 
     @Override
     public void drawShape(final PdfShape pdfShape, final GraphicsState currentGraphicsState, final int cmd) {
-	//    throw new UnsupportedOperationException("Not supported yet.");
+        //    throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void drawEmbeddedText(final float[][] Trm, final int fontSize, final PdfGlyph embeddedGlyph, final Object javaGlyph, final int type, final GraphicsState gs, final double[] at, final String glyf, final PdfFont currentFontData, final float glyfWidth) {
-	//throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void paint(final Rectangle[] highlights, final AffineTransform viewScaling, final Rectangle userAnnot) {
-	//   throw new UnsupportedOperationException("Not supported yet.");
+        //   throw new UnsupportedOperationException("Not supported yet.");
 
     }
 
     @Override
     public int drawImage(final int pageNumber, final BufferedImage image, final GraphicsState currentGraphicsState, final boolean alreadyCached, final String name, final int previousUse) {
-	return -1;
+        return -1;
     }
 
     @Override
@@ -576,22 +598,22 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     @Override
     public void drawText(final float[][] Trm, final String text, final GraphicsState currentGraphicsState, final float x, final float y, final Font javaFont) {
-	//throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void setGraphicsState(final int fillType, final float value, final int BM) {
-	//throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void drawTR(final int value) {
-	//throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void drawClip(final GraphicsState currentGraphicsState, final Shape defaultClip, final boolean alwaysDraw) {
-	//    throw new UnsupportedOperationException("Not supported yet.");
+        //    throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -599,16 +621,16 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
      */
     @Override
     public void writeCustom(final int key, final Object value) {
-        
+
         switch (key) {
             case CUSTOM_IMAGE_HANDLER:
                 this.customImageHandler = (org.jpedal.external.ImageHandler) value;
                 break;
 
             case CUSTOM_COLOR_HANDLER:
-                this.customColorHandler = (org.jpedal.external.ColorHandler)  value;
+                this.customColorHandler = (org.jpedal.external.ColorHandler) value;
                 break;
-                
+
             case PAINT_BACKGROUND:
                 paintBackground((Shape) value);
                 break;
@@ -618,42 +640,42 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
 
     @Override
     public void setValue(final int key, final int i) {
-        switch(key){
-        case ALT_BACKGROUND_COLOR:
-        	backgroundColor = new Color(i);
-        	break;
-        case ALT_FOREGROUND_COLOR:
-        	textColor = new Color(i);
-        	break;
-        case FOREGROUND_INCLUDE_LINEART:
-            changeLineArtAndText = i > 0;
-        	break;
-        case COLOR_REPLACEMENT_THRESHOLD:
-        	colorThresholdToReplace = i;
-        	break;
-        case ENHANCE_FRACTIONAL_LINES:
-            enhanceFractionalLines = i != 0;
-        	break;
-            
-        case TOKEN_NUMBER:
-           this.currentTokenNumber = i;
-           break;
-           
+        switch (key) {
+            case ALT_BACKGROUND_COLOR:
+                backgroundColor = new Color(i);
+                break;
+            case ALT_FOREGROUND_COLOR:
+                textColor = new Color(i);
+                break;
+            case FOREGROUND_INCLUDE_LINEART:
+                changeLineArtAndText = i > 0;
+                break;
+            case COLOR_REPLACEMENT_THRESHOLD:
+                colorThresholdToReplace = i;
+                break;
+            case ENHANCE_FRACTIONAL_LINES:
+                enhanceFractionalLines = i != 0;
+                break;
+
+            case TOKEN_NUMBER:
+                this.currentTokenNumber = i;
+                break;
+
         }
     }
 
     @Override
     public int getValue(final int key) {
-        
-        switch(key){
+
+        switch (key) {
 
             case TOKEN_NUMBER:
                 return currentTokenNumber;
-            
-        //used by HTML to get font handing mode, etc
-        //this is the unused 'dummy' default implementation required for other modes as in Interface
+
+            //used by HTML to get font handing mode, etc
+            //this is the unused 'dummy' default implementation required for other modes as in Interface
             default:
-        return -1;
+                return -1;
         }
     }
 
@@ -684,19 +706,19 @@ public abstract class BaseDisplay implements DynamicVectorRenderer {
     }
 
     /*save shape in array to draw*/
-	@Override
+    @Override
     public void eliminateHiddenText(final Shape currentShape, final GraphicsState gs, final int count, final boolean ignoreScaling) {
     }
 
     protected void renderComposite(final float alpha) {
 
-        if(blendMode==PdfDictionary.Normal || blendMode==PdfDictionary.Compatible){
+        if (blendMode == PdfDictionary.Normal || blendMode == PdfDictionary.Compatible) {
             if (alpha != 1.0f) {
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
             }
-        }else{/// if (alpha != 1.0f){ - possible fix for 19888 to test
+        } else { /// if (alpha != 1.0f){ - possible fix for 19888 to test
 
-            final Composite comp=new BlendMode(blendMode,alpha);
+            final Composite comp = new BlendMode(blendMode, alpha);
 
             g2.setComposite(comp);
         }

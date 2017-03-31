@@ -41,6 +41,7 @@ import java.awt.image.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.function.PDFFunction;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -48,7 +49,6 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
 
 /**
- *
  * @author suda
  */
 public class CoonsContext implements PaintContext {
@@ -60,7 +60,7 @@ public class CoonsContext implements PaintContext {
     private int bitsPerFlag;
     private int colCompCount;
     private float[] decodeArr;
-//    private final float[][] CTM;
+    //    private final float[][] CTM;
     private ArrayList<Point2D> pp; //patch points
     private ArrayList<Color> pc; // patch colors
     private final ArrayList<Shape67> shapes;
@@ -112,19 +112,19 @@ public class CoonsContext implements PaintContext {
         if (decodeArr != null) {
             colCompCount = (decodeArr.length - 4) / 2;
         }
-        
+
         AffineTransform shadeAffine = new AffineTransform();
         if (mm != null) {
             shadeAffine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
         }
-        
+
         try {
             final AffineTransform invXF = xform.createInverse();
             final AffineTransform invSH = shadeAffine.createInverse();
             invSH.concatenate(invXF);
-            invAffine = (AffineTransform)invSH.clone();
+            invAffine = (AffineTransform) invSH.clone();
         } catch (final NoninvertibleTransformException ex) {
-            LogWriter.writeLog("Exception "+ex+ ' ');
+            LogWriter.writeLog("Exception " + ex + ' ');
         }
 
         this.function = function;
@@ -137,7 +137,7 @@ public class CoonsContext implements PaintContext {
         adjustPoints();
 
         isRecursive = shapes.size() < 50;
-        
+
     }
 
     /**
@@ -341,14 +341,14 @@ public class CoonsContext implements PaintContext {
 
         final List<Shape67> foundList = new ArrayList<Shape67>();
         for (final Shape67 sh : shapes) {
-            if (sh.getMinX()<rect2D.getMaxX() 
-                    && sh.getMinY()<rect2D.getMaxY() 
+            if (sh.getMinX() < rect2D.getMaxX()
+                    && sh.getMinY() < rect2D.getMaxY()
                     && sh.getShape().intersects(rect2D)) {
                 foundList.add(sh);
             }
         }
-        
-        float xx,yy;
+
+        float xx, yy;
         for (final Shape67 sh : foundList) {
             final GeneralPath path = sh.getShape();
             for (int y = 0; y < h; y++) {
@@ -356,7 +356,7 @@ public class CoonsContext implements PaintContext {
                     //float[] xy = PixelFactory.convertPhysicalToPDF(false, x, y, offX, offY, 1 / scaling, xStart, yStart, 0, pageHeight);
 //                    float[] xy = ShadingUtils.getPixelPDF(false, rotation, x, y, xStart,yStart, offX, offY, 0, pageHeight, scaling);
 //                    float[] xy = ShadingUtils.getPdfCoords(inversed, x, y, xStart, yStart);
-                    final float[] src = {x+xStart, y+yStart};
+                    final float[] src = {x + xStart, y + yStart};
                     invAffine.transform(src, 0, src, 0, 1);
                     xx = src[0];
                     yy = src[1];

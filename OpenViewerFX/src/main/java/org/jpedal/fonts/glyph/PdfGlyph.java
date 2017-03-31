@@ -34,6 +34,7 @@ package org.jpedal.fonts.glyph;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
+
 import org.jpedal.color.PdfPaint;
 
 /**
@@ -51,67 +52,70 @@ public abstract class PdfGlyph {
         glyphNumber = no;
     }
 
-    public static final int FontBB_X=1;
-    public static final int FontBB_Y=2;
-    public static final int FontBB_WIDTH=3;
-    public static final int FontBB_HEIGHT=4;
+    public static final int FontBB_X = 1;
+    public static final int FontBB_Y = 2;
+    public static final int FontBB_WIDTH = 3;
+    public static final int FontBB_HEIGHT = 4;
 
-    /**draw the glyph*/
-	public void render(final int text_fill_type, final Graphics2D g2, final float scaling, final boolean isFormGlyph){
-        
+    /**
+     * draw the glyph
+     */
+    public void render(final int text_fill_type, final Graphics2D g2, final float scaling, final boolean isFormGlyph) {
+
     }
 
-	/**
-	 * return max possible glyph width in absolute units
-	 */
-	public float getmaxWidth(){
+    /**
+     * return max possible glyph width in absolute units
+     */
+    public float getmaxWidth() {
         return 0;
     }
 
-	/**
-	 * used by type3 glyphs to set colour if required
-	 */
-	public void setT3Colors(final PdfPaint strokeColor, final PdfPaint nonstrokeColor, final boolean lockColours){
-        
+    /**
+     * used by type3 glyphs to set colour if required
+     */
+    public void setT3Colors(final PdfPaint strokeColor, final PdfPaint nonstrokeColor, final boolean lockColours) {
+
     }
 
-	/**
-	 * see if we ignore colours for type 3 font
-	 */
-	public boolean ignoreColors(){
+    /**
+     * see if we ignore colours for type 3 font
+     */
+    public boolean ignoreColors() {
         return true;
     }
 
-	public Area getShape(){
+    public Area getShape() {
         return null;
     }
 
-	public void setWidth(final float width){
-        
+    public void setWidth(final float width) {
+
     }
 
     /**
      * retrun fontBounds paramter where type is a contant in PdfGlyh
+     *
      * @param type
      * @return
      */
-    int getFontBB(final int type){
+    int getFontBB(final int type) {
         return 0;
     }
 
-    public void setStrokedOnly(final boolean b){
-        
+    public void setStrokedOnly(final boolean b) {
+
     }
 
-    public boolean containsBrokenData(){
+    public boolean containsBrokenData() {
         return false;
     }
 
     public Object getPath() {
-        throw new UnsupportedOperationException("getPath Not supported yet."); 
+        throw new UnsupportedOperationException("getPath Not supported yet.");
     }
 
-    public boolean hasHintingApplied(){
+    public boolean hasHintingApplied() {
         return false;
     }
 }

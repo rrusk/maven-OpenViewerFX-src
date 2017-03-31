@@ -44,6 +44,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -61,7 +62,7 @@ public class FreeFormContext implements PaintContext {
     private final int bitsPerFlag;
     private final int colCompCount;
     private final float[] decodeArr;
-//    private final float[][] CTM;
+    //    private final float[][] CTM;
     private final float[][] matrix;
     //private final int pointer = 0; // use pointer to access the data in array;
     private final ArrayList<Point2D> triangles;

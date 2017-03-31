@@ -38,7 +38,7 @@ import java.awt.image.BufferedImage;
  * hold details for String to render
  */
 public class ImageObject {
-	public int x,y;
-	//public Font font;
-	public BufferedImage image;
+    public int x, y;
+    //public Font font;
+    public BufferedImage image;
 }

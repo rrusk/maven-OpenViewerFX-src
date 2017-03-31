@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer.commands;
 
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.Display;
 import org.jpedal.examples.viewer.Commands;
@@ -61,7 +62,7 @@ public class PageNavigator {
 
     //Flag to prevent page changing is page changing currently taking place (prevent viewer freezing)
     private static boolean pageChanging;
-    
+
     public static void gotoPage(String page, final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf) {
         int newPage;
 
@@ -99,7 +100,7 @@ public class PageNavigator {
             }
 
         } catch (final Exception e) {
-            currentGUI.showMessageDialog('>' + page + "< " + Messages.getMessage("PdfViewerInvalidNumber.text")+ ' ' +e);
+            currentGUI.showMessageDialog('>' + page + "< " + Messages.getMessage("PdfViewerInvalidNumber.text") + ' ' + e);
             newPage = commonValues.getCurrentPage();
             currentGUI.setPageCounterText(PageCounter.PAGECOUNTER2, currentGUI.getPageLabel(commonValues.getCurrentPage()));
         }
@@ -142,13 +143,13 @@ public class PageNavigator {
     }
 
     public static void goFForwardPage(final Object[] args, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
-        if ((args == null) && (commonValues.getSelectedFile() != null)){
-                if (commonValues.getPageCount() < commonValues.getCurrentPage() + 10) //						forward(commonValues.getPageCount()-commonValues.getCurrentPage());
-                {
-                    navigatePages(commonValues.getPageCount() - commonValues.getCurrentPage(), commonValues, decode_pdf, currentGUI);
-                } else {
-                    navigatePages(10, commonValues, decode_pdf, currentGUI);
-                }
+        if ((args == null) && (commonValues.getSelectedFile() != null)) {
+            if (commonValues.getPageCount() < commonValues.getCurrentPage() + 10) //						forward(commonValues.getPageCount()-commonValues.getCurrentPage());
+            {
+                navigatePages(commonValues.getPageCount() - commonValues.getCurrentPage(), commonValues, decode_pdf, currentGUI);
+            } else {
+                navigatePages(10, commonValues, decode_pdf, currentGUI);
+            }
         }
     }
 
@@ -187,10 +188,10 @@ public class PageNavigator {
             }
             while (Values.isProcessing()) {
                 //Wait while pdf is loading
-                   try {
+                try {
                     Thread.sleep(5000);
                 } catch (final Exception e) {
-                    LogWriter.writeLog("Attempting to set propeties values " + e);           
+                    LogWriter.writeLog("Attempting to set propeties values " + e);
                 }
             }
         }
@@ -229,7 +230,7 @@ public class PageNavigator {
 
     private static void changePage(final PdfDecoderInt decode_pdf, final GUIFactory currentGUI, final Values commonValues, final int updatedTotal) {
         commonValues.setCurrentPage(updatedTotal);
-        
+
         if (decode_pdf.getDisplayView() == Display.CONTINUOUS
                 || decode_pdf.getDisplayView() == Display.CONTINUOUS_FACING) {
 
@@ -252,7 +253,7 @@ public class PageNavigator {
             currentGUI.decodePage();
         }
     }
-    
+
     private static void navigatePagePrevious(int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
         int updatedTotal = getUpdatedPageNumber(decode_pdf.getDisplayView(), commonValues.getCurrentPage(), decode_pdf.getPageCount(), count);
@@ -320,7 +321,7 @@ public class PageNavigator {
         }
 
     }
-    
+
     private static void navigatePageNext(int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
         int updatedTotal = getUpdatedPageNumber(decode_pdf.getDisplayView(), commonValues.getCurrentPage(), decode_pdf.getPageCount(), count);
@@ -390,7 +391,7 @@ public class PageNavigator {
         }
 
     }
-    
+
     public static void navigatePages(final int count, final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI) {
 
         //Check isOpen as failling to load file may allow nav buttons to function
@@ -398,33 +399,33 @@ public class PageNavigator {
             return;
         }
 
-        if(!pageChanging){
-			pageChanging = true;
-			
-			if (count > 0) {
-                
+        if (!pageChanging) {
+            pageChanging = true;
+
+            if (count > 0) {
+
                 navigatePageNext(count, commonValues, decode_pdf, currentGUI);
-            
+
             } else {
-                
+
                 navigatePagePrevious(count, commonValues, decode_pdf, currentGUI);
-			}
+            }
 
-			//Ensure thumbnail scroll bar is updated when page changed
-			if (currentGUI.getThumbnailScrollBar() != null) {
-				currentGUI.setThumbnailScrollBarValue(commonValues.getCurrentPage() - 1);
-			}
+            //Ensure thumbnail scroll bar is updated when page changed
+            if (currentGUI.getThumbnailScrollBar() != null) {
+                currentGUI.setThumbnailScrollBarValue(commonValues.getCurrentPage() - 1);
+            }
 
-			//After changing page, ensure buttons are updated, redundent buttons are hidden
-			currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
+            //After changing page, ensure buttons are updated, redundent buttons are hidden
+            currentGUI.getButtons().hideRedundentNavButtons(currentGUI);
 
-			currentGUI.setPageNumber();
+            currentGUI.setPageNumber();
 
-			pageChanging = false;
-		}
+            pageChanging = false;
+        }
     }
 
-    private static void changeTiffPage(final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI, final int count, final int updatedTotal){
+    private static void changeTiffPage(final Values commonValues, final PdfDecoderInt decode_pdf, final GUIFactory currentGUI, final int count, final int updatedTotal) {
         //Update page number and draw new page
         commonValues.setTiffImageToLoad((lastPageDecoded - 1) + count);
         drawMultiPageTiff(commonValues, decode_pdf);
@@ -434,11 +435,12 @@ public class PageNavigator {
         lastPageDecoded = commonValues.getTiffImageToLoad() + 1;
         currentGUI.setPageNumber();
 
-		//Display new page
+        //Display new page
         decode_pdf.repaint();
 
 
     }
+
     public static void drawMultiPageTiff(final Values commonValues, final PdfDecoderInt decode_pdf) {
 
         if (tiffHelper != null) {
@@ -485,5 +487,5 @@ public class PageNavigator {
     public static void setTiffHelper(final TiffHelper tiffHelp) {
         tiffHelper = tiffHelp;
     }
-   
+
 }

@@ -44,9 +44,10 @@ import java.awt.image.ColorModel;
 /**
  *
  */
-public class ShearedTexturePaint extends TexturePaint implements PdfPaint{
+public class ShearedTexturePaint extends TexturePaint implements PdfPaint {
 
     private final AffineTransform callerTransform;
+
     public ShearedTexturePaint(final BufferedImage txtr, final Rectangle2D anchor, final AffineTransform callerTransform) {
         super(txtr, anchor);
         this.callerTransform = callerTransform;
@@ -54,11 +55,11 @@ public class ShearedTexturePaint extends TexturePaint implements PdfPaint{
 
     @Override
     public PaintContext createContext(final ColorModel cm, final Rectangle deviceBounds, final Rectangle2D userBounds, final AffineTransform xform, final RenderingHints hints) {
-        final AffineTransform subForm =(AffineTransform) xform.clone();
+        final AffineTransform subForm = (AffineTransform) xform.clone();
         subForm.concatenate(callerTransform);
-        return super.createContext(cm, deviceBounds, userBounds, subForm, hints); 
+        return super.createContext(cm, deviceBounds, userBounds, subForm, hints);
     }
-    
+
     @Override
     public void setScaling(final double cropX, final double cropH, final float scaling, final float textX, final float textY) {
     }
@@ -82,5 +83,5 @@ public class ShearedTexturePaint extends TexturePaint implements PdfPaint{
         return true;
     }
 
-    
+
 }

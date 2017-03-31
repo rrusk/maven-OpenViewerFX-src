@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
+
 import org.jpedal.constants.ErrorCodes;
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.ReturnValues;
@@ -62,26 +63,27 @@ public class JSFunction {
     public static final int AFSpecial = 6;
     public static final int AFTime = 7;
 
-    static final int AVG=1;
-    static final int SUM=2;
-    static final int PRD=3;
-    static final int MIN=4;
-    static final int MAX=5;
+    static final int AVG = 1;
+    static final int SUM = 2;
+    static final int PRD = 3;
+    static final int MIN = 4;
+    static final int MAX = 5;
 
     public static final int UNKNOWN = -1;
     public static final int KEYSTROKE = 1;
     public static final int VALIDATE = 2;
     public static final int FORMAT = 3;
     public static final int CALCULATE = 4;
-    
+
     public boolean DECIMAL_IS_COMMA;
-    
+
     String value;
-    
+
     private static int staticGapformat = -1;
     private static int staticDecimalcount = -1;
-    
-    /** sets generic values for the gap format and the decimal count<br>
+
+    /**
+     * sets generic values for the gap format and the decimal count<br>
      * <br>
      * int gapFormat:<br>
      * 0  Comma separated, period decimal point<br>
@@ -90,52 +92,59 @@ public class JSFunction {
      * 3  No separator, comma decimal point <br>
      * <br>
      * int decCount - the number of decimal places after the decimal point.
-     * 
+     * <p>
      * if either is -1 it is ignored
      */
-    public static void setValidDataFormat(final int gapFormat, final int decCount){
-    	staticDecimalcount = decCount;
-    	staticGapformat = gapFormat;
+    public static void setValidDataFormat(final int gapFormat, final int decCount) {
+        staticDecimalcount = decCount;
+        staticGapformat = gapFormat;
     }
-    
-    public static int getStaticGapFormat(){ return staticGapformat; }
-    public static int getStaticDecimalCount(){ return staticDecimalcount; }
+
+    public static int getStaticGapFormat() {
+        return staticGapformat;
+    }
+
+    public static int getStaticDecimalCount() {
+        return staticDecimalcount;
+    }
 
     public JSFunction(final AcroRenderer acro, final FormObject formObject) {
-        
-        this.acro=acro;
 
-        this.formObject=formObject;
+        this.acro = acro;
+
+        this.formObject = formObject;
 
     }
 
-    public static void debug(final String str){
+    public static void debug(final String str) {
 
-    	if(LogWriter.isRunningFromIDE){
-            System.out.println("[javascript] "+str);
+        if (LogWriter.isRunningFromIDE) {
+            System.out.println("[javascript] " + str);
             org.jpedal.objects.acroforms.utils.ConvertToString.printStackTrace(2);
 
-            if(str.startsWith("Unknown") && 1 == 1) {
-                    throw new RuntimeException("Exception");
-                }
+            if (str.startsWith("Unknown") && 1 == 1) {
+                throw new RuntimeException("Exception");
+            }
         }
     }
 
-    /**apply one of more matching patterns and return where a match*/
-    protected static String applyRegexp(final String text, final String[] patterns ) {
-        String matchedString="";
+    /**
+     * apply one of more matching patterns and return where a match
+     */
+    protected static String applyRegexp(final String text, final String[] patterns) {
+        String matchedString = "";
 
-        final int patternCount=patterns.length;
+        final int patternCount = patterns.length;
 
-        for(int i = 0; i<patternCount; i++){
+        for (int i = 0; i < patternCount; i++) {
 
-            final Pattern pa=Pattern.compile(patterns[i]);
-            final Matcher m=pa.matcher(text);
-            if(m.matches()){
-                i=patternCount;
-                final int start=m.start();
-                final int end=m.end();
-                matchedString=text.substring(start,end);
+            final Pattern pa = Pattern.compile(patterns[i]);
+            final Matcher m = pa.matcher(text);
+            if (m.matches()) {
+                i = patternCount;
+                final int start = m.start();
+                final int end = m.end();
+                matchedString = text.substring(start, end);
 
                 //System.out.println(matchedString+" "+patterns[i]);
             }
@@ -143,73 +152,73 @@ public class JSFunction {
 
         return matchedString;
     }
-    
+
     /**
      * general routine to handle array values
      */
     String processArray(final String nextValue, final int operation) {
 
-        float result=0;
+        float result = 0;
         boolean resultNotSet = true;
 
-        boolean hasDec=false, hasData=false;
+        boolean hasDec = false, hasData = false;
 
-        final String[] args2=convertToArray(nextValue);
-        
+        final String[] args2 = convertToArray(nextValue);
+
         //add together except first item (which is new Array)
-        final float arrayCount=args2.length;
-        
-        for(int ii=1;ii<arrayCount;ii++){
+        final float arrayCount = args2.length;
+
+        for (int ii = 1; ii < arrayCount; ii++) {
 
             //nextValue=stripQuotes(args2[ii]);
-            
+
 //            String val=(String)formObject.getFormValue();
             String val = null;
-			final String strippedValue = args2[ii].replaceAll("\"", "");
-			final Object[] os = acro.getFormComponents(strippedValue, ReturnValues.FORMOBJECTS_FROM_NAME, -1);
+            final String strippedValue = args2[ii].replaceAll("\"", "");
+            final Object[] os = acro.getFormComponents(strippedValue, ReturnValues.FORMOBJECTS_FROM_NAME, -1);
 //			System.out.println(os.length);
-			if(os.length > 0) {
-				final FormObject o = (FormObject) os[0];
-				val = o.getValue();
-			}
-            
-            //if string is empty set value to 0 in calculations
-            if(val==null || val.isEmpty()){
-            	val="0";
+            if (os.length > 0) {
+                final FormObject o = (FormObject) os[0];
+                val = o.getValue();
             }
-        	
-            hasData=true;
 
-            final boolean isNegative=val.startsWith("-");
+            //if string is empty set value to 0 in calculations
+            if (val == null || val.isEmpty()) {
+                val = "0";
+            }
+
+            hasData = true;
+
+            final boolean isNegative = val.startsWith("-");
 
             final float nextVal;
-            
-            
+
+
             //interprete the value properly, replace commas or remove full stops.
-            if(DECIMAL_IS_COMMA){
-            	val = val.replaceAll("\\.", "");// "\\. as its regular expression and quotes next char ie '\.' is decimal
-            	val = val.replaceAll(",", ".");
-            }else{
-            	//check if we only have a comma
-            	if(val.indexOf(',')!=-1 && !val.contains(".")){
-            		val=val.replace(',', '.');
-            	}else {
-            		val = val.replaceAll(",", "");
-            	}
+            if (DECIMAL_IS_COMMA) {
+                val = val.replaceAll("\\.", ""); // "\\. as its regular expression and quotes next char ie '\.' is decimal
+                val = val.replaceAll(",", ".");
+            } else {
+                //check if we only have a comma
+                if (val.indexOf(',') != -1 && !val.contains(".")) {
+                    val = val.replace(',', '.');
+                } else {
+                    val = val.replaceAll(",", "");
+                }
             }
-            
+
             //flag if any values and if decimal
-            if(val.indexOf('.')!=-1) {
+            if (val.indexOf('.') != -1) {
                 hasDec = true;
             }
-            
-            if(isNegative){
-                nextVal= -Float.parseFloat(val.substring(1));
-            }else {
+
+            if (isNegative) {
+                nextVal = -Float.parseFloat(val.substring(1));
+            } else {
                 nextVal = Float.parseFloat(val);
             }
-            
-            switch(operation){
+
+            switch (operation) {
                 case AVG:
                     result += nextVal;
                     break;
@@ -219,43 +228,43 @@ public class JSFunction {
                     break;
 
                 case PRD:
-                	if(resultNotSet){
-                		result = 1;
-                		resultNotSet = false;
-                	}
+                    if (resultNotSet) {
+                        result = 1;
+                        resultNotSet = false;
+                    }
                     result *= nextVal;
                     break;
 
                 case MIN:
-                    if(ii==1) {
+                    if (ii == 1) {
                         result = nextVal;
-                    } else if(nextVal<result) {
+                    } else if (nextVal < result) {
                         result = nextVal;
                     }
                     break;
 
                 case MAX:
-                    if(ii==1) {
+                    if (ii == 1) {
                         result = nextVal;
-                    } else if(nextVal>result) {
+                    } else if (nextVal > result) {
                         result = nextVal;
                     }
                     break;
-                
+
                 default:
-                    debug("Unsupported op "+operation+" in processArray");
-                     break;
+                    debug("Unsupported op " + operation + " in processArray");
+                    break;
             }
         }
-        
+
         //post process
-        if(operation==AVG) {
+        if (operation == AVG) {
             result /= (arrayCount - 1);
         }
 
-        if(hasDec) {
+        if (hasDec) {
             return String.valueOf(result);
-        } else if(!hasData) {
+        } else if (!hasData) {
             return "";
         } else {
             return String.valueOf((int) result);
@@ -267,38 +276,38 @@ public class JSFunction {
      */
     public static String[] convertToArray(String js) {
 
-        final String rawCommand=js;
+        final String rawCommand = js;
 
-        final int ptr=js.indexOf('(');
-        int items=0,count=0;
+        final int ptr = js.indexOf('(');
+        int items = 0, count = 0;
         final String[] values;
-        String finalValue="";
+        String finalValue = "";
 
-        final List<String> rawValues=new ArrayList<String>();
+        final List<String> rawValues = new ArrayList<String>();
 
         /*
          * first value is command
          */
-        if(ptr!=-1){
+        if (ptr != -1) {
 
-            final String com=js.substring(0,ptr);
+            final String com = js.substring(0, ptr);
 
             rawValues.add(com);
 
             items++;
 
             //remove
-            js=js.substring(ptr,js.length()).trim();
+            js = js.substring(ptr, js.length()).trim();
 
-            int charsAtEnd=1;
+            int charsAtEnd = 1;
 
             //lose ; as well
-            if(js.endsWith(";")) {
+            if (js.endsWith(";")) {
                 charsAtEnd++;
             }
 
             //remove main brackets and possibly ;
-            if(js.startsWith("(")) //strip brackets
+            if (js.startsWith("(")) //strip brackets
             {
                 js = js.substring(1, js.length() - charsAtEnd);
             } else {
@@ -309,28 +318,28 @@ public class JSFunction {
         /*
          * break into values allowing for nested values
          */
-        final StringTokenizer tokens=new StringTokenizer(js,"(,);",true);
-        while(tokens.hasMoreTokens()){
+        final StringTokenizer tokens = new StringTokenizer(js, "(,);", true);
+        while (tokens.hasMoreTokens()) {
 
             //get value
-            final StringBuilder nextValueStr=new StringBuilder(tokens.nextToken());
+            final StringBuilder nextValueStr = new StringBuilder(tokens.nextToken());
 
             //allow for comma in brackets
-            while(tokens.hasMoreTokens() && nextValueStr.toString().startsWith("\"") && !nextValueStr.toString().endsWith("\"")) {
+            while (tokens.hasMoreTokens() && nextValueStr.toString().startsWith("\"") && !nextValueStr.toString().endsWith("\"")) {
                 nextValueStr.append(tokens.nextToken());
             }
-            
-            final String nextValue=nextValueStr.toString();
 
-            if(count==0 && nextValue.equals(",")){
+            final String nextValue = nextValueStr.toString();
+
+            if (count == 0 && nextValue.equals(",")) {
                 rawValues.add(finalValue);
 
-                finalValue="";
+                finalValue = "";
                 items++;
-            }else{
-                if(nextValue.equals("(")) {
+            } else {
+                if (nextValue.equals("(")) {
                     count++;
-                } else if(nextValue.equals(")")) {
+                } else if (nextValue.equals(")")) {
                     count--;
                 }
 
@@ -345,11 +354,11 @@ public class JSFunction {
 
         //turn into String array to avoid casting later
         //(could be rewritten later to be cleaner if time/performance issue)
-        values=new String[items];
-        for(int ii=0;ii<items;ii++){
-            values[ii]=(rawValues.get(ii)).trim();
+        values = new String[items];
+        for (int ii = 0; ii < items; ii++) {
+            values[ii] = (rawValues.get(ii)).trim();
             //System.out.println(ii+" >"+values[ii]+"<");
-            }
+        }
 
         return values;
     }
@@ -359,18 +368,18 @@ public class JSFunction {
      */
     private static String padString(final String rawVal, final int maxLen) {
 
-        final int length= rawVal.length();
-        
-        if(maxLen ==length) {
-            return rawVal;
-        } else if(maxLen <length) {
-            return rawVal;
-        } else{
-            final StringBuilder paddedString=new StringBuilder();
+        final int length = rawVal.length();
 
-            final int extraChars=maxLen-length;
+        if (maxLen == length) {
+            return rawVal;
+        } else if (maxLen < length) {
+            return rawVal;
+        } else {
+            final StringBuilder paddedString = new StringBuilder();
 
-            for(int jj=0;jj<extraChars;jj++) {
+            final int extraChars = maxLen - length;
+
+            for (int jj = 0; jj < extraChars; jj++) {
                 paddedString.append('0');
             }
 
@@ -381,23 +390,23 @@ public class JSFunction {
     }
 
     //alert user and reset to old value
-    void maskAlert(final int code, final Object[] args){
+    void maskAlert(final int code, final Object[] args) {
 
         //restore old value
-		String validValue= formObject.getLastValidValue();
-		if(validValue==null) {
+        String validValue = formObject.getLastValidValue();
+        if (validValue == null) {
             validValue = "";
         }
 
 
-        formObject.setLastValidValue(validValue);//may not be needed as is same value as should be there
-		formObject.updateValue(validValue,false, true);
+        formObject.setLastValidValue(validValue); //may not be needed as is same value as should be there
+        formObject.updateValue(validValue, false, true);
 
 
-        if(((String) args[0]).contains(" R")){
-        	args[0] = formObject.getTextStreamValue(PdfDictionary.T);
+        if (((String) args[0]).contains(" R")) {
+            args[0] = formObject.getTextStreamValue(PdfDictionary.T);
         }
-        
+
         reportError(code, args);
 
     }
@@ -406,243 +415,243 @@ public class JSFunction {
     //returns null if invalid
     String validateMask(final String[] args, final String separator, final boolean useDefaultValues) {
 
-    	final String[] months={"January","February","March","April","May","June","July","August","September","October","November","December"};
-    	final int[] monthsCount={31,28,31,30,31,30,31,31,30,31,30,31};
+        final String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+        final int[] monthsCount = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    	int monthMod = 1;
-    	int monthValue = 0;
-    	int dayValue = 0;
-    	
-    	String validValue=null;
+        int monthMod = 1;
+        int monthValue = 0;
+        int dayValue = 0;
 
-    	final int count=args.length;
-    	if(count!=2){
-    		String list="";
-    		for(int i=0;i<count;i++){
+        String validValue = null;
 
-    			if(i==0) {
+        final int count = args.length;
+        if (count != 2) {
+            String list = "";
+            for (int i = 0; i < count; i++) {
+
+                if (i == 0) {
                     list = args[i];
                 } else {
                     list = list + ',' + args[i];
                 }
 
-    		}
+            }
 
-    		JSFunction.debug("Unexpected values items="+count+ '{' +list+ '}');
+            JSFunction.debug("Unexpected values items=" + count + '{' + list + '}');
 
-    	}else{
+        } else {
 
-    		boolean isValid=true; //assume okay and disprove
+            boolean isValid = true; //assume okay and disprove
 
-    		String formData;
+            String formData;
 
-            formData=(String)formObject.getFormValue();
+            formData = (String) formObject.getFormValue();
 
-    		if(formData==null || formData.isEmpty()) {
+            if (formData == null || formData.isEmpty()) {
                 return "";
             }
 
-    		final String endText;
+            final String endText;
 
-    		//some values have additions such as PM/AM
-    		final int space=formData.lastIndexOf(' ');
-    		if(space!=-1){
-    			endText=formData.substring(space+1).toLowerCase().trim();
+            //some values have additions such as PM/AM
+            final int space = formData.lastIndexOf(' ');
+            if (space != -1) {
+                endText = formData.substring(space + 1).toLowerCase().trim();
 
-    			//must end am or pm  is does, strip it off
-    			if((endText!=null) &&
-    				(endText.equals("am") || endText.equals("pm"))) {
-                        formData = formData.substring(0, space);
-                    
+                //must end am or pm  is does, strip it off
+                if ((endText != null) &&
+                        (endText.equals("am") || endText.equals("pm"))) {
+                    formData = formData.substring(0, space);
+
 //  				else
 //  				return null;
-    			}
-    		}
+                }
+            }
 
-    		String mask=stripQuotes(args[1]);
+            String mask = stripQuotes(args[1]);
 
-    		//Day must be "XX" not "X"
-    		final int d = mask.indexOf('d');
-    		if(mask.charAt(d+1)!='d'){
-    			mask = mask.replaceFirst("d", "dd");
-    		}
-    		
-    		final StringTokenizer maskValues=new StringTokenizer(mask,separator,true); //ie mm:dd:yyyy
-    		final StringTokenizer formValues=new StringTokenizer(formData,separator,true); //ie 01:01:2007
-    		//match each part
+            //Day must be "XX" not "X"
+            final int d = mask.indexOf('d');
+            if (mask.charAt(d + 1) != 'd') {
+                mask = mask.replaceFirst("d", "dd");
+            }
 
-    		final StringBuilder finalValue=new StringBuilder();
+            final StringTokenizer maskValues = new StringTokenizer(mask, separator, true); //ie mm:dd:yyyy
+            final StringTokenizer formValues = new StringTokenizer(formData, separator, true); //ie 01:01:2007
+            //match each part
 
-    		String nextMask,nextVal,nextSep, paddedValue;
+            final StringBuilder finalValue = new StringBuilder();
 
-    		//get a time instance and defaults for all Date values here
-    		final GregorianCalendar gc = new GregorianCalendar();
+            String nextMask, nextVal, nextSep, paddedValue;
 
-    		//loop through and test each value
-    		while(maskValues.hasMoreTokens()){
+            //get a time instance and defaults for all Date values here
+            final GregorianCalendar gc = new GregorianCalendar();
 
-    			paddedValue="";
+            //loop through and test each value
+            while (maskValues.hasMoreTokens()) {
 
-    			//get next mask and any next value (allowing for multiple separators)
-    			while(true){
-    				nextMask=maskValues.nextToken();
-    				
-    				if(!separator.contains(nextMask) || !maskValues.hasMoreTokens()) {
+                paddedValue = "";
+
+                //get next mask and any next value (allowing for multiple separators)
+                while (true) {
+                    nextMask = maskValues.nextToken();
+
+                    if (!separator.contains(nextMask) || !maskValues.hasMoreTokens()) {
                         break;
                     }
 
-    				//its muliple separators so append and retry
-    				finalValue.append(nextMask);
+                    //its muliple separators so append and retry
+                    finalValue.append(nextMask);
 
-    			}
-    			
-    			while(true){
-    				//get form if there is one
-        			if(!formValues.hasMoreTokens()) {
+                }
+
+                while (true) {
+                    //get form if there is one
+                    if (!formValues.hasMoreTokens()) {
                         nextVal = null; //run out of values
                     } else {
                         nextVal = formValues.nextToken();
                     }
-        			
-    				if(nextVal==null || !separator.contains(nextVal) || !formValues.hasMoreTokens()) {
+
+                    if (nextVal == null || !separator.contains(nextVal) || !formValues.hasMoreTokens()) {
                         break;
                     }
-    			}
+                }
 
-    			if(maskValues.hasMoreTokens()) {
+                if (maskValues.hasMoreTokens()) {
                     nextSep = maskValues.nextToken();
                 } else {
                     nextSep = null;
                 }
-    			
-    			if(nextVal!=null) {
+
+                if (nextVal != null) {
                     paddedValue = padString(nextVal, nextMask.length());
                 }
-    			
-    			if(nextMask.equals("h")){ //12 hour clock
 
-    				//allow for null value in Date
-    				if(useDefaultValues && nextVal==null){
-    					paddedValue= String.valueOf(gc.get(Calendar.HOUR));
-    					/* added to make the testing be more predictable */
-    					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
-    						paddedValue = "10";
-							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
-    					}
-    				}else {
+                if (nextMask.equals("h")) { //12 hour clock
+
+                    //allow for null value in Date
+                    if (useDefaultValues && nextVal == null) {
+                        paddedValue = String.valueOf(gc.get(Calendar.HOUR));
+                        /* added to make the testing be more predictable */
+                        if (org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate) {
+                            paddedValue = "10";
+                            //new Date(110,10,10,10,10,10); //year,month,date,hrs,mins,secs
+                        }
+                    } else {
                         paddedValue = padString(nextVal, 2);
                     }
-    				
-					isValid = verifyNumberInRange(paddedValue,0,11);
-    				
 
-    			}else if(nextMask.equals("HH")){ //24 hours clock
+                    isValid = verifyNumberInRange(paddedValue, 0, 11);
 
-    				//allow for null value in Date
-    				if(useDefaultValues && nextVal==null){
-    					paddedValue= String.valueOf(gc.get(Calendar.HOUR_OF_DAY));
+
+                } else if (nextMask.equals("HH")) { //24 hours clock
+
+                    //allow for null value in Date
+                    if (useDefaultValues && nextVal == null) {
+                        paddedValue = String.valueOf(gc.get(Calendar.HOUR_OF_DAY));
     					/* added to make the testing be more predictable */
-    					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
-    						paddedValue = "10";
-							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
-    					}
-    					paddedValue=padString(paddedValue,2);
-    					isValid = verifyNumberInRange(paddedValue,0,23);
-    				}else{
-    					isValid = verifyNumberInRange(paddedValue,0,23);
-    				}
+                        if (org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate) {
+                            paddedValue = "10";
+                            //new Date(110,10,10,10,10,10); //year,month,date,hrs,mins,secs
+                        }
+                        paddedValue = padString(paddedValue, 2);
+                        isValid = verifyNumberInRange(paddedValue, 0, 23);
+                    } else {
+                        isValid = verifyNumberInRange(paddedValue, 0, 23);
+                    }
 
-    			}else if(nextMask.equals("MM")){
+                } else if (nextMask.equals("MM")) {
 
-    				//allow for null value in Date
-    				if(useDefaultValues && nextVal==null){
-    					paddedValue= String.valueOf(gc.get(Calendar.MINUTE));
+                    //allow for null value in Date
+                    if (useDefaultValues && nextVal == null) {
+                        paddedValue = String.valueOf(gc.get(Calendar.MINUTE));
     					/* added to make the testing be more predictable */
-    					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
-    						paddedValue = "10";
-							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
-    					}
-    					paddedValue=padString(paddedValue,2);
-    					isValid = verifyNumberInRange(paddedValue,0,59);
-    				}else{
-    					isValid = verifyNumberInRange(paddedValue,0,59);
-    				}
+                        if (org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate) {
+                            paddedValue = "10";
+                            //new Date(110,10,10,10,10,10); //year,month,date,hrs,mins,secs
+                        }
+                        paddedValue = padString(paddedValue, 2);
+                        isValid = verifyNumberInRange(paddedValue, 0, 59);
+                    } else {
+                        isValid = verifyNumberInRange(paddedValue, 0, 59);
+                    }
 
-    			}else if(nextMask.equals("mm") || nextMask.equals("m")){
+                } else if (nextMask.equals("mm") || nextMask.equals("m")) {
 
-    				isValid = verifyNumberInRange(paddedValue,0,12);
-    				if(isValid){
-    					final int numVal = Integer.parseInt(paddedValue);
-    					if((paddedValue.length()!=nextMask.length()) && 
-    						(nextMask.length()==1)) {
-                                paddedValue = String.valueOf(numVal);
-                            
-    						//2 should have been delt with on PadString()
-    					}
-    					
-    					final int idx=numVal-1;
-    					if(idx==1 && monthMod>0) {
+                    isValid = verifyNumberInRange(paddedValue, 0, 12);
+                    if (isValid) {
+                        final int numVal = Integer.parseInt(paddedValue);
+                        if ((paddedValue.length() != nextMask.length()) &&
+                                (nextMask.length() == 1)) {
+                            paddedValue = String.valueOf(numVal);
+
+                            //2 should have been delt with on PadString()
+                        }
+
+                        final int idx = numVal - 1;
+                        if (idx == 1 && monthMod > 0) {
                             monthMod -= 1;
                         }
-    				}
-    			}else if(nextMask.equals("tt")){
-    				if(useDefaultValues && nextVal==null) {
+                    }
+                } else if (nextMask.equals("tt")) {
+                    if (useDefaultValues && nextVal == null) {
                         paddedValue = "am";
                     }
 
-   					isValid = (paddedValue.toLowerCase().equals("am") || paddedValue.toLowerCase().equals("pm"));
-    			
-    			}else if(nextMask.equals("ss")){
+                    isValid = (paddedValue.toLowerCase().equals("am") || paddedValue.toLowerCase().equals("pm"));
 
-    				//allow for null value in Date
-    				if(useDefaultValues && nextVal==null){
-    					paddedValue= String.valueOf(gc.get(Calendar.SECOND));
+                } else if (nextMask.equals("ss")) {
+
+                    //allow for null value in Date
+                    if (useDefaultValues && nextVal == null) {
+                        paddedValue = String.valueOf(gc.get(Calendar.SECOND));
     					/* added to make the testing be more predictable */
-    					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
-    						paddedValue = "10";
-							//new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
-    					}
-    					
-    					paddedValue=padString(paddedValue,2);
-    					isValid = verifyNumberInRange(paddedValue,0,59);
-    				}else{
-    					isValid = verifyNumberInRange(paddedValue,0,59);
-    				}
+                        if (org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate) {
+                            paddedValue = "10";
+                            //new Date(110,10,10,10,10,10); //year,month,date,hrs,mins,secs
+                        }
 
-    			}else if(nextMask.equals("dd") || nextMask.equals("d")){
-    				isValid = verifyNumberInRange(paddedValue,0,31);
-    				if(isValid) {
+                        paddedValue = padString(paddedValue, 2);
+                        isValid = verifyNumberInRange(paddedValue, 0, 59);
+                    } else {
+                        isValid = verifyNumberInRange(paddedValue, 0, 59);
+                    }
+
+                } else if (nextMask.equals("dd") || nextMask.equals("d")) {
+                    isValid = verifyNumberInRange(paddedValue, 0, 31);
+                    if (isValid) {
                         dayValue = Integer.parseInt(paddedValue);
                     }
-    				
-    				
-    			}else if(nextMask.equals("yyyy") || nextMask.equals("yy")){
 
-    				//get a time instance and defaults for all Date values here
-    				//add this check to all values except day and month
 
-    				//allow for null value in Date
-    				if(useDefaultValues && nextVal==null){
-    					nextVal= String.valueOf(gc.get(Calendar.YEAR));
+                } else if (nextMask.equals("yyyy") || nextMask.equals("yy")) {
+
+                    //get a time instance and defaults for all Date values here
+                    //add this check to all values except day and month
+
+                    //allow for null value in Date
+                    if (useDefaultValues && nextVal == null) {
+                        nextVal = String.valueOf(gc.get(Calendar.YEAR));
     					/* added to make the testing be more predictable */
-    					if(org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate){
-    						nextVal = "2010";
-//							new Date(110,10,10,10,10,10);//year,month,date,hrs,mins,secs
-    					}
-    					isValid = verifyNumberInRange(nextVal,0,9999);
+                        if (org.jpedal.objects.javascript.defaultactions.JpedalDefaultJavascript.testingSetStaticDate) {
+                            nextVal = "2010";
+//							new Date(110,10,10,10,10,10); //year,month,date,hrs,mins,secs
+                        }
+                        isValid = verifyNumberInRange(nextVal, 0, 9999);
 
-    				}else{
-    					//cannot pad year
-    					if(nextMask.length()!=nextVal.length()){
-    						if(nextMask.length()>nextVal.length()){
-    							isValid=false;
-    						}else {
-    							if(nextVal.length()==4){
-    								isValid = verifyNumberInRange(nextVal,0,9999);
-    								nextVal = nextVal.substring(2);
-    							}
-    						}
-    					}else{
+                    } else {
+                        //cannot pad year
+                        if (nextMask.length() != nextVal.length()) {
+                            if (nextMask.length() > nextVal.length()) {
+                                isValid = false;
+                            } else {
+                                if (nextVal.length() == 4) {
+                                    isValid = verifyNumberInRange(nextVal, 0, 9999);
+                                    nextVal = nextVal.substring(2);
+                                }
+                            }
+                        } else {
 //    						//07  becomes 2007
 //    						if(nextVal.length()==2){
 //    							int year=Integer.parseInt(nextVal);
@@ -651,24 +660,24 @@ public class JSFunction {
 //    							else
 //    								nextVal="19"+nextVal;
 //    						}
-    						//note year is not padded out
-    						isValid = verifyNumberInRange(nextVal,0,9999);
+                            //note year is not padded out
+                            isValid = verifyNumberInRange(nextVal, 0, 9999);
 
-    					}
-    				}
-    				
-    				if(isValid && Integer.parseInt(nextVal)%4!=0 && monthMod>0) {
+                        }
+                    }
+
+                    if (isValid && Integer.parseInt(nextVal) % 4 != 0 && monthMod > 0) {
                         monthMod -= 1;
                     }
-    				//stop padded value over-writing underneath
-    				paddedValue=nextVal;
+                    //stop padded value over-writing underneath
+                    paddedValue = nextVal;
 
-    			}else if(nextMask.equals("mmm") || nextMask.equals("mmmm")){
+                } else if (nextMask.equals("mmm") || nextMask.equals("mmmm")) {
 
-    				//this needs to handle april apr 4 and 04 -if invalid it uses default (ie May)
-    				int idx = -1;
-    				//if chars used instead of month number only check first 3 chars
-    				if(nextVal.length()>=3) {
+                    //this needs to handle april apr 4 and 04 -if invalid it uses default (ie May)
+                    int idx = -1;
+                    //if chars used instead of month number only check first 3 chars
+                    if (nextVal.length() >= 3) {
                         for (int i = 0; i != months.length; i++) {
                             nextVal = nextVal.toLowerCase();
                             final int length = 3;
@@ -681,76 +690,76 @@ public class JSFunction {
                             }
                         }
                     }
-    				if(idx==-1){
-    					try{
-    						idx = Integer.parseInt(nextVal)-1;
-    						if(idx<12) {
+                    if (idx == -1) {
+                        try {
+                            idx = Integer.parseInt(nextVal) - 1;
+                            if (idx < 12) {
                                 paddedValue = months[idx];
                             }
-    					}catch(final Exception e){
+                        } catch (final Exception e) {
 
-                            LogWriter.writeLog("Exception in handling JSscript "+e);
-                            
-    						paddedValue = null;
-    						isValid=false;
-    					}
-    				}else{
-    					paddedValue = months[idx];
-    				}
-    				if(idx!=1 && monthMod>0) {
+                            LogWriter.writeLog("Exception in handling JSscript " + e);
+
+                            paddedValue = null;
+                            isValid = false;
+                        }
+                    } else {
+                        paddedValue = months[idx];
+                    }
+                    if (idx != 1 && monthMod > 0) {
                         monthMod -= 1;
                     }
 
-    				//Check valid month index
-    				if(idx>11) {
+                    //Check valid month index
+                    if (idx > 11) {
                         isValid = false;
                     } else {
                         monthValue = idx;
                     }
-    			}else{
+                } else {
 
-    				JSFunction.debug("Mask value >"+nextMask+"< not implemented");
-    				isValid=false;
-    			}
+                    JSFunction.debug("Mask value >" + nextMask + "< not implemented");
+                    isValid = false;
+                }
 
-    			if(!isValid) {
+                if (!isValid) {
                     break;
                 }
 
-    			//if passed, add on to result
-    			finalValue.append(paddedValue);
-    			if(nextSep!=null) //not on last one
+                //if passed, add on to result
+                finalValue.append(paddedValue);
+                if (nextSep != null) //not on last one
                 {
                     finalValue.append(nextSep);
                 }
 
 
-    		}
-    		
-    		if(monthValue<0 || monthValue>monthsCount.length || dayValue>monthsCount[monthValue]+monthMod) {
+            }
+
+            if (monthValue < 0 || monthValue > monthsCount.length || dayValue > monthsCount[monthValue] + monthMod) {
                 isValid = false;
             }
-    		
-    		if(isValid) {
+
+            if (isValid) {
                 validValue = finalValue.toString();
             }
 
-    	}
+        }
 
-    	return validValue;
+        return validValue;
     }
 
     //must line in range min-max (inclusive so range 0-24 will pass values 0 and 24 and 1 and 23)
     private static boolean verifyNumberInRange(final String nextVal, final int min, final int max) {
-    	
-        boolean valid=true;
-        
-        if(nextVal==null || isNotNumber(nextVal)){ //too long or invalid
-            valid =false;
-        }else{
-            final int number =Integer.parseInt(nextVal);
 
-            if(number<min || number>max) {
+        boolean valid = true;
+
+        if (nextVal == null || isNotNumber(nextVal)) { //too long or invalid
+            valid = false;
+        } else {
+            final int number = Integer.parseInt(nextVal);
+
+            if (number < min || number > max) {
                 valid = false;
             }
         }
@@ -761,23 +770,23 @@ public class JSFunction {
     protected static String stripQuotes(String arg) {
 
         //lose quotes
-        if(arg.startsWith("\"")) {
+        if (arg.startsWith("\"")) {
             arg = arg.substring(1, arg.length() - 1);
         }
 
         //allow for \\u00xx
-        if(arg.startsWith("\\u")){
-            String unicodeVal=arg.substring(2);
-            
+        if (arg.startsWith("\\u")) {
+            String unicodeVal = arg.substring(2);
+
             //Fix for issue where unicode value ends with a space character.
-            if(unicodeVal.endsWith(" ")){
-                unicodeVal = unicodeVal.substring(0, unicodeVal.length()-1);
+            if (unicodeVal.endsWith(" ")) {
+                unicodeVal = unicodeVal.substring(0, unicodeVal.length() - 1);
             }
-            
-            arg= String.valueOf((char) Integer.parseInt(unicodeVal, 16));
-        }else if(arg.startsWith("\\")){ //and octal
-            final String unicodeVal=arg.substring(1);
-            arg= String.valueOf((char) Integer.parseInt(unicodeVal, 8));
+
+            arg = String.valueOf((char) Integer.parseInt(unicodeVal, 16));
+        } else if (arg.startsWith("\\")) { //and octal
+            final String unicodeVal = arg.substring(1);
+            arg = String.valueOf((char) Integer.parseInt(unicodeVal, 8));
         }
 
         return arg;
@@ -785,143 +794,158 @@ public class JSFunction {
 
     //check it is a number
     protected static boolean isNotNumber(final String nextVal) {
-    	
+
         //allow for empty string
-        if(nextVal.isEmpty()) {
+        if (nextVal.isEmpty()) {
             return true;
         }
 
         //assume false and disprove
-        boolean notNumber =false;
+        boolean notNumber = false;
 
-        final char[] chars=nextVal.toCharArray();
-        final int count=chars.length;
+        final char[] chars = nextVal.toCharArray();
+        final int count = chars.length;
 
         //exit on first char not 0-9
-        for(int ii=0;ii<count;ii++){
-            if(chars[ii]=='.' || chars[ii]=='-' || chars[ii]==','){
+        for (int ii = 0; ii < count; ii++) {
+            if (chars[ii] == '.' || chars[ii] == '-' || chars[ii] == ',') {
 
-            }else if(chars[ii]<48 || chars[ii]>57){
-                ii=count;
-                notNumber =true;
+            } else if (chars[ii] < 48 || chars[ii] > 57) {
+                ii = count;
+                notNumber = true;
             }
         }
-        
+
         return notNumber;
 
     }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public int execute(final String js, final String[] args, final int type, final int eventType,
-			final char keyPressed) {
-		return 0;
-		
-	}
-	
-	public String parseJSvariables(String arg) {
-		final String methodToFind = "this.getField(";
-		
-		final int start = arg.indexOf(methodToFind);
-		if(start!=-1){
-			final int nameSt = start + methodToFind.length();
-			int finish = arg.indexOf(')', nameSt);
-			String name = arg.substring(nameSt, finish);
-			if(name.startsWith("\"")){
-				name = name.substring(1, name.length()-1);
-			}
-			
-			//DEFINE the strings to search for within getfield
-			final String valStr = ".value";
+    public int execute(final String js, final String[] args, final int type, final int eventType,
+                       final char keyPressed) {
+        return 0;
 
-			if(arg.indexOf(valStr,finish+1)!=-1){
-                            finish  = arg.indexOf(valStr,finish+1)+valStr.length();
-			
-                            final FormObject field = acro.getFormObject(name);
+    }
 
-                            arg = arg.substring(0,start) + field.getValue() +arg.substring(finish);
-                
+    public String parseJSvariables(String arg) {
+        final String methodToFind = "this.getField(";
+
+        final int start = arg.indexOf(methodToFind);
+        if (start != -1) {
+            final int nameSt = start + methodToFind.length();
+            int finish = arg.indexOf(')', nameSt);
+            String name = arg.substring(nameSt, finish);
+            if (name.startsWith("\"")) {
+                name = name.substring(1, name.length() - 1);
+            }
+
+            //DEFINE the strings to search for within getfield
+            final String valStr = ".value";
+
+            if (arg.indexOf(valStr, finish + 1) != -1) {
+                finish = arg.indexOf(valStr, finish + 1) + valStr.length();
+
+                final FormObject field = acro.getFormObject(name);
+
+                arg = arg.substring(0, start) + field.getValue() + arg.substring(finish);
+
+            }
+        }
+
+        //check for * / + - %
+        if (!StringUtils.isNumber(arg)) {
+            double firstNum, secondNum;
+            String nextNum;
+
+            endloop:
+//TAG so that the we can exit for loop from inside switch
+            for (int i = 0; i < arg.length(); i++) {
+                switch (arg.charAt(i)) {
+                    case '*':
+                    case '/':
+                    case '+':
+                    case '-':
+                    case '%':
+                        firstNum = Double.parseDouble(arg.substring(0, i));
+
+                        nextNum = getNextNum(arg, i + 1);
+                        secondNum = Double.parseDouble(nextNum);
+
+                        final double newValue;
+                        switch (arg.charAt(i)) {
+                            case '*':
+                                newValue = (firstNum * secondNum);
+                                break;
+                            case '/':
+                                newValue = (firstNum / secondNum);
+                                break;
+                            case '-':
+                                newValue = (firstNum - secondNum);
+                                break;
+                            case '%':
+                                newValue = (firstNum % secondNum);
+                                break;
+                            default://'+'
+                                newValue = (firstNum + secondNum);
+                                break;
                         }
-		}
-		
-		//check for * / + - %
-		if(!StringUtils.isNumber(arg)){
-			double firstNum,secondNum;
-			String nextNum;
-			
-			endloop://TAG so that the we can exit for loop from inside switch
-			for (int i = 0; i < arg.length(); i++) {
-				switch(arg.charAt(i)){
-				case '*':case '/':case '+':case '-':case '%':
-					firstNum = Double.parseDouble(arg.substring(0,i));
-					
-					nextNum = getNextNum(arg,i+1);
-					secondNum = Double.parseDouble(nextNum);
-					
-					final double newValue;
-					switch(arg.charAt(i)){
-					case '*':
-						newValue = (firstNum * secondNum);
-						break;
-					case '/':
-						newValue = (firstNum / secondNum);
-						break;
-					case '-':
-						newValue = (firstNum - secondNum);
-						break;
-					case '%':
-						newValue = (firstNum % secondNum);
-						break;
-					default://'+'
-						newValue = (firstNum + secondNum);
-						break;
-					}
-					arg = newValue + arg.substring(i+1+nextNum.length());
-					
-					if(StringUtils.isNumber(arg)){
-						break endloop;
-					}
-					break;
-				}
-			}
-		}
-		
-		return arg;
-	}
+                        arg = newValue + arg.substring(i + 1 + nextNum.length());
 
-	private static String getNextNum(final String arg, final int s) {
-		int f = -1;
-		
-		ENDLOOP://TAG to allow us to exit the for loop from inside the switch
-		for (int i = s; i < arg.length(); i++) {
-			switch(arg.charAt(i)){
-			case '0':case '1':case '2':case '3':case '4':case '.':
-			case '5':case '6':case '7':case '8':case '9':
-				break;
-			default:
-				f = i;
-				break ENDLOOP;
-			}
-		}
-		
-		if(f==-1) {
+                        if (StringUtils.isNumber(arg)) {
+                            break endloop;
+                        }
+                        break;
+                }
+            }
+        }
+
+        return arg;
+    }
+
+    private static String getNextNum(final String arg, final int s) {
+        int f = -1;
+
+        ENDLOOP:
+//TAG to allow us to exit the for loop from inside the switch
+        for (int i = s; i < arg.length(); i++) {
+            switch (arg.charAt(i)) {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '.':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    break;
+                default:
+                    f = i;
+                    break ENDLOOP;
+            }
+        }
+
+        if (f == -1) {
             f = arg.length();
         }
-		
-		return arg.substring(s,f);
-	}
+
+        return arg.substring(s, f);
+    }
 
     /**
      */
     private static void reportError(final int code, final Object[] args) {
 
-        final boolean errorReported=false;
+        final boolean errorReported = false;
 
         //report error
-        if(!errorReported){
-            if(!DecoderOptions.showErrorMessages) {
+        if (!errorReported) {
+            if (!DecoderOptions.showErrorMessages) {
                 return;
             }
 
@@ -937,7 +961,7 @@ public class JSFunction {
                     break;
                 case ErrorCodes.JSInvalidRangeFormat:
                     JOptionPane.showMessageDialog(null, args[1],
-                            "Warning: Javascript Window",JOptionPane.INFORMATION_MESSAGE);
+                            "Warning: Javascript Window", JOptionPane.INFORMATION_MESSAGE);
                     break;
                 default:
                     JOptionPane.showMessageDialog(null, "The values entered does not match the format of the field",

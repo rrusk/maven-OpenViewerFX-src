@@ -43,12 +43,12 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
     private final float outputs[];
     private final double[] sampleArray;
     private float[] prevInputs;
-    private final double[] cubeN ;
+    private final double[] cubeN;
     private final int[] cubeVertex;
     private final int cubeVertices;
 
     public PDFSampled(final byte[] stream, final int bits, final float[] domain, final float[] range,
-            final float[] encode, final float[] decode, final int[] size) {
+                      final float[] encode, final float[] decode, final int[] size) {
         super(domain, range);
         this.size = size;
         this.m = domain.length / 2;
@@ -71,7 +71,7 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
         for (int i = 0; i < sampleLen; i++) {
             while (pos < bits) {
                 buffer <<= 8;
-                buffer |= (stream[index++]&0xff);
+                buffer |= (stream[index++] & 0xff);
                 pos += 8;
             }
             pos -= bits;
@@ -118,10 +118,10 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
     public float[] computeStitch(final float[] subinput) {
         return compute(subinput);
     }
-    
-    private static boolean isSame(final float[] arr0, final float[] arr1){
+
+    private static boolean isSame(final float[] arr0, final float[] arr1) {
         for (int i = 0; i < arr0.length; i++) {
-            if(arr0[i]!=arr1[i]){
+            if (arr0[i] != arr1[i]) {
                 return false;
             }
         }
@@ -130,10 +130,10 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
 
     @Override
     public float[] compute(final float[] input) {
-        if(isSame(input,prevInputs)){
+        if (isSame(input, prevInputs)) {
             return outputs;
         }
-        
+
         prevInputs = input.clone();
 
         for (int i = 0; i < cubeVertices; i++) {
@@ -152,7 +152,7 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
             final int cur = size[i];
             e = Math.min(Math.max(e, 0), cur - 1);
 
-            final double e0 = e < cur - 1 ? ((int)e) : (e - 1.0);
+            final double e0 = e < cur - 1 ? ((int) e) : (e - 1.0);
             final double n0 = e0 + 1 - e;
             final double n1 = e - e0;
             final double offset0 = e0 * k;
@@ -170,8 +170,8 @@ public class PDFSampled extends PDFGenericFunction implements PDFFunction {
             k *= cur;
             pos <<= 1;
         }
-        
-        int kk,ff,nn;
+
+        int kk, ff, nn;
         double pp;
         for (int i = 0; i < n; i++) {
             ff = i << 1;

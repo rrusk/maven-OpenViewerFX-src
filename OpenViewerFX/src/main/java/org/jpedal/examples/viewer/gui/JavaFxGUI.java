@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.gui;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.*;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.Transition;
@@ -65,7 +66,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
 import javax.imageio.ImageIO;
+
 import org.jpedal.FileAccess;
 import org.jpedal.PdfDecoderFX;
 import org.jpedal.PdfDecoderInt;
@@ -148,13 +151,13 @@ public class JavaFxGUI extends GUI {
      */
     private HBox multiboxfx;
     private FXProgressBarWithText memoryBarFX;
-     
+
     //visual display of current cursor co-ords on page
     private TextField coordsFX;
 
     //Track whether both pages are properly displayed
     private static final boolean pageTurnScalingAppropriate = true;
-    
+
     //holds back/forward buttons at bottom of page
     private HBox navButtons;
 
@@ -176,7 +179,7 @@ public class JavaFxGUI extends GUI {
 
     //stop user forcing open tab before any pages loaded
     private boolean tabsNotInitialised = true;
-    
+
     //private boolean thumbnailsInitialised;
     private boolean hasPageChanged;
     private ToolBar navToolBar;
@@ -184,16 +187,16 @@ public class JavaFxGUI extends GUI {
 
     //The main JavaFX Stage
     private final Stage stage;
-    
+
     //The main JavaFX Scene
     private Scene scene;
-    
+
     //BorderPane lays out children in top, left, right, bottom, and center positions. 
     private final BorderPane root;
     private static final int dropshadowDepth = 40;
-    
+
     private Group group;
-    
+
     // Scrollpane to contain the PDF page
     private ScrollPane pageContainer;
     private SplitPane center;
@@ -211,7 +214,7 @@ public class JavaFxGUI extends GUI {
     private boolean cursorOverPage;
 
     private TransitionType transitionType = TransitionType.None;
-    
+
     // Scrolls between pages when the pdf is not zoomed in
     private ScrollBar pageScroll;
 
@@ -244,10 +247,10 @@ public class JavaFxGUI extends GUI {
         setupDisplay();
     }
 
-    /*
-     For the following methods getThumbnailScrollBar, setThumbnailScrollBarVisibility and setThumbnailScrollBarValue:
-     These methods have not been implemented yet as they do not have the equivalent to SwingGUI.thumbscroll
-     implemented in FX.
+    /**
+     * Returns the scroll bar used in single page mode that shows page thumbnails as you scroll
+     *
+     * @return ScrollBar used for the thumbnail scroll in single page mode
      */
     @Override
     public Object getThumbnailScrollBar() {
@@ -259,6 +262,11 @@ public class JavaFxGUI extends GUI {
         return pageScroll;
     }
 
+    /**
+     * Control thumbnail scroll bars visibility
+     *
+     * @param isVisible boolean value to control visibility
+     */
     @Override
     public void setThumbnailScrollBarVisibility(final boolean isVisible) {
         if (debugFX) {
@@ -266,13 +274,18 @@ public class JavaFxGUI extends GUI {
         }
         pageScroll.setVisible(isVisible);
         //#making invisible still shows the gap so iam padding negative to hide it
-        if(isVisible){
+        if (isVisible) {
             pageScroll.setStyle("-fx-padding:0px");
-        }else{
+        } else {
             pageScroll.setStyle("-fx-padding:-10px");
         }
     }
-        
+
+    /**
+     * Set the position of the scroll bar based on desired page number
+     *
+     * @param pageNum int value for the page
+     */
     @Override
     public void setThumbnailScrollBarValue(final int pageNum) {
         if (debugFX) {
@@ -306,7 +319,7 @@ public class JavaFxGUI extends GUI {
     }
 
     private void setupDisplay() {
-        
+
         setDisplayView(Display.SINGLE_PAGE, Display.DISPLAY_CENTERED);
 
         //pass in SwingGUI so we can call via callback
@@ -316,21 +329,34 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Returns the split pane used in the display area of the viewer.
+     *
+     * @return SplitPane used to hold the page display and the side tab bar
+     */
     @Override
     public SplitPane getDisplayPane() {
         return center;
     }
 
+    /**
+     * Used in Swing MultiViewer only
+     */
     @Override
     public Object getMultiViewerFrames() {
 
         if (debugFX) {
             System.out.println("getMultiViewerFrames");
         }
-        
+
         return null;
     }
 
+    /**
+     * Gets the file path for the properties file used in the viewer.
+     *
+     * @return String containing the properties file name
+     */
     @Override
     public String getPropertiesFileLocation() {
 
@@ -341,6 +367,12 @@ public class JavaFxGUI extends GUI {
         return properties.getConfigFile();
     }
 
+    /**
+     * Gets the page number of the given bookmark
+     *
+     * @param bookmark String value of the bookmark
+     * @return String value of the page number
+     */
     @Override
     public String getBookmark(final String bookmark) {
 
@@ -351,6 +383,11 @@ public class JavaFxGUI extends GUI {
         return tree.getPage(bookmark);
     }
 
+    /**
+     * Set the side tab bar state and set any values required for that state.
+     *
+     * @param showVisible true to expand the side tab bar, false to collapse
+     */
     @Override
     public void reinitialiseTabs(final boolean showVisible) {
 
@@ -364,7 +401,7 @@ public class JavaFxGUI extends GUI {
         }
 
         if (properties.getValue("ShowSidetabbar").equalsIgnoreCase("true")) {
-            
+
             if (!showVisible && !properties.getValue("consistentTabBar").equalsIgnoreCase("true")) {
                 if (sideTabBarOpenByDefault) {
                     setSplitDividerLocation(expandedSize);
@@ -387,21 +424,21 @@ public class JavaFxGUI extends GUI {
                 if (!decode_pdf.hasOutline()) {
 
                     int outlineTab = -1;
-                    
+
                     //see if there is an outlines tab
                     for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
                         if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
                             outlineTab = jj;
                         }
                     }
-                    
+
                     if (outlineTab != -1) {
                         navOptionsPanel.getTabs().remove(outlineTab);
                     }
 
                 } else if (properties.getValue("Bookmarkstab").equalsIgnoreCase("true")) {
                     int outlineTab = -1;
-                    
+
                     //see if there is an outlines tab
                     for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
                         if (navOptionsPanel.getTabs().get(jj).getText().equals(bookmarksTitle)) {
@@ -409,7 +446,7 @@ public class JavaFxGUI extends GUI {
                         }
                     }
 
-                    if (outlineTab == -1){
+                    if (outlineTab == -1) {
                         navOptionsPanel.getTabs().add(navOptionsPanel.getTabs().size() - 1, (Tab) tree);
                     }
                 }
@@ -457,7 +494,7 @@ public class JavaFxGUI extends GUI {
                         navOptionsPanel.getSelectionModel().select(i);
                         break;
                     }
-                    
+
                 }
             }
         }
@@ -470,7 +507,7 @@ public class JavaFxGUI extends GUI {
         }
 
         int outlineTab = -1;
-        
+
         //see if there is an outlines tab
         for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
             if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
@@ -495,16 +532,16 @@ public class JavaFxGUI extends GUI {
         }
 
         int outlineTab = -1;
-        
+
         //see if there is an outlines tab
         for (int jj = 0; jj < navOptionsPanel.getTabs().size(); jj++) {
             if (navOptionsPanel.getTabs().get(jj).getText().equals(title)) {
                 outlineTab = jj;
             }
         }
-        
 
-        if (outlineTab != -1){
+
+        if (outlineTab != -1) {
             navOptionsPanel.getTabs().remove(outlineTab);
         }
 
@@ -551,13 +588,13 @@ public class JavaFxGUI extends GUI {
         if (debugFX) {
             System.out.println("resetNavBar");
         }
-        
+
         if (!properties.getValue("consistentTabBar").equalsIgnoreCase("true")) {
             setSplitDividerLocation(collapsedSize);
             tabsExpanded = false;
             tabsNotInitialised = true;
         }
-        
+
         //disable page view buttons until we know we have multiple pages
         fxButtons.setPageLayoutButtonsEnabled(false);
 
@@ -581,6 +618,9 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * setDisplayMode not supported in OpenViewerFX
+     */
     @Override
     public void setDisplayMode(final Integer mode) {
 
@@ -590,6 +630,11 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * JavaFX is only in single mode
+     *
+     * @return Always returns true
+     */
     @Override
     public boolean isSingle() {
 
@@ -600,6 +645,11 @@ public class JavaFxGUI extends GUI {
         return true;
     }
 
+    /**
+     * Gets the object used for the thumbnail panel.
+     *
+     * @return an Object that extends GUIThumbnailPanel
+     */
     @Override
     public Object getThumbnailPanel() {
 
@@ -610,6 +660,11 @@ public class JavaFxGUI extends GUI {
         return thumbnails;
     }
 
+    /**
+     * Gets the object used for the outline panel
+     *
+     * @return an Object that extends GUIOutline
+     */
     @Override
     public Object getOutlinePanel() {
 
@@ -637,7 +692,7 @@ public class JavaFxGUI extends GUI {
             return null;
         }
     }
-    
+
     /*
      *Allows user to embed viewer into own application
      */
@@ -681,7 +736,7 @@ public class JavaFxGUI extends GUI {
         if (customWindowSize != null) {
 
             final StringTokenizer values = new StringTokenizer(customWindowSize, "x");
-            
+
             if (values.countTokens() != 2) {
                 throw new RuntimeException("Unable to use value for org.jpedal.startWindowSize=" + customWindowSize + "\nValue should be in format org.jpedal.startWindowSize=200x300");
             }
@@ -734,11 +789,12 @@ public class JavaFxGUI extends GUI {
         this.searchFrame = searchFrame;
 
         this.searchFrame.init(decode_pdf, commonValues);
-        
+
     }
 
     /**
      * Adds Drop-Down Search Menu Options to the In-Menu Search Field.
+     *
      * @return
      */
     private MenuBar createMenuBarSearchOptions() {
@@ -752,21 +808,21 @@ public class JavaFxGUI extends GUI {
         cb1.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(final ObservableValue ov,
-                    final Boolean old_val, final Boolean new_val) {
+                                final Boolean old_val, final Boolean new_val) {
                 searchFrame.setWholeWords(cb1.isSelected());
             }
         });
         cb2.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(final ObservableValue ov,
-                    final Boolean old_val, final Boolean new_val) {
+                                final Boolean old_val, final Boolean new_val) {
                 searchFrame.setCaseSensitive(cb2.isSelected());
             }
         });
         cb3.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(final ObservableValue ov,
-                    final Boolean old_val, final Boolean new_val) {
+                                final Boolean old_val, final Boolean new_val) {
                 searchFrame.setMultiLine(cb3.isSelected());
             }
         });
@@ -807,12 +863,22 @@ public class JavaFxGUI extends GUI {
         fxButtons.getButton(Commands.PREVIOUSRESULT).setVisible(true);
     }
 
+    /**
+     * Sets the properties file to be used
+     *
+     * @param file String file name for the properties file to be used
+     */
     @Override
     public void setPropertiesFileLocation(final String file) {
 
         properties.loadProperties(file);
     }
 
+    /**
+     * Gets the Commands object used by the user interface
+     *
+     * @return Commands object for executing commands
+     */
     @Override
     public Commands getCommand() {
 
@@ -874,7 +940,7 @@ public class JavaFxGUI extends GUI {
         //setup combo boxes
         setupComboBoxes();
 
-        if(LogWriter.isRunningFromIDE || org.jpedal.DevFlags.GUITESTINGINPROGRESS){
+        if (LogWriter.isRunningFromIDE || org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
             nameElements();
         }
 
@@ -923,12 +989,12 @@ public class JavaFxGUI extends GUI {
 
         fxButtons.getTopButtons().getItems().add(sep);
 
-        if(includeExtraMenus && commonValues.getModeOfOperation() != Values.RUNNING_PLUGIN) {
+        if (includeExtraMenus && commonValues.getModeOfOperation() != Values.RUNNING_PLUGIN) {
             fxButtons.addButton(GUIFactory.BUTTONBAR, Messages.getMessage("PdfViewerToolbarTooltip.help"), "help.png", Commands.HELP, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
         }
 
         //addButton(GUIFactory.BUTTONBAR,Messages.getMessage("PdfViewerToolbarTooltip.buy"),iconLocation+"buy.png",Commands.BUY);
-        if(includeExtraMenus && commonValues.getModeOfOperation() != Values.RUNNING_PLUGIN) {
+        if (includeExtraMenus && commonValues.getModeOfOperation() != Values.RUNNING_PLUGIN) {
             fxButtons.addButton(GUIFactory.BUTTONBAR, "RSS", "rss.gif", Commands.RSS, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
         }
 
@@ -948,7 +1014,7 @@ public class JavaFxGUI extends GUI {
         /*
          * Ensure all gui sections are displayed correctly
          * Issues found when removing some sections
-         */ 
+         */
         if (GUI.debugFX) {
             System.out.println("Swing specific invalidate(), validate(), repaint() not implemented for JavaFX in JavaFxGUI");
         }
@@ -1090,7 +1156,7 @@ public class JavaFxGUI extends GUI {
 
             //workout selected tab
             final String tabName = navOptionsPanel.getTabs().get(tabSelected).getText();
-            
+
             if (tabName != null && tabName.equals(pageTitle)) {
                 thumbnails.setIsDisplayedOnscreen(true);
             } else {
@@ -1118,6 +1184,13 @@ public class JavaFxGUI extends GUI {
         initDownloadBar();
     }
 
+    /**
+     * Not part of API - used internally
+     * <p>
+     * Set the state and value for the multi box at the bottom left of the user interface.
+     *
+     * @param flags an int[] used to control multi box display
+     */
     @Override
     public void setMultibox(final int[] flags) {
 
@@ -1127,7 +1200,7 @@ public class JavaFxGUI extends GUI {
             multiboxfx.getChildren().add(coordsFX);
             return;
         }
-        
+
         //deal with flags
         if (flags.length > 1 && flags[0] == CURSOR) {
             //if no change, return
@@ -1312,7 +1385,7 @@ public class JavaFxGUI extends GUI {
                 pages = new PageFlowDisplayFX((GUIFactory) customFXHandle, comp);
 
                 break;
-            
+
         }
 
         /*
@@ -1456,7 +1529,7 @@ public class JavaFxGUI extends GUI {
      */
     @Override
     public void scaleAndRotate() {
-        
+
         if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
             decode_pdf.setPageParameters(scaling, commonValues.getCurrentPage(), rotation);
             return;
@@ -1479,13 +1552,13 @@ public class JavaFxGUI extends GUI {
 //        }
         //update value and GUI
         if (decode_pdf != null) {
-            
-           for(int i=0;i<group.getChildren().size();i++){
-               if(!group.getChildren().get(i).equals(decode_pdf)){
-                   group.getChildren().remove(group.getChildren().get(i));
-               }
-           }
-            
+
+            for (int i = 0; i < group.getChildren().size(); i++) {
+                if (!group.getChildren().get(i).equals(decode_pdf)) {
+                    group.getChildren().remove(group.getChildren().get(i));
+                }
+            }
+
             int index = getSelectedComboIndex(Commands.SCALING);
 
             if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
@@ -1511,10 +1584,10 @@ public class JavaFxGUI extends GUI {
 
             if (index != -1) {
                 //always check in facing mode with turnover on
-                int tw = 0, th = 0;//temp width and temp hegiht;
+                int tw = 0, th = 0; //temp width and temp hegiht;
                 final double sw;
                 final double sh;
-                
+
                 final PdfPageData pData = decode_pdf.getPdfPageData();
                 final int curPW = pData.getCropBoxWidth(page); //current page width
                 final int curPH = pData.getCropBoxHeight(page); //current page height
@@ -1564,9 +1637,9 @@ public class JavaFxGUI extends GUI {
                         } else {
                             group.setTranslateX(0);
                         }
-                        
+
                         //##we need to hide the scrollbar and show the scrollpane if content does not fit
-                        if (sh < height && sw<width) {
+                        if (sh < height && sw < width) {
 //                            setScrollBarPolicy(GUI.ScrollPolicy.VERTICAL_NEVER);
 //                            setScrollBarPolicy(GUI.ScrollPolicy.HORIZONTAL_NEVER);
 //                            setThumbnailScrollBarVisibility(true);
@@ -1665,10 +1738,24 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Get the scaling ratio required to fit one dimension to another
+     *
+     * @param actualW double value representing actual width
+     * @param actualH double value representing actual height
+     * @param maxW    double value representing max width
+     * @param maxH    double value representing max height
+     * @return double value representing the scaling ration to convert actual values to max values
+     */
     public static double getScalingRatio(final double actualW, final double actualH, final double maxW, final double maxH) {
         return Math.min((maxW / actualW), (maxH / actualH));
     }
 
+    /**
+     * Set scaling to nearest of the viewer default values.
+     *
+     * @param newScaling The scaling value to snap to viewer default values
+     */
     @Override
     public void snapScalingToDefaults(float newScaling) {
 
@@ -1821,6 +1908,11 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Scrolls the view to the specified page.
+     *
+     * @param page Page to scroll to.
+     */
     @Override
     public void scrollToPage(final int page) {
 
@@ -1834,13 +1926,13 @@ public class JavaFxGUI extends GUI {
 
             //int xCord = 0;
             final int pageCount = decode_pdf.getPageCount();
-            double yCord;// = decode_pdf.getPages().getYCordForPage(page, scaling);
-                        
+            double yCord; // = decode_pdf.getPages().getYCordForPage(page, scaling);
+
             //$$$$$$$$$$$$$ call it and ignore please dont delete as it has affect in continuous mode               
-            decode_pdf.getPages().getYCordForPage(page, scaling);            
-                      
-           // if (decode_pdf.getDisplayView() != Display.SINGLE_PAGE) {
-             //   xCord = 0;
+            decode_pdf.getPages().getYCordForPage(page, scaling);
+
+            // if (decode_pdf.getDisplayView() != Display.SINGLE_PAGE) {
+            //   xCord = 0;
             //}
             //System.out.println("Before="+decode_pdf.getVisibleRect()+" "+decode_pdf.getPreferredSize());
 
@@ -1848,7 +1940,7 @@ public class JavaFxGUI extends GUI {
 
             //final int ch = (int) (pageData.getCropBoxHeight(page) * scaling);
             //final int cw = (int) (pageData.getCropBoxWidth(page) * scaling);
-                        
+
             double totalHeight = 0;
 
             //int pw = pageData.getScaledCropBoxWidth(page);
@@ -1858,7 +1950,7 @@ public class JavaFxGUI extends GUI {
             //double localW = pageContainer.getContent().getBoundsInLocal().getWidth();
             //double viewH = pageContainer.getViewportBounds().getHeight();
             //double viewW = pageContainer.getViewportBounds().getWidth();
-            
+
             final double vv;
             switch (decode_pdf.getDisplayView()) {
                 case Display.SINGLE_PAGE:
@@ -1867,24 +1959,24 @@ public class JavaFxGUI extends GUI {
                 case Display.CONTINUOUS:
                     yCord = 0;
                     for (int i = 1; i < pageCount; i++) {
-                        totalHeight+= pageData.getScaledCropBoxHeight(i);
+                        totalHeight += pageData.getScaledCropBoxHeight(i);
                     }
                     for (int i = 1; i < page; i++) {
-                        yCord+= pageData.getScaledCropBoxHeight(i);
+                        yCord += pageData.getScaledCropBoxHeight(i);
                     }
-                    vv = yCord/totalHeight;
-                    pageContainer.setVvalue(vv);//                   
+                    vv = yCord / totalHeight;
+                    pageContainer.setVvalue(vv);
                     break;
                 case Display.CONTINUOUS_FACING:
                     yCord = 0;
-                    for (int i = 1; i < pageCount; i+=2) {
-                        totalHeight+= pageData.getScaledCropBoxHeight(i);
+                    for (int i = 1; i < pageCount; i += 2) {
+                        totalHeight += pageData.getScaledCropBoxHeight(i);
                     }
-                    for (int i = 1; i < page; i+=2) {
-                        yCord+= pageData.getScaledCropBoxHeight(i);
+                    for (int i = 1; i < page; i += 2) {
+                        yCord += pageData.getScaledCropBoxHeight(i);
                     }
-                    vv = yCord/totalHeight;
-                    pageContainer.setVvalue(vv);//               
+                    vv = yCord / totalHeight;
+                    pageContainer.setVvalue(vv);
                     break;
             }
         }
@@ -1895,6 +1987,9 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Set the thumbnail panel ready for display.
+     */
     @Override
     public void setupThumbnailPanel() {
 
@@ -1926,6 +2021,11 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Set the bookmarks for the outline panel
+     *
+     * @param alwaysGenerate true we will generate the bookmarks, false we only generate bookmarks if not already generated
+     */
     @Override
     public void setBookmarks(final boolean alwaysGenerate) {
 
@@ -2113,13 +2213,13 @@ public class JavaFxGUI extends GUI {
             } else {
                 pageCounter2.setText(getPageLabel(currentPage));
             }
-            
-            if(pageLabelDiffers(currentPage)){
-                pageCounter3.setText("(" + currentPage + ' ' + Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()+")"); //$NON-NLS-1$
-            }else{
+
+            if (pageLabelDiffers(currentPage)) {
+                pageCounter3.setText("(" + currentPage + ' ' + Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount() + ")"); //$NON-NLS-1$
+            } else {
                 pageCounter3.setText(Messages.getMessage("PdfViewerOfLabel.text") + ' ' + commonValues.getPageCount()); //$NON-NLS-1$
             }
-            
+
             fxButtons.hideRedundentNavButtons(this);
         }
 
@@ -2133,7 +2233,7 @@ public class JavaFxGUI extends GUI {
         if (debugFX) {
             System.out.println("createNavbar");
         }
-        
+
         navButtons.getChildren().add(multiboxfx);
 
 //        multibox.setLayout(new BorderLayout());
@@ -2167,7 +2267,7 @@ public class JavaFxGUI extends GUI {
         fxButtons.addButton(PAGES, Messages.getMessage("PageLayoutButton.SinglePage"), "single.gif", Commands.SINGLE, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
 
         fxButtons.addButton(PAGES, Messages.getMessage("PageLayoutButton.PageFlow"), "pageflow.gif", Commands.PAGEFLOW, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
-        
+
         //on top in plugin
         if (commonValues.getModeOfOperation() == Values.RUNNING_PLUGIN) {
             fxButtons.getTopButtons().getItems().add(pagesToolBar);
@@ -2188,9 +2288,15 @@ public class JavaFxGUI extends GUI {
         }
 
         multiboxfx.prefWidthProperty().bind(pagesToolBar.widthProperty());
-        
+
     }
 
+    /**
+     * Set the interfaces page counter to the page number
+     * and alter any other interface options to match.
+     *
+     * @param page page number as an int
+     */
     @Override
     public void setPage(int page) {
 
@@ -2211,6 +2317,11 @@ public class JavaFxGUI extends GUI {
         setPageNumber();
     }
 
+    /**
+     * Get the type of the user interface
+     *
+     * @return GUIModes.JAVAFX
+     */
     @Override
     public Enum getType() {
 
@@ -2221,6 +2332,9 @@ public class JavaFxGUI extends GUI {
         return GUIModes.JAVAFX;
     }
 
+    /**
+     * Reset the page counter to empty them.
+     */
     @Override
     public void resetPageNav() {
 
@@ -2231,6 +2345,11 @@ public class JavaFxGUI extends GUI {
         pageCounter3.setText("");
     }
 
+    /**
+     * Method to set the viewers rotation from external sources.
+     *
+     * @param rot The rotation to use in the Viewer
+     */
     @Override
     public void setRotationFromExternal(final int rot) {
 
@@ -2238,6 +2357,11 @@ public class JavaFxGUI extends GUI {
         rotationBox.setSelectedIndex(rotation / 90);
     }
 
+    /**
+     * Method to set the viewers scaling from external sources.
+     *
+     * @param scale The scaling to use in the Viewer as a String
+     */
     @Override
     public void setScalingFromExternal(final String scale) {
 
@@ -2253,7 +2377,7 @@ public class JavaFxGUI extends GUI {
         }
 
         //if (!Values.isProcessing()) {
-            //((PdfDecoder) decode_pdf).repaint();
+        //((PdfDecoder) decode_pdf).repaint();
         //}
     }
 
@@ -2429,10 +2553,10 @@ public class JavaFxGUI extends GUI {
         if (yesToAllPresent) {
 
             final Object[] buttonRowObjects = {
-                Messages.getMessage("PdfViewerConfirmButton.Yes"),
-                Messages.getMessage("PdfViewerConfirmButton.YesToAll"),
-                Messages.getMessage("PdfViewerConfirmButton.No"),
-                Messages.getMessage("PdfViewerConfirmButton.Cancel")
+                    Messages.getMessage("PdfViewerConfirmButton.Yes"),
+                    Messages.getMessage("PdfViewerConfirmButton.YesToAll"),
+                    Messages.getMessage("PdfViewerConfirmButton.No"),
+                    Messages.getMessage("PdfViewerConfirmButton.Cancel")
             };
 
             final FXOptionDialog dialog = new FXOptionDialog(stage,
@@ -2478,10 +2602,16 @@ public class JavaFxGUI extends GUI {
         });
     }
 
+    /**
+     * Show a message dialog with the specified message and title
+     *
+     * @param message String message to be used in the dialog
+     * @param title   String title to be used in the dialog
+     */
     public void showMessageDialog(final String message, final String title) {
 
         if (debugFX) {
-            System.out.println("showMessageDialog - Implemented "+title);
+            System.out.println("showMessageDialog - Implemented " + title);
         }
         final FXMessageDialog dialog = new FXMessageDialog(stage, message);
         dialog.showAndWait();
@@ -2512,6 +2642,9 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Method used to show popups that are displayed the first time the Viewer is opened
+     */
     @Override
     public void showFirstTimePopup() {
 
@@ -2545,7 +2678,7 @@ public class JavaFxGUI extends GUI {
                     try {
                         BrowserLauncher.openURL(Messages.getMessage("PdfViewer.SupportLink.Link"));
                     } catch (final Exception ex) {
-                        LogWriter.writeLog("Exception "+ex.getMessage());
+                        LogWriter.writeLog("Exception " + ex.getMessage());
                         showMessageDialog(Messages.getMessage("PdfViewer.ErrorWebsite"));
                     }
                 }
@@ -2664,13 +2797,18 @@ public class JavaFxGUI extends GUI {
             System.out.println("setSplitDividerLocation");
         }
         double w = center.getWidth();
-        if (w == 0) {//If not set, set to 1 to prevent break
+        if (w == 0) { // If not set, set to 1 to prevent break
             w = 1;
         }
         center.setDividerPosition(0, size / w);
 
     }
 
+    /**
+     * getSplitDividerLocation not supported in OpenViewerFX
+     *
+     * @return Always returns 0
+     */
     @Override
     public int getSplitDividerLocation() {
         if (debugFX) {
@@ -2679,14 +2817,26 @@ public class JavaFxGUI extends GUI {
         return 0;
     }
 
+    /**
+     * Printing is not currently supported in OpenViewerFX
+     *
+     * @param printersList
+     * @param defaultPrinter
+     * @return
+     */
     @Override
     public Object printDialog(final String[] printersList, final String defaultPrinter) {
 
         System.err.println("Print is  not supported in FX Viewer");
-        
+
         return null;
     }
 
+    /**
+     * Gets the paper sizes for use by the print dialog
+     *
+     * @return a PaperSizes object holding all paper sizes
+     */
     @Override
     public PaperSizes getPaperSizes() {
 
@@ -2731,11 +2881,21 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Set the search text field to be used for the menu bar search input
+     *
+     * @param searchText A JTextField to be used for search input
+     */
     @Override
     public void setSearchText(final Object searchText) {
         this.searchText = (TextField) searchText;
     }
 
+    /**
+     * Set the search list to be used to hold search results in menu bar search mode
+     *
+     * @param results an implementation of GUISearchList
+     */
     @Override
     public void setResults(final GUISearchList results) {
 
@@ -2750,6 +2910,11 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Get the TabPane, as an Object, used for the side tab bar
+     *
+     * @return TabPane used for the side tab bar
+     */
     @Override
     public Object getSideTabBar() {
 //        if(debugFX){
@@ -2775,6 +2940,11 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Removes the search window from view with option to clear search results
+     *
+     * @param justHide true to just remove the search window, false to also clear current results
+     */
     @Override
     public void removeSearchWindow(final boolean justHide) {
 
@@ -2792,6 +2962,9 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Method to dispose of objects used by the interface before closing.
+     */
     @Override
     public void dispose() {
 
@@ -2860,6 +3033,9 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Not part of API - used internally
+     */
     @Override
     public boolean getPageTurnScalingAppropriate() {
 
@@ -2870,16 +3046,28 @@ public class JavaFxGUI extends GUI {
         return pageTurnScalingAppropriate;
     }
 
+    /**
+     * Not part of API - used internally
+     */
     @Override
     public SwingCursor getGUICursor() {
         return guiCursor;
     }
 
+    /**
+     * Not part of API - used internally
+     */
     @Override
     public void rescanPdfLayers() {
 //        layersPanel.rescanPdfLayers();
     }
 
+    /**
+     * Checks if title matches the title of any of the side tab bar tabs
+     *
+     * @param title String title to check for.
+     * @return String title of tab found.
+     */
     @Override
     public String getTitles(final String title) {
 
@@ -2899,6 +3087,11 @@ public class JavaFxGUI extends GUI {
         return null;
     }
 
+    /**
+     * getStatusBar not supported in OpenViewerFX
+     *
+     * @return Always returns null
+     */
     @Override
     public Object getStatusBar() {
 
@@ -2909,16 +3102,31 @@ public class JavaFxGUI extends GUI {
         return null;
     }
 
+    /**
+     * Get the GUIButtons object that holds all buttons used by the user interface
+     *
+     * @return GUIButtons implementation used by the user interface
+     */
     @Override
     public GUIButtons getButtons() {
         return fxButtons;
     }
 
+    /**
+     * Get the GUIMenuItems object that holds all the menu items used by the user interface.
+     *
+     * @return GUIMenuItems implementation used by the user interface
+     */
     @Override
     public GUIMenuItems getMenuItems() {
         return menuItems;
     }
 
+    /**
+     * Set tabs not initialised flag to prevent use of tabs.
+     *
+     * @param b true to mark the tabs as not initialised, false to mark as initialised
+     */
     @Override
     public void setTabsNotInitialised(final boolean b) {
 
@@ -2991,15 +3199,28 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Set the transition type to be used when changing between pages
+     */
     public void updateTransitionType() {
         transitionType = TransitionType.valueOf(properties.getValue("transitionType").replace(" ", "_"));
     }
 
+    /**
+     * Get the page container for the PDF display area
+     *
+     * @return ScrollPane containing the PdfDecoderFX
+     */
     @Override
     public ScrollPane getPageContainer() {
         return pageContainer;
     }
 
+    /**
+     * Get the PdfDecoderFX object used to display the PDF in the user interface
+     *
+     * @return PdfDecoderFX object used for display
+     */
     @Override
     public PdfDecoderFX getPdfDecoder() {
         return ((PdfDecoderFX) decode_pdf);
@@ -3010,7 +3231,7 @@ public class JavaFxGUI extends GUI {
      */
     @Override
     protected void addComboListenerAndLabel(final GUICombo combo) {
-        ((ComboBoxBase<String>) combo).setOnAction((EventHandler<ActionEvent>)currentCommandListener.getCommandListener());
+        ((ComboBoxBase<String>) combo).setOnAction((EventHandler<ActionEvent>) currentCommandListener.getCommandListener());
     }
 
     /**
@@ -3065,12 +3286,12 @@ public class JavaFxGUI extends GUI {
      */
     @Override
     protected void setupComboBoxes() {
-       
+
         final String[] rotationValues = {"0", "90", "180", "270"};
 
         final String[] scalingValues = {Messages.getMessage("PdfViewerScaleWindow.text"), Messages.getMessage("PdfViewerScaleHeight.text"),
-            Messages.getMessage("PdfViewerScaleWidth.text"),
-            "25%", "50%", "75%", "100%", "125%", "150%", "200%", "250%", "500%", "750%", "1000%"};
+                Messages.getMessage("PdfViewerScaleWidth.text"),
+                "25%", "50%", "75%", "100%", "125%", "150%", "200%", "250%", "500%", "750%", "1000%"};
 
         //set new default if appropriate
         String choosenScaling = System.getProperty("org.jpedal.defaultViewerScaling");
@@ -3222,7 +3443,7 @@ public class JavaFxGUI extends GUI {
         previewOnSingleScroll = properties.getValue("previewOnSingleScroll").equalsIgnoreCase("true");
 
 
-        if (previewOnSingleScroll && 1==2) { //currently disable as some bugs in pageflow to normal modes
+        if (previewOnSingleScroll && 1 == 2) { //currently disable as some bugs in pageflow to normal modes
             pageScroll = new ScrollBar();
             pageScroll.setOrientation(Orientation.VERTICAL);
             pageScroll.setValue(0);
@@ -3300,7 +3521,7 @@ public class JavaFxGUI extends GUI {
                 }
             }
         });
-        
+
         String propValue = properties.getValue("startSideTabOpen");
         if (!propValue.isEmpty()) {
             sideTabBarOpenByDefault = propValue.equalsIgnoreCase("true");
@@ -3353,10 +3574,10 @@ public class JavaFxGUI extends GUI {
                 commonValues.setCurrentPage(decode_pdf.getPageNumber());
 
                 String value = pageCounter2.getText().trim();
-                
+
                 //Check if mapped and if so set the actual page number
                 //This is updated later to the correct page label
-                if (decode_pdf.getIO().getPageLabels()!=null && decode_pdf.getIO().getPageLabels().containsValue(value)) {
+                if (decode_pdf.getIO().getPageLabels() != null && decode_pdf.getIO().getPageLabels().containsValue(value)) {
                     final Set<Map.Entry<Integer, String>> entries = decode_pdf.getIO().getPageLabels().entrySet();
                     for (final Map.Entry<Integer, String> e : entries) {
                         if (e.getValue().equals(value)) {
@@ -3365,7 +3586,7 @@ public class JavaFxGUI extends GUI {
                         }
                     }
                 }
-                
+
                 currentCommands.executeCommand(Commands.GOTO, new Object[]{value});
             }
         });
@@ -3400,19 +3621,18 @@ public class JavaFxGUI extends GUI {
                 final DropShadow pdfBorder = new DropShadow();
                 pdfBorder.setOffsetY(0f);
                 pdfBorder.setOffsetX(0f);
-                
+
                 pdfBorder.setWidth(dropshadowDepth);
                 pdfBorder.setHeight(dropshadowDepth);
 
                 //if decoder.borderpresent set effect else transparent
-                if (decode_pdf.isBorderPresent()){
+                if (decode_pdf.isBorderPresent()) {
                     pdfBorder.setColor(color);
-                }
-                else{
+                } else {
                     pdfBorder.setColor(Color.TRANSPARENT);
                 }
-                
-                ((javafx.scene.Node) decode_pdf).setEffect(pdfBorder);   
+
+                ((javafx.scene.Node) decode_pdf).setEffect(pdfBorder);
             }
         });
     }
@@ -3434,7 +3654,8 @@ public class JavaFxGUI extends GUI {
 
     /**
      * Creates the Main Display Window for all of the JavaFX Content.
-     * @param width is of type int
+     *
+     * @param width  is of type int
      * @param height is of type int
      */
     @Override
@@ -3456,6 +3677,11 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Sets the scroll bar policy for the display areas scroll pane
+     *
+     * @param pol ScrollPolicy to be applied to the scroll pane
+     */
     @Override
     public void setScrollBarPolicy(final ScrollPolicy pol) {
         switch (pol) {
@@ -3522,6 +3748,11 @@ public class JavaFxGUI extends GUI {
         tabsNotInitialised = false;
     }
 
+    /**
+     * Returns the RecentDocumentFactory used to hand the recent document list
+     *
+     * @return RecentDocumentFactory used by the user interface
+     */
     @Override
     public RecentDocumentsFactory getRecentDocument() {
         if (recent != null) {
@@ -3531,11 +3762,19 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Create the RecentDocuments for the user interface
+     */
     @Override
     public void setRecentDocument() {
         recent = new JavaFXRecentDocuments(PropertiesFile.getNoRecentDocumentsToDisplay());
     }
 
+    /**
+     * Open a file in the Viewer
+     *
+     * @param fileToOpen String filename for the file to be opened
+     */
     @Override
     public void openFile(final String fileToOpen) {
         if (fileToOpen != null) {
@@ -3544,11 +3783,23 @@ public class JavaFxGUI extends GUI {
 
     }
 
+    /**
+     * Open a file in the Viewer
+     *
+     * @param fileName String filename for the file to be opened
+     */
     @Override
     public void open(final String fileName) {
         JavaFXOpenFile.open(fileName, commonValues, searchFrame, this, decode_pdf, properties, thumbnails);
     }
 
+    /**
+     * Enable and make visible different parts of the page counter of all of it
+     *
+     * @param value      PageCounter value for the different page counter elements
+     * @param enabled    true to enable the counter section, false to disable.
+     * @param visibility true to make visible the counter section, false to disable.
+     */
     @Override
     public void enablePageCounter(final PageCounter value, final boolean enabled, final boolean visibility) {
         switch (value) {
@@ -3583,6 +3834,9 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Remove the ChangeListener from the PdfDecoder and flush cached pages
+     */
     @Override
     public void removePageListener() {
 
@@ -3600,6 +3854,12 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Set the text content for a section of the page counter.
+     *
+     * @param value PageCounter value for the different page counter elements
+     * @param text  String value to be place in the page counter
+     */
     @Override
     public void setPageCounterText(final PageCounter value, final String text) {
         switch (value) {
@@ -3622,6 +3882,12 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Get the page counter segments
+     *
+     * @param value PageCounter value for the different page counter elements
+     * @return an Object containing the section of the page counter
+     */
     @Override
     public Object getPageCounter(final PageCounter value) {
         switch (value) {
@@ -3641,6 +3907,9 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Update the page counter input size to accommodate the contents
+     */
     @Override
     public void updateTextBoxSize() {
         //Set textbox size
@@ -3658,6 +3927,12 @@ public class JavaFxGUI extends GUI {
         pageCounter2.setMaxSize(pageCounter2.getPrefWidth(), pageCounter2.getPrefHeight());
     }
 
+    /**
+     * Enable and or set visibility for the cursor display for multi box
+     *
+     * @param enabled true to enable, false to disable
+     * @param visible true to make visible, false to make invisible
+     */
     @Override
     public void enableCursor(final boolean enabled, final boolean visible) {
         coordsFX.setDisable(!enabled);
@@ -3676,42 +3951,79 @@ public class JavaFxGUI extends GUI {
         navButtons.setVisible(visible);
     }
 
+    /**
+     * Enable and or set visibility for the download display for multi box
+     *
+     * @param enabled true to enable, false to disable
+     * @param visible true to make visible, false to make invisible
+     */
     @Override
     public void enableDownloadBar(final boolean enabled, final boolean visible) {
         downloadBar.setDisable(!enabled);
         downloadBar.setVisible(visible);
     }
 
+    /**
+     * Get the current count of tabs on the side tab bar
+     *
+     * @return int value representing the number of tabs currently visible
+     */
     @Override
     public int getSidebarTabCount() {
         return navOptionsPanel.getTabs().size();
     }
 
+    /**
+     * Get the title of the tab at the given position
+     *
+     * @param pos The position of the tab on the tabbed pane
+     * @return String title of the given tab or an empty String is tab not present.
+     */
     @Override
     public String getSidebarTabTitleAt(final int pos) {
         return navOptionsPanel.getTabs().get(pos).getText();
     }
 
+    /**
+     * Remove the tab at the specified position from the side tab bar
+     *
+     * @param pos Tab index to removed.
+     */
     @Override
     public void removeSidebarTabAt(final int pos) {
         navOptionsPanel.getTabs().remove(pos);
     }
 
+    /**
+     * Get the divider location for the viewer
+     *
+     * @return double representation of the divider location
+     */
     @Override
     public double getDividerLocation() {
         double w = center.getWidth();
-        if (w == 0) {//If not set, set to 1 to prevent break
+        if (w == 0) { // If not set, set to 1 to prevent break
             w = 1;
         }
         //Convert from double value to int size based on viewer width (To match Swing)
         return w * center.getDividers().get(0).getPosition();
     }
 
+    /**
+     * Get the start / collapsed position of the split pane divider
+     *
+     * @return divider position as a double
+     */
     @Override
     public double getStartSize() {
         return collapsedSize;
     }
 
+    /**
+     * Set the start / collapsed position of the split pane divider
+     *
+     * @param size position as an int
+     */
     @Override
     public void setStartSize(final int size) {
         collapsedSize = size; //We multiply because JavaFX uses double not int.
@@ -3750,26 +4062,53 @@ public class JavaFxGUI extends GUI {
         return scaling;
     }
 
+    /**
+     * Get the thickness of the glow border
+     *
+     * @return thickness of glow as an int
+     */
     @Override
     public int getDropShadowDepth() {
         return dropshadowDepth;
     }
 
+    /**
+     * Get the root pane that holds the GUI interface
+     *
+     * @return BorderPane object for the user interface
+     */
     public BorderPane getRoot() {
         return root;
     }
 
+    /**
+     * Set is the page display can be panned
+     *
+     * @param pan boolean value to control if pannable
+     */
     @Override
     public void setPannable(final boolean pan) {
         pageContainer.setPannable(pan);
     }
 
+    /**
+     * Set up the split pane divider for use
+     *
+     * @param size       unsupported in OpenViewerFX
+     * @param visibility true to set left side of divider visible and enabled, false to set disabled and invisible
+     */
     @Override
     public void setupSplitPaneDivider(final int size, final boolean visibility) {
         center.setDisable(!visibility);
         center.setVisible(visibility);
     }
 
+    /**
+     * Enable and or set visibility for the status bar for multi box
+     *
+     * @param enabled true to enable, false to disable
+     * @param visible true to make visible, false to make invisible
+     */
     @Override
     public void enableStatusBar(final boolean enabled, final boolean visible) {
         // System.out.println("enableStatusBar not yet implemented for JavaFX");
@@ -3798,13 +4137,19 @@ public class JavaFxGUI extends GUI {
             customFXHandle.hvalueProperty().addListener(viewListener);
         }
     }
-    
+
+    /**
+     * Annotation panel is not available in FX Viewer
+     */
     @Override
     public GUIAnnotationPanel getAnnotationPanel() {
         LogWriter.writeLog("JavaFxGUI.getAnnotationPanel is not available in FX Viewer.");
         return null;
     }
 
+    /**
+     * Glass pane is not available in FX Viewer
+     */
     @Override
     public Object getGlassPane() {
         LogWriter.writeLog("JavaFxGUI.getGlassPane is not available in FX Viewer.");
@@ -3839,23 +4184,31 @@ public class JavaFxGUI extends GUI {
         }
     }
 
+    /**
+     * Not used in FX.
+     *
+     * @throws RuntimeException When called throws a runtime exception
+     */
     @Override
     public PdfDecoderInt openNewMultiplePage(final String selectedFile, final Values commonValues) {
         throw new RuntimeException("Not implemented in JavaFX");
 
     }
 
+    /**
+     * triggerPageTurnAnimation is unsupported in OpenViewerFX
+     */
     @Override
     public void triggerPageTurnAnimation(final PdfDecoderInt decode_pdf, final Values commonValues, final int updatedTotal, final boolean rightTurn) {
 
     }
 
     @Override
-    protected String getTitle(){
+    protected String getTitle() {
 
-        if(OpenViewerFX.isOpenFX) {
+        if (OpenViewerFX.isOpenFX) {
             return "LGPL PDF JavaFX Viewer " + PdfDecoderInt.version;
-        }else{
+        } else {
             return super.getTitle();
         }
     }

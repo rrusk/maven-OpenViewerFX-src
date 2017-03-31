@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.commands.javafx;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -55,7 +56,7 @@ import org.jpedal.examples.viewer.gui.javafx.dialog.FXDialog;
 import org.jpedal.utils.BrowserLauncher;
 
 /**
- * When the RSS button on the viewer is called it will load   
+ * When the RSS button on the viewer is called it will load
  * the stage with the link for the RSS Feed to join.
  */
 public class JavaFXRSSyndication {
@@ -66,11 +67,11 @@ public class JavaFXRSSyndication {
 
         }
     }
-    
+
     public static void getRSSBox() {
-        
+
         final BorderPane border = new BorderPane();
-        
+
         final VBox top = new VBox();
         top.setPadding(new Insets(20, 0, 20, 20));
         final Label topLabel = new Label("Click the link below to load a web browser and sign up to our RSS Feed");
@@ -105,7 +106,7 @@ public class JavaFXRSSyndication {
         middle.getChildren().addAll(mainImage);
         middle.setEffect(borderGlow);
         border.setCenter(middle);
-        
+
         final HBox bottom = new HBox();
         final Button ok = new Button("OK");
         bottom.getChildren().add(ok);
@@ -113,17 +114,17 @@ public class JavaFXRSSyndication {
         border.setBottom(bottom);
         bottom.setAlignment(Pos.BASELINE_RIGHT);
         bottom.setPadding(new Insets(20, 20, 20, 0));
-        
+
         final FXDialog newDialog = new FXDialog(null, Modality.APPLICATION_MODAL, border, 550, 600);
-        
+
         ok.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent e) {
                 newDialog.close();
             }
         });
-        
+
         newDialog.show();
-        
+
     }
 }

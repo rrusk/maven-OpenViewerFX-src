@@ -34,46 +34,46 @@ package org.jpedal.objects.raw;
 
 public class OCObject extends PdfObject {
 
-    float max,min;
-    
-    int Event=-1;
+    float max, min;
 
-    private byte[] rawBaseState,rawListMode,rawViewState;
+    int Event = -1;
+
+    private byte[] rawBaseState, rawListMode, rawViewState;
     String BaseState, ListMode;
 
-    private PdfObject D, Layer, OCGs_dictionary, Usage, View,Zoom;
+    private PdfObject D, Layer, OCGs_dictionary, Usage, View, Zoom;
 
     private Object[] Order;
-    private byte[][] AS, Category, Locked, ON, OFF,OCGs,Configs, RBGroups;
+    private byte[][] AS, Category, Locked, ON, OFF, OCGs, Configs, RBGroups;
 
     public OCObject(final String ref) {
         super(ref);
     }
 
     public OCObject(final int ref, final int gen) {
-       super(ref,gen);
+        super(ref, gen);
     }
 
     @Override
-    public PdfObject getDictionary(final int id){
+    public PdfObject getDictionary(final int id) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.D:
-	        	return D;
+            case PdfDictionary.D:
+                return D;
 
             case PdfDictionary.Layer:
-	        	return Layer;
+                return Layer;
 
             case PdfDictionary.OCGs:
-	        	return OCGs_dictionary;
+                return OCGs_dictionary;
 
             case PdfDictionary.Usage:
                 return Usage;
 
             case PdfDictionary.View:
                 return View;
-                    
+
             case PdfDictionary.Zoom:
                 return Zoom;
 
@@ -84,35 +84,35 @@ public class OCObject extends PdfObject {
 
 
     @Override
-    public void setFloatNumber(final int id, final float value){
+    public void setFloatNumber(final int id, final float value) {
 
-        switch(id){
+        switch (id) {
 
-	        case PdfDictionary.max:
-	    		max=value;
-	    		break;
+            case PdfDictionary.max:
+                max = value;
+                break;
 
             case PdfDictionary.min:
-                            min=value;
-                            break;
+                min = value;
+                break;
 
 
             default:
 
-                super.setFloatNumber(id,value);
+                super.setFloatNumber(id, value);
         }
     }
 
     @Override
-    public float getFloatNumber(final int id){
+    public float getFloatNumber(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.max:
-        		return max;
+                return max;
 
             case PdfDictionary.min:
-        		return min;
+                return min;
 
             default:
 
@@ -122,38 +122,38 @@ public class OCObject extends PdfObject {
 
 
     @Override
-    public void setDictionary(final int id, final PdfObject value){
+    public void setDictionary(final int id, final PdfObject value) {
 
-    	value.setID(id);
-    	
-        switch(id){
+        value.setID(id);
 
-	        case PdfDictionary.D:
-	        	D=value;
-			break;
+        switch (id) {
+
+            case PdfDictionary.D:
+                D = value;
+                break;
 
             case PdfDictionary.Layer:
-	        	Layer=value;
-			break;
-                
+                Layer = value;
+                break;
+
             case PdfDictionary.OCGs:
-                OCGs_dictionary=value;
-            break;    
+                OCGs_dictionary = value;
+                break;
 
             case PdfDictionary.Usage:
-                Usage=value;
-    		break;
+                Usage = value;
+                break;
 
-                case PdfDictionary.View:
-            	View=value;
-    		break;
-                    
+            case PdfDictionary.View:
+                View = value;
+                break;
+
             case PdfDictionary.Zoom:
-            	Zoom=value;
-    		break;
+                Zoom = value;
+                break;
 
             default:
-            	super.setDictionary(id, value);
+                super.setDictionary(id, value);
         }
     }
 
@@ -163,12 +163,12 @@ public class OCObject extends PdfObject {
 
         final int id = PdfObject.getId(keyStart, keyLength, raw);
 
-        final int PDFvalue=super.setConstant(pdfKeyType,id);
+        final int PDFvalue = super.setConstant(pdfKeyType, id);
 
-        switch(pdfKeyType){
+        switch (pdfKeyType) {
 
             case PdfDictionary.Event:
-                    Event=PDFvalue;
+                Event = PDFvalue;
                 break;
 
         }
@@ -180,14 +180,14 @@ public class OCObject extends PdfObject {
     @Override
     public int getParameterConstant(final int key) {
 
-    	//System.out.println("Get constant for "+key +" "+this);
-        switch(key){
+        //System.out.println("Get constant for "+key +" "+this);
+        switch (key) {
 
             case PdfDictionary.Event:
                 return Event;
 
-        default:
-        	return super.getParameterConstant(key);
+            default:
+                return super.getParameterConstant(key);
 
         }
     }
@@ -195,17 +195,17 @@ public class OCObject extends PdfObject {
     @Override
     public void setName(final int id, final byte[] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.ListMode:
-                rawListMode=value;
-            break;
+                rawListMode = value;
+                break;
 
             case PdfDictionary.ViewState:
-                rawViewState=value;
-            break;    
+                rawViewState = value;
+                break;
             default:
-                super.setName(id,value);
+                super.setName(id, value);
 
         }
 
@@ -216,28 +216,28 @@ public class OCObject extends PdfObject {
     @Override
     public int getNameAsConstant(final int id) {
 
-        final byte[] raw ;
+        final byte[] raw;
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BaseState:
-            raw=rawBaseState;
-            break;
+                raw = rawBaseState;
+                break;
 
             case PdfDictionary.ListMode:
-            raw=rawListMode;
-            break;
-                
+                raw = rawListMode;
+                break;
+
             case PdfDictionary.ViewState:
-                raw=rawViewState;
-            break;
+                raw = rawViewState;
+                break;
 
             default:
                 return super.getNameAsConstant(id);
 
         }
 
-        if(raw==null) {
+        if (raw == null) {
             return super.getNameAsConstant(id);
         } else {
             return PdfDictionary.generateChecksum(0, raw.length, raw);
@@ -249,28 +249,27 @@ public class OCObject extends PdfObject {
     @Override
     public String getName(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.BaseState:
 
-            //setup first time
-            if(BaseState==null && rawBaseState!=null) {
-                BaseState = new String(rawBaseState);
-            }
+                //setup first time
+                if (BaseState == null && rawBaseState != null) {
+                    BaseState = new String(rawBaseState);
+                }
 
-            return BaseState;
+                return BaseState;
 
             case PdfDictionary.ListMode:
 
-            //setup first time
-            if(ListMode==null && rawListMode!=null) {
-                ListMode = new String(rawListMode);
-            }
+                //setup first time
+                if (ListMode == null && rawListMode != null) {
+                    ListMode = new String(rawListMode);
+                }
 
-            return ListMode;
+                return ListMode;
 
 
-            
             default:
                 return super.getName(id);
 
@@ -280,7 +279,7 @@ public class OCObject extends PdfObject {
     @Override
     public byte[][] getKeyArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.AS:
                 return AS;
@@ -305,19 +304,19 @@ public class OCObject extends PdfObject {
 
             case PdfDictionary.RBGroups:
                 return RBGroups;
-            
+
             default:
-            	return super.getKeyArray(id);
+                return super.getKeyArray(id);
         }
     }
 
     @Override
     public void setObjectArray(final int id, final Object[] objectValues) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Order:
-                Order=objectValues;
+                Order = objectValues;
                 break;
 
             default:
@@ -329,7 +328,7 @@ public class OCObject extends PdfObject {
     @Override
     public Object[] getObjectArray(final int id) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.Order:
                 return deepCopy(Order);
@@ -339,28 +338,28 @@ public class OCObject extends PdfObject {
         }
     }
 
-    protected static Object[] deepCopy(final Object[] input){
+    protected static Object[] deepCopy(final Object[] input) {
 
-        if(input==null) {
+        if (input == null) {
             return null;
         }
 
-        final int count=input.length;
+        final int count = input.length;
 
-        final Object[] deepCopy=new Object[count];
+        final Object[] deepCopy = new Object[count];
 
-        for(int aa=0;aa<count;aa++){
+        for (int aa = 0; aa < count; aa++) {
 
-            if(input[aa] instanceof byte[]){
-                final byte[] byteVal=(byte[])input[aa];
-                final int byteCount=byteVal.length;
+            if (input[aa] instanceof byte[]) {
+                final byte[] byteVal = (byte[]) input[aa];
+                final int byteCount = byteVal.length;
 
-                final byte[] newValue=new byte[byteCount];
-                deepCopy[aa]=newValue;
-    
-                System.arraycopy(byteVal,0,newValue,0,byteCount);
-            }else{
-               deepCopy[aa]=deepCopy((Object[])input[aa]); 
+                final byte[] newValue = new byte[byteCount];
+                deepCopy[aa] = newValue;
+
+                System.arraycopy(byteVal, 0, newValue, 0, byteCount);
+            } else {
+                deepCopy[aa] = deepCopy((Object[]) input[aa]);
             }
         }
 
@@ -371,48 +370,48 @@ public class OCObject extends PdfObject {
     @Override
     public void setKeyArray(final int id, final byte[][] value) {
 
-        switch(id){
+        switch (id) {
 
             case PdfDictionary.AS:
-                AS=value;
-            break;
+                AS = value;
+                break;
 
             case PdfDictionary.Category:
-                Category=value;
-            break;
+                Category = value;
+                break;
 
             case PdfDictionary.Configs:
-                Configs=value;
-            break;
+                Configs = value;
+                break;
 
             case PdfDictionary.Locked:
-                Locked=value;
-            break;
+                Locked = value;
+                break;
 
             case PdfDictionary.OCGs:
-                OCGs=value;
-            break;
+                OCGs = value;
+                break;
 
             case PdfDictionary.OFF:
-                OFF=value;
-            break;
+                OFF = value;
+                break;
 
             case PdfDictionary.ON:
-                ON=value;
-            break;
+                ON = value;
+                break;
 
             case PdfDictionary.RBGroups:
-                RBGroups=value;
-            break;
+                RBGroups = value;
+                break;
 
             default:
-            	super.setKeyArray(id, value);
+                super.setKeyArray(id, value);
         }
 
     }
 
     @Override
-    public int getObjectType(){
+    public int getObjectType() {
         return PdfDictionary.OCProperties;
     }
 }

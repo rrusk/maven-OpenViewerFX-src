@@ -36,7 +36,6 @@ import org.jpedal.objects.acroforms.GUIData;
 import org.jpedal.objects.acroforms.SwingData;
 
 /**
- *
  * @author markee
  */
 public class SwingFormCreator {
@@ -44,13 +43,13 @@ public class SwingFormCreator {
     public GUIData getData() {
         return new SwingData();
     }
-    
-     /**
+
+    /**
      * create appropriate FormFactory
      */
     public FormFactory createFormFactory() {
         return new SwingFormFactory();
     }
-    
-    
+
+
 }

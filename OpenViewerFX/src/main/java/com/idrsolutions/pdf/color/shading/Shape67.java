@@ -58,9 +58,8 @@ public class Shape67 {
     private final double minY;
 
     /**
-     * @param sp size 12 points array
+     * @param sp     size 12 points array
      * @param colors size 4 color array
-     *
      */
     public Shape67(final Point2D[] sp, final Color[] colors) {
         this.pointsArr = sp;

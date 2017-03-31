@@ -40,6 +40,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.function.PDFFunction;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -79,32 +80,32 @@ public class RadialContext implements PaintContext {
 
         coords = new float[src.length];
         System.arraycopy(src, 0, coords, 0, src.length);
-        
+
         AffineTransform shadeAffine = new AffineTransform();
         if (mm != null) {
             shadeAffine = new AffineTransform(mm[0][0], mm[0][1], mm[1][0], mm[1][1], mm[2][0], mm[2][1]);
         }
-        
+
         try {
             final AffineTransform invXF = xForm.createInverse();
             final AffineTransform invSH = shadeAffine.createInverse();
             invSH.concatenate(invXF);
-            inversed = (AffineTransform)invSH.clone();
+            inversed = (AffineTransform) invSH.clone();
         } catch (final NoninvertibleTransformException ex) {
-            LogWriter.writeLog("Exception "+ex+ ' ');
+            LogWriter.writeLog("Exception " + ex + ' ');
         }
-               
+
         x0 = coords[0];
         y0 = coords[1];
         r0 = coords[2];
-        
+
         x1 = coords[3];
         y1 = coords[4];
         r1 = coords[5];
-        
+
         colorT0 = calculateColor(t0);
         colorT1 = calculateColor(t1);
-                
+
         //dont use Math.pow functions here;
         deltaX = x1 - x0;
         deltaY = y1 - y0;
@@ -129,10 +130,10 @@ public class RadialContext implements PaintContext {
         shadingColorSpace.setColor(colValues, colValues.length);
         return (Color) shadingColorSpace.getColor();
     }
-    
+
     @Override
     public Raster getRaster(final int startX, final int startY, final int w, final int h) {
-        
+
         final int[] data = new int[w * h * 4];
         if (background != null) {
             shadingColorSpace.setColor(background, shadingColorSpace.getColorComponentCount());
@@ -150,7 +151,7 @@ public class RadialContext implements PaintContext {
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                final float[] xy = { startX + x, startY + y};
+                final float[] xy = {startX + x, startY + y};
                 inversed.transform(xy, 0, xy, 0, 1);
                 Color result = null;
 

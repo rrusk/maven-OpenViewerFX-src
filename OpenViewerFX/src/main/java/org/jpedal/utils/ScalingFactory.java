@@ -33,6 +33,7 @@
 package org.jpedal.utils;
 
 import java.awt.geom.AffineTransform;
+
 import org.jpedal.objects.PageOrigins;
 import org.jpedal.objects.PdfPageData;
 
@@ -41,64 +42,68 @@ import org.jpedal.objects.PdfPageData;
  */
 public class ScalingFactory {
 
-    public  static double[] getScalingForImage(final int pageNumber, final int rotation, final float scaling, final PdfPageData pageData) {
+    public static double[] getScalingForImage(final int pageNumber, final int rotation, final float scaling, final PdfPageData pageData) {
 
-        final double mediaX = pageData.getMediaBoxX(pageNumber)*scaling;
-        final double mediaY = pageData.getMediaBoxY(pageNumber)*scaling;
+        final double mediaX = pageData.getMediaBoxX(pageNumber) * scaling;
+        final double mediaY = pageData.getMediaBoxY(pageNumber) * scaling;
         //double mediaW = pageData.getMediaBoxWidth(pageNumber)*scaling;
-        final double mediaH = pageData.getMediaBoxHeight(pageNumber)*scaling;
+        final double mediaH = pageData.getMediaBoxHeight(pageNumber) * scaling;
 
-        final double crw = pageData.getCropBoxWidth(pageNumber)*scaling;
-        final double crh = pageData.getCropBoxHeight(pageNumber)*scaling;
-        final double crx = pageData.getCropBoxX(pageNumber)*scaling;
-        final double cry = pageData.getCropBoxY(pageNumber)*scaling;
+        final double crw = pageData.getCropBoxWidth(pageNumber) * scaling;
+        final double crh = pageData.getCropBoxHeight(pageNumber) * scaling;
+        final double crx = pageData.getCropBoxX(pageNumber) * scaling;
+        final double cry = pageData.getCropBoxY(pageNumber) * scaling;
 
         //create scaling factor to use
         final AffineTransform displayScaling = new AffineTransform();
         final double[] displayScalingArray = new double[6];
 
         //** new x_size y_size declaration *
-        final int x_size=(int) (crw+(crx-mediaX));
-        final int y_size=(int) (crh+(cry-mediaY));
-	
+        final int x_size = (int) (crw + (crx - mediaX));
+        final int y_size = (int) (crh + (cry - mediaY));
+
         /*
          * XFA needs to be other way up so set page as inverted so option added
          */
         switch (rotation) {
             case 270:
-                displayScaling.rotate(-Math.PI / 2.0, x_size/ 2, y_size / 2);
+                displayScaling.rotate(-Math.PI / 2.0, x_size / 2, y_size / 2);
                 if (pageData.getOrigin() == PageOrigins.BOTTOM_LEFT) {
                     final double x_change = (displayScaling.getTranslateX());
                     final double y_change = (displayScaling.getTranslateY());
                     displayScaling.translate((y_size - y_change), -x_change);
                     displayScaling.translate(0, y_size);
                     displayScaling.scale(1, -1);
-                    displayScaling.translate(-(crx+mediaX), -(mediaH-crh-(cry-mediaY)));
-                }       break;
+                    displayScaling.translate(-(crx + mediaX), -(mediaH - crh - (cry - mediaY)));
+                }
+                break;
             case 180:
                 displayScaling.rotate(Math.PI, x_size / 2, y_size / 2);
                 if (pageData.getOrigin() == PageOrigins.BOTTOM_LEFT) {
-                    displayScaling.translate(-(crx+mediaX),y_size+(cry+mediaY)-(mediaH-crh-(cry-mediaY)));
+                    displayScaling.translate(-(crx + mediaX), y_size + (cry + mediaY) - (mediaH - crh - (cry - mediaY)));
                     displayScaling.scale(1, -1);
-                }       break;
+                }
+                break;
             case 90:
                 displayScaling.rotate(Math.PI / 2.0);
                 if (pageData.getOrigin() == PageOrigins.BOTTOM_LEFT) {
-                    displayScaling.translate(0,(cry+mediaY)-(mediaH-crh-(cry-mediaY)));
+                    displayScaling.translate(0, (cry + mediaY) - (mediaH - crh - (cry - mediaY)));
                     displayScaling.scale(1, -1);
-                }       break;
+                }
+                break;
             default:
-                if (pageData.getOrigin() ==PageOrigins.BOTTOM_LEFT) {
+                if (pageData.getOrigin() == PageOrigins.BOTTOM_LEFT) {
                     displayScaling.translate(0, y_size);
                     displayScaling.scale(1, -1);
                     displayScaling.translate(0, -(mediaH - crh - (cry - mediaY)));
-                }       break;
+                }
+                break;
         }
 
-        displayScaling.scale(scaling,scaling);
+        displayScaling.scale(scaling, scaling);
 
         displayScaling.getMatrix(displayScalingArray);
-        
+
         return displayScalingArray;
     }
 }

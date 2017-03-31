@@ -37,6 +37,7 @@ import java.security.cert.Certificate;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.jpedal.exception.PdfSecurityException;
 import org.jpedal.gui.ShowGUIMessage;
 
@@ -45,7 +46,7 @@ public class JCADecryption implements BaseDecryption {
     public JCADecryption() {
         allowBiggerKeySize();
     }
-    
+
     @Override
     public byte[] v5Decrypt(final byte[] rawValue, final byte[] encKey) throws PdfSecurityException {
         final byte[] returnKey;
@@ -70,10 +71,10 @@ public class JCADecryption implements BaseDecryption {
             final Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
             c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(ivData));
             out = c.doFinal(encData);
-        
+
         } catch (final Exception e) {
             e.printStackTrace();
-    }
+        }
         return out;
     }
 
@@ -90,9 +91,9 @@ public class JCADecryption implements BaseDecryption {
     @Override
     public byte[] readCertificate(final byte[][] recipients, final Certificate certificate, final Key key) {
         final String message = "This method is not supported without the BouncyCastle mail jar added "
-                + "to the classpath. " + System.getProperty("line.separator") + 
+                + "to the classpath. " + System.getProperty("line.separator") +
                 "See https://www.idrsolutions.com/jpedal/support/additional-jars/ for more details.";
-        
+
         ShowGUIMessage.showGUIMessage(message, "Unsupported Certificate operation");
         throw new UnsupportedOperationException(message);
     }

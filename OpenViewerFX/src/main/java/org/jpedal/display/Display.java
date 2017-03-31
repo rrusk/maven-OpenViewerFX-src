@@ -35,34 +35,57 @@ package org.jpedal.display;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.text.TextLines;
 
 public interface Display {
 
-    /**when no display is set*/
-    int NODISPLAY=0;
-    
-    /**show pages one at a time*/
-    int SINGLE_PAGE=1;
+    /**
+     * when no display is set
+     */
+    int NODISPLAY = 0;
 
-    /**show all pages*/
-    int CONTINUOUS=2;
+    /**
+     * show pages one at a time
+     */
+    int SINGLE_PAGE = 1;
 
-    /**show all pages two at a time*/
-    int CONTINUOUS_FACING=3;
-    
-    /**show pages two at a time*/
-    int FACING=4;
-    
-    /**PageFlowing mode*/
-    int PAGEFLOW=5;
+    /**
+     * show all pages
+     */
+    int CONTINUOUS = 2;
 
-    int DISPLAY_LEFT_ALIGNED=1;
+    /**
+     * show all pages two at a time
+     */
+    int CONTINUOUS_FACING = 3;
 
-    int DISPLAY_CENTERED=2;
-    
+    /**
+     * show pages two at a time
+     */
+    int FACING = 4;
+
+    /**
+     * PageFlowing mode
+     */
+    int PAGEFLOW = 5;
+
+    /**
+     * Portfolio Detail mode
+     */
+    int PORTFOLIO_DETAIL = 6;
+
+    /**
+     * Portfolio Tile mode
+     */
+    int PORTFOLIO_TILE = 7;
+
+    int DISPLAY_LEFT_ALIGNED = 1;
+
+    int DISPLAY_CENTERED = 2;
+
     double getIndent();
 
     int[] getCursorBoxOnScreenAsArray();
@@ -74,21 +97,23 @@ public interface Display {
     void resetViewableArea();
 
     void paintPage(Graphics2D g2, AcroRenderer formRenderer, TextLines textLines);
-    
-    void updateCursorBoxOnScreen(int[] newOutlineRectangle, int outlineColor, int pageNumber,int x_size,int y_size);
+
+    void updateCursorBoxOnScreen(int[] newOutlineRectangle, int outlineColor, int pageNumber, int x_size, int y_size);
 
     void drawCursor(Graphics g, float scaling);
 
     void drawFacing(Rectangle visibleRect);
-    
+
     enum BoolValue {
         TURNOVER_ON,
         SEPARATE_COVER
     }
 
-    /**flag used in development of layout modes*/
-    boolean debugLayout=false;
-    
+    /**
+     * flag used in development of layout modes
+     */
+    boolean debugLayout = false;
+
     int[] getPageSize(int displayView);
 
     void decodeOtherPages(int pageNumber, int pageCount);
@@ -98,7 +123,7 @@ public interface Display {
     void refreshDisplay();
 
     Rectangle getDisplayedRectangle();
-    
+
     void disableScreen();
 
     void flushPageCaches();
@@ -106,8 +131,8 @@ public interface Display {
     void init(float scaling, int displayRotation, int pageNumber, DynamicVectorRenderer currentDisplay, boolean isInit);
 
     void drawBorder();
-    
-    void setup(boolean useAcceleration,PageOffsets currentOffset);
+
+    void setup(boolean useAcceleration, PageOffsets currentOffset);
 
     int getYCordForPage(int page);
 
@@ -115,17 +140,17 @@ public interface Display {
 
     int getXCordForPage(int currentPage);
 
-	void setThumbnailPanel(GUIThumbnailPanel thumbnails);
-	
-	void setScaling(float scaling);
+    void setThumbnailPanel(GUIThumbnailPanel thumbnails);
 
-	@SuppressWarnings("UnusedDeclaration")
+    void setScaling(float scaling);
+
+    @SuppressWarnings("UnusedDeclaration")
     void setPageOffsets(int page);
 
     void dispose();
 
     void setAcceleration(boolean enable);
-    
+
     void setAccelerationAlwaysRedraw(boolean enable);
 
     void setObjectValue(int type, Object newValue);

@@ -38,110 +38,110 @@ import org.w3c.dom.NodeList;
 
 /**
  * @author chris
- *
- * class to help convert data structures to a single String
+ *         <p>
+ *         class to help convert data structures to a single String
  */
 public class ConvertToString {
 
     /**
-	 * @return
-	 */
-	public static String convertArrayToString(final float[] values) {
-		if(values!=null){
-			final StringBuilder ret = new StringBuilder();
-			for(int i=0; i<values.length;i++){
-				if(i>0) {
+     * @return
+     */
+    public static String convertArrayToString(final float[] values) {
+        if (values != null) {
+            final StringBuilder ret = new StringBuilder();
+            for (int i = 0; i < values.length; i++) {
+                if (i > 0) {
                     ret.append(", ");
                 }
-				ret.append(values[i]);
-			}
-			
-			return ret.toString();
-		}else{
-			return null;
-		}
-	}
+                ret.append(values[i]);
+            }
+
+            return ret.toString();
+        } else {
+            return null;
+        }
+    }
 
     /**
-	 * @return
-	 */
-	public static String convertArrayToString(final int[] items) {
-		if(items!=null){
-			final StringBuilder ret = new StringBuilder();
-			for(int i=0; i<items.length;i++){
-				if(i>0) {
+     * @return
+     */
+    public static String convertArrayToString(final int[] items) {
+        if (items != null) {
+            final StringBuilder ret = new StringBuilder();
+            for (int i = 0; i < items.length; i++) {
+                if (i > 0) {
                     ret.append(", ");
                 }
-				ret.append(items[i]);
-			}
-			
-			return ret.toString();
-		}else{
-			return null;
-		}
-	}
+                ret.append(items[i]);
+            }
+
+            return ret.toString();
+        } else {
+            return null;
+        }
+    }
 
     public static void printStackTrace(final int level) {
-    	printStackTrace(2,level+1,false);//start at 2 to ignore this method line
+        printStackTrace(2, level + 1, false); //start at 2 to ignore this method line
     }
-    
-    public static void printStackTrace(final int startLevel,int endLevel, final boolean err) {
-    	
-		final Throwable stackgetter = new Throwable();
-		final StackTraceElement[] elems = stackgetter.getStackTrace();
-		if(endLevel==-1 || endLevel>elems.length-1) {
+
+    public static void printStackTrace(final int startLevel, int endLevel, final boolean err) {
+
+        final Throwable stackgetter = new Throwable();
+        final StackTraceElement[] elems = stackgetter.getStackTrace();
+        if (endLevel == -1 || endLevel > elems.length - 1) {
             endLevel = elems.length - 1;
         }
-		
-		for(int i=startLevel;i<=endLevel;i++){
-			if(err) {
+
+        for (int i = startLevel; i <= endLevel; i++) {
+            if (err) {
                 System.err.println(elems[i]);
             } else {
                 System.out.println(elems[i]);
             }
-		}
-	}
+        }
+    }
 
-    public static String convertDocumentToString(final Node formData){
-    	return convertDocumentToString(formData,0);
+    public static String convertDocumentToString(final Node formData) {
+        return convertDocumentToString(formData, 0);
     }
 
     private static String convertDocumentToString(final Node formData, final int level) {
-    	if(formData==null) {
+        if (formData == null) {
             return null;
         }
-    	
-    	final StringBuilder buf = new StringBuilder();
-    	
-    	buf.append(formData.getNodeName());
-    	buf.append(" = ");
-    	buf.append(formData.getNodeValue());
-    	buf.append(" type=");
-    	buf.append(formData.getNodeType());
-    	buf.append(" textContent=");
-    	buf.append(formData.getTextContent());
-    	
-    	final NamedNodeMap att = formData.getAttributes();
-    	if(att!=null){
-    		buf.append(" attributes=[");
-    		for(int i=0;i<att.getLength();i++){
-    			if(i>0) {
+
+        final StringBuilder buf = new StringBuilder();
+
+        buf.append(formData.getNodeName());
+        buf.append(" = ");
+        buf.append(formData.getNodeValue());
+        buf.append(" type=");
+        buf.append(formData.getNodeType());
+        buf.append(" textContent=");
+        buf.append(formData.getTextContent());
+
+        final NamedNodeMap att = formData.getAttributes();
+        if (att != null) {
+            buf.append(" attributes=[");
+            for (int i = 0; i < att.getLength(); i++) {
+                if (i > 0) {
                     buf.append(',');
                 }
-    			buf.append(att.item(i));
-    		}
-    		buf.append(']');
-    	}
-    	
-    	final NodeList nodes = formData.getChildNodes();
-    	for(int i=0;i<nodes.getLength();i++){
-    		buf.append('\n');
-        	for(int d=0;d<level;d++){
-        		buf.append('|');
-        	}
-    		buf.append(convertDocumentToString(nodes.item(i),level+1));
-    	}
-    	
-    	return buf.toString();
+                buf.append(att.item(i));
+            }
+            buf.append(']');
+        }
+
+        final NodeList nodes = formData.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            buf.append('\n');
+            for (int d = 0; d < level; d++) {
+                buf.append('|');
+            }
+            buf.append(convertDocumentToString(nodes.item(i), level + 1));
+        }
+
+        return buf.toString();
     }
 }

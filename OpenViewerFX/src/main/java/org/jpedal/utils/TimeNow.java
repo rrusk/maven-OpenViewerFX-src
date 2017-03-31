@@ -31,6 +31,7 @@
  * ---------------
  */
 package org.jpedal.utils;
+
 import java.text.DateFormat;
 import java.util.Calendar;
 
@@ -39,35 +40,34 @@ import java.util.Calendar;
  * int shortdate format
  * <br><b>This class is NOT part of the API</b>
  */
-public class TimeNow
-{
+public class TimeNow {
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * get date as YYYYMMDDHHMMSS
      */
-    public static final String getShortTimeNow()
-    {
+    public static final String getShortTimeNow() {
         final Calendar now = Calendar.getInstance();
-        return now.get( Calendar.YEAR ) + format( 1 + now.get( Calendar.MONTH ) ) + format( now.get( Calendar.DAY_OF_MONTH ) ) + format( now.get( Calendar.HOUR_OF_DAY ) ) + format( now.get( Calendar.MINUTE ) ) + format( now.get( Calendar.SECOND ) );
+        return now.get(Calendar.YEAR) + format(1 + now.get(Calendar.MONTH)) + format(now.get(Calendar.DAY_OF_MONTH)) + format(now.get(Calendar.HOUR_OF_DAY)) + format(now.get(Calendar.MINUTE)) + format(now.get(Calendar.SECOND));
     }
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * get Time as a string
      */
-    public static final String getTimeNow()
-    {
+    public static final String getTimeNow() {
         final DateFormat short_date = DateFormat.getDateInstance();
-        final DateFormat short_time = DateFormat.getTimeInstance( DateFormat.SHORT );
-        return ( short_date.format( new java.util.Date() ) + ' ' + short_time.format( new java.util.Date() ) );
+        final DateFormat short_time = DateFormat.getTimeInstance(DateFormat.SHORT);
+        return (short_date.format(new java.util.Date()) + ' ' + short_time.format(new java.util.Date()));
     }
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * pad out to 2 chars
      */
-    private static String format( final int number )
-    {
+    private static String format(final int number) {
         String value = String.valueOf(number);
-        if( value.length() == 1 ) {
+        if (value.length() == 1) {
             value = '0' + value;
         }
         return value;

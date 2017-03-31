@@ -34,6 +34,7 @@ package org.jpedal.fonts.objects;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
 import org.jpedal.utils.LogWriter;
 
 /**
@@ -43,59 +44,70 @@ public class FontData {
 
     private byte[] fontData;
 
-    /**flag to show if all fontData in memory or just some*/
+    /**
+     * flag to show if all fontData in memory or just some
+     */
     private boolean isInMemory;
 
-    /**real size of font object*/
+    /**
+     * real size of font object
+     */
     private int fullLength;
 
-    /**offset to actual block loaded*/
+    /**
+     * offset to actual block loaded
+     */
     private int offset;
 
-    /**bytes size of font we keep in memory*/
-    public static int maxSizeAllowedInMemory=-1;
+    /**
+     * bytes size of font we keep in memory
+     */
+    public static int maxSizeAllowedInMemory = -1;
 
-    /**max size of data kept in memory at any one point*/
-    private int blockSize=8192;
+    /**
+     * max size of data kept in memory at any one point
+     */
+    private int blockSize = 8192;
 
     private RandomAccessFile fontFile;
 
     /**
      * pass in name of temp file on disk so we can just read part at a time -
      * if not part of PDF user is responsible for deleting
+     *
      * @param cachedFile
      */
-    public FontData(final String cachedFile){//, byte[] stream) {
+    public FontData(final String cachedFile) { //, byte[] stream) {
 
-        try{
-            fontFile = new RandomAccessFile( cachedFile, "r" );
+        try {
+            fontFile = new RandomAccessFile(cachedFile, "r");
             fullLength = (int) fontFile.length();
 
-        }catch( final Exception e ){
+        } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
         //if small read all
-        if(fullLength<maxSizeAllowedInMemory){
+        if (fullLength < maxSizeAllowedInMemory) {
 
-            blockSize=maxSizeAllowedInMemory;
+            blockSize = maxSizeAllowedInMemory;
 
             adjustForCache(0);
 
-            isInMemory=true;
+            isInMemory = true;
 
         }
     }
 
-    public byte getByte(int pointer){
+    public byte getByte(int pointer) {
 
-    	if(!isInMemory) {
+        if (!isInMemory) {
             pointer = adjustForCache(pointer);
         }
 
-       // System.err.println("Now="+pointer+" "+fontData.length+" inMemory="+isInMemory);
+        // System.err.println("Now="+pointer+" "+fontData.length+" inMemory="+isInMemory);
 
-        if(pointer>=fontData.length) {
+        if (pointer >= fontData.length) {
             return 0;
         } else {
             return fontData[pointer];
@@ -105,18 +117,19 @@ public class FontData {
     /**
      * check block in memory, read if not and
      * adjust pointer
+     *
      * @param pointer
      * @return
      */
     private int adjustForCache(final int pointer) {
 
         //see if in memory and load if not
-        if(fontData==null || pointer<offset || pointer>=(offset+blockSize-1)){
+        if (fontData == null || pointer < offset || pointer >= (offset + blockSize - 1)) {
 
             try {
 
                 fontFile.seek(pointer);
-                fontData=new byte[blockSize];
+                fontData = new byte[blockSize];
 
                 fontFile.read(fontData);
 
@@ -124,12 +137,12 @@ public class FontData {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
 
-            offset=pointer;
+            offset = pointer;
 
         }
 
         //subtract offset to make it fall in loaded range
-        return pointer-offset;
+        return pointer - offset;
     }
 
     private int adjustForCache(final int pointer, final int blockSize) {
@@ -137,48 +150,50 @@ public class FontData {
         //see if in memory and load if not
         //if(fontData==null || pointer<offset || pointer>=(offset+blockSize-1)){
 
-            try {
+        try {
 
-                fontFile.seek(pointer);
-                fontData=new byte[blockSize];
+            fontFile.seek(pointer);
+            fontData = new byte[blockSize];
 
-                fontFile.read(fontData);
+            fontFile.read(fontData);
 
-            } catch (final IOException e) {
-                LogWriter.writeLog("Exception: " + e.getMessage());
-            }
-            offset=pointer;
+        } catch (final IOException e) {
+            LogWriter.writeLog("Exception: " + e.getMessage());
+        }
+        offset = pointer;
 
         //}
 
         //subtract offset to make it fall in loaded range
-        return pointer-offset;
+        return pointer - offset;
     }
 
-    public byte[] getBytes(int startPointer, final int length){
+    public byte[] getBytes(int startPointer, final int length) {
 
-        if(!isInMemory) {
+        if (!isInMemory) {
             startPointer = adjustForCache(startPointer, length + 1);
         }
 
-        final byte[] block=new byte[length];
-        System.arraycopy(fontData,startPointer,block,0,length);
+        final byte[] block = new byte[length];
+        System.arraycopy(fontData, startPointer, block, 0, length);
         return block;
 
     }
 
-    /**total length of FontData in bytes*/
+    /**
+     * total length of FontData in bytes
+     */
     public int length() {
 
-        if(isInMemory) {
+        if (isInMemory) {
             return fontData.length;
         } else {
             return fullLength;
         }
     }
-    
-    public void close(){
-    	if(fontFile!=null) {
+
+    public void close() {
+        if (fontFile != null) {
             try {
                 fontFile.close();
             } catch (final IOException e) {

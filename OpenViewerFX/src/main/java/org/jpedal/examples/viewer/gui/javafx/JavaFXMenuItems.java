@@ -49,17 +49,17 @@ import org.jpedal.parser.DecoderOptions;
 import org.jpedal.utils.Messages;
 
 /**
- * This class controls everything todo with Menu Items, it holds the objects and
+ * This class controls everything to do with Menu Items, it holds the objects and
  * their corresponding methods.
- *
+ * <p>
  * To initialise the object/class call init()
  */
 public class JavaFXMenuItems extends GUIMenuItems {
 
-    
+
     //holds all menu entries (File, View, Help)
-	private MenuBar currentMenu =new MenuBar();
-    
+    private MenuBar currentMenu = new MenuBar();
+
     //Menu items for gui
     private Menu fileMenu;
     private Menu openMenu;
@@ -88,7 +88,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
     private MenuItem nextDocument;
     private Menu pageLayoutMenu;
     private MenuItem single;
-   
+
     private MenuItem pageFlow;
     private CheckMenuItem textSelect;
     private CheckMenuItem separateCover;
@@ -97,15 +97,15 @@ public class JavaFXMenuItems extends GUIMenuItems {
     private Menu windowMenu;
     private MenuItem cascade;
     private MenuItem tile;
-    
+
     private Menu helpMenu;
     private MenuItem visitWebsite;
     private MenuItem tipOfTheDay;
-   // private MenuItem checkUpdates;
+    // private MenuItem checkUpdates;
     private MenuItem about;
-    
+
     private MenuItem helpForum;
-    
+
     private Menu exportMenu;
     private Menu pdfMenu;
     private Menu contentMenu;
@@ -127,7 +127,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
     public JavaFXMenuItems(final PropertiesFile properties) {
         super(properties);
     }
-    
+
     private Menu getMenu(final int ID) {
         switch (ID) {
             case Commands.FILEMENU:
@@ -149,7 +149,7 @@ public class JavaFXMenuItems extends GUIMenuItems {
         }
         return null;
     }
-    
+
     private MenuItem getMenuItem(final int ID) {
         switch (ID) {
             case Commands.FILEMENU:
@@ -266,29 +266,43 @@ public class JavaFXMenuItems extends GUIMenuItems {
                 return about;
             case Commands.HELPFORUM:
                 return helpForum;
-        
+
         }
 
         return null;
 
     }
-    
-    public MenuBar getCurrentMenuFX(){
+
+    /**
+     * Get the MenuBar that holds the menu items
+     *
+     * @return MenuBar used by this class
+     */
+    public MenuBar getCurrentMenuFX() {
         return currentMenu;
     }
-    
+
+    /**
+     * Method to dispose of objects used by the menu bar.
+     */
     @Override
-    public void dispose(){
-        if(currentMenu!=null) {
+    public void dispose() {
+        if (currentMenu != null) {
             currentMenu.getMenus().removeAll(currentMenu.getMenus());
         }
-		currentMenu =null;
+        currentMenu = null;
     }
-    
+
+    /**
+     * Set the selected state of a check box style menu item.
+     *
+     * @param ID int value for the menu items you wish to select
+     * @param b  true to select the menu item, false to deselect
+     */
     @Override
-    public void setCheckMenuItemSelected(final int ID, final boolean b){
-        
-        switch(ID){
+    public void setCheckMenuItemSelected(final int ID, final boolean b) {
+
+        switch (ID) {
             case Commands.TEXTSELECT:
                 textSelect.setSelected(b);
                 break;
@@ -297,35 +311,50 @@ public class JavaFXMenuItems extends GUIMenuItems {
                 break;
             case Commands.SEPARATECOVER:
                 separateCover.setSelected(b);
-                break;    
+                break;
             default:
-                if(GUI.debugFX) {
+                if (GUI.debugFX) {
                     System.out.println("Only TEXTSELECT, PANMODE and SEPARATECOVER are Accepted IDs");
                 }
                 break;
         }
-        
+
     }
-    
+
+    /**
+     * Method to enable or disable the back navigation menu items
+     *
+     * @param enabled true to enable, false to disable
+     */
     @Override
-    public void setBackNavigationItemsEnabled(final boolean enabled){
-       
-    	backPage.setDisable(!enabled);
-		firstPage.setDisable(!enabled);
+    public void setBackNavigationItemsEnabled(final boolean enabled) {
+
+        backPage.setDisable(!enabled);
+        firstPage.setDisable(!enabled);
     }
-    
+
+    /**
+     * Method to enable or disable the forward navigation menu items
+     *
+     * @param enabled true to enable, false to disable
+     */
     @Override
-    public void setForwardNavigationItemsEnabled(final boolean enabled){
-    	forwardPage.setDisable(!enabled);
-		lastPage.setDisable(!enabled);
+    public void setForwardNavigationItemsEnabled(final boolean enabled) {
+        forwardPage.setDisable(!enabled);
+        lastPage.setDisable(!enabled);
     }
-    
+
+    /**
+     * Method to enable or disable the goto menu items
+     *
+     * @param enabled true to enable, false to disable
+     */
     @Override
-    public void setGoToNavigationItemEnabled(final boolean enabled){
-    	goTo.setDisable(!enabled);
+    public void setGoToNavigationItemEnabled(final boolean enabled) {
+        goTo.setDisable(!enabled);
     }
-    
-	protected void addMenuItem(final Menu parentMenu, final String text, final int ID) {
+
+    protected void addMenuItem(final Menu parentMenu, final String text, final int ID) {
 
         final boolean isCheckBox = (ID == Commands.SEPARATECOVER || ID == Commands.PANMODE || ID == Commands.TEXTSELECT);
 
@@ -341,453 +370,459 @@ public class JavaFXMenuItems extends GUIMenuItems {
         menuItem.setID(ID);
         setKeyAccelerators(ID, (MenuItem) menuItem);
 
-		//add listener
-		menuItem.setOnAction((EventHandler<ActionEvent>) currentCommandListener.getCommandListener());
+        //add listener
+        menuItem.setOnAction((EventHandler<ActionEvent>) currentCommandListener.getCommandListener());
 
-                    switch(ID){
-                        case Commands.OPENFILE :
-                                open = (MenuItem)menuItem;
-                                break;
-                        case Commands.OPENURL :
-                                openUrl = (MenuItem)menuItem;
-                                break;
-                        case Commands.SAVE :
-                                save = (MenuItem)menuItem;
-                                break;
-                        case Commands.SAVEFORM :
-                                reSaveAsForms = (MenuItem)menuItem;
-                                //add name to resave option so fest can get to it.
-                                reSaveAsForms.setId("resaveForms");
-                                break;
-                        case Commands.FIND :
-                                find = (MenuItem)menuItem;
-                                break;
-                        case Commands.DOCINFO :
-                                documentProperties = (MenuItem)menuItem;
-                                break;
-                        case Commands.SIGN :
-                                signPDF = (MenuItem)menuItem;
-                                break;
-                        case Commands.EXIT :
-                                exit = (MenuItem)menuItem;
-                                //set name to exit so fest can find it
-                                exit.setId("exit");
-                                break;
-                        case Commands.COPY :
-                                copy = (MenuItem)menuItem;
-                                break;
-                        case Commands.SELECTALL :
-                                selectAll = (MenuItem)menuItem;
-                                break;
-                        case Commands.DESELECTALL :
-                                deselectAll = (MenuItem)menuItem;
-                                break;
-                        case Commands.PREFERENCES :
-                                preferences = (MenuItem)menuItem;
-                                break;
-                        case Commands.FIRSTPAGE :
-                                firstPage = (MenuItem)menuItem;
-                                break;
-                        case Commands.BACKPAGE :
-                                backPage = (MenuItem)menuItem;
-                                break;
-                        case Commands.FORWARDPAGE :
-                                forwardPage = (MenuItem)menuItem;
-                                break;
-                        case Commands.LASTPAGE :
-                                lastPage = (MenuItem)menuItem;
-                                break;
-                        case Commands.GOTO :
-                                goTo = (MenuItem)menuItem;
-                                break;
-                        case Commands.PREVIOUSDOCUMENT :
-                                previousDocument = (MenuItem)menuItem;
-                                break;
-                        case Commands.NEXTDOCUMENT :
-                                nextDocument = (MenuItem)menuItem;
-                                break;
-                        case Commands.FULLSCREEN :
-                                fullscreen = (MenuItem)menuItem;
-                                break;
-                        case Commands.MOUSEMODE :
-                                fullscreen = (MenuItem)menuItem;
-                                break;
-                        case Commands.PANMODE:
-                                panMode = (CheckMenuItem) menuItem;
-                                panMode.setSelected(false);
-                                break;
-                        case Commands.TEXTSELECT :
-                                textSelect = (CheckMenuItem)menuItem;
-                                textSelect.setSelected(true);
-                                break;
-                        case Commands.SEPARATECOVER :
-                                separateCover = (CheckMenuItem)menuItem;
-                                GUIDisplay.default_separateCover = properties.getValue("separateCoverOn").equalsIgnoreCase("true");
-                                separateCover.setSelected(true);
-                                break;
-                        case Commands.CASCADE :
-                                cascade = (MenuItem)menuItem;
-                                break;
-                        case Commands.TILE :
-                                tile = (MenuItem)menuItem;
-                                break;
-                        case Commands.PDF :
-                                onePerPage = (MenuItem)menuItem;
-                                break;
-                        case Commands.NUP :
-                                nup = (MenuItem)menuItem;
-                                break;
-                        case Commands.HANDOUTS :
-                                handouts = (MenuItem)menuItem;
-                                break;
-                        case Commands.IMAGES :
-                                images = (MenuItem)menuItem;
-                                break;
-                        case Commands.TEXT :
-                                this.text = (MenuItem)menuItem;
-                                break;
-                        case Commands.BITMAP :
-                                bitmap = (MenuItem)menuItem;
-                                break;
-                        case Commands.ROTATE :
-                                rotatePages = (MenuItem)menuItem; 
-                                break;
-                        case Commands.DELETE :
-                                deletePages = (MenuItem)menuItem;
-                                break;
-                        case Commands.ADD :
-                                addPage = (MenuItem)menuItem;
-                                break;
-                        case Commands.ADDHEADERFOOTER :
-                                addHeaderFooter = (MenuItem)menuItem;
-                                break;
-                        case Commands.STAMPTEXT :
-                                stampText = (MenuItem)menuItem;
-                                break;
-                        case Commands.STAMPIMAGE :
-                                stampImage = (MenuItem)menuItem;
-                                break;
-                        case Commands.SETCROP :
-                                crop = (MenuItem)menuItem;
-                                break;
-                        case Commands.VISITWEBSITE :
-                                visitWebsite = (MenuItem)menuItem;
-                                break;
-                        case Commands.TIP :
-                                tipOfTheDay = (MenuItem)menuItem;
-                                break;
-        //		case Commands.UPDATE :
-        //			checkUpdates = (MenuItem)menuItem;
-        //			break;
-                        case Commands.ABOUT :
-                                about = (MenuItem)menuItem;
-                                break;
-                        
-                        case Commands.HELP :
-                                helpForum = (MenuItem)menuItem;
-                                break;
-                }
-        
+        switch (ID) {
+            case Commands.OPENFILE:
+                open = (MenuItem) menuItem;
+                break;
+            case Commands.OPENURL:
+                openUrl = (MenuItem) menuItem;
+                break;
+            case Commands.SAVE:
+                save = (MenuItem) menuItem;
+                break;
+            case Commands.SAVEFORM:
+                reSaveAsForms = (MenuItem) menuItem;
+                //add name to resave option so fest can get to it.
+                reSaveAsForms.setId("resaveForms");
+                break;
+            case Commands.FIND:
+                find = (MenuItem) menuItem;
+                break;
+            case Commands.DOCINFO:
+                documentProperties = (MenuItem) menuItem;
+                break;
+            case Commands.SIGN:
+                signPDF = (MenuItem) menuItem;
+                break;
+            case Commands.EXIT:
+                exit = (MenuItem) menuItem;
+                //set name to exit so fest can find it
+                exit.setId("exit");
+                break;
+            case Commands.COPY:
+                copy = (MenuItem) menuItem;
+                break;
+            case Commands.SELECTALL:
+                selectAll = (MenuItem) menuItem;
+                break;
+            case Commands.DESELECTALL:
+                deselectAll = (MenuItem) menuItem;
+                break;
+            case Commands.PREFERENCES:
+                preferences = (MenuItem) menuItem;
+                break;
+            case Commands.FIRSTPAGE:
+                firstPage = (MenuItem) menuItem;
+                break;
+            case Commands.BACKPAGE:
+                backPage = (MenuItem) menuItem;
+                break;
+            case Commands.FORWARDPAGE:
+                forwardPage = (MenuItem) menuItem;
+                break;
+            case Commands.LASTPAGE:
+                lastPage = (MenuItem) menuItem;
+                break;
+            case Commands.GOTO:
+                goTo = (MenuItem) menuItem;
+                break;
+            case Commands.PREVIOUSDOCUMENT:
+                previousDocument = (MenuItem) menuItem;
+                break;
+            case Commands.NEXTDOCUMENT:
+                nextDocument = (MenuItem) menuItem;
+                break;
+            case Commands.FULLSCREEN:
+                fullscreen = (MenuItem) menuItem;
+                break;
+            case Commands.MOUSEMODE:
+                fullscreen = (MenuItem) menuItem;
+                break;
+            case Commands.PANMODE:
+                panMode = (CheckMenuItem) menuItem;
+                panMode.setSelected(false);
+                break;
+            case Commands.TEXTSELECT:
+                textSelect = (CheckMenuItem) menuItem;
+                textSelect.setSelected(true);
+                break;
+            case Commands.SEPARATECOVER:
+                separateCover = (CheckMenuItem) menuItem;
+                GUIDisplay.default_separateCover = properties.getValue("separateCoverOn").equalsIgnoreCase("true");
+                separateCover.setSelected(true);
+                break;
+            case Commands.CASCADE:
+                cascade = (MenuItem) menuItem;
+                break;
+            case Commands.TILE:
+                tile = (MenuItem) menuItem;
+                break;
+            case Commands.PDF:
+                onePerPage = (MenuItem) menuItem;
+                break;
+            case Commands.NUP:
+                nup = (MenuItem) menuItem;
+                break;
+            case Commands.HANDOUTS:
+                handouts = (MenuItem) menuItem;
+                break;
+            case Commands.IMAGES:
+                images = (MenuItem) menuItem;
+                break;
+            case Commands.TEXT:
+                this.text = (MenuItem) menuItem;
+                break;
+            case Commands.BITMAP:
+                bitmap = (MenuItem) menuItem;
+                break;
+            case Commands.ROTATE:
+                rotatePages = (MenuItem) menuItem;
+                break;
+            case Commands.DELETE:
+                deletePages = (MenuItem) menuItem;
+                break;
+            case Commands.ADD:
+                addPage = (MenuItem) menuItem;
+                break;
+            case Commands.ADDHEADERFOOTER:
+                addHeaderFooter = (MenuItem) menuItem;
+                break;
+            case Commands.STAMPTEXT:
+                stampText = (MenuItem) menuItem;
+                break;
+            case Commands.STAMPIMAGE:
+                stampImage = (MenuItem) menuItem;
+                break;
+            case Commands.SETCROP:
+                crop = (MenuItem) menuItem;
+                break;
+            case Commands.VISITWEBSITE:
+                visitWebsite = (MenuItem) menuItem;
+                break;
+            case Commands.TIP:
+                tipOfTheDay = (MenuItem) menuItem;
+                break;
+            //		case Commands.UPDATE :
+            //			checkUpdates = (MenuItem)menuItem;
+            //			break;
+            case Commands.ABOUT:
+                about = (MenuItem) menuItem;
+                break;
+
+            case Commands.HELP:
+                helpForum = (MenuItem) menuItem;
+                break;
+        }
+
         disableUnimplementedItems(ID, false);
-     
-	}
+
+    }
 
     /**
      * sets up layout menu (controls page views - Multiple, facing,etc)
      */
     protected void initLayoutMenus(final Menu pageLayout, final String[] descriptions, final int[] value, final GUIButtons buttons, final Commands currentCommands) {
 
-        final int count=value.length;
-        for(int i=0;i<count;i++){
-            final CheckMenuItem pageView=new CheckMenuItem(descriptions[i]);
-            if(i==0) {
+        final int count = value.length;
+        for (int i = 0; i < count; i++) {
+            final CheckMenuItem pageView = new CheckMenuItem(descriptions[i]);
+            if (i == 0) {
                 pageView.setSelected(true);
             }
 
-            if(pageLayout!=null){
+            if (pageLayout != null) {
 
-            	switch(value[i]){
-            	case Display.SINGLE_PAGE :
-                    //Give copy to Buttons to update items if buttons used
-                    ((JavaFXButtons)buttons).getLayoutGroup().add(pageView);
-            		single = pageView;
-                    single.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(final ActionEvent t) {
-                            currentCommands.executeCommand(Commands.SINGLE, null);
-                        }
-                    });
-            		pageLayout.getItems().add(single);
-            		break;
-                   
-            	case Display.PAGEFLOW :
-                    
-                    pageFlow = pageView;
-                    pageFlow.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(final ActionEvent t) {
-                            currentCommands.executeCommand(Commands.PAGEFLOW, null);
-                        }
-                    });
-                    pageLayout.getItems().add(pageFlow);
-                    
-            		break;
-                    
-            	}        
+                switch (value[i]) {
+                    case Display.SINGLE_PAGE:
+                        //Give copy to Buttons to update items if buttons used
+                        ((JavaFXButtons) buttons).getLayoutGroup().add(pageView);
+                        single = pageView;
+                        single.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(final ActionEvent t) {
+                                currentCommands.executeCommand(Commands.SINGLE, null);
+                            }
+                        });
+                        pageLayout.getItems().add(single);
+                        break;
+
+                    case Display.PAGEFLOW:
+
+                        pageFlow = pageView;
+                        pageFlow.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(final ActionEvent t) {
+                                currentCommands.executeCommand(Commands.PAGEFLOW, null);
+                            }
+                        });
+                        pageLayout.getItems().add(pageFlow);
+
+                        break;
+
+                }
             }
             disableUnimplementedItems(value[i], true);
         }
-        
+
         //default is off
         buttons.setPageLayoutButtonsEnabled(false);
     }
-    
+
+    /**
+     * Sets various menu items as enabled or disabled
+     * and selects given values based on the display view.
+     *
+     * @param commandIDForDislayMode int value for the display view being used
+     * @param mouseMode              int values for the mouse mode being used
+     */
     @Override
     public void setMenusForDisplayMode(final int commandIDForDislayMode, final int mouseMode) {
-        
-        switch(commandIDForDislayMode){
-            
+
+        switch (commandIDForDislayMode) {
+
             case Commands.SINGLE:
                 textSelect.setDisable(true);
                 panMode.setDisable(true);
                 textSelect.setSelected(true);
                 panMode.setSelected(false);
                 break;
-            
+
             case Commands.PAGEFLOW:
                 textSelect.setDisable(false);
-					panMode.setDisable(false);
-					textSelect.setSelected(false);
-					panMode.setSelected(true);
+                panMode.setDisable(false);
+                textSelect.setSelected(false);
+                panMode.setSelected(true);
                 break;
-               
+
             case Commands.MOUSEMODE:
-                switch(mouseMode){
-                    case 0 : //Text Select
+                switch (mouseMode) {
+                    case 0: //Text Select
                         textSelect.setSelected(true);
                         panMode.setSelected(false);
                         break;
-                    case 1 : //Pan Mode
+                    case 1: //Pan Mode
                         textSelect.setSelected(false);
                         panMode.setSelected(true);
                         break;
                 }
         }
     }
-    
+
     /**
      * add MenuItem to main menu
      */
     protected void addToMainMenu(final Menu fileMenuList) {
         //fileMenuList.getPopupMenu().setLightWeightPopupEnabled(!JavaFXHelper.isJavaFXAvailable());
         currentMenu.getMenus().add(fileMenuList);
-        currentMenu.setUseSystemMenuBar(true);     
-	}
-    
-    /**
-     * create items on drop down menus
-     */
-	@Override
-    public void createMainMenu(final boolean includeAll, final CommandListener currentCommandListener, final boolean isSingle,
-            final Values commonValues, final Commands currentCommands, final GUIButtons buttons){
+        currentMenu.setUseSystemMenuBar(true);
+    }
 
-        this.currentCommandListener=currentCommandListener;
+    /**
+     * Not part of API - used internally
+     * <p>
+     * create items for menuMap on the menu bar
+     */
+    @Override
+    public void createMainMenu(final boolean includeAll, final CommandListener currentCommandListener, final boolean isSingle,
+                               final Values commonValues, final Commands currentCommands, final GUIButtons buttons) {
+
+        this.currentCommandListener = currentCommandListener;
 
         String addSeparator;
 
-		fileMenu = new Menu(Messages.getMessage("PdfViewerFileMenu.text"));
+        fileMenu = new Menu(Messages.getMessage("PdfViewerFileMenu.text"));
 
-		addToMainMenu(fileMenu);
+        addToMainMenu(fileMenu);
 
-		 //add open options
+        //add open options
 
-		openMenu = new Menu(Messages.getMessage("PdfViewerFileMenuOpen.text"));
-        
+        openMenu = new Menu(Messages.getMessage("PdfViewerFileMenuOpen.text"));
+
         //openMenu.getPopupMenu().setLightWeightPopupEnabled(!JavaFXHelper.isJavaFXAvailable());
-        
-		fileMenu.getItems().add(openMenu);
 
-		addMenuItem(openMenu,Messages.getMessage("PdfViewerFileMenuOpen.text"), Commands.OPENFILE);
+        fileMenu.getItems().add(openMenu);
 
-		addMenuItem(openMenu,Messages.getMessage("PdfViewerFileMenuOpenurl.text"), Commands.OPENURL);
+        addMenuItem(openMenu, Messages.getMessage("PdfViewerFileMenuOpen.text"), Commands.OPENFILE);
+
+        addMenuItem(openMenu, Messages.getMessage("PdfViewerFileMenuOpenurl.text"), Commands.OPENURL);
 
 
-		addSeparator = properties.getValue("Save")
-			+ properties.getValue("Resaveasforms")
-			+ properties.getValue("Find");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			fileMenu.getItems().add(new SeparatorMenuItem());
-		}
-		
-		
-		addMenuItem(fileMenu,Messages.getMessage("PdfViewerFileMenuSave.text"),
+        addSeparator = properties.getValue("Save")
+                + properties.getValue("Resaveasforms")
+                + properties.getValue("Find");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            fileMenu.getItems().add(new SeparatorMenuItem());
+        }
+
+
+        addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuSave.text"),
                 Commands.SAVE);
 
         //not set if I just run from jar as no IText....
-		if(includeAll) {
+        if (includeAll) {
             addMenuItem(fileMenu,
                     Messages.getMessage("PdfViewerFileMenuResaveForms.text"),
                     Commands.SAVEFORM);
         }
 
 
-		// Remember to finish this off
-		addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuFind.text"), Commands.FIND);
+        // Remember to finish this off
+        addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuFind.text"), Commands.FIND);
 
-		// =====================
+        // =====================
 
 
-
-		addSeparator = properties.getValue("Documentproperties");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			fileMenu.getItems().add(new SeparatorMenuItem());
-		}
-		addMenuItem(fileMenu,Messages.getMessage("PdfViewerFileMenuDocProperties.text"),
+        addSeparator = properties.getValue("Documentproperties");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            fileMenu.getItems().add(new SeparatorMenuItem());
+        }
+        addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuDocProperties.text"),
                 Commands.DOCINFO);
 
-        if(commonValues.isEncrypOnClasspath()) {
-            addMenuItem(fileMenu,Messages.getMessage("PdfViewerFileMenuSignPDF.text"),
+        if (commonValues.isEncrypOnClasspath()) {
+            addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuSignPDF.text"),
                     Commands.SIGN);
-        }
-        else {
-            addMenuItem(fileMenu,Messages.getMessage("PdfViewerFileMenuSignPDF.text"),
+        } else {
+            addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuSignPDF.text"),
                     Commands.SIGN);
         }
 
-		addSeparator = properties.getValue("Recentdocuments");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			fileMenu.getItems().add(new SeparatorMenuItem());
-			currentCommands.recentDocumentsOption();
-		}
+        addSeparator = properties.getValue("Recentdocuments");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            fileMenu.getItems().add(new SeparatorMenuItem());
+            currentCommands.recentDocumentsOption();
+        }
 
-		addSeparator = properties.getValue("Exit");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			fileMenu.getItems().add(new SeparatorMenuItem());
-		}
-		addMenuItem(fileMenu,Messages.getMessage("PdfViewerFileMenuExit.text"),
+        addSeparator = properties.getValue("Exit");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            fileMenu.getItems().add(new SeparatorMenuItem());
+        }
+        addMenuItem(fileMenu, Messages.getMessage("PdfViewerFileMenuExit.text"),
                 Commands.EXIT);
 
-		//EDIT MENU
-		editMenu = new Menu(Messages.getMessage("PdfViewerEditMenu.text"));
-		addToMainMenu(editMenu);
+        //EDIT MENU
+        editMenu = new Menu(Messages.getMessage("PdfViewerEditMenu.text"));
+        addToMainMenu(editMenu);
 
-		addMenuItem(editMenu,Messages.getMessage("PdfViewerEditMenuCopy.text"),
+        addMenuItem(editMenu, Messages.getMessage("PdfViewerEditMenuCopy.text"),
                 Commands.COPY);
 
-		addMenuItem(editMenu,Messages.getMessage("PdfViewerEditMenuSelectall.text"),
+        addMenuItem(editMenu, Messages.getMessage("PdfViewerEditMenuSelectall.text"),
                 Commands.SELECTALL);
 
-		addMenuItem(editMenu,Messages.getMessage("PdfViewerEditMenuDeselectall.text"),
+        addMenuItem(editMenu, Messages.getMessage("PdfViewerEditMenuDeselectall.text"),
                 Commands.DESELECTALL);
 
-		addSeparator = properties.getValue("Preferences");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			editMenu.getItems().add(new SeparatorMenuItem());
-		}
-		addMenuItem(editMenu, Messages.getMessage("PdfViewerEditMenuPreferences.text"),
+        addSeparator = properties.getValue("Preferences");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            editMenu.getItems().add(new SeparatorMenuItem());
+        }
+        addMenuItem(editMenu, Messages.getMessage("PdfViewerEditMenuPreferences.text"),
                 Commands.PREFERENCES);
 
 
-		viewMenu = new Menu(Messages.getMessage("PdfViewerViewMenu.text"));
-		addToMainMenu(viewMenu);
+        viewMenu = new Menu(Messages.getMessage("PdfViewerViewMenu.text"));
+        addToMainMenu(viewMenu);
 
-		goToMenu = new Menu(Messages.getMessage("GoToViewMenuGoto.text"));
+        goToMenu = new Menu(Messages.getMessage("GoToViewMenuGoto.text"));
 
         //goToMenu.getPopupMenu().setLightWeightPopupEnabled(!JavaFXHelper.isJavaFXAvailable());
 
-		viewMenu.getItems().add(goToMenu);
+        viewMenu.getItems().add(goToMenu);
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.FirstPage"), Commands.FIRSTPAGE);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.FirstPage"), Commands.FIRSTPAGE);
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.BackPage"), Commands.BACKPAGE);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.BackPage"), Commands.BACKPAGE);
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.ForwardPage"), Commands.FORWARDPAGE);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.ForwardPage"), Commands.FORWARDPAGE);
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.LastPage"), Commands.LASTPAGE);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.LastPage"), Commands.LASTPAGE);
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.GoTo"), Commands.GOTO);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.GoTo"), Commands.GOTO);
 
-		addSeparator = properties.getValue("Previousdocument")
-			+properties.getValue("Nextdocument");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			goToMenu.getItems().add(new SeparatorMenuItem());
-		}
+        addSeparator = properties.getValue("Previousdocument")
+                + properties.getValue("Nextdocument");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            goToMenu.getItems().add(new SeparatorMenuItem());
+        }
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.PreviousDoucment"), Commands.PREVIOUSDOCUMENT);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.PreviousDoucment"), Commands.PREVIOUSDOCUMENT);
 
-		addMenuItem(goToMenu,Messages.getMessage("GoToViewMenuGoto.NextDoucment"), Commands.NEXTDOCUMENT);
+        addMenuItem(goToMenu, Messages.getMessage("GoToViewMenuGoto.NextDoucment"), Commands.NEXTDOCUMENT);
 
-		//add page layout
+        //add page layout
         pageLayoutMenu = new Menu(Messages.getMessage("PageLayoutViewMenu.PageLayout"));
         //pageLayoutMenu.getPopupMenu().setLightWeightPopupEnabled(!JavaFXHelper.isJavaFXAvailable());
         viewMenu.getItems().add(pageLayoutMenu);
-		
-		
-		final String[] descriptions={Messages.getMessage("PageLayoutViewMenu.SinglePage"),Messages.getMessage("PageLayoutViewMenu.PageFlow")};
-        final int[] value={Display.SINGLE_PAGE, Display.PAGEFLOW};
+
+
+        final String[] descriptions = {Messages.getMessage("PageLayoutViewMenu.SinglePage"), Messages.getMessage("PageLayoutViewMenu.PageFlow")};
+        final int[] value = {Display.SINGLE_PAGE, Display.PAGEFLOW};
 
         initLayoutMenus(pageLayoutMenu, descriptions, value, buttons, currentCommands);
-        
 
-        if(properties.getValue("separateCover").equals("true")) {
+
+        if (properties.getValue("separateCover").equals("true")) {
             addMenuItem(viewMenu, Messages.getMessage("PdfViewerViewMenuSeparateCover.text"), Commands.SEPARATECOVER);
         }
 
-		// addMenuItem(view,Messages.getMessage("PdfViewerViewMenuAutoscroll.text"),Messages.getMessage("PdfViewerViewMenuTooltip.autoscroll"),Commands.AUTOSCROLL);
-        if(properties.getValue("panMode").equals("true") || properties.getValue("textSelect").equals("true")){
-        	viewMenu.getItems().add(new SeparatorMenuItem());
-        	if(properties.getValue("panMode").equals("true")) {
+        // addMenuItem(view,Messages.getMessage("PdfViewerViewMenuAutoscroll.text"),Messages.getMessage("PdfViewerViewMenuTooltip.autoscroll"),Commands.AUTOSCROLL);
+        if (properties.getValue("panMode").equals("true") || properties.getValue("textSelect").equals("true")) {
+            viewMenu.getItems().add(new SeparatorMenuItem());
+            if (properties.getValue("panMode").equals("true")) {
                 addMenuItem(viewMenu, Messages.getMessage("PdfViewerViewMenuPanMode.text"), Commands.PANMODE);
             }
 
-        	if(properties.getValue("textSelect").equals("true")) {
+            if (properties.getValue("textSelect").equals("true")) {
                 addMenuItem(viewMenu, Messages.getMessage("PdfViewerViewMenuTextSelectMode.text"), Commands.TEXTSELECT);
             }
-        	viewMenu.getItems().add(new SeparatorMenuItem());
+            viewMenu.getItems().add(new SeparatorMenuItem());
         }
-			
-		addSeparator = properties.getValue("Fullscreen");
-		if(!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")){
-			goToMenu.getItems().add(new SeparatorMenuItem());
-		}
 
-		//full page mode
-		addMenuItem(viewMenu,Messages.getMessage("PdfViewerViewMenuFullScreenMode.text"), Commands.FULLSCREEN);
+        addSeparator = properties.getValue("Fullscreen");
+        if (!addSeparator.isEmpty() && addSeparator.equalsIgnoreCase("true")) {
+            goToMenu.getItems().add(new SeparatorMenuItem());
+        }
 
-		//add export menus
-        
+        //full page mode
+        addMenuItem(viewMenu, Messages.getMessage("PdfViewerViewMenuFullScreenMode.text"), Commands.FULLSCREEN);
+
+        //add export menus
+
 //		if(commonValues.isItextOnClasspath()){
-			exportMenu = new Menu(Messages.getMessage("PdfViewerExportMenu.text"));
-			addToMainMenu(exportMenu);
+        exportMenu = new Menu(Messages.getMessage("PdfViewerExportMenu.text"));
+        addToMainMenu(exportMenu);
 
 			/*
-			 * external/itext menu option example adding new option to Export menu
+             * external/itext menu option example adding new option to Export menu
 			 * Tooltip text can be externalised in Messages.getMessage("PdfViewerTooltip.NEWFUNCTION")
 			 * and text added into files in res package
              * addMenuItem(export,"NEW",tooltip,Commands.NEWFUNCTION);
 			 */
 
 
-			pdfMenu = new Menu(Messages.getMessage("PdfViewerExportMenuPDF.text"));
-			exportMenu.getItems().add(pdfMenu);
+        pdfMenu = new Menu(Messages.getMessage("PdfViewerExportMenuPDF.text"));
+        exportMenu.getItems().add(pdfMenu);
 
-			addMenuItem(pdfMenu,Messages.getMessage("PdfViewerExportMenuOnePerPage.text"), Commands.PDF);
+        addMenuItem(pdfMenu, Messages.getMessage("PdfViewerExportMenuOnePerPage.text"), Commands.PDF);
 
-			addMenuItem(pdfMenu,Messages.getMessage("PdfViewerExportMenuNUp.text"), Commands.NUP);
+        addMenuItem(pdfMenu, Messages.getMessage("PdfViewerExportMenuNUp.text"), Commands.NUP);
 
-			addMenuItem(pdfMenu,Messages.getMessage("PdfViewerExportMenuHandouts.text"), Commands.HANDOUTS);
-
-
-
-			contentMenu=new Menu(Messages.getMessage("PdfViewerExportMenuContent.text"));
-			exportMenu.getItems().add(contentMenu);
-
-			addMenuItem(contentMenu,Messages.getMessage("PdfViewerExportMenuImages.text"), Commands.IMAGES);
-
-			addMenuItem(contentMenu,Messages.getMessage("PdfViewerExportMenuText.text"), Commands.TEXT);
+        addMenuItem(pdfMenu, Messages.getMessage("PdfViewerExportMenuHandouts.text"), Commands.HANDOUTS);
 
 
-			addMenuItem(exportMenu,Messages.getMessage("PdfViewerExportMenuBitmap.text"), Commands.BITMAP);
+        contentMenu = new Menu(Messages.getMessage("PdfViewerExportMenuContent.text"));
+        exportMenu.getItems().add(contentMenu);
+
+        addMenuItem(contentMenu, Messages.getMessage("PdfViewerExportMenuImages.text"), Commands.IMAGES);
+
+        addMenuItem(contentMenu, Messages.getMessage("PdfViewerExportMenuText.text"), Commands.TEXT);
+
+
+        addMenuItem(exportMenu, Messages.getMessage("PdfViewerExportMenuBitmap.text"), Commands.BITMAP);
 //		}
         
        /*
@@ -808,50 +843,50 @@ public class JavaFXMenuItems extends GUIMenuItems {
 		* }
         */
 
-		if(includeAll && GUI.debugFX){
-			
-			//menu option for debugging viewport
-			final Menu debugViewport = new Menu("Debug");
-			addToMainMenu(debugViewport);
+        if (includeAll && GUI.debugFX) {
 
-			//reset vieport option button
-			addMenuItem(debugViewport,"Reset viewport", Commands.RESET);
+            //menu option for debugging viewport
+            final Menu debugViewport = new Menu("Debug");
+            addToMainMenu(debugViewport);
 
-			//switch for testing hardware acceleration
-			addMenuItem(debugViewport,"Enable acceleration", Commands.ACCELERATIONON);
+            //reset vieport option button
+            addMenuItem(debugViewport, "Reset viewport", Commands.RESET);
 
-			//switch for testing hardware acceleration
-			addMenuItem(debugViewport,"Disable acceleration", Commands.ACCELERATIONOFF);
+            //switch for testing hardware acceleration
+            addMenuItem(debugViewport, "Enable acceleration", Commands.ACCELERATIONON);
 
-			addMenuItem(debugViewport,"Show form NAMES", Commands.SHOWFORMNAMES);
+            //switch for testing hardware acceleration
+            addMenuItem(debugViewport, "Disable acceleration", Commands.ACCELERATIONOFF);
+
+            addMenuItem(debugViewport, "Show form NAMES", Commands.SHOWFORMNAMES);
 
             //delete properties file on exit
-            addMenuItem(debugViewport,"Wipe properties on exit", Commands.DELETEPROPERTIESONEXIT);
+            addMenuItem(debugViewport, "Wipe properties on exit", Commands.DELETEPROPERTIESONEXIT);
 
-            addMenuItem(debugViewport,"Always show mouse coords", Commands.ALWAYSSHOWMOUSE);
+            addMenuItem(debugViewport, "Always show mouse coords", Commands.ALWAYSSHOWMOUSE);
 
-		}
-		
-		helpMenu = new Menu(Messages.getMessage("PdfViewerHelpMenu.text"));
-		addToMainMenu(helpMenu);
-
-		addMenuItem(helpMenu,Messages.getMessage("PdfViewerHelpMenu.VisitWebsite"), Commands.VISITWEBSITE);
-		addMenuItem(helpMenu,Messages.getMessage("PdfViewerHelpMenuTip.text"), Commands.TIP);
-		//addMenuItem(helpMenu,Messages.getMessage("PdfViewerHelpMenuUpdates.text"),"",Commands.UPDATE);
-		addMenuItem(helpMenu,Messages.getMessage("PdfViewerHelpMenuabout.text"), Commands.ABOUT);
-
-		if(includeExtraMenus){
-            addMenuItem(helpMenu,Messages.getMessage("PdfViewerHelpMenuTutorial.text"), Commands.HELP);
         }
 
-	}
-    
-    
-	/**
+        helpMenu = new Menu(Messages.getMessage("PdfViewerHelpMenu.text"));
+        addToMainMenu(helpMenu);
+
+        addMenuItem(helpMenu, Messages.getMessage("PdfViewerHelpMenu.VisitWebsite"), Commands.VISITWEBSITE);
+        addMenuItem(helpMenu, Messages.getMessage("PdfViewerHelpMenuTip.text"), Commands.TIP);
+        //addMenuItem(helpMenu,Messages.getMessage("PdfViewerHelpMenuUpdates.text"),"",Commands.UPDATE);
+        addMenuItem(helpMenu, Messages.getMessage("PdfViewerHelpMenuabout.text"), Commands.ABOUT);
+
+        if (includeExtraMenus) {
+            addMenuItem(helpMenu, Messages.getMessage("PdfViewerHelpMenuTutorial.text"), Commands.HELP);
+        }
+
+    }
+
+
+    /**
      * setup keyboard shortcuts
      */
-	static void setKeyAccelerators(final int ID, final MenuItem menuItem){
-		      switch (ID) {
+    static void setKeyAccelerators(final int ID, final MenuItem menuItem) {
+        switch (ID) {
 
             case Commands.FIND:
                 menuItem.setAccelerator(KeyCombination.keyCombination("Shortcut+F"));
@@ -908,8 +943,11 @@ public class JavaFXMenuItems extends GUIMenuItems {
                 menuItem.setAccelerator(KeyCombination.keyCombination("Shortcut+K"));
                 break;
         }
-	}
-    
+    }
+
+    /**
+     * Remove separators from between menu items in File, Edit, View and Goto menuMap
+     */
     @Override
     public void ensureNoSeperators() {
         ensureNoSeperators(Commands.FILEMENU);
@@ -917,7 +955,14 @@ public class JavaFXMenuItems extends GUIMenuItems {
         ensureNoSeperators(Commands.VIEWMENU);
         ensureNoSeperators(Commands.GOTOMENU);
     }
-    
+
+    /**
+     * Not part of API - used internally
+     * <p>
+     * Ensure no separators are present on the given MenuItem
+     *
+     * @param type int value for the menu bar to check
+     */
     @Override
     public void ensureNoSeperators(final int type) {
         for (int k = 0; k != ((Menu) getMenuItem(type)).getItems().size(); k++) {
@@ -929,46 +974,65 @@ public class JavaFXMenuItems extends GUIMenuItems {
             }
         }
     }
-    
+
+    /**
+     * Check if the given menu item has been created for the viewer
+     *
+     * @param ID int value specifying a menu item
+     * @return true is menu item is present, false if not
+     */
     @Override
-    public boolean isMenuItemExist(final int ID){
+    public boolean isMenuItemExist(final int ID) {
         return getMenuItem(ID) != null;
     }
-    
+
+    /**
+     * Set the visibility or the enabled state of the menu or menu item specified by the id
+     *
+     * @param ID      int value specifying a menu item
+     * @param enabled true to enable the menu item, false to disable
+     * @param visible true to show the menu item, false to hide it
+     */
     @Override
     public void setMenuItem(final int ID, final boolean enabled, final boolean visible) {
-        
-        if(ID == Commands.CURRENTMENU && currentMenu!=null){
+
+        if (ID == Commands.CURRENTMENU && currentMenu != null) {
             currentMenu.setDisable(!enabled);
             currentMenu.setVisible(visible);
-        }else if(getMenuItem(ID)!=null){
+        } else if (getMenuItem(ID) != null) {
             getMenuItem(ID).setDisable(!enabled);
             getMenuItem(ID).setVisible(visible);
         }
-        if(ID == Commands.FULLSCREEN  && DecoderOptions.isRunningOnMac){
-              fullscreen.setDisable(true);
+        if (ID == Commands.FULLSCREEN && DecoderOptions.isRunningOnMac) {
+            fullscreen.setDisable(true);
         }
     }
-    
+
+    /**
+     * Add a menu item to a given menu bar
+     *
+     * @param menuItem     MenuItem to be add to the menu bar
+     * @param parentMenuID int value for the parent menu to add to
+     */
     @Override
-    public void addToMenu(final Object menuItem, final int parentMenuID){
-        getMenu(parentMenuID).getItems().add((MenuItem)menuItem);
+    public void addToMenu(final Object menuItem, final int parentMenuID) {
+        getMenu(parentMenuID).getItems().add((MenuItem) menuItem);
     }
 
     /**
      * Temporary Method to Disable unimplemented Viewer Items.
      * Edit and Remove the items from this method as we implement features.
      */
-    public void disableUnimplementedItems(final int ID,  final boolean disableViewModes){
-        
+    public void disableUnimplementedItems(final int ID, final boolean disableViewModes) {
+
         @SuppressWarnings("PointlessBooleanExpression") final boolean debug = !GUI.debugFX;
 
         final int ALL = -10;
-        
-        if(ID != ALL){
-            if(!disableViewModes){
-                switch(ID){
-                     //View Menu.
+
+        if (ID != ALL) {
+            if (!disableViewModes) {
+                switch (ID) {
+                    //View Menu.
                     case Commands.SEPARATECOVER:
                         separateCover.setDisable(debug);
                         break;
@@ -984,20 +1048,20 @@ public class JavaFXMenuItems extends GUIMenuItems {
                         break;
 
                 }
-            }else{
+            } else {
                 //Disable View Modes.
-                switch(ID){
-                   
+                switch (ID) {
+
                     case Display.PAGEFLOW:
                         pageFlow.setDisable(debug);
                         break;
                 }
             }
-        }else{
+        } else {
             separateCover.setDisable(debug);
             reSaveAsForms.setDisable(debug);
             signPDF.setDisable(debug);
         }
-    }   
-    
+    }
+
 }

@@ -35,6 +35,7 @@
 package org.jpedal.objects.acroforms.javafx;
 
 import java.math.BigInteger;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -46,23 +47,23 @@ import org.jpedal.utils.LogWriter;
 public class CertificateHolderFX {
     private final Stage frame;
     private JavaFXGeneral generalTab;
-    
 
-     public void setValues(final String name, final int version, final String hashAlgorithm, final String subjectFields, final String issuerFields,
+
+    public void setValues(final String name, final int version, final String hashAlgorithm, final String subjectFields, final String issuerFields,
                           final BigInteger serialNumber, final String notBefore, final String notAfter, final String publicKeyDescription, final String publicKey,
                           final String x509Data, final String sha1Digest, final String md5Digest) {
 
         generalTab = new JavaFXGeneral();
-       
+
         generalTab.setValues(name, notBefore, notAfter);
         JavaFXDetails.setValues();
 
-         LogWriter.writeLog("JavaFX does not make use of "+version+' '+hashAlgorithm+' '+subjectFields+' '+issuerFields+
-                 ' '+serialNumber+' '+publicKeyDescription+' '+publicKey+' '+x509Data+' '+sha1Digest+' '+md5Digest);
-        
-        
-     }
-     
+        LogWriter.writeLog("JavaFX does not make use of " + version + ' ' + hashAlgorithm + ' ' + subjectFields + ' ' + issuerFields +
+                ' ' + serialNumber + ' ' + publicKeyDescription + ' ' + publicKey + ' ' + x509Data + ' ' + sha1Digest + ' ' + md5Digest);
+
+
+    }
+
     /**
      * Creates new form CertificateHolder
      *
@@ -72,27 +73,27 @@ public class CertificateHolderFX {
         initComponents();
         this.frame = dialog;
     }
-    
+
     private void initComponents() {
         final TabPane tabbedPanel1 = new TabPane();
         final Button button1 = new Button();
         final HBox box = new HBox();
-        
-        
+
+
         button1.setText("OK");
-        button1.setOnAction(new EventHandler<javafx.event.ActionEvent>(){
+        button1.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override
             public void handle(final ActionEvent t) {
 //                throw new UnsupportedOperationException("Not supported yet."); 
                 frame.close();
             }
-            
+
         });
-        
-        box.getChildren().addAll(button1,tabbedPanel1);
-              
+
+        box.getChildren().addAll(button1, tabbedPanel1);
+
 
     }
 
-    
+
 }

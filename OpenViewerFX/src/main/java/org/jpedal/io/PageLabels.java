@@ -33,6 +33,7 @@
 package org.jpedal.io;
 
 import java.util.HashMap;
+
 import org.jpedal.objects.raw.PageLabelObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -41,38 +42,38 @@ import org.jpedal.objects.raw.PdfObject;
 /**
  * convert names to refs
  */
-public class PageLabels extends HashMap<Integer, String>{
+public class PageLabels extends HashMap<Integer, String> {
 
     private final PdfFileReader objectReader;
 
     private final int pageCount;
 
-    private static final String symbolLowerCase[]={"m","cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i"};
-    private static final String symbolUpperCase[]={"M","CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-    private static final String lettersLowerCase[]={"a","b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m","n",
-                                                "o", "p", "q", "r", "s", "t", "u", "v", "x", "w", "y", "z"};
-    private static final String lettersUpperCase[]={"A","B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M","N",
-                                                "O", "P", "Q", "R", "S", "T", "U", "V", "X", "W", "Y", "Z"};
-    private static final int[] power={1000,900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+    private static final String symbolLowerCase[] = {"m", "cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i"};
+    private static final String symbolUpperCase[] = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+    private static final String lettersLowerCase[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
+            "o", "p", "q", "r", "s", "t", "u", "v", "x", "w", "y", "z"};
+    private static final String lettersUpperCase[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+            "O", "P", "Q", "R", "S", "T", "U", "V", "X", "W", "Y", "Z"};
+    private static final int[] power = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
 
     PageLabels(final PdfFileReader objectReader, final int pageCount) {
-        this.objectReader=objectReader;
-        this.pageCount=pageCount;
+        this.objectReader = objectReader;
+        this.pageCount = pageCount;
     }
-    
+
     void readLabels(final PdfObject pageObj) {
-      
-        final PdfArrayIterator numList =pageObj.getMixedArray(PdfDictionary.Nums);
-        
-        if(numList!=null && objectReader!=null && numList.hasMoreTokens()){
-            
-            int endPage,numbType,St,pageNum;
-            String convertedPage,pageLabel;
+
+        final PdfArrayIterator numList = pageObj.getMixedArray(PdfDictionary.Nums);
+
+        if (numList != null && objectReader != null && numList.hasMoreTokens()) {
+
+            int endPage, numbType, St, pageNum;
+            String convertedPage, pageLabel;
             PageLabelObject labelObj;
             boolean isFirstToken = true;
 
             //read first page values
-            int startPage=numList.getNextValueAsInteger(true)+1;
+            int startPage = numList.getNextValueAsInteger(true) + 1;
 
             while (numList.hasMoreTokens()) {
 
@@ -124,83 +125,83 @@ public class PageLabels extends HashMap<Integer, String>{
     }
 
     private PageLabelObject getObject(final byte[] data) {
-        
-        final PageLabelObject labelObj  = new PageLabelObject(new String(data));
 
-        if(data[0]=='<') {
+        final PageLabelObject labelObj = new PageLabelObject(new String(data));
+
+        if (data[0] == '<') {
             labelObj.setStatus(PdfObject.UNDECODED_DIRECT);
         } else {
             labelObj.setStatus(PdfObject.UNDECODED_REF);
         }
-        labelObj.setUnresolvedData(data,PdfDictionary.PageLabels);
-        
-        final ObjectDecoder objectDecoder=new ObjectDecoder(this.objectReader);
+        labelObj.setUnresolvedData(data, PdfDictionary.PageLabels);
+
+        final ObjectDecoder objectDecoder = new ObjectDecoder(this.objectReader);
         objectDecoder.checkResolved(labelObj);
-        
+
         return labelObj;
     }
 
     private static String getNumberValue(final int numbType, final int page) {
-        
+
         final String convertedPage;
-    
-        switch(numbType){
+
+        switch (numbType) {
             case PdfDictionary.a:
-                convertedPage=convertLetterToNumber(page, lettersLowerCase);
+                convertedPage = convertLetterToNumber(page, lettersLowerCase);
                 break;
-                
+
             case PdfDictionary.A:
-                convertedPage=convertLetterToNumber(page, lettersUpperCase);
+                convertedPage = convertLetterToNumber(page, lettersUpperCase);
                 break;
-                
+
             case PdfDictionary.D:
-                convertedPage=String.valueOf(page);
+                convertedPage = String.valueOf(page);
                 break;
-                
+
             case PdfDictionary.R:
-                convertedPage=convertToRoman(page,symbolUpperCase);
+                convertedPage = convertToRoman(page, symbolUpperCase);
                 break;
-                
+
             case PdfDictionary.r:
-                convertedPage=convertToRoman(page,symbolLowerCase);
+                convertedPage = convertToRoman(page, symbolLowerCase);
                 break;
-                
+
             default:
-                convertedPage="";
+                convertedPage = "";
         }
         return convertedPage;
     }
 
-    private static String convertToRoman(int arabicNumber, final String[] symbols){
-        
-        final StringBuilder romanNumeral=new StringBuilder();
+    private static String convertToRoman(int arabicNumber, final String[] symbols) {
+
+        final StringBuilder romanNumeral = new StringBuilder();
         int repeat;
-        
-        for(int x=0; arabicNumber>0; x++){
-            repeat=arabicNumber/power[x];
-            
-            for(int chars=1; chars<=repeat; chars++){
+
+        for (int x = 0; arabicNumber > 0; x++) {
+            repeat = arabicNumber / power[x];
+
+            for (int chars = 1; chars <= repeat; chars++) {
                 romanNumeral.append(symbols[x]);
             }
             arabicNumber %= power[x];
         }
-        
+
         return romanNumeral.toString();
     }
-    
+
     private static String convertLetterToNumber(final int page, final String[] letters) {
-       
-        final StringBuilder finalLetters=new StringBuilder();
-        final int repeat = page/26;
-        final int remainder = page%26;
-        
-        if (repeat>0) {
-            for (int x=0; x<repeat; x++) {
+
+        final StringBuilder finalLetters = new StringBuilder();
+        final int repeat = page / 26;
+        final int remainder = page % 26;
+
+        if (repeat > 0) {
+            for (int x = 0; x < repeat; x++) {
                 finalLetters.append(letters[25]);
             }
         }
-        if (remainder!=0) {
-            finalLetters.append(letters[remainder-1]);
+        if (remainder != 0) {
+            finalLetters.append(letters[remainder - 1]);
         }
         return finalLetters.toString();
     }

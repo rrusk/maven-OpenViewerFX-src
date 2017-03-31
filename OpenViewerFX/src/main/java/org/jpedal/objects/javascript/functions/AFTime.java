@@ -38,46 +38,46 @@ import org.jpedal.objects.acroforms.actions.ActionHandler;
 import org.jpedal.objects.raw.FormObject;
 
 public class AFTime extends JSFunction {
-    
+
     public AFTime(final AcroRenderer acro, final FormObject formObject) {
 
-        super(acro,formObject);
+        super(acro, formObject);
     }
 
     @Override
     public int execute(final String js, final String[] args, final int type, final int event, final char keyPressed) {
 
-        if(event== ActionHandler.FOCUS_EVENT && (type==KEYSTROKE || type==FORMAT)){
-        	//format added for file baseline_screens\forms\Testdokument PDF.pdf
-        	//F action found this AFTime_FormatEx("HH:MM") unknown command
+        if (event == ActionHandler.FOCUS_EVENT && (type == KEYSTROKE || type == FORMAT)) {
+            //format added for file baseline_screens\forms\Testdokument PDF.pdf
+            //F action found this AFTime_FormatEx("HH:MM") unknown command
 //        	if(type==FORMAT){
 //        		System.out.println("AFTime.execute focus format js="+js);
 //	        	org.jpedal.objects.acroforms.utils.ConvertToString.printStackTrace(7);
 
 //        	}
-            final String validatedValue= validateMask(args,":",false);
+            final String validatedValue = validateMask(args, ":", false);
 
-            if(validatedValue==null){
+            if (validatedValue == null) {
 
-                final Object[] errArgs=new Object[1];
-                errArgs[0]=formObject.getObjectRefAsString();
+                final Object[] errArgs = new Object[1];
+                errArgs[0] = formObject.getObjectRefAsString();
 
-                maskAlert(ErrorCodes.JSInvalidFormat,errArgs);//chris unformat
+                maskAlert(ErrorCodes.JSInvalidFormat, errArgs); //chris unformat
                 execute(js, args, type, event, keyPressed);
-            }else{
-				//be sure to get the current value before we change it
+            } else {
+                //be sure to get the current value before we change it
 
                 formObject.setLastValidValue(validatedValue);
                 formObject.updateValue(validatedValue, false, true);
 
             }
 
-        }else if(type==KEYSTROKE){ //just ignore and process on focus lost
-            JSFunction.debug("AFTime(keystroke)="+js);
-        }else if(type==FORMAT){
-        	JSFunction.debug("AFTime(format)="+js);
-        }else {
-            JSFunction.debug("Unknown command "+js);
+        } else if (type == KEYSTROKE) { //just ignore and process on focus lost
+            JSFunction.debug("AFTime(keystroke)=" + js);
+        } else if (type == FORMAT) {
+            JSFunction.debug("AFTime(format)=" + js);
+        } else {
+            JSFunction.debug("Unknown command " + js);
         }
 
         return 0;

@@ -35,35 +35,36 @@ package org.jpedal.exception;
 /**
  * a generic exception which code can throw if there is an error
  */
-public class PdfException extends Exception
-{
-    
-    /**feedback on exception*/
+public class PdfException extends Exception {
+
+    /**
+     * feedback on exception
+     */
     protected String error_message = "";
-    
+
     /**
      * display the error message
      */
     @Override
-    public String getMessage()
-    {
+    public String getMessage() {
         return error_message;
     }
-    
-    public PdfException(){}
-    
-    /**set message at exception
+
+    public PdfException() {
+    }
+
+    /**
+     * set message at exception
+     *
      * @param message is of type String.
      */
-    public PdfException( final String message )
-    {
+    public PdfException(final String message) {
         super(message);
         error_message = message;
     }
-    
-    public PdfException( final String message, final Throwable cause )
-    {
-        super(message,cause);
+
+    public PdfException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }
 

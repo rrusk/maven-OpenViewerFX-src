@@ -35,7 +35,8 @@ package org.jpedal.fonts.tt;
 import java.io.Serializable;
 
 /**
- * generic table class for tables in truetype font */
+ * generic table class for tables in truetype font
+ */
 public class Table implements Serializable {
 
 }

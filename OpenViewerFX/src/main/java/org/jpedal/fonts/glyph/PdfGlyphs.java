@@ -35,19 +35,19 @@ package org.jpedal.fonts.glyph;
 import java.awt.geom.Area;
 
 /**
- *  generic holder for glyph data
+ * generic holder for glyph data
  */
 public interface PdfGlyphs {
-	Area getStandardGlyph(float[][] trm, int rawInt, String displayValue, 
-			float currentWidth, boolean isSTD);
+    Area getStandardGlyph(float[][] trm, int rawInt, String displayValue,
+                          float currentWidth, boolean isSTD);
 
-	PdfGlyph getEmbeddedGlyph(GlyphFactory factory, String charGlyph, float[][] trm, int rawInt, String displayValue, float currentWidth,String key);
+    PdfGlyph getEmbeddedGlyph(GlyphFactory factory, String charGlyph, float[][] trm, int rawInt, String displayValue, float currentWidth, String key);
 
-	String getBaseFontName();
+    String getBaseFontName();
 
-	String getDisplayValue(Integer key);
+    String getDisplayValue(Integer key);
 
-	String getCharGlyph(Integer key);
+    String getCharGlyph(Integer key);
 
-	String getEmbeddedEnc(Integer key);
+    String getEmbeddedEnc(Integer key);
 }

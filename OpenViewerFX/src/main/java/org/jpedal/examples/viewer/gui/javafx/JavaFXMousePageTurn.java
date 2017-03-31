@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.gui.javafx;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.control.ScrollPane;
@@ -83,23 +84,22 @@ public class JavaFXMousePageTurn extends MouseSelector implements JavaFXMouseFun
     private Timer middleDragTimer;
 
     long timeOfLastPageChange;
-    
+
     final DisplayOffsets offsets;
 
     public JavaFXMousePageTurn(final PdfDecoderFX decode_pdf, final GUIFactory currentGUI,
-            final Values commonValues, final Commands currentCommands) {
+                               final Values commonValues, final Commands currentCommands) {
 
         this.decode_pdf = decode_pdf;
         this.currentGUI = currentGUI;
         this.commonValues = commonValues;
         this.currentCommands = currentCommands;
 
-        offsets=(DisplayOffsets) decode_pdf.getExternalHandler(Options.DisplayOffsets);
+        offsets = (DisplayOffsets) decode_pdf.getExternalHandler(Options.DisplayOffsets);
     }
 
     /**
      * checks the link areas on the page and allow user to save file
-     *
      */
     public void checkLinks(final boolean mouseClicked, final PdfObjectReader pdfObjectReader, final double x, final double y) {
 
@@ -120,7 +120,7 @@ public class JavaFXMousePageTurn extends MouseSelector implements JavaFXMouseFun
                 && decode_pdf.getExternalHandler(Options.UniqueAnnotationHandler) != null) {
             final double mouseX = e.getX();
             final double mouseY = e.getY();
-            final int[] pos = updateXY((int)mouseX, (int)mouseY, decode_pdf, commonValues);
+            final int[] pos = updateXY((int) mouseX, (int) mouseY, decode_pdf, commonValues);
             checkLinks(true, decode_pdf.getIO(), pos[0], pos[1]);
         }
     }
@@ -247,7 +247,7 @@ public class JavaFXMousePageTurn extends MouseSelector implements JavaFXMouseFun
     public void mouseDragged(final MouseEvent e) {
         if (e.getButton().equals(MouseButton.PRIMARY)) {
             if (decode_pdf.getExternalHandler(Options.UniqueAnnotationHandler) != null) {
-                final int[] pos = updateXY((int)e.getX(), (int)e.getY(), decode_pdf, commonValues);
+                final int[] pos = updateXY((int) e.getX(), (int) e.getY(), decode_pdf, commonValues);
                 checkLinks(true, decode_pdf.getIO(), pos[0], pos[1]);
             }
 
@@ -367,7 +367,7 @@ public class JavaFXMousePageTurn extends MouseSelector implements JavaFXMouseFun
 
         }
 
-        
+
         //Update cursor position if over page in single mode
 //
 //            int[] flag = new int[2];
@@ -420,103 +420,103 @@ public class JavaFXMousePageTurn extends MouseSelector implements JavaFXMouseFun
 //                flag[1] = 0;
 //            }
 //            currentGUI.setMultibox(flag);
-       
+
         if (decode_pdf.getExternalHandler(Options.UniqueAnnotationHandler) != null) {
-            final int[] pos = updateXY((int)e.getX(), (int)e.getY(), decode_pdf, commonValues);
+            final int[] pos = updateXY((int) e.getX(), (int) e.getY(), decode_pdf, commonValues);
             checkLinks(false, decode_pdf.getIO(), pos[0], pos[1]);
         }
     }
-    
-    public void mouseWheelMoved(final ScrollEvent e){
-        if(decode_pdf.getDisplayView() == Display.PAGEFLOW) {
+
+    public void mouseWheelMoved(final ScrollEvent e) {
+        if (decode_pdf.getDisplayView() == Display.PAGEFLOW) {
             return;
         }
-        
-        if(currentGUI.getProperties().getValue("allowScrollwheelZoom").equalsIgnoreCase("true") && e.isControlDown()){
-            //zoom
-            int scaling = ((GUI)currentGUI).getSelectedComboIndex(Commands.SCALING);
-            if(scaling!=-1){
-                scaling = (int)decode_pdf.getDPIFactory().removeScaling(decode_pdf.getScaling()*100);
-            }else{
-                String numberValue = ((GUI)currentGUI).getSelectedComboItem(Commands.SCALING).toString();
-                try{
-                    scaling= (int)Float.parseFloat(numberValue);
-                }catch(final Exception ex){
 
-                    LogWriter.writeLog("Exception in handling scaling "+ex);
-                    
-                    scaling=-1;
+        if (currentGUI.getProperties().getValue("allowScrollwheelZoom").equalsIgnoreCase("true") && e.isControlDown()) {
+            //zoom
+            int scaling = ((GUI) currentGUI).getSelectedComboIndex(Commands.SCALING);
+            if (scaling != -1) {
+                scaling = (int) decode_pdf.getDPIFactory().removeScaling(decode_pdf.getScaling() * 100);
+            } else {
+                String numberValue = ((GUI) currentGUI).getSelectedComboItem(Commands.SCALING).toString();
+                try {
+                    scaling = (int) Float.parseFloat(numberValue);
+                } catch (final Exception ex) {
+
+                    LogWriter.writeLog("Exception in handling scaling " + ex);
+
+                    scaling = -1;
                     //its got characters in it so get first valid number string
-                    final int length=numberValue.length();
-                    int ii=0;
-                    while(ii<length){
-                        final char c=numberValue.charAt(ii);
-                        if(((c>='0')&&(c<='9'))|(c=='.')) {
+                    final int length = numberValue.length();
+                    int ii = 0;
+                    while (ii < length) {
+                        final char c = numberValue.charAt(ii);
+                        if (((c >= '0') && (c <= '9')) | (c == '.')) {
                             ii++;
                         } else {
                             break;
                         }
                     }
-                    
-                    if(ii>0) {
+
+                    if (ii > 0) {
                         numberValue = numberValue.substring(0, ii);
                     }
-                    
-                    //try again if we reset above
-                    if(scaling==-1){
-                        try{
-                            scaling = (int)Float.parseFloat(numberValue);
-                        }catch(final Exception e1){
 
-                            LogWriter.writeLog("Exception in handling scaling "+e1);
-                           
-                            scaling=-1;
+                    //try again if we reset above
+                    if (scaling == -1) {
+                        try {
+                            scaling = (int) Float.parseFloat(numberValue);
+                        } catch (final Exception e1) {
+
+                            LogWriter.writeLog("Exception in handling scaling " + e1);
+
+                            scaling = -1;
                         }
                     }
                 }
             }
-            
+
             float value = e.getTouchCount();
-            
-            if(scaling!=1 || value<0){
-                if(value<0){
+
+            if (scaling != 1 || value < 0) {
+                if (value < 0) {
                     value = 1.25f;
-                }else{
+                } else {
                     value = 0.8f;
                 }
-                if(!(scaling+value<0)){
-                    float currentScaling = (scaling*value);
-                    
-                    if(((int)currentScaling)==(scaling)) {
+                if (!(scaling + value < 0)) {
+                    float currentScaling = (scaling * value);
+
+                    if (((int) currentScaling) == (scaling)) {
                         currentScaling = scaling + 1;
                     } else {
                         currentScaling = ((int) currentScaling);
                     }
-                    
-                    if(currentScaling<1) {
+
+                    if (currentScaling < 1) {
                         currentScaling = 1;
                     }
-                    
-                    if(currentScaling>1000) {
+
+                    if (currentScaling > 1000) {
                         currentScaling = 1000;
                     }
-                    
+
                     //update scaling
                     currentGUI.snapScalingToDefaults(currentScaling);
                 }
             }
         } else {
-            
-            final ScrollPane scroll = ((ScrollPane)decode_pdf.getParent());
-            
-            if ((scroll.getVvalue()==scroll.getVmax()-scroll.getHeight() || scroll.getHeight()==0) &&
-                    timeOfLastPageChange+700 < System.currentTimeMillis() &&
+
+            final ScrollPane scroll = ((ScrollPane) decode_pdf.getParent());
+
+            if ((scroll.getVvalue() == scroll.getVmax() - scroll.getHeight() || scroll.getHeight() == 0) &&
+                    timeOfLastPageChange + 700 < System.currentTimeMillis() &&
                     currentGUI.getValues().getCurrentPage() < decode_pdf.getPageCount()) {
-                
+
                 //change page
                 timeOfLastPageChange = System.currentTimeMillis();
                 currentCommands.executeCommand(Commands.FORWARDPAGE, null);
-                
+
                 //update scrollbar so at top of page
                 Platform.runLater(new Runnable() {
                     @Override
@@ -524,9 +524,9 @@ public class JavaFXMousePageTurn extends MouseSelector implements JavaFXMouseFun
                         scroll.setVvalue(scroll.getVmin());
                     }
                 });
-                
-            } else if (scroll.getVvalue()==scroll.getVmin() &&
-                    timeOfLastPageChange+700 < System.currentTimeMillis() &&
+
+            } else if (scroll.getVvalue() == scroll.getVmin() &&
+                    timeOfLastPageChange + 700 < System.currentTimeMillis() &&
                     currentGUI.getValues().getCurrentPage() > 1) {
 
                 //change page

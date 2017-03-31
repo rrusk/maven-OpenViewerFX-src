@@ -33,6 +33,7 @@
 package org.jpedal.external;
 
 import java.awt.Shape;
+
 import org.jpedal.color.PdfPaint;
 
 /**
@@ -43,12 +44,13 @@ public interface ShapeTracker {
 
     /**
      * pass user the low-level details
-     * @param tokenNumber actual token reached in stream (useful for working out if objects behind others
-     * @param type (Cmd.S, Cmd.s, Cmd.B, etc)... B,S and F comands with or without star and upper/lower case
-     * to define Fill, Stroke, etc
-     * @param currentShape - shape with unscaled, unrotated PDF co-ordinates
+     *
+     * @param tokenNumber    actual token reached in stream (useful for working out if objects behind others
+     * @param type           (Cmd.S, Cmd.s, Cmd.B, etc)... B,S and F comands with or without star and upper/lower case
+     *                       to define Fill, Stroke, etc
+     * @param currentShape   - shape with unscaled, unrotated PDF co-ordinates
      * @param nonstrokecolor - used for Fills
-     * @param strokecolor - used for stroking shape
+     * @param strokecolor    - used for stroking shape
      */
     void addShape(int tokenNumber, int type, Shape currentShape, PdfPaint nonstrokecolor, PdfPaint strokecolor);
 

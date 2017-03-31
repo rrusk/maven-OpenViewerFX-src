@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer.commands.javafx;
 
 import java.util.*;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -75,9 +76,9 @@ public class JavaFXDocInfo {
         if (args == null) {
             if (!commonValues.isPDF()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.ImageSearch"));
-            }else if(commonValues.getSelectedFile() == null){
-                    currentGUI.showMessageDialog(Messages.getMessage("PdfVieweremptyFile.message"), Messages.getMessage("PdfViewerTooltip.pageSize"),FXMessageDialog.PLAIN_MESSAGE);
-            }else{
+            } else if (commonValues.getSelectedFile() == null) {
+                currentGUI.showMessageDialog(Messages.getMessage("PdfVieweremptyFile.message"), Messages.getMessage("PdfViewerTooltip.pageSize"), FXMessageDialog.PLAIN_MESSAGE);
+            } else {
                 getPropertiesBox(commonValues.getSelectedFile(), commonValues.getFileSize(), commonValues.getPageCount(), commonValues.getCurrentPage(), decode_pdf);
             }
         }
@@ -87,7 +88,7 @@ public class JavaFXDocInfo {
 
         //Setup Vars to Pass.
         final String user_dir = System.getProperty("user.dir");
-        final PdfFileInformation currentFileInformation=decode_pdf.getFileInformationData();
+        final PdfFileInformation currentFileInformation = decode_pdf.getFileInformationData();
 
         int ptr = 0;
         if (ptr == -1) {
@@ -110,36 +111,36 @@ public class JavaFXDocInfo {
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE); //Stops ability to close tabs
 
         //Populate the Properties Tab.
-        properties.setContent(getPropTab(currentFileInformation,file, path, user_dir, fileSize, pageCount, currentPage, decode_pdf));
+        properties.setContent(getPropTab(currentFileInformation, file, path, user_dir, fileSize, pageCount, currentPage, decode_pdf));
 
         //Populate the Fonts Tab.
         fonts.setContent(getFontTab(decode_pdf.getInfo(PdfDictionary.Font)));
 
         //Populate the Available Tab.
         available.setContent(getAvailableTab());
-        
+
         //Populate the Aliases Tab.
         aliases.setContent(getAliasesTab());
-        
+
         tabPane.getTabs().addAll(properties, fonts, available, aliases); //Add tabs to tabPane
-        
+
         //Populate the Forms Tab.
-        if(getFormsTab(decode_pdf)!=null){
+        if (getFormsTab(decode_pdf) != null) {
             final Tab forms = new Tab("Forms");
             forms.setContent(getFormsTab(decode_pdf));
             tabPane.getTabs().add(forms);
         }
-        
+
         //Populate the Image Tab.
         if (org.jpedal.parser.image.ImageCommands.trackImages) {
             final Tab image = new Tab("Image");
             image.setContent(getImageTab(decode_pdf));
             tabPane.getTabs().add(image);
         }
-        
+
         //Populate the XML Tab.
-        final String xmlText=currentFileInformation.getFileXMLMetaData();
-        if(!xmlText.isEmpty()){
+        final String xmlText = currentFileInformation.getFileXMLMetaData();
+        if (!xmlText.isEmpty()) {
             final Tab xml = new Tab("XML");
             xml.setContent(getXMLTab(xmlText));
             tabPane.getTabs().add(xml);
@@ -151,6 +152,7 @@ public class JavaFXDocInfo {
 
     /**
      * Grabs the Contents for the Properties Tab.
+     *
      * @param file
      * @param path
      * @param user_dir
@@ -235,6 +237,7 @@ public class JavaFXDocInfo {
 
     /**
      * Grabs the Contents for the Fonts Tab.
+     *
      * @param xmlTxt
      * @return ScrollPane Object
      */
@@ -246,7 +249,7 @@ public class JavaFXDocInfo {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         //List of Fonts.
-        final StringBuilder xmlText = new StringBuilder( "Font Substitution Mode: ");
+        final StringBuilder xmlText = new StringBuilder("Font Substitution Mode: ");
 
         switch (FontMappings.getFontSubstitutionMode()) {
             case (1):
@@ -292,6 +295,7 @@ public class JavaFXDocInfo {
 
     /**
      * Grabs the Contents for the Image Tab.
+     *
      * @param decode_pdf
      * @return ScrollPane Object
      */
@@ -315,44 +319,46 @@ public class JavaFXDocInfo {
             imageListContent.setFont(textFont);
 
             content.getChildren().addAll(imageListTitle, imageListContent);
-            
+
             scrollPane.setContent(content);
-            
+
         }
 
         return scrollPane;
     }
-    
+
     /**
      * Grabs the Contents for the XML Tab.
+     *
      * @param xmlText
      * @return ScrollPane Object
      */
-    private static ScrollPane getXMLTab(final String xmlText){
+    private static ScrollPane getXMLTab(final String xmlText) {
 
         //Setup the ScrollPane.
         final ScrollPane scrollPane = new ScrollPane();
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        
+
         //Fill the VBox with Content.
         final VBox content = new VBox();
 
         final Text imageListTitle = new Text(lb + "XML Content");
         imageListTitle.setFont(headerFont);
-        
+
         final Text imageListContent = new Text(xmlText);
         imageListContent.setFont(textFont);
-        
+
         content.getChildren().addAll(imageListTitle, imageListContent);
-        
+
         scrollPane.setContent(content);
-        
+
         return scrollPane;
     }
-    
+
     /**
      * Grabs the Contents for the Forms Tab.
+     *
      * @param decode_pdf
      * @return ScrollPane Object
      */
@@ -432,9 +438,10 @@ public class JavaFXDocInfo {
         }
         return scrollPane;
     }
-    
+
     /**
      * Grabs the Contents for the Aliases Tab.
+     *
      * @return ScrollPane Object
      */
     private static ScrollPane getAliasesTab() {
@@ -463,15 +470,15 @@ public class JavaFXDocInfo {
 
         return scrollPane;
     }
-    
+
     private static VBox getAvailableTab() {
 
         final VBox container = new VBox();
-        
+
         //Setup Title.
-        final Text titleText = new Text (lb+"Available Fonts");
+        final Text titleText = new Text(lb + "Available Fonts");
         titleText.setFont(headerFont);
-        
+
         //Setup the Filter Options.
         final GridPane filterContainer = new GridPane();
 
@@ -481,7 +488,7 @@ public class JavaFXDocInfo {
         final TextField filterField = new TextField();
         filterField.setMaxSize(150, 0);
         filterField.setFont(textFont);
-        
+
         final RadioButton sortFolder = new RadioButton("Sort By Folder ");
         sortFolder.setFont(textFont);
 
@@ -496,7 +503,7 @@ public class JavaFXDocInfo {
         /*
          * Setup the Search Display.
          */
-        
+
         //Add format buttons to a toggle group, so only one be selected.
         final ToggleGroup docInfoGroup = new ToggleGroup();
         sortFolder.setSelected(true);
@@ -505,7 +512,7 @@ public class JavaFXDocInfo {
         final ChangeListener<Toggle> updateSelectionListener = new ChangeListener<Toggle>() {
             @Override
             public void changed(final ObservableValue<? extends Toggle> ov,
-                    final Toggle old_toggle, final Toggle new_toggle) {
+                                final Toggle old_toggle, final Toggle new_toggle) {
 
                 getAvailableFonts(filterField, sortFolder.isSelected());
 
@@ -513,20 +520,20 @@ public class JavaFXDocInfo {
         };
 
         docInfoGroup.selectedToggleProperty().addListener(updateSelectionListener);
-        
+
         filterField.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(final KeyEvent t) {
-                getAvailableFonts(filterField,sortFolder.isSelected());
+                getAvailableFonts(filterField, sortFolder.isSelected());
             }
         });
-        
-        container.getChildren().addAll(titleText,filterContainer, treeContainer);
+
+        container.getChildren().addAll(titleText, filterContainer, treeContainer);
         container.setAlignment(Pos.CENTER);
 
         return container;
     }
-    
+
     /**
      * list of all fonts properties in sorted order
      */
@@ -551,15 +558,15 @@ public class JavaFXDocInfo {
             final java.util.List<TreeItem<String>> locationNode = new ArrayList<TreeItem<String>>();
 
             String current;
-            
-            String lowerCaseFilter="";
-            if(filter!=null){
-                lowerCaseFilter=filter.toLowerCase();
+
+            String lowerCaseFilter = "";
+            if (filter != null) {
+                lowerCaseFilter = filter.toLowerCase();
             }
-            
+
             //build display
-            for (final String nextFont :fontNames) {
-                
+            for (final String nextFont : fontNames) {
+
                 current = (FontMappings.fontSubstitutionLocation.get(nextFont));
 
                 int ptr = current.lastIndexOf(System.getProperty("file.separator"));
@@ -570,7 +577,7 @@ public class JavaFXDocInfo {
                 if (ptr != -1) {
                     current = current.substring(0, ptr);
                 }
-                
+
                 if (filter == null || nextFont.toLowerCase().contains(lowerCaseFilter)) {
                     if (sortFontsByDir && !location.contains(current)) {
                         location.add(current);
@@ -607,11 +614,11 @@ public class JavaFXDocInfo {
         return top;
     }
 
-    private static void getAvailableFonts(final TextField filterText, final boolean sortFontsByDir){
+    private static void getAvailableFonts(final TextField filterText, final boolean sortFontsByDir) {
         TreeItem<String> fontlist = new TreeItem<String>("Fonts");
-        fontlist = populateAvailableFonts(fontlist, filterText.getText(),sortFontsByDir);
+        fontlist = populateAvailableFonts(fontlist, filterText.getText(), sortFontsByDir);
         treeContainer.getChildren().clear();
         treeContainer.getChildren().add(new TreeView<String>(fontlist));
     }
-    
+
 }

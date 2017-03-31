@@ -36,18 +36,19 @@ package org.jpedal.examples.handlers;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.IOException;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.external.ImageHelper;
 
 /**
  * abstract image saving and reading so we can move between different libraries if ImageIO not sufficient
  **/
-public class DefaultImageHelper{
+public class DefaultImageHelper {
 
-    static ImageHelper customHelper=new StandardImageIO();
+    static ImageHelper customHelper = new StandardImageIO();
 
-    public static void setUserImplementation(final ImageHelper userHelper){
-        customHelper=userHelper;
+    public static void setUserImplementation(final ImageHelper userHelper) {
+        customHelper = userHelper;
     }
 
     public static void write(final BufferedImage image, final String type, final String file_name) throws IOException {
@@ -65,7 +66,7 @@ public class DefaultImageHelper{
         return customHelper.readRasterFromJPeg(data);
     }
 
-    public static BufferedImage read(final byte[] data) throws IOException{
+    public static BufferedImage read(final byte[] data) throws IOException {
 
         return customHelper.read(data);
 

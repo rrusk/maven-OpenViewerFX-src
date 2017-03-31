@@ -34,44 +34,47 @@ package org.jpedal.display;
 
 import java.awt.Font;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.objects.PdfPageData;
 
-/**generic version to show thumbnails in panel on side*/
+/**
+ * generic version to show thumbnails in panel on side
+ */
 public interface GUIThumbnailPanel {
 
-	boolean isShownOnscreen();
+    boolean isShownOnscreen();
 
-	void terminateDrawing();
+    void terminateDrawing();
 
-	void setIsDisplayedOnscreen(boolean b);
+    void setIsDisplayedOnscreen(boolean b);
 
-	Object[] getButtons();
+    Object[] getButtons();
 
-	void addComponentListener();
+    void addComponentListener();
 
-	void generateOtherVisibleThumbnails(int currentPage);
+    void generateOtherVisibleThumbnails(int currentPage);
 
-	void setupThumbnails(int pages, Font textFont, PdfPageData pdfPageData);
+    void setupThumbnails(int pages, Font textFont, PdfPageData pdfPageData);
 
-	//void removeAll();
+    //void removeAll();
 
-	//void setupThumbnails(int i, int[] js, int pageCount);
+    //void setupThumbnails(int i, int[] js, int pageCount);
 
-	//void generateOtherThumbnails(String[] strings, Vector_Object thumbnailsStored);
+    //void generateOtherThumbnails(String[] strings, Vector_Object thumbnailsStored);
 
-	//void resetHighlightedThumbnail(int id);
+    //void resetHighlightedThumbnail(int id);
 
-	void resetToDefault();
+    void resetToDefault();
 
-	void removeAllListeners();
+    void removeAllListeners();
 
-	void setThumbnailsEnabled(boolean value);
+    void setThumbnailsEnabled(boolean value);
 
-	//void refreshDisplay();
+    //void refreshDisplay();
 
-	void dispose();
+    void dispose();
 
     BufferedImage getImage(int pNum);
-    
+
     void drawThumbnails();
 }

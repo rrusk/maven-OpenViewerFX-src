@@ -34,6 +34,7 @@ package org.jpedal.color;
 
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.JDeliHelper;
 import org.jpedal.examples.handlers.DefaultImageHelper;
 import org.jpedal.exception.PdfException;
@@ -57,17 +58,17 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
     public void clearCache() {
         lastC = -1;
     }
-    
+
     @Override
-    public void invalidateCaching(final int color){
-        
+    public void invalidateCaching(final int color) {
+
         super.invalidateCaching(color);
-        
+
         lastC = -1;
         lastM = -1;
         lastY = -1;
         lastK = -1;
-         
+
     }
 
     public DeviceCMYKColorSpace() {
@@ -136,7 +137,7 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
 //            }
 //
 //        }
-        
+
         //new code refer to case 26589
         switch (length) {
             case 1:
@@ -189,7 +190,7 @@ public class DeviceCMYKColorSpace extends GenericColorSpace {
                 bb[2] = (int) (255 * (1 - y) * (1 - k));
             }
             this.currentColor = new PdfColor(bb[0], bb[1], bb[2]);
-            
+
         }
     }
 

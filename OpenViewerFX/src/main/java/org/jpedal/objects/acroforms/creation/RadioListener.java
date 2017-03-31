@@ -35,6 +35,7 @@ package org.jpedal.objects.acroforms.creation;
 import javax.swing.AbstractButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.jpedal.objects.raw.FormObject;
 
 /**
@@ -48,21 +49,21 @@ public class RadioListener implements ChangeListener {
     //boolean avoidLooping = false;
 
     RadioListener(final AbstractButton comp, final FormObject form) {
-	this.comp = comp;
-	this.form = form;
+        this.comp = comp;
+        this.form = form;
     }
 
     @Override
     public void stateChanged(final ChangeEvent e) {
 
-	//idea for another day
+        //idea for another day
 //            if(avoidLooping){ //swallow the extra call we created by reseting
 //                avoidLooping=false;
 //            }else if(form.isReadOnly()){ //not allowed so restore
 //                comp.setSelected(!comp.isSelected());
 //                avoidLooping=true;
 //            }else{
-	form.updateValue(comp.getText(), comp.isSelected(), false);  //false is critical to stop it looping
-	//}
+        form.updateValue(comp.getText(), comp.isSelected(), false);  //false is critical to stop it looping
+        //}
     }
 }

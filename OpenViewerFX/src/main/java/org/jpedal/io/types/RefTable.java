@@ -33,6 +33,7 @@
 package org.jpedal.io.types;
 
 import java.io.IOException;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.io.ObjectDecoder;
 import org.jpedal.io.PdfFileReader;
@@ -317,25 +318,25 @@ public class RefTable {
 
         if (isInvalid) {
             offset.setRefTableInvalid(true);
-			
-            try {
-				rootObj = new PageObject(BrokenRefTable.findOffsets(pdf_datafile, offset));
-				
-				final byte[] rootDictBytes = BrokenRefTable.findFirstRootDict(pdf_datafile); //fix for 28184
-				if (rootDictBytes != null) {
-					final PdfObject pdfObject = new CompressedObject("0 0 R");	
-					Dictionary.readDictionary(pdfObject, 0, rootDictBytes, -1, currentPdfFile);
-					encryptObj = pdfObject.getDictionary(PdfDictionary.Encrypt);
-					if (encryptObj != null) {
 
-						final byte[][] IDs = pdfObject.getStringArray(PdfDictionary.ID);
-						if (IDs != null && this.ID == null) {
-							// only the first encountered ID should be used as a fileID for decryption
-							this.ID = IDs[0];
-						}
-					}
-					infoObject = pdfObject.getDictionary(PdfDictionary.Info);
-				}						
+            try {
+                rootObj = new PageObject(BrokenRefTable.findOffsets(pdf_datafile, offset));
+
+                final byte[] rootDictBytes = BrokenRefTable.findFirstRootDict(pdf_datafile); //fix for 28184
+                if (rootDictBytes != null) {
+                    final PdfObject pdfObject = new CompressedObject("0 0 R");
+                    Dictionary.readDictionary(pdfObject, 0, rootDictBytes, -1, currentPdfFile);
+                    encryptObj = pdfObject.getDictionary(PdfDictionary.Encrypt);
+                    if (encryptObj != null) {
+
+                        final byte[][] IDs = pdfObject.getStringArray(PdfDictionary.ID);
+                        if (IDs != null && this.ID == null) {
+                            // only the first encountered ID should be used as a fileID for decryption
+                            this.ID = IDs[0];
+                        }
+                    }
+                    infoObject = pdfObject.getDictionary(PdfDictionary.Info);
+                }
             } catch (final Error err) {
                 throw new PdfException(err.getMessage() + " attempting to manually scan file for objects");
             }
@@ -391,7 +392,7 @@ public class RefTable {
 
             //for(int a=0;a<100;a++)
             //	System.out.println((char)Bytes[i+a]);
-            while (i < maxLen - 7) {//look for trailer keyword
+            while (i < maxLen - 7) { //look for trailer keyword
                 if (Bytes[i] == 116 && Bytes[i + 1] == 114 && Bytes[i + 2] == 97 && Bytes[i + 3] == 105 &&
                         Bytes[i + 4] == 108 && Bytes[i + 5] == 101 && Bytes[i + 6] == 114) {
                     trailerNotFound = false;
@@ -455,7 +456,7 @@ public class RefTable {
                     //track ref table so we can work out object length
                     offset.addXref(pointer);
 
-                } else{ //reset if fails second test above
+                } else { //reset if fails second test above
                     pointer = -1;
                 }
 
@@ -466,7 +467,7 @@ public class RefTable {
                 //noinspection ObjectAllocationInLoop
                 rootObj = new PageObject(BrokenRefTable.findOffsets(pdf_datafile, offset));
                 currentPdfFile.readObject(rootObj);
-                
+
                 offset.setRefTableInvalid(true);
 
 
@@ -554,11 +555,11 @@ public class RefTable {
         if (hasRef) {
 
             //move to start of value ignoring spaces or returns
-            i=StreamReaderUtils.skipSpaces(bytes,i+8);
+            i = StreamReaderUtils.skipSpaces(bytes, i + 8);
 
             final int s = i;
 
-            i=StreamReaderUtils.skipToEndOfKey(bytes,i);
+            i = StreamReaderUtils.skipToEndOfKey(bytes, i);
 
             /*convert xref to string to get pointer*/
             if (s != i) {
@@ -700,7 +701,7 @@ public class RefTable {
         final StringBuilder objectName = new StringBuilder();
         char current1, last = ' ';
         int matched = 0, i1 = 0;
-        final int length=raw.length;
+        final int length = raw.length;
 
         while (i1 < length) {
             current1 = (char) raw[i1];
@@ -710,7 +711,7 @@ public class RefTable {
                 current1 = ' ';
             }
 
-            if (current1 == ' ' && last == ' ') {//lose duplicate or spaces
+            if (current1 == ' ' && last == ' ') { //lose duplicate or spaces
                 matched = 0;
             } else if (current1 == pattern.charAt(matched)) { //looking for obj at end
                 matched++;

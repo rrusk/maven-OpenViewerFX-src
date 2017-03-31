@@ -39,7 +39,7 @@ import java.awt.Font;
  * hold details for String to render
  */
 public class TextObject {
-	public int x,y;
-	public Font font;
-	public String text;
+    public int x, y;
+    public Font font;
+    public String text;
 }

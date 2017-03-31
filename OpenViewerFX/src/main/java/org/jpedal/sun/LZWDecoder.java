@@ -67,16 +67,17 @@
  * LZWDecoder.java
  */
 package org.jpedal.sun;
+
 import java.io.IOException;
 import java.io.OutputStream;
+
 import org.jpedal.utils.LogWriter;
+
 /**
  * A class for performing LZW decoding.
- *
- *
  */
 public class LZWDecoder {
-    
+
     byte stringTable[][];
     byte data[];
     OutputStream uncompData;
@@ -85,70 +86,70 @@ public class LZWDecoder {
     int nextData;
     int nextBits;
     boolean earlyChange;
-    
+
     final int[] andTable = {
-        511,
-        1023,
-        2047,
-        4095
+            511,
+            1023,
+            2047,
+            4095
     };
-    
+
     public LZWDecoder() {
     }
-    
+
     /**
      * Method to decode LZW compressed data.
      *
-     * @param data            The compressed data.
-     * @param uncompData      Array to return the uncompressed data in.
-     * @param earlyChange         Default should be true.  RE: PDF spec EarlyChange
+     * @param data        The compressed data.
+     * @param uncompData  Array to return the uncompressed data in.
+     * @param earlyChange Default should be true.  RE: PDF spec EarlyChange
      */
     public void decode(final byte[] data, final OutputStream uncompData, final boolean earlyChange) {
-        
-        if(data[0] == (byte)0x00 && data[1] == (byte)0x01) {
+
+        if (data[0] == (byte) 0x00 && data[1] == (byte) 0x01) {
             throw new RuntimeException("LZW flavour not supported.");
         }
-        
+
         initializeStringTable();
-        
+
         this.data = data;
         this.uncompData = uncompData;
         this.earlyChange = earlyChange;
-        
+
         // Initialize pointers
         bytePointer = 0;
 
         nextData = 0;
         nextBits = 0;
-        
+
         int code, oldCode = 0;
         byte string[];
-        
+
         while ((code = getNextCode()) != 257) {
-        
+
             if (code == 256) {
-                
+
                 initializeStringTable();
                 code = getNextCode();
-                
+
                 if (code == 257) {
                     break;
                 }
                 writeString(stringTable[code]);
                 oldCode = code;
-                
+
             } else {
-                
+
                 if (code < tableIndex) {
-                    
+
                     string = stringTable[code];
-                    
+
                     writeString(string);
                     addStringToTable(stringTable[oldCode], string[0]);
                     oldCode = code;
-                    
+
                 } else {
-                    
+
                     string = stringTable[oldCode];
                     string = composeString(string, string[0]);
                     writeString(string);
@@ -158,36 +159,35 @@ public class LZWDecoder {
             }
         }
     }
-    
-    
+
+
     /**
      * Initialize the string table.
      */
     public void initializeStringTable() {
-        
+
         stringTable = new byte[8192][];
-        
-        for (int i=0; i<256; i++) {
+
+        for (int i = 0; i < 256; i++) {
             stringTable[i] = new byte[1];
-            stringTable[i][0] = (byte)i;
+            stringTable[i][0] = (byte) i;
         }
-        
+
         tableIndex = 258;
         bitsToGet = 9;
     }
-    
+
     /**
      * Write out the string just uncompressed.
      */
     public void writeString(final byte[] string) {
         try {
             uncompData.write(string);
-        }
-        catch (final IOException e) {
-            LogWriter.writeLog("Exception "+e+" with LZW decoder");
+        } catch (final IOException e) {
+            LogWriter.writeLog("Exception " + e + " with LZW decoder");
         }
     }
-    
+
     /**
      * Add a new string to the string table.
      */
@@ -196,19 +196,19 @@ public class LZWDecoder {
         final byte[] string = new byte[length + 1];
         System.arraycopy(oldString, 0, string, 0, length);
         string[length] = newString;
-        
+
         addStringToTable(string);
     }
-    
+
     /**
      * Add a new string to the string table.
      */
     public void addStringToTable(final byte[] string) {
-        
-        if(earlyChange) {
+
+        if (earlyChange) {
             stringTable[tableIndex++] = string;
         }
-    	
+
         if (tableIndex == 511) {
             bitsToGet = 10;
         } else if (tableIndex == 1023) {
@@ -216,12 +216,12 @@ public class LZWDecoder {
         } else if (tableIndex == 2047) {
             bitsToGet = 12;
         }
-        
-        if(!earlyChange) {
+
+        if (!earlyChange) {
             stringTable[tableIndex++] = string;
         }
     }
-    
+
     /**
      * Append <code>newString</code> to the end of <code>oldString</code>.
      */
@@ -230,10 +230,10 @@ public class LZWDecoder {
         final byte[] string = new byte[length + 1];
         System.arraycopy(oldString, 0, string, 0, length);
         string[length] = newString;
-  
+
         return string;
     }
-    
+
     // Returns the next 9, 10, 11 or 12 bits
     public int getNextCode() {
         // Attempt to get the next code. The exception is caught to make
@@ -243,22 +243,22 @@ public class LZWDecoder {
         try {
             nextData = (nextData << 8) | (data[bytePointer++] & 0xff);
             nextBits += 8;
-            
+
             if (nextBits < bitsToGet) {
                 nextData = (nextData << 8) | (data[bytePointer++] & 0xff);
                 nextBits += 8;
             }
-            
+
             final int code =
-            (nextData >> (nextBits - bitsToGet)) & andTable[bitsToGet-9];
+                    (nextData >> (nextBits - bitsToGet)) & andTable[bitsToGet - 9];
             nextBits -= bitsToGet;
-            
+
             return code;
-        } catch(final ArrayIndexOutOfBoundsException e) {
+        } catch (final ArrayIndexOutOfBoundsException e) {
             // Strip not terminated as expected: return EndOfInformation code.
 
-            LogWriter.writeLog("LZW value out of bounds "+e);
-            
+            LogWriter.writeLog("LZW value out of bounds " + e);
+
             return 257;
         }
     }

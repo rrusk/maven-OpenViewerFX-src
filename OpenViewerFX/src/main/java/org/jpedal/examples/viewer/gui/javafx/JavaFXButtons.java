@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.gui.javafx;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
@@ -53,22 +54,25 @@ import org.jpedal.examples.viewer.gui.generic.GUIButton;
 import org.jpedal.examples.viewer.gui.generic.GUIButtons;
 import org.jpedal.examples.viewer.gui.generic.GUIMenuItems;
 import org.jpedal.gui.GUIFactory;
+
 import static org.jpedal.gui.GUIFactory.BUTTONBAR;
 import static org.jpedal.gui.GUIFactory.NAVBAR;
 import static org.jpedal.gui.GUIFactory.PAGES;
 
 /**
- * This class controls everything todo with GUIButtons, 
+ * This class controls everything todo with GUIButtons,
  * it holds the objects and their corresponding methods.
- * 
+ * <p>
  * To initialise the object/class call init()
  */
-public class JavaFXButtons implements GUIButtons{
+public class JavaFXButtons implements GUIButtons {
 
-    /**holds OPEN, INFO,etc*/
+    /**
+     * holds OPEN, INFO,etc
+     */
     private ToolBar topButtons = new ToolBar();
-   
-//    Group layoutGroup = new Group ();
+
+    //    Group layoutGroup = new Group ();
     ArrayList<CheckMenuItem> layoutGroup = new ArrayList<CheckMenuItem>();
 
     private GUIButton mouseMode;
@@ -94,14 +98,14 @@ public class JavaFXButtons implements GUIButtons{
     private GUIButton first, fback, back, forward, fforward, last;
 
     private GUIButton buyButton, helpButton, rssButton;
-    
+
     /**
      * Initialises the buttons
      *
      * @param isSingle is of type boolean
      */
     public void init(final boolean isSingle) {
-        
+
         previousSearch = new JavaFXButton();
         nextSearch = new JavaFXButton();
         searchButton = new JavaFXButton();
@@ -121,7 +125,7 @@ public class JavaFXButtons implements GUIButtons{
         buyButton = new JavaFXButton();
         helpButton = new JavaFXButton();
         rssButton = new JavaFXButton();
-        
+
         singleButton = new JavaFXButton();
         continuousButton = new JavaFXButton();
         continuousFacingButton = new JavaFXButton();
@@ -133,7 +137,7 @@ public class JavaFXButtons implements GUIButtons{
         docPropButton = new JavaFXButton();
         infoButton = new JavaFXButton();
         mouseMode = new JavaFXButton();
-        
+
         setupButtonStyle();
 
     }
@@ -141,8 +145,8 @@ public class JavaFXButtons implements GUIButtons{
     /**
      * Returns the button associated with the ID.
      *
-     * @param ID is of type Int
-     * @return GUIButton object
+     * @param ID int value specifying a button
+     * @return GUIButton object specified
      */
     @Override
     public GUIButton getButton(final int ID) {
@@ -155,7 +159,7 @@ public class JavaFXButtons implements GUIButtons{
             case Commands.HELP:
                 return helpButton;
             case Commands.BUY:
-                return buyButton;       
+                return buyButton;
             case Commands.ABOUT:
                 return infoButton;
             case Commands.DOCINFO:
@@ -221,23 +225,23 @@ public class JavaFXButtons implements GUIButtons{
         snapshotButton = null;
         rotateLeftButton = null;
         rotateRightButton = null;
-       
+
         buyButton = null;
         helpButton = null;
         rssButton = null;
-        
+
         layoutGroup = null;
 
-        if(topButtons!=null) {
+        if (topButtons != null) {
             topButtons.getItems().removeAll(topButtons.getItems());
         }
-        topButtons =null;
+        topButtons = null;
     }
 
     /**
-     * Enables all the back navigation buttons.
+     * Enables or disables all the back navigation buttons.
      *
-     * @param flag is of type boolean
+     * @param flag true to enable buttons, false to disable
      */
     @Override
     public void setBackNavigationButtonsEnabled(final boolean flag) {
@@ -248,9 +252,9 @@ public class JavaFXButtons implements GUIButtons{
     }
 
     /**
-     * Enables all the forward navigation buttons.
+     * Enables or disables all the forward navigation buttons.
      *
-     * @param flag is of type boolean
+     * @param flag true to enable buttons, false to disable
      */
     @Override
     public void setForwardNavigationButtonsEnabled(final boolean flag) {
@@ -261,13 +265,13 @@ public class JavaFXButtons implements GUIButtons{
     }
 
     /**
-     * Enables all the page layout buttons.
+     * Enables or disables all the page layout buttons.
      *
-     * @param flag is type boolean
+     * @param flag true to enable buttons, false to disable
      */
     @Override
     public void setPageLayoutButtonsEnabled(final boolean flag) {
-        
+
         continuousButton.setEnabled(flag);
         continuousFacingButton.setEnabled(flag);
         /*
@@ -276,16 +280,16 @@ public class JavaFXButtons implements GUIButtons{
         /////////////////
         facingButton.setEnabled(flag);
         pageFlowButton.setEnabled(flag);
-        for(int i = Commands.FACING; i < Commands.FULLSCREEN; i++){
-            if(i!=Commands.PAGEFLOW){
+        for (int i = Commands.FACING; i < Commands.FULLSCREEN; i++) {
+            if (i != Commands.PAGEFLOW) {
                 disableUnimplementedItems(i);
             }
         }
         /////////////////
-        
+
         final Iterator<CheckMenuItem> menuOptions = layoutGroup.iterator();
 
-		if (menuOptions.hasNext()) {
+        if (menuOptions.hasNext()) {
             CheckMenuItem item = menuOptions.next();
             //first one is always ON
             item.setDisable(false);
@@ -296,35 +300,20 @@ public class JavaFXButtons implements GUIButtons{
                 item.setDisable(!flag);
             }
         }
-        //ObservableList<Node> menuOptions = layoutGroup.getChildren();
-        
-        if(GUI.debugFX) {
-            System.out.println("menuOptions variable if statement not yet implemented in JavaFX for JavaFXButtons class");
-        }
-//        if (menuOptions.isEmpty()) {
-//
-//            //first one is always ON
-//            ((MenuItem) menuOptions.nextElement()).setDisable(flag);
-//
-//            //set other menu items
-//            while (menuOptions.hasMoreElements()) {
-//                ((MenuItem) menuOptions.nextElement()).setDisable(flag);
-//            }
-//        }
-
     }
 
     /**
      * Aligns the layout menu option to the current view mode
-     * @param mode is of type int
+     *
+     * @param mode int value specifying the display view mode
      */
     @Override
     public void alignLayoutMenuOption(final int mode) {
 
-        if(GUI.debugFX) {
+        if (GUI.debugFX) {
             System.out.println("alignLayoutMenuOption not yet implemented for JavaFX in JavaFXButtons.java");
         }
-        
+
         int i = 1;
 
         //cycle set correct value to true, else false
@@ -342,16 +331,19 @@ public class JavaFXButtons implements GUIButtons{
     public ArrayList<CheckMenuItem> getLayoutGroup() {
         return layoutGroup;
     }
-    
+
+    /**
+     * Ensure buttons separators only appear in their logical places based on buttons present.
+     */
     @Override
     public void checkButtonSeparators() {
         /*
          * Ensure the buttonBar doesn't start or end with a separator
          */
-        boolean before=false, after=false;
-        Separator currentSep=null;
-        for(int k=0; k!=topButtons.getItems().size(); k++) {
-            if (topButtons.getItems().get(k) instanceof Separator){
+        boolean before = false, after = false;
+        Separator currentSep = null;
+        for (int k = 0; k != topButtons.getItems().size(); k++) {
+            if (topButtons.getItems().get(k) instanceof Separator) {
                 if (currentSep == null) {
                     currentSep = (Separator) topButtons.getItems().get(k);
                 } else {
@@ -362,7 +354,7 @@ public class JavaFXButtons implements GUIButtons{
                     }
                     before = before || after;
                     after = false;
-                    currentSep = (Separator)topButtons.getItems().get(k);
+                    currentSep = (Separator) topButtons.getItems().get(k);
                 }
             } else {
                 if (topButtons.getItems().get(k).isVisible()) {
@@ -382,37 +374,39 @@ public class JavaFXButtons implements GUIButtons{
             }
         }
     }
-    
-    public ToolBar getTopButtons(){
+
+    /**
+     * Get the tool bar used to display the viewers top button bar
+     *
+     * @return ToolBar used to hold the viewers buttons
+     */
+    public ToolBar getTopButtons() {
         return topButtons;
     }
-    
+
     /* (non-Javadoc)
      * @see org.jpedal.examples.viewer.gui.swing.GUIFactory#addButton(int, java.lang.String, java.lang.String, int)
      */
     public void addButton(final int line, final String toolTip, final String path, final int ID,
-                            final GUIMenuItems fxMenuItems, final GUIFactory currentGUI,
-                            final CommandListener currentCommandListener, final ToolBar pagesToolBar, final ToolBar navToolBar) {
+                          final GUIMenuItems fxMenuItems, final GUIFactory currentGUI,
+                          final CommandListener currentCommandListener, final ToolBar pagesToolBar, final ToolBar navToolBar) {
 
         GUIButton newButton = new JavaFXButton();
-        
-        /*
-         * specific buttons
-         */
+
         switch (ID) {
 
             case Commands.HELP:
                 newButton = getButton(Commands.HELP);
                 break;
-            
+
             case Commands.RSS:
                 newButton = getButton(Commands.RSS);
                 break;
-            
+
             case Commands.BUY:
                 newButton = getButton(Commands.BUY);
                 break;
-            
+
             case Commands.FIRSTPAGE:
                 newButton = getButton(Commands.FIRSTPAGE);
                 break;
@@ -515,7 +509,7 @@ public class JavaFXButtons implements GUIButtons{
                 break;
         }
 
-        
+
         //Changes the cursor style to hand if we enter the buttons area
         ((Node) newButton).setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
@@ -525,7 +519,7 @@ public class JavaFXButtons implements GUIButtons{
                 }
             }
         });
-        
+
         //Changes the cursor style to default if we exit the buttons area
         ((Node) newButton).setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
@@ -551,58 +545,62 @@ public class JavaFXButtons implements GUIButtons{
         } else if (line == PAGES) {
             pagesToolBar.getItems().add((Node) newButton);
         }
-        
+
         disableUnimplementedItems(ID);
     }
-    
-	//When page changes make sure only relevant navigation buttons are displayed
-	@Override
-    public void hideRedundentNavButtons(final GUIFactory currentGUI){
 
-		int maxPages = currentGUI.getPdfDecoder().getPageCount();
-		if(currentGUI.getValues().isMultiTiff()){
-			maxPages = currentGUI.getValues().getPageCount();
-		}
+    /**
+     * When page changes make sure only relevant navigation buttons are displayed
+     *
+     * @param currentGUI The user interface used for the viewer
+     */
+    @Override
+    public void hideRedundentNavButtons(final GUIFactory currentGUI) {
+
+        int maxPages = currentGUI.getPdfDecoder().getPageCount();
+        if (currentGUI.getValues().isMultiTiff()) {
+            maxPages = currentGUI.getValues().getPageCount();
+        }
 
         if (((currentGUI.getPdfDecoder().getDisplayView() == Display.FACING && currentGUI.getPdfDecoder().getPages().getBoolean(Display.BoolValue.SEPARATE_COVER)) ||
-                currentGUI.getPdfDecoder().getDisplayView() == Display.CONTINUOUS_FACING) 
-                && (maxPages & 1)==1) {
+                currentGUI.getPdfDecoder().getDisplayView() == Display.CONTINUOUS_FACING)
+                && (maxPages & 1) == 1) {
             maxPages--;
         }
-        
-		if(currentGUI.getValues().getCurrentPage()==1){
-			setBackNavigationButtonsEnabled(false);
-			currentGUI.getMenuItems().setBackNavigationItemsEnabled(false);
-		}else{
-			setBackNavigationButtonsEnabled(true);
-			currentGUI.getMenuItems().setBackNavigationItemsEnabled(true);
-		}
-		
-		if(currentGUI.getValues().getCurrentPage()==maxPages){
-			setForwardNavigationButtonsEnabled(false);
-			currentGUI.getMenuItems().setForwardNavigationItemsEnabled(false);
-		}else{
-			setForwardNavigationButtonsEnabled(true);
-			currentGUI.getMenuItems().setForwardNavigationItemsEnabled(true);
-		}
-		
-		currentGUI.getMenuItems().setGoToNavigationItemEnabled(maxPages!=1);
-		
+
+        if (currentGUI.getValues().getCurrentPage() == 1) {
+            setBackNavigationButtonsEnabled(false);
+            currentGUI.getMenuItems().setBackNavigationItemsEnabled(false);
+        } else {
+            setBackNavigationButtonsEnabled(true);
+            currentGUI.getMenuItems().setBackNavigationItemsEnabled(true);
+        }
+
+        if (currentGUI.getValues().getCurrentPage() == maxPages) {
+            setForwardNavigationButtonsEnabled(false);
+            currentGUI.getMenuItems().setForwardNavigationItemsEnabled(false);
+        } else {
+            setForwardNavigationButtonsEnabled(true);
+            currentGUI.getMenuItems().setForwardNavigationItemsEnabled(true);
+        }
+
+        currentGUI.getMenuItems().setGoToNavigationItemEnabled(maxPages != 1);
+
         //update single mode toolbar to be visible in only SINGLE if set
-        if(currentGUI.getThumbnailScrollBar()!=null){
-            if(currentGUI.getPdfDecoder().getDisplayView() == Display.SINGLE_PAGE){
-                
+        if (currentGUI.getThumbnailScrollBar() != null) {
+            if (currentGUI.getPdfDecoder().getDisplayView() == Display.SINGLE_PAGE) {
+
                 currentGUI.setScrollBarPolicy(GUI.ScrollPolicy.VERTICAL_NEVER);
                 currentGUI.setScrollBarPolicy(GUI.ScrollPolicy.HORIZONTAL_NEVER);
 
                 currentGUI.setThumbnailScrollBarVisibility(true);
-            }else if (currentGUI.getPdfDecoder().getDisplayView() == Display.PAGEFLOW){
+            } else if (currentGUI.getPdfDecoder().getDisplayView() == Display.PAGEFLOW) {
 
                 currentGUI.setScrollBarPolicy(GUI.ScrollPolicy.VERTICAL_NEVER);
                 currentGUI.setScrollBarPolicy(GUI.ScrollPolicy.HORIZONTAL_NEVER);
 
                 currentGUI.setThumbnailScrollBarVisibility(false);
-            }else{
+            } else {
 
                 currentGUI.setScrollBarPolicy(GUI.ScrollPolicy.VERTICAL_AS_NEEDED);
                 currentGUI.setScrollBarPolicy(GUI.ScrollPolicy.HORIZONTAL_AS_NEEDED);
@@ -610,72 +608,61 @@ public class JavaFXButtons implements GUIButtons{
                 currentGUI.setThumbnailScrollBarVisibility(false);
             }
         }
-	}
-    
+    }
+
     /**
-    * This is where we setup the Button Styles
-    */
-    public static void setupButtonStyle(){
-        if(GUI.debugFX) {
+     * setupButtonStyle is unsupported in OpenViewerFX
+     */
+    public static void setupButtonStyle() {
+        if (GUI.debugFX) {
             System.out.println("setupButtonStyle not yet implemented for JavaFX in JavaFXButtons class");
         }
-        //topButtons.setBorder(BorderFactory.createEmptyBorder());
-        //topButtons.setLayout(new FlowLayout(FlowLayout.LEADING));
-        //topButtons.setFloatable(false);
-        //topButtons.setFont(new Font("SansSerif", Font.PLAIN, 8));
     }
-    
+
+    /**
+     * Set the buttons tool bar visibility
+     *
+     * @param set true to make the tool bar and button visible, false to make invisible
+     */
     @Override
-    public void setVisible(final boolean set){
-        
+    public void setVisible(final boolean set) {
         topButtons.setVisible(set);
-        
     }
-    
+
+    /**
+     * Set the buttons tool bar to be enabled or disabled
+     *
+     * @param set true to enable the tool bar, false to disable
+     */
     @Override
-    public void setEnabled(final boolean set){
-        
-        //we reverse the flag for FX because setDisabled is the reverse equivalent of the Swing setEnabled.
+    public void setEnabled(final boolean set) {
         topButtons.setDisable(!set);
-        
     }
-    
+
     /**
      * Temporary Method to Disable unimplemented Viewer Items.
      * Edit and Remove the items from this method as we implement features.
      * When all items have been implemented, do a search for and remove
      * all instances of this method + the method itself.
-     * 
      */
-    public void disableUnimplementedItems(final int ID){
-        
+    public void disableUnimplementedItems(final int ID) {
+
         final boolean debug = GUI.debugFX;
         final int ALL = -10;
-        
-        if(ID!=ALL){
-            switch(ID){
-//                case Commands.SNAPSHOT:
-//                    snapshotButton.setEnabled(debug);
-//                    break;
-                    
-                    
+
+        if (ID != ALL) {
+            switch (ID) {
                 case Commands.CONTINUOUS_FACING:
                     continuousFacingButton.setEnabled(debug);
                     break;
-                    
-                //case Commands.FACING:
-                  //  facingButton.setEnabled(debug);
-                    //break;
-                  
-                    case Commands.PAGEFLOW:
+                case Commands.PAGEFLOW:
                     pageFlowButton.setEnabled(debug);
                     break;
-                    case Commands.CONTINUOUS:
+                case Commands.CONTINUOUS:
                     continuousButton.setEnabled(debug);
                     break;
             }
-        }else{
-            //snapshotButton.setEnabled(debug);
+        } else {
             continuousFacingButton.setEnabled(debug);
             facingButton.setEnabled(debug);
             continuousButton.setEnabled(debug);

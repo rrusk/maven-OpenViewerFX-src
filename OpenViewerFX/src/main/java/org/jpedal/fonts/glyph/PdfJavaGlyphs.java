@@ -42,6 +42,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.jpedal.fonts.FontMappings;
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.fonts.objects.FontData;
@@ -50,42 +51,52 @@ import org.jpedal.parser.DecoderOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.utils.StringUtils;
 
-public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
+public class PdfJavaGlyphs implements PdfGlyphs, Serializable {
 
     protected boolean hasGIDtoCID;
 
-    /**shapes we have already drawn to speed up plotting, or <code>null</code> if there are none*/
+    /**
+     * shapes we have already drawn to speed up plotting, or <code>null</code> if there are none
+     */
     private Area[] cachedShapes;
     private AffineTransform[] cachedAt;
 
-    /**lookup to translate CMAP chars*/
+    /**
+     * lookup to translate CMAP chars
+     */
     public int[] CMAP_Translate;
 
     protected int glyphCount;
 
     public boolean isFontInstalled;
 
-    /**default font to use in display*/
+    /**
+     * default font to use in display
+     */
     public String defaultFont = "Lucida Sans";
 
-    /**lookup for font names less any + suffix*/
-    public String fontName="default";
+    /**
+     * lookup for font names less any + suffix
+     */
+    public String fontName = "default";
 
     //some fonts need to be remapped (ie Arial-BoldMT to Arial,Bold)
-    public String logicalfontName="default";
+    public String logicalfontName = "default";
 
-    Map<Integer, String> chars=new HashMap<Integer, String>();
-    Map<Integer, String> displayValues=new HashMap<Integer, String>();
-    Map<Integer, String> embeddedChars=new HashMap<Integer, String>();
+    Map<Integer, String> chars = new HashMap<Integer, String>();
+    Map<Integer, String> displayValues = new HashMap<Integer, String>();
+    Map<Integer, String> embeddedChars = new HashMap<Integer, String>();
 
-    /**flag is CID font is identity matrix*/
+    /**
+     * flag is CID font is identity matrix
+     */
     private boolean isIdentity;
     private boolean isFontEmbedded;
-    private boolean hasWidths=true;
+    private boolean hasWidths = true;
     protected int objID;
     protected boolean remappedCFFFont;
 
-    public void flush(){
+    public void flush() {
         cachedShapes = null;
         cachedAt = null;
     }
@@ -96,22 +107,26 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     }
 
     public void setBaseFontName(final String baseFontName) {
-        this.baseFontName=baseFontName;
+        this.baseFontName = baseFontName;
     }
 
-    public String baseFontName="";
+    public String baseFontName = "";
 
     public boolean isSubsetted;
 
 
-    /**copy of Trm so we can choose if cache should be flushed*/
-    public float[][] lastTrm=new float[3][3];
+    /**
+     * copy of Trm so we can choose if cache should be flushed
+     */
+    public float[][] lastTrm = new float[3][3];
 
-    /**current font to plot, or <code>null</code> if not used yet*/
+    /**
+     * current font to plot, or <code>null</code> if not used yet
+     */
     private Font unscaledFont;
 
     public boolean isArialInstalledLocally;
-    private int maxCharCount=255;
+    private int maxCharCount = 255;
     public boolean isCIDFont;
 
     public String font_family_name;
@@ -120,121 +135,128 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
     int size;
 
-    String weight,testFont;
+    String weight, testFont;
 
-    /**used to render page by drawing routines*/
-    public static final FontRenderContext frc =new FontRenderContext(null, true, true);
+    /**
+     * used to render page by drawing routines
+     */
+    public static final FontRenderContext frc = new FontRenderContext(null, true, true);
 
-    /**list of installed fonts*/
+    /**
+     * list of installed fonts
+     */
     private static String[] fontList;
 
 
     /**
      * used for standard non-substituted version
+     *
      * @param Trm
      * @param rawInt
      * @param displayValue
      * @param currentWidth
      */
     @Override
-    public Area getStandardGlyph(final float[][]Trm, final int rawInt, final String displayValue, final float currentWidth, final boolean isSTD) {
+    public Area getStandardGlyph(final float[][] Trm, final int rawInt, final String displayValue, final float currentWidth, final boolean isSTD) {
 
         //either calculate the glyph to draw or reuse if already drawn
         Area transformedGlyph2 = getCachedShape(rawInt);
 
         if (transformedGlyph2 == null) {
 
-            double dY = -1,dX=1,y=0;
+            double dY = -1, dX = 1, y = 0;
 
             AffineTransform at;
 
             //allow for text running up the page
-            if ((Trm[1][0] < 0 && Trm[0][1] >= 0)||(Trm[0][1] < 0 && Trm[1][0] >= 0)) {
-                dX=1f;
-                dY=-1f;
+            if ((Trm[1][0] < 0 && Trm[0][1] >= 0) || (Trm[0][1] < 0 && Trm[1][0] >= 0)) {
+                dX = 1f;
+                dY = -1f;
             }
 
             if (isSTD) {
 
-                transformedGlyph2=getGlyph(displayValue, currentWidth);
+                transformedGlyph2 = getGlyph(displayValue, currentWidth);
 
                 //hack to fix problem with Java Arial font
-                if(transformedGlyph2!=null && rawInt==146 && isArialInstalledLocally) {
+                if (transformedGlyph2 != null && rawInt == 146 && isArialInstalledLocally) {
                     y = -(transformedGlyph2.getBounds().height - transformedGlyph2.getBounds().y);
                 }
-            }else {
+            } else {
 
-                GlyphVector gv1 =null;
+                GlyphVector gv1 = null;
 
                 //do not show CID fonts as Lucida unless match
-                if(!isCIDFont|| isFontInstalled) {
+                if (!isCIDFont || isFontInstalled) {
                     gv1 = getUnscaledFont().createGlyphVector(frc, displayValue);
                 }
 
-                if(gv1!=null){
+                if (gv1 != null) {
 
                     transformedGlyph2 = new Area(gv1.getOutline());
 
                     //put glyph into display position
-                    double glyphX=gv1.getOutline().getBounds2D().getX();
+                    double glyphX = gv1.getOutline().getBounds2D().getX();
 
                     //ensure inside box
-                    if(glyphX<0){
-                        glyphX=-glyphX;
-                        at =AffineTransform.getTranslateInstance(glyphX*2,0);
+                    if (glyphX < 0) {
+                        glyphX = -glyphX;
+                        at = AffineTransform.getTranslateInstance(glyphX * 2, 0);
                         transformedGlyph2.transform(at);
                         //x=-glyphX*2;
                     }
 
-                    final double glyphWidth=gv1.getVisualBounds().getWidth()+(glyphX*2);
-                    final double scaleFactor=currentWidth/glyphWidth;
-                    if(scaleFactor<1) {
+                    final double glyphWidth = gv1.getVisualBounds().getWidth() + (glyphX * 2);
+                    final double scaleFactor = currentWidth / glyphWidth;
+                    if (scaleFactor < 1) {
                         dX *= scaleFactor;
                     }
                 }
             }
 
             //create shape for text using transformation to make correct size
-            at =new AffineTransform(dX*Trm[0][0],dX*Trm[0][1],dY*Trm[1][0],dY*Trm[1][1] ,0,y);
+            at = new AffineTransform(dX * Trm[0][0], dX * Trm[0][1], dY * Trm[1][0], dY * Trm[1][1], 0, y);
 
-            if(transformedGlyph2!=null){
+            if (transformedGlyph2 != null) {
                 transformedGlyph2.transform(at);
             }
 
             //save so we can reuse if it occurs again in this TJ command
-            setCachedShape(rawInt, transformedGlyph2,at);
+            setCachedShape(rawInt, transformedGlyph2, at);
         }
 
         return transformedGlyph2;
     }
 
-    /**returns a generic glyph using inbuilt fonts*/
-    public Area getGlyph(final String displayValue, final float currentWidth){
+    /**
+     * returns a generic glyph using inbuilt fonts
+     */
+    public Area getGlyph(final String displayValue, final float currentWidth) {
 
-        boolean fontMatched=true;
+        boolean fontMatched = true;
 
         /*use default if cannot be displayed*/
-        GlyphVector gv1=null;
+        GlyphVector gv1 = null;
 
         //remap font if needed
-        String xx=displayValue;
+        String xx = displayValue;
 
         //if cannot display return to Lucida
-        if(!getUnscaledFont().canDisplay(xx.charAt(0))){
-            xx=displayValue;
-            fontMatched=false;
+        if (!getUnscaledFont().canDisplay(xx.charAt(0))) {
+            xx = displayValue;
+            fontMatched = false;
         }
 
-        if(this.isCIDFont && isFontEmbedded && fontMatched){
-            gv1=null;
-        }else if(fontMatched){
-            gv1 =getUnscaledFont().createGlyphVector(frc, xx);
-        }else{
+        if (this.isCIDFont && isFontEmbedded && fontMatched) {
+            gv1 = null;
+        } else if (fontMatched) {
+            gv1 = getUnscaledFont().createGlyphVector(frc, xx);
+        } else {
             Font tempFont = new Font(defaultFont, 0, 1);
-            if(!tempFont.canDisplay(xx.charAt(0))) {
+            if (!tempFont.canDisplay(xx.charAt(0))) {
                 tempFont = new Font("lucida", 0, 1);
             }
-            if(tempFont.canDisplay(xx.charAt(0))) {
+            if (tempFont.canDisplay(xx.charAt(0))) {
                 gv1 = tempFont.createGlyphVector(frc, xx);
             }
         }
@@ -242,36 +264,36 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
         //gv1 =getUnscaledFont().createGlyphVector(frc, xx);
 
         Area transformedGlyph2 = null;
-        if(gv1!=null){
-            transformedGlyph2=new Area(gv1.getOutline());
+        if (gv1 != null) {
+            transformedGlyph2 = new Area(gv1.getOutline());
 
             //put glyph into display position
-            double glyphX=gv1.getOutline().getBounds2D().getX();
+            double glyphX = gv1.getOutline().getBounds2D().getX();
             //double glyphY=gv1.getOutline().getBounds2D().getY();
-            final double width=gv1.getOutline().getBounds2D().getWidth();
+            final double width = gv1.getOutline().getBounds2D().getWidth();
 
             AffineTransform at;
 
-            if(!hasWidths){ //center for looks
+            if (!hasWidths) { //center for looks
                 //try standard values which are indexed under NAME of char
                 //String charName = StandardFonts.getUnicodeChar(StandardFonts.WIN, rawInt);
-                final float leading=(float)(currentWidth-(width+glyphX+glyphX))/2;
+                final float leading = (float) (currentWidth - (width + glyphX + glyphX)) / 2;
 
-                if(leading>0){
-                    at =AffineTransform.getTranslateInstance(leading,0);
+                if (leading > 0) {
+                    at = AffineTransform.getTranslateInstance(leading, 0);
                     transformedGlyph2.transform(at);
                 }
-            }else{
+            } else {
 
-                if(glyphX<0){ //ensure inside box
-                    glyphX=-glyphX;
-                    at =AffineTransform.getTranslateInstance(glyphX,0);
+                if (glyphX < 0) { //ensure inside box
+                    glyphX = -glyphX;
+                    at = AffineTransform.getTranslateInstance(glyphX, 0);
                     transformedGlyph2.transform(at);
                 }
 
-                final double scaleFactor=currentWidth/(transformedGlyph2.getBounds2D().getWidth());
-                if(scaleFactor<1)	{
-                    at =AffineTransform.getScaleInstance(scaleFactor,1);
+                final double scaleFactor = currentWidth / (transformedGlyph2.getBounds2D().getWidth());
+                if (scaleFactor < 1) {
+                    at = AffineTransform.getScaleInstance(scaleFactor, 1);
                     transformedGlyph2.transform(at);
                 }
             }
@@ -286,20 +308,20 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     public final void setCachedShape(final int idx, final Area shape, final AffineTransform at) {
         // using local variable instead of sync'ing
         Area[] cache = cachedShapes;
-        AffineTransform[] atCache=cachedAt;
+        AffineTransform[] atCache = cachedAt;
 
-        if (cache == null){
+        if (cache == null) {
             cachedShapes = cache = new Area[maxCharCount];
             cachedAt = atCache = new AffineTransform[maxCharCount];
         }
 
-        if(shape==null) {
+        if (shape == null) {
             cache[idx] = null;
         } else {
             cache[idx] = shape;
         }
 
-        if(shape!=null && at!=null) {
+        if (shape != null && at != null) {
             atCache[idx] = at;
         }
     }
@@ -312,14 +334,14 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
         // using local variable instead of sync'ing
         final AffineTransform[] cache = cachedAt;
 
-        if(cache==null) {
+        if (cache == null) {
             return null;
         } else {
             return cache[idx];
         }
 
     }
-    
+
     public boolean isValidGIDtoCID(final int value) {
         return false;
     }
@@ -332,12 +354,12 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
         // using local variable instead of sync'ing
         final Area[] cache = cachedShapes;
 
-        if(cache==null) {
+        if (cache == null) {
             return null;
-        } else{
-            final Area currentShape=cache[idx];
+        } else {
+            final Area currentShape = cache[idx];
 
-            if(currentShape==null) {
+            if (currentShape == null) {
                 return null;
             } else {
                 return currentShape;
@@ -348,24 +370,26 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     }
 
     public void init(final int maxCharCount, final boolean isCIDFont) {
-        this.maxCharCount=maxCharCount;
-        this.isCIDFont=isCIDFont;
+        this.maxCharCount = maxCharCount;
+        this.isCIDFont = isCIDFont;
     }
 
-    /**set the font being used or try to approximate*/
+    /**
+     * set the font being used or try to approximate
+     */
     public final void setFont(String name, final int size) {
 
-        this.size=size;
+        this.size = size;
 
         //allow user to totally over-ride
         //passing in this allows user to reset any global variables
         //set in this method as well.
         //Helper is a static instance of the inteface JPedalHelper
-        if(DecoderOptions.Helper!=null){
-            final Font f=DecoderOptions.Helper.setFont(this, StringUtils.convertHexChars(name),size);
+        if (DecoderOptions.Helper != null) {
+            final Font f = DecoderOptions.Helper.setFont(this, StringUtils.convertHexChars(name), size);
             //if you want to implement JPedalHelper but not
             //use this function, just return null
-            if(f!=null) {
+            if (f != null) {
                 this.style = f.getStyle();
                 this.font_family_name = f.getFamily();
                 this.unscaledFont = f;
@@ -374,20 +398,20 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
         }
 
-        name=StandardFonts.expandName(name);
+        name = StandardFonts.expandName(name);
 
         //set defaults
-        this.font_family_name=name;
-        this.style =Font.PLAIN;
+        this.font_family_name = name;
+        this.style = Font.PLAIN;
 
-        String mappedName=null;
+        String mappedName = null;
 
-        if(font_family_name==null) {
+        if (font_family_name == null) {
             font_family_name = this.fontName;
         }
 
-        testFont=font_family_name;
-        if(font_family_name!=null) {
+        testFont = font_family_name;
+        if (font_family_name != null) {
             testFont = font_family_name.toLowerCase();
         }
 
@@ -401,56 +425,55 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
         if (pointer != -1) {
 
             //see if present with ,
-            mappedName= FontMappings.fontSubstitutionAliasTable.get(testFont);
+            mappedName = FontMappings.fontSubstitutionAliasTable.get(testFont);
 
 
-            weight =testFont.substring(pointer + 1, testFont.length());
+            weight = testFont.substring(pointer + 1, testFont.length());
 
             style = getWeight(weight);
 
             font_family_name = font_family_name.substring(0, pointer).toLowerCase();
 
-            testFont=font_family_name;
+            testFont = font_family_name;
 
-            if(testFont.endsWith("mt")) {
+            if (testFont.endsWith("mt")) {
                 testFont = testFont.substring(0, testFont.length() - 2);
             }
 
         }
 
         //remap if not type 3 match
-        if(mappedName==null) {
+        if (mappedName == null) {
             mappedName = FontMappings.fontSubstitutionAliasTable.get(testFont);
         }
 
-        if((mappedName!=null)&&(mappedName.equals("arialbd"))) {
+        if ((mappedName != null) && (mappedName.equals("arialbd"))) {
             mappedName = "arial-bold";
         }
 
-        if(mappedName!=null){
+        if (mappedName != null) {
 
-            font_family_name=mappedName;
+            font_family_name = mappedName;
 
             pointer = font_family_name.indexOf('-');
-            if(pointer!=-1){
+            if (pointer != -1) {
 
-                font_family_name=font_family_name.toLowerCase();
+                font_family_name = font_family_name.toLowerCase();
 
-                weight =font_family_name.substring(pointer + 1, font_family_name.length());
+                weight = font_family_name.substring(pointer + 1, font_family_name.length());
 
                 style = getWeight(weight);
 
                 font_family_name = font_family_name.substring(0, pointer);
             }
 
-            testFont=font_family_name.toLowerCase();
+            testFont = font_family_name.toLowerCase();
 
-            if(testFont.endsWith("mt")) {
+            if (testFont.endsWith("mt")) {
                 testFont = testFont.substring(0, testFont.length() - 2);
             }
 
         }
-
 
 
     }
@@ -460,9 +483,9 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
      */
     private static int getWeight(String weight) {
 
-        int style=Font.PLAIN;
+        int style = Font.PLAIN;
 
-        if(weight.endsWith("mt")) {
+        if (weight.endsWith("mt")) {
             weight = weight.substring(0, weight.length() - 2);
         }
 
@@ -489,78 +512,78 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
      */
     public final Font getUnscaledFont() {
 
-            if (unscaledFont == null && font_family_name!=null) {
-                //Recheck
-                if (fontList == null) {
+        if (unscaledFont == null && font_family_name != null) {
+            //Recheck
+            if (fontList == null) {
 
-                    //Make sure lowercase
-                    fontList = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-                    for (int i = 0; i < fontList.length; i++) {
-                        fontList[i] = fontList[i].toLowerCase();
+                //Make sure lowercase
+                fontList = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+                for (int i = 0; i < fontList.length; i++) {
+                    fontList[i] = fontList[i].toLowerCase();
+                }
+            }
+
+            //see if installed
+            if (fontList != null) {
+
+                //check exact first
+                boolean isFound = false;
+                int count = fontList.length;
+                for (int i = 0; i < count; i++) {
+                    if ((fontList[i].equals(testFont)) || ((weight == null) && (testFont.startsWith(fontList[i])))) {
+                        isFontInstalled = true;
+                        font_family_name = fontList[i];
+                        i = count;
+                        isFound = true;
                     }
                 }
 
-                //see if installed
-                if (fontList != null) {
-
-                    //check exact first
-                    boolean isFound = false;
-                    int count = fontList.length;
+                if (!isFound) {
+                    count = fontList.length;
                     for (int i = 0; i < count; i++) {
                         if ((fontList[i].equals(testFont)) || ((weight == null) && (testFont.startsWith(fontList[i])))) {
                             isFontInstalled = true;
                             font_family_name = fontList[i];
                             i = count;
-                            isFound = true;
                         }
-                    }
-
-                    if (!isFound) {
-                        count = fontList.length;
-                        for (int i = 0; i < count; i++) {
-                            if ((fontList[i].equals(testFont)) || ((weight == null) && (testFont.startsWith(fontList[i])))) {
-                                isFontInstalled = true;
-                                font_family_name = fontList[i];
-                                i = count;
-                            }
-                        }
-                    }
-
-                    //hack for windows as some odd things going on
-                    if (isFontInstalled && font_family_name.equals("arial")) {
-                        isArialInstalledLocally = true;
                     }
                 }
+
+                //hack for windows as some odd things going on
+                if (isFontInstalled && font_family_name.equals("arial")) {
+                    isArialInstalledLocally = true;
+                }
+            }
 
                 /*approximate display if not installed*/
-                if (!isFontInstalled) {
+            if (!isFontInstalled) {
 
-                    //try to approximate font
-                    if (weight == null) {
+                //try to approximate font
+                if (weight == null) {
 
-                        //pick up any weight
-                        final String test = font_family_name.toLowerCase();
-                        style = getWeight(test);
+                    //pick up any weight
+                    final String test = font_family_name.toLowerCase();
+                    style = getWeight(test);
 
-                    }
-
-                    font_family_name = defaultFont;
                 }
 
-                unscaledFont = new Font(font_family_name, style, size);
+                font_family_name = defaultFont;
             }
 
+            unscaledFont = new Font(font_family_name, style, size);
+        }
+
             /*commenting out  this broke originaldoc.pdf*/
-            if (unscaledFont == null) {
-                unscaledFont = new Font(defaultFont, Font.PLAIN, 1);
-            }
+        if (unscaledFont == null) {
+            unscaledFont = new Font(defaultFont, Font.PLAIN, 1);
+        }
 
         return unscaledFont;
     }
 
     protected PdfGlyph[] cachedEmbeddedShapes;
 
-    protected int localBias,globalBias;
+    protected int localBias, globalBias;
 
     /**
      * Caches the specified shape.
@@ -572,7 +595,7 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
             cachedEmbeddedShapes = cache = new PdfGlyph[maxCharCount];
         }
 
-        if(idx<cache.length) {
+        if (idx < cache.length) {
             cache[idx] = shape;
         }
     }
@@ -585,17 +608,17 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
         // using local variable instead of sync'ing
         final PdfGlyph[] cache = cachedEmbeddedShapes;
 
-        if(cache==null) {
+        if (cache == null) {
             return null;
-        } else if(idx<cache.length){
-            final PdfGlyph currentShape=cache[idx];
+        } else if (idx < cache.length) {
+            final PdfGlyph currentShape = cache[idx];
 
-            if(currentShape==null) {
+            if (currentShape == null) {
                 return null;
             } else {
                 return currentShape;
             }
-        }else {
+        } else {
             return null;
         }
         //return cache == null ? null : (Area)cache[idx].clone();
@@ -619,13 +642,13 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
 
     public int readEmbeddedFont(final boolean TTstreamisCID, final byte[] fontDataAsArray, final FontData fontData) {
-        
+
         throw new RuntimeException("readEmbeddedFont in PdfJavaGlyphs should not be called");
-        
+
     }
 
     public void setIsSubsetted(final boolean b) {
-        isSubsetted=b;
+        isSubsetted = b;
     }
 
     public void setT3Glyph(final int key, final int altKey, final PdfGlyph glyph) {
@@ -645,10 +668,10 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
 
     public void setValuesForGlyph(final int rawInt, final String charGlyph, final String displayValue, final String embeddedChar) {
-        final Integer key= rawInt;
-        chars.put(key,charGlyph);
-        displayValues.put(key,displayValue);
-        embeddedChars.put(key,embeddedChar);
+        final Integer key = rawInt;
+        chars.put(key, charGlyph);
+        displayValues.put(key, displayValue);
+        embeddedChars.put(key, embeddedChar);
     }
 
     @Override
@@ -677,29 +700,29 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
     public Map<Integer, String> getEmbeddedEncs() {
 
-        return  Collections.unmodifiableMap(embeddedChars);
+        return Collections.unmodifiableMap(embeddedChars);
     }
 
     public void setDisplayValues(final Map<Integer, String> displayValues) {
-        this.displayValues=displayValues;
+        this.displayValues = displayValues;
     }
 
     public void setCharGlyphs(final Map<Integer, String> chars) {
-        this.chars=chars;
+        this.chars = chars;
     }
 
     public void setEmbeddedEncs(final Map<Integer, String> embeddedChars) {
 
-        this.embeddedChars=embeddedChars;
+        this.embeddedChars = embeddedChars;
     }
 
     public void setLocalBias(final int i) {
-        localBias=i;
+        localBias = i;
 
     }
 
     public void setGlobalBias(final int i) {
-        globalBias=i;
+        globalBias = i;
 
     }
 
@@ -707,7 +730,7 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     public float getTTWidth(final String charGlyph, final int rawInt, final String displayValue, final boolean b) {
 
         throw new RuntimeException("getTTWidth should not be called");
-        
+
     }
 
     @SuppressWarnings({"UnusedParameters", "UnusedDeclaration"})
@@ -717,6 +740,7 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
     /**
      * should never be called - just to allow TTGlyphs to extend
+     *
      * @param rawInt
      */
     public int getConvertedGlyph(final int rawInt) {
@@ -725,14 +749,16 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
 
     /**
      * flag for CID TT fonts
+     *
      * @param isIdentity
      */
     public void setIsIdentity(final boolean isIdentity) {
-        this.isIdentity=isIdentity;
+        this.isIdentity = isIdentity;
     }
 
     /**
      * flag to show if CID TT fonts have identity matrix
+     *
      * @return
      */
     public boolean isIdentity() {
@@ -745,24 +771,24 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     }
 
     public void setFontEmbedded(final boolean isSet) {
-        isFontEmbedded =isSet;
+        isFontEmbedded = isSet;
     }
 
     public int getType() {
-        return 0;  
+        return 0;
     }
 
     public void setHasWidths(final boolean hasWidths) {
-        this.hasWidths=hasWidths;
+        this.hasWidths = hasWidths;
     }
 
     /**
      * return value or -1
      */
     public int getCMAPValue(final int rawInt) {
-        if(CMAP_Translate==null) {
+        if (CMAP_Translate == null) {
             return -1;
-        } else{
+        } else {
             //System.out.println(rawInt+" becomes "+CMAP_Translate[rawInt]);
             return (CMAP_Translate[rawInt]);
         }
@@ -792,7 +818,7 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     }
 
     public void setGlyphCount(final int nGlyphs) {
-        glyphCount=nGlyphs;
+        glyphCount = nGlyphs;
     }
 
     public int getGlyphCount() {
@@ -803,9 +829,9 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     }
 
     public Table getTable(final int id) {
-       return null;
+        return null;
     }
-    
+
     public boolean hasGIDtoCID() {
         return hasGIDtoCID;
     }
@@ -815,7 +841,7 @@ public class PdfJavaGlyphs implements PdfGlyphs,Serializable{
     }
 
     public void setRemappedCFFFont(final boolean remappedCFFFont) {
-        this.remappedCFFFont=remappedCFFFont;
+        this.remappedCFFFont = remappedCFFFont;
     }
 
     public boolean isRemappedCFFFont() {

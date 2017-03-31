@@ -37,17 +37,16 @@ package org.jpedal.utils;
  * (needs other sort classes adding in)
  * <br><b>This class is NOT part of the API</b>
  */
-public class Sorts
-{
-    
+public class Sorts {
+
     //////////////////////////////////////////////////////////////////////
+
     /**
      * quick sort list on 1 value with names as int
      * primary is sorted into ascending order and names is joined to primary.
      * so if primary[i] is moved to primary[j], then names[i] is moved to names[j]
      */
     //#####################################################
-    
     private static void sift(final int[] primary, final int[] names, final int left, final int right) {
 //		variables for sift moved to reduce initialization
         int currentLeft;
@@ -57,100 +56,101 @@ public class Sorts
         final int namesTMP;
 //	  variables for sift moved to reduce initialization
         int childL;
-        
+
         //assign left to local
         currentLeft = left;
         //temp store of left item
         primaryTMP = primary[currentLeft];
         //temp store of left item
         namesTMP = names[currentLeft];
-        
+
         //Left child node of currentLeft
-        childL = 2*left+1;
-        
-        
+        childL = 2 * left + 1;
+
+
         //Find a[left]'s larger child
-        if ((childL<right) && (primary[childL]<primary[childL+1])) {
+        if ((childL < right) && (primary[childL] < primary[childL + 1])) {
             childL += 1;
         }
         //assert: a[childL] is larger child
-        
+
         //sift temp to be in correct place in highest on leftMost and arranged as tree
-        while ((childL<=right) && (primaryTMP<primary[childL])){
+        while ((childL <= right) && (primaryTMP < primary[childL])) {
             //assign highest item to leftmost position
-            primary[currentLeft]=primary[childL];
-            names[currentLeft]=names[childL];
-            currentLeft=childL;
-            childL=2*childL+1;
-            
+            primary[currentLeft] = primary[childL];
+            names[currentLeft] = names[childL];
+            currentLeft = childL;
+            childL = 2 * childL + 1;
+
             //pick highest child
-            if ((childL<right) && (primary[childL]<primary[childL+1])){
+            if ((childL < right) && (primary[childL] < primary[childL + 1])) {
                 childL += 1;
             }
         }
         //put temp in the correct place in the sub-heap
-        primary[currentLeft]=primaryTMP;
-        names[currentLeft]=namesTMP;
+        primary[currentLeft] = primaryTMP;
+        names[currentLeft] = namesTMP;
         //assert: a[left] is the root a sub-heap.
     }
-    
-    /** sorts as a tree like structure in array representation */
-    public static final int[] quicksort( final int[] primaryIN, final int[] names ){
+
+    /**
+     * sorts as a tree like structure in array representation
+     */
+    public static final int[] quicksort(final int[] primaryIN, final int[] names) {
         /* copy so we don't sort original */
         final int items = primaryIN.length;
         final int[] primary = new int[items];
         System.arraycopy(primaryIN, 0, primary, 0, items);
-        
+
         //pointer to left side of unsorted array
-        int left = primary.length/2;
+        int left = primary.length / 2;
         //pointer to right side of unsorted array
-        int right = primary.length-1;
-        
+        int right = primary.length - 1;
+
         //sift through array into a heap
-        while (left>0) {
-            
+        while (left > 0) {
+
             left -= 1;
-            
+
             //go through tree starting with leaves and going up
-            sift(primary,names, left, right);
+            sift(primary, names, left, right);
         }
-        
+
         //rearrange heap into a sorted array
-        while (right>0) {
-            
+        while (right > 0) {
+
             //assert: largest unsorted value is at a[0]
             //move largest item to right end
-            final int tempA=primary[0];
-            final int tempB=names[0];
-            primary[0]=primary[right];
-            names[0]=names[right];
-            primary[right]=tempA;
-            names[right]=tempB;
+            final int tempA = primary[0];
+            final int tempB = names[0];
+            primary[0] = primary[right];
+            names[0] = names[right];
+            primary[right] = tempA;
+            names[right] = tempB;
             //assert: a[right..] is sorted
-            
+
             //right is largest and sorted decrement it
             right -= 1;
-            
+
             //get largest value in the tree to the leftMost position
-            sift(primary,names, left, right);
+            sift(primary, names, left, right);
         }
         //assert: right==0, therefore a[0..] is all sorted
-        
+
         return names;
     }
     //#####################################################
+
     /**
      * quick sort list on 2 values with names as int
      */
-    public static final int[] quicksort( final int[] primary, final int[] secondary, final int[] names )
-    {
+    public static final int[] quicksort(final int[] primary, final int[] secondary, final int[] names) {
         final int items = names.length;
-        
+
         //copy items so we don't sort originals
         final int[] primary_values = new int[items];
         final int[] secondary_values = new int[items];
-        for( int i = 0;i < items;i++ )
-        {
+        for (int i = 0; i < items; i++) {
             primary_values[i] = primary[i];
             secondary_values[i] = secondary[i];
         }
@@ -158,19 +158,17 @@ public class Sorts
         int i, j, k;
         int temp, temp2;
         int temp_name;
-        for( i = start + 1;i < items;i++ )
-        {
+        for (i = start + 1; i < items; i++) {
             temp = primary_values[i];
             temp2 = secondary_values[i];
             temp_name = names[i];
             k = start;
-            for( j = i - 1;j >= start;j-- ) {
-                if( ( temp < primary_values[j] ) | ( ( temp == primary_values[j] ) & ( temp2 < secondary_values[j] ) ) )
-                {
+            for (j = i - 1; j >= start; j--) {
+                if ((temp < primary_values[j]) | ((temp == primary_values[j]) & (temp2 < secondary_values[j]))) {
                     primary_values[j + 1] = primary_values[j];
                     secondary_values[j + 1] = secondary_values[j];
                     names[j + 1] = names[j];
-                }else{
+                } else {
                     k = j + 1;
                     break;
                 }
@@ -179,7 +177,7 @@ public class Sorts
             secondary_values[k] = temp2;
             names[k] = temp_name;
         }
-        
+
         //return the sorted list
         return names;
     }

@@ -35,10 +35,13 @@ package com.idrsolutions.pdf.color.shading;
 import java.awt.Color;
 import java.awt.PaintContext;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+
 import org.jpedal.color.GenericColorSpace;
 import org.jpedal.function.PDFFunction;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -46,7 +49,6 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.Matrix;
 
 /**
- *
  * @author suda
  */
 public class AxialShadeContext implements PaintContext {
@@ -58,8 +60,7 @@ public class AxialShadeContext implements PaintContext {
     private float[] domain = {0.0f, 1.0f};
     private boolean[] extension;
     final float t0, t1, x0, y0, x1, y1, deltaX, deltaY, multiXY;
-    //final double textX;
-    //final double textY;
+    private Rectangle2D bboxRect;
 
     private final float[][] toUserSpace;
     private final float[][] toShadeSpace;
@@ -82,25 +83,36 @@ public class AxialShadeContext implements PaintContext {
         t0 = domain[0];
         t1 = domain[1];
 
-       	
-		float[][] caller = {{1,0,0},{0,1,0},{0,0,1}};
-		float[][] shadeMatrix = {{1,0,0},{0,1,0},{0,0,1}};
-				
-		if (mm != null) {
-			caller = mm;			
-		}
-				
-		final float [] inputs = shadingObject.getFloatArray(PdfDictionary.Matrix);
-		if(inputs != null){
-			shadeMatrix = new float[][]{{inputs[0],inputs[1],0},{inputs[2],inputs[3],0},{inputs[4],inputs[5],1}};
-		}
-		
-		final float[][] shader = Matrix.concatenate(caller, shadeMatrix);
+        float[] bbox = shadingObject.getFloatArray(PdfDictionary.BBox);
+        if (bbox != null) {
+            GeneralPath gp = new GeneralPath();
+            gp.moveTo(bbox[0], bbox[1]);
+            gp.lineTo(bbox[2], bbox[1]);
+            gp.lineTo(bbox[2], bbox[3]);
+            gp.lineTo(bbox[0], bbox[3]);
+            gp.lineTo(bbox[0], bbox[1]);
+            gp.closePath();
+            bboxRect = gp.getBounds2D();
+        }
+
+        float[][] caller = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        float[][] shadeMatrix = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+
+        if (mm != null) {
+            caller = mm;
+        }
+
+        final float[] inputs = shadingObject.getFloatArray(PdfDictionary.Matrix);
+        if (inputs != null) {
+            shadeMatrix = new float[][]{{inputs[0], inputs[1], 0}, {inputs[2], inputs[3], 0}, {inputs[4], inputs[5], 1}};
+        }
+
+        final float[][] shader = Matrix.concatenate(caller, shadeMatrix);
 
         final float[][] xformMatrix = {
-            {(float) xform.getScaleX(), (float) xform.getShearX(), 0},
-            {(float) xform.getShearY(), (float) xform.getScaleY(), 0},
-            {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}
+                {(float) xform.getScaleX(), (float) xform.getShearX(), 0},
+                {(float) xform.getShearY(), (float) xform.getScaleY(), 0},
+                {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}
         };
         toUserSpace = Matrix.inverse(xformMatrix);
         toShadeSpace = Matrix.inverse(shader);
@@ -169,6 +181,10 @@ public class AxialShadeContext implements PaintContext {
                     t = t1;
                 } else {
                     render = false;
+                }
+
+                if (bboxRect != null && render) {
+                    render = bboxRect.contains(x, y);
                 }
                 if (render) {
                     final Color c = calculateColor(t);

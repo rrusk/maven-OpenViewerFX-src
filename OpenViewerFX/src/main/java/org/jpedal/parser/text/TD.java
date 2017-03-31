@@ -37,14 +37,16 @@ import org.jpedal.utils.Matrix;
 
 public class TD {
 
-    /**used to speed-up conversion of hex strings to numbers*/
-    static final int[] multiply8={0,3,6,9,12,15};
+    /**
+     * used to speed-up conversion of hex strings to numbers
+     */
+    static final int[] multiply8 = {0, 3, 6, 9, 12, 15};
 
-    static final int[] multiply16={0,4,8,12,16,20,24,28,32,36,40};
+    static final int[] multiply16 = {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40};
 
     public static void execute(final boolean isLowerCase, final float x, final float y, final TextState currentTextState) {
 
-        relativeMove(x, y,currentTextState);
+        relativeMove(x, y, currentTextState);
 
         if (!isLowerCase) { //set leading as well
             final float TL = -y;
@@ -88,7 +90,7 @@ public class TD {
 
         final int val;
 
-        switch(base) {
+        switch (base) {
             case 8:
                 val = getOctal(start, count, characterStream);
                 break;
@@ -99,7 +101,7 @@ public class TD {
 
             default:
                 val = getGeneral(start, count, base, characterStream);
-           break;
+                break;
         }
 
         return val;
@@ -119,10 +121,10 @@ public class TD {
 
     private static int getHex(final int start, final int count, final byte[] characterStream) {
 
-        int val=0;
+        int val = 0;
 
         //now convert to value
-        int topHex, ptr=0;
+        int topHex, ptr = 0;
         for (int aa = 1; aa < count + 1; aa++) {
 
             topHex = characterStream[start + count - aa];
@@ -146,7 +148,7 @@ public class TD {
     private static int getOctal(final int start, final int count, final byte[] characterStream) {
 
         //now convert to value
-        int topHex, ptr=0, val=0;
+        int topHex, ptr = 0, val = 0;
 
         for (int aa = 1; aa < count + 1; aa++) {
 
@@ -168,35 +170,34 @@ public class TD {
     /**
      * convert to to String
      */
-    static String getString(final int start,int end, final byte[] dataStream) {
+    static String getString(final int start, int end, final byte[] dataStream) {
 
         final String s;
 
         //lose spaces or returns at end
-        while(dataStream[end]==32 || dataStream[end]==13 || dataStream[end]==10) {
+        while (dataStream[end] == 32 || dataStream[end] == 13 || dataStream[end] == 10) {
             end--;
         }
 
-        final int count=end-start+1;
+        final int count = end - start + 1;
 
         //discount duplicate spaces
-        int spaces=0;
-        for(int ii=0;ii<count;ii++){
-            if(ii>0 &&(dataStream[start+ii]==32 || dataStream[start+ii]==13 ||dataStream[start+ii]==10)&&
-                    (dataStream[start+ii-1]==32|| dataStream[start+ii-1]==13|| dataStream[start+ii-1]==10)) {
+        int spaces = 0;
+        for (int ii = 0; ii < count; ii++) {
+            if (ii > 0 && (dataStream[start + ii] == 32 || dataStream[start + ii] == 13 || dataStream[start + ii] == 10) &&
+                    (dataStream[start + ii - 1] == 32 || dataStream[start + ii - 1] == 13 || dataStream[start + ii - 1] == 10)) {
                 spaces++;
             }
         }
 
-        final char[] charString=new char[count-spaces];
-        int pos=0;
+        final char[] charString = new char[count - spaces];
+        int pos = 0;
 
-        for(int ii=0;ii<count;ii++){
-            if((ii>0)&&((dataStream[start+ii]==32)||(dataStream[start+ii]==13)||(dataStream[start+ii]==10))&&
-                    ((dataStream[start+ii-1]==32)||(dataStream[start+ii-1]==13)||(dataStream[start+ii-1]==10)))
-            {
-            }else{
-                if((dataStream[start+ii]==10)||(dataStream[start+ii]==13)) {
+        for (int ii = 0; ii < count; ii++) {
+            if ((ii > 0) && ((dataStream[start + ii] == 32) || (dataStream[start + ii] == 13) || (dataStream[start + ii] == 10)) &&
+                    ((dataStream[start + ii - 1] == 32) || (dataStream[start + ii - 1] == 13) || (dataStream[start + ii - 1] == 10))) {
+            } else {
+                if ((dataStream[start + ii] == 10) || (dataStream[start + ii] == 13)) {
                     charString[pos] = ' ';
                 } else {
                     charString[pos] = (char) dataStream[start + ii];
@@ -205,7 +206,7 @@ public class TD {
             }
         }
 
-        s=String.copyValueOf(charString);
+        s = String.copyValueOf(charString);
 
         return s;
 

@@ -35,122 +35,154 @@ package org.jpedal.examples.viewer.gui.javafx;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+
 import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.jpedal.examples.viewer.gui.generic.GUIOutline;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- *
  * @author Simon
  */
-public class JavaFXOutline extends Tab implements GUIOutline{
-	/**used by tree to convert page title into page number*/
-	private Map<String, String> pageLookupTableViaTitle=new HashMap<String, String>();
-	private boolean hasDuplicateTitles;
-	
-	private final Map<Integer, String> nodeToRef;
+public class JavaFXOutline extends Tab implements GUIOutline {
+    /**
+     * used by tree to convert page title into page number
+     */
+    private Map<String, String> pageLookupTableViaTitle = new HashMap<String, String>();
+    private boolean hasDuplicateTitles;
+
+    private final Map<Integer, String> nodeToRef;
 
     private final TreeView<Label> list;
-    
-    public JavaFXOutline(){
+
+    public JavaFXOutline() {
         this.nodeToRef = new HashMap<Integer, String>();
-        list= new TreeView<Label>();
-        
-        pageLookupTableViaTitle=new HashMap<String, String>();
+        list = new TreeView<Label>();
+
+        pageLookupTableViaTitle = new HashMap<String, String>();
         hasDuplicateTitles = false;
-        
+
         final ScrollPane content = new ScrollPane();
         setContent(content);
         content.setContent(list);
-        
+
         list.prefWidthProperty().bind(content.widthProperty());
         list.prefHeightProperty().bind(content.heightProperty());
         list.setShowRoot(false);
-        
+
     }
-    
+
+    /**
+     * Get the tree used to hold the outline data
+     *
+     * @return JTree holding all data returned as an Object
+     */
     @Override
     public Object getTree() {
         return list;
     }
 
+    /**
+     * Get the last selected Node in the outline
+     *
+     * @return DefaultMutableTreeNode object of the last selected component
+     */
     @Override
     public DefaultMutableTreeNode getLastSelectedPathComponent() {
         return null;
     }
 
+    /**
+     * Get the page pointed to by the bookmark text value
+     *
+     * @param title String value of the bookmark
+     * @return String value of the bookmarks page number
+     */
     @Override
     public String getPage(final String title) {
-		if(hasDuplicateTitles) {
+        if (hasDuplicateTitles) {
             return null;
-        }//throw new RuntimeException("Bookmark "+title+" not unique");
-		else {
+        } //throw new RuntimeException("Bookmark "+title+" not unique");
+        else {
             return pageLookupTableViaTitle.get(title);
         }
     }
 
+    /**
+     * Reset the outline contents with new values or empty them
+     *
+     * @param rootNode Node object holding the outline data
+     */
     @Override
     public void reset(final Node rootNode) {
 
         final TreeItem<Label> root = new TreeItem<Label>();
-        
+
         nodeToRef.clear();
         pageLookupTableViaTitle.clear();
         hasDuplicateTitles = false;
-        
+
         readChildNodes(rootNode, root, 0);
-        
+
         list.setRoot(root);
     }
 
+    /**
+     * Get the object ref for the given node
+     *
+     * @param index int value of the node
+     * @return String value presenting the object ref
+     */
     @Override
     public String convertNodeIDToRef(final int index) {
         return nodeToRef.get(index);
     }
-    private void readChildNodes(final Node rootData, final TreeItem<Label> rootNode, int nodeIndex){
-        if(rootData == null) {
+
+    private void readChildNodes(final Node rootData, final TreeItem<Label> rootNode, int nodeIndex) {
+        if (rootData == null) {
             return;
         }
-        
+
         final NodeList nl = rootData.getChildNodes();
         OutlineNode currentNode;
-        
-        for(int i = 0; i < nl.getLength(); i++){
-            final Element currentElement = (Element)nl.item(i);
+
+        for (int i = 0; i < nl.getLength(); i++) {
+            final Element currentElement = (Element) nl.item(i);
             final String title = currentElement.getAttribute("title");
-			final String page = currentElement.getAttribute("page");
-			final String isClosed = currentElement.getAttribute("isClosed");
-            final String ref=currentElement.getAttribute("objectRef");
-            
-            currentNode = new OutlineNode(title,ref,isClosed);
+            final String page = currentElement.getAttribute("page");
+            final String isClosed = currentElement.getAttribute("isClosed");
+            final String ref = currentElement.getAttribute("objectRef");
+
+            currentNode = new OutlineNode(title, ref, isClosed);
             // Add a callback for use in JavaFXGUI.setBookmarks()
             currentNode.getValue().setUserData(currentNode);
             currentNode.setPage(page);
-            
-			if (pageLookupTableViaTitle.containsKey(title)) {
-				hasDuplicateTitles = true;
-			} else {
-				pageLookupTableViaTitle.put(title, page);
-			}
-			nodeToRef.put(nodeIndex, ref);
+
+            if (pageLookupTableViaTitle.containsKey(title)) {
+                hasDuplicateTitles = true;
+            } else {
+                pageLookupTableViaTitle.put(title, page);
+            }
+            nodeToRef.put(nodeIndex, ref);
             nodeIndex++;
-            
+
             rootNode.getChildren().add(currentNode);
-            
+
             readChildNodes(nl.item(i), currentNode, nodeIndex);
         }
     }
-    
-    public final class OutlineNode extends TreeItem<Label>{
+
+    public final class OutlineNode extends TreeItem<Label> {
         private final String objectRef;
         private String page;
-        
+
         private OutlineNode() {
-            objectRef=null;
+            objectRef = null;
         }
 
         private OutlineNode(final String title, final String objectRef, final String isClosed) {
@@ -158,15 +190,15 @@ public class JavaFXOutline extends Tab implements GUIOutline{
             final Label titleLabel = new Label(title);
             // Small adjustment to take into account vertical scrollbar
             titleLabel.prefWidthProperty().bind(list.prefWidthProperty().subtract(20));
-            
+
             titleLabel.setTextFill(Color.BLACK);
             setValue(titleLabel);
-            
+
             setExpanded(!isClosed.equals("true"));
             setTooltip(new Tooltip(title));
         }
-        
-        public String getObjectRef(){
+
+        public String getObjectRef() {
             return objectRef;
         }
 
@@ -177,7 +209,7 @@ public class JavaFXOutline extends Tab implements GUIOutline{
         private void setPage(final String page) {
             this.page = page;
         }
-        
+
     }
-    
+
 }

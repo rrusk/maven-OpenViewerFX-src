@@ -58,7 +58,7 @@ public interface GlyphFactory {
     void curveTo(float f, float g, float h, float i, float j, float k);
 
     /**
-     * 
+     *
      */
     void closePath();
 
@@ -76,7 +76,6 @@ public interface GlyphFactory {
 
     /**
      * @param f
-     *
      */
     void setYMin(float f);
 
@@ -84,6 +83,6 @@ public interface GlyphFactory {
 
     boolean useFX();
 
-    PdfGlyph getGlyph(Glyf currentGlyf,FontFile2 fontTable, Hmtx currentHmtx, int idx, float f, TTVM vm, String baseFontName);
-                    
+    PdfGlyph getGlyph(Glyf currentGlyf, FontFile2 fontTable, Hmtx currentHmtx, int idx, float f, TTVM vm, String baseFontName);
+
 }

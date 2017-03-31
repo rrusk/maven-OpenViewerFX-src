@@ -34,7 +34,9 @@ package org.jpedal.objects.javascript;
 
 import org.jpedal.objects.raw.FormObject;
 
-/**JS wrapper around formObject for JS*/
+/**
+ * JS wrapper around formObject for JS
+ */
 @SuppressWarnings("ALL")
 public class PDF2JS {
 
@@ -42,6 +44,6 @@ public class PDF2JS {
     //FormObject formObject;
 
     PDF2JS(final FormObject formObject) {
-     //   this.formObject=formObject;
+        //   this.formObject=formObject;
     }
 }

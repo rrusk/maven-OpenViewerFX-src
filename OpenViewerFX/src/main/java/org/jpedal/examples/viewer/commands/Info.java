@@ -36,6 +36,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIDisplay;
 import org.jpedal.gui.GUIFactory;
@@ -98,7 +99,7 @@ public class Info {
         details.add(idr);
 
         final JLabel url = new JLabel("<html><center>" + Messages.getMessage("PdfViewerJpedalLibrary.Text")
-                );
+        );
         url.setForeground(Color.blue);
         url.setHorizontalAlignment(JLabel.CENTER);
         url.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -122,7 +123,7 @@ public class Info {
                     details.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
                 url.setText("<html><center>" + Messages.getMessage("PdfViewerJpedalLibrary.Text")
-                        );
+                );
             }
 
             @Override
@@ -130,7 +131,7 @@ public class Info {
                 try {
                     BrowserLauncher.openURL(Messages.getMessage("PdfViewer.VisitWebsite"));
                 } catch (final Exception e1) {
-                    LogWriter.writeLog("Exception attempting launch browser: " + e1); 
+                    LogWriter.writeLog("Exception attempting launch browser: " + e1);
                 }
             }
 

@@ -149,7 +149,7 @@ public class ConvertToFloat {
 
     private static float getHundredThousandths(final int c) {
 
-        float hunthousands=0;
+        float hunthousands = 0;
 
         switch (c) {
             case 1:
@@ -185,7 +185,7 @@ public class ConvertToFloat {
 
     private static float getTenThousandths(final int c) {
 
-        float tenthousands=0;
+        float tenthousands = 0;
 
         switch (c) {
             case 1:
@@ -221,7 +221,7 @@ public class ConvertToFloat {
 
     private static float getThousandths(final int c) {
 
-        float thousands=0;
+        float thousands = 0;
 
         switch (c) {
             case 1:
@@ -257,7 +257,7 @@ public class ConvertToFloat {
 
     private static float getHundredths(final int c) {
 
-        float hundredths=0;
+        float hundredths = 0;
 
         switch (c) {
             case 1:
@@ -293,7 +293,7 @@ public class ConvertToFloat {
 
     private static float getTenths(final int c) {
 
-        float tenths=0;
+        float tenths = 0;
 
         switch (c) {
             case 1:
@@ -329,7 +329,7 @@ public class ConvertToFloat {
 
     private static float getUnits(final int c) {
 
-        float units=0;
+        float units = 0;
 
         switch (c) {
             case 1:
@@ -365,7 +365,7 @@ public class ConvertToFloat {
 
     private static float getTens(final int c) {
 
-        float tens=0;
+        float tens = 0;
 
         switch (c) {
             case 1:
@@ -401,7 +401,7 @@ public class ConvertToFloat {
 
     private static float getHundreds(final int c) {
 
-        float hundreds=0;
+        float hundreds = 0;
 
         switch (c) {
             case 1:
@@ -437,7 +437,7 @@ public class ConvertToFloat {
 
     private static float getThousands(final int c) {
 
-        float thous=0;
+        float thous = 0;
 
         switch (c) {
             case 1:

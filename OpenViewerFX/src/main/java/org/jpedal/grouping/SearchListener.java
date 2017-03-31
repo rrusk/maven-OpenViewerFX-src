@@ -34,9 +34,9 @@ package org.jpedal.grouping;
 
 public interface SearchListener {
 
-	boolean isCanceled();
-	
-	@SuppressWarnings("UnusedDeclaration")
+    boolean isCanceled();
+
+    @SuppressWarnings("UnusedDeclaration")
     void requestCancel();
-	
+
 }

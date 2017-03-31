@@ -34,107 +34,108 @@ package org.jpedal.objects.acroforms.actions.JavaFX;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javafx.event.EventHandler;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Labeled;
 import javafx.scene.input.MouseEvent;
 import org.jpedal.objects.acroforms.actions.PDFListener;
 
-public class JavaFXFormButtonListener implements EventHandler<MouseEvent>{
+public class JavaFXFormButtonListener implements EventHandler<MouseEvent> {
 
     private static final boolean showMethods = false;
 
     private Map<String, String> captionChanger;
-    
-    public JavaFXFormButtonListener(final String normalCaption, final String rolloverCaption, final String downCaption){
-       if(showMethods) {
-           System.out.println("JavaFXFormButtonListener.JavaFXFormButtonListener(string string string)");
-       }
-       int captions = 0;
-       
-       captionChanger = new HashMap<String, String>();
-       if (rolloverCaption != null && !rolloverCaption.isEmpty()){
+
+    public JavaFXFormButtonListener(final String normalCaption, final String rolloverCaption, final String downCaption) {
+        if (showMethods) {
+            System.out.println("JavaFXFormButtonListener.JavaFXFormButtonListener(string string string)");
+        }
+        int captions = 0;
+
+        captionChanger = new HashMap<String, String>();
+        if (rolloverCaption != null && !rolloverCaption.isEmpty()) {
             captionChanger.put("rollover", rolloverCaption);
             captions++;
         }
-        if (downCaption != null && !downCaption.isEmpty()){
+        if (downCaption != null && !downCaption.isEmpty()) {
             captionChanger.put("down", downCaption);
             captions++;
         }
-        if(normalCaption!=null  && !normalCaption.isEmpty()){
-        	captionChanger.put("normal", normalCaption);
-        	captions++;
+        if (normalCaption != null && !normalCaption.isEmpty()) {
+            captionChanger.put("normal", normalCaption);
+            captions++;
         }
-        
-        if(captions==0) {
+
+        if (captions == 0) {
             captionChanger = null;
         }
     }
-    
+
     public void mouseEntered(final MouseEvent e) {
-        if(PDFListener.debugMouseActions || showMethods) {
+        if (PDFListener.debugMouseActions || showMethods) {
             System.out.println("JavaFXFormButtonListener.mouseEntered()");
         }
-        if((captionChanger != null && e.getSource() instanceof ButtonBase) && 
-            (captionChanger.containsKey(("rollover")))){
-                ((Labeled)e.getSource()).setText(captionChanger.get("rollover"));
-            }
+        if ((captionChanger != null && e.getSource() instanceof ButtonBase) &&
+                (captionChanger.containsKey(("rollover")))) {
+            ((Labeled) e.getSource()).setText(captionChanger.get("rollover"));
         }
-    
+    }
+
 
     public void mouseExited(final MouseEvent e) {
         if (PDFListener.debugMouseActions || showMethods) {
             System.out.println("customMouseListener.mouseExited()");
         }
         if ((captionChanger != null && e.getSource() instanceof ButtonBase) &&
-            (captionChanger.containsKey("normal"))) {
-                ((Labeled) e.getSource()).setText(captionChanger.get("normal"));
-            }
+                (captionChanger.containsKey("normal"))) {
+            ((Labeled) e.getSource()).setText(captionChanger.get("normal"));
         }
-    
+    }
+
 
     public static void mouseClicked(final MouseEvent e) {
-        if(PDFListener.debugMouseActions || showMethods) {
-            System.out.println("SwingFormButtonListener.mouseClicked() "+e);
+        if (PDFListener.debugMouseActions || showMethods) {
+            System.out.println("SwingFormButtonListener.mouseClicked() " + e);
         }
     }
 
     public void mousePressed(final MouseEvent e) {
         if (PDFListener.debugMouseActions || showMethods) {
-            System.out.println("customMouseListener.mousePressed() "+e);
+            System.out.println("customMouseListener.mousePressed() " + e);
         }
         if ((captionChanger != null && e.getSource() instanceof ButtonBase) &&
-             (captionChanger.containsKey("down"))) {
-               ((Labeled) e.getSource()).setText(captionChanger.get("down"));
-            }
+                (captionChanger.containsKey("down"))) {
+            ((Labeled) e.getSource()).setText(captionChanger.get("down"));
         }
-    
+    }
+
 
     public void mouseReleased(final MouseEvent e) {
-         if (PDFListener.debugMouseActions || showMethods) {
-             System.out.println("customMouseListener.mouseReleased()");
-         }
-         if (captionChanger != null && e.getSource() instanceof ButtonBase){
-             if (captionChanger.containsKey("rollover")) {
-               ((Labeled) e.getSource()).setText(captionChanger.get("rollover"));
-             }else if(captionChanger.containsKey("normal")){
-                 ((Labeled)e.getSource()).setText(captionChanger.get("rollover"));
-             }
-         } 
+        if (PDFListener.debugMouseActions || showMethods) {
+            System.out.println("customMouseListener.mouseReleased()");
+        }
+        if (captionChanger != null && e.getSource() instanceof ButtonBase) {
+            if (captionChanger.containsKey("rollover")) {
+                ((Labeled) e.getSource()).setText(captionChanger.get("rollover"));
+            } else if (captionChanger.containsKey("normal")) {
+                ((Labeled) e.getSource()).setText(captionChanger.get("rollover"));
+            }
+        }
     }
 
     @Override
     public void handle(final MouseEvent event) {
-        if(event.getEventType().equals(MouseEvent.MOUSE_CLICKED)){
+        if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED)) {
             mouseClicked(event);
-        }else if (event.getEventType().equals(MouseEvent.MOUSE_ENTERED)){
+        } else if (event.getEventType().equals(MouseEvent.MOUSE_ENTERED)) {
             mouseEntered(event);
-        }else if (event.getEventType().equals(MouseEvent.MOUSE_EXITED)){
+        } else if (event.getEventType().equals(MouseEvent.MOUSE_EXITED)) {
             mouseExited(event);
-        }else if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)){
+        } else if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
             mousePressed(event);
-        }else if (event.getEventType().equals(MouseEvent.MOUSE_RELEASED)){
+        } else if (event.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
             mouseReleased(event);
-        }            
+        }
     }
 }

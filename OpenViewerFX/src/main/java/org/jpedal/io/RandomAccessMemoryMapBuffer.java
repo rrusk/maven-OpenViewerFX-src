@@ -34,6 +34,7 @@
 package org.jpedal.io;
 
 import java.io.*;
+
 import org.jpedal.utils.LogWriter;
 
 public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
@@ -46,45 +47,44 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     private File file;
     private RandomAccessFile buf;
 
-    public RandomAccessMemoryMapBuffer(final InputStream in)
-    {
+    public RandomAccessMemoryMapBuffer(final InputStream in) {
 
         this.pointer = -1;
 
-        length=0;
+        length = 0;
 
-        FileOutputStream to=null;
-        BufferedInputStream from=null;
+        FileOutputStream to = null;
+        BufferedInputStream from = null;
 
         try {
 
-            file=File.createTempFile("page",".bin", new File(ObjectStore.temp_dir));
+            file = File.createTempFile("page", ".bin", new File(ObjectStore.temp_dir));
 
-            to =new java.io.FileOutputStream(file);
+            to = new java.io.FileOutputStream(file);
 
-            from=new BufferedInputStream(in);
+            from = new BufferedInputStream(in);
 
-			//write
-			final byte[] buffer = new byte[65535];
-			int bytes_read;
-			while ((bytes_read = from.read(buffer)) != -1){
-				to.write(buffer, 0, bytes_read);
+            //write
+            final byte[] buffer = new byte[65535];
+            int bytes_read;
+            while ((bytes_read = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytes_read);
                 length += bytes_read;
             }
 
         } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-		//close streams
-		try {
-            if(to!=null) {
+        //close streams
+        try {
+            if (to != null) {
                 to.close();
             }
-            if(from!=null) {
+            if (from != null) {
                 from.close();
             }
-		} catch (final Exception e) {
-			LogWriter.writeLog("Exception " + e + " closing files");
+        } catch (final Exception e) {
+            LogWriter.writeLog("Exception " + e + " closing files");
         }
 
         try {
@@ -96,10 +96,10 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
 
     }
 
-    private void init() throws Exception{
+    private void init() throws Exception {
 
         // Create a read-only memory-mapped file
-        buf=new RandomAccessFile(file, "r");
+        buf = new RandomAccessFile(file, "r");
 
     }
 
@@ -110,7 +110,7 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
 
     @Override
     public void seek(final long pos) throws IOException {
-        if ( checkPos(pos) ) {
+        if (checkPos(pos)) {
             this.pointer = pos;
         } else {
             throw new IOException("Position out of bounds");
@@ -120,23 +120,23 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     @Override
     public void close() throws IOException {
 
-        if(buf!=null){
+        if (buf != null) {
 
             buf.close();
-            buf=null;
+            buf = null;
         }
 
 
         this.pointer = -1;
 
-        if(file!=null && file.exists()){
-           file.delete();
+        if (file != null && file.exists()) {
+            file.delete();
         }
     }
 
     /**/
     @Override
-    protected void finalize(){
+    protected void finalize() {
 
         try {
             super.finalize();
@@ -146,8 +146,8 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
 
         //ensure removal actual file
         try {
-			close();
-		} catch (final IOException e) {
+            close();
+        } catch (final IOException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
 
@@ -156,7 +156,7 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     @Override
     public long length() throws IOException {
 
-        if (buf!=null) {
+        if (buf != null) {
             return length;
         } else {
             throw new IOException("Data buffer not initialized.");
@@ -176,7 +176,7 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     private int peek() throws IOException {
         if (checkPos(this.pointer)) {
             buf.seek(pointer++);
-            final int returnInt= b2i(buf.readByte());
+            final int returnInt = b2i(buf.readByte());
             pointer--; //needs to roll bakc - peek should not increment as it stops readLine working
             return returnInt;
         } else {
@@ -212,25 +212,25 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     @Override
     public int read(final byte[] b) throws IOException {
 
-        if (buf==null) {
+        if (buf == null) {
             throw new IOException("Data buffer not initialized.");
         }
 
-        if (pointer<0 || pointer>=length) {
+        if (pointer < 0 || pointer >= length) {
             return -1;
         }
 
-        int length=this.length-(int)pointer;
-        if(length>b.length) {
+        int length = this.length - (int) pointer;
+        if (length > b.length) {
             length = b.length;
         }
- 
+
         //replaced inefficient code with an improved performance version (up to ~60 %)
         //buf.seek(pointer);
         //buf.read(b);
         //pointer += b.length;
-        
-        for (int i=0; i<length; i++) {
+
+        for (int i = 0; i < length; i++) {
             buf.seek(pointer++);
             b[i] = buf.readByte();
         }
@@ -238,21 +238,21 @@ public class RandomAccessMemoryMapBuffer implements RandomAccessBuffer {
     }
 
     private static int b2i(final byte b) {
-        if (b>=0) {
+        if (b >= 0) {
             return b;
         }
-        return 256+b;
+        return 256 + b;
     }
 
     private boolean checkPos(final long pos) throws IOException {
-        return ( (pos>=0) && (pos<length()) );
+        return ((pos >= 0) && (pos < length()));
     }
 
     /* returns the byte data*/
     @Override
-    public byte[] getPdfBuffer(){
+    public byte[] getPdfBuffer() {
 
-        final byte[] bytes=new byte[length];
+        final byte[] bytes = new byte[length];
         try {
             buf.seek(0);
             buf.read(bytes);

@@ -26,18 +26,17 @@ import org.jpedal.examples.viewer.utils.PropertiesFile;
 import org.jpedal.gui.GUIFactory;
 
 /**
- *
  * @author markee
  */
 class SwingCommands extends Commands {
 
     public SwingCommands(Values commonValues, GUIFactory currentGUI, PdfDecoderInt decode_pdf, GUIThumbnailPanel thumbnails, PropertiesFile properties, GUISearchWindow searchFrame, PrinterInt currentPrinter) {
-       super(commonValues, currentGUI, decode_pdf, thumbnails, properties, searchFrame, currentPrinter);
-     
+        super(commonValues, currentGUI, decode_pdf, thumbnails, properties, searchFrame, currentPrinter);
+
     }
-    
-     Object executeSwingCommand(int ID, Object[] args, Object status) {
-         throw new UnsupportedOperationException("executeSwingCommand should not be called");
-     }
-    
+
+    Object executeSwingCommand(int ID, Object[] args, Object status) {
+        throw new UnsupportedOperationException("executeSwingCommand should not be called");
+    }
+
 }

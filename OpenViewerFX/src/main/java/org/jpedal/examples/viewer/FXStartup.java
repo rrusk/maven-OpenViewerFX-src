@@ -30,10 +30,10 @@
  * FXStartup.java
  * ---------------
  */
-
 package org.jpedal.examples.viewer;
 
 import java.util.List;
+
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -58,13 +58,16 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
 import static org.jpedal.examples.viewer.OpenViewerFX.checkUserJavaVersion;
+
 import org.jpedal.parser.DecoderOptions;
 
 /**
  * startup our Viewer as Application and allow user to access Viewer
  */
 public class FXStartup extends Application {
+
     private ProgressBar loadProgress;
     private Label progressText;
     OpenViewerFX viewer;
@@ -72,54 +75,55 @@ public class FXStartup extends Application {
     private final Stage splashStage = new Stage();
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 200;
-    
+
     public static void main(final String[] args) {
         DecoderOptions.javaVersion = Float.parseFloat(System.getProperty("java.specification.version"));
         checkUserJavaVersion();
         launch(args);
     }
+
+    /**
+     * Initalising the stage for the SplashScreen
+     */
     @Override
-    //Initalising the stage for the SplashScreen
-     public void init()
-    {
+    public void init() {
         final String imgPath;
         final String barColour;
-        
+
         if (OpenViewerFX.isOpenFX == false) {
             //setup viewer image
             imgPath = "/org/jpedal/examples/viewer/res/viewerFXSplash.png";
             barColour = ("-fx-accent: blue;");
-        } else{
+        } else {
             //setup reader image
             imgPath = "/org/jpedal/examples/viewer/res/OSFXSplash.png";
-            barColour = ("-fx-accent: purple;");  
+            barColour = ("-fx-accent: purple;");
         }
-            final ImageView splash = new ImageView(getClass().getResource(imgPath).toExternalForm());
-            loadProgress = new ProgressBar();
-            loadProgress.setPrefWidth(SPLASH_WIDTH);
-            progressText = new Label("All modules are loaded.");
-            loadProgress.setStyle(barColour);
-            splashLayout = new VBox();
-            splashLayout.getChildren().addAll(splash, loadProgress, progressText);
-            progressText.setAlignment(Pos.CENTER);
-            splashLayout.setEffect(new DropShadow());
+        final ImageView splash = new ImageView(getClass().getResource(imgPath).toExternalForm());
+        loadProgress = new ProgressBar();
+        loadProgress.setPrefWidth(SPLASH_WIDTH);
+        progressText = new Label("All modules are loaded.");
+        loadProgress.setStyle(barColour);
+        splashLayout = new VBox();
+        splashLayout.getChildren().addAll(splash, loadProgress, progressText);
+        progressText.setAlignment(Pos.CENTER);
+        splashLayout.setEffect(new DropShadow());
     }
 
     @Override
-    
-    public void start(final Stage initstage){
-        
-        final boolean showSplashScreen  = false;
-        
-        if(showSplashScreen){
+    public void start(final Stage initstage) {
+
+        final boolean showSplashScreen = false;
+
+        if (showSplashScreen) {
             System.out.println("Starting the SplashScreen");
             final Task<ObservableList<String>> loadModsTask = new Task<ObservableList<String>>() {
                 @Override
                 protected ObservableList<String> call() throws InterruptedException {
                     final ObservableList<String> loadMods
-                        = FXCollections.observableArrayList();
+                            = FXCollections.observableArrayList();
                     final ObservableList<String> availableFriends
-                        = FXCollections.observableArrayList("Network Module", "User Module", "User Interface", "User Controls");
+                            = FXCollections.observableArrayList("Network Module", "User Module", "User Interface", "User Controls");
 
                     updateMessage("Loading. . .");
                     for (int i = 0; i < availableFriends.size(); i++) {
@@ -146,50 +150,45 @@ public class FXStartup extends Application {
             });
 
             new Thread(loadModsTask).start();
-        }
-        //if debug not true then start viewer
-        else{
+        } //if debug not true then start viewer
+        else {
             startNew(initstage);
         }
     }
-    
-    //starting the FXViewer Stage
-     public void startNew(final Stage stage){
 
-            final List<String> args = this.getParameters().getUnnamed();
-        viewer = new OpenViewerFX(stage,args.toArray(new String[args.size()]));
+    //starting the FXViewer Stage
+    public void startNew(final Stage stage) {
+
+        final List<String> args = this.getParameters().getUnnamed();
+        viewer = new OpenViewerFX(stage, args.toArray(new String[args.size()]));
         viewer.setupViewer();
     }
+
     //Starting the splash screen
-    private void showSplash(final Task<ObservableList<String>> task){
+    private void showSplash(final Task<ObservableList<String>> task) {
         progressText.textProperty().bind(task.messageProperty());
         loadProgress.progressProperty().bind(task.progressProperty());
-        task.stateProperty().addListener(new ChangeListener<Worker.State>()
-        {
+        task.stateProperty().addListener(new ChangeListener<Worker.State>() {
             @Override
-            public void changed(final ObservableValue<? extends Worker.State> observableValue, final Worker.State oldState, final Worker.State newState)
-            {
-                if (newState == Worker.State.SUCCEEDED)
-                {
+            public void changed(final ObservableValue<? extends Worker.State> observableValue, final Worker.State oldState, final Worker.State newState) {
+                if (newState == Worker.State.SUCCEEDED) {
                     loadProgress.progressProperty().unbind();
                     loadProgress.setProgress(1);
                     splashStage.toFront();
                     final FadeTransition fadeSplash = new FadeTransition(Duration.seconds(1.2), splashLayout);
                     fadeSplash.setFromValue(1.0);
                     fadeSplash.setToValue(0.0);
-                     fadeSplash.setOnFinished(new EventHandler<ActionEvent>()
-                    {
+                    fadeSplash.setOnFinished(new EventHandler<ActionEvent>() {
                         @Override
-                        public void handle(final ActionEvent actionEvent)
-                        {
-                                splashStage.hide();
+                        public void handle(final ActionEvent actionEvent) {
+                            splashStage.hide();
                         }
                     });
                     fadeSplash.play();
-                    
+
                 }
             }
-            
+
         });
         final Scene splashScene = new Scene(splashLayout);
         splashStage.initStyle(StageStyle.UNDECORATED);
@@ -197,10 +196,10 @@ public class FXStartup extends Application {
         splashStage.setScene(splashScene);
         splashStage.setX(bounds.getMinX() + bounds.getWidth() / 2 - SPLASH_WIDTH / 2);
         splashStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
-        splashStage.show(); 
+        splashStage.show();
     }
-            
-    public OpenViewerFX getViewer(){
+
+    public OpenViewerFX getViewer() {
         return viewer;
     }
 }

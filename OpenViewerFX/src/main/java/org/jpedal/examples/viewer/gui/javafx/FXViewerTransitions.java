@@ -264,10 +264,10 @@ public class FXViewerTransitions {
 
         } else if (direction == TransitionDirection.LEFT) {
             // Going backwards
-            
+
             // Get the current translated position of the decoder's parent
-            final double xPos=pdf.getParent() != null ? pdf.getParent().getTranslateX() : 0;
-            
+            final double xPos = pdf.getParent() != null ? pdf.getParent().getTranslateX() : 0;
+
             final ScaleTransition st = new ScaleTransition(Duration.seconds(1), pdf.getParent());
             st.setToX(1.0);
             st.setToY(1.0);
@@ -276,7 +276,7 @@ public class FXViewerTransitions {
             cardStackOut.setFromX(-pdf.getWidth());
             cardStackOut.setByX(pdf.getWidth());
             cardStackOut.setToX(xPos);
-            
+
             final FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), pdf.getParent());
             fadeOut.setFromValue(0.0);
             fadeOut.setToValue(1.0);

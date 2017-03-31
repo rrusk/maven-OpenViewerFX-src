@@ -47,53 +47,56 @@ import javafx.stage.Stage;
 
 /**
  * Dialog window which prompts the user for input.
- * 
+ *
  * @author Simon
  */
 public class FXInputDialog extends FXMessageDialog {
     private final StringProperty input;
-    
+
     public FXInputDialog(final Stage parent, final String message) {
         super(parent, message);
-        
+
         input = new SimpleStringProperty();
         final TextField textField = new TextField();
         final BorderPane contentPane = getBorderPane();
         final Button cancelButton = new Button("Cancel");
-        
+
         input.bind(textField.textProperty());
         textField.textProperty().set("");
-        
+
         contentPane.getCenter().boundsInLocalProperty().addListener(new ChangeListener<Bounds>() {
-            @Override public void changed(final ObservableValue<? extends Bounds> ov, final Bounds oldBounds, final Bounds newBounds) {
+            @Override
+            public void changed(final ObservableValue<? extends Bounds> ov, final Bounds oldBounds, final Bounds newBounds) {
                 textField.setPrefWidth(newBounds.getWidth());
             }
         });
-        
+
         cancelButton.setPrefWidth(BUTTONWIDTH);
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent t) {
+            @Override
+            public void handle(final ActionEvent t) {
                 cancel();
             }
         });
-        
+
         getCenterGroup().getChildren().add(textField);
         getButtonGroup().getChildren().add(cancelButton);
-        
+
     }
-    
+
     /**
      * Use to get the value from the input box. Returns null if the user cancels the dialog.
+     *
      * @return the value from the input box
      */
-    public String showInputDialog(){
+    public String showInputDialog() {
         showAndWait();
-        
-        if(isCancelled) {
+
+        if (isCancelled) {
             return null;
         } else {
             return input.get();
         }
     }
-    
+
 }

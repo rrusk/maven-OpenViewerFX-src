@@ -39,40 +39,42 @@ import java.util.Map;
  * allow us to lookup pages
  */
 public class PageLookup {
-	
-	/**holds pdf id (ie 4 0 R) which stores each object in reverse so we can lookup*/
-	private Map<String, Integer> pageLookup = new HashMap<String, Integer>();
-	
-	/**
-	 * used to work out page id for the object (returns -1 if no value found)
-	 */
-	public int convertObjectToPageNumber(final String offset){
-		
-		final Integer value=pageLookup.get(offset);
-		
-		if(value==null) {
-            return -1;
-        } else{
-			return value;
-		}
-		
-		
-	}
-	
-	/**
-	 * The pageLookup to set.
-	 */
-	public void put(final String key, final int value) {
-		pageLookup.put(key, value);
-		
-	}
 
-	public void dispose() {
-		
-		if(pageLookup!=null) {
+    /**
+     * holds pdf id (ie 4 0 R) which stores each object in reverse so we can lookup
+     */
+    private Map<String, Integer> pageLookup = new HashMap<String, Integer>();
+
+    /**
+     * used to work out page id for the object (returns -1 if no value found)
+     */
+    public int convertObjectToPageNumber(final String offset) {
+
+        final Integer value = pageLookup.get(offset);
+
+        if (value == null) {
+            return -1;
+        } else {
+            return value;
+        }
+
+
+    }
+
+    /**
+     * The pageLookup to set.
+     */
+    public void put(final String key, final int value) {
+        pageLookup.put(key, value);
+
+    }
+
+    public void dispose() {
+
+        if (pageLookup != null) {
             pageLookup.clear();
         }
-		pageLookup=null;
-		
-	}
+        pageLookup = null;
+
+    }
 }

@@ -33,5 +33,5 @@
 package org.jpedal.external;
 
 @SuppressWarnings("UnusedParameters")
-public interface ImageDataHandler extends ImageHandler{
+public interface ImageDataHandler extends ImageHandler {
 }

@@ -41,9 +41,9 @@ import org.jpedal.exception.PdfException;
 public class PageGrouping {
 
     public static Object execute(final Object[] args, final PdfDecoderInt decode_pdf) {
-        
+
         Object status = null;
-        
+
         if (args != null) {
 
             final int i = (Integer) args[0];
@@ -64,8 +64,8 @@ public class PageGrouping {
             //ensure done
             decode_pdf.waitForDecodingToFinish();
         }
-        
+
         return status;
-        
+
     }
 }

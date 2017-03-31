@@ -43,6 +43,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.script.*;
 import javax.swing.SwingUtilities;
+
 import org.jpedal.objects.Javascript;
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.actions.ActionHandler;
@@ -62,7 +63,7 @@ public class GenericParser implements ExpressionEngine {
     private final ScriptContext context;
     private JSDoc docObject;
     private final Javascript jsObject;
-   
+
     private static final boolean debugEngine = false;
     private static ArrayList<String> erroredCode;
 
@@ -100,9 +101,9 @@ public class GenericParser implements ExpressionEngine {
 //			context.setAttribute("event", new JSEvent(), ScriptContext.ENGINE_SCOPE);
             final JSConsole console = new JSConsole();
             context.setAttribute("console", console, ScriptContext.ENGINE_SCOPE);
-            
+
             //console.setGUIFactory(this.guiFactory);
-            
+
             if (debugEngine) {
                 System.out.println("Parsing aform.js");
             }
@@ -141,7 +142,7 @@ public class GenericParser implements ExpressionEngine {
 
         if (debugEngine) {
             System.out.println("execute(FormObject ref, int type, Object js, int eventType, char keyPressed)");
-            System.out.println("execute(" + '[' + ref.getObjectRefAsString() + ']' + ", " + PdfDictionary.showAsConstant(type) + ", \"" + js + "\", "  + ", " + keyPressed + ')');
+            System.out.println("execute(" + '[' + ref.getObjectRefAsString() + ']' + ", " + PdfDictionary.showAsConstant(type) + ", \"" + js + "\", " + ", " + keyPressed + ')');
         }
 
         if (js instanceof String) {
@@ -226,7 +227,7 @@ public class GenericParser implements ExpressionEngine {
                     engine.eval(finalValue, context); // attempt to evaluate given code
                 } catch (final ScriptException e) {
 //					debugLog("addCode Code: " + finalValue + "\r\n" + e.getMessage() + "\r\n");
-                    e.printStackTrace();  
+                    e.printStackTrace();
                 }
             }
         };
@@ -299,7 +300,7 @@ public class GenericParser implements ExpressionEngine {
                     }
                 } catch (final ScriptException e) {
 //					debugLog("Calculate Code: " + command + "\r\n" + e.getMessage() + "\r\n");
-                    e.printStackTrace();  
+                    e.printStackTrace();
                 }
 
             }

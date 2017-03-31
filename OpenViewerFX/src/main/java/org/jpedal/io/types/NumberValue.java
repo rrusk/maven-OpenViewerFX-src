@@ -34,6 +34,7 @@ package org.jpedal.io.types;
 
 import static org.jpedal.io.ObjectDecoder.debugFastCode;
 import static org.jpedal.io.ObjectDecoder.padding;
+
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.LogWriter;
@@ -43,26 +44,25 @@ import org.jpedal.utils.NumberUtils;
  *
  */
 public class NumberValue {
-    
-    
-    
+
+
     public static int setNumberValue(final PdfObject pdfObject, int i, final byte[] raw, final int PDFkeyInt, final PdfFileReader objectReader) {
-        
-        final int keyStart=i;
-        final int rawLength=raw.length;
+
+        final int keyStart = i;
+        final int rawLength = raw.length;
 
         //move cursor to end of text
-        while(raw[i]!=10 && raw[i]!=13 && raw[i]!=32 && raw[i]!=47 && raw[i]!=60 && raw[i]!=62 && raw[i]!='(' && raw[i]!='.'){
+        while (raw[i] != 10 && raw[i] != 13 && raw[i] != 32 && raw[i] != 47 && raw[i] != 60 && raw[i] != 62 && raw[i] != '(' && raw[i] != '.') {
             i++;
         }
-        
+
         //actual value or first part of ref
-        final int number= NumberUtils.parseInt(keyStart, i, raw);
-        
+        final int number = NumberUtils.parseInt(keyStart, i, raw);
+
         final int jj = StreamReaderUtils.skipSpaces(raw, i);
 
         //check its not a ref (assumes it XX 0 R)
-        if(raw[jj]>= 48 && raw[jj]<=57) { //if next char is number 0-9 it may be a ref
+        if (raw[jj] >= 48 && raw[jj] <= 57) { //if next char is number 0-9 it may be a ref
 
             //move cursor to end of number
             int aa = StreamReaderUtils.skipToEndOfRef(raw, jj);
@@ -76,16 +76,16 @@ public class NumberValue {
                 return readNumberFromIndirectObj(PDFkeyInt, pdfObject, i, raw, objectReader, rawLength, number);
             }
         }
-        
+
         //store value
-        pdfObject.setIntNumber(PDFkeyInt,number);
-        
-        if(debugFastCode) {
+        pdfObject.setIntNumber(PDFkeyInt, number);
+
+        if (debugFastCode) {
             System.out.println(padding + "set numberValue=" + number);
         }
-        
+
         // move back so loop works
-        return i-1;
+        return i - 1;
     }
 
     static int readNumberFromIndirectObj(final int PDFkeyInt, final PdfObject pdfObject, int i, final byte[] raw, final PdfFileReader objectReader, final int rawLength, int number) {
@@ -93,29 +93,29 @@ public class NumberValue {
         final int keyStart;
         i = StreamReaderUtils.skipSpaces(raw, i);
 
-        keyStart=i;
+        keyStart = i;
         //move cursor to end of reference
         i = StreamReaderUtils.skipToEndOfRef(raw, i);
 
-        final int generation= NumberUtils.parseInt(keyStart, i, raw);
+        final int generation = NumberUtils.parseInt(keyStart, i, raw);
 
         //move cursor to start of R
-        while(raw[i]==10 || raw[i]==13 || raw[i]==32 || raw[i]==47 || raw[i]==60) {
+        while (raw[i] == 10 || raw[i] == 13 || raw[i] == 32 || raw[i] == 47 || raw[i] == 60) {
             i++;
         }
 
-        if(raw[i]!=82){ //we are expecting R to end ref
+        if (raw[i] != 82) { //we are expecting R to end ref
             throw new RuntimeException("3. Unexpected value in file - please send to IDRsolutions for analysis");
         }
 
         //read the Dictionary data
-        final byte[] data=objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
+        final byte[] data = objectReader.readObjectAsByteArray(pdfObject, objectReader.isCompressed(number, generation), number, generation);
 
         //allow for data in Linear object not yet loaded
-        if(data==null){
+        if (data == null) {
             pdfObject.setFullyResolved(false);
 
-            if(debugFastCode) {
+            if (debugFastCode) {
                 System.out.println(padding + "Data not yet loaded");
             }
 
@@ -125,20 +125,20 @@ public class NumberValue {
         }
 
         //lose obj at start
-        int j=0;
-        final int len=data.length;
+        int j = 0;
+        final int len = data.length;
 
         //allow for example where start <<
-        if(len>1 && data[0]=='<' && data[1]=='<'){
-        }else if(len<=3){ //fix for short indirect value /K 30 0 R where 30 0R is -1 ie (11dec/Real Estate Tax Bill 2011.pdf)
-        }else{
-            j=3;
-            if(len>3){ //allow for small values (ie Rotate object pointing to value 0)
-                while(data[j-1]!=106 && data[j-2]!=98 && data[j-3]!=111){
+        if (len > 1 && data[0] == '<' && data[1] == '<') {
+        } else if (len <= 3) { //fix for short indirect value /K 30 0 R where 30 0R is -1 ie (11dec/Real Estate Tax Bill 2011.pdf)
+        } else {
+            j = 3;
+            if (len > 3) { //allow for small values (ie Rotate object pointing to value 0)
+                while (data[j - 1] != 106 && data[j - 2] != 98 && data[j - 3] != 111) {
                     j++;
 
-                    if(j==len){
-                        j=0;
+                    if (j == len) {
+                        j = 0;
                         break;
                     }
                 }
@@ -146,28 +146,28 @@ public class NumberValue {
         }
 
         //skip any spaces after
-        if(len>1){//allow for small values (ie Rotate object pointing to value 0)
-           j = StreamReaderUtils.skipSpaces(data, j);
+        if (len > 1) { //allow for small values (ie Rotate object pointing to value 0)
+            j = StreamReaderUtils.skipSpaces(data, j);
         }
 
-        int count=j;
+        int count = j;
 
         //skip any spaces at end
-        while(count<len && data[count]!=9 && data[count]!=10 && data[count]!=13 && data[count]!=32)// || data[j]==47 || data[j]==60)
+        while (count < len && data[count] != 9 && data[count] != 10 && data[count] != 13 && data[count] != 32)// || data[j]==47 || data[j]==60)
         {
             count++;
         }
 
-        number= NumberUtils.parseInt(j, count, data);
+        number = NumberUtils.parseInt(j, count, data);
 
-        pdfObject.setIntNumber(PDFkeyInt,number);
+        pdfObject.setIntNumber(PDFkeyInt, number);
 
-        if(debugFastCode) {
-            System.out.println(padding + "set numberValue=" + number);//+" in "+pdfObject);
+        if (debugFastCode) {
+            System.out.println(padding + "set numberValue=" + number); //+" in "+pdfObject);
         }
 
         // move back so loop works
-        return i-1;
+        return i - 1;
     }
 }
 

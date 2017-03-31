@@ -33,58 +33,66 @@
 package org.jpedal.examples.viewer.gui.javafx;
 
 import java.net.URL;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.jpedal.examples.viewer.gui.generic.GUIButton;
 
-/**Swing specific implementation of GUIButton interface*/
-public class JavaFXButton extends Button implements GUIButton{
-	
-	private int ID;
+/**
+ * JavaFX specific implementation of GUIButton interface
+ */
+public class JavaFXButton extends Button implements GUIButton {
 
-	public JavaFXButton(){
+    private int ID;
+
+    public JavaFXButton() {
     }
 
     @Override
-    public void init(final URL path, final int ID, final String toolTip){
+    public void init(final URL path, final int ID, final String toolTip) {
 
-        this.ID=ID;
+        this.ID = ID;
 
-        path.toString(); //Conver the path to string so can be used in JavaFX
-        
         this.setTooltip(new Tooltip(toolTip));
-       
-        if (path!=null)  {
-                setIcon(path);
+
+        if (path != null) {
+            setIcon(path);
         }
 
         //Prevent the dotted focus border
         this.setFocusTraversable(false);
     }
-	
-	
-	/**command ID of button*/
-	@Override
+
+
+    /**
+     * command ID of button
+     */
+    @Override
     public int getID() {
-		
-		return ID;
-	}
-	
-	@Override
-    public void setName(final String s){
-		super.setId(s);
-	}
+
+        return ID;
+    }
+
+    @Override
+    public void setName(final String s) {
+        super.setId(s);
+    }
 
     @Override
     public void setEnabled(final boolean b) {
-         super.setDisable(!b);
+        super.setDisable(!b);
     }
 
+    /**
+     * Sets the current icon for the image and creates the pressed look of the icon
+     *
+     * @param url : URL object pointing to the image to be used for the button
+     */
     @Override
     public void setIcon(final URL url) {
         super.setGraphic(new ImageView(new Image(url.toString())));
     }
-    
+
 }

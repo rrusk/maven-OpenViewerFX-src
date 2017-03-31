@@ -34,16 +34,18 @@ package org.jpedal.examples.viewer.utils;
 
 import java.awt.Color;
 import java.util.StringTokenizer;
+
 import org.jpedal.utils.LogWriter;
 
 public class CSSToJavaValues {
-    
+
     /**
      * Accepts a valid CSS1 color value and return a Color object.
+     *
      * @param cssValue A string representation of a valid CSS1 color string
      * @return A color object or null if string was null, empty or not valid css
      */
-    public static Color convertToColor(final String cssValue){
+    public static Color convertToColor(final String cssValue) {
         Color col = null;
 
         if (cssValue != null && !cssValue.isEmpty()) {
@@ -62,8 +64,8 @@ public class CSSToJavaValues {
 
         return col;
     }
-    
-    private static Color handleRGBColor(final String cssValue){
+
+    private static Color handleRGBColor(final String cssValue) {
 
         //Handle rgb values
         final String rgbValues = cssValue.substring(cssValue.indexOf('(') + 1, cssValue.indexOf(')'));
@@ -91,9 +93,9 @@ public class CSSToJavaValues {
             return new Color(r, g, b, a);
         }
     }
-    
+
     private static Color handleNamedColor(final String cssValue) {
-        
+
         switch (cssValue.charAt(0)) {
             case 'a':
                 //aqua

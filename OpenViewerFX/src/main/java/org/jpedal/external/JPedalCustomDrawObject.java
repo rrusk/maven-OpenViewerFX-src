@@ -39,21 +39,31 @@ import java.awt.Graphics2D;
  */
 @SuppressWarnings("UnusedDeclaration")
 public interface JPedalCustomDrawObject {
-	
-	Integer ALLPAGES= 1;
 
-    /**code to execute when rendering to screen*/
+    Integer ALLPAGES = 1;
+
+    /**
+     * code to execute when rendering to screen
+     */
     void paint(Graphics2D g2);
 
-    /**code to execute when printing to jps*/
+    /**
+     * code to execute when printing to jps
+     */
     void print(Graphics2D g2, int x);
 
-    /**allow user to switch on and off*/
+    /**
+     * allow user to switch on and off
+     */
     void setVisible(boolean isVisible);
-    
-    /** sets the x media offset of the page */
+
+    /**
+     * sets the x media offset of the page
+     */
     void setMedX(int x);
-    
-    /** sets the y media offset of the page */
+
+    /**
+     * sets the y media offset of the page
+     */
     void setMedY(int y);
 }

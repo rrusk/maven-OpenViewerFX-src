@@ -33,12 +33,12 @@
 package org.jpedal.fonts.tt;
 
 public class Maxp extends Table {
-	
-	private int numGlyphs, maxPoints, maxContours, maxTwilightPoints, maxStorage;
 
-	public Maxp(final FontFile2 currentFontFile){
-	
-		//LogWriter.writeMethod("{readMapxTable}", 0);
+    private int numGlyphs, maxPoints, maxContours, maxTwilightPoints, maxStorage;
+
+    public Maxp(final FontFile2 currentFontFile) {
+
+        //LogWriter.writeMethod("{readMapxTable}", 0);
         init(currentFontFile);
 
     }
@@ -48,20 +48,20 @@ public class Maxp extends Table {
 
     private void init(final FontFile2 currentFontFile) {
         //move to start and check exists
-        final int startPointer=currentFontFile.selectTable(FontFile2.MAXP);
+        final int startPointer = currentFontFile.selectTable(FontFile2.MAXP);
 
         //read 'head' table
-        if(startPointer!=0){
+        if (startPointer != 0) {
 
             currentFontFile.getNextUint32(); //id
-            numGlyphs=currentFontFile.getNextUint16();
-            maxPoints=currentFontFile.getNextUint16();
-            maxContours=currentFontFile.getNextUint16();
+            numGlyphs = currentFontFile.getNextUint16();
+            maxPoints = currentFontFile.getNextUint16();
+            maxContours = currentFontFile.getNextUint16();
             currentFontFile.getNextUint16(); //maxComponentPoints
             currentFontFile.getNextUint16(); //maxComponentContours
             currentFontFile.getNextUint16(); //maxZones
-            maxTwilightPoints=currentFontFile.getNextUint16();
-            maxStorage=currentFontFile.getNextUint16();
+            maxTwilightPoints = currentFontFile.getNextUint16();
+            maxStorage = currentFontFile.getNextUint16();
             currentFontFile.getNextUint16(); //maxFunctionDefs
             currentFontFile.getNextUint16(); //maxInstructionDefs
             currentFontFile.getNextUint16(); //maxStackElements
@@ -71,24 +71,24 @@ public class Maxp extends Table {
         }
     }
 
-    public int getGlyphCount(){
-		return numGlyphs;
-	}
+    public int getGlyphCount() {
+        return numGlyphs;
+    }
 
-    public int getMaxPoints(){
+    public int getMaxPoints() {
         return maxPoints;
     }
 
-    public int getMaxTwilightPoints(){
+    public int getMaxTwilightPoints() {
         return maxTwilightPoints;
     }
 
-    public int getMaxStorage(){
+    public int getMaxStorage() {
         return maxStorage;
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public int getMaxContours(){
+    public int getMaxContours() {
         return maxContours;
     }
 }

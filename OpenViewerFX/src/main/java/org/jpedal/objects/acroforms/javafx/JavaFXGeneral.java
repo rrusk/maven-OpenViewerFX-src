@@ -44,14 +44,14 @@ class JavaFXGeneral {
     private Label label4;
     private Label validFromBox;
     private Label validToBox;
-    
+
     /**
      * Creates new form General
      */
     JavaFXGeneral() {
         initComponents();
     }
-    
+
     void setValues(final String name, final String notBefore, final String notAfter) {
         issuedToBox.setText(name);
         validFromBox.setText(notBefore);
@@ -59,13 +59,13 @@ class JavaFXGeneral {
     }
 
     private void initComponents() {
-      final HBox box = new HBox();
-      
-      label1.setText("Valid to:");
-      label3.setText("Valid from:");
-      label4.setText("Issued to:");
-      
-      box.getChildren().addAll(label1,label3,label4,validFromBox,issuedToBox);
+        final HBox box = new HBox();
+
+        label1.setText("Valid to:");
+        label3.setText("Valid from:");
+        label4.setText("Issued to:");
+
+        box.getChildren().addAll(label1, label3, label4, validFromBox, issuedToBox);
     }
 
 }

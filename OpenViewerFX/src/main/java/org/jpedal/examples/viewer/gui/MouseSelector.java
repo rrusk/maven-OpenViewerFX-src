@@ -44,14 +44,15 @@ public class MouseSelector {
 
     /**
      * Adjust x coordinate from mouse to take into account any centring offset
-     * @param cx int value for the current x value
+     *
+     * @param cx         int value for the current x value
      * @param decode_pdf PdfDecoderInt for the current PDF
      * @return int value for the x coordinate after adjustments
      */
     protected static int adjustForAlignment(int cx, final PdfDecoderInt decode_pdf) {
 
         if (decode_pdf.getPageAlignment() == Display.DISPLAY_CENTERED) {
-            final int width =  decode_pdf.getPaneBounds()[0];
+            final int width = decode_pdf.getPaneBounds()[0];
             int pdfWidth = decode_pdf.getPDFWidth();
 
             if (decode_pdf.getDisplayView() != Display.SINGLE_PAGE) {

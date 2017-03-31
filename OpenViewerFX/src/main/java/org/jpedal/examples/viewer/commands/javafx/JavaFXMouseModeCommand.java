@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer.commands.javafx;
 
 import java.net.URL;
+
 import javafx.scene.Cursor;
 import javafx.stage.Stage;
 import org.jpedal.PdfDecoderFX;
@@ -76,7 +77,7 @@ public class JavaFXMouseModeCommand {
                     currentGUI.getMenuItems().setCheckMenuItemSelected(Commands.TEXTSELECT, true);
                     currentGUI.getMenuItems().setCheckMenuItemSelected(Commands.PANMODE, false);
                     currentGUI.setPannable(false);
-                    
+
                     //Set Mouse Mode
                     mouseMode.setMouseMode(MouseMode.MOUSE_MODE_TEXT_SELECT);
 
@@ -86,14 +87,14 @@ public class JavaFXMouseModeCommand {
                     if (url != null) {
                         currentGUI.getButtons().getButton(Commands.MOUSEMODE).setIcon(url);
                     }
-                    
+
                     currentGUI.getButtons().getButton(Commands.SNAPSHOT).setEnabled(true);
-                    
+
                     //Update Cursor
                     ((PdfDecoderFX) decode_pdf).setDefaultCursor(Cursor.TEXT);
                 }
             } else {
-                final FXMessageDialog newMessage = new FXMessageDialog((Stage)currentGUI.getFrame(), Messages.getMessage("PdfCustomGui.textSelectionUnavailible"));
+                final FXMessageDialog newMessage = new FXMessageDialog((Stage) currentGUI.getFrame(), Messages.getMessage("PdfCustomGui.textSelectionUnavailible"));
                 newMessage.show();
             }
         } else {

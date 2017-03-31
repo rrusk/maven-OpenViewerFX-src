@@ -35,11 +35,10 @@ package org.jpedal.io.types;
 import org.jpedal.objects.raw.PdfObject;
 
 /**
- *
  * @author markee
  */
 public interface ArrayDecoder {
 
     int readArray(PdfObject Aobj, int Dest);
-    
+
 }

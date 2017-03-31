@@ -44,66 +44,65 @@ import javax.swing.event.ChangeListener;
  * next panel.  See SignWizardModel.java for an example.
  */
 
-public interface WizardPanelModel 
-{
-	/**
-	 * @return true if the currently displayed panel requires a Finish box instead of a next box.
-	 */
-	boolean isFinishPanel();
-	
-	/**
-	 * @return The unique ID String of the first JPanel to be shown
-	 */
-	String getStartPanelID();
-	
-	/**
-	 * @return The ID of the JPanel that should be displayed if next is clicked.
-	 */
-	String next();
-	
-	/**
-	 * @return The ID of the JPanel that should be displayed if previous is clicked.
-	 */
-	String previous();
-	
-	/**
-	 * This method can contain any housekeeping you require when the Wizard
-	 * is exited.
-	 */
-	void close();
-	
-	/**
-	 * @return true if the current panel has a previous panel
-	 */
-	boolean hasPrevious();
-	
-	/**
-	 * @return true if the current panel is able to advance.
-	 */
-	boolean canAdvance();
-	
-	/**
-	 * In order to use the Card Layout in the wizard class
-	 * each JPanel must have a unique String identifier.
-	 * ie HashMap (String, JPanel)
-	 * 
-	 * @return A mapping of ID Strings to JPanels. 
-	 */
-	Map<String, javax.swing.JPanel> getJPanels();
-	
-	/**
-	 * A component that is registered will alert the Wizard
-	 * class that it should check whether the advance button should be enabled.
-	 * 
-	 * @param e Alerts Wizard that the registered component effects the Next button enable/disable status
-	 */
-	void registerNextChangeListeners(ChangeListener e);
-	
-	/**
-	 * The same effect as registerNextChangeListeners(ChangeListener e) except
-	 * applied to keys.
-	 * 
-	 * @param e Alerts Wizard that the registered component effects the Next button enable/disable status
-	 */
-	void registerNextKeyListeners(KeyListener e);
+public interface WizardPanelModel {
+    /**
+     * @return true if the currently displayed panel requires a Finish box instead of a next box.
+     */
+    boolean isFinishPanel();
+
+    /**
+     * @return The unique ID String of the first JPanel to be shown
+     */
+    String getStartPanelID();
+
+    /**
+     * @return The ID of the JPanel that should be displayed if next is clicked.
+     */
+    String next();
+
+    /**
+     * @return The ID of the JPanel that should be displayed if previous is clicked.
+     */
+    String previous();
+
+    /**
+     * This method can contain any housekeeping you require when the Wizard
+     * is exited.
+     */
+    void close();
+
+    /**
+     * @return true if the current panel has a previous panel
+     */
+    boolean hasPrevious();
+
+    /**
+     * @return true if the current panel is able to advance.
+     */
+    boolean canAdvance();
+
+    /**
+     * In order to use the Card Layout in the wizard class
+     * each JPanel must have a unique String identifier.
+     * ie HashMap (String, JPanel)
+     *
+     * @return A mapping of ID Strings to JPanels.
+     */
+    Map<String, javax.swing.JPanel> getJPanels();
+
+    /**
+     * A component that is registered will alert the Wizard
+     * class that it should check whether the advance button should be enabled.
+     *
+     * @param e Alerts Wizard that the registered component effects the Next button enable/disable status
+     */
+    void registerNextChangeListeners(ChangeListener e);
+
+    /**
+     * The same effect as registerNextChangeListeners(ChangeListener e) except
+     * applied to keys.
+     *
+     * @param e Alerts Wizard that the registered component effects the Next button enable/disable status
+     */
+    void registerNextKeyListeners(KeyListener e);
 }

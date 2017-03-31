@@ -35,6 +35,7 @@ package org.jpedal;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.utils.LogWriter;
@@ -43,63 +44,58 @@ import org.jpedal.utils.LogWriter;
  * generates the thumbnails of pages for display
  */
 public class ThumbnailDecoder {
-    
+
     private final PdfDecoderInt decode_pdf;
-    
+
     public ThumbnailDecoder(final PdfDecoderInt decode_pdf) {
-        
-        this.decode_pdf=decode_pdf;
-        
+
+        this.decode_pdf = decode_pdf;
+
     }
-    
+
     /**
      * get pdf as Image of any page scaling is size (100 = full size)
      */
     public final synchronized BufferedImage getPageAsThumbnail(final int pageNumber, final int height) {
-        
-        BufferedImage newImg =null;
+
+        BufferedImage newImg = null;
         //stopDecoding=false;
         try {
-            
+
             //this is used in Viewer so we need to over-ride implicit assumption            
             //forms rendered as components just for thumbnail
-            final AcroRenderer formRenderer=decode_pdf.getFormRenderer();
-            final boolean originalRasterize = formRenderer.getCompData().formsRasterizedForDisplay();
-            
-            final boolean formsAlreadyDecoded = formRenderer.getCompData().getFormList(true)[pageNumber]!=null;
-            
-            formRenderer.getCompData().setRasterizeForms(true);
-            
+            final AcroRenderer formRenderer = decode_pdf.getFormRenderer();
+
+            final boolean formsAlreadyDecoded = formRenderer.getCompData().getFormList(true)[pageNumber] != null;
+
             //Produce image at 50% scaling to prevent massive memory issues at large scalings
             //Also improves thumbnail quality at higher resolutions
             float scaling = decode_pdf.getScaling();
-            if(scaling>0.5f) {
+            if (scaling > 0.5f) {
                 scaling = 0.5f;
             }
             final BufferedImage pageImage = decode_pdf.getPageAsImage(pageNumber, scaling);
-            
-            formRenderer.getCompData().setRasterizeForms(originalRasterize);
-            
+
             //If viewer had not decoded forms for that page, reset to null
-            if(!formsAlreadyDecoded){
-                formRenderer.getCompData().getFormList(true)[pageNumber]=null;
-                formRenderer.getCompData().getFormList(false)[pageNumber]=null;
+            if (!formsAlreadyDecoded) {
+                formRenderer.getCompData().getFormList(true)[pageNumber] = null;
+                formRenderer.getCompData().getFormList(false)[pageNumber] = null;
             }
-            
+
             final int imgHeight = pageImage.getHeight();
-            final double scale = height/(double)imgHeight;
-            final int width = (int)(pageImage.getWidth()*scale);
-            
-            newImg = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+            final double scale = height / (double) imgHeight;
+            final int width = (int) (pageImage.getWidth() * scale);
+
+            newImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             final Graphics g = newImg.getGraphics();
             g.drawImage(pageImage, 0, 0, width, height, null);
             g.dispose();
-            
+
         } catch (final PdfException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-        
+
         return newImg;
-        
-    }   
+
+    }
 }

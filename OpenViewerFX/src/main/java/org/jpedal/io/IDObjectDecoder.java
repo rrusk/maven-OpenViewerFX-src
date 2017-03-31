@@ -35,12 +35,12 @@ package org.jpedal.io;
 /**
  * specific fucntions for ID
  */
-public class IDObjectDecoder extends ObjectDecoder{
+public class IDObjectDecoder extends ObjectDecoder {
 
     public IDObjectDecoder(final PdfFileReader pdfFileReader) {
 
         super(pdfFileReader);
 
-        this.isInlineImage=true;
+        this.isInlineImage = true;
     }
 }

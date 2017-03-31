@@ -46,37 +46,37 @@ import org.w3c.dom.NodeList;
 
 /**
  * A class that handles modifying the the viewers GUI based on property values
- * found in the properties files. This class has two public methods 
- * (Load and alterProperty) to allow you to do this. 
- * 
+ * found in the properties files. This class has two public methods
+ * (Load and alterProperty) to allow you to do this.
+ * <p>
  * Load allows you to pass in a PropertiesFile object from which we take the
  * various GUI properties and set the GUI to match these options
- * 
+ * <p>
  * AlterProperty allows you to specify a single property and the value you wish
  * to change it to.
- * 
+ * <p>
  * Be aware that there are some properties that will not update live and must be
- * set before the GUI is created, in these cases it is recommended to set the 
+ * set before the GUI is created, in these cases it is recommended to set the
  * value within the properties file instead of changing it manually.
- * 
+ * <p>
  * Please note, this updates the GUI only, if you wish to alter the values that
  * are stored within you properties.xml file you need to use the following method.
- * 
+ * <p>
  * PropertiesFile.setValue(final String elementName, final String newValue)
  */
 public class GUIModifier {
-    
+
     private static void setButtonEnabledAndVisible(final GUIButtons buttons, final int type, final boolean set) {
-        
+
         final GUIButton button = buttons.getButton(type);
-        
-        if(button!=null){
+
+        if (button != null) {
             button.setEnabled(set);
             button.setVisible(set);
         }
     }
-    
-    private static void removeUnwantedTabs(final int tabCount, final GUIFactory currentGUI, final boolean set, final String title){
+
+    private static void removeUnwantedTabs(final int tabCount, final GUIFactory currentGUI, final boolean set, final String title) {
         for (int i = 0; i < tabCount; i++) {
 
             if (currentGUI.getSidebarTabTitleAt(i).equals(currentGUI.getTitles(title)) && !set) {
@@ -85,9 +85,9 @@ public class GUIModifier {
             }
         }
     }
-    
-    private static void loadNodeList(final NodeList tags, final GUIFactory currentGUI){
-        for(int i=0; i!=tags.getLength(); i++){
+
+    private static void loadNodeList(final NodeList tags, final GUIFactory currentGUI) {
+        for (int i = 0; i != tags.getLength(); i++) {
             final Node node = tags.item(i);
             final String name = tags.item(i).getNodeName();
             if (!name.startsWith("#")) { //Actual node
@@ -108,10 +108,10 @@ public class GUIModifier {
             }
         }
     }
-    
+
     /**
      * This method loads all GUI properties from a PropertiesFile object.
-     * 
+     *
      * @param properties The PropertiesFile to load values from.
      * @param currentGUI The GUI to have the properties loaded into.
      */
@@ -133,8 +133,8 @@ public class GUIModifier {
         loadNodeList(tags, currentGUI);
     }
 
-    private static boolean alterSectionProperties(final String value, final boolean set, final GUIFactory currentGUI, final boolean isSingle){
-        
+    private static boolean alterSectionProperties(final String value, final boolean set, final GUIFactory currentGUI, final boolean isSingle) {
+
         final int propertyCode = value.hashCode();
         boolean used = true;
 
@@ -166,9 +166,9 @@ public class GUIModifier {
         }
         return used;
     }
-    
-    private static boolean alterNavButtonProperties(final String value, final boolean set, final GUIFactory currentGUI){
-        
+
+    private static boolean alterNavButtonProperties(final String value, final boolean set, final GUIFactory currentGUI) {
+
         final int propertyCode = value.hashCode();
         boolean used = true;
         //Disable entire section
@@ -194,16 +194,16 @@ public class GUIModifier {
             case PropertyTags.LASTBOTTOM:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.LASTPAGE, set);
                 break;
-            default :
+            default:
                 used = false;
                 break;
         }
-        
+
         return used;
     }
-    
-    private static boolean alterDisplayButtonProperties(final String value, final boolean set, final GUIFactory currentGUI){
-        
+
+    private static boolean alterDisplayButtonProperties(final String value, final boolean set, final GUIFactory currentGUI) {
+
         final int propertyCode = value.hashCode();
         boolean used = true;
         //Disable entire section
@@ -226,19 +226,19 @@ public class GUIModifier {
             case PropertyTags.MEMORYBOTTOM:
                 currentGUI.enableMemoryBar(set, set);
                 break;
-            default :
+            default:
                 used = false;
                 break;
         }
-        
+
         return used;
     }
-    
+
     private static boolean alterOptionPaneProperties(final String value, final boolean set, final GUIFactory currentGUI) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.SCALINGDISPLAY:
                 currentGUI.getCombo(Commands.SCALING).setEnabled(set);
@@ -254,18 +254,18 @@ public class GUIModifier {
             case PropertyTags.DOWNLOADPROGRESSDISPLAY:
                 currentGUI.enableDownloadBar(set, set);
                 break;
-            default :
-                used = false;                
+            default:
+                used = false;
                 break;
         }
         return used;
     }
-    
+
     private static boolean alterButtonBarProperties(final String value, final boolean set, final GUIFactory currentGUI) {
-    
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.OPENFILEBUTTON:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.OPENFILE, set);
@@ -315,18 +315,18 @@ public class GUIModifier {
             case PropertyTags.OPENSYSTEMDEFAULT:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.OPENINSYSTEMDEFAULT, set);
                 break;
-            default :
+            default:
                 used = false;
         }
-        
+
         return used;
     }
-    
+
     private static boolean alterSideBarProperties(final String value, final boolean set, final GUIFactory currentGUI) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         final int tabCount = currentGUI.getSidebarTabCount();
         if (tabCount != 0) {
             switch (propertyCode) {
@@ -349,37 +349,37 @@ public class GUIModifier {
         }
         return used;
     }
-    
+
     private static void alterMenuBarProperties(final String value, final boolean set, final GUIFactory currentGUI, final boolean isSingle) {
-        
+
         boolean skipOthers = alterFileMenuItemProperties(value, set, currentGUI, currentGUI.getMenuItems());
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterEditMenuItemProperties(value, set, currentGUI.getMenuItems());
         }
-        if(!skipOthers){
+        if (!skipOthers) {
             skipOthers = alterViewMenuItemProperties(value, set, isSingle, currentGUI.getMenuItems());
         }
-        if(!skipOthers){
+        if (!skipOthers) {
             skipOthers = alterWindowMenuItemProperties(value, set, currentGUI.getMenuItems());
         }
-        if(!skipOthers){
+        if (!skipOthers) {
             skipOthers = alterExportMenuItemProperties(value, set, currentGUI.getMenuItems());
         }
-        if(!skipOthers){
+        if (!skipOthers) {
             skipOthers = alterHelpMenuItemProperties(value, set, currentGUI.getMenuItems());
         }
-        
-        if (skipOthers) {//Menu bar altered so double check separators
+
+        if (skipOthers) { // Menu bar altered so double check separators
             currentGUI.getButtons().checkButtonSeparators();
         }
     }
-     
+
     private static boolean alterEditMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.EDITMENU:
                 menuItems.setMenuItem(Commands.EDITMENU, set, set);
@@ -403,27 +403,27 @@ public class GUIModifier {
 
         return used;
     }
-     
+
     private static boolean alterViewMenuItemProperties(final String value, final boolean set, final boolean isSingle, final GUIMenuItems menuItems) {
-        
+
         boolean skipOthers = alterPageNavMenuItemProperties(value, set, menuItems);
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterPageDisplayMenuItemProperties(value, set, isSingle, menuItems);
         }
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterDisplayOptionMenuItemProperties(value, set, menuItems);
         }
-        
+
         return skipOthers;
     }
-    
+
     private static boolean alterPageNavMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.VIEWMENU:
                 menuItems.setMenuItem(Commands.VIEWMENU, set, set);
@@ -459,12 +459,12 @@ public class GUIModifier {
 
         return used;
     }
-    
+
     private static boolean alterPageDisplayMenuItemProperties(final String value, final boolean set, final boolean isSingle, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.PAGELAYOUTMENU:
                 if (isSingle) {
@@ -503,12 +503,12 @@ public class GUIModifier {
 
         return used;
     }
-    
+
     private static boolean alterDisplayOptionMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.PANMODE:
                 if (menuItems.isMenuItemExist(Commands.PANMODE)) {
@@ -535,12 +535,12 @@ public class GUIModifier {
 
         return used;
     }
-    
+
     private static boolean alterWindowMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.WINDOWMENU:
                 if (menuItems.isMenuItemExist(Commands.WINDOWMENU)) {
@@ -564,12 +564,12 @@ public class GUIModifier {
 
         return used;
     }
-    
+
     private static boolean alterExportMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.EXPORTMENU:
                 menuItems.setMenuItem(Commands.EXPORTMENU, set, set);
@@ -629,12 +629,12 @@ public class GUIModifier {
 
         return used;
     }
-    
+
     private static boolean alterHelpMenuItemProperties(final String value, final boolean set, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.HELPMENU:
                 menuItems.setMenuItem(Commands.HELP, set, set);
@@ -658,12 +658,12 @@ public class GUIModifier {
 
         return used;
     }
-    
+
     private static boolean alterFileMenuItemProperties(final String value, final boolean set, final GUIFactory currentGUI, final GUIMenuItems menuItems) {
-        
+
         final int propertyCode = value.hashCode();
         boolean used = true;
-        
+
         switch (propertyCode) {
             case PropertyTags.FILEMENU:
                 menuItems.setMenuItem(Commands.FILEMENU, set, set);
@@ -709,41 +709,41 @@ public class GUIModifier {
         }
         return used;
     }
-    
+
     /**
      * The method alters a single property value related to the GUI.
-     * 
-     * @param value Name of the property to be altered as a String.
-     * @param set The value you wish to set for the property as a boolean.
+     *
+     * @param value      Name of the property to be altered as a String.
+     * @param set        The value you wish to set for the property as a boolean.
      * @param currentGUI The GUI interface the property is applied to.
      */
     public static void alterProperty(final String value, final boolean set, final GUIFactory currentGUI) {
-        
+
         boolean skipOthers = alterSectionProperties(value, set, currentGUI, currentGUI.isSingle());
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterNavButtonProperties(value, set, currentGUI);
         }
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterDisplayButtonProperties(value, set, currentGUI);
         }
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterOptionPaneProperties(value, set, currentGUI);
         }
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterButtonBarProperties(value, set, currentGUI);
         }
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             skipOthers = alterSideBarProperties(value, set, currentGUI);
         }
-        
-        if(!skipOthers){
+
+        if (!skipOthers) {
             alterMenuBarProperties(value, set, currentGUI, currentGUI.isSingle());
         }
-        
+
     }
 }

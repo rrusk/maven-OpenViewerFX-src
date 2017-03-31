@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.exception.PdfFontException;
 import org.jpedal.io.ObjectStore;
@@ -51,26 +52,28 @@ import org.jpedal.utils.Strip;
  * Holds Maps which are used to map font names onto actual fonts and files
  */
 public final class FontMappings {
-    
-    /**ensure fonts setup only once*/
+
+    /**
+     * ensure fonts setup only once
+     */
     public static boolean fontsInitialised;
-    
+
     /**
      * font to use in preference to Lucida
      */
     public static String defaultFont;
-    
+
     /**
      * flag to show if there must be a mapping value (program exits if none
      * found)
      */
     public static boolean enforceFontSubstitution;
-    
+
     /**
      * used to remap fonts onto truetype fonts (set internally)
      */
     public static Map<String, String> fontSubstitutionTable;
-    
+
     /**
      * hold details of all fonts
      */
@@ -84,35 +87,39 @@ public final class FontMappings {
      * used to ensure substituted fonts unique
      */
     public static Map<String, String> fontPossDuplicates;
-    
+
     /**
      * used to store number for subfonts in TTC
      */
     public static Map<String, Integer> fontSubstitutionFontID;
-    
+
     /**
      * used to remap fonts onto truetype fonts (set internally)
      */
     public static Map<String, String> fontSubstitutionLocation = new ConcurrentHashMap<String, String>();
-    
+
     /**
      * used to remap fonts onto truetype fonts (set internally)
      */
     public static Map<String, String> fontSubstitutionAliasTable = new ConcurrentHashMap<String, String>();
-    
-    /**only upload all fonts once*/
+
+    /**
+     * only upload all fonts once
+     */
     private static boolean fontsSet;
-    
+
     private static final String separator = System.getProperty("file.separator");
-    
-    /**put fonts in variable so can be altered if needed by Client*/
-    public static String[] defaultFontDirs= {"C:/windows/fonts/","C:/winNT/fonts/",
-        "/Library/Fonts/",
-        //"/System/Library/Fonts/",  ms 20111013 commented out as breaks forms with Zapf
-        "/usr/share/fonts/truetype/msttcorefonts/",
-        //"/usr/share/fonts/truetype/",
-        //"/windows/D/Windows/Fonts/"
-        "usr/local/Fonts/",
+
+    /**
+     * put fonts in variable so can be altered if needed by Client
+     */
+    public static String[] defaultFontDirs = {"C:/windows/fonts/", "C:/winNT/fonts/",
+            "/Library/Fonts/",
+            //"/System/Library/Fonts/",  ms 20111013 commented out as breaks forms with Zapf
+            "/usr/share/fonts/truetype/msttcorefonts/",
+            //"/usr/share/fonts/truetype/",
+            //"/windows/D/Windows/Fonts/"
+            "usr/local/Fonts/",
     };
     /**
      * determine how font substitution is done
@@ -122,45 +129,46 @@ public final class FontMappings {
     //private static int fontSubstitutionMode=PdfDecoderInt.SUBSTITUTE_FONT_USING_FULL_FONT_NAME;
     //private static int fontSubstitutionMode=PdfDecoderInt.SUBSTITUTE_FONT_USING_FAMILY_NAME;
     //private static int fontSubstitutionMode=PdfDecoderInt.SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME_USE_FAMILY_NAME_IF_DUPLICATES;
-    
-    private FontMappings(){}
-    
+
+    private FontMappings() {
+    }
+
     /**
      * used internally to pick uo org.jpedal.fontmaps property and set
      */
-    public static void initFonts(){
-        
+    public static void initFonts() {
+
         // pick up D options and use settings
-        
+
         try {
             final String fontMaps = System.getProperty("org.jpedal.fontmaps");
-            
+
             if (fontMaps != null) {
                 final StringTokenizer fontPaths = new StringTokenizer(fontMaps, ",");
-                
+
                 while (fontPaths.hasMoreTokens()) {
-                    
+
                     final String fontPath = fontPaths.nextToken();
                     final StringTokenizer values = new StringTokenizer(fontPath, "=:");
-                    
+
                     final int count = values.countTokens() - 1;
                     final String[] nameInPDF = new String[count];
                     final String key = values.nextToken();
                     for (int i = 0; i < count; i++) {
                         nameInPDF[i] = values.nextToken();
                     }
-                    
+
                     setSubstitutedFontAliases(key, nameInPDF); //$NON-NLS-1$
-                    
+
                 }
             }
-            
+
         } catch (final Exception e) {
             LogWriter.writeLog("Unable to read org.jpedal.fontmaps " + e.getMessage());
         }
-        
+
         // pick up D options and use settings
-        
+
         try {
             final String fontDirs = System.getProperty("org.jpedal.fontdirs");
             String failed = null;
@@ -178,45 +186,45 @@ public final class FontMappings {
     /**
      * used to ensure we load once
      */
-    private static final Map<String, String> isLiberationLoaded=new HashMap<String, String>();
-    
-    public static void addLiberationAsFallBackFont(final String family, final String path) throws IOException{
-        
-        if(isLiberationLoaded.containsKey(family)){
+    private static final Map<String, String> isLiberationLoaded = new HashMap<String, String>();
+
+    public static void addLiberationAsFallBackFont(final String family, final String path) throws IOException {
+
+        if (isLiberationLoaded.containsKey(family)) {
             return;
         }
-        
-        isLiberationLoaded.put(family,path);
-        
+
+        isLiberationLoaded.put(family, path);
+
         checkFontTablesInitialised();
-        
-        final String[] fontNames={"-Regular","-Bold","-Italic","-BoldItalic"};
-        final int fontCount=fontNames.length;
+
+        final String[] fontNames = {"-Regular", "-Bold", "-Italic", "-BoldItalic"};
+        final int fontCount = fontNames.length;
 
         for (int i = 0; i < fontCount; i++) {
 
-            final String type= "/TrueType";
-            final String fontName=family+fontNames[i];
-        
-            final String rawPath="org/jpedal/res/"+path+"/"+fontName+".ttf";
-            final String outPath= ObjectStore.temp_dir+fontName+".ttf";
+            final String type = "/TrueType";
+            final String fontName = family + fontNames[i];
+
+            final String rawPath = "org/jpedal/res/" + path + "/" + fontName + ".ttf";
+            final String outPath = ObjectStore.temp_dir + fontName + ".ttf";
 
             final InputStream url = FontMappings.class.getClassLoader().getResourceAsStream(rawPath);
-            final BufferedOutputStream to=new BufferedOutputStream(new FileOutputStream(outPath));
-            
+            final BufferedOutputStream to = new BufferedOutputStream(new FileOutputStream(outPath));
+
             ObjectStore.copy(url, to);
             to.close();
-            
+
             fontSubstitutionTable.put(fontName, type);
             fontSubstitutionLocation.put(fontName, outPath);
-            
+
             //store details under file
             fontPropertiesTableType.put(fontName, StandardFonts.TRUETYPE);
-            fontPropertiesTablePath.put(fontName,outPath);
-                     
-        }/**/
+            fontPropertiesTablePath.put(fontName, outPath);
+
+        } /**/
     }
-    
+
     /**
      * set mode to use when substituting fonts (default is to use Filename (ie arial.ttf)
      * Options are  SUBSTITUTE_* values from PdfDecoder
@@ -224,15 +232,15 @@ public final class FontMappings {
     public static void setFontSubstitutionMode(final int mode) {
         fontSubstitutionMode = mode;
     }
-    
+
     /**
      * set mode to use when substituting fonts (default is to use Filename (ie arial.ttf)
      * Options are  SUBSTITUTE_* values from PdfDecoder
      */
     public static int getFontSubstitutionMode() {
-        return  fontSubstitutionMode;
+        return fontSubstitutionMode;
     }
-    
+
     /**
      * allows a number of fonts to be mapped onto an actual font and provides a
      * way around slightly differing font naming when substituting fonts - So if
@@ -249,9 +257,9 @@ public final class FontMappings {
      * (directories do not need to exist so can be multi-platform setting)
      */
     public static void setSubstitutedFontAliases(final String fontFileName, final String[] aliases) {
-        
+
         if (aliases != null) {
-            
+
             final String name = fontFileName.toLowerCase();
             String alias;
             for (final String aliase : aliases) {
@@ -262,61 +270,61 @@ public final class FontMappings {
             }
         }
     }
-    
+
     /**
      * takes a comma separated list of font directories and add to substitution
      */
     public static String addFonts(final String fontDirs, final String failed) {
-        
+
         final StringTokenizer fontPaths = new StringTokenizer(fontDirs, ",");
-        
+
         while (fontPaths.hasMoreTokens()) {
-            
+
             String fontPath = fontPaths.nextToken();
-            
+
             if (!fontPath.endsWith("/") && !fontPath.endsWith("\\")) {
                 fontPath += separator;
             }
-            
+
             //LogWriter.writeLog("Looking in " + fontPath + " for TT fonts");
-            
+
             addTTDir(fontPath, failed);
         }
-        
+
         return failed;
     }
-    
-    public static void dispose(){
-        
-        fontSubstitutionTable=null;
-        fontPropertiesTable=null;
-        fontPropertiesTableType=null;
-        fontPropertiesTablePath=null;
 
-        fontPossDuplicates=null;
+    public static void dispose() {
+
+        fontSubstitutionTable = null;
+        fontPropertiesTable = null;
+        fontPropertiesTableType = null;
+        fontPropertiesTablePath = null;
+
+        fontPossDuplicates = null;
         fontSubstitutionFontID = null;
         fontSubstitutionLocation = null;
         fontSubstitutionAliasTable = null;
     }
-    
+
     /**
      * add a truetype font directory and contents to substitution
      */
     public static String addTTDir(final String fontPath, String failed) {
-        
+
         checkFontTablesInitialised();
-        
+
         final File currentDir = new File(fontPath);
-        
+
         if ((currentDir.exists()) && (currentDir.isDirectory())) {
-            
+
             final String[] files = currentDir.list();
-            
+
             if (files != null) {
-                
+
                 for (final String currentFont : files) {
                     addFontFile(currentFont, fontPath);
-                    
+
                 }
             }
         } else {
@@ -326,120 +334,120 @@ public final class FontMappings {
                 failed = failed + ',' + fontPath;
             }
         }
-        
+
         return failed;
     }
-    
+
     /**
      * add a list of settings to map common fonts which can be substituted onto correct platform settings for Windows/MAC/Linux so JPedal
      * will try to use the fonts on the computer if possible to produce most accurate display.
      */
     public static void setFontReplacements() {
-        
+
         //this is where we setup specific font mapping to use fonts on local machines
         //note different settigns for Win, linux, MAC
-        
+
         //general
-        final String[] aliases6={/*"AcArial"};//,/**/"acarialunicodems__cn"};//,"acarial,bold"};
-        setSubstitutedFontAliases("adobeheitistd-regular",aliases6);
-        
+        final String[] aliases6 = {/*"AcArial"}; //,/**/"acarialunicodems__cn"}; //,"acarial,bold"};
+        setSubstitutedFontAliases("adobeheitistd-regular", aliases6);
+
         //platform settings
-        if(DecoderOptions.isRunningOnMac){
-            
+        if (DecoderOptions.isRunningOnMac) {
+
             //Courier (CourierNew) both on Mac and different
-            setSubstitutedFontAliases("Courier italic",new String[]{"Courier-Oblique"});
-            setSubstitutedFontAliases("Courier bold",new String[]{"Courier-Bold"});
-            setSubstitutedFontAliases("Courier bold italic",new String[]{"Courier-BoldOblique"});
-            
-            setSubstitutedFontAliases("Courier new italic",new String[]{"CourierNew,italic","CourierStd-Oblique","CourierNewPS-ItalicMT"});
-            setSubstitutedFontAliases("Courier new bold",new String[]{"CourierNew,Bold","Courier-Bold","CourierStd-Bold","CourierNewPS-BoldMT"});
-            setSubstitutedFontAliases("Courier new bold italic",new String[]{"CourierNew-BoldOblique","CourierStd-BoldOblique","CourierNewPS-BoldItalicMT"});
-            setSubstitutedFontAliases("Courier new",new String[]{"CourierNew","Courier","CourierStd","CourierNewPSMT"});
-            
+            setSubstitutedFontAliases("Courier italic", new String[]{"Courier-Oblique"});
+            setSubstitutedFontAliases("Courier bold", new String[]{"Courier-Bold"});
+            setSubstitutedFontAliases("Courier bold italic", new String[]{"Courier-BoldOblique"});
+
+            setSubstitutedFontAliases("Courier new italic", new String[]{"CourierNew,italic", "CourierStd-Oblique", "CourierNewPS-ItalicMT"});
+            setSubstitutedFontAliases("Courier new bold", new String[]{"CourierNew,Bold", "Courier-Bold", "CourierStd-Bold", "CourierNewPS-BoldMT"});
+            setSubstitutedFontAliases("Courier new bold italic", new String[]{"CourierNew-BoldOblique", "CourierStd-BoldOblique", "CourierNewPS-BoldItalicMT"});
+            setSubstitutedFontAliases("Courier new", new String[]{"CourierNew", "Courier", "CourierStd", "CourierNewPSMT"});
+
             //Helvetica (Arial)
-            setSubstitutedFontAliases("arial",new String[]{"Helvetica","arialmt"});
-            setSubstitutedFontAliases("arial italic",new String[]{"arial-italic", "arial-italicmt","Helvetica-Oblique","Arial,Italic"});
-            setSubstitutedFontAliases("arial bold",new String[]{"arial-boldmt,bold","arial-boldmt","Helvetica-Bold","Arial,bold"});
-            setSubstitutedFontAliases("arial bold italic",new String[]{"Arial-BoldItalicMT","Helvetica-BoldOblique"});
-            
+            setSubstitutedFontAliases("arial", new String[]{"Helvetica", "arialmt"});
+            setSubstitutedFontAliases("arial italic", new String[]{"arial-italic", "arial-italicmt", "Helvetica-Oblique", "Arial,Italic"});
+            setSubstitutedFontAliases("arial bold", new String[]{"arial-boldmt,bold", "arial-boldmt", "Helvetica-Bold", "Arial,bold"});
+            setSubstitutedFontAliases("arial bold italic", new String[]{"Arial-BoldItalicMT", "Helvetica-BoldOblique"});
+
             //Arial Narrow - not actually one of fonts but  very common so added
-            setSubstitutedFontAliases("arial Narrow",new String[]{"ArialNarrow",});  //called ArialNarrow in PDF, needs to be arialn for Windows
-            setSubstitutedFontAliases("arial Narrow italic",new String[]{"ArialNarrow-italic"});
-            setSubstitutedFontAliases("arial Narrow bold",new String[]{"ArialNarrow-bold","ArialNarrow,Bold"});
-            setSubstitutedFontAliases("arial Narrow bold italic",new String[]{"ArialNarrow-bolditalic"});
-            
+            setSubstitutedFontAliases("arial Narrow", new String[]{"ArialNarrow"});  //called ArialNarrow in PDF, needs to be arialn for Windows
+            setSubstitutedFontAliases("arial Narrow italic", new String[]{"ArialNarrow-italic"});
+            setSubstitutedFontAliases("arial Narrow bold", new String[]{"ArialNarrow-bold", "ArialNarrow,Bold"});
+            setSubstitutedFontAliases("arial Narrow bold italic", new String[]{"ArialNarrow-bolditalic"});
+
             //Times/TimesNewRoman
-            setSubstitutedFontAliases("times new roman bold",new String[] {"Times-Bold","TimesNewRoman,Bold","TimesNewRomanPS-BoldMT"});
-            setSubstitutedFontAliases("times new roman bold italic",new String[] {"Times-BoldItalic","TimesNewRoman,BoldItalic","TimesNewRomanPS-BoldItalicMT"});
-            setSubstitutedFontAliases("times new roman italic",new String[] {"Times-Italic","TimesNewRoman,Italic","TimesNewRomanPS-ItalicMT"});
-            setSubstitutedFontAliases("times new roman",new String[] {"Times-Roman","TimesNewRoman","Times","TimesNewRomanPSMT"});
-            
-            
-            setSubstitutedFontAliases("wingdings",new String[] {"ZapfDingbats","ZaDb"});
-            
+            setSubstitutedFontAliases("times new roman bold", new String[]{"Times-Bold", "TimesNewRoman,Bold", "TimesNewRomanPS-BoldMT"});
+            setSubstitutedFontAliases("times new roman bold italic", new String[]{"Times-BoldItalic", "TimesNewRoman,BoldItalic", "TimesNewRomanPS-BoldItalicMT"});
+            setSubstitutedFontAliases("times new roman italic", new String[]{"Times-Italic", "TimesNewRoman,Italic", "TimesNewRomanPS-ItalicMT"});
+            setSubstitutedFontAliases("times new roman", new String[]{"Times-Roman", "TimesNewRoman", "Times", "TimesNewRomanPSMT"});
+
+
+            setSubstitutedFontAliases("wingdings", new String[]{"ZapfDingbats", "ZaDb"});
+
             //default at present for others as well
-        }else {//if(PdfDecoder.isRunningOnWindows){
-            
+        } else { //if(PdfDecoder.isRunningOnWindows){
+
             //Courier (CourierNew)
-            setSubstitutedFontAliases("Couri",new String[]{"Courier-Oblique", "CourierNew,italic","CourierStd-Oblique","CourierNewPS-ItalicMT"});
-            setSubstitutedFontAliases("Courbd",new String[]{"Courier-Bold","CourierNew,Bold","CourierStd-Bold","CourierNewPS-BoldMT"});
-            setSubstitutedFontAliases("Courbi",new String[]{"Courier-BoldOblique","CourierNew-BoldOblique","CourierStd-BoldOblique","CourierNewPS-BoldItalicMT"});
-            setSubstitutedFontAliases("Cour",new String[]{"CourierNew","Courier","CourierStd","CourierNewPSMT","CourierNewPSMT"});
-            
+            setSubstitutedFontAliases("Couri", new String[]{"Courier-Oblique", "CourierNew,italic", "CourierStd-Oblique", "CourierNewPS-ItalicMT"});
+            setSubstitutedFontAliases("Courbd", new String[]{"Courier-Bold", "CourierNew,Bold", "CourierStd-Bold", "CourierNewPS-BoldMT"});
+            setSubstitutedFontAliases("Courbi", new String[]{"Courier-BoldOblique", "CourierNew-BoldOblique", "CourierStd-BoldOblique", "CourierNewPS-BoldItalicMT"});
+            setSubstitutedFontAliases("Cour", new String[]{"CourierNew", "Courier", "CourierStd", "CourierNewPSMT", "CourierNewPSMT"});
+
             //Helvetica (Arial)
-            setSubstitutedFontAliases("arial",new String[]{"Helvetica","arialmt","ArialNarrow"});
-            setSubstitutedFontAliases("ariali",new String[]{"arial-italic", "arial-italicmt","Helvetica-Oblique","Arial,Italic", "ArialNarrow-Italic"});
-            setSubstitutedFontAliases("arialbd",new String[]{"arial-boldmt,bold","arial-boldmt","Helvetica-Bold","Arial,bold","arial bold", "ArialNarrow-Bold"});
-            setSubstitutedFontAliases("arialbi",new String[]{"Arial-BoldItalicMT","Helvetica-BoldOblique", "ArialNarrow-BoldItalic"});
-            
+            setSubstitutedFontAliases("arial", new String[]{"Helvetica", "arialmt", "ArialNarrow"});
+            setSubstitutedFontAliases("ariali", new String[]{"arial-italic", "arial-italicmt", "Helvetica-Oblique", "Arial,Italic", "ArialNarrow-Italic"});
+            setSubstitutedFontAliases("arialbd", new String[]{"arial-boldmt,bold", "arial-boldmt", "Helvetica-Bold", "Arial,bold", "arial bold", "ArialNarrow-Bold"});
+            setSubstitutedFontAliases("arialbi", new String[]{"Arial-BoldItalicMT", "Helvetica-BoldOblique", "ArialNarrow-BoldItalic"});
+
             //Font doesn't work in generic Windows 8 (commented out by Mark) 14/11/2013
             //Arial Narrow - not actually one of fonts but  very common so added
             //setSubstitutedFontAliases("arialn",new String[]{"ArialNarrow",}); //called ArialNarrow in PDF, needs to be arialn for Windows
             //setSubstitutedFontAliases("arialni",new String[]{"ArialNarrow-italic"});
             //setSubstitutedFontAliases("arialnb",new String[]{"ArialNarrow-bold","ArialNarrow,Bold"});
             //setSubstitutedFontAliases("arialnbi",new String[]{"ArialNarrow-bolditalic"});
-            
+
             //Times/TimesNewRoman
-            setSubstitutedFontAliases("timesbd",new String[] {"Times-Bold","TimesNewRoman,Bold","TimesNewRomanPS-BoldMT"});
-            setSubstitutedFontAliases("timesi",new String[] {"Times-BoldItalic","TimesNewRoman,BoldItalic"});
-            setSubstitutedFontAliases("timesbi",new String[] {"Times-Italic","TimesNewRoman,Italic"});
-            setSubstitutedFontAliases("times",new String[] {"Times-Roman","TimesNewRoman","Times","TimesNewRomanPSMT"});
-            
-            setSubstitutedFontAliases("wingdings",new String[] {"ZapfDingbats","ZaDb"});
+            setSubstitutedFontAliases("timesbd", new String[]{"Times-Bold", "TimesNewRoman,Bold", "TimesNewRomanPS-BoldMT"});
+            setSubstitutedFontAliases("timesi", new String[]{"Times-BoldItalic", "TimesNewRoman,BoldItalic"});
+            setSubstitutedFontAliases("timesbi", new String[]{"Times-Italic", "TimesNewRoman,Italic"});
+            setSubstitutedFontAliases("times", new String[]{"Times-Roman", "TimesNewRoman", "Times", "TimesNewRomanPSMT"});
+
+            setSubstitutedFontAliases("wingdings", new String[]{"ZapfDingbats", "ZaDb"});
             // setSubstitutedFontAliases("wingding",new String[] {"ZapfDingbats","ZaDb","wingdings"});
-            
+
         }
-        
-        setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"STSong-Light"});
+
+        setSubstitutedFontAliases("AdobeSongStd-Light", new String[]{"STSong-Light"});
 //         setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"MHei-Medium"});
 //         setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"MSung-Light"});
 //         setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"HeiseiKakuGo-W5"});
 //         setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"HeiseiMin-W3"});
 //         setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"HYGoThic-Medium"});
 //         setSubstitutedFontAliases("AdobeSongStd-Light",new String[] {"HYSMyeongJo-Medium"});
-        
+
         //set general mappings for non-embedded fonts (assumes names the same) - do first time used
-        if(!fontsSet){
-            
-            fontsSet=true;
-            
+        if (!fontsSet) {
+
+            fontsSet = true;
+
             //now in public static variable so can be altered
             setFontDirs(defaultFontDirs);
             
             /*check for any windows fonts lurking in Adobe folders as well*/
-            if(DecoderOptions.isRunningOnWindows){
-                final File adobeFonts=new File("C:\\Program Files\\Adobe\\");
-                
-                if(adobeFonts.exists()){
-                    
-                    final String[] subdirs=adobeFonts.list();
-                    
-                    for(final String path : subdirs){
-                        final String adobePath="C:\\Program Files\\Adobe\\"+path+"\\Resource\\CIDFont";
-                        final File testAdobe=new File(adobePath);
-                        
+            if (DecoderOptions.isRunningOnWindows) {
+                final File adobeFonts = new File("C:\\Program Files\\Adobe\\");
+
+                if (adobeFonts.exists()) {
+
+                    final String[] subdirs = adobeFonts.list();
+
+                    for (final String path : subdirs) {
+                        final String adobePath = "C:\\Program Files\\Adobe\\" + path + "\\Resource\\CIDFont";
+                        final File testAdobe = new File(adobePath);
+
                         //add if it exists
-                        if(testAdobe.exists()){
+                        if (testAdobe.exists()) {
                             addTTDir(adobePath, "");
                         }
                     }
@@ -447,7 +455,7 @@ public final class FontMappings {
             }
         }
     }
-    
+
     /**
      * takes a String[] of font directories and adds to substitution - Can just
      * be called for each JVM - Should be called before file opened - this
@@ -455,18 +463,18 @@ public final class FontMappings {
      * flushes all settings
      *
      * @return String which will be null or list of directories it could not
-     *         find
+     * find
      */
     public static String setFontDirs(final String[] fontDirs) {
-        
+
         String failed = null;
-        
+
         checkFontTablesInitialised();
-        
+
         try {
             if (fontDirs == null) { // idiot safety test
                 LogWriter.writeLog("Null font parameter passed");
-                
+
                 fontSubstitutionAliasTable.clear();
                 fontSubstitutionLocation.clear();
                 fontSubstitutionTable.clear();
@@ -475,26 +483,26 @@ public final class FontMappings {
                 fontPropertiesTable.clear();
                 fontPropertiesTableType.clear();
                 fontPropertiesTablePath.clear();
-                
-                fontsSet=false;
+
+                fontsSet = false;
             } else {
-                
+
                 for (final String fontDir : fontDirs) {
-                    
+
                     String fontPath = fontDir;
-                    
+
                     // allow for 'wrong' separator
                     if (!fontPath.endsWith("/") && !fontPath.endsWith("\\")) {
                         fontPath += separator;
                     }
-                    
+
                     failed = addTTDir(fontPath, failed);
                 }
             }
         } catch (final Exception e) {
             LogWriter.writeLog("Unable to run setFontDirs " + e.getMessage());
         }
-        
+
         return failed;
     }
 
@@ -508,7 +516,7 @@ public final class FontMappings {
             fontPropertiesTablePath = new ConcurrentHashMap<String, String>();
         }
     }
-    
+
     /**
      * This routine allows the user to add truetype,
      * type1 or type1C fonts which will be used to disalay the fonts in PDF
@@ -558,126 +566,126 @@ public final class FontMappings {
      * @return flag (true if fonts added)
      */
     public static boolean addSubstituteFonts(String fontPath, final boolean enforceMapping) {
-        
+
         boolean hasFonts = false;
-        
-        InputStream in=null, dir=null;
-        
+
+        InputStream in = null, dir = null;
+
         try {
             final String[] dirs = {"tt", "t1c", "t1"};
             final String[] types = {"/TrueType", "/Type1C", "/Type1"};
-            
+
             // check fontpath ends with separator - we may need to check this.
             // if((!fontPath.endsWith("/"))&(!fontPath.endsWith("\\")))
             // fontPath=fontPath=fontPath+separator;
-            
+
             enforceFontSubstitution = enforceMapping;
-            
+
             final ClassLoader loader = FontMappings.class.getClass().getClassLoader();
-            
+
             // see if root dir exists
             dir = loader.getResourceAsStream(fontPath);
-            
+
             LogWriter.writeLog("Looking for root " + fontPath);
-            
+
             // if it does, look for sub-directories
             if (in != null) {
-                
-                LogWriter.writeLog("Adding fonts fonts found in  tt,t1c,t1 sub-directories of "+ fontPath);
-                
+
+                LogWriter.writeLog("Adding fonts fonts found in  tt,t1c,t1 sub-directories of " + fontPath);
+
                 hasFonts = true;
-                
+
                 for (int i = 0; i < dirs.length; i++) {
-                    
+
                     if (!fontPath.endsWith("/")) {
                         fontPath += '/';
                     }
-                    
+
                     final String path = fontPath + dirs[i] + '/';
-                    
+
                     // see if it exists
                     in = loader.getResourceAsStream(path);
-                    
+
                     // if it does read its contents and store
                     if (in != null) {
                         System.out.println("Found  " + path + ' ' + in);
-                        
+
                         final ArrayList<String> fonts;
-                        
+
                         try {
-                            
+
                             // works with IDE or jar
                             if (in instanceof ByteArrayInputStream) {
                                 fonts = readIndirectValues(in);
                             } else {
                                 fonts = getDirectoryMatches(path);
                             }
-                            
+
                             String value, fontName;
-                            
+
                             // now assign the fonts
                             for (final String font : fonts) {
-                                
+
                                 value = font;
-                                
+
                                 if (value == null) {
                                     break;
                                 }
-                                
+
                                 final int pointer = value.indexOf('.');
                                 if (pointer == -1) {
                                     fontName = value.toLowerCase();
                                 } else {
                                     fontName = value.substring(0, pointer).toLowerCase();
                                 }
-                                
+
                                 fontSubstitutionTable.put(fontName, types[i]);
                                 fontSubstitutionLocation.put(fontName, path + value);
-                                
+
                             }
-                            
+
                         } catch (final Exception e) {
-                            LogWriter.writeLog("Exception " + e+ " reading substitute fonts");
-                        }finally {
-                            if(in!=null){
+                            LogWriter.writeLog("Exception " + e + " reading substitute fonts");
+                        } finally {
+                            if (in != null) {
                                 try {
                                     in.close();
                                 } catch (final IOException e) {
-                                    LogWriter.writeLog("Exception: "+e.getMessage());
+                                    LogWriter.writeLog("Exception: " + e.getMessage());
                                 }
                             }
                         }
-                    }   
+                    }
                 }
             } else {
                 LogWriter.writeLog("No fonts found at " + fontPath);
             }
-            
+
         } catch (final Exception e) {
-            LogWriter.writeLog("Exception adding substitute fonts "+ e.getMessage());
-        }finally {  //close streams if open
-            if(in!=null){
+            LogWriter.writeLog("Exception adding substitute fonts " + e.getMessage());
+        } finally {  //close streams if open
+            if (in != null) {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LogWriter.writeLog("Exception: "+e.getMessage());
+                    LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
-            
-            if(dir!=null){
+
+            if (dir != null) {
                 try {
                     dir.close();
                 } catch (final IOException e) {
-                    LogWriter.writeLog("Exception: "+e.getMessage());
+                    LogWriter.writeLog("Exception: " + e.getMessage());
                 }
             }
         }
-        
+
         return hasFonts;
-        
+
     }
-    
-    
+
+
     /**
      * method to add a single file to the PDF renderer
      *
@@ -685,44 +693,44 @@ public final class FontMappings {
      * @param fontPath    - full path to font file used for this font
      */
     public static void addFontFile(final String currentFont, String fontPath) {
-        
+
         checkFontTablesInitialised();
 
         //add separator if needed
         if (fontPath != null && !fontPath.endsWith("/") && !fontPath.endsWith("\\")) {
             fontPath += separator;
         }
-        
+
         final String name = currentFont.toLowerCase();
-        
+
         //decide font type
         final int type = StandardFonts.getFontType(name);
-        
+
         InputStream in = null;
-        
+
         if (type != StandardFonts.FONT_UNSUPPORTED && new File(fontPath + currentFont).exists()) {
             // see if root dir exists
-            
-            boolean failed=false;
-            
+
+            boolean failed = false;
+
             try {
                 in = new FileInputStream(fontPath + currentFont);
-                
+
             } catch (final Exception e) {
-                LogWriter.writeLog("Exception: "+e.getMessage());
-            
-                failed=true;
+                LogWriter.writeLog("Exception: " + e.getMessage());
+
+                failed = true;
             } catch (final Error err) {
-                LogWriter.writeLog("Error: "+err.getMessage());
-                
-                failed=true;
+                LogWriter.writeLog("Error: " + err.getMessage());
+
+                failed = true;
             }
-            
+
             // if it does, add
             if (!failed) {
-                
+
                 final String fontName;
-                
+
                 //name from file
                 final int pointer = currentFont.indexOf('.');
                 if (pointer == -1) {
@@ -730,210 +738,210 @@ public final class FontMappings {
                 } else {
                     fontName = currentFont.substring(0, pointer).toLowerCase();
                 }
-                
+
                 //choose filename  or over-ride if OpenType
-                if (fontSubstitutionMode == PdfDecoderInt.SUBSTITUTE_FONT_USING_FILE_NAME|| type == StandardFonts.OPENTYPE) {
-                    if(type==StandardFonts.TYPE1) {
+                if (fontSubstitutionMode == PdfDecoderInt.SUBSTITUTE_FONT_USING_FILE_NAME || type == StandardFonts.OPENTYPE) {
+                    if (type == StandardFonts.TYPE1) {
                         fontSubstitutionTable.put(fontName, "/Type1");
                     } else {
                         //TT or OTF
                         fontSubstitutionTable.put(fontName, "/TrueType");
                     }
-                    
+
                     fontSubstitutionLocation.put(fontName, fontPath + currentFont);
-                    
+
                     //store details under file
                     fontPropertiesTableType.put(fontName, type);
-                    fontPropertiesTablePath.put(fontName,fontPath + currentFont);
-                    
+                    fontPropertiesTablePath.put(fontName, fontPath + currentFont);
+
                 } else if (type == StandardFonts.TRUETYPE_COLLECTION || type == StandardFonts.TRUETYPE) {
-                    
-                    if(fontSubstitutionMode== PdfDecoderInt.SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME_USE_FAMILY_NAME_IF_DUPLICATES){
-                        
+
+                    if (fontSubstitutionMode == PdfDecoderInt.SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME_USE_FAMILY_NAME_IF_DUPLICATES) {
+
                         //get both possible values
-                        String[] postscriptNames=null;
+                        String[] postscriptNames = null;
                         try {
                             postscriptNames = StandardFonts.readNamesFromFont(type, fontPath + currentFont, PdfDecoderInt.SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME);
                         } catch (final Exception e) {
-                            LogWriter.writeLog("Exception: "+e.getMessage());
+                            LogWriter.writeLog("Exception: " + e.getMessage());
                         }
-                        
-                        String[] familyNames =null;
+
+                        String[] familyNames = null;
                         try {
                             familyNames = StandardFonts.readNamesFromFont(type, fontPath + currentFont, PdfDecoderInt.SUBSTITUTE_FONT_USING_FAMILY_NAME);
                         } catch (final Exception e) {
-                            LogWriter.writeLog("Exception: "+e.getMessage());
+                            LogWriter.writeLog("Exception: " + e.getMessage());
                         }
-                        
-                        int fontCount=0;
-                        if(postscriptNames!=null) {
-                            fontCount=postscriptNames.length;
+
+                        int fontCount = 0;
+                        if (postscriptNames != null) {
+                            fontCount = postscriptNames.length;
                         }
-                        
-                        for(int ii=0;ii<fontCount;ii++){
-                            
+
+                        for (int ii = 0; ii < fontCount; ii++) {
+
                             //allow for null and use font name
                             if (postscriptNames[ii] == null) {
                                 postscriptNames[ii] = Strip.stripAllSpaces(fontName);
                             }
-                            
+
                             //allow for null and use font name
                             if (familyNames[ii] == null) {
                                 familyNames[ii] = Strip.stripAllSpaces(fontName);
                             }
-                            
-                            final String fontSubValue=  fontSubstitutionTable.get(postscriptNames[ii]);
-                            final String possDuplicate= fontPossDuplicates.get(postscriptNames[ii]);
-                            if(fontSubValue==null && possDuplicate==null){ //first time so store and track
-                                
+
+                            final String fontSubValue = fontSubstitutionTable.get(postscriptNames[ii]);
+                            final String possDuplicate = fontPossDuplicates.get(postscriptNames[ii]);
+                            if (fontSubValue == null && possDuplicate == null) { //first time so store and track
+
                                 //System.out.println("store "+postscriptNames[ii]);
-                                
+
                                 fontSubstitutionTable.put(postscriptNames[ii], "/TrueType");
                                 fontSubstitutionLocation.put(postscriptNames[ii], fontPath + currentFont);
                                 fontSubstitutionFontID.put(postscriptNames[ii], ii);
-                                
+
                                 //and remember in case we need to switch
-                                fontPossDuplicates.put(postscriptNames[ii],familyNames[ii]);
-                                
-                            }else if(!familyNames[ii].equals(postscriptNames[ii])){
+                                fontPossDuplicates.put(postscriptNames[ii], familyNames[ii]);
+
+                            } else if (!familyNames[ii].equals(postscriptNames[ii])) {
                                 //if no duplicates,add to mappings with POSTSCRIPT and log filename
                                 //both lists should be in same order and name
-                                
+
                                 //else save as FAMILY_NAME
                                 fontSubstitutionTable.put(postscriptNames[ii], "/TrueType");
                                 fontSubstitutionLocation.put(postscriptNames[ii], fontPath + currentFont);
                                 fontSubstitutionFontID.put(postscriptNames[ii], ii);
-                                
+
                                 //store details under file
                                 fontPropertiesTableType.put(postscriptNames[ii], type);
-                                fontPropertiesTablePath.put(postscriptNames[ii],fontPath + currentFont);
-                                
+                                fontPropertiesTablePath.put(postscriptNames[ii], fontPath + currentFont);
+
                                 //if second find change first match
-                                if(!possDuplicate.equals("DONE")){
-                                    
+                                if (!possDuplicate.equals("DONE")) {
+
                                     //System.out.println("replace "+postscriptNames[ii]+" "+familyNames[ii]);
-                                    
+
                                     //flag as done
-                                    fontPossDuplicates.put(postscriptNames[ii],"DONE");
-                                    
+                                    fontPossDuplicates.put(postscriptNames[ii], "DONE");
+
                                     //swap over
                                     fontSubstitutionTable.remove(postscriptNames[ii]);
                                     fontSubstitutionTable.put(familyNames[ii], "/TrueType");
-                                    
-                                    final String font= fontSubstitutionLocation.get(postscriptNames[ii]);
+
+                                    final String font = fontSubstitutionLocation.get(postscriptNames[ii]);
                                     fontSubstitutionLocation.remove(postscriptNames[ii]);
                                     fontSubstitutionLocation.put(familyNames[ii], font);
-                                    
+
                                     fontSubstitutionFontID.remove(postscriptNames[ii]);
                                     fontSubstitutionFontID.put(familyNames[ii], ii);
-                                    
+
                                     //store details under file
                                     fontPropertiesTablePath.remove(familyNames[ii]);
                                     fontPropertiesTableType.remove(familyNames[ii]);
-                                    
+
                                     fontPropertiesTableType.put(familyNames[ii], type);
-                                    fontPropertiesTablePath.put(familyNames[ii],fontPath + currentFont);
-                                    
+                                    fontPropertiesTablePath.put(familyNames[ii], fontPath + currentFont);
+
                                 }
                             }
                         }
-                        
-                    }else{ //easy version
+
+                    } else { //easy version
                         //read 1 or more font mappings from file
-                        String[] fontNames=null;
+                        String[] fontNames = null;
                         try {
                             fontNames = StandardFonts.readNamesFromFont(type, fontPath + currentFont, fontSubstitutionMode);
                         } catch (final Exception e) {
-                            LogWriter.writeLog("Exception: "+e.getMessage());
+                            LogWriter.writeLog("Exception: " + e.getMessage());
                         }
-                        
-                        if(fontNames!=null){
+
+                        if (fontNames != null) {
                             for (int i = 0; i < fontNames.length; i++) {
-                                
+
                                 //allow for null and use font name
                                 if (fontNames[i] == null) {
                                     fontNames[i] = Strip.stripAllSpaces(fontName);
                                 }
-                                
+
                                 fontSubstitutionTable.put(fontNames[i], "/TrueType");
                                 fontSubstitutionLocation.put(fontNames[i], fontPath + currentFont);
                                 fontSubstitutionFontID.put(fontNames[i], i);
-                                
+
                                 //store details under file
                                 fontPropertiesTableType.put(fontNames[i], type);
-                                fontPropertiesTablePath.put(fontNames[i],fontPath + currentFont);
+                                fontPropertiesTablePath.put(fontNames[i], fontPath + currentFont);
                             }
                         }
                     }
-                }else if(type==StandardFonts.TYPE1){// || type == StandardFonts.OPENTYPE){ //type1
-                    
+                } else if (type == StandardFonts.TYPE1) { // || type == StandardFonts.OPENTYPE){ //type1
+
                     //read 1 or more font mappings from file
-                    String[] fontNames=null;
+                    String[] fontNames = null;
                     try {
                         fontNames = StandardFonts.readNamesFromFont(type, fontPath + currentFont, fontSubstitutionMode);
                     } catch (final Exception e) {
-                        LogWriter.writeLog("Exception: "+e.getMessage());
+                        LogWriter.writeLog("Exception: " + e.getMessage());
                     }
-                    
-                    if(fontNames!=null){
+
+                    if (fontNames != null) {
                         for (int i = 0; i < fontNames.length; i++) {
-                            
+
                             //allow for null and use font name
                             if (fontNames[i] == null) {
                                 fontNames[i] = Strip.stripAllSpaces(fontName);
                             }
-                            
+
                             //System.out.println("font="+fontNames[i]);
-                            
+
                             fontSubstitutionTable.put(fontNames[i], "/Type1");
                             fontSubstitutionLocation.put(fontNames[i], fontPath + currentFont);
                             fontSubstitutionFontID.put(fontNames[i], i);
-                            
+
                             //store details under file
                             fontPropertiesTableType.put(fontNames[i], type);
-                            fontPropertiesTablePath.put(fontNames[i],fontPath + currentFont);
-                            
+                            fontPropertiesTablePath.put(fontNames[i], fontPath + currentFont);
+
                         }
                     }
                 }
-            } else{
+            } else {
                 LogWriter.writeLog("No fonts found at " + fontPath);
             }
         }
-          
+
         //finally close
-        if(in!=null){
+        if (in != null) {
             try {
                 in.close();
             } catch (final IOException e) {
-                LogWriter.writeLog("Exception: "+e.getMessage());
+                LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
     }
-    
+
     private static ArrayList<String> getDirectoryMatches(String sDirectoryName) throws IOException {
-        
-        sDirectoryName=sDirectoryName.replaceAll("\\.", "/");
-        
+
+        sDirectoryName = sDirectoryName.replaceAll("\\.", "/");
+
         final URL u = Thread.currentThread().getContextClassLoader().getResource(
                 sDirectoryName);
         final ArrayList<String> retValue = new ArrayList<String>(0);
         String s = u.toString();
-        
+
         System.out.println("scanning " + s);
-        
+
         if (s.startsWith("jar:") && s.endsWith(sDirectoryName)) {
             final int idx = s.lastIndexOf(sDirectoryName);
             s = s.substring(0, idx); // isolate entry name
-            
+
             System.out.println("entry= " + s);
-            
+
             final URL url = new URL(s);
             // Get the jar file
             final JarURLConnection conn = (JarURLConnection) url.openConnection();
             final JarFile jar = conn.getJarFile();
-            
-            for (final Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
+
+            for (final Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements(); ) {
                 final JarEntry entry = e.nextElement();
                 if ((!entry.isDirectory())
                         && (entry.getName().startsWith(sDirectoryName))) { // this
@@ -942,15 +950,15 @@ public final class FontMappings {
                     // System.out.println("Found a match!");
                     final String fontName = entry.getName();
                     final int i = fontName.lastIndexOf('/');
-                    
+
                     retValue.add(fontName.substring(i + 1));
                 }
             }
-        } 
-        
+        }
+
         return retValue;
     }
-    
+
     /**
      * read values from the classpath
      */
@@ -964,15 +972,15 @@ public final class FontMappings {
             if (nextValue == null) {
                 break;
             }
-            
+
             fonts.add(nextValue);
         }
-        
+
         inpStream.close();
-        
+
         return fonts;
     }
-    
+
     /**
      * set the font used for default from Java fonts on system - Java fonts are
      * case sensitive, but JPedal resolves this internally, so you could use
@@ -980,14 +988,14 @@ public final class FontMappings {
      * valid Java font (otherwise it will default to Lucida anyway)
      */
     public static void setDefaultDisplayFont(final String fontName) throws PdfFontException {
-        
+
         boolean isFontInstalled = false;
-        
+
         // get list of fonts and see if installed
         final String[] fontList = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-        
+
         final int count = fontList.length;
-        
+
         for (int i = 0; i < count; i++) {
             if (fontList[i].equalsIgnoreCase(fontName.toLowerCase())) {
                 isFontInstalled = true;
@@ -995,10 +1003,10 @@ public final class FontMappings {
                 i = count;
             }
         }
-        
+
         if (!isFontInstalled) {
             throw new PdfFontException("Font " + fontName + " is not available.");
         }
-        
+
     }
 }

@@ -41,6 +41,7 @@ import java.security.cert.Certificate;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.border.Border;
+
 import org.jpedal.display.Display;
 import org.jpedal.display.DisplayOffsets;
 import org.jpedal.exception.PdfException;
@@ -63,7 +64,7 @@ public interface PdfDecoderInt {
     /**
      * build number of this version
      */
-    String version = "7.10.24";
+    String version = "7.11.31";
     /**
      * flag to show extraction mode should include any text
      */
@@ -92,7 +93,7 @@ public interface PdfDecoderInt {
      * flag to show extraction of raw cmyk images
      */
     //int CMYKIMAGES = 128;
-    
+
     /**
      * flag to show extraction of xforms metadata
      */
@@ -101,7 +102,7 @@ public interface PdfDecoderInt {
     /**
      * flag to tell code to flatten forms
      */
-    int RASTERIZE_FORMS=1024;
+    int RASTERIZE_FORMS = 1024;
     /**
      * flag to show render mode includes any text
      */
@@ -147,19 +148,18 @@ public interface PdfDecoderInt {
     int SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME = 2;
     int SUBSTITUTE_FONT_USING_FAMILY_NAME = 3;
     int SUBSTITUTE_FONT_USING_FULL_FONT_NAME = 4;
-    int SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME_USE_FAMILY_NAME_IF_DUPLICATES= 5;
-    
+    int SUBSTITUTE_FONT_USING_POSTSCRIPT_NAME_USE_FAMILY_NAME_IF_DUPLICATES = 5;
+
     /**
      * returns object containing grouped text of last decoded page
      * - if no page decoded, a Runtime exception is thrown to warn user
      * Please see org.jpedal.examples.text for example code.
-     *
      */
-    PdfGroupingAlgorithms getGroupingObject() throws PdfException ;
+    PdfGroupingAlgorithms getGroupingObject() throws PdfException;
 
     /**
      * not part of API used internally
-     *
+     * <p>
      * allows external helper classes to be added to JPedal to alter default functionality -
      *
      * @param newHandler
@@ -171,12 +171,12 @@ public interface PdfDecoderInt {
 
     /**
      * allow access to PDF file
+     *
      * @return
      */
     PdfObjectReader getIO();
 
     /**
-     *
      * access textlines object
      */
     TextLines getTextLines();
@@ -188,7 +188,7 @@ public interface PdfDecoderInt {
     PdfGroupingAlgorithms getBackgroundGroupingObject();
 
     Document getMarkedContent();
-    
+
     boolean isOpen();
 
     int getDisplayRotation();
@@ -200,7 +200,7 @@ public interface PdfDecoderInt {
     Iterator getPageInfo(int type);
 
     OutlineData getOutlineData();
-    
+
     boolean isLoadingLinearizedPDF();
 
     int getPageAlignment();
@@ -218,13 +218,13 @@ public interface PdfDecoderInt {
     Document getOutlineAsXML();
 
     PdfPageData getPdfPageData();
-    
+
     int getPDFWidth();
-    
+
     int getPDFHeight();
 
     BufferedImage getPageAsImage(int pageIndex) throws PdfException;
-    
+
     BufferedImage getPageAsImage(int pageIndex, float scaling) throws PdfException;
 
     BufferedImage getPageAsHiRes(int pageIndex) throws PdfException;
@@ -233,49 +233,53 @@ public interface PdfDecoderInt {
 
     BufferedImage getPageAsHiRes(int pageIndex, Map params, boolean isTransparent) throws PdfException;
 
-    BufferedImage getPageAsHiRes(int pageIndex, boolean isTransparent)throws PdfException;
+    BufferedImage getPageAsHiRes(int pageIndex, boolean isTransparent) throws PdfException;
 
     BufferedImage getPageAsTransparentImage(int pageIndex) throws PdfException;
-    
+
     float getHiResUpscaleFactor();
-    
+
     /**
      * Return amount to inset the page rectangle height by
+     *
      * @return int
      */
     int getInsetH();
-    
+
     /**
      * Return amount to inset the page rectangle width by
+     *
      * @return int
      */
     int getInsetW();
-    
-        /**
-         * Return amount to scroll window by when scrolling (default is 10).
-         * @return int
-         */
-        int getScrollInterval();
 
-        /**
-         * Sets the ammount to scroll the window by (default is 10).
-         * @param scrollInterval 
-         */
-        void setScrollInterval(int scrollInterval);
+    /**
+     * Return amount to scroll window by when scrolling (default is 10).
+     *
+     * @return int
+     */
+    int getScrollInterval();
 
-
-        /**
-         * NOT PART OF API
-         * turns off the viewable area, scaling the page back to original scaling
-         */
-        void resetViewableArea();
+    /**
+     * Sets the ammount to scroll the window by (default is 10).
+     *
+     * @param scrollInterval
+     */
+    void setScrollInterval(int scrollInterval);
 
 
-        /**
-         * used for non-PDF files to reset page
-         */
-        void resetForNonPDFPage(int pageCount);
-        
+    /**
+     * NOT PART OF API
+     * turns off the viewable area, scaling the page back to original scaling
+     */
+    void resetViewableArea();
+
+
+    /**
+     * used for non-PDF files to reset page
+     */
+    void resetForNonPDFPage(int pageCount);
+
     void setPDFBorder(Border newBorder);
 
     void flushObjectValues(boolean reinit);
@@ -293,9 +297,9 @@ public interface PdfDecoderInt {
     PdfFileInformation getFileInformationData();
 
     void setExtractionMode(int mode, float scaling);
-    
+
     void setHardwareAccelerationforScreen(boolean useAcceleration);
-    
+
     DPIFactory getDPIFactory();
 
     void waitForDecodingToFinish();
@@ -309,7 +313,7 @@ public interface PdfDecoderInt {
     boolean isPageAvailable(int rawPage);
 
     void updateCursorBoxOnScreen(int[] rectParams, int outlineColor);
-   
+
     void decodePageInBackground(int i) throws Exception;
 
     int getPageCount();
@@ -317,7 +321,7 @@ public interface PdfDecoderInt {
     boolean isEncrypted();
 
     boolean isPasswordSupplied();
-    
+
     boolean isForm();
 
     boolean isFileViewable();
@@ -331,7 +335,7 @@ public interface PdfDecoderInt {
     void openPdfFile(String filename, String password) throws PdfException;
 
     void openPdfArray(byte[] data) throws PdfException;
-    
+
     void openPdfArray(byte[] data, String password) throws PdfException;
 
     void openPdfFile(String filename, Certificate certificate, PrivateKey key) throws PdfException;
@@ -359,7 +363,7 @@ public interface PdfDecoderInt {
     void useXMLExtraction();
 
     void setStreamCacheSize(int size);
-    
+
     void setUserOffsets(int x, int y, int mode);
 
     boolean hasEmbeddedFonts();
@@ -372,7 +376,7 @@ public interface PdfDecoderInt {
 
     Javascript getJavaScript();
 
-   // boolean isPageSuccessful();
+    // boolean isPageSuccessful();
 
     String getPageDecodeReport();
 
@@ -386,11 +390,11 @@ public interface PdfDecoderInt {
 
     BufferedImage getSelectedRectangleOnscreen(float t_x1, float t_y1,
                                                float t_x2, float t_y2, float scaling);
-    
+
     float getScaling();
-    
+
     void setScaling(float x);
-    
+
     //temporary below
     void setDisplayRotation(int newRotation);
 
@@ -408,41 +412,41 @@ public interface PdfDecoderInt {
     void flushAdditionalObjectsOnPage(int page) throws PdfException;
 
     String getFileName();
-    
+
     boolean getPageDecodeStatus(int status);
-    
+
     String getPageDecodeStatusReport(int status);
-    
+
     String getPDFVersion();
-    
+
     ExternalHandlers getExternalHandler();
-    
+
     int getSpecialMode();
-    
+
     boolean useNewGraphicsMode();
-    
+
     void useNewGraphicsMode(boolean b);
-    
+
     void setPageParameters(float scaling, int pageNumber, int newRotation);
-    
+
     void setStatusBarObject(StatusBar statusBar);
-    
+
     void setInset(int width, int height);
-    
+
     DecoderOptions getDecoderOptions();
-    
+
     int[] getMaxSizeWH();
-    
+
     int[] getPaneBounds();
-    
+
     void repaintPane(int page);
-    
+
     void requestFocus();
-    
+
     void setBorderPresent(boolean borderPresent);
-    
+
     boolean isBorderPresent();
-    
+
     void setPreviewThumbnail(final BufferedImage previewImage, final String previewText);
 
     Rectangle getVisibleRect();

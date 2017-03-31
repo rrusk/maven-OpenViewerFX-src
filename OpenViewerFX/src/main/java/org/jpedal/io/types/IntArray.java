@@ -38,29 +38,28 @@ import org.jpedal.objects.raw.PdfObject;
 import org.jpedal.utils.NumberUtils;
 
 /**
- *
  * @author markee
  */
 public class IntArray extends Array {
-    
+
     public IntArray(final PdfFileReader pdfFileReader, final int i, final byte[] raw) {
         super(pdfFileReader, i, PdfDictionary.VALUE_IS_INT_ARRAY, raw);
     }
-    
+
     @Override
     void fillArray(final int elementCount, final PdfObject pdfObject) {
-        
+
         final int[] finalByteValues = new int[elementCount];
         byte[] data;
-        
-        for(int a=0;a<elementCount;a++){
-            data=valuesRead.get(a);
-            finalByteValues[a]=NumberUtils.parseInt(0, data.length, data); 
+
+        for (int a = 0; a < elementCount; a++) {
+            data = valuesRead.get(a);
+            finalByteValues[a] = NumberUtils.parseInt(0, data.length, data);
         }
-        
+
         pdfObject.setIntArray(PDFkeyInt, finalByteValues);
-        
-               
+
+
     }
-    
+
 }

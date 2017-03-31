@@ -39,27 +39,27 @@ import javafx.scene.control.CheckMenuItem;
  *
  */
 public class JavaFXCheckBoxMenuItem extends CheckMenuItem implements JavaFXID {
-    
-	private int ID;
 
-	public JavaFXCheckBoxMenuItem(final String text) {
-		super(text);
-	}
+    private int ID;
 
-	/**
-	 * @return the iD
-	 */
-	@Override
+    public JavaFXCheckBoxMenuItem(final String text) {
+        super(text);
+    }
+
+    /**
+     * @return the iD
+     */
+    @Override
     public int getID() {
-		return ID;
-	}
+        return ID;
+    }
 
-	/**
-	 * @param id the iD to set
-	 */
-	@Override
+    /**
+     * @param id the iD to set
+     */
+    @Override
     public void setID(final int id) {
-		ID = id;
-	}
+        ID = id;
+    }
 
 }

@@ -39,144 +39,161 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.acroforms.GUIData;
 import org.jpedal.objects.raw.*;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.StringUtils;
 
-/** this class is used to display the text fields in the defined font, but is used for readonly fields only. */
+/**
+ * this class is used to display the text fields in the defined font, but is used for readonly fields only.
+ */
 public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants {
-    
-    /** used to tell the paint method that we need to scale up the image for printing */
+
+    /**
+     * used to tell the paint method that we need to scale up the image for printing
+     */
     private boolean currentlyPrinting;
     private int printMultiplier = 1;
-    
-    private int alignment=-1;
-    
+
+    private int alignment = -1;
+
     private static final long serialVersionUID = 8946195842453749725L;
-    
-    /** stores the root image for selected and unselected icons */
+
+    /**
+     * stores the root image for selected and unselected icons
+     */
     private BufferedImage rootImage;
-    /** stores the final image after any icon rotation */
+    /**
+     * stores the final image after any icon rotation
+     */
     private BufferedImage finalImage;
-    
+
     private PdfObject fakeObj;
-    
-    /** tells us if the text for this icon has chnaged and so if we need to redraw the icon*/
+
+    /**
+     * tells us if the text for this icon has chnaged and so if we need to redraw the icon
+     */
     private boolean textChanged;
-    private String preFontStream="",betweenFontAndTextStream="",afterTextStream="",text="";
-    
-    private String fontName="",fontSize="12",fontCommand="";
-    
-    /** our full command Stream*/
+    private String preFontStream = "", betweenFontAndTextStream = "", afterTextStream = "", text = "";
+
+    private String fontName = "", fontSize = "12", fontCommand = "";
+
+    /**
+     * our full command Stream
+     */
     private String fullCommandString;
-    
+
     private final PdfObjectReader currentpdffile;
-    private int subtype=-1;
+    private int subtype = -1;
     private final PdfObject resources;
-    
+
     private final PdfObject form;
-    
-    /** new code to store the data to create the image when needed to the size needed
+
+    /**
+     * new code to store the data to create the image when needed to the size needed
      * offset = if 0 no change, 1 offset image, 2 invert image
      * <br> NOTE if decipherAppObject ios not called this will cause problems.
      */
-    public ReadOnlyTextIcon(final PdfObject form, final int iconRot, final PdfObjectReader pdfObjectReader, final PdfObject res){
+    public ReadOnlyTextIcon(final PdfObject form, final int iconRot, final PdfObjectReader pdfObjectReader, final PdfObject res) {
         super(iconRot);
-        
-        this.form=form;
+
+        this.form = form;
         currentpdffile = pdfObjectReader;
         resources = res;
-        
+
         //        if(selObj.getObjectRefAsString().equals("128 0 R") || selObj.getObjectRefAsString().equals("130 0 R"))
         //			debug = true;
     }
-    
-    /** returns the currently selected Image*/
+
+    /**
+     * returns the currently selected Image
+     */
     @Override
-    public Image getImage(){
+    public Image getImage() {
         final Image image;
         checkAndCreateimage();
-        
+
         image = finalImage;
-        
+
         return image;
     }
-    
-    /** draws the form to a BufferedImage the size of the Icon and returns it,
+
+    /**
+     * draws the form to a BufferedImage the size of the Icon and returns it,
      * uses the paintIcon method for the drawing so future changes should only be in one place
      */
-    public BufferedImage drawToBufferedImage(){
+    public BufferedImage drawToBufferedImage() {
         final BufferedImage bufImg = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
         final Graphics g = bufImg.getGraphics();
         paintIcon(null, g, 0, 0);
         g.dispose();
-        
+
         return bufImg;
     }
-    
+
     @Override
     public synchronized void paintIcon(final Component c, final Graphics g, final int x, final int y) {
-        
+
         final BufferedImage image = (BufferedImage) getImage();
-        
+
         if (image == null) {
             return;
         }
-        
-        if (c!=null && c.isEnabled()) {
+
+        if (c != null && c.isEnabled()) {
             g.setColor(c.getBackground());
         } else {
             g.setColor(Color.gray);
         }
-        
+
         final Graphics2D g2 = (Graphics2D) g;
         if (iconWidth > 0 && iconHeight > 0) {
-            
+
             int drawWidth = iconWidth;
             int drawHeight = iconHeight;
-            if(displaySingle && (iconRotation==270 || iconRotation==90)){
+            if (displaySingle && (iconRotation == 270 || iconRotation == 90)) {
                 //swap width and height so that the image is drawn in the corect orientation
                 //without changing the raw width and height for the icon size
                 drawWidth = iconHeight;
                 drawHeight = iconWidth;
             }
-            
+
             //only work out scaling if we have a dictionary of an image, as otherwise it could be a blank image (i.e. 1 x 1).
-            if(currentpdffile!=null){
+            if (currentpdffile != null) {
                 //work out w,h which we want to draw inside our icon to maintain aspect ratio.
-                final float ws = drawWidth / (float)image.getWidth(null);
-                final float hs = drawHeight / (float)image.getHeight(null);
-                if(ws<hs){
-                    drawWidth = (int)(ws * image.getWidth(null));
-                    drawHeight = (int)(ws * image.getHeight(null));
-                }else {
-                    drawWidth = (int)(hs * image.getWidth(null));
-                    drawHeight = (int)(hs * image.getHeight(null));
+                final float ws = drawWidth / (float) image.getWidth(null);
+                final float hs = drawHeight / (float) image.getHeight(null);
+                if (ws < hs) {
+                    drawWidth = (int) (ws * image.getWidth(null));
+                    drawHeight = (int) (ws * image.getHeight(null));
+                } else {
+                    drawWidth = (int) (hs * image.getWidth(null));
+                    drawHeight = (int) (hs * image.getHeight(null));
                 }
             }
-            
+
             //now work out the x,y position to keep the icon in the centre of the icon
-            int posX=0,posY=0;
-            if(currentpdffile!=null){
-                if(displaySingle && (iconRotation==270 || iconRotation==90)){
-                    posX = (iconHeight-drawWidth)/2;
-                    posY = (iconWidth-drawHeight)/2;
-                }else {
-                    posX = (iconWidth-drawWidth)/2;
-                    posY = (iconHeight-drawHeight)/2;
+            int posX = 0, posY = 0;
+            if (currentpdffile != null) {
+                if (displaySingle && (iconRotation == 270 || iconRotation == 90)) {
+                    posX = (iconHeight - drawWidth) / 2;
+                    posY = (iconWidth - drawHeight) / 2;
+                } else {
+                    posX = (iconWidth - drawWidth) / 2;
+                    posY = (iconHeight - drawHeight) / 2;
                 }
             }
-            
-            if(alignment==JTextField.LEFT) {
+
+            if (alignment == JTextField.LEFT) {
                 posX = 0;
             }
-            
+
             final int finalRotation;
-            if(displaySingle){
+            if (displaySingle) {
                 finalRotation = validateRotationValue(pageRotate - iconRotation);
-            }else {
+            } else {
                 finalRotation = pageRotate;
             }
             
@@ -204,13 +221,13 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants 
         } else {
             g2.drawImage(image, 0, 0, null);
         }
-        
+
         g2.translate(-x, -y);
     }
-    
+
     private void checkAndCreateimage() {
         //check if pdf object reader is defined, as we still use opaque images which do NOT need redecoding
-        if(currentpdffile==null) {
+        if (currentpdffile == null) {
             return;
         }
         
@@ -222,120 +239,121 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants 
          *  if we do this the best way would be to have an object that we move the decode routine to, and
          *  then when we read the 100% values from the image object we can store them in that size.
          */
-        
+
         //define normal sizes for normal use
-        int newWidth = iconWidth,newHeight = iconHeight;
-        
+        int newWidth = iconWidth, newHeight = iconHeight;
+
         //if printing define larger sizes for root image, but dont change icon height and width
-        if(currentlyPrinting){
+        if (currentlyPrinting) {
             newWidth = iconWidth * printMultiplier;
             newHeight = iconHeight * printMultiplier;
         }
-        
+
         //decode images at needed size
-        if(textChanged || rootImage==null
+        if (textChanged || rootImage == null
                 || newWidth > (rootImage.getWidth(null))
                 || newHeight > (rootImage.getHeight(null))
-                || newWidth < (rootImage.getWidth(null)/MAXSCALEFACTOR)
-                || newHeight < (rootImage.getHeight(null)/MAXSCALEFACTOR)){
+                || newWidth < (rootImage.getWidth(null) / MAXSCALEFACTOR)
+                || newHeight < (rootImage.getHeight(null) / MAXSCALEFACTOR)) {
             //System.out.println(fakeObj.getObjectRefAsString()+" command="+fullCommandString);
-            rootImage = FormStream.decode(form,currentpdffile, fakeObj, subtype,newWidth,newHeight,0,1);
-            
-            finalImage = FormStream.rotate(rootImage,iconRotation);
-            
+            rootImage = FormStream.decode(form, currentpdffile, fakeObj, subtype, newWidth, newHeight, 0, 1);
+
+            finalImage = FormStream.rotate(rootImage, iconRotation);
+
             //make text as redrawn
             textChanged = false;
-            
-        }//icon rotation is always defined in the constructor so we dont need to change it
+
+        } //icon rotation is always defined in the constructor so we dont need to change it
     }
-    public void setText(String str){
-        if(str==null) {
+
+    public void setText(String str) {
+        if (str == null) {
             str = "";
         }
-        
-        if(str.equals(text)) {
+
+        if (str.equals(text)) {
             return;
         }
-        
+
         textChanged = true;
         this.text = str;
-        
+
         //check afterTextStream to try and sto duplicate TJs with same wording
         final PdfObject xobj = new PdfObject("1 10 X");
-        while(true){
+        while (true) {
             xobj.setDecodedStream(StringUtils.toBytes(afterTextStream));
-            final String tj = FormStream.decipherTextFromAP(currentpdffile,xobj);
-            if(tj!=null && text.contains(tj)){
-                final int endOfTj = afterTextStream.indexOf(" Tj", afterTextStream.indexOf(tj))+3;
+            final String tj = FormStream.decipherTextFromAP(currentpdffile, xobj);
+            if (tj != null && text.contains(tj)) {
+                final int endOfTj = afterTextStream.indexOf(" Tj", afterTextStream.indexOf(tj)) + 3;
                 afterTextStream = afterTextStream.substring(endOfTj);
-                if(afterTextStream.isEmpty()) {
+                if (afterTextStream.isEmpty()) {
                     break;
                 }
-            }else {
+            } else {
                 break;
             }
         }
-        
+
         try {
-        	
-        	if(text.contains("\n")){//multiline text
-                final StringTokenizer lines=new StringTokenizer(text,"\n",false);
+
+            if (text.contains("\n")) { //multiline text
+                final StringTokenizer lines = new StringTokenizer(text, "\n", false);
                 String nextLine;
-              //Add 2 to simulate form padding
+                //Add 2 to simulate form padding
                 String textAlignment;
                 int alignmentX = 2;
-                int alignmentY = ((FormObject)form).getBoundingRectangle().height;
-                
-                textAlignment = " "+alignmentX+ ' ' +alignmentY+" Td ";
-                
-                this.fullCommandString = preFontStream+fontName+fontSize+fontCommand+
+                int alignmentY = ((FormObject) form).getBoundingRectangle().height;
+
+                textAlignment = " " + alignmentX + ' ' + alignmentY + " Td ";
+
+                this.fullCommandString = preFontStream + fontName + fontSize + fontCommand +
                         betweenFontAndTextStream + textAlignment;
-                
+
 //                int y = ((FormObject)form).getBoundingRectangle().height;
                 int xPoint = 0;
-                
-                while(lines.hasMoreTokens()){
-                    
-                    nextLine=lines.nextToken();
-                    final FontMetrics fm = new Canvas().getFontMetrics(new Font(fontName, Font.PLAIN, (int)Float.parseFloat(fontSize)));
-                	final Rectangle2D r = fm.getStringBounds(nextLine, null);
 
-                    if(((FormObject)form).getAlignment()!=-1){
+                while (lines.hasMoreTokens()) {
 
-                    	
-                    	switch(((FormObject)form).getAlignment()){
-                    	case SwingConstants.LEFT :
-                    		alignmentX=0;
-                    		break;
-                    	case SwingConstants.CENTER : 
-                    		alignmentX = ((int)(((FormObject)form).getBoundingRectangle().width - r.getWidth()))/2;
-                    		alignmentX -= xPoint;
-                    		break;
-                    	case SwingConstants.RIGHT : 
-                    		alignmentX = ((int)(((FormObject)form).getBoundingRectangle().width - r.getWidth()));
-                    		alignmentX -= xPoint;
-                    		break;
-                    	}
-                    	
+                    nextLine = lines.nextToken();
+                    final FontMetrics fm = new Canvas().getFontMetrics(new Font(fontName, Font.PLAIN, (int) Float.parseFloat(fontSize)));
+                    final Rectangle2D r = fm.getStringBounds(nextLine, null);
+
+                    if (((FormObject) form).getAlignment() != -1) {
+
+
+                        switch (((FormObject) form).getAlignment()) {
+                            case SwingConstants.LEFT:
+                                alignmentX = 0;
+                                break;
+                            case SwingConstants.CENTER:
+                                alignmentX = ((int) (((FormObject) form).getBoundingRectangle().width - r.getWidth())) / 2;
+                                alignmentX -= xPoint;
+                                break;
+                            case SwingConstants.RIGHT:
+                                alignmentX = ((int) (((FormObject) form).getBoundingRectangle().width - r.getWidth()));
+                                alignmentX -= xPoint;
+                                break;
+                        }
+
                     }
 
-                	alignmentY = (int)-(r.getHeight()+2);
-                	
+                    alignmentY = (int) -(r.getHeight() + 2);
+
                     //Construction alignment string
-                    textAlignment = " "+alignmentX+ ' ' +alignmentY+" Td ";
-                    
-                    this.fullCommandString += textAlignment+'(' +nextLine+")Tj ";
-                    
+                    textAlignment = " " + alignmentX + ' ' + alignmentY + " Td ";
+
+                    this.fullCommandString += textAlignment + '(' + nextLine + ")Tj ";
+
                     xPoint += alignmentX;
                 }
-                this.fullCommandString += afterTextStream;   
-                
-            }else{
-            	
+                this.fullCommandString += afterTextStream;
+
+            } else {
+
                 //Add 2 to simulate form padding
                 int alignmentX = 2;
-                int alignmentY = ((int) (((FormObject) form).getBoundingRectangle().height - Float.parseFloat(fontSize)))+2;
-                
+                int alignmentY = ((int) (((FormObject) form).getBoundingRectangle().height - Float.parseFloat(fontSize))) + 2;
+
                 if (form.getParameterConstant(PdfDictionary.Subtype) != PdfDictionary.FreeText) {
                     alignmentY = ((int) (((FormObject) form).getBoundingRectangle().height - Float.parseFloat(fontSize))) / 2;
                     if (alignmentY < 2) {
@@ -358,44 +376,44 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants 
                     }
                 }
                 //Construction alignment string
-                final String textAlignment = alignmentX+" "+alignmentY+" Td ";
-                
-                this.fullCommandString = preFontStream+fontName+fontSize+fontCommand+
-                        betweenFontAndTextStream+ textAlignment+'(' +text+")Tj "+afterTextStream;
-                
+                final String textAlignment = alignmentX + " " + alignmentY + " Td ";
+
+                this.fullCommandString = preFontStream + fontName + fontSize + fontCommand +
+                        betweenFontAndTextStream + textAlignment + '(' + text + ")Tj " + afterTextStream;
+
             }
-        	
-        	Color BG = null;
+
+            Color BG = null;
 //        	Color BC = new Color(0, 0, 0, 0);
-        	if(form.getDictionary(PdfDictionary.MK)!=null){
-        		final PdfObject MK = form.getDictionary(PdfDictionary.MK);
+            if (form.getDictionary(PdfDictionary.MK) != null) {
+                final PdfObject MK = form.getDictionary(PdfDictionary.MK);
 //        		float[] bc = MK.getFloatArray(PdfDictionary.BC);
-        		final float[] bg = MK.getFloatArray(PdfDictionary.BG);
-        		
+                final float[] bg = MK.getFloatArray(PdfDictionary.BG);
+
         		
         		/*
         		 * Some files do not store colour values between 0 and 1.
         		 * Catch these and convert them
         		 */
-        		//Check BG values
-        		if(bg!=null){
-        			boolean colorOutOfBounds = false;
-        			for(int i=0; i!=bg.length; i++){
-        				if(bg[i]>1.0f){
-        					colorOutOfBounds = true;
-        					break;
-        				}
-        			}
-        			if(colorOutOfBounds){
-        				for(int i=0; i!=bg.length; i++){
-        					if(bg[i]>1.0f) {
+                //Check BG values
+                if (bg != null) {
+                    boolean colorOutOfBounds = false;
+                    for (int i = 0; i != bg.length; i++) {
+                        if (bg[i] > 1.0f) {
+                            colorOutOfBounds = true;
+                            break;
+                        }
+                    }
+                    if (colorOutOfBounds) {
+                        for (int i = 0; i != bg.length; i++) {
+                            if (bg[i] > 1.0f) {
                                 bg[i] /= 255;
                             }
-        				}
-        			}
-        		}
-        		
-        		//Check BC values
+                        }
+                    }
+                }
+
+                //Check BC values
 //        		if(bc!=null){
 //        			boolean colorOutOfBounds = false;
 //        			for(int i=0; i!=bc.length; i++){
@@ -427,121 +445,123 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants 
 //        			}
 //        		}
 
-        		if(bg != null && bg.length>0){
-        			switch(bg.length){
-        			case 1 : 
-        				BG = new Color(bg[0],bg[0],bg[0],1.0f);
-        				break;
-        			case 3 : 
-        				BG = new Color(bg[0],bg[1],bg[2],1.0f);
-        				break;
-        			case 4 : 
+                if (bg != null && bg.length > 0) {
+                    switch (bg.length) {
+                        case 1:
+                            BG = new Color(bg[0], bg[0], bg[0], 1.0f);
+                            break;
+                        case 3:
+                            BG = new Color(bg[0], bg[1], bg[2], 1.0f);
+                            break;
+                        case 4:
 //        				BG = new Color(bg[0],bg[0],bg[0],1.0f);
-        				break;
-        			}
-        		}
-        	}
-        	
-        	//Fill Background if set
-        	if(BG!=null){            	
-            	this.fullCommandString = BG.getRed()+" "+BG.getGreen()+ ' ' +BG.getBlue()+" rg 0 0 "+(((FormObject)form).getBoundingRectangle().width-3)+ ' ' +(((FormObject)form).getBoundingRectangle().height-3)+" re f "+fullCommandString;
-        	}
-        	
+                            break;
+                    }
+                }
+            }
+
+            //Fill Background if set
+            if (BG != null) {
+                this.fullCommandString = BG.getRed() + " " + BG.getGreen() + ' ' + BG.getBlue() + " rg 0 0 " + (((FormObject) form).getBoundingRectangle().width - 3) + ' ' + (((FormObject) form).getBoundingRectangle().height - 3) + " re f " + fullCommandString;
+            }
+
             //we may need to actually check encoding on font here rather than assume win
             fakeObj.setDecodedStream(fullCommandString.getBytes("Cp1252"));
-            
+
         } catch (final IOException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
     }
-      
-    /** decodes and saves all information needed to decode the object on the fly,
+
+    /**
+     * decodes and saves all information needed to decode the object on the fly,
      * the test and font can be altered with specific methods.
+     *
      * @return boolean true if it all worked.
      */
     public boolean decipherAppObject(final FormObject form) {
         //read the command from file if there is one
-        String fontStr="";
+        String fontStr = "";
         final PdfObject appObj = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
-        if(appObj!=null){
+        if (appObj != null) {
             final byte[] bytes = appObj.getDecodedStream();
-            
-            if(bytes!=null){
-                int startTf=-1;
-                int endTf=-1;
+
+            if (bytes != null) {
+                int startTf = -1;
+                int endTf = -1;
                 int startTj;
-                int endTj=-1;
-                final int end=bytes.length;
+                int endTj = -1;
+                final int end = bytes.length;
 
                 //find index of Tf command
-                for (int i = 0; i < end-1; i++) {
-                    if((((char)bytes[i])=='T' && ((char)bytes[i+1])=='f') && 
-                        (i+2>=end || bytes[i+2]==10 || bytes[i+2]==13 || bytes[i+2]==' ')){
-                            endTf = i+2;
-                            break;
-                        }
+                for (int i = 0; i < end - 1; i++) {
+                    if ((((char) bytes[i]) == 'T' && ((char) bytes[i + 1]) == 'f') &&
+                            (i + 2 >= end || bytes[i + 2] == 10 || bytes[i + 2] == 13 || bytes[i + 2] == ' ')) {
+                        endTf = i + 2;
+                        break;
                     }
-                
-                
-                if(endTf==-1){
+                }
+
+
+                if (endTf == -1) {
                     startTf = 0;
                     endTf = 0;
-                }else {
+                } else {
                     //find beginning of Tf command
                     //					int strs = 0;
                     //					boolean strFound = false;
-                    for (int i = endTf-3; i > startTf; i--) {
+                    for (int i = endTf - 3; i > startTf; i--) {
                         //this is kept until its passed tests.
                         //						if(bytes[i]==' ' || bytes[i]==10 || bytes[i]==13){
                         //							if(strFound){
                         //								strs++;
                         //								if(strs==2){
-                        //									startTj = i+1;//to allow for the gap
+                        //									startTj = i+1; //to allow for the gap
                         //									//should give the same index as the '/'
                         //									break;
                         //								}
                         //							}
                         //							continue;
                         //						}else
-                        if(bytes[i]=='/'){
+                        if (bytes[i] == '/') {
                             startTf = i;
                             break;
                             //						}else {
                             //							strFound = true;
                         }
                     }
-                    
+
                     //******startTf and endTf should both have a value, and start should be before end******
                 }
-                
+
                 //find index of Tj command
-                for (int i = endTf; i < end-1; i++) {
-                    if((((char)bytes[i])=='T' && ((char)bytes[i+1])=='j') &&
-                        (i+2>=end || bytes[i+2]==10 || bytes[i+2]==13 || bytes[i+2]==' ')){
-                            endTj = i+2;
-                            break;
-                        }
+                for (int i = endTf; i < end - 1; i++) {
+                    if ((((char) bytes[i]) == 'T' && ((char) bytes[i + 1]) == 'j') &&
+                            (i + 2 >= end || bytes[i + 2] == 10 || bytes[i + 2] == 13 || bytes[i + 2] == ' ')) {
+                        endTj = i + 2;
+                        break;
                     }
-                
-                
-                if(endTj==-1){
+                }
+
+
+                if (endTj == -1) {
                     startTj = endTf;
                     endTj = endTf;
-                }else {
+                } else {
                     startTj = endTf;
-                    
+
                     //find the start of the Tj command
                     int brackets = 0;
                     boolean strFound = false;
                     OUTER:
-                    for (int i = endTj-3; i > startTj; i--) {
+                    for (int i = endTj - 3; i > startTj; i--) {
                         switch (bytes[i]) {
                             case ' ':
                             case 10:
                             case 13:
-                                if (strFound && brackets==0) {
+                                if (strFound && brackets == 0) {
                                     //+1 as we dont want the gap we just found in our text string
-                                    startTj = i+1;
+                                    startTj = i + 1;
                                     break OUTER;
                                 }
                                 break;
@@ -550,7 +570,7 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants 
                                 break;
                             case '(':
                                 brackets--;
-                                if (brackets==0 && strFound) {
+                                if (brackets == 0 && strFound) {
                                     startTj = i;
                                     break OUTER;
                                 }
@@ -561,173 +581,175 @@ public class ReadOnlyTextIcon extends CustomImageIcon implements SwingConstants 
                         }
                     }
                 }
-                
+
                 //find actual end of Tf including any rg or g command after the Tf.
                 for (int i = endTf; i < startTj; i++) {
-                    if(bytes[i]==' ' || bytes[i]==10 || bytes[i]==13){
-                    }else if(bytes[i]>47 && bytes[i]<58){
+                    if (bytes[i] == ' ' || bytes[i] == 10 || bytes[i] == 13) {
+                    } else if (bytes[i] > 47 && bytes[i] < 58) {
                         //number
 
-                    }else {
-                        if(bytes[i]=='g' && i+1<startTj && (bytes[i+1]==' ' || bytes[i+1]==10 || bytes[i+1]==13)){
-                            endTf = i+1;
+                    } else {
+                        if (bytes[i] == 'g' && i + 1 < startTj && (bytes[i + 1] == ' ' || bytes[i + 1] == 10 || bytes[i + 1] == 13)) {
+                            endTf = i + 1;
                             break;
-                        }else if(bytes[i]=='r' && i+2<startTj && bytes[i+1]=='g' && (bytes[i+2]==' '  || bytes[i+2]==10 || bytes[i+2]==13)){
-                            endTf = i+2;
+                        } else if (bytes[i] == 'r' && i + 2 < startTj && bytes[i + 1] == 'g' && (bytes[i + 2] == ' ' || bytes[i + 2] == 10 || bytes[i + 2] == 13)) {
+                            endTf = i + 2;
                             break;
-                        }else {
+                        } else {
                             //not what we want leave endTf as is.
                             break;
                         }
                     }
                 }
-                
-                if(endTj!=endTf){
+
+                if (endTj != endTf) {
                     //there is a Tj (text)
-                    if(endTf==0){
+                    if (endTf == 0) {
                         //we dont have a font command defined so allow for one
-                        preFontStream = new String(bytes,0,startTj);
+                        preFontStream = new String(bytes, 0, startTj);
                         betweenFontAndTextStream = " ";
-                    }else {
+                    } else {
                         //we have a font command
-                        preFontStream = new String(bytes,0,startTf);
-                        fontStr = new String(bytes,startTf,endTf-startTf);
-                        betweenFontAndTextStream = new String(bytes,endTf,startTj-endTf);
+                        preFontStream = new String(bytes, 0, startTf);
+                        fontStr = new String(bytes, startTf, endTf - startTf);
+                        betweenFontAndTextStream = new String(bytes, endTf, startTj - endTf);
                     }
                     //-3 to ignore the Tj command letters at the end as we add that ourselves.
-                    text = new String(bytes,startTj,endTj-3-startTj);
-                    afterTextStream = new String(bytes,endTj,bytes.length-endTj);
-                }else {
+                    text = new String(bytes, startTj, endTj - 3 - startTj);
+                    afterTextStream = new String(bytes, endTj, bytes.length - endTj);
+                } else {
                     //theres no TJ
-                    if(endTf==0){
+                    if (endTf == 0) {
                         //store as command1, and if not valid we deal with below with default command
                         preFontStream = new String(bytes);
-                    }else {
+                    } else {
                         //we have a font command
-                        preFontStream = new String(bytes,0,startTf);
-                        fontStr = new String(bytes,startTf,endTf-startTf);
+                        preFontStream = new String(bytes, 0, startTf);
+                        fontStr = new String(bytes, startTf, endTf - startTf);
                         //add rest to middleCommand so Text can be added to end
-                        betweenFontAndTextStream = new String(bytes,endTf,bytes.length-endTf);
+                        betweenFontAndTextStream = new String(bytes, endTf, bytes.length - endTf);
                     }
                 }
             }
         }
-        
+
         //get the forms font string
         final String DA = form.getTextStreamValue(PdfDictionary.DA);
-        
+
         //create a fake XObject to make use of the code we already have to generate image
-        fakeObj=new XObject(form.getObjectRefAsString()); //value does not matter
-        
-        if(DA==null || DA.isEmpty()){
-            if(!fontStr.isEmpty()){
+        fakeObj = new XObject(form.getObjectRefAsString()); //value does not matter
+
+        if (DA == null || DA.isEmpty()) {
+            if (!fontStr.isEmpty()) {
                 //set font we have found
                 form.setTextStreamValue(PdfDictionary.DA, StringUtils.toBytes(fontStr));
-                FormStream.decodeFontCommandObj(fontStr,form);
+                FormStream.decodeFontCommandObj(fontStr, form);
             }
-            
+
             //use old methods as appropriate info not present.
             return false;
-            
-        }else{  //updated by Mark as previous code had bug
+
+        } else {  //updated by Mark as previous code had bug
             //we replace the TF string (ie /FO_0 8 Tf) with the DA value (ie /Helv 8 Tf) to get the font name
             //this though assumes that Tm is 1 0 0 1 (scaling is done by fotnsize not matrix)
             //on sample file Tf was 1 and Tm was 8 0 0 8 so we ended up with text 8 times too big as we changed
             // /Fo_0 1 Tf to /Helv 8 Tf while not altering Tm
             //I have fixed by keeping Tf value and using /DA font part
-            
-            if(fontStr.isEmpty()) //use defined DA and remove any whitespace at front (ORIGINAL version)
+
+            if (fontStr.isEmpty()) //use defined DA and remove any whitespace at front (ORIGINAL version)
             {
                 //first file since we wrote this code in 2004 where the DA stream has contained more than a font and needs rest of data stripped off
-                int ptr=DA.indexOf('/');
-                if(ptr<0){
-                    ptr=0;
+                int ptr = DA.indexOf('/');
+                if (ptr < 0) {
+                    ptr = 0;
                 }
                 //end of new code
                 fontStr = DA.substring(ptr).trim();
-            } else{//get font name from DA but use original fontsize
-                final String fontname=DA.substring(0, DA.indexOf(' '));
-                final String fontsize=fontStr.substring(fontStr.indexOf(' '), fontStr.length());
-                fontStr=fontname+fontsize;
+            } else { //get font name from DA but use original fontsize
+                final String fontname = DA.substring(0, DA.indexOf(' '));
+                final String fontsize = fontStr.substring(fontStr.indexOf(' '), fontStr.length());
+                fontStr = fontname + fontsize;
                 fontStr = fontStr.trim();
             }
         }
-        
+
         //do not think we need but here for completeness
         //		XObject.setFloatArray(PdfDictionary.Matrix,new float[]{1,0,0,1,0,0});
-        
+
         //forms can have resources (Fonts, XOBjects, etc) which are in the DR value -
         //we store this in AcroRenderer
-        if(resources!=null) {
+        if (resources != null) {
             fakeObj.setDictionary(PdfDictionary.Resources, resources);
         }
 
         final Rectangle BBox = form.getBoundingRectangle();
-		if(BBox != null) {
-			fakeObj.setFloatArray(PdfDictionary.BBox,new float[]{BBox.width,0,0,BBox.height,0,0});
-		}
+        if (BBox != null) {
+            fakeObj.setFloatArray(PdfDictionary.BBox, new float[]{BBox.width, 0, 0, BBox.height, 0, 0});
+        }
 
-        subtype=-1; //could use PdfDictionary.Highlight for transparency
-        
+        subtype = -1; //could use PdfDictionary.Highlight for transparency
+
         //if no command in file.
-        if(preFontStream.isEmpty() || !preFontStream.contains("BT")){
+        if (preFontStream.isEmpty() || !preFontStream.contains("BT")) {
             //build a fake command stream to decode
             preFontStream = "BT 0 0 0 RG 1 TFS ";
             betweenFontAndTextStream = " 1 0 0 1 0 0 Tm ";
             afterTextStream = "";
         }
-        
+
         //find the start and end of the size param
         final int sizeSt = fontStr.indexOf(' ');
         int sizeEn = -1;
         boolean strFound = false;
-        for(int i=sizeSt; i<fontStr.length() ;i++){
+        for (int i = sizeSt; i < fontStr.length(); i++) {
             final char chr = fontStr.charAt(i);
-            if(chr==' ' || chr==10 || chr==13){
-                if(strFound){
+            if (chr == ' ' || chr == 10 || chr == 13) {
+                if (strFound) {
                     sizeEn = i;
                     break;
                 }
-            }else {
+            } else {
                 strFound = true;
             }
         }
-        
+
         float size = 12;
-        if(sizeEn!=-1){
+        if (sizeEn != -1) {
             //store the name, and command
-            fontName = fontStr.substring(0,sizeSt);
+            fontName = fontStr.substring(0, sizeSt);
             fontCommand = fontStr.substring(sizeEn);
-            size = Float.parseFloat( fontStr.substring(sizeSt,sizeEn) );
+            size = Float.parseFloat(fontStr.substring(sizeSt, sizeEn));
         }
-        
+
         //store the seperate font attributes
-        if(fontName.isEmpty()){
+        if (fontName.isEmpty()) {
             final Font textFont = form.getTextFont();
-            fontName = '/' +textFont.getFontName();
+            fontName = '/' + textFont.getFontName();
             fontCommand = "Tf ";
         }
-        
+
         //check if font size needs autosizing
-        if(size==0 || size==-1){
+        if (size == 0 || size == -1) {
             //call our calculate routine to work out a good size
             size = GUIData.calculateFontSize(BBox.height, BBox.width, false, text);
         }
-        fontSize = " "+size+' ';
-        
+        fontSize = " " + size + ' ';
+
         return true;
     }
-    
+
     public void setAlignment(final int alignment) {
-        this.alignment=alignment;
+        this.alignment = alignment;
     }
-    
-    /**generates higher quality images */
-    public void setPrinting(final boolean print, final int multiplier){
-        
+
+    /**
+     * generates higher quality images
+     */
+    public void setPrinting(final boolean print, final int multiplier) {
+
         currentlyPrinting = print;
         printMultiplier = multiplier;
-        
+
         checkAndCreateimage();
     }
 

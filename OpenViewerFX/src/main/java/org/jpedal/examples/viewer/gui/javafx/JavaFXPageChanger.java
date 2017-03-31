@@ -40,7 +40,6 @@ import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.examples.viewer.gui.generic.GUIPageChanger;
 
 /**
- *
  * @author Simon
  */
 public class JavaFXPageChanger extends GUIPageChanger implements EventHandler<ActionEvent> {
@@ -53,5 +52,5 @@ public class JavaFXPageChanger extends GUIPageChanger implements EventHandler<Ac
     public void handle(final ActionEvent event) {
         super.handlePageChange();
     }
-    
+
 }

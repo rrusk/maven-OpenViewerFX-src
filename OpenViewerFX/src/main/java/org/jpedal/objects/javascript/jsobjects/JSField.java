@@ -38,10 +38,10 @@ import org.jpedal.objects.raw.PdfDictionary;
 
 public class JSField {
 
-	public FormObject target; //TODO: Sync form object with field object
+    public FormObject target; //TODO: Sync form object with field object
 
-	public String alignment = "left";
-//	public String borderStyle = "solid";
+    public String alignment = "left";
+    //	public String borderStyle = "solid";
 //	public int buttonAlignX = 50;
 //	public int buttonAlignY = 50;
 //	public boolean buttonFitBounds = true;
@@ -49,36 +49,36 @@ public class JSField {
 //	public int buttonScaleHow = 0;
 //	public int buttonScaleWhen = 0;
 //	public int calcOrderIndex = 0;
-	public int charLimit = -1;
-//	public boolean comb = false;
+    public int charLimit = -1;
+    //	public boolean comb = false;
 //	public boolean commitOnSelChange = false;
 //	public int currentValueIndices; or array
 //	public Object defaultStyle;
-	public String defaultValue;
-//	public boolean doNotScroll = false;
+    public String defaultValue;
+    //	public boolean doNotScroll = false;
 //	public boolean doNotSpellCheck = true;
 //	public boolean delay = false;
 //	public int display = 0;
-	public JSDoc doc;
-//	public boolean editable = false;
+    public JSDoc doc;
+    //	public boolean editable = false;
 //	public String[] exportValues;
 //	public boolean fileSelect = false;
 //	public String[] fillColor;
-	public boolean hidden;
-//	public String highlight = "none";
+    public boolean hidden;
+    //	public String highlight = "none";
 //	public int lineWidth = 1;
 //	public boolean multiline = false;
 //	public boolean multipleSelection = false;
-	public String name;
-//	public int numItems = 0;
+    public String name;
+    //	public int numItems = 0;
 //	public int page;
 //	public boolean password = false;
 //	public boolean print = true;
 //	public boolean radiosInUnison = true;
-	public boolean readonly;
-//	public float[] rect = new float[4];
-	public boolean required;
-//	public boolean richText = false;
+    public boolean readonly;
+    //	public float[] rect = new float[4];
+    public boolean required;
+    //	public boolean richText = false;
 //	public Object[] richValue;
 //	public int rotation = 0;
 //	public String[] strokeColor;
@@ -89,26 +89,28 @@ public class JSField {
 //	public float textSize;
 //	public String type = "text";
 //	public String userName;
-	public Object value;
-	public String valueAsString;
+    public Object value;
+    public String valueAsString;
 
-	public JSField() {
+    public JSField() {
 
-	}
-	public JSField(final FormObject fObj) {
+    }
+
+    public JSField(final FormObject fObj) {
 //		System.out.println("Called for: " + fObj);
-		target = fObj;
-		syncUp();
-	}
+        target = fObj;
+        syncUp();
+    }
 
-	private void syncUp() {
-		name = target.getTextStreamValue(PdfDictionary.T);
-		value = target.getValue();
-		valueAsString = target.getValue();
-	}
-	public void syncToGUI(final boolean isSelected) {
-		target.updateValue(value, isSelected, true);
-	}
+    private void syncUp() {
+        name = target.getTextStreamValue(PdfDictionary.T);
+        value = target.getValue();
+        valueAsString = target.getValue();
+    }
+
+    public void syncToGUI(final boolean isSelected) {
+        target.updateValue(value, isSelected, true);
+    }
 
 //	public void browseForFileToSubmit() {
 //	}
@@ -224,7 +226,6 @@ public class JSField {
 //	}
 //	public void signatureValidate() {
 //	}
-
 
 
 }

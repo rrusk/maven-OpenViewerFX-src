@@ -23,17 +23,16 @@ import org.jpedal.examples.viewer.Values;
 import org.jpedal.gui.GUIFactory;
 
 /**
- *
  * @author markee
  */
 public class MultiPages {
-    
+
     /**
      * this is the code which does all the work (not implemented in LGPL version)
      *
      * @return
      */
-    public static PdfDecoderInt openNewMultiplePage(final GUIFactory currentGUI,final Values commonValues) {
+    public static PdfDecoderInt openNewMultiplePage(final GUIFactory currentGUI, final Values commonValues) {
 
         return null;
 

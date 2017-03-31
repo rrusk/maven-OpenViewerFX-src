@@ -35,6 +35,7 @@ package org.jpedal.examples.viewer.commands;
 import java.beans.PropertyVetoException;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+
 import org.jpedal.gui.GUIFactory;
 import org.jpedal.utils.LogWriter;
 
@@ -49,9 +50,9 @@ public class Cascade {
         }
 
     }
-    
+
     private static void cascade(final GUIFactory currentGUI) {
-        final JDesktopPane desktopPane = (JDesktopPane)currentGUI.getMultiViewerFrames();
+        final JDesktopPane desktopPane = (JDesktopPane) currentGUI.getMultiViewerFrames();
 
         final JInternalFrame[] frames = desktopPane.getAllFrames();
 
@@ -88,11 +89,11 @@ public class Cascade {
                         y = 0;
                     }
                 } catch (final PropertyVetoException e) {
-                    LogWriter.writeLog("Exception attempting to set size" + e); 
-                    
-               }
+                    LogWriter.writeLog("Exception attempting to set size" + e);
+
+                }
             }
+        }
     }
-}
 
 }

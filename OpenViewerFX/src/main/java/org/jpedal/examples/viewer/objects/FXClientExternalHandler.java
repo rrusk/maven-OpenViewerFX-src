@@ -37,40 +37,42 @@ import org.jpedal.external.Options;
 
 /**
  * Additional handlers used in Client
- * 
+ *
  * @author markee
  */
 public class FXClientExternalHandler extends ClientExternalHandler {
- 
-    /**Used in JavaFX to display additional objects if decoding with transition*/
+
+    /**
+     * Used in JavaFX to display additional objects if decoding with transition
+     */
     private FXAdditionalData additionaValuesforPage;
-    
+
     @Override
     public void addExternalHandler(final Object newHandler, final int type) {
-        
+
         switch (type) {
-            
+
             case Options.JavaFX_ADDITIONAL_OBJECTS:
-                additionaValuesforPage = (FXAdditionalData)newHandler;
+                additionaValuesforPage = (FXAdditionalData) newHandler;
                 break;
-                
+
             default:
                 super.addExternalHandler(newHandler, type);
-                
+
         }
-    } 
-    
+    }
+
     @Override
     public Object getExternalHandler(final int type) {
-        
+
         switch (type) {
-               
+
             case Options.JavaFX_ADDITIONAL_OBJECTS:
                 return additionaValuesforPage;
-              
+
             default:
                 return super.getExternalHandler(type);
-                
+
         }
     }
 }

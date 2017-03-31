@@ -33,6 +33,7 @@
 package org.jpedal.color;
 
 import java.io.Serializable;
+
 import org.jpedal.function.FunctionFactory;
 import org.jpedal.function.PDFFunction;
 import org.jpedal.io.PdfObjectReader;
@@ -43,24 +44,25 @@ import org.jpedal.objects.raw.PdfObject;
  */
 public class ColorMapping implements Serializable {
 
-	private static final long serialVersionUID = 2732809266903967232L;
+    private static final long serialVersionUID = 2732809266903967232L;
 
-	private final PDFFunction function;
+    private final PDFFunction function;
 
-	public ColorMapping (final PdfObjectReader currentPdfFile, final PdfObject functionObj) {
+    public ColorMapping(final PdfObjectReader currentPdfFile, final PdfObject functionObj) {
 
-		function = FunctionFactory.getFunction(functionObj, currentPdfFile);
+        function = FunctionFactory.getFunction(functionObj, currentPdfFile);
 
-	}
+    }
 
-	/**
-	 * Do the actual conversion
-	 * @param values
-	 * @return
-	 */
-	public float[] getOperandFloat(final float[] values){
+    /**
+     * Do the actual conversion
+     *
+     * @param values
+     * @return
+     */
+    public float[] getOperandFloat(final float[] values) {
 
-		return function.compute(values);
+        return function.compute(values);
 
-	}
+    }
 }

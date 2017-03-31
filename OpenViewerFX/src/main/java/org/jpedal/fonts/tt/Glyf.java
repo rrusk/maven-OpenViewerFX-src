@@ -38,57 +38,61 @@ import java.util.Map;
 
 public class Glyf extends Table {
 
-    /**holds mappings for drawing the glyphs*/
+    /**
+     * holds mappings for drawing the glyphs
+     */
     private final int[] charStrings;
 
     private final int glyfCount;
 
-    /**holds list of empty glyphs*/
+    /**
+     * holds list of empty glyphs
+     */
     private final boolean[] emptyCharStrings;
     private byte[] glyphTable;
 
-    Glyf(final FontFile2 currentFontFile, final int glyphCount, final int[] glyphIndexStart){
+    Glyf(final FontFile2 currentFontFile, final int glyphCount, final int[] glyphIndexStart) {
 
         //save so we can access
-        this.glyfCount=glyphCount;
-        
-        charStrings=new int[glyphCount];
-        emptyCharStrings=new boolean[glyphCount];
+        this.glyfCount = glyphCount;
+
+        charStrings = new int[glyphCount];
+        emptyCharStrings = new boolean[glyphCount];
 
         //move to start and check exists
-        final int startPointer=currentFontFile.selectTable(FontFile2.LOCA);
+        final int startPointer = currentFontFile.selectTable(FontFile2.LOCA);
 
         //read  table
-        if(startPointer!=0){
+        if (startPointer != 0) {
 
             //read each gyf
-            for(int i=0;i<glyphCount;i++){
+            for (int i = 0; i < glyphCount; i++) {
 
                 //just store in lookup table or flag as zero length
-                if((glyphIndexStart[i]==glyphIndexStart[i+1])){
-                    charStrings[i]=-1;
-                    emptyCharStrings[i]=true;
-                }else{
-                    charStrings[i]=glyphIndexStart[i];
+                if ((glyphIndexStart[i] == glyphIndexStart[i + 1])) {
+                    charStrings[i] = -1;
+                    emptyCharStrings[i] = true;
+                } else {
+                    charStrings[i] = glyphIndexStart[i];
                 }
             }
 
             //read the actual glyph data
-            glyphTable=currentFontFile.getTableBytes(FontFile2.GLYF);
+            glyphTable = currentFontFile.getTableBytes(FontFile2.GLYF);
 
         }
     }
 
-    public int getCharString(final int glyph){
+    public int getCharString(final int glyph) {
 
         final int value;
-        
-        if(glyph<0 || glyph>=glyfCount) {
+
+        if (glyph < 0 || glyph >= glyfCount) {
             value = glyph;
         } else {
             value = charStrings[glyph];
         }
-        
+
         return value;
     }
 
@@ -100,13 +104,14 @@ public class Glyf extends Table {
         return glyfCount;
     }
 
-    /**assume identify and build data needed for our OTF converter*/
+    /**
+     * assume identify and build data needed for our OTF converter
+     */
     public Map<Integer, Integer> buildCharStringTable() {
 
-        final Map<Integer, Integer> returnStrings=new HashMap<Integer, Integer>();
+        final Map<Integer, Integer> returnStrings = new HashMap<Integer, Integer>();
 
-        for(int key=0;key<glyfCount;key++)
-        {
+        for (int key = 0; key < glyfCount; key++) {
             if (!emptyCharStrings[key]) {
                 returnStrings.put(key, key);
             }

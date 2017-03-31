@@ -43,7 +43,7 @@ class DashBorder extends LineBorder {
     DashBorder(final Stroke stroke, final Color borderColor) {
 
         super(borderColor);
-        this.stroke=stroke;
+        this.stroke = stroke;
     }
 
     @Override

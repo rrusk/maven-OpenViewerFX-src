@@ -91,7 +91,7 @@ public class SelectAll {
             // Remove all previous highlight areas
             decode_pdf.updateCursorBoxOnScreen(null, 0); // remove box
 
-            decode_pdf.getPages().setHighlightedImage(null);// remove image highlight
+            decode_pdf.getPages().setHighlightedImage(null); // Remove image highlight
 
             decode_pdf.updateCursorBoxOnScreen(currentRectangle, DecoderOptions.highlightColor.getRGB());
 

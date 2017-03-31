@@ -43,59 +43,59 @@ import javafx.scene.shape.Shape;
 public class FXClip implements PdfClip {
 
     private Shape current_clipping_shape;
-    
+
     @Override
     public boolean updateClip(final Object path) {
-        
+
         // Check that the passed parameter is valid.
         // If this code causes trouble in future, it may be due to
         // null instanceof Class, which evaluates to false. null might be needed in resetting the clip
-        if(!(path instanceof Shape)) {
+        if (!(path instanceof Shape)) {
             return false;
         }
-        
-        final Path fxPath = (Path)path;
+
+        final Path fxPath = (Path) path;
 
         // Fill the path so that everything inside the path becomes the clipping area
-        if(fxPath != null) {
+        if (fxPath != null) {
             fxPath.setFill(Color.WHITE);
         }
-        
-        if( current_clipping_shape == null || fxPath==null){
+
+        if (current_clipping_shape == null || fxPath == null) {
             current_clipping_shape = fxPath;
-        }else{
+        } else {
             current_clipping_shape = Shape.intersect(current_clipping_shape, fxPath);
         }
-        
+
         return true;
     }
-    
+
     @Override
     public Object getClippingShape() {
         return setupClippingShape(current_clipping_shape);
     }
-    
+
     /**
      * A clip can be used multiple times, but can only be added to a scene once.
      * This method works around it by creating a new shape from the path elements.
-     * 
+     *
      * @param clipping_shape The shape to be copied
      * @return a new Shape containing the clipping Path
      */
-    private static Shape setupClippingShape(final Shape clipping_shape){
-        if(clipping_shape == null) {
+    private static Shape setupClippingShape(final Shape clipping_shape) {
+        if (clipping_shape == null) {
             return null;
         }
-        
+
         // Cast is safe as all shapes are drawn as paths
-        final Path clipPath = (Path)clipping_shape;
+        final Path clipPath = (Path) clipping_shape;
         final Path s = new Path(clipPath.getElements());
         s.setFillRule(clipPath.getFillRule());
-       
+
         s.setFill(Color.WHITE);
-       
+
         return s;
     }
-    
-    
+
+
 }

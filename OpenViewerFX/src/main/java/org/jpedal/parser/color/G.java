@@ -42,30 +42,30 @@ import org.jpedal.parser.PdfObjectCache;
  *
  */
 public class G {
-    
+
     public static void execute(final boolean isLowerCase, final GraphicsState gs, final CommandParser parser, final PdfObjectCache cache) {
 
-        final boolean isStroke=!isLowerCase;
-        final float[] operand= parser.getValuesAsFloat();
-        final int operandCount=operand.length;
+        final boolean isStroke = !isLowerCase;
+        final float[] operand = parser.getValuesAsFloat();
+        final int operandCount = operand.length;
 
         //set colour and colorspace
-        if(isStroke){
+        if (isStroke) {
             if (gs.strokeColorSpace.getID() != ColorSpaces.DeviceGray) {
                 gs.strokeColorSpace = new DeviceGrayColorSpace();
             }
 
-            gs.strokeColorSpace.setColor(operand,operandCount);
+            gs.strokeColorSpace.setColor(operand, operandCount);
 
             //track colrspace use
             cache.put(PdfObjectCache.ColorspacesUsed, gs.strokeColorSpace.getID(), "x");
 
-        }else{
+        } else {
             if (gs.nonstrokeColorSpace.getID() != ColorSpaces.DeviceGray) {
                 gs.nonstrokeColorSpace = new DeviceGrayColorSpace();
             }
 
-            gs.nonstrokeColorSpace.setColor(operand,operandCount);
+            gs.nonstrokeColorSpace.setColor(operand, operandCount);
 
             //track colorspace use
             cache.put(PdfObjectCache.ColorspacesUsed, gs.nonstrokeColorSpace.getID(), "x");

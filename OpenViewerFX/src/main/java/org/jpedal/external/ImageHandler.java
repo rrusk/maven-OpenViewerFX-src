@@ -35,6 +35,7 @@ package org.jpedal.external;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.io.ObjectStore;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.PdfObject;
@@ -49,18 +50,21 @@ public interface ImageHandler {
     //if alwaysIgnoreGenericHandler() is true JPedal code always ignored. If false, JPedal code used if null
     BufferedImage processImageData(GraphicsState gs, PdfObject XObject);
 
-    /**Indicate that image already scaled so should not be scaled/clipped by JPedal*/
+    /**
+     * Indicate that image already scaled so should not be scaled/clipped by JPedal
+     */
     boolean imageHasBeenScaled();
 
     /**
      * Allow user to paint directly onto g2 for screen display
-     * @param image - actual BufferedImage
-     * @param optionsApplied - any options already done (ie 90 rotate) - values from org.jpedal.constants.PDFImageProcessing
-     * @param upside_down - AffineTransform applied to page
+     *
+     * @param image            - actual BufferedImage
+     * @param optionsApplied   - any options already done (ie 90 rotate) - values from org.jpedal.constants.PDFImageProcessing
+     * @param upside_down      - AffineTransform applied to page
      * @param currentImageFile - name of file stored on disk
-     * @param g2 - Graphics2D render object
-     * @param renderDirect -if being rendered straight to g2 (ie bufferedImage)
-     * @param objectStore - JPedals class to access cached images
+     * @param g2               - Graphics2D render object
+     * @param renderDirect     -if being rendered straight to g2 (ie bufferedImage)
+     * @param objectStore      - JPedals class to access cached images
      * @param isPrinting
      * @return true to ignore standard JPedal routines and false to use.
      */

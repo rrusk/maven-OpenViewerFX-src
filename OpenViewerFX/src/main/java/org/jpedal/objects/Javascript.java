@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.objects.acroforms.AcroRenderer;
 import org.jpedal.objects.acroforms.actions.ActionHandler;
@@ -49,53 +50,53 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.Vector_String;
 
 
-
 /**
  * general container for javascript
  * and store text commands
  */
 public class Javascript {
 
-    /**default to handle commands*/
+    /**
+     * default to handle commands
+     */
     private ExpressionEngine jsParser;
-    
+
     private boolean actionsExecuted;
 
-	private static boolean useNewJSParser;
-	private static boolean disableJavascript;
+    private static boolean useNewJSParser;
+    private static boolean disableJavascript;
 
     public Javascript(final ExpressionEngine userExpressionEngine, final AcroRenderer acro) {
-		if(disableJavascript) {
+        if (disableJavascript) {
             return;
         }
-		if(System.getProperty("org.jpedal.newJS") != null) {
-			useNewJSParser = true;
-		}
+        if (System.getProperty("org.jpedal.newJS") != null) {
+            useNewJSParser = true;
+        }
 
-        if(userExpressionEngine!=null){
-            jsParser=userExpressionEngine;
-        }else{
-            try{
+        if (userExpressionEngine != null) {
+            jsParser = userExpressionEngine;
+        } else {
+            try {
                 //noinspection PointlessBooleanExpression
-                if(!useNewJSParser) {
+                if (!useNewJSParser) {
                     // see if javascript jar present and generate JSParser
-					final java.io.InputStream in = DefaultParser.class.getClassLoader().getResourceAsStream("org/mozilla/javascript/Context.class");
-					if (in != null) {
+                    final java.io.InputStream in = DefaultParser.class.getClassLoader().getResourceAsStream("org/mozilla/javascript/Context.class");
+                    if (in != null) {
                         jsParser = new RhinoParser(this);
                     } else {  //just AF commands coded in Java
                         jsParser = new DefaultParser();
                     }
-				}
-				else {
+                } else {
                     final GenericParser genericParser = new GenericParser(this);
-					jsParser = genericParser;
+                    jsParser = genericParser;
                     //genericParser.setGUIFactory((org.jpedal.gui.GUIFactory) swingGUI);
                     genericParser.setupPDFObjects(this);
-				}
+                }
 
-            }catch(final Error err){
+            } catch (final Error err) {
                 LogWriter.writeLog("Error: " + err.getMessage());
-            }catch(final Exception e){
+            } catch (final Exception e) {
                 LogWriter.writeLog("Exception: " + e.getMessage());
             }
         }
@@ -107,51 +108,51 @@ public class Javascript {
 
     }
 
-    private final Map<String, String> javascriptCommands=new HashMap<String, String>();
-    private final Map<Integer, String> javascriptTypesUsed=new HashMap<Integer, String>();
-    private final Map<String, Vector_String> linkedjavascriptCommands=new HashMap<String, Vector_String>();
+    private final Map<String, String> javascriptCommands = new HashMap<String, String>();
+    private final Map<Integer, String> javascriptTypesUsed = new HashMap<Integer, String>();
+    private final Map<String, Vector_String> linkedjavascriptCommands = new HashMap<String, Vector_String>();
     private final Map<String, String> javascriptNamesObjects = new HashMap<String, String>();
 
     /**
      * called to execute various action commands such as page opened
      * triggered by events not easily tracked with listeners
      */
-    public  void executeAction(final String jsCode){
-        
-        actionsExecuted=true;
-        
-		if(disableJavascript) {
+    public void executeAction(final String jsCode) {
+
+        actionsExecuted = true;
+
+        if (disableJavascript) {
             return;
         }
-    	jsParser.executeFunctions(jsCode,null);
+        jsParser.executeFunctions(jsCode, null);
     }
 
     /**
-     * we execute the command given and then execute command C on any linked fields 
+     * we execute the command given and then execute command C on any linked fields
      * or on itself if there are no linked fields
      */
     public int execute(final FormObject ref, final int type, final int eventType, final char keyPressed) {
 
-        final int returnCode=executeCommand(ref, type, eventType, keyPressed);
-        
+        final int returnCode = executeCommand(ref, type, eventType, keyPressed);
+
         boolean executeChangedCode = false;
-    	if(eventType==ActionHandler.FOCUS_EVENT &&
-    			(type != PdfDictionary.C2 ||
-    				(type == PdfDictionary.C2 &&
-    					(returnCode == ActionHandler.NOMESSAGE ||
-    					returnCode == ActionHandler.VALUESCHANGED)))) {
+        if (eventType == ActionHandler.FOCUS_EVENT &&
+                (type != PdfDictionary.C2 ||
+                        (type == PdfDictionary.C2 &&
+                                (returnCode == ActionHandler.NOMESSAGE ||
+                                        returnCode == ActionHandler.VALUESCHANGED)))) {
             executeChangedCode = true;
         }
-        
-        if(executeChangedCode){
-        	final String refName = ref.getTextStreamValue(PdfDictionary.T);
-        	
+
+        if (executeChangedCode) {
+            final String refName = ref.getTextStreamValue(PdfDictionary.T);
+
             //C action requires us to execute other objects code
-        	final Vector_String linkedObj= linkedjavascriptCommands.get(refName);
-        	
-            if(linkedObj!=null){
-            	linkedObj.trim();
-            	final String[] value = linkedObj.get();
+            final Vector_String linkedObj = linkedjavascriptCommands.get(refName);
+
+            if (linkedObj != null) {
+                linkedObj.trim();
+                final String[] value = linkedObj.get();
 
                 for (final String nextVal : value) {
                     //if values.nexttoken is this field and type is C2 ignore as it will start a loop
@@ -179,43 +180,43 @@ public class Javascript {
 
         return returnCode;
     }
-    
-    public String getJavascriptCommand(final String ref, final int type){
-    	//get javascript
-    	return javascriptCommands.get(ref+ '-' +type);
-        
+
+    public String getJavascriptCommand(final String ref, final int type) {
+        //get javascript
+        return javascriptCommands.get(ref + '-' + type);
+
     }
 
     private int executeCommand(final FormObject ref, final int type, final int eventType, final char keyPressed) {
-    	
-        int message=ActionHandler.NOMESSAGE;
 
-		if(disableJavascript) {
+        int message = ActionHandler.NOMESSAGE;
+
+        if (disableJavascript) {
             return message;
         }
-        
-        if(ref==null) {
+
+        if (ref == null) {
             return message;
         }
-        
+
         //get javascript
         //we read the ref first,
-        String js= javascriptCommands.get(ref.getObjectRefAsString()+'-'+type);
-        if(js==null){
-        	//if this is null then the name is read to get JS for parent objects.
-        	js= javascriptCommands.get(ref.getTextStreamValue(PdfDictionary.T)+'-'+type);
+        String js = javascriptCommands.get(ref.getObjectRefAsString() + '-' + type);
+        if (js == null) {
+            //if this is null then the name is read to get JS for parent objects.
+            js = javascriptCommands.get(ref.getTextStreamValue(PdfDictionary.T) + '-' + type);
         }
 
-        if(js==null) {
+        if (js == null) {
             return ActionHandler.NOMESSAGE;
         }
 
-        if(message!=ActionHandler.STOPPROCESSING) {
+        if (message != ActionHandler.STOPPROCESSING) {
             message = jsParser.execute(ref, type, js, eventType, keyPressed);
         }
 
-        actionsExecuted=true;
-        
+        actionsExecuted = true;
+
         return message;
     }
 
@@ -223,41 +224,41 @@ public class Javascript {
      * store and execute code from Names object
      */
     public void setCode(final String name, final String value) {
-		if(disableJavascript) {
+        if (disableJavascript) {
             return;
         }
 
-    	javascriptNamesObjects.put(name, value);
+        javascriptNamesObjects.put(name, value);
 
         jsParser.addCode(value);
-        
+
     }
 
     /**
      * Returns the JavaScript from a JavaScript Name object <br>
      * If key is set to null it will return the whole contents of the map
+     *
      * @param key
      * @return JavaScript as a String
      */
     public String getJavaScript(final String key) {
-    	final String str;
-    	if(key == null) {
-	        final Collection<String> c = javascriptNamesObjects.values();
-	        
-	        //obtain an Iterator for Collection
-	        final Iterator<String> itr = c.iterator();
-	       
-	        //iterate through HashMap values iterator
-            final StringBuilder s=new StringBuilder();
-	        while(itr.hasNext()) {
-	        	s.append(itr.next());
-	        }
-            str=s.toString();
-    	}
-    	else {
-    		str = javascriptNamesObjects.get(key);
-    	}
-          return str;
+        final String str;
+        if (key == null) {
+            final Collection<String> c = javascriptNamesObjects.values();
+
+            //obtain an Iterator for Collection
+            final Iterator<String> itr = c.iterator();
+
+            //iterate through HashMap values iterator
+            final StringBuilder s = new StringBuilder();
+            while (itr.hasNext()) {
+                s.append(itr.next());
+            }
+            str = s.toString();
+        } else {
+            str = javascriptNamesObjects.get(key);
+        }
+        return str;
     }
 
     public void closeFile() {
@@ -266,25 +267,25 @@ public class Javascript {
         javascriptCommands.clear();
         linkedjavascriptCommands.clear();
 
-		if(disableJavascript) {
+        if (disableJavascript) {
             return;
         }
-        if(actionsExecuted && !ExternalHandlers.isULCPresent()){
+        if (actionsExecuted && !ExternalHandlers.isULCPresent()) {
             jsParser.closeFile();
         }
 
     }
 
     public void storeJavascript(final String name, final String script, final int type) {
-        
-		//adobe spec says explicitly:-This method will overwrite any action already defined for the chosen trigger.
-        javascriptCommands.put(name+ '-' +type,script);
 
-        javascriptTypesUsed.put(type,"x");//track types used so we can recall
+        //adobe spec says explicitly:-This method will overwrite any action already defined for the chosen trigger.
+        javascriptCommands.put(name + '-' + type, script);
+
+        javascriptTypesUsed.put(type, "x"); //track types used so we can recall
 
         //log all values in "" as possible fields
         //(will include commands and spurious links as well)
-        if(type==PdfDictionary.C2){
+        if (type == PdfDictionary.C2) {
 
 //            int ptr=0,start;
 //
@@ -346,20 +347,20 @@ public class Javascript {
         }
     }
 
-    public void dispose(){
-		if(disableJavascript) {
+    public void dispose() {
+        if (disableJavascript) {
             return;
         }
-    	jsParser.dispose();
+        jsParser.dispose();
 
     }
 
-	/**
-	 * Stop JavaScript from being run.
-	 * Should be run before instancing a Javascript object.
-	 */
-	public static void disableJavascript() {
-		disableJavascript = true;
-	}
+    /**
+     * Stop JavaScript from being run.
+     * Should be run before instancing a Javascript object.
+     */
+    public static void disableJavascript() {
+        disableJavascript = true;
+    }
 
 }

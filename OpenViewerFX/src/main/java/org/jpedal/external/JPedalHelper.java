@@ -35,6 +35,7 @@ package org.jpedal.external;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.color.PdfPaint;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.glyph.PdfJavaGlyphs;

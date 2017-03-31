@@ -40,56 +40,55 @@
     Note that so it doesn't affect the GUI use #PdfDecoderFX before the control class, or give it a custom style class
 */
 
-
-.popupAnnot{
-    -fx-border-radius:5px; 
-    -fx-border-style: solid; 
-    -fx-border-width:2px;
-    -fx-background-radius:5px;
-    -fx-background-color:linear-gradient(rgb(238,238,238) 0%, rgb(204,204,204) 100%);
+.popupAnnot {
+    -fx-border-radius: 5px;
+    -fx-border-style: solid;
+    -fx-border-width: 2px;
+    -fx-background-radius: 5px;
+    -fx-background-color: linear-gradient(rgb(238, 238, 238) 0%, rgb(204, 204, 204) 100%);
 }
 
-.popupAnnot .dragbar{
-    -fx-cursor:move;
-    -fx-fill-radius:5px;
+.popupAnnot .dragbar {
+    -fx-cursor: move;
+    -fx-fill-radius: 5px;
 }
 
 .formsMultiLine .scroll-pane {
     -fx-background-color: transparent;
 }
 
-.formsMultiLine .scroll-pane .viewport{
+.formsMultiLine .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
 
-.formsMultiLine .scroll-pane .content{
+.formsMultiLine .scroll-pane .content {
     -fx-background-color: transparent;
 }
 
-.formsSingleline{
-    -fx-padding:0;
+.formsSingleline {
+    -fx-padding: 0;
 }
 
 .formsListBox .list-cell {
-    -fx-background-color:transparent;
+    -fx-background-color: transparent;
 }
 
 .formsListBox .list-cell:selected {
-    -fx-background-color:cornflowerblue;
-    -fx-text-fill:black;
+    -fx-background-color: cornflowerblue;
+    -fx-text-fill: black;
 }
 
-.formsComboBox .text-field{
-    -fx-background-color:transparent;
-    -fx-padding:0;
+.formsComboBox .text-field {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
 }
 
-.formsComboBox .arrow-button{
-    -fx-padding:2;
-    -fx-border-style:solid;
-    -fx-border-color:#f0f0f0;
-    -fx-border-width:1;
-    -fx-border-radius:0;
-    -fx-background-radius:0;
-    -fx-background-color:#f0f0f0;
+.formsComboBox .arrow-button {
+    -fx-padding: 2;
+    -fx-border-style: solid;
+    -fx-border-color: #f0f0f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-background-color: #f0f0f0;
 }

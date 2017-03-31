@@ -40,15 +40,15 @@ import org.jpedal.PdfDecoderFX;
 
 public class JavaFXMousePanMode implements JavaFXMouseFunctionality {
 
-	//private Point currentPoint;
+    //private Point currentPoint;
     //private Rectangle currentView;
-	private final PdfDecoderFX decode_pdf;
-	
-    
-	public JavaFXMousePanMode(final PdfDecoderFX decode_pdf) {
-		this.decode_pdf=decode_pdf;
-	}
-    
+    private final PdfDecoderFX decode_pdf;
+
+
+    public JavaFXMousePanMode(final PdfDecoderFX decode_pdf) {
+        this.decode_pdf = decode_pdf;
+    }
+
     @Override
     public void mouseClicked(final MouseEvent e) {
     }
@@ -63,8 +63,8 @@ public class JavaFXMousePanMode implements JavaFXMouseFunctionality {
 
     @Override
     public void mousePressed(final MouseEvent e) {
-        
-        if(e.getButton().equals(MouseButton.PRIMARY) || e.getButton().equals(MouseButton.MIDDLE)){
+
+        if (e.getButton().equals(MouseButton.PRIMARY) || e.getButton().equals(MouseButton.MIDDLE)) {
 
             //set cursor
             decode_pdf.setCursor(Cursor.CLOSED_HAND);
@@ -77,10 +77,11 @@ public class JavaFXMousePanMode implements JavaFXMouseFunctionality {
     }
 
     @Override
-    public void mouseDragged(final MouseEvent e) {}
+    public void mouseDragged(final MouseEvent e) {
+    }
 
     @Override
     public void mouseMoved(final MouseEvent e) {
     }
-    
+
 }

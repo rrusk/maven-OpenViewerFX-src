@@ -37,27 +37,28 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+
 import org.jpedal.io.ObjectStore;
 import org.jpedal.utils.LogWriter;
 
 public class DownloadProgress {
-	//Load file from URL into file then open file
-	File tempURLFile;
+    //Load file from URL into file then open file
+    File tempURLFile;
 
-	boolean isDownloading=true;
+    boolean isDownloading = true;
 
-	int progress;
+    int progress;
 
     private final String pdfUrl;
 
-	public DownloadProgress(final String pdfUrl){
+    public DownloadProgress(final String pdfUrl) {
 
-		this.pdfUrl = pdfUrl;
+        this.pdfUrl = pdfUrl;
 
-	}
+    }
 
     public void startDownload() {
-        
+
         final URL url;
         final InputStream is;
 
@@ -67,28 +68,28 @@ public class DownloadProgress {
 
             progress = 0;
 
-            String str= "file.pdf";
-            if(pdfUrl.startsWith("jar:/")) {
-                is=this.getClass().getResourceAsStream(pdfUrl.substring(4));
-            }else{
+            String str = "file.pdf";
+            if (pdfUrl.startsWith("jar:/")) {
+                is = this.getClass().getResourceAsStream(pdfUrl.substring(4));
+            } else {
                 //Allow for firefox drag and drop link without enough forward slashes
-                if(pdfUrl.startsWith("file:/") && pdfUrl.charAt(7)!='/') {
+                if (pdfUrl.startsWith("file:/") && pdfUrl.charAt(7) != '/') {
                     url = new URL(pdfUrl.replaceFirst("file:/*?", "file:///"));
-                }else{
+                } else {
                     url = new URL(pdfUrl);
                 }
 
                 is = url.openStream();
 
-                str=url.getPath().substring(url.getPath().lastIndexOf('/')+1);
+                str = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
                 fileLength = url.openConnection().getContentLength();
-                fileLengthPercent = fileLength/100;
+                fileLengthPercent = fileLength / 100;
             }
             final String filename = str;
 
-            tempURLFile=ObjectStore.createTempFile(filename);
-            
-            
+            tempURLFile = ObjectStore.createTempFile(filename);
+
+
             final FileOutputStream fos = new FileOutputStream(tempURLFile);
 
             // Download buffer
@@ -100,7 +101,7 @@ public class DownloadProgress {
 
             while ((read = is.read(buffer)) != -1) {
                 current += read;
-                progress = current/fileLengthPercent;
+                progress = current / fileLengthPercent;
                 fos.write(buffer, 0, read);
             }
             fos.flush();
@@ -111,24 +112,24 @@ public class DownloadProgress {
             progress = 100;
 
         } catch (final Exception e) {
-            LogWriter.writeLog("[PDF] Exception " + e + " opening URL "+ pdfUrl);
+            LogWriter.writeLog("[PDF] Exception " + e + " opening URL " + pdfUrl);
             e.printStackTrace();
             progress = 100;
         }
 
-        isDownloading=false;
+        isDownloading = false;
 
     }
-	
-	public File getFile(){
-		return tempURLFile;
-	}
 
-	public boolean isDownloading() {
-		return isDownloading; 
-	}
+    public File getFile() {
+        return tempURLFile;
+    }
 
-	public int getProgress(){
-		return progress;
-	}
+    public boolean isDownloading() {
+        return isDownloading;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
 }

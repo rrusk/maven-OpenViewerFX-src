@@ -44,127 +44,145 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.StringUtils;
 
 /**
- * <p>Added as a repository to store PDF file metadata (both legacy fields and XML metadata) in so that it can be accesed. 
+ * <p>Added as a repository to store PDF file metadata (both legacy fields and XML metadata) in so that it can be accesed.
  * <p>Please see org.jpedal.examples (especially Viewer) for example code.
  */
-public class PdfFileInformation
-{
-	/**list of pdf information fields data might contain*/
+public class PdfFileInformation {
+    /**
+     * list of pdf information fields data might contain
+     */
     private static final String[] information_fields =
-		{
-			"Title",
-			"Author",
-			"Subject",
-			"Keywords",
-			"Creator",
-			"Producer",
-			"CreationDate",
-			"ModDate",
-			"Trapped" };
+            {
+                    "Title",
+                    "Author",
+                    "Subject",
+                    "Keywords",
+                    "Creator",
+                    "Producer",
+                    "CreationDate",
+                    "ModDate",
+                    "Trapped"};
 
-    /**list of pdf information fields data might contain*/
+    /**
+     * list of pdf information fields data might contain
+     */
     public static final int[] information_field_IDs =
-		{
-			PdfDictionary.Title,
-			PdfDictionary.Author,
-			PdfDictionary.Subject,
-			PdfDictionary.Keywords,
-			PdfDictionary.Creator,
-			PdfDictionary.Producer,
-			PdfDictionary.CreationDate,
-			PdfDictionary.ModDate,
-			PdfDictionary.Trapped};
+            {
+                    PdfDictionary.Title,
+                    PdfDictionary.Author,
+                    PdfDictionary.Subject,
+                    PdfDictionary.Keywords,
+                    PdfDictionary.Creator,
+                    PdfDictionary.Producer,
+                    PdfDictionary.CreationDate,
+                    PdfDictionary.ModDate,
+                    PdfDictionary.Trapped};
 
-    /**assigned values found in pdf information object*/
-	private final String[] information_values = {"","","","","","","","",""};	
-	
-	/**Any XML metadata as a string*/
-	private String XMLmetadata;
+    /**
+     * assigned values found in pdf information object
+     */
+    private final String[] information_values = {"", "", "", "", "", "", "", "", ""};
 
-	private byte[] rawData;
-			
-	/**@return list of field names*/
-	public static String[] getFieldNames(){
-		return information_fields;
-	}
-	
-	/**@return XML data embedded inside PDF*/
-	public String getFileXMLMetaData(){
+    /**
+     * Any XML metadata as a string
+     */
+    private String XMLmetadata;
 
-        if(rawData==null) {
+    private byte[] rawData;
+
+    /**
+     * @return list of field names
+     */
+    public static String[] getFieldNames() {
+        return information_fields;
+    }
+
+    /**
+     * @return XML data embedded inside PDF
+     */
+    public String getFileXMLMetaData() {
+
+        if (rawData == null) {
             return "";
-        } else{
+        } else {
 
-            if(XMLmetadata==null){
+            if (XMLmetadata == null) {
 
                 //make deep copy
-                final int length=rawData.length;
-                byte[] stream=new byte[length];
-                System.arraycopy(rawData,0,stream,0,length);
-                
+                final int length = rawData.length;
+                byte[] stream = new byte[length];
+                System.arraycopy(rawData, 0, stream, 0, length);
+
                 //strip empty lines
-                final int count=stream.length;
-                int reached=0;
-                byte lastValue=0;
-                for(int ii=0;ii<count;ii++){
-                    if(lastValue==13 && stream[ii]==10){
+                final int count = stream.length;
+                int reached = 0;
+                byte lastValue = 0;
+                for (int ii = 0; ii < count; ii++) {
+                    if (lastValue == 13 && stream[ii] == 10) {
                         //convert return
-                        stream[reached-1]=10;
-                    }else if((lastValue==10 || lastValue==32) && (stream[ii]==32 || stream[ii]==10)){
-                    }else{
-                        stream[reached]=stream[ii];
-                        lastValue=stream[ii];
+                        stream[reached - 1] = 10;
+                    } else if ((lastValue == 10 || lastValue == 32) && (stream[ii] == 32 || stream[ii] == 10)) {
+                    } else {
+                        stream[reached] = stream[ii];
+                        lastValue = stream[ii];
                         reached++;
                     }
                 }
 
-                if(reached!=count){
-                    final byte[] cleanedStream=new byte[reached];
-                    System.arraycopy(stream, 0,cleanedStream,0,reached);
-                    stream=cleanedStream;
+                if (reached != count) {
+                    final byte[] cleanedStream = new byte[reached];
+                    System.arraycopy(stream, 0, cleanedStream, 0, reached);
+                    stream = cleanedStream;
                 }
 
-                XMLmetadata=new String(stream);
+                XMLmetadata = new String(stream);
             }
 
             return XMLmetadata;
         }
     }
-	
-	/**set list of field names as file opened by JPedal (should not be used externally)
+
+    /**
+     * set list of field names as file opened by JPedal (should not be used externally)
+     *
      * @param rawData An array containing list of field names
-         */
-	public void setFileXMLMetaData(final byte[] rawData){
+     */
+    public void setFileXMLMetaData(final byte[] rawData) {
 
-		this.rawData=rawData;
-	}
-	
-	/**@return list of field values to match field names (legacy non-XML information fields)*/
-	public String[] getFieldValues(){
-		return information_values;
-	}
-	
-	/**set the information values as file opened by JPedal (should not be used externally)
-     * @param i position of the pointer        
-     * @param convertedValue new value of the pointer       
-         */
-	public void setFieldValue(final int i, final String convertedValue){
-		information_values[i] =convertedValue;
-	}
+        this.rawData = rawData;
+    }
 
-/**
+    /**
+     * @return list of field values to match field names (legacy non-XML information fields)
+     */
+    public String[] getFieldValues() {
+        return information_values;
+    }
+
+    /**
+     * set the information values as file opened by JPedal (should not be used externally)
+     *
+     * @param i              position of the pointer
+     * @param convertedValue new value of the pointer
+     */
+    public void setFieldValue(final int i, final String convertedValue) {
+        information_values[i] = convertedValue;
+    }
+
+    /**
      * read information object and return pointer to correct
      * place
-     * @param infoObj a value of information object
+     *
+     * @param infoObj       a value of information object
      * @param objectDecoder gets information of information object
      */
-public void readInformationObject(final PdfObject infoObj, final ObjectDecoder objectDecoder) {
+    public void readInformationObject(final PdfObject infoObj, final ObjectDecoder objectDecoder) {
 
 
         //get info
-        try{
+        try {
             objectDecoder.checkResolved(infoObj);
-        }catch(final Exception e){
+        } catch (final Exception e) {
 
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
@@ -173,23 +191,23 @@ public void readInformationObject(final PdfObject infoObj, final ObjectDecoder o
         int id;
         byte[] data;
 
-        final int count=PdfFileInformation.information_field_IDs.length;
+        final int count = PdfFileInformation.information_field_IDs.length;
 
         //put into fields so we can display
-        for (int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
 
-            id=PdfFileInformation.information_field_IDs[i];
-            if(id==PdfDictionary.Trapped){
-                newValue=infoObj.getName(id);
+            id = PdfFileInformation.information_field_IDs[i];
+            if (id == PdfDictionary.Trapped) {
+                newValue = infoObj.getName(id);
 
-                if(newValue==null) {
+                if (newValue == null) {
                     newValue = "";
                 }
 
-            }else{
+            } else {
 
-                data=infoObj.getTextStreamValueAsByte(id);
-                if(data==null) {
+                data = infoObj.getTextStreamValueAsByte(id);
+                if (data == null) {
                     newValue = "";
                 } else {
                     newValue = StringUtils.getTextString(data, false);
@@ -201,64 +219,64 @@ public void readInformationObject(final PdfObject infoObj, final ObjectDecoder o
     }
 
     /**
-        * read the form data from the file
-     * @param metadataObj  XML value
+     * read the form data from the file
+     *
+     * @param metadataObj    XML value
      * @param currentPdfFile the Current PDF File
      * @return form data from the file
-        */
+     */
     public final PdfFileInformation readPdfFileMetadata(final PdfObject metadataObj, final PdfObjectReader currentPdfFile) {
 
-           final PdfFileReader objectReader=currentPdfFile.getObjectReader();
-           final ObjectDecoder objectDecoder=new ObjectDecoder(currentPdfFile.getObjectReader());
+        final PdfFileReader objectReader = currentPdfFile.getObjectReader();
+        final ObjectDecoder objectDecoder = new ObjectDecoder(currentPdfFile.getObjectReader());
 
-           //read info object (may be defined and object set in different trailers so must be done at end)
-           final DecryptionFactory decryption=objectReader.getDecryptionObject();
-           final PdfObject infoObject=objectReader.getInfoObject();
-           if(infoObject!=null &&(!(decryption!=null && (decryption.getBooleanValue(PDFflags.IS_FILE_ENCRYPTED) || decryption.getBooleanValue(PDFflags.IS_PASSWORD_SUPPLIED))))) {
-               readInformationObject(infoObject, objectDecoder);
-           }
+        //read info object (may be defined and object set in different trailers so must be done at end)
+        final DecryptionFactory decryption = objectReader.getDecryptionObject();
+        final PdfObject infoObject = objectReader.getInfoObject();
+        if (infoObject != null && (!(decryption != null && (decryption.getBooleanValue(PDFflags.IS_FILE_ENCRYPTED) || decryption.getBooleanValue(PDFflags.IS_PASSWORD_SUPPLIED))))) {
+            readInformationObject(infoObject, objectDecoder);
+        }
 
-           //read and set XML value
-           if(metadataObj!=null){
+        //read and set XML value
+        if (metadataObj != null) {
 
-               final String objectRef=new String(metadataObj.getUnresolvedData());
+            final String objectRef = new String(metadataObj.getUnresolvedData());
 
-               //byte[] stream= metadataObj.DecodedStream;
+            //byte[] stream= metadataObj.DecodedStream;
 
-               //start old
-               //get data
-               final MetadataObject oldMetaDataObj =new MetadataObject(objectRef);
-               objectReader.readObject(oldMetaDataObj);
+            //start old
+            //get data
+            final MetadataObject oldMetaDataObj = new MetadataObject(objectRef);
+            objectReader.readObject(oldMetaDataObj);
 
-               rawData = oldMetaDataObj.getDecodedStream();
+            rawData = oldMetaDataObj.getDecodedStream();
 
                /*
                 * remove any rubbish at end  (last char should be > so find last >
                 * and remove the rest)
                 */
-               if(rawData!=null){
-            	   int count=rawData.length;
-            	   while(count>1){
-            		   if(rawData[count-1]=='>') {
-                           break;
-                       }
+            if (rawData != null) {
+                int count = rawData.length;
+                while (count > 1) {
+                    if (rawData[count - 1] == '>') {
+                        break;
+                    }
 
-            		   count--;
-            	   }
+                    count--;
+                }
 
-            	   //copy and resize
-            	   if(count>0){
-            		   final byte[] trimmedVersion=new byte[count];
-            		   System.arraycopy(rawData,0,trimmedVersion,0,count);
-            		   rawData=trimmedVersion;
-            	   }
-               }
+                //copy and resize
+                if (count > 0) {
+                    final byte[] trimmedVersion = new byte[count];
+                    System.arraycopy(rawData, 0, trimmedVersion, 0, count);
+                    rawData = trimmedVersion;
+                }
+            }
 
-           }
+        }
 
-           return this;
-       }
-
+        return this;
+    }
 
 
 }

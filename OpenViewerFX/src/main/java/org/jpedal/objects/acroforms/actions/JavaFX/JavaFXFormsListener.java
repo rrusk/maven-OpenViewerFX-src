@@ -45,95 +45,102 @@ import org.jpedal.objects.acroforms.actions.PDFListener;
 import org.jpedal.objects.raw.FormObject;
 
 /**
- * Listener which listens to various actions on JavaFX Form objects and 
+ * Listener which listens to various actions on JavaFX Form objects and
  * executes the correct method in ActionHandler
+ *
  * @author Simon
  */
-public class JavaFXFormsListener extends PDFListener{
+public class JavaFXFormsListener extends PDFListener {
     private boolean debug;
-    
+
     private final EventHandler<MouseEvent> mouseHandler;
     private EventHandler<TouchEvent> touchHandler;
     private final ChangeListener<Boolean> focusHandler;
     private final EventHandler<KeyEvent> keyHandler;
 
-    public JavaFXFormsListener(final FormObject form, final ActionHandler handler){
-        super(form,handler);
-        
+    public JavaFXFormsListener(final FormObject form, final ActionHandler handler) {
+        super(form, handler);
+
         mouseHandler = new EventHandler<MouseEvent>() {
-            @Override public void handle(final MouseEvent event) {
+            @Override
+            public void handle(final MouseEvent event) {
                 handleMouseEvent(event);
             }
         };
-        
+
         focusHandler = new ChangeListener<Boolean>() {
-            @Override public void changed(final ObservableValue<? extends Boolean> observable, final Boolean oldValue, final Boolean newValue) {
+            @Override
+            public void changed(final ObservableValue<? extends Boolean> observable, final Boolean oldValue, final Boolean newValue) {
                 handleFocusEvent(newValue);
             }
         };
-        
+
         keyHandler = new EventHandler<KeyEvent>() {
-            @Override public void handle(final KeyEvent event) {
+            @Override
+            public void handle(final KeyEvent event) {
                 handleKeyEvent(event);
             }
         };
     }
 
-    public EventHandler<MouseEvent> getMouseHandler(){
+    public EventHandler<MouseEvent> getMouseHandler() {
         return mouseHandler;
     }
-    public EventHandler<TouchEvent> getTouchHandler(){
+
+    public EventHandler<TouchEvent> getTouchHandler() {
         return touchHandler;
     }
-    public ChangeListener<Boolean> getFocusHandler(){
+
+    public ChangeListener<Boolean> getFocusHandler() {
         return focusHandler;
     }
-    public EventHandler<KeyEvent> getKeyHandler(){
+
+    public EventHandler<KeyEvent> getKeyHandler() {
         return keyHandler;
     }
-    
+
     private void handleMouseEvent(final MouseEvent event) {
-        if(debug) {
+        if (debug) {
             System.out.println("JavaFXFormsMouseListener event: " + event.getEventType().getName());
         }
 
-        if(event.getEventType() == MouseEvent.MOUSE_CLICKED){
+        if (event.getEventType() == MouseEvent.MOUSE_CLICKED) {
             super.mouseClicked(event);
-        }else if (event.getEventType() == MouseEvent.MOUSE_PRESSED){
+        } else if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
             super.mousePressed(event);
-        }else if (event.getEventType() == MouseEvent.MOUSE_RELEASED){
+        } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
             super.mouseReleased(event);
-        }else if (event.getEventType() == MouseEvent.MOUSE_ENTERED){
+        } else if (event.getEventType() == MouseEvent.MOUSE_ENTERED) {
             handler.A(event, formObject, ActionHandler.MOUSEENTERED);
             handler.E(event, formObject);
 
-            if (formObject.getCharacteristics()[8] && formObject.getGUIComponent() !=null) {//togglenoView
-                ((Node)formObject.getGUIComponent()).setVisible(true);
+            if (formObject.getCharacteristics()[8] && formObject.getGUIComponent() != null) { //togglenoView
+                ((Node) formObject.getGUIComponent()).setVisible(true);
             }
-        }else if (event.getEventType() == MouseEvent.MOUSE_EXITED){
+        } else if (event.getEventType() == MouseEvent.MOUSE_EXITED) {
             handler.A(event, formObject, ActionHandler.MOUSEEXITED);
             handler.X(event, formObject);
 
-            if (formObject.getCharacteristics()[8] && formObject.getGUIComponent() !=null) {//togglenoView
-                ((Node)formObject.getGUIComponent()).setVisible(false);
+            if (formObject.getCharacteristics()[8] && formObject.getGUIComponent() != null) { //togglenoView
+                ((Node) formObject.getGUIComponent()).setVisible(false);
             }
         }
     }
 
-    private void handleFocusEvent(final boolean gainedFocus){
-        if(gainedFocus) {
+    private void handleFocusEvent(final boolean gainedFocus) {
+        if (gainedFocus) {
             super.focusGained(null);
         } else {
             super.focusLost(null);
         }
     }
-    
-    private void handleKeyEvent(final KeyEvent event){
-        if(event.getEventType().equals(KeyEvent.KEY_PRESSED)){
+
+    private void handleKeyEvent(final KeyEvent event) {
+        if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
             // Ignored at present
-        }else if(event.getEventType().equals(KeyEvent.KEY_RELEASED)){
+        } else if (event.getEventType().equals(KeyEvent.KEY_RELEASED)) {
             super.keyReleased(event);
         }
     }
-    
+
 }

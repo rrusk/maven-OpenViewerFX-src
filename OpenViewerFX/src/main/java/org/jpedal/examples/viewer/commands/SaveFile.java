@@ -39,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.viewer.Values;
 import org.jpedal.examples.viewer.utils.FileFilterer;
@@ -60,31 +61,31 @@ public class SaveFile {
         }
     }
 
-        public static void handleUnsaveForms(final GUIFactory currentGUI, final Values commonValues) {
-        
-        if(!org.jpedal.DevFlags.GUITESTINGINPROGRESS){
-           
-        	//OLD FORM CHANGE CODE
-            if(commonValues.isFormsChanged()){
-                final int n = currentGUI.showConfirmDialog(Messages.getMessage("PdfViewerFormsUnsavedOptions.message"),Messages.getMessage("PdfViewerFormsUnsavedWarning.message"), JOptionPane.YES_NO_OPTION);
-                
-                if(n==JOptionPane.YES_OPTION) {
+    public static void handleUnsaveForms(final GUIFactory currentGUI, final Values commonValues) {
+
+        if (!org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
+
+            //OLD FORM CHANGE CODE
+            if (commonValues.isFormsChanged()) {
+                final int n = currentGUI.showConfirmDialog(Messages.getMessage("PdfViewerFormsUnsavedOptions.message"), Messages.getMessage("PdfViewerFormsUnsavedWarning.message"), JOptionPane.YES_NO_OPTION);
+
+                if (n == JOptionPane.YES_OPTION) {
                     SaveFile.saveFile(currentGUI, commonValues);
                 }
-            }  
+            }
         }
-        
+
         commonValues.setFormsChanged(false);
         currentGUI.setViewerTitle(null);
     }
-    
+
     private static final FileFilterer pdf = new FileFilterer(new String[]{"pdf"}, "Pdf (*.pdf)");
     private static final FileFilterer fdf = new FileFilterer(new String[]{"fdf"}, "fdf (*.fdf)");
-    private static final FileFilterer png = new FileFilterer(new String[] {"png"}, "Png (*.png)");
-    private static final FileFilterer tif = new FileFilterer(new String[] {"tif"}, "Tiff (*.tif)");
-    private static final FileFilterer jpg = new FileFilterer(new String[] {"jpg"}, "Jpg (*.jpg)");
-        
-    
+    private static final FileFilterer png = new FileFilterer(new String[]{"png"}, "Png (*.png)");
+    private static final FileFilterer tif = new FileFilterer(new String[]{"tif"}, "Tiff (*.tif)");
+    private static final FileFilterer jpg = new FileFilterer(new String[]{"jpg"}, "Jpg (*.jpg)");
+
+
     private static void saveFile(final GUIFactory currentGUI, final Values commonValues) {
 
         //Prevent save is linearised file is still loading
@@ -116,19 +117,19 @@ public class SaveFile {
             }
         }
     }
-   
+
     private static void saveAsImage(final File file, final GUIFactory currentGUI, final String ext) {
-        
+
         if (ext.equals("png") || ext.equals("jpg") || ext.equals("tif")) {
-            
+
             final PdfDecoderInt decoder = currentGUI.getPdfDecoder();
-            
+
             final File f = new File(file.getPath().replace("." + ext, "").replace(".pdf", ""));
             f.mkdir();
 
             for (int i = 1; i <= decoder.getPageCount(); i++) {
                 try {
-                    
+
                     final BufferedImage imageToSave = decoder.getPageAsImage(i, 1);
 
                     final String filename = f.getAbsolutePath() + System.getProperty("file.separator") + file.getName().replace(".pdf", "") + "_" + i + '.' + ext;
@@ -140,24 +141,24 @@ public class SaveFile {
                 }
             }
         } else {
-            currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.ImagesSaveUnsupported")+" "+ext);
-            LogWriter.writeLog("Saving as "+ext +" is currently unsupported.");
+            currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.ImagesSaveUnsupported") + " " + ext);
+            LogWriter.writeLog("Saving as " + ext + " is currently unsupported.");
         }
     }
-    
-    private static void saveAsPdf(File file, final GUIFactory currentGUI, final Values commonValues){
+
+    private static void saveAsPdf(File file, final GUIFactory currentGUI, final Values commonValues) {
         String fileToSave = file.getAbsolutePath();
         File tempFile = null;
 
         //check if pdf is encrypted/password protected
         //if new annots have been added we prevent saving
-        if (currentGUI.getPdfDecoder().isEncrypted()){// && !decode_pdf.isPasswordSupplied()){
-            if (currentGUI.getAnnotationPanel().annotationAdded()){
+        if (currentGUI.getPdfDecoder().isEncrypted()) { // && !decode_pdf.isPasswordSupplied()){
+            if (currentGUI.getAnnotationPanel().annotationAdded()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerMessage.NewAnnotInEncryptedFile"));
                 return;
             }
         }
-        
+
         if (!fileToSave.endsWith(".pdf")) {
             fileToSave += ".pdf";
             file = new File(fileToSave);
@@ -165,23 +166,23 @@ public class SaveFile {
 
         if (file.exists()) {
             final int n = currentGUI.showConfirmDialog(fileToSave + '\n'
-                    + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + '\n'
-                    + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
+                            + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + '\n'
+                            + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
                     Messages.getMessage("PdfViewerMessage.Resave"), JOptionPane.YES_NO_OPTION);
             if (n == 1) {
                 return;
             }
         }
-        
+
         try {
             tempFile = File.createTempFile(file.getName().substring(0, file.getName().lastIndexOf('.')) + "SaveTemp", file.getName().substring(file.getName().lastIndexOf('.')));
             copyFile(commonValues.getSelectedFile(), tempFile.getAbsolutePath(), currentGUI);
         } catch (final IOException ex) {
             LogWriter.writeLog("Exception attempting to create temp file: " + ex);
         }
-        
+
         if (tempFile != null) {
-            
+
             if (currentGUI.getValues().isFormsChanged()) {
                 final Object[] objArr = currentGUI.getPdfDecoder().getFormRenderer().getFormComponents(null, ReturnValues.FORMOBJECTS_FROM_REF, -1);
 
@@ -203,14 +204,14 @@ public class SaveFile {
 
             //Remove temp File
             tempFile.delete();
-            
+
             commonValues.setFormsChanged(false);
             currentGUI.setViewerTitle(null);
         }
     }
-    
-    
-    private static void copyFile(final String input, final String output, final GUIFactory currentGUI){
+
+
+    private static void copyFile(final String input, final String output, final GUIFactory currentGUI) {
         
         /*
          * reset flag and graphical clue
@@ -235,11 +236,11 @@ public class SaveFile {
         }
 
         try {
-            if(fis!=null){
+            if (fis != null) {
                 fis.close();
             }
-            
-            if(fos!=null){
+
+            if (fos != null) {
                 fos.close();
             }
         } catch (final IOException e2) {

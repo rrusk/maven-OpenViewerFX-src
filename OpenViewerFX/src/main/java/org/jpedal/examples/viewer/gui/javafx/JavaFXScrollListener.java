@@ -34,6 +34,7 @@
 package org.jpedal.examples.viewer.gui.javafx;
 
 import java.awt.image.BufferedImage;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -50,7 +51,6 @@ import org.jpedal.examples.viewer.gui.GUI;
 import org.jpedal.utils.LogWriter;
 
 /**
- *
  * @author Simon
  */
 public class JavaFXScrollListener implements ChangeListener<Number>, EventHandler<MouseEvent> {
@@ -59,71 +59,72 @@ public class JavaFXScrollListener implements ChangeListener<Number>, EventHandle
     // Avoid StackOverflowExceptions
     private boolean setValueLocally;
     private final GUI gui;
-    private int nextPage=-1, lastPageSent=-1;
+    private int nextPage = -1, lastPageSent = -1;
     private boolean decodeLock;
     private final ScrollBar scroll;
     public BufferedImage lastImage;
-    
+
     public JavaFXScrollListener(final GUI gui, final ScrollBar callback) {
         requestMade = false;
         setValueLocally = false;
         this.gui = gui;
         scroll = callback;
         this.trapMultipleMovements = new Timeline(new KeyFrame(Duration.millis(250), new EventHandler<ActionEvent>() {
-            @Override public void handle(final ActionEvent event) {
-                if(!requestMade){
+            @Override
+            public void handle(final ActionEvent event) {
+                if (!requestMade) {
                     requestMade = true;
-                    if(nextPage > 0){
+                    if (nextPage > 0) {
                         decodeLock = true;
 //                        gotoPage(nextPage);
 //                        gui.getPdfDecoder().waitForDecodingToFinish();
                         setThumbnail();
                         decodeLock = false;
-                        
+
                     }
                     requestMade = false;
                 }
             }
         }));
-        
+
         scroll.setOnMouseReleased(this);
     }
-    
-    private void gotoPage(final int page){
+
+    private void gotoPage(final int page) {
         gui.getCommand().executeCommand(Commands.GOTO, new Object[]{Integer.toString(page)});
     }
-    
+
     @Override
     public void changed(final ObservableValue<? extends Number> observable, final Number oldValue, final Number newValue) {
-        if(setValueLocally || newValue == null){
+        if (setValueLocally || newValue == null) {
             setValueLocally = false;
             return;
         }
-        
-        final int newPage = newValue.intValue()+1;
-        
-        if(decodeLock){
+
+        final int newPage = newValue.intValue() + 1;
+
+        if (decodeLock) {
             setValueLocally = true;
             scroll.setValue(oldValue.intValue());
             return;
         }
-        
-        if(newValue.intValue() >= 0 && nextPage != newPage){
+
+        if (newValue.intValue() >= 0 && nextPage != newPage) {
             nextPage = newPage <= gui.getPdfDecoder().getPageCount() ? newPage : gui.getPdfDecoder().getPageCount();
-            
-            if(trapMultipleMovements.getStatus() == Animation.Status.RUNNING) {
+
+            if (trapMultipleMovements.getStatus() == Animation.Status.RUNNING) {
                 trapMultipleMovements.stop();
             }
-            
+
             //Only start timer to display preview if mouse has been used
-            if(scroll.isPressed()){
+            if (scroll.isPressed()) {
                 trapMultipleMovements.setCycleCount(1);
                 trapMultipleMovements.playFromStart();
             }
-            
+
         }
     }
-    
+
     public synchronized void setThumbnail() {
 
         if (lastPageSent != nextPage) {
@@ -152,10 +153,10 @@ public class JavaFXScrollListener implements ChangeListener<Number>, EventHandle
             requestMade = true;
             if (nextPage > 0) {
                 decodeLock = true;
-                
+
                 //Prevents preview creation is no preview shown but page change
-                lastPageSent=nextPage;
-                
+                lastPageSent = nextPage;
+
                 gotoPage(nextPage);
                 gui.setPageNumber();
                 gui.getPdfDecoder().waitForDecodingToFinish();

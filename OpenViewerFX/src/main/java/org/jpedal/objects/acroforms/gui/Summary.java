@@ -44,6 +44,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JDialog;
+
 import org.jpedal.objects.acroforms.gui.certificates.CertificateHolder;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
@@ -57,17 +58,17 @@ public class Summary extends javax.swing.JPanel {
         signedByBox.setText(signName);
         reasonBox.setText(reason);
 
-        final String rawDate=sigObject.getTextStreamValue(PdfDictionary.M);
+        final String rawDate = sigObject.getTextStreamValue(PdfDictionary.M);
         //if(rawDate!=null){
-            final StringBuilder date = new StringBuilder(rawDate);
-            date.delete(0, 2);
-            date.insert(4, '/');
-            date.insert(7, '/');
-            date.insert(10, ' ');
-            date.insert(13, ':');
-            date.insert(16, ':');
-            date.insert(19, ' ');
-            dateBox.setText(date.toString());
+        final StringBuilder date = new StringBuilder(rawDate);
+        date.delete(0, 2);
+        date.insert(4, '/');
+        date.insert(7, '/');
+        date.insert(10, ' ');
+        date.insert(13, ':');
+        date.insert(16, ':');
+        date.insert(19, ' ');
+        dateBox.setText(date.toString());
         //}
 
         locationBox.setText(location);
@@ -90,14 +91,14 @@ public class Summary extends javax.swing.JPanel {
         if (bytes == null) {
             showCertificateButton.setEnabled(false);
         } else {
-        showCertificateButton.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                showCertificate();
-            }
-        });
-        add(showCertificateButton);
-        showCertificateButton.setBounds(380, 10, 150, 23);
+            showCertificateButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    showCertificate();
+                }
+            });
+            add(showCertificateButton);
+            showCertificateButton.setBounds(380, 10, 150, 23);
         }
     }
 
@@ -174,36 +175,36 @@ public class Summary extends javax.swing.JPanel {
         });
         add(jButton1);
         jButton1.setBounds(433, 140, 90, 23);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void close() {//GEN-FIRST:event_close
+    private void close() { //GEN-FIRST:event_close
         frame.setVisible(false);
-    }//GEN-LAST:event_close
+    } //GEN-LAST:event_close
 
-    private void showCertificate() {//GEN-FIRST:event_showCertificate
+    private void showCertificate() { //GEN-FIRST:event_showCertificate
         final JDialog frame = new JDialog((Frame) null, "Certificate Viewer", true);
 
         final CertificateHolder ch = new CertificateHolder(frame);
-        
+
 
         try {
 
-        	//System.out.println("sigObject = "+sigObject+" "+sigObject.getObjectRefAsString());
-        	
-        	final byte[] bytes = sigObject.getTextStreamValueAsByte(PdfDictionary.Cert);
-        	
+            //System.out.println("sigObject = "+sigObject+" "+sigObject.getObjectRefAsString());
+
+            final byte[] bytes = sigObject.getTextStreamValueAsByte(PdfDictionary.Cert);
+
 //        	byte[] contents=sigObject.getTextStreamValueAsByte(PdfDictionary.Contents);
 //        	System.out.println(contents+" << "+sigObject);
-        	
-			//byte[] bytes = null;//(byte[]) dictionary.DecodedStream;
-        	//PdfObject dictionary = sigObject.getDictionary(PdfDictionary.M);
-        	
-        	//System.out.println("dictionary = "+dictionary);
-        	
-			//byte[] bytes = (byte[]) dictionary.DecodedStream;
-        	
-        	//String textStreamValue = sigObject.getTextStreamValue(PdfDictionary.Cert);
-			//byte[] bytes = StringUtils.toBytes(textStreamValue);
+
+            //byte[] bytes = null; //(byte[]) dictionary.DecodedStream;
+            //PdfObject dictionary = sigObject.getDictionary(PdfDictionary.M);
+
+            //System.out.println("dictionary = "+dictionary);
+
+            //byte[] bytes = (byte[]) dictionary.DecodedStream;
+
+            //String textStreamValue = sigObject.getTextStreamValue(PdfDictionary.Cert);
+            //byte[] bytes = StringUtils.toBytes(textStreamValue);
             final InputStream bais = new ByteArrayInputStream(bytes);
             final CertificateFactory cf = CertificateFactory.getInstance("X.509");
             final X509Certificate signingCertificate = (X509Certificate) cf.generateCertificate(bais);
@@ -292,7 +293,7 @@ public class Summary extends javax.swing.JPanel {
         } catch (final Exception e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-    }//GEN-LAST:event_showCertificate
+    } //GEN-LAST:event_showCertificate
 
     /**
      * @param bytes

@@ -36,6 +36,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+
 import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -47,43 +48,43 @@ import org.jpedal.utils.Matrix;
  *
  */
 public class XForm {
-    
-    private static boolean hasEmptySMask(final GraphicsState gs){
-        return gs.SMask!=null && gs.SMask.getGeneralType(PdfDictionary.SMask)==PdfDictionary.None;
+
+    private static boolean hasEmptySMask(final GraphicsState gs) {
+        return gs.SMask != null && gs.SMask.getGeneralType(PdfDictionary.SMask) == PdfDictionary.None;
     }
-    
+
     public static PdfObject getSMask(final float[] BBox, final GraphicsState gs, final PdfObjectReader currentPdfFile) {
-        PdfObject newSMask=null;
+        PdfObject newSMask = null;
 
         //ignore if none
-        if(hasEmptySMask(gs)){
+        if (hasEmptySMask(gs)) {
 
             return null;
         }
 
-        if(gs.SMask!=null && BBox!=null){ //see if SMask to cache to image & stop negative cases such as Milkshake StckBook Activity disX.pdf
-           
+        if (gs.SMask != null && BBox != null) { //see if SMask to cache to image & stop negative cases such as Milkshake StckBook Activity disX.pdf
+
             //if(gs.SMask.getParameterConstant(PdfDictionary.Type)!=PdfDictionary.Mask || gs.SMask.getFloatArray(PdfDictionary.BC)!=null){ //fix for waves file
-                newSMask= gs.SMask.getDictionary(PdfDictionary.G);
-                currentPdfFile.checkResolved(newSMask);
-                
-           // }
+            newSMask = gs.SMask.getDictionary(PdfDictionary.G);
+            currentPdfFile.checkResolved(newSMask);
+
+            // }
         }
         return newSMask;
     }
-    
-    private static final float[] matches={1f,0f,0f,1f,0f,0f};
+
+    private static final float[] matches = {1f, 0f, 0f, 1f, 0f, 0f};
 
     public static boolean isIdentity(final float[] matrix) {
 
-        boolean isIdentity=true;// assume right and try to disprove
+        boolean isIdentity = true; // assume right and try to disprove
 
-        if(matrix!=null){
+        if (matrix != null) {
 
             //see if it matches if not set flag and exit
-            for(int ii=0;ii<6;ii++){
-                if(matrix[ii]!=matches[ii]){
-                    isIdentity=false;
+            for (int ii = 0; ii < 6; ii++) {
+                if (matrix[ii] != matches[ii]) {
+                    isIdentity = false;
                     break;
                 }
             }
@@ -92,41 +93,40 @@ public class XForm {
         return isIdentity;
     }
 
-    
+
     public static Area setClip(final Shape defaultClip, final float[] BBox, final GraphicsState gs, final DynamicVectorRenderer current) {
-        
+
         final Rectangle rect = new Rectangle();
-        rect.setFrameFromDiagonal(BBox[0],BBox[1],BBox[2],BBox[3]);
-        
-        final float minX = (float)rect.getMinX();
-        final float minY = (float)rect.getMinY();
-        
-        final float maxX = (float)rect.getMaxX();
-        final float maxY = (float)rect.getMaxY();
-        
+        rect.setFrameFromDiagonal(BBox[0], BBox[1], BBox[2], BBox[3]);
+
+        final float minX = (float) rect.getMinX();
+        final float minY = (float) rect.getMinY();
+
+        final float maxX = (float) rect.getMaxX();
+        final float maxY = (float) rect.getMaxY();
+
         final float[] p1 = Matrix.transformPoint(gs.CTM, minX, minY);
         final float[] p2 = Matrix.transformPoint(gs.CTM, maxX, minY);
         final float[] p3 = Matrix.transformPoint(gs.CTM, maxX, maxY);
         final float[] p4 = Matrix.transformPoint(gs.CTM, minX, maxY);
-        
+
         final GeneralPath gp = new GeneralPath();
         gp.moveTo(p1[0], p1[1]);
         gp.lineTo(p2[0], p2[1]);
         gp.lineTo(p3[0], p3[1]);
         gp.lineTo(p4[0], p4[1]);
         gp.closePath();
-        
+
         final Area clip;
 
-        if(gs.getClippingShape()==null) {
-            clip=null;
+        if (gs.getClippingShape() == null) {
+            clip = null;
+        } else {
+            clip = (Area) gs.getClippingShape().clone();
         }
-        else {
-            clip= (Area) gs.getClippingShape().clone();
-        }
-        
+
         gs.updateClip(new Area(gp));
-        current.drawClip(gs, defaultClip,false) ;
+        current.drawClip(gs, defaultClip, false);
 
         return clip;
     }

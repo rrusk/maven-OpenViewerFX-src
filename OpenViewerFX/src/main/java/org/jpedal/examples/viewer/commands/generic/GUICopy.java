@@ -48,8 +48,9 @@ public class GUICopy {
 
     /**
      * routine to link GUI into text extraction functions
-     * @param decode_pdf Displayed PDF file
-     * @param currentGUI The Viewer
+     *
+     * @param decode_pdf   Displayed PDF file
+     * @param currentGUI   The Viewer
      * @param commonValues Stores data including Page Number
      * @return Extracted text
      */

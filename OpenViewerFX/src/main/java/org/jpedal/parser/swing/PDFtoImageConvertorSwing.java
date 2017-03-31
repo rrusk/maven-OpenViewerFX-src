@@ -37,6 +37,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.display.swing.SwingHelper;
 import org.jpedal.exception.PdfException;
@@ -51,19 +52,19 @@ import org.jpedal.parser.ValueTypes;
 import org.jpedal.render.DynamicVectorRenderer;
 import org.jpedal.render.ImageDisplay;
 
-public class PDFtoImageConvertorSwing extends PDFtoImageConvertor{
+public class PDFtoImageConvertorSwing extends PDFtoImageConvertor {
 
 
-     public PDFtoImageConvertorSwing(final float multiplyer, final DecoderOptions options) {
-        
-        super(multiplyer,options);
+    public PDFtoImageConvertorSwing(final float multiplyer, final DecoderOptions options) {
+
+        super(multiplyer, options);
     }
 
     @Override
     public DynamicVectorRenderer getDisplay(final int pageIndex, final ObjectStore localStore, final boolean isTransparent) {
-       
-        return imageDisplay = new ImageDisplay(pageIndex,!isTransparent, 5000, localStore); //note !isTransparent as actually addBackground
-        
+
+        return imageDisplay = new ImageDisplay(pageIndex, !isTransparent, 5000, localStore); //note !isTransparent as actually addBackground
+
     }
 
     public static AffineTransform setPageParametersForImage(final float scaling, final int pageNumber, final PdfPageData pageData) {
@@ -77,37 +78,37 @@ public class PDFtoImageConvertorSwing extends PDFtoImageConvertor{
         final int cry = pageData.getCropBoxY(pageNumber);
 
 
-        final int image_x_size =(int) ((crw)*scaling);
-        final int image_y_size =(int) ((crh)*scaling);
+        final int image_x_size = (int) ((crw) * scaling);
+        final int image_y_size = (int) ((crh) * scaling);
 
         final int raw_rotation = pageData.getRotation(pageNumber);
 
-        imageScaling.translate(-crx*scaling,+cry*scaling);
+        imageScaling.translate(-crx * scaling, +cry * scaling);
 
         if (raw_rotation == 270) {
 
-            imageScaling.rotate(-Math.PI / 2.0, image_x_size/ 2, image_y_size / 2);
+            imageScaling.rotate(-Math.PI / 2.0, image_x_size / 2, image_y_size / 2);
 
             final double x_change = (imageScaling.getTranslateX());
             final double y_change = (imageScaling.getTranslateY());
             imageScaling.translate((image_y_size - y_change), -x_change);
 
-            
-            if(cry<0){
-                imageScaling.translate(2*cry*scaling,2*cry*scaling);
-            }else{
-                imageScaling.translate(2*cry*scaling,0);
+
+            if (cry < 0) {
+                imageScaling.translate(2 * cry * scaling, 2 * cry * scaling);
+            } else {
+                imageScaling.translate(2 * cry * scaling, 0);
             }
-            imageScaling.translate(0,-scaling*(pageData.getCropBoxHeight(pageNumber)-pageData.getMediaBoxHeight(pageNumber)));
+            imageScaling.translate(0, -scaling * (pageData.getCropBoxHeight(pageNumber) - pageData.getMediaBoxHeight(pageNumber)));
         } else if (raw_rotation == 180) {
 
             imageScaling.rotate(Math.PI, image_x_size / 2, image_y_size / 2);
 
         } else if (raw_rotation == 90) {
 
-            imageScaling.rotate(Math.PI / 2.0,  image_x_size / 2,  image_y_size / 2);
+            imageScaling.rotate(Math.PI / 2.0, image_x_size / 2, image_y_size / 2);
 
-            final double x_change =(imageScaling.getTranslateX());
+            final double x_change = (imageScaling.getTranslateX());
             final double y_change = (imageScaling.getTranslateY());
             imageScaling.translate(-y_change, image_x_size - x_change);
 
@@ -117,15 +118,15 @@ public class PDFtoImageConvertorSwing extends PDFtoImageConvertor{
         imageScaling.scale(1, -1);
         imageScaling.translate(-image_x_size, 0);
 
-        imageScaling.scale(scaling,scaling);
-        
+        imageScaling.scale(scaling, scaling);
+
         return imageScaling;
     }
-    
-    
+
+
     @Override
     public BufferedImage pageToImage(final boolean imageIsTransparent, final PdfStreamDecoder currentImageDecoder, final float scaling,
-            final PdfObject pdfObject,final AcroRenderer formRenderer) throws PdfException {
+                                     final PdfObject pdfObject, final AcroRenderer formRenderer) throws PdfException {
 
         final BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
@@ -141,59 +142,59 @@ public class PDFtoImageConvertorSwing extends PDFtoImageConvertor{
         /*
          * adjustment for upside down images
          */
-        if(rotation==180){
-            g2.translate(crx*2*multiplyer, -(cry*2*multiplyer));
+        if (rotation == 180) {
+            g2.translate(crx * 2 * multiplyer, -(cry * 2 * multiplyer));
         }
 
         /*
          * pass in values as needed for patterns
          */
-        imageDisplay.setScalingValues(crx*multiplyer, (crh*multiplyer) + cry, multiplyer*scaling);
+        imageDisplay.setScalingValues(crx * multiplyer, (crh * multiplyer) + cry, multiplyer * scaling);
 
         g2.setRenderingHints(ColorSpaces.hints);
         g2.transform(imageScaling);
 
-        if (rotated){
+        if (rotated) {
 
-            if(rotation==90){//90
-                
-                if(multiplyer<1){
+            if (rotation == 90) { //90
+
+                if (multiplyer < 1) {
                     cry = imageScaling.getTranslateX() + cry;
                     crx = imageScaling.getTranslateY() + crx;
 
-                }else{
-                    cry = (int)((imageScaling.getTranslateX()/multiplyer) + cry);
-                    crx = (int)((imageScaling.getTranslateY()/multiplyer) + crx);
+                } else {
+                    cry = (int) ((imageScaling.getTranslateX() / multiplyer) + cry);
+                    crx = (int) ((imageScaling.getTranslateY() / multiplyer) + crx);
                 }
-                
-                
+
+
                 crx /= scaling;
                 cry /= scaling;
-                
+
                 g2.translate(-crx, -cry);
 
-            }else{ //270
-                if(cry<0) {
-                    g2.translate(-(crx/scaling), (mediaH - crh + cry)/scaling);
+            } else { //270
+                if (cry < 0) {
+                    g2.translate(-(crx / scaling), (mediaH - crh + cry) / scaling);
                 } else {
-                    g2.translate(-(crx/scaling), (mediaH - crh - cry)/scaling);
+                    g2.translate(-(crx / scaling), (mediaH - crh - cry) / scaling);
                 }
             }
         }
-        
+
         // decode and print in 1 go
-        currentImageDecoder.setObjectValue(ValueTypes.DirectRendering, g2);//(Graphics2D) graphics);
+        currentImageDecoder.setObjectValue(ValueTypes.DirectRendering, g2); //(Graphics2D) graphics);
         imageDisplay.setG2(g2);
         currentImageDecoder.decodePageContent(pdfObject);
-        
+
         final AffineTransform old = g2.getTransform();
         g2.scale(1, -1);
-        g2.translate(0, -((cry/scaling)+(crh/scaling)));
-        SwingHelper.scaleDisplay(g2, 0, 0, (int)(crw/scaling), (int)(crh/scaling));
+        g2.translate(0, -((cry / scaling) + (crh / scaling)));
+        SwingHelper.scaleDisplay(g2, 0, 0, (int) (crw / scaling), (int) (crh / scaling));
         g2.setTransform(old);
-        
+
         g2.setClip(null);
-        
+
         return image;
     }
 }

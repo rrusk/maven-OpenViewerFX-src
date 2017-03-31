@@ -34,6 +34,7 @@
 package org.jpedal.examples.viewer.gui.javafx;
 
 import java.net.URL;
+
 import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 
@@ -42,34 +43,29 @@ import javafx.scene.image.Image;
  */
 public class JavaFXCursor {
 
-    /** grabbing cursor
-    private Cursor grabCursor;
-    private Cursor grabbingCursor;
-    private Cursor panCursor;
-    private Cursor panCursorL;
-    private Cursor panCursorTL;
-    private Cursor panCursorT;
-    private Cursor panCursorTR;
-    private Cursor panCursorR;
-    private Cursor panCursorBR;
-    private Cursor panCursorB;
-    private Cursor panCursorBL;
-    /**/
-    
+    /**
+     * getCursor is unsupported in OpenViewerFX
+     */
     public static Cursor getCursor(final int type) {
-        System.out.println("Method getCursor in JavaFXCursor.java is not implemented for JavaFX "+type);
+        System.out.println("Method getCursor in JavaFXCursor.java is not implemented for JavaFX " + type);
         return null;
     }
-    
-    public static URL getURLForImage(final String path){
-        System.out.println("Method getURLForImage in JavaFXCursor.java is not implemented for JavaFX "+path);
+
+    /**
+     * getURLForImage is unsupported in OpenViewerFX
+     */
+    public static URL getURLForImage(final String path) {
+        System.out.println("Method getURLForImage in JavaFXCursor.java is not implemented for JavaFX " + path);
         return null;
     }
-    
+
+    /**
+     * getCursorImageForFX is unsupported in OpenViewerFX
+     */
     public static Image getCursorImageForFX(final int type) {
-        System.out.println("Method getURLForImage in JavaFXCursor.java is not implemented for JavaFX "+type);
+        System.out.println("Method getURLForImage in JavaFXCursor.java is not implemented for JavaFX " + type);
         return null;
     }
-    
-    
+
+
 }

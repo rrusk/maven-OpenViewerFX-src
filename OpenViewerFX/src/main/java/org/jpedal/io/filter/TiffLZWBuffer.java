@@ -37,7 +37,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 
 public class TiffLZWBuffer {
-    
+
     private byte[][] codes;
     private BufferedOutputStream output;
     private BufferedInputStream input;
@@ -104,7 +104,7 @@ public class TiffLZWBuffer {
     }
 
     private void addCodes(final byte[] codes) throws IOException {
-        output.write(codes);       
+        output.write(codes);
     }
 
     private void addCodeToCodes(final byte[] oldCodes, final byte code) {
@@ -154,7 +154,7 @@ public class TiffLZWBuffer {
             putBits -= bitsToGet;
             return code;
         } catch (final Exception e) {
-            System.err.println("Exception in findNext "+e);
+            System.err.println("Exception in findNext " + e);
             return 257;
         }
     }

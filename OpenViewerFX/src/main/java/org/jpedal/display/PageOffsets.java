@@ -35,6 +35,7 @@ package org.jpedal.display;
 import static org.jpedal.display.Display.CONTINUOUS;
 import static org.jpedal.display.Display.CONTINUOUS_FACING;
 import static org.jpedal.display.Display.FACING;
+
 import org.jpedal.objects.PdfPageData;
 
 
@@ -43,21 +44,29 @@ import org.jpedal.objects.PdfPageData;
  */
 public class PageOffsets {
 
-    private int width,height;
-    
-    /**width of all pages*/
-    private int totalSingleWidth,totalDoubleWidth,gaps,doubleGaps;
+    private int width, height;
 
-    /**height of all pages*/
-    private int totalSingleHeight,totalDoubleHeight;
+    /**
+     * width of all pages
+     */
+    private int totalSingleWidth, totalDoubleWidth, gaps, doubleGaps;
+
+    /**
+     * height of all pages
+     */
+    private int totalSingleHeight, totalDoubleHeight;
 
     protected int maxW, maxH;
 
-    /**gap between pages*/
-    public static final int pageGap=10;
+    /**
+     * gap between pages
+     */
+    public static final int pageGap = 10;
 
-    /**max widths and heights for facing and continuous pages*/
-    private int doublePageWidth,doublePageHeight,biggestWidth,biggestHeight,widestPageNR,widestPageR;
+    /**
+     * max widths and heights for facing and continuous pages
+     */
+    private int doublePageWidth, doublePageHeight, biggestWidth, biggestHeight, widestPageNR, widestPageR;
 
     public PageOffsets(final int pageCount, final PdfPageData pageData) {
 
@@ -109,7 +118,7 @@ public class PageOffsets {
             totalSingleHeight += pageH;
 
             //track page sizes
-            if ((i & 1) == 1) {//odd
+            if ((i & 1) == 1) { //odd
                 if (widestRightPage < pageW) {
                     widestRightPage = pageW;
                 }
@@ -150,7 +159,7 @@ public class PageOffsets {
                     greatestH = pageH;
                 }
 
-                if (i == 1) {// first page special case
+                if (i == 1) { // first page special case
                     totalDoubleWidth = pageW;
                     totalDoubleHeight = pageH;
                 } else {
@@ -194,14 +203,14 @@ public class PageOffsets {
         return maxW;
     }
 
-	public int getWidestPageR() {
-		return widestPageR;
-	}
+    public int getWidestPageR() {
+        return widestPageR;
+    }
 
-	public int getWidestPageNR() {
-		return widestPageNR;
-	}
-    
+    public int getWidestPageNR() {
+        return widestPageNR;
+    }
+
     /**
      * @param totalSingleWidth the totalSingleWidth to set
      */
@@ -243,14 +252,14 @@ public class PageOffsets {
     public void setTotalDoubleWidth(final int totalDoubleWidth) {
         this.totalDoubleWidth = totalDoubleWidth;
     }
-    
+
     /**
      * @param totalSingleHeight the totalSingleHeight to set
      */
     public void setTotalSingleHeight(final int totalSingleHeight) {
         this.totalSingleHeight = totalSingleHeight;
     }
-    
+
     /**
      * @param totalDoubleHeight the totalDoubleHeight to set
      */
@@ -328,102 +337,102 @@ public class PageOffsets {
         this.widestPageR = widestPageR;
     }
 
-    public void calculateCombinedPageSizes(final int displayView, final int pageNumber, final int displayRotation, final MultiDisplayOptions multiDisplayOptions, final PdfPageData pageData, final float scaling, final int insetW, final int insetH ) {
-        
+    public void calculateCombinedPageSizes(final int displayView, final int pageNumber, final int displayRotation, final MultiDisplayOptions multiDisplayOptions, final PdfPageData pageData, final float scaling, final int insetW, final int insetH) {
+
         //height for facing pages
-        int biggestFacingHeight=0;
-        
-        if(displayView==FACING && multiDisplayOptions.getPageW()!=null){
-            
+        int biggestFacingHeight = 0;
+
+        if (displayView == FACING && multiDisplayOptions.getPageW() != null) {
+
             //get 2 facing page numbers
             int p1;
             final int p2;
             if (multiDisplayOptions.isSeparateCover()) {
-                p1=pageNumber;
-                if((p1 & 1)==1) {
+                p1 = pageNumber;
+                if ((p1 & 1) == 1) {
                     p1--;
                 }
-                p2=p1+1;
+                p2 = p1 + 1;
             } else {
-                p1=pageNumber;
-                if((p1 & 1)==0) {
+                p1 = pageNumber;
+                if ((p1 & 1) == 0) {
                     p1--;
                 }
-                p2=p1+1;
+                p2 = p1 + 1;
             }
-            
-            biggestFacingHeight=multiDisplayOptions.getPageH(p1);
-            if(p2<multiDisplayOptions.getPageH().length && biggestFacingHeight<multiDisplayOptions.getPageH(p2)) {
+
+            biggestFacingHeight = multiDisplayOptions.getPageH(p1);
+            if (p2 < multiDisplayOptions.getPageH().length && biggestFacingHeight < multiDisplayOptions.getPageH(p2)) {
                 biggestFacingHeight = multiDisplayOptions.getPageH(p2);
             }
         }
 
-        final int gaps= this.gaps;
-        final int doubleGaps= this.doubleGaps;
-        
-        switch(displayView){
-            
+        final int gaps = this.gaps;
+        final int doubleGaps = this.doubleGaps;
+
+        switch (displayView) {
+
             case FACING:
-                
+
                 //Get widths of pages
                 final int firstW;
                 final int secondW;
-                if ((displayRotation + pageData.getRotation(pageNumber))%180==90) {
+                if ((displayRotation + pageData.getRotation(pageNumber)) % 180 == 90) {
                     firstW = pageData.getCropBoxHeight(pageNumber);
                 } else {
                     firstW = pageData.getCropBoxWidth(pageNumber);
                 }
-                
-                final int pageCount=pageData.getPageCount();
-                
-                if (pageNumber+1 > pageCount || (pageNumber==1 && pageCount!=2) ) {
+
+                final int pageCount = pageData.getPageCount();
+
+                if (pageNumber + 1 > pageCount || (pageNumber == 1 && pageCount != 2)) {
                     secondW = firstW;
-                }else {
-                    if ((displayRotation + pageData.getRotation(pageNumber+1))%180==90) {
+                } else {
+                    if ((displayRotation + pageData.getRotation(pageNumber + 1)) % 180 == 90) {
                         secondW = pageData.getCropBoxHeight(pageNumber + 1);
                     } else {
                         secondW = pageData.getCropBoxWidth(pageNumber + 1);
                     }
                 }
-                
+
                 //get total width
                 final int totalW = firstW + secondW;
-                
-                width=(int)(totalW*scaling)+ PageOffsets.pageGap;
-                height=(biggestFacingHeight);	//NOTE scaled already!
+
+                width = (int) (totalW * scaling) + PageOffsets.pageGap;
+                height = (biggestFacingHeight);    //NOTE scaled already!
                 break;
-                
-                
+
+
             case CONTINUOUS:
-                
-                if((displayRotation==90)|(displayRotation==270)){
-                    width=(int)(biggestHeight *scaling);
-                    height=(int)((totalSingleWidth)*scaling)+gaps+insetH;
-                }else{
-                    width=(int)(biggestWidth *scaling);
-                    height=(int)((totalSingleHeight)*scaling)+gaps+insetH;
+
+                if ((displayRotation == 90) | (displayRotation == 270)) {
+                    width = (int) (biggestHeight * scaling);
+                    height = (int) ((totalSingleWidth) * scaling) + gaps + insetH;
+                } else {
+                    width = (int) (biggestWidth * scaling);
+                    height = (int) ((totalSingleHeight) * scaling) + gaps + insetH;
                 }
                 break;
-                
-                
+
+
             case CONTINUOUS_FACING:
-                
-                if((displayRotation==90)|(displayRotation==270)){
-                    width=(int)((doublePageHeight)*scaling)+(insetW*2)+doubleGaps;
-                    height=(int)((totalDoubleWidth)*scaling)+doubleGaps+insetH;
-                }else{
-                    width=(int)((doublePageWidth)*scaling)+(insetW*2);
-                    height=(int)((totalDoubleHeight)*scaling)+doubleGaps+insetH;
+
+                if ((displayRotation == 90) | (displayRotation == 270)) {
+                    width = (int) ((doublePageHeight) * scaling) + (insetW * 2) + doubleGaps;
+                    height = (int) ((totalDoubleWidth) * scaling) + doubleGaps + insetH;
+                } else {
+                    width = (int) ((doublePageWidth) * scaling) + (insetW * 2);
+                    height = (int) ((totalDoubleHeight) * scaling) + doubleGaps + insetH;
                 }
                 break;
-                
+
         }
     }
 
     public int getPageWidth() {
         return width;
     }
-    
+
     public int getPageHeight() {
         return height;
     }

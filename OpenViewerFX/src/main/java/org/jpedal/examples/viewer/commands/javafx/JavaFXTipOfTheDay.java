@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -66,14 +67,20 @@ import org.jpedal.utils.Messages;
  * Can be toggled to display on Viewer Startup.
  */
 public class JavaFXTipOfTheDay {
-    
+
     private static FXDialog tipOfDayPopup;
     private static final List<String> urls = new ArrayList<String>();
     private static final BorderPane border = new BorderPane();
-    private static  WebEngine webEngine;
+    private static WebEngine webEngine;
     private static int currentTip;
     private static final CheckBox show = new CheckBox(Messages.getMessage("PdfViewerTipOfDay.Show"));
-    
+
+    /**
+     * Generate and show the Tip of the Day
+     *
+     * @param args       Object array, must be null for default behaviour
+     * @param properties PropertiesFile object holding current properties data
+     */
     public static void execute(final Object[] args, final PropertiesFile properties) {
         if (args == null) {
             try {
@@ -81,153 +88,152 @@ public class JavaFXTipOfTheDay {
             } catch (final IOException ex) {
                 ex.printStackTrace();
             }
-            getTip( properties);
-            
+            getTip(properties);
+
         } else {
 
         }
     }
-    
-    private static void getTip (final PropertiesFile properties){
+
+    private static void getTip(final PropertiesFile properties) {
         setupStage();
         bottomButtons();
-        
+
         // Code to Handle Auto Startup.
-		final String propValue = properties.getValue("displaytipsonstartup");
-		if(!propValue.isEmpty()) {
+        final String propValue = properties.getValue("displaytipsonstartup");
+        if (!propValue.isEmpty()) {
             show.setSelected(propValue.equals("true"));
         }
-        
-		show.setOnAction(new EventHandler<ActionEvent>(){
-			@Override
+
+        show.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
             public void handle(final ActionEvent e) {
-				properties.setValue("displaytipsonstartup", String.valueOf(show.isSelected()));
-			}
-		});
-        
+                properties.setValue("displaytipsonstartup", String.valueOf(show.isSelected()));
+            }
+        });
+
         tipOfDayPopup.show();
     }
-   
-    private static void setupStage(){
-        
+
+    private static void setupStage() {
+
         // Setup the Main Stage.
         tipOfDayPopup = new FXDialog(null, Modality.APPLICATION_MODAL, border, 500, 400);
         tipOfDayPopup.setTitle(Messages.getMessage("PdfCustomGui.Tipoftheday"));
-        
+
         // Setup Did You Know Top Element.
         final HBox titleBar = new HBox();
         final Label title = new Label(Messages.getMessage("PdfViewerTipOfDay.DidYouKnow"), new ImageView(new Image("/org/jpedal/examples/viewer/res/tip.png")));
         titleBar.getChildren().addAll(title);
-        titleBar.setPadding(new Insets(10,0,20,10));
+        titleBar.setPadding(new Insets(10, 0, 20, 10));
         border.setTop(titleBar);
-        
+
         // Setup the Default WebView.
         final VBox middle = new VBox();
         final Random r = new Random();
-		currentTip = r.nextInt(urls.size());
+        currentTip = r.nextInt(urls.size());
         final WebView centerTip = new WebView();
         webEngine = centerTip.getEngine();
         final URL tip = JavaFXTipOfTheDay.class.getResource("/org/jpedal/examples/viewer/res/tips/apps/javabean.html");
-        webEngine.load(tip.toExternalForm());  
-        
+        webEngine.load(tip.toExternalForm());
+
         middle.getChildren().addAll(centerTip);
         middle.setAlignment(Pos.CENTER);
-        middle.setPadding(new Insets(0,10,20,10));
+        middle.setPadding(new Insets(0, 10, 20, 10));
         border.setCenter(middle);
-        
+
     }
-    
+
     /**
      * Sets up the Bottom Buttons.
      */
-    private static void bottomButtons (){
-        
+    private static void bottomButtons() {
+
         // Setup the Next Button.
         final HBox bottomButtons = new HBox();
-        final Button nextTip = new Button (Messages.getMessage("PdfViewerTipOfDay.Next"));
+        final Button nextTip = new Button(Messages.getMessage("PdfViewerTipOfDay.Next"));
         nextTip.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override
             public void handle(final javafx.event.ActionEvent e) {
-                if(currentTip < urls.size() -1){
+                if (currentTip < urls.size() - 1) {
                     currentTip++;
-                }
-                else{
+                } else {
                     currentTip = 0;
                 }
                 final URL urlNext = JavaFXTipOfTheDay.class.getResource(urls.get(currentTip));
                 webEngine.load(urlNext.toExternalForm());
-                
+
             }
         });
-        
+
         // Setup the Previous Button.
-        final Button prevTip = new Button (Messages.getMessage("PdfViewerTipOfDay.Previous"));
+        final Button prevTip = new Button(Messages.getMessage("PdfViewerTipOfDay.Previous"));
         prevTip.setOnAction(new EventHandler<javafx.event.ActionEvent>() {
             @Override
             public void handle(final javafx.event.ActionEvent e) {
-                if(currentTip < urls.size() && currentTip > 0){
+                if (currentTip < urls.size() && currentTip > 0) {
                     currentTip--;
-                }
-                else{
-                    currentTip = urls.size() -1;
+                } else {
+                    currentTip = urls.size() - 1;
                 }
                 final URL urlPrev = JavaFXTipOfTheDay.class.getResource(urls.get(currentTip));
                 webEngine.load(urlPrev.toExternalForm());
-                
+
             }
         });
-        
+
         show.setAlignment(Pos.BOTTOM_LEFT);
-        show.setPadding(new Insets(0,0,10,10));
-        final Region space =  new Region();
+        show.setPadding(new Insets(0, 0, 10, 10));
+        final Region space = new Region();
         HBox.setHgrow(space, Priority.ALWAYS);
         bottomButtons.getChildren().addAll(show, space, prevTip, nextTip);
         bottomButtons.setAlignment(Pos.BOTTOM_RIGHT);
-        bottomButtons.setPadding(new Insets(0,10,10,0));
+        bottomButtons.setPadding(new Insets(0, 10, 10, 0));
         bottomButtons.setSpacing(10d);
         border.setBottom(bottomButtons);
     }
-    
+
     /**
      * Creates an Array List which holds all of the Tips located in the tips directory.
+     *
      * @param tipRoot
-     * @throws IOException 
+     * @throws IOException
      */
     private static void populateTipsList(final String tipRoot) throws IOException {
-		try {
-			final URL url = JavaFXTipOfTheDay.class.getResource(tipRoot);
-			
-			// allow for it in jar
-			if(url.toString().startsWith("jar")){
-				final JarURLConnection conn = (JarURLConnection) url.openConnection();
-				final JarFile jar = conn.getJarFile();
-	
-				for (final Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
-					final JarEntry entry = e.nextElement();
-					final String name=entry.getName();
-					
-					if ((!entry.isDirectory()) && name.contains("/res/tips/") && name.endsWith(".html")) { // this
-						urls.add('/' + name);
-					}
-				}
-			}else{ //IDE
-				final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-				
-				String inputLine;
-				
-				while ((inputLine = in.readLine()) != null) {
-					if (inputLine.indexOf('.') == -1) { // this is a directory
-						populateTipsList(tipRoot + '/' + inputLine);
-					} else if ((inputLine.endsWith(".htm")) || inputLine.endsWith(".html")) { // this is a file
-						urls.add(tipRoot + '/' + inputLine);
-					}
-				}
-			
-			
-				in.close();
-			}
-		} catch (final IOException e) {
-			throw e;
-		}
-	}
+        try {
+            final URL url = JavaFXTipOfTheDay.class.getResource(tipRoot);
+
+            // allow for it in jar
+            if (url.toString().startsWith("jar")) {
+                final JarURLConnection conn = (JarURLConnection) url.openConnection();
+                final JarFile jar = conn.getJarFile();
+
+                for (final Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements(); ) {
+                    final JarEntry entry = e.nextElement();
+                    final String name = entry.getName();
+
+                    if ((!entry.isDirectory()) && name.contains("/res/tips/") && name.endsWith(".html")) { // this
+                        urls.add('/' + name);
+                    }
+                }
+            } else { //IDE
+                final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    if (inputLine.indexOf('.') == -1) { // this is a directory
+                        populateTipsList(tipRoot + '/' + inputLine);
+                    } else if ((inputLine.endsWith(".htm")) || inputLine.endsWith(".html")) { // this is a file
+                        urls.add(tipRoot + '/' + inputLine);
+                    }
+                }
+
+
+                in.close();
+            }
+        } catch (final IOException e) {
+            throw e;
+        }
+    }
 }

@@ -39,43 +39,43 @@ import java.awt.Color;
  * template for all shading operations
  */
 public class PdfColor extends Color implements PdfPaint {
-	
-	public PdfColor(final float r, final float g, final float b) {
-		super(r, g, b);
-	}
-	
-	public PdfColor(final int r, final int g, final int b) {
-		super(r, g, b);
-	}
+
+    public PdfColor(final float r, final float g, final float b) {
+        super(r, g, b);
+    }
+
+    public PdfColor(final int r, final int g, final int b) {
+        super(r, g, b);
+    }
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	protected boolean isPattern;
+    protected boolean isPattern;
 
-	public PdfColor(final int raw) {
-		super(((raw >> 16) & 255),((raw >> 8) & 255),((raw) & 255));
-	}
+    public PdfColor(final int raw) {
+        super(((raw >> 16) & 255), ((raw >> 8) & 255), ((raw) & 255));
+    }
 
-	@Override
-    public void setScaling(final double cropX, final double cropH, final float scaling, final float textX, final float textY){
-		//this.cropX=(int)cropX;
-		//this.cropH=(int)cropH;
-	}
-	
-	@Override
-    public boolean isPattern(){
-		return isPattern;
-	}
-	
-	//constructor for pattern color
-	@SuppressWarnings({"UnusedParameters", "UnusedDeclaration"})
-    public void setPattern(final int dummy){
-		isPattern=true;
-	}
-    
+    @Override
+    public void setScaling(final double cropX, final double cropH, final float scaling, final float textX, final float textY) {
+        //this.cropX=(int)cropX;
+        //this.cropH=(int)cropH;
+    }
+
+    @Override
+    public boolean isPattern() {
+        return isPattern;
+    }
+
+    //constructor for pattern color
+    @SuppressWarnings({"UnusedParameters", "UnusedDeclaration"})
+    public void setPattern(final int dummy) {
+        isPattern = true;
+    }
+
     @Override
     public boolean isTexture() {
         return false;

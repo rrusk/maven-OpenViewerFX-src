@@ -35,18 +35,19 @@ package org.jpedal.io;
 
 import java.io.IOException;
 import javax.imageio.stream.ImageInputStream;
+
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.FastByteArrayOutputStream;
 
 public class ImageInputStreamFileBuffer implements RandomAccessBuffer {
 
-	private static final String fileName="";
+    private static final String fileName = "";
 
     final ImageInputStream iis;
 
     @SuppressWarnings("UnusedDeclaration")
     public ImageInputStreamFileBuffer(final ImageInputStream iis) {
-        this.iis=iis;
+        this.iis = iis;
     }
 
     @Override
@@ -85,30 +86,30 @@ public class ImageInputStreamFileBuffer implements RandomAccessBuffer {
     }
 
     @Override
-    public byte[] getPdfBuffer(){
+    public byte[] getPdfBuffer() {
 
-  	byte[] pdfByteArray = null;
-  	final FastByteArrayOutputStream os;
-  	
-  	try {
-  		os = new FastByteArrayOutputStream();
-  		
-  		// Download buffer
-  		final byte[] buffer = new byte[4096];
-  		
-  		// Download the PDF document
-  		int read;
-  		while ((read = iis.read(buffer)) != -1) {
-  			os.write(buffer, 0 ,read);
-  		}
+        byte[] pdfByteArray = null;
+        final FastByteArrayOutputStream os;
 
-  		// Copy output stream to byte array
-  		pdfByteArray = os.toByteArray();
-  		
-  	} catch (final IOException e) {
-  		LogWriter.writeLog("[PDF] Exception " + e + " getting byte[] for " + fileName);
+        try {
+            os = new FastByteArrayOutputStream();
+
+            // Download buffer
+            final byte[] buffer = new byte[4096];
+
+            // Download the PDF document
+            int read;
+            while ((read = iis.read(buffer)) != -1) {
+                os.write(buffer, 0, read);
+            }
+
+            // Copy output stream to byte array
+            pdfByteArray = os.toByteArray();
+
+        } catch (final IOException e) {
+            LogWriter.writeLog("[PDF] Exception " + e + " getting byte[] for " + fileName);
+        }
+
+        return pdfByteArray;
     }
-  	
-  	return pdfByteArray;
-  }
 }

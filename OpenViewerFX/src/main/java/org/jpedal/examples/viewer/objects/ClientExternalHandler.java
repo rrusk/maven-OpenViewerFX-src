@@ -40,23 +40,23 @@ import org.jpedal.io.Speech;
 
 /**
  * Additional handlers used in Client
- * 
+ *
  * @author markee
  */
-public abstract class ClientExternalHandler implements AdditonalHandler{
+public abstract class ClientExternalHandler implements AdditonalHandler {
 
-    
-    AnnotationHandler annotationHandler;// =new ExampleAnnotationHandler();
-    
+
+    AnnotationHandler annotationHandler; // =new ExampleAnnotationHandler();
+
     // [AWI] Used when the UI is ready for Keyboard input (used for touchscreens with virtual keyboards).
-    
+
     private JPedalActionHandler keyboardHandler;
-    
-    private Speech speech; 
-    
+
+    private Speech speech;
+
     @Override
     public Object getExternalHandler(final int type) {
-        
+
         switch (type) {
             
             /* [AWI] Used when the UI is ready for Keyboard input (used for touchscreens with virtual keyboards). */
@@ -65,41 +65,41 @@ public abstract class ClientExternalHandler implements AdditonalHandler{
 
             case Options.SpeechEngine:
                 return speech;
-             
+
             case Options.UniqueAnnotationHandler:
                 return annotationHandler;
-               
+
             default:
-                throw new IllegalArgumentException("Unknown type="+type);
-                
+                throw new IllegalArgumentException("Unknown type=" + type);
+
         }
     }
-    
+
     @Override
     public void addExternalHandler(final Object newHandler, final int type) {
-        
+
         switch (type) {
-            
+
             case Options.UniqueAnnotationHandler:
-                annotationHandler =(AnnotationHandler) newHandler;
+                annotationHandler = (AnnotationHandler) newHandler;
                 break;
             
              /* [AWI] Used when the UI is ready for Keyboard input (used for touchscreens with virtual keyboards). */
             case Options.KeyboardReadyHandler:
-                if ( newHandler instanceof JPedalActionHandler ) {
-                    keyboardHandler = (JPedalActionHandler)newHandler;
+                if (newHandler instanceof JPedalActionHandler) {
+                    keyboardHandler = (JPedalActionHandler) newHandler;
                 }
                 break;
-                
+
             case Options.SpeechEngine:
-                if ( newHandler instanceof Speech ) {
-                    speech = (Speech)newHandler;
+                if (newHandler instanceof Speech) {
+                    speech = (Speech) newHandler;
                 }
                 break;
-                
+
             default:
-                throw new IllegalArgumentException("Unknown type="+type);
-                
+                throw new IllegalArgumentException("Unknown type=" + type);
+
         }
-    } 
+    }
 }

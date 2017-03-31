@@ -34,54 +34,60 @@ package org.jpedal.examples.viewer.gui.popups;
 
 import javax.print.attribute.SetOfIntegerSyntax;
 import javax.print.attribute.standard.PrinterResolution;
+
 import org.jpedal.examples.viewer.paper.MarginPaper;
 
-public interface PrintPanelInt{
+public interface PrintPanelInt {
 
     void resetDefaults(String[] printersList, String defaultPrinter, int pageCount, int currentPage);
-    
+
     PrinterResolution getResolution();
-    
+
     /**
      * return range as SetOfIntegerSytax
      * - if you try to do something silly like print all
-     *  even pages in rage 1-1 you will get null returned
+     * even pages in rage 1-1 you will get null returned
      */
     SetOfIntegerSyntax getPrintRange();
-    
+
     int getCopies();
-    
-    /** return setting for type of scaling to use 
+
+    /**
+     * return setting for type of scaling to use
      * PAGE_SCALING_NONE,PAGE_SCALING_FIT_TO_PRINTER_MARGINS,PAGE_SCALING_REDUCE_TO_PRINTER_MARGINS
-     *see org.jpedal.objects.contstants.PrinterOptions for all values
+     * see org.jpedal.objects.contstants.PrinterOptions for all values
      */
     int getPageScaling();
-    
+
     String getPrinter();
-    
+
     boolean okClicked();
 
     boolean isAutoRotateAndCenter();
-    
+
     boolean isPaperSourceByPDFSize();
-    
+
     boolean isPrintingCurrentView();
-    
+
     String[] getAvailablePaperSizes();
-    
-    /**return selected Paper*/
+
+    /**
+     * return selected Paper
+     */
     MarginPaper getSelectedPaper();
-    
-    /**return printers default orientation*/
+
+    /**
+     * return printers default orientation
+     */
     int getSelectedPrinterOrientation();
-    
+
     boolean isPagesReversed();
 
-	boolean isOddPagesOnly();
+    boolean isOddPagesOnly();
 
-	boolean isEvenPagesOnly();
+    boolean isEvenPagesOnly();
 
     boolean isMonochrome();
-    
+
     boolean isVisible();
 }

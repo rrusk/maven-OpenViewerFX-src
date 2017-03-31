@@ -33,11 +33,10 @@
 package org.jpedal.examples.viewer.utils;
 
 /**
- *
  * @author Kieran
  */
 public class PropertyTags {
-        
+
     public static final int RECENTFILES = -2016594692;
     public static final int SHOWFIRSTTIMEPOPUP = 2082497932;
     public static final int DAYSLEFT = 1948582142;
@@ -153,7 +152,7 @@ public class PropertyTags {
     public static final int CONTINUOUSFACINGBOTTOM = 1992490804;
     public static final int FACINGBOTTOM = 1722020517;
     public static final int PAGEFLOWBOTTOM = 1943135464;
-    public static final int SIDETABBARMENU =  936107924;
+    public static final int SIDETABBARMENU = 936107924;
     public static final int PAGETAB = 861124230;
     public static final int BOOKMARKSTAB = 2116514968;
     public static final int LAYERSTAB = 340454131;

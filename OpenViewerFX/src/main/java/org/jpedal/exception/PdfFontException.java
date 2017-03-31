@@ -33,17 +33,17 @@
 package org.jpedal.exception;
 
 /**
- *used to handle problems or unexpected behaviour in our Font Renderer
+ * used to handle problems or unexpected behaviour in our Font Renderer
  */
 public class PdfFontException extends PdfException {
 
-	/**
-	 * provides a security exception if access not permitted
-	 */
-	public PdfFontException(final String message) {
-		
-		error_message = message;
-		
-	}
-	
+    /**
+     * provides a security exception if access not permitted
+     */
+    public PdfFontException(final String message) {
+
+        error_message = message;
+
+    }
+
 }

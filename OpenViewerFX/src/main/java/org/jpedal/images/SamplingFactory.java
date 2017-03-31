@@ -34,30 +34,51 @@ package org.jpedal.images;
 
 public class SamplingFactory {
 
-
-    /**do nothing*/
+    /**
+     * do nothing
+     */
     public static int none;
 
-    /** medium will make sure images larger than page are reduced in size (often large scanned tiffs)*/
-    public static final int medium=1;
+    /**
+     * medium will make sure images larger than page are reduced in size (often large scanned tiffs)
+     */
+    public static final int medium = 1;
 
-    /** (default setting) high will agressively reduce images bigger than twice their drawn size at 100% so a image
+    /**
+     * (default setting) high will agressively reduce images bigger than twice their drawn size at 100% so a image
      * which appears as 100x100 on the PDF but whose raw images is 250x250 will be stored as 125x125 image
      * and not a 250x250 image
      */
-    public static final int high=2;
+    public static final int high = 2;
 
-    /** use down-sampling on printing (which is default) */
-    public static final int print_enable=3;
+    /**
+     * use down-sampling on printing (which is default)
+     */
+    public static final int print_enable = 3;
 
-    /** do not use down-sampling on printing*/
-    public static final int print_disable=4;
+    /**
+     * do not use down-sampling on printing
+     */
+    public static final int print_disable = 4;
 
-    /**current setting - do not set directly*/
-    public static int downsampleLevel=high;
+    /**
+     * current setting - do not set directly
+     */
+    public static int downsampleLevel = high;
 
-    /**current setting - do not set directly*/
-    public static boolean isPrintDownsampleEnabled=true;
+    /**
+     * current setting - do not set directly
+     */
+    public static boolean isPrintDownsampleEnabled = true;
+
+    public static boolean kernelSharpen;
+
+    //sharpening kernel
+    private static double[][] sharpenKernel = {{0, -1, 0}, {-1, 5, -1}, {0, -1, 0}};
+
+    /* 5x5 version
+    private static double[][] sharpenKernel = {{0,0, 0, 0,0},{0,0, -1, 0,0},{0,-1, 5, -1,0},{0,0, -1, 0,0},{0,0, 0, 0,0}};
+    /**/
 
     /**
      * PDFs contain images which may often be much larger than the actual space they occupy and they are reduced to fit the space<br>
@@ -65,27 +86,27 @@ public class SamplingFactory {
      *
      * @param newLevel A String value of image sampling strategies
      */
-    public static void setDownsampleMode(String newLevel){
+    public static void setDownsampleMode(String newLevel) {
 
-        if(newLevel==null) {
+        if (newLevel == null) {
             newLevel = System.getProperty("org.jpedal.downsample");
         }
-        
-		if(newLevel!=null){
-			if(newLevel.equals("high") || newLevel.equals("\"high\"")) {
+
+        if (newLevel != null) {
+            if (newLevel.equals("high") || newLevel.equals("\"high\"")) {
                 downsampleLevel = high;
-            } else if(newLevel.equals("medium") || newLevel.equals("\"medium\"")) {
+            } else if (newLevel.equals("medium") || newLevel.equals("\"medium\"")) {
                 downsampleLevel = medium;
-            } else if(newLevel.equals("none") || newLevel.equals("\"none\"")) {
+            } else if (newLevel.equals("none") || newLevel.equals("\"none\"")) {
                 downsampleLevel = none;
-            } else if(newLevel.equals("print_disable") || newLevel.equals("\"print_disable\"")) {
+            } else if (newLevel.equals("print_disable") || newLevel.equals("\"print_disable\"")) {
                 isPrintDownsampleEnabled = false;
-            } else if(newLevel.equals("print_enable")|| newLevel.equals("\"print_enable\"")) {
+            } else if (newLevel.equals("print_enable") || newLevel.equals("\"print_enable\"")) {
                 isPrintDownsampleEnabled = true;
             }
         }
 
-	}
+    }
 
     /**
      * PDFs contain images which may often be much larger than the actual space they occupy and they are reduced to fit the space<br>
@@ -94,15 +115,29 @@ public class SamplingFactory {
      * @param newLevel A String value of image sampling strategies
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static void setDownsampleMode(final int newLevel){
+    public static void setDownsampleMode(final int newLevel) {
 
-        if(newLevel==high || newLevel==medium || newLevel==none) {
+        if (newLevel == high || newLevel == medium || newLevel == none) {
             downsampleLevel = newLevel;
-        } else if(newLevel==print_disable) {
+        } else if (newLevel == print_disable) {
             isPrintDownsampleEnabled = false;
-        } else if(newLevel==print_enable) {
+        } else if (newLevel == print_enable) {
             isPrintDownsampleEnabled = true;
         }
 
+    }
+
+    /**
+     * allow user to over-ride default setting and set their own
+     * 3x3 kernel to sharpen down-sampled images
+     *
+     * @param userKernel
+     */
+    public static void setSharpenKernel(double[][] userKernel) {
+        sharpenKernel = userKernel;
+    }
+
+    public static double[][] getSharpenKernel() {
+        return sharpenKernel;
     }
 }

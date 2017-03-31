@@ -33,6 +33,7 @@
 package org.jpedal.examples.viewer;
 
 import java.util.Stack;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.MenuItem;
@@ -64,6 +65,12 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
 
     }
 
+    /**
+     * Get the previously opened documents file name
+     * This can be used to move through the list of recent files
+     *
+     * @return String value representing the documents file name
+     */
     @Override
     public String getPreviousDocument() {
 
@@ -77,6 +84,12 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
         return fileToOpen;
     }
 
+    /**
+     * Get the file name of the next document in the list.
+     * This can be used to move through the list of recent files     *
+     *
+     * @return String value representing the documents file name
+     */
     @Override
     public String getNextDocument() {
 
@@ -89,12 +102,22 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
         return fileToOpen;
     }
 
+    /**
+     * Adds a file to the list of recent file
+     *
+     * @param selectedFile String representing a file name
+     */
     @Override
     public void addToFileList(final String selectedFile) {
         previousFiles.push(selectedFile);
 
     }
 
+    /**
+     * Control if recent documents items should be enabled and visible
+     *
+     * @param enable True to show and enable the recent documents items, false otherwise
+     */
     @Override
     public void enableRecentDocuments(final boolean enable) {
         if (recentDocuments == null) {
@@ -109,6 +132,11 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
         }
     }
 
+    /**
+     * Set the recent documents items from the set of values provided
+     *
+     * @param recentDocs String array of file names to load into the recent documents
+     */
     @Override
     public void updateRecentDocuments(final String[] recentDocs) {
         if (recentDocs == null) {
@@ -135,6 +163,11 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
         }
     }
 
+    /**
+     * Remove all items from the recent documents list and stored in properties list
+     *
+     * @param properties PropertiesFile object holding the recent documents to clear
+     */
     @Override
     public void clearRecentDocuments(final PropertiesFile properties) {
         final NodeList nl = properties.getDoc().getElementsByTagName("recentfiles");
@@ -154,14 +187,21 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
         }
     }
 
- 
+    /**
+     * Create the menu items used to represent the recent documents in the Viewer menu
+     *
+     * @param fileNameToAdd String filename for the menu item
+     * @param position      int value representing the position in the recent documents
+     * @param currentGUI    GUIFactory object to add the menu item to
+     * @param commonValues  Values object used by the view
+     */
     @Override
     public void createMenuItems(final String fileNameToAdd, final int position, final GUIFactory currentGUI, final Values commonValues) {
-     
-        
+
+
         final String shortenedFileName = RecentDocuments.getShortenedFileName(fileNameToAdd);
         recentDocuments[position] = new MenuItem(position + 1 + ": " + shortenedFileName);
-        
+
         if (recentDocuments[position].getText().equals(position + 1 + ": ")) {
             recentDocuments[position].setVisible(false);
         }
@@ -185,17 +225,17 @@ public class JavaFXRecentDocuments implements RecentDocumentsFactory {
                     final String fileName = item.getId();
 
                     if (!fileName.isEmpty()) {
-                        if(!SharedViewer.closeCalled){
+                        if (!SharedViewer.closeCalled) {
                             currentGUI.open(fileName);
-                        }else {
-                             throw new RuntimeException("No resource to open document, call to close() disposes viewer resources");
+                        } else {
+                            throw new RuntimeException("No resource to open document, call to close() disposes viewer resources");
                         }
-                        
+
                     }
                 }
             }
         });
-        
+
         currentGUI.getMenuItems().addToMenu(recentDocuments[position], Commands.FILEMENU);
     }
 }

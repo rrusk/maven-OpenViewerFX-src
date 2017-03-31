@@ -39,16 +39,15 @@ import org.jpedal.color.GenericColorSpace;
 import org.jpedal.parser.image.data.ImageData;
 
 /**
- *
  * @author markee
  */
 class OneBitDownSampler {
-    
+
     public static GenericColorSpace downSample(final int sampling, final ImageData imageData, GenericColorSpace decodeColorData) {
 
-        final byte[] data=imageData.getObjectData();
-        
-        final int[] flag={1,2,4,8,16,32,64,128};
+        final byte[] data = imageData.getObjectData();
+
+        final int[] flag = {1, 2, 4, 8, 16, 32, 64, 128};
         
         /* if(sampling>2){
             
@@ -104,229 +103,229 @@ class OneBitDownSampler {
         
         System.out.println("downSample ="+sampling);
         /**/
-        
-        final int newW=imageData.getWidth()/sampling;
-        final int newH=imageData.getHeight()/sampling;
-        
-        final int size=newW*newH;
-        
-        final byte[] newData=new byte[size];
 
-        final int origLineLength= (imageData.getWidth()+7)>>3;
+        final int newW = imageData.getWidth() / sampling;
+        final int newH = imageData.getHeight() / sampling;
+
+        final int size = newW * newH;
+
+        final byte[] newData = new byte[size];
+
+        final int origLineLength = (imageData.getWidth() + 7) >> 3;
 
         //scan all pixels and down-sample
-        for(int y=0;y<newH;y++){
-            for(int x=0;x<newW;x++){
+        for (int y = 0; y < newH; y++) {
+            for (int x = 0; x < newW; x++) {
 
                 //allow for edges in number of pixels left
-                int wCount=sampling,hCount=sampling;
-                final int wGapLeft=imageData.getWidth()-x;
-                final int hGapLeft=imageData.getHeight()-y;
-                if(wCount>wGapLeft) {
+                int wCount = sampling, hCount = sampling;
+                final int wGapLeft = imageData.getWidth() - x;
+                final int hGapLeft = imageData.getHeight() - y;
+                if (wCount > wGapLeft) {
                     wCount = wGapLeft;
                 }
-                if(hCount>hGapLeft) {
+                if (hCount > hGapLeft) {
                     hCount = hGapLeft;
                 }
-                
+
                 //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
                 final int bytes = getPixelSetCount(sampling, false, data, flag, origLineLength, y, x, wCount, hCount);
 
-                final int count=(wCount*hCount);
+                final int count = (wCount * hCount);
 
                 //set value as white or average of pixels
-                final int offset=x+(newW*y);
-                
-                if(count>0){
-                    newData[offset] = (byte) ((255 * bytes) / count);    
-                }else{                   
-                    newData[offset] = (byte) 255;                   
+                final int offset = x + (newW * y);
+
+                if (count > 0) {
+                    newData[offset] = (byte) ((255 * bytes) / count);
+                } else {
+                    newData[offset] = (byte) 255;
                 }
             }
         }
-       
+
         imageData.setWidth(newW);
         imageData.setHeight(newH);
         imageData.setCompCount(1);
-        
+
         //suggest you add kernel sharpening here
         //@bethan
         //imageData=KernelUtils.sharpenGrayScale(imageData,w,h);
-        
+
         //remap Separation as already converted here
-        if(decodeColorData.getID()==ColorSpaces.Separation || decodeColorData.getID()==ColorSpaces.DeviceN){
-            decodeColorData=new DeviceRGBColorSpace();
-            
-            imageData.setCompCount(1);                
-            invertBytes(newData);           
+        if (decodeColorData.getID() == ColorSpaces.Separation || decodeColorData.getID() == ColorSpaces.DeviceN) {
+            decodeColorData = new DeviceRGBColorSpace();
+
+            imageData.setCompCount(1);
+            invertBytes(newData);
         }
-        
+
         imageData.setObjectData(newData);
-        
+
         imageData.setDepth(8);
-        
+
         return decodeColorData;
     }
 
     private static void invertBytes(final byte[] newData) {
-        final int count=newData.length;
-        for(int aa=0;aa<count;aa++) {
+        final int count = newData.length;
+        for (int aa = 0; aa < count; aa++) {
             newData[aa] = (byte) (newData[aa] ^ 255);
         }
     }
-   
+
     public static GenericColorSpace downSampleMask(final int sampling, final ImageData imageData,
                                                    final byte[] maskCol, GenericColorSpace decodeColorData) {
 
-        final byte[] data=imageData.getObjectData();
-        
-        final int newW=imageData.getWidth()/sampling;
-        final int newH=imageData.getHeight()/sampling;
-        
-        final int size=newW*newH*4;
-        
-        maskCol[3]=(byte)255;
-        
-        final byte[] newData=new byte[size];
-        
-        final int[] flag={1,2,4,8,16,32,64,128};
-        
-        final int origLineLength= (imageData.getWidth()+7)>>3;
+        final byte[] data = imageData.getObjectData();
+
+        final int newW = imageData.getWidth() / sampling;
+        final int newH = imageData.getHeight() / sampling;
+
+        final int size = newW * newH * 4;
+
+        maskCol[3] = (byte) 255;
+
+        final byte[] newData = new byte[size];
+
+        final int[] flag = {1, 2, 4, 8, 16, 32, 64, 128};
+
+        final int origLineLength = (imageData.getWidth() + 7) >> 3;
 
         //scan all pixels and down-sample
-        for(int y=0;y<newH;y++){
-            for(int x=0;x<newW;x++){
+        for (int y = 0; y < newH; y++) {
+            for (int x = 0; x < newW; x++) {
 
                 //allow for edges in number of pixels left
-                int wCount=sampling,hCount=sampling;
-                final int wGapLeft=imageData.getWidth()-x;
-                final int hGapLeft=imageData.getHeight()-y;
-                if(wCount>wGapLeft) {
+                int wCount = sampling, hCount = sampling;
+                final int wGapLeft = imageData.getWidth() - x;
+                final int hGapLeft = imageData.getHeight() - y;
+                if (wCount > wGapLeft) {
                     wCount = wGapLeft;
                 }
-                if(hCount>hGapLeft) {
+                if (hCount > hGapLeft) {
                     hCount = hGapLeft;
                 }
-                
+
                 //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
                 final int bytes = getPixelSetCount(sampling, true, data, flag, origLineLength, y, x, wCount, hCount);
 
-                final int count=(wCount*hCount);
+                final int count = (wCount * hCount);
 
                 //set value as white or average of pixels
-                final int offset=x+(newW*y);
-                
-                if(count>0){                    
-                    for(int ii=0;ii<4;ii++){
+                final int offset = x + (newW * y);
+
+                if (count > 0) {
+                    for (int ii = 0; ii < 4; ii++) {
                         newData[(offset * 4) + ii] = (byte) ((((maskCol[ii] & 255) * bytes) / count));
-                    }                                           
-                }else{
-                    
-                    for(int ii=0;ii<3;ii++) {
+                    }
+                } else {
+
+                    for (int ii = 0; ii < 3; ii++) {
                         newData[(offset * 4) + ii] = (byte) 0;
-                    }                   
+                    }
                 }
             }
         }
-        
+
         imageData.setWidth(newW);
         imageData.setHeight(newH);
-        
+
         //remap Separation as already converted here
-        if(decodeColorData.getID()==ColorSpaces.Separation || decodeColorData.getID()==ColorSpaces.DeviceN){
-            decodeColorData=new DeviceRGBColorSpace();
-            
+        if (decodeColorData.getID() == ColorSpaces.Separation || decodeColorData.getID() == ColorSpaces.DeviceN) {
+            decodeColorData = new DeviceRGBColorSpace();
+
             imageData.setCompCount(1);
-            invertBytes(newData);           
+            invertBytes(newData);
         }
-        
+
         imageData.setObjectData(newData);
-        
+
         imageData.setDepth(8);
-        
+
         return decodeColorData;
     }
 
-    
+
     public static GenericColorSpace downSampleIndexed(final int sampling, final ImageData imageData,
                                                       final byte[] index, GenericColorSpace decodeColorData) {
 
-        final byte[] data=imageData.getObjectData();
-        
-        final int newW=imageData.getWidth()/sampling;
-        final int newH=imageData.getHeight()/sampling;
-        
-        final int size=newW*newH*3;
-        
-        final byte[] newData=new byte[size];
-        
-        final int[] flag={1,2,4,8,16,32,64,128};
-        
-        final int origLineLength= (imageData.getWidth()+7)>>3;
+        final byte[] data = imageData.getObjectData();
+
+        final int newW = imageData.getWidth() / sampling;
+        final int newH = imageData.getHeight() / sampling;
+
+        final int size = newW * newH * 3;
+
+        final byte[] newData = new byte[size];
+
+        final int[] flag = {1, 2, 4, 8, 16, 32, 64, 128};
+
+        final int origLineLength = (imageData.getWidth() + 7) >> 3;
 
         //scan all pixels and down-sample
-        for(int y=0;y<newH;y++){
-            for(int x=0;x<newW;x++){
+        for (int y = 0; y < newH; y++) {
+            for (int x = 0; x < newW; x++) {
 
                 //allow for edges in number of pixels left
-                int wCount=sampling,hCount=sampling;
-                final int wGapLeft=imageData.getWidth()-x;
-                final int hGapLeft=imageData.getHeight()-y;
-                if(wCount>wGapLeft) {
+                int wCount = sampling, hCount = sampling;
+                final int wGapLeft = imageData.getWidth() - x;
+                final int hGapLeft = imageData.getHeight() - y;
+                if (wCount > wGapLeft) {
                     wCount = wGapLeft;
                 }
-                if(hCount>hGapLeft) {
+                if (hCount > hGapLeft) {
                     hCount = hGapLeft;
                 }
-                
+
                 //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
                 final int bytes = getPixelSetCount(sampling, false, data, flag, origLineLength, y, x, wCount, hCount);
 
-                final int count=(wCount*hCount);
+                final int count = (wCount * hCount);
 
                 //set value as white or average of pixels
-                final int offset=x+(newW*y);
-                
-                if(count>0){                   
+                final int offset = x + (newW * y);
+
+                if (count > 0) {
                     int av;
 
-                    for(int ii=0;ii<3;ii++){
+                    for (int ii = 0; ii < 3; ii++) {
 
                         //can be in either order so look at index
-                        if(index[0]==-1 && index[1]==-1 && index[2]==-1){
-                            av=(index[ii] & 255) +(index[ii+3] & 255);
-                            newData[(offset*3)+ii]=(byte)(255-((av *bytes)/count));
-                        }else{//  if(decodeColorData.getID()==ColorSpaces.DeviceCMYK){  //avoid color 'smoothing' - see CustomersJune2011/lead base paint.pdf
-                            final float ratio=bytes/count;
-                            if(ratio>0.5) {
+                        if (index[0] == -1 && index[1] == -1 && index[2] == -1) {
+                            av = (index[ii] & 255) + (index[ii + 3] & 255);
+                            newData[(offset * 3) + ii] = (byte) (255 - ((av * bytes) / count));
+                        } else { //  if(decodeColorData.getID()==ColorSpaces.DeviceCMYK){  //avoid color 'smoothing' - see CustomersJune2011/lead base paint.pdf
+                            final float ratio = bytes / count;
+                            if (ratio > 0.5) {
                                 newData[(offset * 3) + ii] = index[ii + 3];
                             } else {
                                 newData[(offset * 3) + ii] = index[ii];
                             }
                         }
-                    }                   
-                }else{                   
-                    for(int ii=0;ii<3;ii++) {
+                    }
+                } else {
+                    for (int ii = 0; ii < 3; ii++) {
                         newData[((offset) * 3) + ii] = 0;
-                    }                   
+                    }
                 }
             }
         }
         imageData.setCompCount(3);
-        
+
         imageData.setWidth(newW);
         imageData.setHeight(newH);
         decodeColorData.setIndex(null, 0);
-        
+
         //remap Separation as already converted here
-        if(decodeColorData.getID()==ColorSpaces.Separation || decodeColorData.getID()==ColorSpaces.DeviceN){
-            decodeColorData=new DeviceRGBColorSpace();
+        if (decodeColorData.getID() == ColorSpaces.Separation || decodeColorData.getID() == ColorSpaces.DeviceN) {
+            decodeColorData = new DeviceRGBColorSpace();
         }
-        
+
         imageData.setObjectData(newData);
-        
+
         imageData.setDepth(8);
-        
+
         return decodeColorData;
     }
 
@@ -335,27 +334,27 @@ class OneBitDownSampler {
 
         byte currentByte;
         int bit;
-        int bytes=0;
+        int bytes = 0;
         int ptr;
 
-        for(int yy=0;yy<hCount;yy++){
-            for(int xx=0;xx<wCount;xx++){
+        for (int yy = 0; yy < hCount; yy++) {
+            for (int xx = 0; xx < wCount; xx++) {
 
-                ptr=((yy+(y*sampling))*origLineLength)+(((x*sampling)+xx)>>3);
+                ptr = ((yy + (y * sampling)) * origLineLength) + (((x * sampling) + xx) >> 3);
 
-                if(ptr<data.length){
-                    currentByte=data[ptr];
-                }else{
-                    currentByte=0;
+                if (ptr < data.length) {
+                    currentByte = data[ptr];
+                } else {
+                    currentByte = 0;
                 }
 
-                if(imageMask) {
+                if (imageMask) {
                     currentByte = (byte) (currentByte ^ 255);
                 }
 
-                bit=currentByte & flag[7-(((x*sampling)+xx)& 7)];
+                bit = currentByte & flag[7 - (((x * sampling) + xx) & 7)];
 
-                if(bit!=0) {
+                if (bit != 0) {
                     bytes++;
                 }
             }

@@ -37,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import javax.swing.JMenuItem;
+
 import org.jpedal.examples.viewer.commands.SaveFile;
 import org.jpedal.examples.viewer.utils.Printer;
 import org.jpedal.examples.viewer.utils.PropertiesFile;
@@ -48,114 +49,146 @@ import org.w3c.dom.NodeList;
 
 
 public class RecentDocuments implements RecentDocumentsFactory {
-	
-	//int noOfRecentDocs;
-	//PropertiesFile properties;
-	
+
+    //int noOfRecentDocs;
+    //PropertiesFile properties;
+
     public final int noOfRecentDocs;
-    
-	private final Stack<String> previousFiles = new Stack<String>();
-	private final Stack<String> nextFiles = new Stack<String>();
+
+    private final Stack<String> previousFiles = new Stack<String>();
+    private final Stack<String> nextFiles = new Stack<String>();
 
     public final JMenuItem[] recentDocuments;
-   
-    
-	public RecentDocuments(final int noOfRecentDocs) {
-		
+
+
+    public RecentDocuments(final int noOfRecentDocs) {
+
         this.noOfRecentDocs = noOfRecentDocs;
         recentDocuments = new JMenuItem[noOfRecentDocs];
-		//this.noOfRecentDocs=noOfRecentDocs;
-		//this.properties=properties;
-		
-	}
+        //this.noOfRecentDocs=noOfRecentDocs;
+        //this.properties=properties;
 
-	static String getShortenedFileName(final String fileNameToAdd) {
-		final int maxChars = 30;
-		
-		if (fileNameToAdd.length() <= maxChars) {
+    }
+
+    /**
+     * Convert the provided file name into a shortened file name
+     *
+     * @param fileNameToAdd String value of the filename
+     * @return String value representing the shortened file name
+     */
+    static String getShortenedFileName(final String fileNameToAdd) {
+        final int maxChars = 30;
+
+        if (fileNameToAdd.length() <= maxChars) {
             return fileNameToAdd;
         }
-		
-		final StringTokenizer st = new StringTokenizer(fileNameToAdd,"\\/");
+
+        final StringTokenizer st = new StringTokenizer(fileNameToAdd, "\\/");
 
         final int noOfTokens = st.countTokens();
 
         //allow for /filename.pdf
-        if (noOfTokens==1) {
+        if (noOfTokens == 1) {
             return fileNameToAdd.substring(0, maxChars);
         }
 
         final String[] arrayedFile = new String[noOfTokens];
-		for (int i = 0; i < noOfTokens; i++) {
+        for (int i = 0; i < noOfTokens; i++) {
             arrayedFile[i] = st.nextToken();
         }
 
         final String filePathBody = fileNameToAdd.substring(arrayedFile[0].length(),
-				fileNameToAdd.length() - arrayedFile[noOfTokens - 1].length());
-		
-		final StringBuilder sb = new StringBuilder(filePathBody);
-		
-		int start,end;
-		for (int i = noOfTokens - 2; i > 0; i--) {
-			
-			start = sb.lastIndexOf(arrayedFile[i]);			
-			end = start + arrayedFile[i].length();
-			sb.replace(start, end, "...");
+                fileNameToAdd.length() - arrayedFile[noOfTokens - 1].length());
 
-			if (sb.length() <= maxChars) {
+        final StringBuilder sb = new StringBuilder(filePathBody);
+
+        int start, end;
+        for (int i = noOfTokens - 2; i > 0; i--) {
+
+            start = sb.lastIndexOf(arrayedFile[i]);
+            end = start + arrayedFile[i].length();
+            sb.replace(start, end, "...");
+
+            if (sb.length() <= maxChars) {
                 break;
             }
-		}
-		
-		return arrayedFile[0] + sb + arrayedFile[noOfTokens - 1];
-	}
+        }
 
-	@Override
-    public String getPreviousDocument() {
-		
-		String fileToOpen =null;
-		
-		if(previousFiles.size() > 1){
-			nextFiles.push(previousFiles.pop());
-			fileToOpen = previousFiles.pop();
-		}
-		
-		return fileToOpen;
-	}
-	
+        return arrayedFile[0] + sb + arrayedFile[noOfTokens - 1];
+    }
+
+    /**
+     * Get the previously opened documents file name
+     *
+     * @return String value representing the documents file name
+     */
     @Override
-	public String getNextDocument() {
-		
-		String fileToOpen =null;
-		
-		if(!nextFiles.isEmpty()) {
+    public String getPreviousDocument() {
+
+        String fileToOpen = null;
+
+        if (previousFiles.size() > 1) {
+            nextFiles.push(previousFiles.pop());
+            fileToOpen = previousFiles.pop();
+        }
+
+        return fileToOpen;
+    }
+
+    /**
+     * Get the file name of the next document in the list.
+     * This can be used to move through the list of recent files     *
+     *
+     * @return String value representing the documents file name
+     */
+    @Override
+    public String getNextDocument() {
+
+        String fileToOpen = null;
+
+        if (!nextFiles.isEmpty()) {
             fileToOpen = nextFiles.pop();
         }
-		
-		return fileToOpen;
-	}
 
-	@Override
+        return fileToOpen;
+    }
+
+    /**
+     * Adds a file to the list of recent file
+     *
+     * @param selectedFile String representing a file name
+     */
+    @Override
     public void addToFileList(final String selectedFile) {
-		previousFiles.push(selectedFile);
-		
-		
-	}
-    
+        previousFiles.push(selectedFile);
+
+
+    }
+
+    /**
+     * Control if recent documents items should be enabled and visible
+     *
+     * @param enable True to show and enable the recent documents items, false otherwise
+     */
     @Override
     public void enableRecentDocuments(final boolean enable) {
-      if(recentDocuments == null) {
-          return;
-      }
+        if (recentDocuments == null) {
+            return;
+        }
 
-      for(int i=0; i<recentDocuments.length;i++){
-          if(recentDocuments[i]!=null && !recentDocuments[i].getText().equals(i+1 + ": ")){
-              recentDocuments[i].setVisible(enable);
-              recentDocuments[i].setEnabled(enable);
-          }
-      }
-  }
+        for (int i = 0; i < recentDocuments.length; i++) {
+            if (recentDocuments[i] != null && !recentDocuments[i].getText().equals(i + 1 + ": ")) {
+                recentDocuments[i].setVisible(enable);
+                recentDocuments[i].setEnabled(enable);
+            }
+        }
+    }
 
+    /**
+     * Set the recent documents items from the set of values provided
+     *
+     * @param recentDocs String array of file names to load into the recent documents
+     */
     @Override
     public void updateRecentDocuments(final String[] recentDocs) {
         if (recentDocs == null) {
@@ -181,15 +214,20 @@ public class RecentDocuments implements RecentDocumentsFactory {
             }
         }
     }
-    
+
+    /**
+     * Remove all items from the recent documents list and stored in properties list
+     *
+     * @param properties PropertiesFile object holding the recent documents to clear
+     */
     @Override
     public void clearRecentDocuments(final PropertiesFile properties) {
         final NodeList nl = properties.getDoc().getElementsByTagName("recentfiles");
-        
-        if(nl != null && nl.getLength() > 0) {
+
+        if (nl != null && nl.getLength() > 0) {
             final NodeList allRecentDocs = ((Element) nl.item(0)).getElementsByTagName("*");
-            
-            for(int i=0;i<allRecentDocs.getLength();i++){
+
+            for (int i = 0; i < allRecentDocs.getLength(); i++) {
                 final Node item = allRecentDocs.item(i);
                 nl.item(0).removeChild(item);
             }
@@ -200,11 +238,19 @@ public class RecentDocuments implements RecentDocumentsFactory {
             recentDocuments[i].setVisible(false);
         }
     }
-    
+
+    /**
+     * Create the menu items used to represent the recent documents in the Viewer menu
+     *
+     * @param fileNameToAdd String filename for the menu item
+     * @param position      int value representing the position in the recent documents
+     * @param currentGUI    GUIFactory object to add the menu item to
+     * @param commonValues  Values object used by the view
+     */
     @Override
     public void createMenuItems(final String fileNameToAdd, final int position, final GUIFactory currentGUI,
                                 final Values commonValues) {
-                
+
         final String shortenedFileName = RecentDocuments.getShortenedFileName(fileNameToAdd);
         recentDocuments[position] = new JMenuItem(position + 1 + ": " + shortenedFileName);
 
@@ -240,5 +286,5 @@ public class RecentDocuments implements RecentDocumentsFactory {
         currentGUI.getMenuItems().addToMenu(recentDocuments[position], Commands.FILEMENU);
 
     }
-    
+
 }

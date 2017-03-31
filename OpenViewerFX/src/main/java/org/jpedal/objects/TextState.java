@@ -37,39 +37,56 @@ import org.jpedal.utils.StringUtils;
 /**
  * holds the current text state
  */
-public class TextState
-{
+public class TextState {
 
 
     float kerningAdded;
 
-    /**orientation of text using contstants from PdfData*/
+    /**
+     * orientation of text using contstants from PdfData
+     */
     public int writingMode;
 
-    /**last Tm value*/
+    /**
+     * last Tm value
+     */
     private final float[][] TmAtStart = new float[3][3];
 
-    /**matrix operations for calculating start of text*/
+    /**
+     * matrix operations for calculating start of text
+     */
     public float[][] Tm = new float[3][3];
 
-    private String font_ID="";
+    private String font_ID = "";
 
-    /**leading setin text*/
+    /**
+     * leading setin text
+     */
     private float TL;
 
-    /**gap between chars set by Tc command*/
+    /**
+     * gap between chars set by Tc command
+     */
     private float character_spacing;
 
-    /**current Tfs value*/
+    /**
+     * current Tfs value
+     */
     private float Tfs = 1;
 
-    /** text rise set in stream*/
+    /**
+     * text rise set in stream
+     */
     private float text_rise;
 
-    /**text height - see also Tfs*/
+    /**
+     * text height - see also Tfs
+     */
     private float th = 1;
 
-    /**gap inserted with spaces - set by Tw*/
+    /**
+     * gap inserted with spaces - set by Tw
+     */
     private float word_spacing;
 
     private boolean hasFontChanged;
@@ -77,8 +94,7 @@ public class TextState
     /**
      * set Trm values
      */
-    public TextState()
-    {
+    public TextState() {
         Tm[0][0] = 1;
         Tm[0][1] = 0;
         Tm[0][2] = 0;
@@ -127,93 +143,92 @@ public class TextState
     }
 
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * set Horizontal Scaling
      */
-    public final void setHorizontalScaling( final float th )
-    {
+    public final void setHorizontalScaling(final float th) {
         this.th = th;
     }
     ///////////////////////////////////////////////////////////////////////
+
     /**
      * get font id
      */
-    public final String getFontID()
-    {
+    public final String getFontID() {
         return font_ID;
     }
     ///////////////////////////////////////////////////////////////////////////
+
     /**
      * get Text rise
      */
-    public final float getTextRise()
-    {
+    public final float getTextRise() {
         return text_rise;
     }
     ////////////////////////////////////////////////////////////////////////
+
     /**
      * get character spacing
      */
-    public final float getCharacterSpacing()
-    {
+    public final float getCharacterSpacing() {
         return character_spacing;
     }
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * get word spacing
      */
-    public final float getWordSpacing()
-    {
+    public final float getWordSpacing() {
         return word_spacing;
     }
     ///////////////////////////////////////////////////////////////////////////
+
     /**
      * set font tfs
      */
-    public final void setLeading( final float TL )
-    {
+    public final void setLeading(final float TL) {
         this.TL = TL;
     }
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * get font tfs
      */
-    public final float getTfs()
-    {
+    public final float getTfs() {
         return Tfs;
     }
 
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * get Horizontal Scaling
      */
-    public final float getHorizontalScaling()
-    {
+    public final float getHorizontalScaling() {
         return th;
     }
 
     /**
      * set Text rise
      */
-    public final void setTextRise( final float text_rise )
-    {
+    public final void setTextRise(final float text_rise) {
         this.text_rise = text_rise;
     }
 
     /**
      * get font tfs
      */
-    public final float getLeading()
-    {
+    public final float getLeading() {
         return TL;
     }
 
 
     /////////////////////////////////////////////////////////////////////////
+
     /**
      * clone object
      */
-	/*final public Object clone()
+    /*final public Object clone()
 	{
 		Object o = null;
 		try
@@ -227,26 +242,25 @@ public class TextState
 		return o;
 	}*/
     /////////////////////////////////////////////////////////////////////////
-    
-    public final TextState deepCopy(){
-        
+    public final TextState deepCopy() {
+
         final TextState ts = new TextState();
 
         ts.writingMode = writingMode;
 
-        if(TmAtStart != null){
-            for(int i=0;i<3;i++){
+        if (TmAtStart != null) {
+            for (int i = 0; i < 3; i++) {
                 System.arraycopy(TmAtStart[i], 0, ts.TmAtStart[i], 0, 3);
             }
         }
 
-        if(Tm != null){
-            for(int i=0;i<3;i++){
+        if (Tm != null) {
+            for (int i = 0; i < 3; i++) {
                 System.arraycopy(Tm[i], 0, ts.Tm[i], 0, 3);
             }
         }
 
-        if(font_ID!=null) {
+        if (font_ID != null) {
             ts.font_ID = new String(StringUtils.toBytes(font_ID));
         }
 
@@ -266,27 +280,26 @@ public class TextState
 
         return ts;
     }
+
     /**
      * set word spacing
      */
-    public final void setWordSpacing( final float word_spacing )
-    {
+    public final void setWordSpacing(final float word_spacing) {
         this.word_spacing = word_spacing;
     }
 
     /**
      * set character spacing
      */
-    public final void setCharacterSpacing( final float character_spacing )
-    {
+    public final void setCharacterSpacing(final float character_spacing) {
         this.character_spacing = character_spacing;
     }
     //////////////////////////////////////////////////////////////////////////
+
     /**
      * set font tfs to default
      */
-    public final void resetTm()
-    {
+    public final void resetTm() {
         Tm[0][0] = 1;
         Tm[0][1] = 0;
         Tm[0][2] = 0;
@@ -307,7 +320,7 @@ public class TextState
     }
 
     public void setFontChanged(final boolean status) {
-        hasFontChanged=status;
+        hasFontChanged = status;
     }
 
     public void TF(final float Tfs, final String fontID) {
@@ -323,7 +336,7 @@ public class TextState
     }
 
     public void setLastKerningAdded(final float spacingAdded) {
-        this.kerningAdded =spacingAdded;
+        this.kerningAdded = spacingAdded;
     }
 
     public float getLastKerningAdded() {

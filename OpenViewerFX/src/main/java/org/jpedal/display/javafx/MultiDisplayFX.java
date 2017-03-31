@@ -27,7 +27,6 @@ import org.jpedal.parser.DecoderOptions;
 import org.jpedal.render.DynamicVectorRenderer;
 
 /**
- *
  * @author markee
  */
 public class MultiDisplayFX extends SingleDisplayFX implements MultiPagesDisplay {

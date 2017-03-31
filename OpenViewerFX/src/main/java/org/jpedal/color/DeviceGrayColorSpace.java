@@ -40,98 +40,100 @@ import java.awt.image.BufferedImage;
  * handle GrayColorSpace
  */
 public class DeviceGrayColorSpace extends GenericColorSpace {
-    
+
     private static final long serialVersionUID = -8160089076145994695L;
-    
-    public DeviceGrayColorSpace(){
+
+    public DeviceGrayColorSpace() {
         setType(ColorSpaces.DeviceGray);
         cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
     }
-    
+
     /**
      * set  color (in terms of rgb)
      */
     @Override
     public final void setColor(final String[] number_values, final int opCount) {
-        
-        final float[] colValues=new float[1];
+
+        final float[] colValues = new float[1];
         colValues[0] = Float.parseFloat(number_values[0]);
-        
-        setColor(colValues,1);
+
+        setColor(colValues, 1);
     }
-    
-    /**set color from grayscale values*/
+
+    /**
+     * set color from grayscale values
+     */
     @Override
     public final void setColor(final float[] operand, final int length) {
-        
+
         int val;
         final float tmp = operand[0];
-        
+
         //handle float or int
-        if(tmp<=1) {
-            val =(int) (255* tmp);
+        if (tmp <= 1) {
+            val = (int) (255 * tmp);
         } else {
-            val =(int) (tmp);
+            val = (int) (tmp);
         }
-        
+
         //allow for bum values
-        if(val<0) {
-            val=0;
+        if (val < 0) {
+            val = 0;
         }
-        
-        this.currentColor= new PdfColor(val, val, val);
-        
+
+        this.currentColor = new PdfColor(val, val, val);
+
     }
-    
+
     /**
      * create rgb version of gray
      */
     @Override
-    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h){
-        
-        final int size=data.length;
-        final byte[] newData=new byte[size*3];
-        int ptr=0;
-        
-        for(int a=0;a<size;a++){
-           for(int comp=0;comp<3;comp++){
-               newData[ptr]=data[a];
-               ptr++;
-           } 
+    public byte[] dataToRGBByteArray(final byte[] data, final int w, final int h) {
+
+        final int size = data.length;
+        final byte[] newData = new byte[size * 3];
+        int ptr = 0;
+
+        for (int a = 0; a < size; a++) {
+            for (int comp = 0; comp < 3; comp++) {
+                newData[ptr] = data[a];
+                ptr++;
+            }
         }
-        
+
         return newData;
     }
-    
+
     /**
      * convert Index to RGB
      */
     @Override
-    public byte[] convertIndexToRGB(final byte[] index){
-        
-        isConverted=true;
-        
-        final int count=index.length;
-        final byte[] newIndex=new byte[count*3];
-        
-        for(int i=0;i<count;i++){
-            final byte value=index[i];
-            for(int j=0;j<3;j++) {
-                newIndex[(i*3)+j]=value;
+    public byte[] convertIndexToRGB(final byte[] index) {
+
+        isConverted = true;
+
+        final int count = index.length;
+        final byte[] newIndex = new byte[count * 3];
+
+        for (int i = 0; i < count; i++) {
+            final byte value = index[i];
+            for (int j = 0; j < 3; j++) {
+                newIndex[(i * 3) + j] = value;
             }
-            
+
         }
-        
+
         return newIndex;
     }
-    
+
     /**
      * convert data stream to srgb image
      */
     @Override
-    public BufferedImage JPEGToRGBImage( final byte[] data, final int w, final int h, final int pX, final int pY) {
-        
-        return JPEGDecoder.grayJPEGToRGBImage( data, pX, pY);
-        
+    public BufferedImage JPEGToRGBImage(final byte[] data, final int w, final int h, final int pX, final int pY) {
+
+        return JPEGDecoder.grayJPEGToRGBImage(data, pX, pY);
+
     }
 }

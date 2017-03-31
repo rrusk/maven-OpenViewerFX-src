@@ -42,15 +42,14 @@ import org.jpedal.objects.raw.FormObject;
 public interface ExpressionEngine {
 
     /**
-     *
-     * @param ref  ie 1 0 R
-     * @param type - defined in ActionHandler (ie K)
-     * @param js - Javascript string
-     * @param eventType - type of event (Keystroke, focus)
+     * @param ref        ie 1 0 R
+     * @param type       - defined in ActionHandler (ie K)
+     * @param js         - Javascript string
+     * @param eventType  - type of event (Keystroke, focus)
      * @param keyPressed - if key event, key value , otherwsie space
      * @return return code (ActionHandler.STOPPROCESSING to ignore JPedal handling)
      */
-	//NOTE type is used externally so needs to be kept
+    //NOTE type is used externally so needs to be kept
     int execute(FormObject ref, int type, String js, int eventType, char keyPressed);
 
     /**
@@ -60,7 +59,7 @@ public interface ExpressionEngine {
 
     /**
      * return true if JPedal should do nothing, false if JPedal should execute command as well
-     * 
+     * <p>
      * if code == ErrorCodes.JSInvalidRangeFormat
      * then args[1] is the forrmatted message to be displayed
      */
@@ -68,13 +67,15 @@ public interface ExpressionEngine {
 
 //	String handleAFCommands(String js, int eventType, char keyPressed, String currentValue);
 
-    /** adding code for the javascript to  call as needed */
+    /**
+     * adding code for the javascript to  call as needed
+     */
     @SuppressWarnings("UnusedReturnValue")
     int addCode(String value);
 
-	void executeFunctions(String jsCode, FormObject formObject);
+    void executeFunctions(String jsCode, FormObject formObject);
 
-	void dispose();
+    void dispose();
 
     void setAcroRenderer(AcroRenderer acro);
 }

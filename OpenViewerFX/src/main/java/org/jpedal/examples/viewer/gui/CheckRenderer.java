@@ -54,8 +54,8 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
 
     @Override
     public Component getTreeCellRendererComponent(final JTree tree, final Object value,
-            final boolean isSelected, final boolean expanded,
-            final boolean leaf, final int row, final boolean hasFocus) {
+                                                  final boolean isSelected, final boolean expanded,
+                                                  final boolean leaf, final int row, final boolean hasFocus) {
 
         final String stringValue = tree.convertValueToText(value, isSelected,
                 expanded, leaf, row, hasFocus);

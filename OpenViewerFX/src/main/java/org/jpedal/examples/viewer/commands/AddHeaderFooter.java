@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -46,13 +47,12 @@ import org.jpedal.objects.PdfPageData;
 import org.jpedal.utils.Messages;
 
 
-
 /**
  * This class allows you to add a header and a footer (usually the page number)
  * to the top and bottom of each page in the opened document. It uses itext
  * function addHeaderFooter()
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class AddHeaderFooter {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
@@ -65,7 +65,7 @@ public class AddHeaderFooter {
 
                 //get values from user
                 final AddHeaderFooterToPDFPages addHeaderFooter = new AddHeaderFooterToPDFPages(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int headerFooterPagesChoice = addHeaderFooter.display((Component)currentGUI.getFrame(), Messages.getMessage("PdfViewerTitle.AddHeaderAndFooters"));
+                final int headerFooterPagesChoice = addHeaderFooter.display((Component) currentGUI.getFrame(), Messages.getMessage("PdfViewerTitle.AddHeaderAndFooters"));
 
                 //get parameters and call if YES
                 if (headerFooterPagesChoice == JOptionPane.OK_OPTION) {

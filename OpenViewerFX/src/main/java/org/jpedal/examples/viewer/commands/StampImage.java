@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -50,7 +51,7 @@ import org.jpedal.utils.Messages;
  * your document It will print the current page count, the page data and a
  * stampImage sent into itext function stampImage()
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class StampImage {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
@@ -63,7 +64,7 @@ public class StampImage {
 
                 //get values from user
                 final StampImageToPDFPages stampImage = new StampImageToPDFPages(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int stampImageChoice = stampImage.display((Component)currentGUI.getFrame(), Messages.getMessage("PdfViewerStampImage.text"));
+                final int stampImageChoice = stampImage.display((Component) currentGUI.getFrame(), Messages.getMessage("PdfViewerStampImage.text"));
 
                 //get parameters and call if YES
                 if (stampImageChoice == JOptionPane.OK_OPTION) {

@@ -35,16 +35,17 @@ package org.jpedal.render;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+
 import org.jpedal.color.PdfPaint;
 
 /**
  * Ant specific methods used to Draw type3 fonts
  */
 class T3ImageUtils {
- 
-    
+
+
     public static BufferedImage handleType3Image(BufferedImage image, final PdfPaint fillCol) {
-        
+
         final int[] maskCol = new int[4];
         final int foreground = fillCol.getRGB();
         maskCol[0] = ((foreground >> 16) & 0xFF);
@@ -54,23 +55,23 @@ class T3ImageUtils {
         if (maskCol[0] == 0 && maskCol[1] == 0 && maskCol[2] == 0) {
             //System.out.println("black");
         } else {
-            
+
             //hack for white text in printing (see Host account statement from open.pdf)
-            if(image.getType()==10 && maskCol[0]>250 && maskCol[1]>250 && maskCol[2]>250){
-                image=null;
-            }else{
-                
+            if (image.getType() == 10 && maskCol[0] > 250 && maskCol[1] > 250 && maskCol[2] > 250) {
+                image = null;
+            } else {
+
                 final BufferedImage img = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-                
+
                 final Raster src = image.getRaster();
                 final WritableRaster dest = img.getRaster();
                 final int[] values = new int[4];
                 for (int yy = 0; yy < image.getHeight(); yy++) {
                     for (int xx = 0; xx < image.getWidth(); xx++) {
-                        
+
                         //get raw color data
                         src.getPixel(xx, yy, values);
-                        
+
                         //if not transparent, fill with color
                         if (values[3] > 2) {
                             dest.setPixel(xx, yy, maskCol);

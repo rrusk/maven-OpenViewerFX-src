@@ -48,12 +48,12 @@ import javax.print.attribute.standard.OrientationRequested;
 
 public class PaperSizes {
 
-    Map<String, MarginPaper> paperDefinitions=new HashMap<String, MarginPaper>();
+    Map<String, MarginPaper> paperDefinitions = new HashMap<String, MarginPaper>();
     ArrayList<String> paperList = new ArrayList<String>();
 
     private static final double mmToSubInch = 72 / 25.4;
 
-    final Map<String, String> paperNames=new HashMap<String, String>();
+    final Map<String, String> paperNames = new HashMap<String, String>();
 
     //default for paper selection
     private int defaultPageIndex;
@@ -63,22 +63,22 @@ public class PaperSizes {
 
     @SuppressWarnings("UnusedDeclaration")
     public PaperSizes(final PrintService printService) {
-    	defaultSize = null;
-    	populateNameMap();
-    	addCustomPaperSizes();
-    	setPrintService(printService);
+        defaultSize = null;
+        populateNameMap();
+        addCustomPaperSizes();
+        setPrintService(printService);
     }
-    
-    public PaperSizes(final String defaultSize){
+
+    public PaperSizes(final String defaultSize) {
         this.defaultSize = defaultSize;
         populateNameMap();
         addCustomPaperSizes();
     }
 
-    public String[] getAvailablePaperSizes(){
+    public String[] getAvailablePaperSizes() {
         final Object[] objs = paperList.toArray();
         final String[] names = new String[objs.length];
-        for (int i=0; i<objs.length; i++) {
+        for (int i = 0; i < objs.length; i++) {
             names[i] = (String) objs[i];
         }
         return names;
@@ -90,14 +90,14 @@ public class PaperSizes {
     }
 
     //method to setup specific Paper sizes - add your own here to extend list
-    private static void addCustomPaperSizes(){
+    private static void addCustomPaperSizes() {
 
-    	//String printDescription;
-    	//MarginPaper paper;
-    	//defintion for each Paper - must match
+        //String printDescription;
+        //MarginPaper paper;
+        //defintion for each Paper - must match
 
         /*
-    	//A4 (border)
+        //A4 (border)
 		printDescription="A4";
 		paper = new Paper();
 		paper.setSize(595, 842);
@@ -156,7 +156,7 @@ public class PaperSizes {
          paperList.add(printDescription);
 		/**/
 
-		//Add your own here
+        //Add your own here
 
     }
 
@@ -165,7 +165,7 @@ public class PaperSizes {
      */
     private void setDefault() {
 
-        if (paperList==null) {
+        if (paperList == null) {
             return;
         }
 
@@ -173,18 +173,18 @@ public class PaperSizes {
         defaultPageIndex = -1;
 
         //check JVM flag
-        final String paperSizeFlag=System.getProperty("org.jpedal.printPaperSize");
-    	if(paperSizeFlag!=null){
-    		for(int i=0; i<paperList.size(); i++){
-                if(paperList.get(i).equals(paperSizeFlag)){
-    				defaultPageIndex = i;
-    			}
-    		}
-    	}
+        final String paperSizeFlag = System.getProperty("org.jpedal.printPaperSize");
+        if (paperSizeFlag != null) {
+            for (int i = 0; i < paperList.size(); i++) {
+                if (paperList.get(i).equals(paperSizeFlag)) {
+                    defaultPageIndex = i;
+                }
+            }
+        }
 
         //Check properties file value (passed in)
         if (defaultPageIndex == -1 && defaultSize != null && !defaultSize.isEmpty()) {
-            for (int i=0; i<paperList.size(); i++) {
+            for (int i = 0; i < paperList.size(); i++) {
                 if (defaultSize.equals(paperList.get(i))) {
                     defaultPageIndex = i;
                 }
@@ -196,7 +196,7 @@ public class PaperSizes {
             defaultSize = "A4";
 
             //Check for US countries
-            final String[] letterSizeDefaults = {"US","CA","MX","CO","VE","AR","CL","PH"};
+            final String[] letterSizeDefaults = {"US", "CA", "MX", "CO", "VE", "AR", "CL", "PH"};
             final String country = Locale.getDefault().getCountry();
             for (final String letterSizeDefault : letterSizeDefaults) {
                 if (country.equals(letterSizeDefault)) {
@@ -205,7 +205,7 @@ public class PaperSizes {
             }
 
             //Get index
-            for (int j=0; j<paperList.size(); j++) {
+            for (int j = 0; j < paperList.size(); j++) {
                 if (defaultSize.equals(paperList.get(j))) {
                     defaultPageIndex = j;
                 }
@@ -220,12 +220,13 @@ public class PaperSizes {
 
     /**
      * Sets the print service and checks which page sizes are available
+     *
      * @param p print service
      */
     public synchronized void setPrintService(final PrintService p) {
         this.printService = p;
-        paperDefinitions=new HashMap<String, MarginPaper>();
-        paperList=new ArrayList<String>();
+        paperDefinitions = new HashMap<String, MarginPaper>();
+        paperList = new ArrayList<String>();
 
         checkAndAddSize(MediaSizeName.ISO_A4);
         checkAndAddSize(MediaSizeName.NA_LETTER);
@@ -305,7 +306,7 @@ public class PaperSizes {
 
         setDefault();
     }
-    
+
     public String[] getPaperSizes() {
 
         return new String[]{
@@ -386,6 +387,7 @@ public class PaperSizes {
 
     /**
      * Checks whether a paper size is available and adds it to the array
+     *
      * @param name The MediaSizeName to check
      */
     private void checkAndAddSize(final MediaSizeName name) {
@@ -415,27 +417,27 @@ public class PaperSizes {
 
         //Get printable area
         attributes.add(name);
-        final MediaPrintableArea[] area = (MediaPrintableArea[])printService.getSupportedAttributeValues(MediaPrintableArea.class,null,attributes);
+        final MediaPrintableArea[] area = (MediaPrintableArea[]) printService.getSupportedAttributeValues(MediaPrintableArea.class, null, attributes);
 
-        if (area.length==0) {
+        if (area.length == 0) {
             return;
         }
 
         int useArea = 0;
-        if(area[useArea]==null) {
+        if (area[useArea] == null) {
             for (int i = 0; i != area.length && area[useArea] == null; i++) {
                 useArea = i;
             }
         }
-        	
-        
+
+
         final float[] values = area[useArea].getPrintableArea(MediaPrintableArea.MM);
 
         //Check if very near to pagesize since pagesize is stored less accurately (avoids rounding/negative issues)
-        if (values[2] > pX-0.5 && values[2] < pX+0.5) {
+        if (values[2] > pX - 0.5 && values[2] < pX + 0.5) {
             values[2] = (float) pX;
         }
-        if (values[3] > pY-0.5 && values[3] < pY+0.5) {
+        if (values[3] > pY - 0.5 && values[3] < pY + 0.5) {
             values[3] = (float) pY;
         }
 
@@ -449,45 +451,47 @@ public class PaperSizes {
 
         //Create and store as Paper object
         final MarginPaper paper = new MarginPaper();
-        paper.setSize(pX*mmToSubInch, pY*mmToSubInch);
-        paper.setMinImageableArea(values[0]* mmToSubInch,values[1]*mmToSubInch, values[2]*mmToSubInch, values[3]*mmToSubInch);
+        paper.setSize(pX * mmToSubInch, pY * mmToSubInch);
+        paper.setMinImageableArea(values[0] * mmToSubInch, values[1] * mmToSubInch, values[2] * mmToSubInch, values[3] * mmToSubInch);
 
-        paperDefinitions.put(printDescription,paper);
+        paperDefinitions.put(printDescription, paper);
         paperList.add(printDescription);
     }
 
     /**
      * Returns the index of the default paper size
+     *
      * @return
      */
     public int getDefaultPageIndex() {
-    	return defaultPageIndex;
-        
+        return defaultPageIndex;
+
     }
 
     /**
      * Returns the default orientation requested by the printer
+     *
      * @return int flag for the orientation
      */
     public int getDefaultPageOrientation() {
-    	
-    	//Set the pageformat orientation based on printer preference
-        final OrientationRequested or = (OrientationRequested)printService.getDefaultAttributeValue(OrientationRequested.class);
+
+        //Set the pageformat orientation based on printer preference
+        final OrientationRequested or = (OrientationRequested) printService.getDefaultAttributeValue(OrientationRequested.class);
         int orientation = PageFormat.PORTRAIT;
-        if(or!=null){
-        	switch (or.getValue()) {
-        	case 4:
-        		orientation = PageFormat.LANDSCAPE;
-        		break;
-        	case 5:
-        		orientation = PageFormat.REVERSE_LANDSCAPE;
-        		break;
-			}
+        if (or != null) {
+            switch (or.getValue()) {
+                case 4:
+                    orientation = PageFormat.LANDSCAPE;
+                    break;
+                case 5:
+                    orientation = PageFormat.REVERSE_LANDSCAPE;
+                    break;
+            }
         }
-        
-    	return orientation;
+
+        return orientation;
     }
-    
+
     /**
      * Fills the name map from standardised to "pretty" names
      */

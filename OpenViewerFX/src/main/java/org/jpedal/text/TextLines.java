@@ -38,148 +38,156 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.jpedal.objects.PdfData;
 import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.repositories.generic.Vector_Rectangle_Int;
 
 public class TextLines {
 
-    /**stores area of arrays in which text should be highlighted*/
-    private Map<Integer, ArrayList<int[]>> lineAreas = new HashMap<Integer, ArrayList<int[]>>();
-    private Map<Integer, ArrayList<Integer>> lineWritingMode = new HashMap<Integer,  ArrayList<Integer>>();
-
-    /**Highlight Areas stored here*/
-    public Map<Integer, int[][]> areas = new HashMap<Integer, int[][]>();
-    
-    /**Track if highlgiht localAreas has changed since last call to getHighlightedAreas(int)*/
-    boolean hasHighlightAreasUpdated;
- 
     /**
-	 * Highlights a section of lines that form a paragraph and
- returns the area that encloses all highlight localAreas.
-     * @param x Coord x value to begin looking for a paragraph
-     * @param y Coord y value to begin looking for a paragraph
+     * stores area of arrays in which text should be highlighted
+     */
+    private Map<Integer, ArrayList<int[]>> lineAreas = new HashMap<Integer, ArrayList<int[]>>();
+    private Map<Integer, ArrayList<Integer>> lineWritingMode = new HashMap<Integer, ArrayList<Integer>>();
+
+    /**
+     * Highlight Areas stored here
+     */
+    public Map<Integer, int[][]> areas = new HashMap<Integer, int[][]>();
+
+    /**
+     * Track if highlgiht localAreas has changed since last call to getHighlightedAreas(int)
+     */
+    boolean hasHighlightAreasUpdated;
+
+    /**
+     * Highlights a section of lines that form a paragraph and
+     * returns the area that encloses all highlight localAreas.
+     *
+     * @param x    Coord x value to begin looking for a paragraph
+     * @param y    Coord y value to begin looking for a paragraph
      * @param page Page number of page to look for a paragraph on
-	 * @return int[] that contains x,y,w,h of all localAreas highlighted
-	 */
-    public int[] setFoundParagraphAsArray(final int x, final int y, final int page){
+     * @return int[] that contains x,y,w,h of all localAreas highlighted
+     */
+    public int[] setFoundParagraphAsArray(final int x, final int y, final int page) {
 
-    final int[][] lines = getLineAreasAs2DArray(page);
+        final int[][] lines = getLineAreasAs2DArray(page);
 
-    if(lines!=null){
+        if (lines != null) {
 
-        final int[] point = {x,y,1,1};
-        final int[] current = {0,0,0,0};
-        boolean lineFound = false;
-        int selectedLine = 0;
+            final int[] point = {x, y, 1, 1};
+            final int[] current = {0, 0, 0, 0};
+            boolean lineFound = false;
+            int selectedLine = 0;
 
-        for(int i=0; i!=lines.length; i++){
-            if(intersects(lines[i],point)){
-                selectedLine = i;
-                lineFound = true;
-                break;
-            }
-        }
-
-        if(lineFound){
-            int left = lines[selectedLine][0];
-            int cx = lines[selectedLine][0]+(lines[selectedLine][2]/2);
-            int right = lines[selectedLine][0]+lines[selectedLine][2];
-            int cy = lines[selectedLine][1]+(lines[selectedLine][3]/2);
-            int h = lines[selectedLine][3];
-
-            current[0]=lines[selectedLine][0];
-            current[1]=lines[selectedLine][1];
-            current[2]=lines[selectedLine][2];
-            current[3]=lines[selectedLine][3];
-
-            boolean foundTop = true;
-            boolean foundBottom = true;
-            final Vector_Rectangle_Int selected = new Vector_Rectangle_Int(0);
-            selected.addElement(lines[selectedLine]);
-
-            while(foundTop){
-                foundTop = false;
-                for(int i=0; i!=lines.length; i++){
-                    if(contains(left, cy+h, lines[i]) || contains(cx, cy+h, lines[i]) || contains(right, cy+h, lines[i])){
-                        selected.addElement(lines[i]);
-                        foundTop = true;
-                        cy = lines[i][1] + (lines[i][3]/2);
-                        h = lines[i][3];
-
-                        if(current[0]>lines[i][0]){
-                            current[2] = (current[0]+current[2])-lines[i][0];
-                            current[0] = lines[i][0];
-                        }
-                        if((current[0]+current[2])<(lines[i][0]+lines[i][2])) {
-                            current[2] = (lines[i][0] + lines[i][2]) - current[0];
-                        }
-                        if(current[1]>lines[i][1]){
-                            current[3] = (current[1]+current[3])-lines[i][1];
-                            current[1] = lines[i][1];
-                        }
-                        if((current[1]+current[3])<(lines[i][1]+lines[i][3])){
-                            current[3] = (lines[i][1]+lines[i][3])-current[1];
-                        }
-
-                        break;
-                    }
+            for (int i = 0; i != lines.length; i++) {
+                if (intersects(lines[i], point)) {
+                    selectedLine = i;
+                    lineFound = true;
+                    break;
                 }
             }
 
-            //Return to selected item else we have duplicate highlights
-            left = lines[selectedLine][0];
-            cx = lines[selectedLine][0]+(lines[selectedLine][2]/2);
-            right = lines[selectedLine][0]+lines[selectedLine][2];
-            cy = lines[selectedLine][1] + (lines[selectedLine][3]/2);
-            h = lines[selectedLine][3];
+            if (lineFound) {
+                int left = lines[selectedLine][0];
+                int cx = lines[selectedLine][0] + (lines[selectedLine][2] / 2);
+                int right = lines[selectedLine][0] + lines[selectedLine][2];
+                int cy = lines[selectedLine][1] + (lines[selectedLine][3] / 2);
+                int h = lines[selectedLine][3];
 
-            while(foundBottom){
-                foundBottom = false;
-                for(int i=0; i!=lines.length; i++){
-                    if(contains(left, cy-h, lines[i]) || contains(cx,cy-h, lines[i]) || contains(right,cy-h, lines[i])){
-                        selected.addElement(lines[i]);
-                        foundBottom = true;
-                        cy = lines[i][1] + (lines[i][3]/2);
-                        h = lines[i][3];
+                current[0] = lines[selectedLine][0];
+                current[1] = lines[selectedLine][1];
+                current[2] = lines[selectedLine][2];
+                current[3] = lines[selectedLine][3];
 
-                        if(current[0]>lines[i][0]){
-                            current[2] = (current[0]+current[2])-lines[i][0];
-                            current[0] = lines[i][0];
-                        }
-                        if((current[0]+current[2])<(lines[i][0]+lines[i][2])) {
-                            current[2] = (lines[i][0] + lines[i][2]) - current[0];
-                        }
-                        if(current[1]>lines[i][1]){
-                            current[3] = (current[1]+current[3])-lines[i][1];
-                            current[1] = lines[i][1];
-                        }
-                        if((current[1]+current[3])<(lines[i][1]+lines[i][3])){
-                            current[3] = (lines[i][1]+lines[i][3])-current[1];
-                        }
+                boolean foundTop = true;
+                boolean foundBottom = true;
+                final Vector_Rectangle_Int selected = new Vector_Rectangle_Int(0);
+                selected.addElement(lines[selectedLine]);
 
-                        break;
+                while (foundTop) {
+                    foundTop = false;
+                    for (int i = 0; i != lines.length; i++) {
+                        if (contains(left, cy + h, lines[i]) || contains(cx, cy + h, lines[i]) || contains(right, cy + h, lines[i])) {
+                            selected.addElement(lines[i]);
+                            foundTop = true;
+                            cy = lines[i][1] + (lines[i][3] / 2);
+                            h = lines[i][3];
+
+                            if (current[0] > lines[i][0]) {
+                                current[2] = (current[0] + current[2]) - lines[i][0];
+                                current[0] = lines[i][0];
+                            }
+                            if ((current[0] + current[2]) < (lines[i][0] + lines[i][2])) {
+                                current[2] = (lines[i][0] + lines[i][2]) - current[0];
+                            }
+                            if (current[1] > lines[i][1]) {
+                                current[3] = (current[1] + current[3]) - lines[i][1];
+                                current[1] = lines[i][1];
+                            }
+                            if ((current[1] + current[3]) < (lines[i][1] + lines[i][3])) {
+                                current[3] = (lines[i][1] + lines[i][3]) - current[1];
+                            }
+
+                            break;
+                        }
                     }
                 }
+
+                //Return to selected item else we have duplicate highlights
+                left = lines[selectedLine][0];
+                cx = lines[selectedLine][0] + (lines[selectedLine][2] / 2);
+                right = lines[selectedLine][0] + lines[selectedLine][2];
+                cy = lines[selectedLine][1] + (lines[selectedLine][3] / 2);
+                h = lines[selectedLine][3];
+
+                while (foundBottom) {
+                    foundBottom = false;
+                    for (int i = 0; i != lines.length; i++) {
+                        if (contains(left, cy - h, lines[i]) || contains(cx, cy - h, lines[i]) || contains(right, cy - h, lines[i])) {
+                            selected.addElement(lines[i]);
+                            foundBottom = true;
+                            cy = lines[i][1] + (lines[i][3] / 2);
+                            h = lines[i][3];
+
+                            if (current[0] > lines[i][0]) {
+                                current[2] = (current[0] + current[2]) - lines[i][0];
+                                current[0] = lines[i][0];
+                            }
+                            if ((current[0] + current[2]) < (lines[i][0] + lines[i][2])) {
+                                current[2] = (lines[i][0] + lines[i][2]) - current[0];
+                            }
+                            if (current[1] > lines[i][1]) {
+                                current[3] = (current[1] + current[3]) - lines[i][1];
+                                current[1] = lines[i][1];
+                            }
+                            if ((current[1] + current[3]) < (lines[i][1] + lines[i][3])) {
+                                current[3] = (lines[i][1] + lines[i][3]) - current[1];
+                            }
+
+                            break;
+                        }
+                    }
+                }
+                selected.trim();
+                addHighlights(selected.get(), true, page);
+                return current;
             }
-            selected.trim();
-            addHighlights(selected.get(), true, page);
-            return current;
+            return null;
         }
         return null;
     }
-    return null;
-}
 
     public void addToLineAreas(final int[] area, final int writingMode, final int page) {
         boolean addNew = true;
 
-        if(lineAreas==null){ //If null, create array
+        if (lineAreas == null) { //If null, create array
 
             lineAreas = new HashMap<Integer, ArrayList<int[]>>();
             lineWritingMode = new HashMap<Integer, ArrayList<Integer>>();
         }
-        
+
         ArrayList<int[]> lastAreas = lineAreas.get(page);
         ArrayList<Integer> lastWritingMode = (lineWritingMode.get(page));
 
@@ -220,11 +228,11 @@ public class TextLines {
                     switch (writingMode) {
                         case PdfData.HORIZONTAL_LEFT_TO_RIGHT:
 
-                                if(lwm== writingMode && ((ly>(cy-(ch/heightMod))) && (ly<(cy+(ch/heightMod)))) && //Ensure this is actually the same line and are about the same size
-                                        (((lh<ch+(ch/heightMod) && lh>ch-(ch/heightMod))) && //Check text is the same height
-                                                (((lx>(cx + cw-(ch*widthMod))) && (lx<(cx + cw+(ch*widthMod)))) || //Check for object at end of this object
-                                                        ((lx + lw>(cx-(ch*widthMod))) && (lx + lw<(cx+(ch*widthMod)))) ||//Check for object at start of this object
-                                    intersects(lastArea, area)))//Check to see if it intersects at all
+                            if (lwm == writingMode && ((ly > (cy - (ch / heightMod))) && (ly < (cy + (ch / heightMod)))) && //Ensure this is actually the same line and are about the same size
+                                    (((lh < ch + (ch / heightMod) && lh > ch - (ch / heightMod))) && //Check text is the same height
+                                            (((lx > (cx + cw - (ch * widthMod))) && (lx < (cx + cw + (ch * widthMod)))) || //Check for object at end of this object
+                                                    ((lx + lw > (cx - (ch * widthMod))) && (lx + lw < (cx + (ch * widthMod)))) || //Check for object at start of this object
+                                                    intersects(lastArea, area)))//Check to see if it intersects at all
                                     ) {
                                 addNew = false;
 
@@ -243,11 +251,11 @@ public class TextLines {
                             cw = area[2];
                             ch = area[3];
 
-                            if(lwm== writingMode && ((ly>(cy-5)) && (ly<(cy+5)) && lh<=(ch+(ch/5)) && lh>=(ch-(ch/5))) && //Ensure this is actually the same line and are about the same size
-                                    (((lx>(cx + cw-(ch*0.6))) && (lx<(cx + cw+(ch*0.6)))) || //Check for object at end of this object
-                                            ((lx + lw>(cx-(ch*0.6))) && (lx + lw<(cx+(ch*0.6)))) ||//Check for object at start of this object
-                                intersects(lastArea, area))//Check to see if it intersects at all
-                                ) {
+                            if (lwm == writingMode && ((ly > (cy - 5)) && (ly < (cy + 5)) && lh <= (ch + (ch / 5)) && lh >= (ch - (ch / 5))) && //Ensure this is actually the same line and are about the same size
+                                    (((lx > (cx + cw - (ch * 0.6))) && (lx < (cx + cw + (ch * 0.6)))) || //Check for object at end of this object
+                                            ((lx + lw > (cx - (ch * 0.6))) && (lx + lw < (cx + (ch * 0.6)))) || //Check for object at start of this object
+                                            intersects(lastArea, area))//Check to see if it intersects at all
+                                    ) {
                                 addNew = false;
 
                                 //No need to reset the writing mode as already set
@@ -265,11 +273,11 @@ public class TextLines {
                             cw = area[3];
                             ch = area[2];
 
-                        if(lwm== writingMode && ((ly>(cy-5)) && (ly<(cy+5)) && lh<=(ch+(ch/5)) && lh>=(ch-(ch/5))) && //Ensure this is actually the same line and are about the same size
-                                    (((lx>(cx + cw-(ch*0.6))) && (lx<(cx + cw+(ch*0.6)))) || //Check for object at end of this object
-                                            ((lx + lw>(cx-(ch*0.6))) && (lx + lw<(cx+(ch*0.6)))) ||//Check for object at start of this object
-                                intersects(lastArea, area))//Check to see if it intersects at all
-                                ) {
+                            if (lwm == writingMode && ((ly > (cy - 5)) && (ly < (cy + 5)) && lh <= (ch + (ch / 5)) && lh >= (ch - (ch / 5))) && //Ensure this is actually the same line and are about the same size
+                                    (((lx > (cx + cw - (ch * 0.6))) && (lx < (cx + cw + (ch * 0.6)))) || //Check for object at end of this object
+                                            ((lx + lw > (cx - (ch * 0.6))) && (lx + lw < (cx + (ch * 0.6)))) || //Check for object at start of this object
+                                            intersects(lastArea, area))//Check to see if it intersects at all
+                                    ) {
                                 addNew = false;
 
                                 //No need to reset the writing mode as already set
@@ -284,14 +292,14 @@ public class TextLines {
                             currentBaseLine = cx + cw;
                             lastBaseLine = lx + lw;
 
-                            if(lwm== writingMode //Check the current writing mode
-                                            && (currentBaseLine >= (lastBaseLine-(lw/3))) && (currentBaseLine <= (lastBaseLine+(lw/3))) //Check is same line
-                                && //Only check left or right if the same line is shared
-                                (( //Check for text on either side
-                                ((ly + (lh + (lw * 0.6)) > cy) && (ly + (lh - (lw * 0.6)) < cy))// Check for text to left of current area
-                                || ((ly + (lw * 0.6) > (cy + ch)) && (ly - (lw * 0.6) < (cy + ch)))// Check for text to right of current area
-                                )
-                                || intersects(area, lastArea))) {
+                            if (lwm == writingMode //Check the current writing mode
+                                    && (currentBaseLine >= (lastBaseLine - (lw / 3))) && (currentBaseLine <= (lastBaseLine + (lw / 3))) //Check is same line
+                                    && //Only check left or right if the same line is shared
+                                    ((//Check for text on either side
+                                            ((ly + (lh + (lw * 0.6)) > cy) && (ly + (lh - (lw * 0.6)) < cy))// Check for text to left of current area
+                                                    || ((ly + (lw * 0.6) > (cy + ch)) && (ly - (lw * 0.6) < (cy + ch)))// Check for text to right of current area
+                                    )
+                                            || intersects(area, lastArea))) {
                                 addNew = false;
 
                                 //No need to reset the writing mode as already set
@@ -327,58 +335,60 @@ public class TextLines {
 
     /**
      * remove zone on page for text localAreas if present
+     *
      * @param rectArea Text area to remove
-     * @param page Page to check for these localAreas
+     * @param page     Page to check for these localAreas
      */
-    public void removeFoundTextArea(final int[] rectArea, final int page){
+    public void removeFoundTextArea(final int[] rectArea, final int page) {
 
         //clearHighlights();
-        if(rectArea==null|| areas==null) {
+        if (rectArea == null || areas == null) {
             return;
         }
 
         final Integer p = page;
         final int[][] localAreas = this.areas.get(p);
-        if(localAreas!=null){
-            final int size=localAreas.length;
-            for(int i=0;i<size;i++){
-                if(localAreas[i]!=null && (contains(rectArea[0],rectArea[1], localAreas[i]) || (localAreas[i][0] ==rectArea[0] && localAreas[i][1] ==rectArea[1] && localAreas[i][2] ==rectArea[2] &&
-                        localAreas[i][3] ==rectArea[3]))){
-                    localAreas[i]=null;
-                    i=size;
+        if (localAreas != null) {
+            final int size = localAreas.length;
+            for (int i = 0; i < size; i++) {
+                if (localAreas[i] != null && (contains(rectArea[0], rectArea[1], localAreas[i]) || (localAreas[i][0] == rectArea[0] && localAreas[i][1] == rectArea[1] && localAreas[i][2] == rectArea[2] &&
+                        localAreas[i][3] == rectArea[3]))) {
+                    localAreas[i] = null;
+                    i = size;
                 }
             }
             this.areas.put(p, localAreas);
-            
+
             //Flag that highlights have changed
             hasHighlightAreasUpdated = true;
         }
     }
-   
+
     /**
      * remove highlight zones on page for text localAreas on single pages null value will totally reset
+     *
      * @param rectArea Text localAreas to remove
-     * @param page Page to check for these localAreas
+     * @param page     Page to check for these localAreas
      */
-    public void removeFoundTextAreas(final int[][] rectArea, final int page){
+    public void removeFoundTextAreas(final int[][] rectArea, final int page) {
 
-        if(rectArea==null){
-            areas=null;
-        }else{
+        if (rectArea == null) {
+            areas = null;
+        } else {
             for (final int[] aRectArea : rectArea) {
                 removeFoundTextArea(aRectArea, page);
             }
             boolean allNull = true;
             final Integer p = page;
             int[][] localAreas = this.areas.get(p);
-            if(localAreas!=null){
-                for(int ii=0;ii<localAreas.length;ii++){
-                    if(localAreas[ii]!=null){
-                        allNull=false;
-                        ii=localAreas.length;
+            if (localAreas != null) {
+                for (int ii = 0; ii < localAreas.length; ii++) {
+                    if (localAreas[ii] != null) {
+                        allNull = false;
+                        ii = localAreas.length;
                     }
                 }
-                if(allNull){
+                if (allNull) {
                     localAreas = null;
                     this.areas.put(p, localAreas);
 
@@ -388,14 +398,14 @@ public class TextLines {
             }
         }
     }
-   
+
     /**
      * Clear all highlights that are being displayed
      */
-    public void clearHighlights(){
-        
+    public void clearHighlights() {
+
         areas = null;
-            
+
         //Flag that highlights have changed
         hasHighlightAreasUpdated = true;
 
@@ -403,23 +413,22 @@ public class TextLines {
 
     /**
      * Method to highlight text on page.
-     *
+     * <p>
      * If areaSelect = true then the Rectangle array will be highlgihted on screen unmodified.
- areaSelect should be true if being when used with values returned from the search as these localAreas
- are already corrected and modified for display.
-
- If areaSelect = false then all lines between the top left point and bottom right point
- will be selected including two partial lines the top line starting from the top left point of the rectangle
- and the bottom line ending at the bottom right point of the rectangle.
+     * areaSelect should be true if being when used with values returned from the search as these localAreas
+     * are already corrected and modified for display.
+     * <p>
+     * If areaSelect = false then all lines between the top left point and bottom right point
+     * will be selected including two partial lines the top line starting from the top left point of the rectangle
+     * and the bottom line ending at the bottom right point of the rectangle.
      *
      * @param highlights :: The 2DArray contains the raw x,y,w,h params of a set of rectangles that you wish to have highlighted
      * @param areaSelect :: The flag that will either select text as line between points if false or characters within an area if true.
      * @param page       :: The page to add highlights to.
      */
-    public void addHighlights(final int[][] highlights, final boolean areaSelect, final int page){
-        
-        
-        
+    public void addHighlights(final int[][] highlights, final boolean areaSelect, final int page) {
+
+
         if (highlights != null) { //If null do nothing to clear use the clear method
 
             //Flag that highlights have changed
@@ -436,7 +445,7 @@ public class TextLines {
     public int[][] getHighlightableInArea(final int[] highlights, final boolean areaSelect, final int page) {
 
         if (!areaSelect) {
-            
+
             if (highlights != null) {
 
                 //Ensure that the points are adjusted so that they are within line area if that is sent as rectangle
@@ -680,73 +689,74 @@ public class TextLines {
         }
         return null;
     }
-    
+
     public boolean hasHighlightAreasUpdated() {
-		return hasHighlightAreasUpdated;
-	}
+        return hasHighlightAreasUpdated;
+    }
 
     /**
-     * Get all the highlights currently stored. The returned Map 
+     * Get all the highlights currently stored. The returned Map
      * using the page numbers as the keys for the values.
-     * 
+     *
      * @return A Map containing all highlights currently stored.
      */
-    public Map getAllHighlights(){
-    	hasHighlightAreasUpdated = false;
-        if(areas==null){
+    public Map getAllHighlights() {
+        hasHighlightAreasUpdated = false;
+        if (areas == null) {
             return null;
-        }else{
+        } else {
             return Collections.unmodifiableMap(areas);
         }
     }
-    
+
     /**
      * Creates a two-dimensional int array containing x,y,width and height
- values for each rectangle that is stored in the localAreas map,
- which allows us to create a swing/fx rectangle on these values.
+     * values for each rectangle that is stored in the localAreas map,
+     * which allows us to create a swing/fx rectangle on these values.
+     *
      * @param page of type int.
      * @return an int[][] Containing x,y,w,h of Highlights on Page.
      */
     public int[][] getHighlightedAreasAs2DArray(final int page) {
 
-        if(areas==null) {
+        if (areas == null) {
             return null;
-        } else{
+        } else {
             final Integer p = page;
             final int[][] localAreas = this.areas.get(p);
-            if(localAreas!=null){
-                final int count=localAreas.length;
+            if (localAreas != null) {
+                final int count = localAreas.length;
 
-                final int[][] returnValue=new int[count][4];
+                final int[][] returnValue = new int[count][4];
 
-                for(int ii=0;ii<count;ii++){
-                    if(localAreas[ii]==null) {
+                for (int ii = 0; ii < count; ii++) {
+                    if (localAreas[ii] == null) {
                         returnValue[ii] = null;
                     } else {
                         returnValue[ii] = new int[]{localAreas[ii][0], localAreas[ii][1],
                                 localAreas[ii][2], localAreas[ii][3]};
                     }
                 }
-                
+
                 //Reset flag as localAreas has been retrieved
                 hasHighlightAreasUpdated = false;
-                
+
                 return returnValue;
-            }else{
+            } else {
                 return null;
             }
         }
 
     }
-    
+
 
     public void setLineAreas(final Map<Integer, int[][]> la) {
-        if(la == null || la.keySet().isEmpty()){
+        if (la == null || la.keySet().isEmpty()) {
             lineAreas = null;
-        }else{
+        } else {
             final Set<Integer> keys = la.keySet();
-            
-            for(final int i : keys){
+
+            for (final int i : keys) {
                 final int[][] values = la.get(i);
                 final ArrayList<int[]> list = new ArrayList<int[]>(Arrays.asList(values));
 
@@ -757,16 +767,16 @@ public class TextLines {
 
     @SuppressWarnings("UnusedDeclaration")
     public void setLineWritingMode(final Map<Integer, int[]> lineOrientation) {
-        if(lineOrientation == null || lineOrientation.keySet().isEmpty()){
+        if (lineOrientation == null || lineOrientation.keySet().isEmpty()) {
             lineWritingMode = null;
-        }else{
+        } else {
             final Set<Integer> keys = lineOrientation.keySet();
-            
-            for(final int i : keys){
+
+            for (final int i : keys) {
                 final int[] values = lineOrientation.get(i);
                 final ArrayList<Integer> list = new ArrayList<Integer>();
-                
-                for(final int ii : values){
+
+                for (final int ii : values) {
                     list.add(ii);
                 }
                 lineWritingMode.put(i, list);
@@ -777,96 +787,97 @@ public class TextLines {
 
     /**
      * Creates a two-dimensional int array containing x,y,width and height
- values for each rectangle that is stored in the localLineAreas map,
- which allows us to create a swing/fx rectangle on these values.
+     * values for each rectangle that is stored in the localLineAreas map,
+     * which allows us to create a swing/fx rectangle on these values.
+     *
      * @param page of type int.
      * @return an int[][] Containing x,y,w,h of line localAreas on Page.
      */
-    public int[][] getLineAreasAs2DArray(final int page){
-        
-        if(lineAreas==null || lineAreas.get(page) == null) {
+    public int[][] getLineAreasAs2DArray(final int page) {
+
+        if (lineAreas == null || lineAreas.get(page) == null) {
             return null;
-        } else{
+        } else {
             final ArrayList<int[]> localLineAreas = this.lineAreas.get(page);
 
-            if(localLineAreas==null) {
+            if (localLineAreas == null) {
                 return null;
             }
 
-            final int count=localLineAreas.size();
+            final int count = localLineAreas.size();
 
-            final int[][] returnValue=new int[count][4];
+            final int[][] returnValue = new int[count][4];
 
-            for(int ii=0;ii<count;ii++){
-                if(localLineAreas.get(ii)==null) {
+            for (int ii = 0; ii < count; ii++) {
+                if (localLineAreas.get(ii) == null) {
                     returnValue[ii] = null;
                 } else {
                     returnValue[ii] = new int[]{localLineAreas.get(ii)[0], localLineAreas.get(ii)[1],
                             localLineAreas.get(ii)[2], localLineAreas.get(ii)[3]};
                 }
             }
-            
+
             return returnValue;
         }
-        
+
     }
-    
+
     public int[] getLineWritingMode(final int page) {
 
-        if(lineWritingMode==null) {
+        if (lineWritingMode == null) {
             return null;
-        } else{
+        } else {
             final ArrayList<Integer> localLineWritingMode = (this.lineWritingMode.get(page));
 
-            if(localLineWritingMode==null) {
+            if (localLineWritingMode == null) {
                 return null;
             }
 
-            final int count=localLineWritingMode.size();
-            
-            final int[] returnValue=new int[count];
-            for(int i=0; i!=count; i++){
+            final int count = localLineWritingMode.size();
+
+            final int[] returnValue = new int[count];
+            for (int i = 0; i != count; i++) {
                 returnValue[i] = localLineWritingMode.get(i);
             }
-            
+
             return returnValue;
         }
     }
 
-    private static int[] mergePartLines(final int[] lastArea, final int[] area){
+    private static int[] mergePartLines(final int[] lastArea, final int[] area) {
         /*
          * Check coords from both areas and merge them to make
          * a single larger area containing contents of both
          */
-        final int x1 =area[0];
-        final int x2 =area[0] + area[2];
-        final int y1 =area[1];
-        final int y2 =area[1] + area[3];
-        final int lx1 =lastArea[0];
-        final int lx2 =lastArea[0] + lastArea[2];
-        final int ly1 =lastArea[1];
-        final int ly2 =lastArea[1] + lastArea[3];
+        final int x1 = area[0];
+        final int x2 = area[0] + area[2];
+        final int y1 = area[1];
+        final int y2 = area[1] + area[3];
+        final int lx1 = lastArea[0];
+        final int lx2 = lastArea[0] + lastArea[2];
+        final int ly1 = lastArea[1];
+        final int ly2 = lastArea[1] + lastArea[3];
 
         //Ensure the highest and lowest values are selected
-        if(x1<lx1) {
+        if (x1 < lx1) {
             area[0] = x1;
         } else {
             area[0] = lx1;
         }
 
-        if(y1<ly1) {
+        if (y1 < ly1) {
             area[1] = y1;
         } else {
             area[1] = ly1;
         }
 
-        if(y2>ly2) {
+        if (y2 > ly2) {
             area[3] = y2 - area[1];
         } else {
             area[3] = ly2 - area[1];
         }
 
-        if(x2>lx2) {
+        if (x2 > lx2) {
             area[2] = x2 - area[0];
         } else {
             area[2] = lx2 - area[0];
@@ -874,16 +885,17 @@ public class TextLines {
 
         return area;
     }
-    
+
     /**
      * Checks whether two rectangles intersect
      * Takes the raw x,y,w,h data of the rectangles in array form.
+     *
      * @param paramsOne
      * @param paramsTwo
      * @return boolean
      */
-    public static boolean intersects(final int[] paramsOne, final int[] paramsTwo){
-        
+    public static boolean intersects(final int[] paramsOne, final int[] paramsTwo) {
+
         final int X1 = paramsOne[0];
         final int Y1 = paramsOne[1];
         final int W1 = paramsOne[2];
@@ -899,10 +911,11 @@ public class TextLines {
     /**
      * Checks whether a point at (x,y) lies within the
      * bounds of an unrotated rectangles raw x,y,w,h values.
+     *
      * @return
      */
-    private static boolean contains(final int x, final int y, final int[] rectParams){
-        
+    private static boolean contains(final int x, final int y, final int[] rectParams) {
+
         final int minX = rectParams[0]; //x
         final int minY = rectParams[1]; //y
         final int maxX = rectParams[0] + rectParams[2]; //x + width

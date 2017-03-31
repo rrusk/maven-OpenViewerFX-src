@@ -40,18 +40,19 @@ public class PdfObjectFactory {
 
     /**
      * get correct key value
+     *
      * @param PDFkeyInt
      * @return
      */
     public static int getInlineID(final int PDFkeyInt) {
-        switch(PDFkeyInt){
+        switch (PDFkeyInt) {
 
             case PdfDictionary.BPC:
                 return PdfDictionary.BitsPerComponent;
 
             case PdfDictionary.CMYK:
                 return ColorSpaces.DeviceCMYK;
-               
+
             case PdfDictionary.D:
                 return PdfDictionary.Decode;
 
@@ -63,7 +64,7 @@ public class PdfObjectFactory {
 
             case PdfDictionary.H:
                 return PdfDictionary.Height;
-                
+
             case PdfDictionary.I:
                 return PdfDictionary.Indexed;
 
@@ -78,18 +79,18 @@ public class PdfObjectFactory {
         }
     }
 
-    public static PdfObject getPDFObjectObjectFromRefOrDirect(final PdfObject obj, final  PdfFileReader pdfFileReader, final byte[] data, final int key) {
-        
-        if(data[0]=='<') {
+    public static PdfObject getPDFObjectObjectFromRefOrDirect(final PdfObject obj, final PdfFileReader pdfFileReader, final byte[] data, final int key) {
+
+        if (data[0] == '<') {
             obj.setStatus(PdfObject.UNDECODED_DIRECT);
         } else {
             obj.setStatus(PdfObject.UNDECODED_REF);
         }
-        obj.setUnresolvedData(data,key);
-        
-        final ObjectDecoder objectDecoder=new ObjectDecoder(pdfFileReader);
+        obj.setUnresolvedData(data, key);
+
+        final ObjectDecoder objectDecoder = new ObjectDecoder(pdfFileReader);
         objectDecoder.checkResolved(obj);
-        
+
         return obj;
     }
 }

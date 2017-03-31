@@ -35,7 +35,9 @@ package org.jpedal.parser;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+
 import org.jpedal.exception.PdfException;
+import org.jpedal.io.PdfObjectReader;
 import org.jpedal.objects.GraphicsState;
 import org.jpedal.objects.TextState;
 import org.jpedal.objects.acroforms.creation.AnnotationFactory;
@@ -50,6 +52,7 @@ import org.jpedal.render.ClipUtils;
 public class FormFlattener {
     /**
      * routine to decode an XForm stream
+     *
      * @param pdfStreamDecoder
      * @param form
      * @param isHTML
@@ -59,9 +62,13 @@ public class FormFlattener {
     public void drawFlattenedForm(final PdfStreamDecoder pdfStreamDecoder, final PdfObject form, final boolean isHTML, final PdfObject AcroRes) throws PdfException {
 
         //Check org.jpedal.removeForms and stop rendering if form should be removed
-        if(exclusionOption!=FormExclusion.ExcludeNone && !showForm(form)){
+        if (exclusionOption != FormExclusion.ExcludeNone && !showForm(form)) {
             return;
         }
+
+        final ParserOptions parserOptions = pdfStreamDecoder.parserOptions;
+        final int pageNumber = parserOptions.getPageNumber();
+        final PdfObjectReader currentPdfFile = pdfStreamDecoder.currentPdfFile;
         
         /*
          * ignore if not going to be drawn
@@ -71,21 +78,21 @@ public class FormFlattener {
         //    return;
         final int type = form.getParameterConstant(PdfDictionary.Subtype);
         if (type == PdfDictionary.Highlight) {
-            AnnotationFactory.renderFlattenedAnnotation(form, pdfStreamDecoder.current, pdfStreamDecoder.parserOptions.getPageNumber(), pdfStreamDecoder.pageData.getRotation(pdfStreamDecoder.parserOptions.getPageNumber()));
+            AnnotationFactory.renderFlattenedAnnotation(form, pdfStreamDecoder.current, pageNumber, pdfStreamDecoder.pageData.getRotation(pageNumber));
             return;
         }
 
         //save and use new version so we can ignore changes
         final GraphicsState oldGS = pdfStreamDecoder.gs;
-        pdfStreamDecoder.gs =new GraphicsState();
+        pdfStreamDecoder.gs = new GraphicsState();
 
-        pdfStreamDecoder.parserOptions.setFlattenedForm(true);
+        parserOptions.setFlattenedForm(true);
 
         //check if this form should be displayed
-        final boolean[] characteristic = ((FormObject)form).getCharacteristics();
+        final boolean[] characteristic = ((FormObject) form).getCharacteristics();
         if (characteristic[0] || characteristic[1] || characteristic[5] ||
                 (!form.getBoolean(PdfDictionary.Open) &&
-                form.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Popup)){
+                        form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Popup)) {
             //this form should be hidden
             return;
         }
@@ -93,32 +100,32 @@ public class FormFlattener {
         PdfObject imgObj = null;
 
         final PdfObject APobjN = form.getDictionary(PdfDictionary.AP).getDictionary(PdfDictionary.N);
-        
-        if(APobjN!=null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) !=null){
+
+        if (APobjN != null || form.getDictionary(PdfDictionary.MK).getDictionary(PdfDictionary.I) != null) {
 
             final String defaultState = form.getName(PdfDictionary.AS);
-            final Object[] values= FormStream.getNormalKeyValues(form, pdfStreamDecoder.currentPdfFile.getObjectReader());
-            if (defaultState != null && defaultState.equals(((FormObject)form).getNormalOnState())) {
-                ((FormObject)form).setNormalOnState((String) values[0]);
-                imgObj =(PdfObject) values[1];
-            }else{
-                imgObj =(PdfObject) values[2];
-            } 
+            final Object[] values = FormStream.getNormalKeyValues(form, pdfStreamDecoder.currentPdfFile.getObjectReader());
+            if (defaultState != null && defaultState.equals(((FormObject) form).getNormalOnState())) {
+                ((FormObject) form).setNormalOnState((String) values[0]);
+                imgObj = (PdfObject) values[1];
+            } else {
+                imgObj = (PdfObject) values[2];
+            }
         }
        
         /*
          * we have some examples where no text inside AP datastream so we ignore in this case
          * and use the text
          */
-        if(imgObj!=null){
+        if (imgObj != null) {
 
-            final byte[] formData=imgObj.getDecodedStream(); //get from the AP
+            final byte[] formData = imgObj.getDecodedStream(); //get from the AP
 
-            if(formData!=null){
-                final String str=new String(formData);
+            if (formData != null) {
+                final String str = new String(formData);
 
                 //if((str.contains("BMC")&& !str.contains("BT"))) {
-                if(str.isEmpty() || (str.contains("BMC")&& !str.contains("BT"))) {
+                if (str.isEmpty() || (str.contains("BMC") && !str.contains("BT"))) {
                     imgObj = null;
                 }
             }
@@ -127,23 +134,23 @@ public class FormFlattener {
         /*
          * alternative to draw image for icon
          */
-        final byte[] DA=form.getTextStreamValueAsByte(PdfDictionary.DA);
+        final byte[] DA = form.getTextStreamValueAsByte(PdfDictionary.DA);
 
         /*
          * if no object present try to create a fake one using Swing code
          * for readonly text icons
          */
-        if(imgObj==null){
+        if (imgObj == null) {
 
             String V = form.getTextStreamValue(PdfDictionary.V);
 
-            if(V==null && type == PdfDictionary.FreeText){
-                V=form.getTextStreamValue(PdfDictionary.Contents);
+            if (V == null && type == PdfDictionary.FreeText) {
+                V = form.getTextStreamValue(PdfDictionary.Contents);
             }
-            
+
             if (DA != null || (V != null && !V.isEmpty())) {
 
-                final ReadOnlyTextIcon textIcon = new ReadOnlyTextIcon(form,0, pdfStreamDecoder.currentPdfFile, AcroRes);
+                final ReadOnlyTextIcon textIcon = new ReadOnlyTextIcon(form, 0, currentPdfFile, AcroRes);
                 textIcon.decipherAppObject((FormObject) form);
                 if (V != null) {
                     textIcon.setText(V);
@@ -156,7 +163,7 @@ public class FormFlattener {
                 }
             }
 
-            if(imgObj==null && DA==null){
+            if (imgObj == null && DA == null) {
 
                 //if(form.getParameterConstant(PdfDictionary.Subtype)!=PdfDictionary.Link)
                 //    System.out.println("missing image "+PdfDictionary.showAsConstant(form.getParameterConstant(PdfDictionary.Subtype))+" "+form.getObjectRefAsString());
@@ -164,19 +171,19 @@ public class FormFlattener {
                 //add in Popup Icon for text Annotation
 //                int type = form.getParameterConstant(PdfDictionary.Subtype);
                 if (type == PdfDictionary.Text) {
-                    AnnotationFactory.renderFlattenedAnnotation(form, pdfStreamDecoder.current, pdfStreamDecoder.parserOptions.getPageNumber(), pdfStreamDecoder.pageData.getRotation(pdfStreamDecoder.parserOptions.getPageNumber()));
+                    AnnotationFactory.renderFlattenedAnnotation(form, pdfStreamDecoder.current, pageNumber, pdfStreamDecoder.pageData.getRotation(pageNumber));
                 }
 
                 return;
             }
         }
 
-        if(imgObj!=null) {
-            pdfStreamDecoder.currentPdfFile.checkResolved(imgObj);
+        if (imgObj != null) {
+            currentPdfFile.checkResolved(imgObj);
         }
 
-        byte[] formData=null; //get from the Fake obj
-        if(imgObj!=null) {
+        byte[] formData = null; //get from the Fake obj
+        if (imgObj != null) {
             formData = imgObj.getDecodedStream(); //get from the DA
         }
 
@@ -184,10 +191,10 @@ public class FormFlattener {
 //        System.out.println("ref="+form.getObjectRefAsString()+" stream="+new String(formData));
 
         //might be needed to pick up fonts
-        if(imgObj!=null){
+        if (imgObj != null) {
             final PdfObject resources = imgObj.getDictionary(PdfDictionary.Resources);
 
-            if(resources!=null) {
+            if (resources != null) {
                 pdfStreamDecoder.readResources(resources, false);
             }
         }
@@ -195,22 +202,22 @@ public class FormFlattener {
         /*
          * see if bounding box and set
          */
-        float[] BBox=form.getFloatArray(PdfDictionary.Rect);
+        float[] BBox = form.getFloatArray(PdfDictionary.Rect);
 
-        if(imgObj!=null && imgObj.getObjectType()==PdfDictionary.XFA_APPEARANCE){
-            final Rectangle rect=((FormObject)form).getBoundingRectangle();
-            if(rect!=null){
-                BBox=new float[]{rect.x,rect.y,rect.width,rect.height};
+        if (imgObj != null && imgObj.getObjectType() == PdfDictionary.XFA_APPEARANCE) {
+            final Rectangle rect = ((FormObject) form).getBoundingRectangle();
+            if (rect != null) {
+                BBox = new float[]{rect.x, rect.y, rect.width, rect.height};
             }
         }
 
-        if(BBox==null){
-            BBox=new float[]{0,0,1,1};
+        if (BBox == null) {
+            BBox = new float[]{0, 0, 1, 1};
         }
 
         //we need to factor in this to calculations
-        final int pageRotation= pdfStreamDecoder.pageData.getRotation(pdfStreamDecoder.parserOptions.getPageNumber());
-        
+        final int pageRotation = pdfStreamDecoder.pageData.getRotation(pageNumber);
+
         if (pageRotation == 0) {
             if (BBox[1] > BBox[3]) {
                 final float t = BBox[1];
@@ -224,28 +231,28 @@ public class FormFlattener {
                 BBox[2] = t;
             }
         }
-                
+
         //if we flatten form objects with XForms, we need to use diff calculation
-        if(pdfStreamDecoder.parserOptions.isFlattenedForm()){
-            pdfStreamDecoder.parserOptions.setOffsets(BBox[0], BBox[1]);
+        if (parserOptions.isFlattenedForm()) {
+            parserOptions.setOffsets(BBox[0], BBox[1]);
         }
 
         //please dont delete through merge this fixes most of the flatten form positionsing.
-        float[] matrix= {1,0,0,1,0,0};
+        float[] matrix = {1, 0, 0, 1, 0, 0};
 
-        if(imgObj!=null) {
+        if (imgObj != null) {
             matrix = imgObj.getFloatArray(PdfDictionary.Matrix);
         }
-        
-        float x = BBox[0],y = BBox[1];
-        Area newClip=null;
+
+        float x = BBox[0], y = BBox[1];
+        Area newClip = null;
 
         //check for null and then recalculate insets
         if (matrix != null) {
 
             float yScale = 1;
 
-            if (imgObj!=null && pageRotation == 0 && matrix[4]>0 && matrix[5]>0) {
+            if (imgObj != null && pageRotation == 0 && matrix[4] > 0 && matrix[5] > 0) {
 
                 final float[] BoundingBox = imgObj.getFloatArray(PdfDictionary.BBox);
                 if (BoundingBox[1] > BoundingBox[3]) {
@@ -259,17 +266,17 @@ public class FormFlattener {
                     BoundingBox[0] = BoundingBox[2];
                     BoundingBox[2] = t;
                 }
-                
+
                 matrix[0] = (BBox[2] - BBox[0]) / (BoundingBox[2] - BoundingBox[0]);
                 matrix[1] = 0;
                 matrix[2] = 0;
                 matrix[3] = (BBox[3] - BBox[1]) / (BoundingBox[3] - BoundingBox[1]);
                 matrix[4] = (BBox[0] - BoundingBox[0]);
                 matrix[5] = (BBox[1] - BoundingBox[1]);
-                
-                pdfStreamDecoder.gs.CTM = new float[][]{{matrix[0],matrix[1],0},{matrix[2],matrix[3],0},{matrix[4],matrix[5],1}};
-                newClip=new Area(new Rectangle((int)BBox[0],(int)BBox[1],(int)((BBox[2]-BBox[0])+2),(int)((BBox[3]-BBox[1])+2)));                   
-                
+
+                pdfStreamDecoder.gs.CTM = new float[][]{{matrix[0], matrix[1], 0}, {matrix[2], matrix[3], 0}, {matrix[4], matrix[5], 1}};
+                newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) ((BBox[2] - BBox[0]) + 2), (int) ((BBox[3] - BBox[1]) + 2)));
+
                 //Set variables for draw form call
                 x = (matrix[4]);
                 y = (matrix[5]);
@@ -293,7 +300,7 @@ public class FormFlattener {
 
                                 if (//Check matrix is standard
                                         matrix[0] * matrix[3] == 1.0f
-                                        && matrix[1] * matrix[2] == 0.0f) {
+                                                && matrix[1] * matrix[2] == 0.0f) {
 
                                     //float bbw = BBox[2]-BBox[0];
                                     final float bbh = BBox[3] - BBox[1];
@@ -308,7 +315,7 @@ public class FormFlattener {
                                     //-90 rotation
                                     if (matrix[0] * matrix[3] == 0.0f
                                             && matrix[1] * matrix[2] == -1.0f) {
-                                    //float bbw = BBox[2]-BBox[0];
+                                        //float bbw = BBox[2]-BBox[0];
 
                                         //Handle 0 rot case here
                                         float bbh = BBox[2] - BBox[0];
@@ -357,7 +364,7 @@ public class FormFlattener {
                         break;
                     default:
                         x = BBox[0] + (matrix[4] * yScale);
-                        newClip = new Area(new Rectangle((int) (BBox[0]-1), (int) (BBox[1]-1), (int) ((BBox[2] - BBox[0])+2), (int) ((BBox[3] - BBox[1])+2)));
+                        newClip = new Area(new Rectangle((int) (BBox[0] - 1), (int) (BBox[1] - 1), (int) ((BBox[2] - BBox[0]) + 2), (int) ((BBox[3] - BBox[1]) + 2)));
                         break;
                 }
 
@@ -366,19 +373,19 @@ public class FormFlattener {
                 //set gs.CTM to form coords (probably {1,0,0}{0,1,0}{x,y,1} at a guess
                 pdfStreamDecoder.gs.CTM = new float[][]{{matrix[0] * yScale, matrix[1] * yScale, 0}, {matrix[2] * yScale, matrix[3] * yScale, 0}, {x, y, 1}};
             }
-        }else{
+        } else {
             newClip = setClipAndCTM(pdfStreamDecoder, form, imgObj, BBox, x, y);
         }
-        
+
         //Convert clip here
         newClip = ClipUtils.convertPDFClipToJavaClip(newClip);
-        
+
         drawForm(imgObj, form, pdfStreamDecoder, newClip, isHTML, BBox, x, y, formData, APobjN, oldGS);
-      
+
     }
 
     Area setClipAndCTM(final PdfStreamDecoder pdfStreamDecoder, final PdfObject form, final PdfObject imgObj, final float[] BBox, final float x, final float y) {
-        final Area newClip;//If using AP, is a widget and not a signature there is a chance of incorrect AP scaling.
+        final Area newClip; //If using AP, is a widget and not a signature there is a chance of incorrect AP scaling.
         //Set CTM based on different between Form bounds and AP bounds
         if (imgObj != null &&
                 form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Widget &&
@@ -400,9 +407,9 @@ public class FormFlattener {
             }
             newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
         } else {
-            if(form.getParameterConstant(PdfDictionary.Subtype)==PdfDictionary.Ink){
-                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x-BBox[0], y-BBox[1], 1}};
-            }else{
+            if (form.getParameterConstant(PdfDictionary.Subtype) == PdfDictionary.Ink) {
+                pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x - BBox[0], y - BBox[1], 1}};
+            } else {
                 pdfStreamDecoder.gs.CTM = new float[][]{{1, 0, 0}, {0, 1, 0}, {x, y, 1}};
             }
             newClip = new Area(new Rectangle((int) BBox[0], (int) BBox[1], (int) BBox[2], (int) BBox[3]));
@@ -411,51 +418,51 @@ public class FormFlattener {
     }
 
     void drawForm(final PdfObject imgObj, final PdfObject form, final PdfStreamDecoder pdfStreamDecoder, final Area newClip, final boolean isHTML, final float[] BBox, final float x, final float y, final byte[] formData, final PdfObject APobjN, final GraphicsState oldGS) throws PdfException {
-        
+
         //set clip to match bounds on form
-        if(newClip!=null) {
+        if (newClip != null) {
             pdfStreamDecoder.gs.updateClip(new Area(newClip));
         }
-        pdfStreamDecoder.current.drawClip(pdfStreamDecoder.gs, pdfStreamDecoder.parserOptions.defaultClip, false) ;
+        pdfStreamDecoder.current.drawClip(pdfStreamDecoder.gs, pdfStreamDecoder.parserOptions.defaultClip, false);
         /*
          * avoid values in main stream
          */
-        final TextState oldState= pdfStreamDecoder.gs.getTextState();
+        final TextState oldState = pdfStreamDecoder.gs.getTextState();
         pdfStreamDecoder.gs.setTextState(new TextState());
         /*
          * write out forms as images in HTML mode - hooks into flatten forms mode
          */
-        if(isHTML){
+        if (isHTML) {
 
             //create the image from the form data
-            final int w=(int)(BBox[2]-BBox[0]);
-            final int h=(int) (BBox[3]-BBox[1]);
+            final int w = (int) (BBox[2] - BBox[0]);
+            final int h = (int) (BBox[3] - BBox[1]);
 
-            if(w>0 && h>0){
-                final BufferedImage image= MaskUtils.createTransparentForm(imgObj, 0, w, h, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer);
+            if (w > 0 && h > 0) {
+                final BufferedImage image = MaskUtils.createTransparentForm(imgObj, 0, w, h, pdfStreamDecoder.currentPdfFile, pdfStreamDecoder.parserOptions, pdfStreamDecoder.formLevel, pdfStreamDecoder.multiplyer);
 
                 //draw the image to HTML
 
                 //4 needed as we upsample by a factor of 4
-                pdfStreamDecoder.gs.CTM=new float[][]{{image.getWidth()/4,0,1},{0,image.getHeight()/4,1},{0,0,0}};
+                pdfStreamDecoder.gs.CTM = new float[][]{{image.getWidth() / 4, 0, 1}, {0, image.getHeight() / 4, 1}, {0, 0, 0}};
 
-                pdfStreamDecoder.gs.x=x;
-                pdfStreamDecoder.gs.y=y;
+                pdfStreamDecoder.gs.x = x;
+                pdfStreamDecoder.gs.y = y;
 
                 //draw onto image
-                pdfStreamDecoder.gs.CTM[2][0]= x;
-                pdfStreamDecoder.gs.CTM[2][1]= y;
+                pdfStreamDecoder.gs.CTM[2][0] = x;
+                pdfStreamDecoder.gs.CTM[2][1] = y;
 
                 pdfStreamDecoder.current.drawImage(pdfStreamDecoder.parserOptions.getPageNumber(), image, pdfStreamDecoder.gs, false, form.getObjectRefAsString(), -2);
             }
 
-        }else{
+        } else {
 
-            if(formData!=null){
-                pdfStreamDecoder.BBox=BBox;
+            if (formData != null) {
+                pdfStreamDecoder.BBox = BBox;
 
                 pdfStreamDecoder.decodeStreamIntoObjects(formData, false);
-                pdfStreamDecoder.BBox=null;
+                pdfStreamDecoder.BBox = null;
             }
 
         }
@@ -464,19 +471,19 @@ public class FormFlattener {
          * like forms data in image or print will not appear.
          */
         pdfStreamDecoder.gs.updateClip(null);
-        pdfStreamDecoder.current.drawClip(pdfStreamDecoder.gs, null, true) ;
+        pdfStreamDecoder.current.drawClip(pdfStreamDecoder.gs, null, true);
         //restore
-        pdfStreamDecoder.gs =oldGS;
+        pdfStreamDecoder.gs = oldGS;
         pdfStreamDecoder.gs.setTextState(oldState);
-        
+
     }
-    
+
     private enum FormExclusion {
         ExcludeNone, ExcludeForms, ExcludeAnnotations, ExcludeFormsAndAnnotations
     }
-    
+
     private static FormExclusion exclusionOption = FormExclusion.ExcludeNone;
-    
+
     static {
         final String value = System.getProperty("org.jpedal.removeForms");
         if (value != null && !value.isEmpty()) {
@@ -484,9 +491,9 @@ public class FormFlattener {
 
         }
     }
-    
-    private static boolean showForm(final PdfObject form){
-        
+
+    private static boolean showForm(final PdfObject form) {
+
         switch (exclusionOption) {
             case ExcludeFormsAndAnnotations:
                 //Show no annotations or forms
@@ -510,5 +517,5 @@ public class FormFlattener {
 
         return true;
     }
-    
+
 }

@@ -37,6 +37,7 @@ import java.awt.Container;
 import java.io.*;
 import java.util.ResourceBundle;
 import javax.swing.SwingUtilities;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.commands.OpenFile;
@@ -57,46 +58,46 @@ import org.jpedal.utils.LogWriter;
 import org.jpedal.utils.Messages;
 import org.w3c.dom.Node;
 
-public abstract class SharedViewer implements ViewerInt{
-	
+public abstract class SharedViewer implements ViewerInt {
+
     //Location of Preferences Files
     public static final String PREFERENCES_DEFAULT = "jar:/org/jpedal/examples/viewer/res/preferences/Default.xml";
     public static final String PREFERENCES_NO_GUI = "jar:/org/jpedal/examples/viewer/res/preferences/NoGUI.xml";
     public static final String PREFERENCES_NO_SIDE_BAR = "jar:/org/jpedal/examples/viewer/res/preferences/NoSideTabOrTopButtons.xml";
     public static final String PREFERENCES_OPEN_AND_NAV_ONLY = "jar:/org/jpedal/examples/viewer/res/preferences/OpenAndNavOnly.xml";
     public static final String PREFERENCES_BEAN = "jar:/org/jpedal/examples/viewer/res/preferences/Bean.xml";
-    
+
     //repository for general settings
-    protected Values commonValues=new Values();
+    protected Values commonValues = new Values();
 
     //All printing functions and access methods to see if printing active 
     //accessed from Commands and GUI
     PrinterInt currentPrinter;
 
-	//PDF library and panel
-	PdfDecoderInt decode_pdf;
+    //PDF library and panel
+    PdfDecoderInt decode_pdf;
 
-	//encapsulates all thumbnail functionality - just ignore if not required
-	GUIThumbnailPanel thumbnails;
+    //encapsulates all thumbnail functionality - just ignore if not required
+    GUIThumbnailPanel thumbnails;
 
-	//values saved on file between sessions
-	PropertiesFile properties=new PropertiesFile();
-	
-	//general GUI functions
-	protected GUIFactory currentGUI;
+    //values saved on file between sessions
+    PropertiesFile properties = new PropertiesFile();
 
-	//search window and functionality
-	GUISearchWindow searchFrame;
+    //general GUI functions
+    protected GUIFactory currentGUI;
 
-	//command functions
-	protected Commands currentCommands;
+    //search window and functionality
+    GUISearchWindow searchFrame;
+
+    //command functions
+    protected Commands currentCommands;
 
     //warn user if viewer not setup fully
     private boolean isSetup;
-    
+
     //tell software to exit on close - default is true
-    public static boolean exitOnClose=true;
-    
+    public static boolean exitOnClose = true;
+
     //Throw runtime exception when user tries to open document after close() has been called
     public static boolean closeCalled;
 
@@ -104,41 +105,39 @@ public abstract class SharedViewer implements ViewerInt{
      * open the file passed in by user on startup (do not call directly)
      * USED by our tests
      */
-    public GUIFactory getSwingGUI(){
+    public GUIFactory getSwingGUI() {
         return currentGUI;
     }
 
 
     /**
-     *
-     * @param defaultFile
-     * Allow user to open PDF file to display
+     * @param defaultFile Allow user to open PDF file to display
      */
     @Override
     public void openDefaultFile(final String defaultFile) {
 
         //reset flag
-        if(thumbnails.isShownOnscreen()) {
+        if (thumbnails.isShownOnscreen()) {
             thumbnails.resetToDefault();
         }
 
-        commonValues.maxViewY=0;// ensure reset for any viewport
+        commonValues.maxViewY = 0; // Ensure reset for any viewport
 
-        //open any default file and selected page
-        if(defaultFile!=null){
+        // Open any default file and selected page
+        if (defaultFile != null) {
 
-            final File testExists=new File(defaultFile);
-            boolean isURL=false;
-            if(defaultFile.startsWith("http:")|| defaultFile.startsWith("jar:") || defaultFile.startsWith("file:")){
+            final File testExists = new File(defaultFile);
+            boolean isURL = false;
+            if (defaultFile.startsWith("http:") || defaultFile.startsWith("jar:") || defaultFile.startsWith("file:")) {
                 LogWriter.writeLog("Opening http connection");
-                isURL=true;
+                isURL = true;
             }
 
-            if((!isURL) && (!testExists.exists())){
-                currentGUI.showMessageDialog(defaultFile+ '\n' +Messages.getMessage("PdfViewerdoesNotExist.message"));
-            }else if((!isURL) &&(testExists.isDirectory())){
-                currentGUI.showMessageDialog(defaultFile+ '\n' +Messages.getMessage("PdfViewerFileIsDirectory.message"));
-            }else{
+            if ((!isURL) && (!testExists.exists())) {
+                currentGUI.showMessageDialog(defaultFile + '\n' + Messages.getMessage("PdfViewerdoesNotExist.message"));
+            } else if ((!isURL) && (testExists.isDirectory())) {
+                currentGUI.showMessageDialog(defaultFile + '\n' + Messages.getMessage("PdfViewerFileIsDirectory.message"));
+            } else {
                 commonValues.setFileSize(testExists.length() >> 10);
 
                 commonValues.setSelectedFile(defaultFile);
@@ -146,31 +145,31 @@ public abstract class SharedViewer implements ViewerInt{
                 currentGUI.setViewerTitle(null);
 
                 //see if user set Page
-                final String page=System.getProperty("org.jpedal.page");
-                final String bookmark=System.getProperty("org.jpedal.bookmark");
-                if(page!=null && !isURL){
+                final String page = System.getProperty("org.jpedal.page");
+                final String bookmark = System.getProperty("org.jpedal.bookmark");
+                if (page != null && !isURL) {
 
-                    try{
-                        int pageNum=Integer.parseInt(page);
+                    try {
+                        int pageNum = Integer.parseInt(page);
 
-                        if(pageNum<1){
-                            pageNum=-1;
-                            System.err.println(page+ " must be 1 or larger. Opening on page 1");
-                            LogWriter.writeLog(page+ " must be 1 or larger. Opening on page 1");
+                        if (pageNum < 1) {
+                            pageNum = -1;
+                            System.err.println(page + " must be 1 or larger. Opening on page 1");
+                            LogWriter.writeLog(page + " must be 1 or larger. Opening on page 1");
                         }
 
-                        if(pageNum!=-1) {
+                        if (pageNum != -1) {
                             openFile(testExists, pageNum);
                         }
 
 
-                    }catch(final Exception e){
-                        System.err.println(page+ "is not a valid number for a page number. Opening on page 1 "+e);
-                        LogWriter.writeLog(page+ "is not a valid number for a page number. Opening on page 1");
+                    } catch (final Exception e) {
+                        System.err.println(page + "is not a valid number for a page number. Opening on page 1 " + e);
+                        LogWriter.writeLog(page + "is not a valid number for a page number. Opening on page 1");
                     }
-                }else if(bookmark!=null){
-                    openFile(testExists,bookmark);
-                }else{
+                } else if (bookmark != null) {
+                    openFile(testExists, bookmark);
+                } else {
                     currentGUI.openFile(defaultFile);
                 }
             }
@@ -178,54 +177,53 @@ public abstract class SharedViewer implements ViewerInt{
     }
 
     /**
-     *
-     * @param defaultFile
-     * Allow user to open PDF file to display
+     * @param defaultFile Allow user to open PDF file to display
      */
     @Override
     public void openDefaultFileAtPage(final String defaultFile, final int page) {
 
         //reset flag
-        if(thumbnails.isShownOnscreen()) {
+        if (thumbnails.isShownOnscreen()) {
             thumbnails.resetToDefault();
         }
 
-        commonValues.maxViewY=0;// ensure reset for any viewport
+        commonValues.maxViewY = 0; // Ensure reset for any viewport
 
         //open any default file and selected page
-        if(defaultFile!=null){
+        if (defaultFile != null) {
 
-            final File testExists=new File(defaultFile);
-            boolean isURL=false;
-            if(defaultFile.startsWith("http:")|| defaultFile.startsWith("jar:")){
+            final File testExists = new File(defaultFile);
+            boolean isURL = false;
+            if (defaultFile.startsWith("http:") || defaultFile.startsWith("jar:")) {
                 LogWriter.writeLog("Opening http connection");
-                isURL=true;
+                isURL = true;
             }
 
-            if((!isURL) && (!testExists.exists())){
-                currentGUI.showMessageDialog(defaultFile+ '\n' +Messages.getMessage("PdfViewerdoesNotExist.message"));
-            }else if((!isURL) &&(testExists.isDirectory())){
-                currentGUI.showMessageDialog(defaultFile+ '\n' +Messages.getMessage("PdfViewerFileIsDirectory.message"));
-           }else{
+            if ((!isURL) && (!testExists.exists())) {
+                currentGUI.showMessageDialog(defaultFile + '\n' + Messages.getMessage("PdfViewerdoesNotExist.message"));
+            } else if ((!isURL) && (testExists.isDirectory())) {
+                currentGUI.showMessageDialog(defaultFile + '\n' + Messages.getMessage("PdfViewerFileIsDirectory.message"));
+            } else {
 
                 commonValues.setSelectedFile(defaultFile);
                 commonValues.setFileSize(testExists.length() >> 10);
                 currentGUI.setViewerTitle(null);
 
-                openFile(testExists,page);
+                openFile(testExists, page);
 
             }
         }
     }
-    
+
     public PdfDecoderInt getPdfDecoder() {
         return decode_pdf;
     }
 
-    public SharedViewer() {}
-       
+    public SharedViewer() {
+    }
+
     @Override
-    public void setRootContainer(final Object rootContainer){
+    public void setRootContainer(final Object rootContainer) {
         currentGUI.setRootContainer(rootContainer);
     }
 
@@ -233,15 +231,16 @@ public abstract class SharedViewer implements ViewerInt{
      * Should be called before setupViewer
      */
     @Override
-    public void loadProperties(final String props){
+    public void loadProperties(final String props) {
         properties.loadProperties(props);
     }
 
     /**
      * Should be called before setupViewer
+     *
      * @param is input of loaded properties
      */
-    public void loadProperties(final InputStream is){
+    public void loadProperties(final InputStream is) {
         properties.loadProperties(is);
     }
 
@@ -252,36 +251,36 @@ public abstract class SharedViewer implements ViewerInt{
     public void setupViewer() {
 
         //also allow messages to be suppressed with JVM option
-        final String flag=System.getProperty("org.jpedal.suppressViewerPopups");
-        boolean suppressViewerPopups =false;
+        final String flag = System.getProperty("org.jpedal.suppressViewerPopups");
+        boolean suppressViewerPopups = false;
 
-        if(flag!=null && flag.equalsIgnoreCase("true")) {
+        if (flag != null && flag.equalsIgnoreCase("true")) {
             suppressViewerPopups = true;
         }
 
         //set search window position here to ensure that gui has correct value
         final String searchType = properties.getValue("searchWindowType");
-        if(searchType!=null && !searchType.isEmpty()){
+        if (searchType != null && !searchType.isEmpty()) {
             final int type = Integer.parseInt(searchType);
             searchFrame.setViewStyle(type);
-        }else {
+        } else {
             searchFrame.setViewStyle(GUISearchWindow.SEARCH_MENU_BAR);
         }
 
         searchFrame.setUpdateListDuringSearch(properties.getValue("updateResultsDuringSearch").equals("true"));
-        
+
         //Set search frame here
         currentGUI.setSearchFrame(searchFrame);
 
         //switch on thumbnails if flag set
-        final String setThumbnail=System.getProperty("org.jpedal.thumbnail");
-        if(setThumbnail!=null){
-            if(setThumbnail.equals("true")) {
+        final String setThumbnail = System.getProperty("org.jpedal.thumbnail");
+        if (setThumbnail != null) {
+            if (setThumbnail.equals("true")) {
                 thumbnails.setThumbnailsEnabled(true);
-            } else if(setThumbnail.equals("false")) {
+            } else if (setThumbnail.equals("false")) {
                 thumbnails.setThumbnailsEnabled(false);
             }
-        }else //default
+        } else //default
         {
             thumbnails.setThumbnailsEnabled(true);
         }
@@ -310,94 +309,94 @@ public abstract class SharedViewer implements ViewerInt{
          */
 
 
-        final String customBundle=System.getProperty("org.jpedal.bundleLocation");
+        final String customBundle = System.getProperty("org.jpedal.bundleLocation");
 
-        if(customBundle!=null){
+        if (customBundle != null) {
 
             final BufferedReader input_stream;
             final ClassLoader loader = Messages.class.getClassLoader();
-            final String fileName=customBundle.replaceAll("\\.","/")+ '_' +java.util.Locale.getDefault().getLanguage()+".properties";
+            final String fileName = customBundle.replaceAll("\\.", "/") + '_' + java.util.Locale.getDefault().getLanguage() + ".properties";
 
             //also tests if locale file exists and tell user if not
-            try{
+            try {
 
-                input_stream =new BufferedReader(new InputStreamReader(loader.getResourceAsStream(fileName)));
+                input_stream = new BufferedReader(new InputStreamReader(loader.getResourceAsStream(fileName)));
                 input_stream.close();
 
-            }catch(final IOException ee){
+            } catch (final IOException ee) {
 
                 ee.printStackTrace();
-                
+
                 java.util.Locale.setDefault(new java.util.Locale("en", "EN"));
-                currentGUI.showMessageDialog("No locale file "+fileName+" has been defined for this Locale - using English as Default"+
+                currentGUI.showMessageDialog("No locale file " + fileName + " has been defined for this Locale - using English as Default" +
                         "\n Format is path, using '.' as break ie org.jpedal.international.messages");
 
             }
 
             init(ResourceBundle.getBundle(customBundle));
 
-        }else {
+        } else {
             init(null);
         }
 
         //gui setup, create gui, load properties
         currentGUI.init(currentCommands);
 
-        if(searchFrame.getViewStyle()==GUISearchWindow.SEARCH_TABBED_PANE) {
+        if (searchFrame.getViewStyle() == GUISearchWindow.SEARCH_TABBED_PANE) {
             currentGUI.searchInTab(searchFrame);
         }
 
         //setup window for warning if renderer has problem
-        if(!SharedViewer.isFX){
-            ((SwingDisplay)decode_pdf.getDynamicRenderer()).setMessageFrame((Container)currentGUI.getFrame());
+        if (!SharedViewer.isFX) {
+            ((SwingDisplay) decode_pdf.getDynamicRenderer()).setMessageFrame((Container) currentGUI.getFrame());
         }
         String propValue = properties.getValue("showfirsttimepopup");
         final boolean showFirstTimePopup = !suppressViewerPopups && !propValue.isEmpty() && propValue.equals("true");
 
-        if(showFirstTimePopup){
+        if (showFirstTimePopup) {
             currentGUI.showFirstTimePopup();
-            properties.setValue("showfirsttimepopup","false");
+            properties.setValue("showfirsttimepopup", "false");
         }
-        
+
         final boolean wasUpdateAvailable = false;
 
         propValue = properties.getValue("displaytipsonstartup");
-        if(!suppressViewerPopups && !wasUpdateAvailable && !propValue.isEmpty() && propValue.equals("true")){
-            currentCommands.executeCommand(Commands.TIP,null);
+        if (!suppressViewerPopups && !wasUpdateAvailable && !propValue.isEmpty() && propValue.equals("true")) {
+            currentCommands.executeCommand(Commands.TIP, null);
         }
 
         //flag so we can warn user if they call executeCommand without it setup
-        isSetup=true;
+        isSetup = true;
     }
-    
+
     /**
      * setup the viewer
      */
     protected void init(final ResourceBundle bundle) {
 
         //load correct set of messages
-        if(bundle==null){
+        if (bundle == null) {
 
             //load locale file
-            try{
+            try {
                 Messages.setBundle(ResourceBundle.getBundle("org.jpedal.international.messages"));
-            }catch(final Exception e){
-                
+            } catch (final Exception e) {
+
                 e.printStackTrace();
-                
-                LogWriter.writeLog("Exception "+e+" loading resource bundle.\n" +
-                        "Also check you have a file in org.jpedal.international.messages to support Locale="+java.util.Locale.getDefault());
+
+                LogWriter.writeLog("Exception " + e + " loading resource bundle.\n" +
+                        "Also check you have a file in org.jpedal.international.messages to support Locale=" + java.util.Locale.getDefault());
             }
 
-        }else{
-            try{
+        } else {
+            try {
                 Messages.setBundle(bundle);
-            }catch(final Exception ee){
-                LogWriter.writeLog("Exception with bundle "+bundle);
+            } catch (final Exception ee) {
+                LogWriter.writeLog("Exception with bundle " + bundle);
                 ee.printStackTrace();
             }
         }
-        
+
         //pass through GUI for use in multipages and Javascript
         decode_pdf.addExternalHandler(currentGUI, Options.MultiPageUpdate);
 
@@ -428,7 +427,7 @@ public abstract class SharedViewer implements ViewerInt{
 
         //set to extract all
         //COMMENT OUT THIS LINE IF USING JUST THE VIEWER
-        decode_pdf.setExtractionMode(0,1); //values extraction mode,dpi of images, dpi of page as a factor of 72
+        decode_pdf.setExtractionMode(0, 1); //values extraction mode,dpi of images, dpi of page as a factor of 72
 
         //don't extract text and images (we just want the display)
 
@@ -618,126 +617,126 @@ public abstract class SharedViewer implements ViewerInt{
          /**/
 
     }
-    
+
     static boolean isFX;
 
-    
 
     /**
      * Have the viewer handle program arguments
+     *
      * @param args :: Program arguments passed into the Viewer.
      */
     @Override
-    public void handleArguments(final String[] args){
-    	
-    	//Ensure default open is on event thread, otherwise the display is updated as values are changing
-        if(SwingUtilities.isEventDispatchThread()){
-        	
-            if (args.length > 0){
-        		openDefaultFile(args[0]);
-        	}else if((properties.getValue("openLastDocument").equalsIgnoreCase("true")) &&
-        		(properties.getRecentDocuments()!=null
-        				&& properties.getRecentDocuments().length>1)){
+    public void handleArguments(final String[] args) {
 
-        			int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
+        //Ensure default open is on event thread, otherwise the display is updated as values are changing
+        if (SwingUtilities.isEventDispatchThread()) {
 
-        			if(lastPageViewed<0) {
-                        lastPageViewed = 1;
-                    }
+            if (args.length > 0) {
+                openDefaultFile(args[0]);
+            } else if ((properties.getValue("openLastDocument").equalsIgnoreCase("true")) &&
+                    (properties.getRecentDocuments() != null
+                            && properties.getRecentDocuments().length > 1)) {
 
-        			openDefaultFileAtPage(properties.getRecentDocuments()[0],lastPageViewed);
-        	}
-        }else{
+                int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
 
-        	final Runnable run = new Runnable() {
-				
-				@Override
-				public void run() {
-					if (args.length > 0){
-						openDefaultFile(args[0]);
+                if (lastPageViewed < 0) {
+                    lastPageViewed = 1;
+                }
 
-			        }else if(properties.getValue("openLastDocument").toLowerCase().equals("true")){
-			            if(properties.getRecentDocuments()!=null
-			                    && properties.getRecentDocuments().length>1){
+                openDefaultFileAtPage(properties.getRecentDocuments()[0], lastPageViewed);
+            }
+        } else {
 
-			                int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
+            final Runnable run = new Runnable() {
 
-			                if(lastPageViewed<0) {
+                @Override
+                public void run() {
+                    if (args.length > 0) {
+                        openDefaultFile(args[0]);
+
+                    } else if (properties.getValue("openLastDocument").toLowerCase().equals("true")) {
+                        if (properties.getRecentDocuments() != null
+                                && properties.getRecentDocuments().length > 1) {
+
+                            int lastPageViewed = Integer.parseInt(properties.getValue("lastDocumentPage"));
+
+                            if (lastPageViewed < 0) {
                                 lastPageViewed = 1;
                             }
 
-			                openDefaultFileAtPage(properties.getRecentDocuments()[0],lastPageViewed);
-			            }
-			        }
-				}
-			};
-			SwingUtilities.invokeLater(run);
+                            openDefaultFileAtPage(properties.getRecentDocuments()[0], lastPageViewed);
+                        }
+                    }
+                }
+            };
+            SwingUtilities.invokeLater(run);
         }
     }
 
     /**
      * General code to open file at specified boomark - do not call directly
      *
-     * @param file File the PDF to be decoded
+     * @param file     File the PDF to be decoded
      * @param bookmark - if not present, exception will be thrown
      */
     private void openFile(final File file, final String bookmark) {
 
-        try{
-            final boolean fileCanBeOpened=OpenFile.openUpFile(file.getCanonicalPath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
+        try {
+            final boolean fileCanBeOpened = OpenFile.openUpFile(file.getCanonicalPath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
-            String bookmarkPage=null;
+            String bookmarkPage = null;
 
-            int page=-1;
+            int page = -1;
 
             //reads tree and populates lookup table
-            if(decode_pdf.getOutlineAsXML()!=null){
-                final Node rootNode= decode_pdf.getOutlineAsXML().getFirstChild();
-                if(rootNode!=null) {
+            if (decode_pdf.getOutlineAsXML() != null) {
+                final Node rootNode = decode_pdf.getOutlineAsXML().getFirstChild();
+                if (rootNode != null) {
                     bookmarkPage = currentGUI.getBookmark(bookmark);
                 }
 
-                if(bookmarkPage!=null) {
+                if (bookmarkPage != null) {
                     page = Integer.parseInt(bookmarkPage);
                 }
             }
 
             //it may be a named destination ( ie bookmark=Test1)
-            if(bookmarkPage==null){
-                bookmarkPage=decode_pdf.getIO().convertNameToRef(bookmark);
+            if (bookmarkPage == null) {
+                bookmarkPage = decode_pdf.getIO().convertNameToRef(bookmark);
 
-                if(bookmarkPage!=null){
+                if (bookmarkPage != null) {
 
                     //read the object
-                    final PdfObject namedDest=new OutlineObject(bookmarkPage);
+                    final PdfObject namedDest = new OutlineObject(bookmarkPage);
                     decode_pdf.getIO().readObject(namedDest);
 
                     //still needed to init viewer
-                    if(fileCanBeOpened) {
+                    if (fileCanBeOpened) {
                         OpenFile.processPage(commonValues, decode_pdf, currentGUI, thumbnails);
                     }
 
                     //and generic open Dest code
-                    decode_pdf.getFormRenderer().getActionHandler().gotoDest(namedDest, ActionHandler.MOUSECLICKED, PdfDictionary.Dest );
+                    decode_pdf.getFormRenderer().getActionHandler().gotoDest(namedDest, ActionHandler.MOUSECLICKED, PdfDictionary.Dest);
                 }
             }
 
-            if(bookmarkPage==null) {
+            if (bookmarkPage == null) {
                 throw new PdfException("Unknown bookmark " + bookmark);
             }
 
 
-            if(page>-1){
+            if (page > -1) {
                 commonValues.setCurrentPage(page);
-                if(fileCanBeOpened) {
+                if (fileCanBeOpened) {
                     OpenFile.processPage(commonValues, decode_pdf, currentGUI, thumbnails);
                 }
             }
-        }catch(final Exception e){
+        } catch (final Exception e) {
             System.err.println("Exception " + e + " processing file");
 
             e.printStackTrace();
-            
+
             Values.setProcessing(false);
         }
     }
@@ -750,19 +749,19 @@ public abstract class SharedViewer implements ViewerInt{
      */
     private void openFile(final File file, final int page) {
 
-        try{
-            final boolean fileCanBeOpened=OpenFile.openUpFile(file.getCanonicalPath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
+        try {
+            final boolean fileCanBeOpened = OpenFile.openUpFile(file.getCanonicalPath(), commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
 
             commonValues.setCurrentPage(page);
 
-            if(fileCanBeOpened) {
+            if (fileCanBeOpened) {
                 OpenFile.processPage(commonValues, decode_pdf, currentGUI, thumbnails);
             }
-        }catch(final Exception e){
+        } catch (final Exception e) {
             System.err.println("Exception " + e + " processing file");
 
             e.printStackTrace();
-            
+
             Values.setProcessing(false);
         }
     }
@@ -770,23 +769,22 @@ public abstract class SharedViewer implements ViewerInt{
     /**
      * Execute Jpedal functionality from outside of the library using this method.
      * EXAMPLES
-     *    commandID = Commands.OPENFILE, args = {"/PDFData/Hand_Test/crbtrader.pdf}"
-     *    commandID = Commands.OPENFILE, args = {byte[] = {0,1,1,0,1,1,1,0,0,1}, "/PDFData/Hand_Test/crbtrader.pdf}"
-     *    commandID = Commands.ROTATION, args = {"90"}
-     *    commandID = Commands.OPENURL,  args = {"http://www.cs.bham.ac.uk/~axj/pub/papers/handy1.pdf"}
-     *
+     * commandID = Commands.OPENFILE, args = {"/PDFData/Hand_Test/crbtrader.pdf}"
+     * commandID = Commands.OPENFILE, args = {byte[] = {0,1,1,0,1,1,1,0,0,1}, "/PDFData/Hand_Test/crbtrader.pdf}"
+     * commandID = Commands.ROTATION, args = {"90"}
+     * commandID = Commands.OPENURL,  args = {"http://www.cs.bham.ac.uk/~axj/pub/papers/handy1.pdf"}
+     * <p>
      * for full details see http://www.idrsolutions.com/access-pdf-viewer-features-from-your-code/
      *
      * @param commandID :: static int value from Commands to spedify which command is wanted
-     * @param args :: arguements for the desired command
-     *
+     * @param args      :: arguements for the desired command
      */
     @Override
     @SuppressWarnings("UnusedReturnValue")
-    public Object executeCommand(final int commandID, final Object[] args){
+    public Object executeCommand(final int commandID, final Object[] args) {
 
         //far too easy to miss this step (I did!) so warn user
-        if(!isSetup){
+        if (!isSetup) {
             throw new RuntimeException("You must call viewer.setupViewer(); before you call any commands");
         }
 
@@ -794,7 +792,7 @@ public abstract class SharedViewer implements ViewerInt{
 
     }
 
-    public static boolean isProcessing(){
+    public static boolean isProcessing() {
         return Values.isProcessing();
     }
 
@@ -810,7 +808,7 @@ public abstract class SharedViewer implements ViewerInt{
      * <b>http://www.jpedal.org/support.php</b>
      *
      * @param newHandler Implementation of interface provided by IDR solutions
-     * @param type Defined value into org.jpedal.external.Options class
+     * @param type       Defined value into org.jpedal.external.Options class
      */
     @Override
     public void addExternalHandler(final java.util.Map<Integer, Object> newHandler, final int type) {
@@ -823,45 +821,45 @@ public abstract class SharedViewer implements ViewerInt{
     @Override
     public void dispose() {
 
-        commonValues=null;
+        commonValues = null;
 
-        currentPrinter=null;
+        currentPrinter = null;
 
-        if(thumbnails!=null) {
+        if (thumbnails != null) {
             thumbnails.dispose();
         }
 
-        thumbnails=null;
+        thumbnails = null;
 
-        if(properties!=null) {
+        if (properties != null) {
             properties.dispose();
         }
 
-        properties=null;
+        properties = null;
 
-        if(currentGUI!=null) {
+        if (currentGUI != null) {
             currentGUI.dispose();
         }
 
-        currentGUI=null;
+        currentGUI = null;
 
-        searchFrame=null;
+        searchFrame = null;
 
-        currentCommands=null;
+        currentCommands = null;
 
-        if(decode_pdf!=null) {
+        if (decode_pdf != null) {
             decode_pdf.dispose();
         }
 
-        decode_pdf =null;
+        decode_pdf = null;
 
         Messages.dispose();
 
     }
-    
-    public static boolean isFX(){
+
+    public static boolean isFX() {
         return isFX;
     }
-    
-    
+
+
 }

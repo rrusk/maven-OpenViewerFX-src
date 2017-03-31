@@ -33,6 +33,7 @@
 package org.jpedal.objects.layers;
 
 import java.util.*;
+
 import org.jpedal.io.PdfFileReader;
 import org.jpedal.io.PdfObjectFactory;
 import org.jpedal.io.PdfObjectReader;
@@ -45,27 +46,29 @@ public class PdfLayerList {
 
     private static boolean debug;
 
-    /**page we have outlines for*/
-    private int OCpageNumber=-1;
+    /**
+     * page we have outlines for
+     */
+    private int OCpageNumber = -1;
 
-    private String padding ="";
+    private String padding = "";
 
     //used in tree as unique separator
-    public static final char deliminator=(char)65535;
+    public static final char deliminator = (char) 65535;
 
-    private final Map<String, Integer> layerNames=new LinkedHashMap<String, Integer>();
+    private final Map<String, Integer> layerNames = new LinkedHashMap<String, Integer>();
 
-    private final Map<String, String> streamToName=new HashMap<String, String>();
+    private final Map<String, String> streamToName = new HashMap<String, String>();
 
-    private final Map<String, String> layersEnabled=new HashMap<String, String>();
+    private final Map<String, String> layersEnabled = new HashMap<String, String>();
 
     private Map<String, String> jsCommands;
 
-    private final Map<String, String> metaData=new HashMap<String, String>();
-    
-    private final Map<String, String> layersTested=new HashMap<String, String>();
+    private final Map<String, String> metaData = new HashMap<String, String>();
 
-    private final Map<String, String> layerLocks=new HashMap<String, String>();
+    private final Map<String, String> layersTested = new HashMap<String, String>();
+
+    private final Map<String, String> layerLocks = new HashMap<String, String>();
 
     private boolean changesMade;
 
@@ -74,11 +77,11 @@ public class PdfLayerList {
     private Map<String, String> refTolayerName;
     private Map<String, String> RBconstraints;
 
-    private final Map<String, Float> minScale=new HashMap<String, Float>();
-    private final Map<String, Float> maxScale=new HashMap<String, Float>();
+    private final Map<String, Float> minScale = new HashMap<String, Float>();
+    private final Map<String, Float> maxScale = new HashMap<String, Float>();
 
     //private float scaling=1f;
-    
+
     private int layerCount;
     private Object[] order;
 
@@ -89,75 +92,76 @@ public class PdfLayerList {
 
     /**
      * add layers and settings to list
-     * @param OCProperties is of type PdfObject
-     * @param PropertiesObj is of type PdfObject
+     *
+     * @param OCProperties   is of type PdfObject
+     * @param PropertiesObj  is of type PdfObject
      * @param currentPdfFile is of type PdfObjectReader
-     * @param pageNumber is of type int
+     * @param pageNumber     is of type int
      */
     public void init(final PdfObject OCProperties, final PdfObject PropertiesObj, final PdfObjectReader currentPdfFile, final int pageNumber) {
 
-        OCpageNumber=pageNumber;
+        OCpageNumber = pageNumber;
 
-        propertyMap=new HashMap<String, PdfObject>();
-        refToPropertyID =new HashMap<String, String>();
-        refTolayerName=new HashMap<String, String>();
-        RBconstraints=new HashMap<String, String>();
-        
-        this.currentPdfFile=currentPdfFile;
+        propertyMap = new HashMap<String, PdfObject>();
+        refToPropertyID = new HashMap<String, String>();
+        refTolayerName = new HashMap<String, String>();
+        RBconstraints = new HashMap<String, String>();
 
-        if(PropertiesObj!=null) {
+        this.currentPdfFile = currentPdfFile;
+
+        if (PropertiesObj != null) {
             setupOCMaps(PropertiesObj, currentPdfFile);
         }
 
-        final PdfObject layerDict=OCProperties.getDictionary(PdfDictionary.D);
+        final PdfObject layerDict = OCProperties.getDictionary(PdfDictionary.D);
 
-        if(layerDict==null) {
+        if (layerDict == null) {
             return;
         }
 
-        int OCBaseState=layerDict.getNameAsConstant(PdfDictionary.BaseState);
+        int OCBaseState = layerDict.getNameAsConstant(PdfDictionary.BaseState);
 
         //if not set use default
-        if(OCBaseState== PdfDictionary.Unknown) {
+        if (OCBaseState == PdfDictionary.Unknown) {
             OCBaseState = PdfDictionary.ON;
         }
 
         //read order first and may be over-written by ON/OFF
-        order=layerDict.getObjectArray(PdfDictionary.Order);
+        order = layerDict.getObjectArray(PdfDictionary.Order);
 
-        if(debug){
-            System.out.println("PropertiesObj="+PropertiesObj);
-            System.out.println("layerDict="+layerDict);
-            System.out.println("propertyMap="+propertyMap);
-            System.out.println("propertyMap="+propertyMap);
-            System.out.println("refToPropertyID="+refToPropertyID);
-            System.out.println("refTolayerName="+refTolayerName);
+        if (debug) {
+            System.out.println("PropertiesObj=" + PropertiesObj);
+            System.out.println("layerDict=" + layerDict);
+            System.out.println("propertyMap=" + propertyMap);
+            System.out.println("propertyMap=" + propertyMap);
+            System.out.println("refToPropertyID=" + refToPropertyID);
+            System.out.println("refTolayerName=" + refTolayerName);
 
-            System.out.println("OCBaseState="+OCBaseState+" (ON="+ PdfDictionary.ON+ ')');
+            System.out.println("OCBaseState=" + OCBaseState + " (ON=" + PdfDictionary.ON + ')');
 
 
-            System.out.println("order="+Arrays.toString(order));
+            System.out.println("order=" + Arrays.toString(order));
 
-            showValues("ON=",PdfDictionary.ON,layerDict);
+            showValues("ON=", PdfDictionary.ON, layerDict);
 
-            showValues("OFF=",PdfDictionary.OFF,layerDict);
+            showValues("OFF=", PdfDictionary.OFF, layerDict);
 
-            showValues("RBGroups=",PdfDictionary.RBGroups,layerDict);
+            showValues("RBGroups=", PdfDictionary.RBGroups, layerDict);
 
         }
         /*
          * workout list of layers (can be in several places)
          */
 
-        addLayer(OCBaseState, order,null);
+        addLayer(OCBaseState, order, null);
 
         //read the ON and OFF values
-        if(OCBaseState!=PdfDictionary.ON) //redundant if basestate on
+        if (OCBaseState != PdfDictionary.ON) //redundant if basestate on
         {
             addLayer(PdfDictionary.ON, layerDict.getKeyArray(PdfDictionary.ON), null);
         }
 
-        if(OCBaseState!=PdfDictionary.OFF) //redundant if basestate off
+        if (OCBaseState != PdfDictionary.OFF) //redundant if basestate off
         {
             addLayer(PdfDictionary.OFF, layerDict.getKeyArray(PdfDictionary.OFF), null);
         }
@@ -165,24 +169,25 @@ public class PdfLayerList {
         /*
          * handle case where layers not explicitly switched on
          */
-        if(OCBaseState==PdfDictionary.ON){// && layerDict.getKeyArray(PdfDictionary.OFF)==null){
-            final Iterator<String> keys=refToPropertyID.keySet().iterator();
-            String ref;String layerName;
-            while(keys.hasNext()){
+        if (OCBaseState == PdfDictionary.ON) { // && layerDict.getKeyArray(PdfDictionary.OFF)==null){
+            final Iterator<String> keys = refToPropertyID.keySet().iterator();
+            String ref;
+            String layerName;
+            while (keys.hasNext()) {
                 ref = keys.next();
-                layerName=refToPropertyID.get(ref);
+                layerName = refToPropertyID.get(ref);
 
-                refTolayerName.put(ref,layerName);
+                refTolayerName.put(ref, layerName);
 
-                if(! layersTested.containsKey(layerName)){
-                	layersTested.put(layerName,"x");
-                	layersEnabled.put(layerName,"x");
+                if (!layersTested.containsKey(layerName)) {
+                    layersTested.put(layerName, "x");
+                    layersEnabled.put(layerName, "x");
                 }
             }
         }
-        
+
         //set any locks
-        setLocks(currentPdfFile,layerDict.getKeyArray(PdfDictionary.Locked));
+        setLocks(currentPdfFile, layerDict.getKeyArray(PdfDictionary.Locked));
 
         //any constraints
         setConstraints(layerDict.getKeyArray(PdfDictionary.RBGroups));
@@ -194,21 +199,21 @@ public class PdfLayerList {
         /*
          * read any metadata
          */
-        final int[] keys={PdfDictionary.Name,PdfDictionary.Creator};
-        final String[] titles={"Name","Creator"};
+        final int[] keys = {PdfDictionary.Name, PdfDictionary.Creator};
+        final String[] titles = {"Name", "Creator"};
 
-        final int count=keys.length;
+        final int count = keys.length;
         String val;
-        for(int jj=0;jj<count;jj++){
-            val= layerDict.getTextStreamValue(keys[jj]);
-            if(val!=null) {
+        for (int jj = 0; jj < count; jj++) {
+            val = layerDict.getTextStreamValue(keys[jj]);
+            if (val != null) {
                 metaData.put(titles[jj], val);
             }
         }
 
         //list mode if set
-        val=layerDict.getName(PdfDictionary.ListMode);
-        if(val!=null) {
+        val = layerDict.getName(PdfDictionary.ListMode);
+        if (val != null) {
             metaData.put("ListMode", val);
         }
 
@@ -216,10 +221,10 @@ public class PdfLayerList {
 
     private static void showValues(final String s, final int key, final PdfObject layerDict) {
 
-        final byte[][] keyValues=layerDict.getKeyArray(key);
-        if(keyValues!=null) {
+        final byte[][] keyValues = layerDict.getKeyArray(key);
+        if (keyValues != null) {
 
-            final StringBuilder values=new StringBuilder(s);
+            final StringBuilder values = new StringBuilder(s);
             for (final byte[] keyValue : keyValues) {
                 if (keyValue == null) {
                     values.append("null ");
@@ -235,41 +240,43 @@ public class PdfLayerList {
 
     /**
      * used by Javascript to flag that state has changed
+     *
      * @param flag is of type boolean
      */
     public void setChangesMade(final boolean flag) {
-        changesMade=flag;
+        changesMade = flag;
     }
 
     /**
      * build a list of constraints using layer names so
-     *  we can switch off if needed
+     * we can switch off if needed
+     *
      * @param layer
      */
     private void setConstraints(final byte[][] layer) {
 
-        if(layer ==null) {
+        if (layer == null) {
             return;
         }
 
         final int layerCount = layer.length;
 
         //turn into list of names
-        final String[] layers=new String[layerCount];
-        for(int ii=0;ii< layerCount;ii++){
+        final String[] layers = new String[layerCount];
+        for (int ii = 0; ii < layerCount; ii++) {
 
-            final String ref=new String(layer[ii]);
-            layers[ii]= this.refTolayerName.get(ref);
+            final String ref = new String(layer[ii]);
+            layers[ii] = this.refTolayerName.get(ref);
         }
 
-        for(int ii=0;ii< layerCount;ii++){
+        for (int ii = 0; ii < layerCount; ii++) {
 
-            if(isLayerName(layers[ii])){
+            if (isLayerName(layers[ii])) {
 
-                final StringBuilder effectedLayers=new StringBuilder();
-                for(int ii2=0;ii2< layerCount;ii2++){
+                final StringBuilder effectedLayers = new StringBuilder();
+                for (int ii2 = 0; ii2 < layerCount; ii2++) {
 
-                    if(ii==ii2) {
+                    if (ii == ii2) {
                         continue;
                     }
 
@@ -277,7 +284,7 @@ public class PdfLayerList {
                     effectedLayers.append(layers[ii2]).append(',');
                 }
 
-                RBconstraints.put(layers[ii],effectedLayers.toString());
+                RBconstraints.put(layers[ii], effectedLayers.toString());
 
 
             }
@@ -289,32 +296,32 @@ public class PdfLayerList {
      */
     private void setupOCMaps(final PdfObject propertiesObj, final PdfObjectReader currentPdfFile) {
 
-        final PdfKeyPairsIterator keyPairs=propertiesObj.getKeyPairsIterator();
+        final PdfKeyPairsIterator keyPairs = propertiesObj.getKeyPairsIterator();
 
-        String glyphKey,ref;
+        String glyphKey, ref;
         PdfObject glyphObj;
-        
-        final PdfFileReader pdfFileReader=currentPdfFile.getObjectReader();
 
-        while(keyPairs.hasMorePairs()){
+        final PdfFileReader pdfFileReader = currentPdfFile.getObjectReader();
 
-            glyphKey=keyPairs.getNextKeyAsString();
+        while (keyPairs.hasMorePairs()) {
 
-            glyphObj=PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new OCObject(propertiesObj.getObjectRefAsString()), pdfFileReader, keyPairs.getNextValueAsBytes(), PdfDictionary.OCProperties);
-        
-            ref=glyphObj.getObjectRefAsString();
-            
+            glyphKey = keyPairs.getNextKeyAsString();
+
+            glyphObj = PdfObjectFactory.getPDFObjectObjectFromRefOrDirect(new OCObject(propertiesObj.getObjectRefAsString()), pdfFileReader, keyPairs.getNextValueAsBytes(), PdfDictionary.OCProperties);
+
+            ref = glyphObj.getObjectRefAsString();
+
             currentPdfFile.checkResolved(glyphObj);
 
-            final byte[][] childPairs=glyphObj.getKeyArray(PdfDictionary.OCGs);
+            final byte[][] childPairs = glyphObj.getKeyArray(PdfDictionary.OCGs);
 
-            if(childPairs!=null) {
+            if (childPairs != null) {
                 setupchildOCMaps(childPairs, glyphKey, currentPdfFile);
-            } else{
-                propertyMap.put(ref,glyphObj);
+            } else {
+                propertyMap.put(ref, glyphObj);
 
-                final String currentNames= refToPropertyID.get(ref);
-                if(currentNames==null) {
+                final String currentNames = refToPropertyID.get(ref);
+                if (currentNames == null) {
                     refToPropertyID.put(ref, glyphKey);
                 } else {
                     refToPropertyID.put(ref, currentNames + ',' + glyphKey);
@@ -362,41 +369,41 @@ public class PdfLayerList {
 
     private void addLayer(final int status, final Object[] layer, String parentName) {
 
-        if(layer ==null) {
+        if (layer == null) {
             return;
         }
 
-        if(debug) {
+        if (debug) {
             padding += "   ";
         }
 
         final int layers = layer.length;
 
-        String ref,name,layerName=null;
+        String ref, name, layerName = null;
 
         PdfObject nextObject;
 
-        for(int ii=0;ii< layers;ii++){
+        for (int ii = 0; ii < layers; ii++) {
 
-            if(layer[ii] instanceof String){
+            if (layer[ii] instanceof String) {
                 //ignore
-            }else if(layer[ii] instanceof byte[]){
+            } else if (layer[ii] instanceof byte[]) {
 
-                final byte[] rawRef=(byte[])layer[ii];
-                ref =new String(rawRef);
-                name= refToPropertyID.get(ref);
+                final byte[] rawRef = (byte[]) layer[ii];
+                ref = new String(rawRef);
+                name = refToPropertyID.get(ref);
 
-                nextObject= propertyMap.get(ref);
+                nextObject = propertyMap.get(ref);
 
-                if(nextObject==null){
+                if (nextObject == null) {
 
-                    if(rawRef!=null && rawRef.length>1 && rawRef[rawRef.length-1]=='R'){
-                        nextObject=new OCObject(ref);
+                    if (rawRef != null && rawRef.length > 1 && rawRef[rawRef.length - 1] == 'R') {
+                        nextObject = new OCObject(ref);
                         currentPdfFile.readObject(nextObject);
-                        name=ref;
-                    }else{ //it is a name for the level so add into path of name
+                        name = ref;
+                    } else { //it is a name for the level so add into path of name
 
-                        if(parentName==null) {
+                        if (parentName == null) {
                             parentName = ref;
                         } else {
                             parentName = ref + deliminator + parentName;
@@ -404,39 +411,39 @@ public class PdfLayerList {
                     }
                 }
 
-                if(nextObject!=null){
+                if (nextObject != null) {
 
                     layerCount++;
 
-                    layerName=nextObject.getTextStreamValue(PdfDictionary.Name);
+                    layerName = nextObject.getTextStreamValue(PdfDictionary.Name);
 
-                    if(parentName!=null) {
+                    if (parentName != null) {
                         layerName = layerName + deliminator + parentName;
                     }
-                    
-                    if(debug) {
+
+                    if (debug) {
                         System.out.println(padding + "[layer1] add layer=" + layerName + " ref=" + ref + " parent=" + parentName + " refToLayerName=" + refTolayerName.get(ref) + " ref=" + ref);
                     }
 
-                    refTolayerName.put(ref,layerName);
-                    
+                    refTolayerName.put(ref, layerName);
+
                     //and write back name value
-                    layer[ii]=layerName;
+                    layer[ii] = layerName;
 
                     layerNames.put(layerName, status);
-                    if(name.indexOf(',')==-1){
-                        final String oldValue= streamToName.get(name);
-                        if(oldValue==null) {
+                    if (name.indexOf(',') == -1) {
+                        final String oldValue = streamToName.get(name);
+                        if (oldValue == null) {
                             streamToName.put(name, layerName);
                         } else {
                             streamToName.put(name, oldValue + ',' + layerName);
                         }
-                    }else{
-                        final StringTokenizer names=new StringTokenizer(name,",");
-                        while(names.hasMoreTokens()){
-                            name=names.nextToken();
-                            final String oldValue= streamToName.get(name);
-                            if(oldValue==null) {
+                    } else {
+                        final StringTokenizer names = new StringTokenizer(name, ",");
+                        while (names.hasMoreTokens()) {
+                            name = names.nextToken();
+                            final String oldValue = streamToName.get(name);
+                            if (oldValue == null) {
                                 streamToName.put(name, layerName);
                             } else {
                                 streamToName.put(name, oldValue + ',' + layerName);
@@ -445,21 +452,21 @@ public class PdfLayerList {
                     }
 
                     //must be done as can be defined in order with default and then ON/OFF as well
-                    if(status==PdfDictionary.ON){
-                        layersEnabled.put(layerName,"x");
-                    }else{
+                    if (status == PdfDictionary.ON) {
+                        layersEnabled.put(layerName, "x");
+                    } else {
                         layersEnabled.remove(layerName);
                     }
                 }
-            }else {
+            } else {
                 addLayer(status, (Object[]) layer[ii], layerName);
             }
         }
 
-        if(debug){
-            final int len=padding.length();
+        if (debug) {
+            final int len = padding.length();
 
-            if(len>3) {
+            if (len > 3) {
                 padding = padding.substring(0, len - 3);
             }
         }
@@ -467,11 +474,11 @@ public class PdfLayerList {
 
     private void addLayer(final int status, final byte[][] layer, final String parentName) {
 
-        if(layer ==null) {
+        if (layer == null) {
             return;
         }
 
-        String ref,name;
+        String ref, name;
 
         PdfObject nextObject;
 
@@ -510,7 +517,7 @@ public class PdfLayerList {
                     layerNames.put(layerName, status);
                 }
 
-                if (streamToName.get(name) != null) {//ignore if done
+                if (streamToName.get(name) != null) { //ignore if done
                 } else if (name.indexOf(',') == -1) {
                     final String oldValue = streamToName.get(name);
                     if (oldValue == null) {
@@ -545,13 +552,13 @@ public class PdfLayerList {
 
     private void setAS(final byte[][] AS, final PdfObjectReader currentPdfFile) {
 
-        if(AS ==null) {
+        if (AS == null) {
             return;
         }
 
         int event;
 
-        String ref, name,layerName;
+        String ref, name, layerName;
 
         byte[][] OCGs;
 
@@ -572,7 +579,7 @@ public class PdfLayerList {
             } else {
                 nextObject.setStatus(PdfObject.UNDECODED_REF);
             }
-            
+
             //must be done AFTER setStatus()
             nextObject.setUnresolvedData(A, PdfDictionary.AS);
             currentPdfFile.checkResolved(nextObject);
@@ -601,9 +608,9 @@ public class PdfLayerList {
 
                             layerName = nextObject.getTextStreamValue(PdfDictionary.Name);
                             name = refToPropertyID.get(ref);
-                            
-                            if(name==null && refToPropertyID.isEmpty()){ //23911 - include implicit value if Properties not set
-                                name="MC0";
+
+                            if (name == null && refToPropertyID.isEmpty()) { //23911 - include implicit value if Properties not set
+                                name = "MC0";
                             }
 
                             streamToName.put(name, layerName);
@@ -667,7 +674,7 @@ public class PdfLayerList {
 
     private void setLocks(final PdfObjectReader currentPdfFile, final byte[][] layer) {
 
-        if(layer ==null) {
+        if (layer == null) {
             return;
         }
 
@@ -690,9 +697,9 @@ public class PdfLayerList {
         return Collections.unmodifiableMap(metaData);
     }
 
-    public Object[] getDisplayTree(){
+    public Object[] getDisplayTree() {
 
-        if(order!=null) {
+        if (order != null) {
             return order;
         } else {
             return getNames();
@@ -704,14 +711,14 @@ public class PdfLayerList {
      */
     private String[] getNames() {
 
-        final int count=layerNames.size();
-        final String[] nameList=new String[count];
+        final int count = layerNames.size();
+        final String[] nameList = new String[count];
 
-        final Iterator<String> names=layerNames.keySet().iterator();
+        final Iterator<String> names = layerNames.keySet().iterator();
 
-        int jj=0;
-        while(names.hasNext()){
-            nameList[jj]=names.next();
+        int jj = 0;
+        while (names.hasNext()) {
+            nameList[jj] = names.next();
             jj++;
         }
 
@@ -723,22 +730,23 @@ public class PdfLayerList {
      * will display only these layers and hide all others and will override
      * any constraints.
      * If you pass null in, all layers will be removed
+     *
      * @param layerNames is of type String[]
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setVisibleLayers(final String[] layerNames) {
 
-    	layersEnabled.clear();
+        layersEnabled.clear();
 
-    	if(layerNames!=null){
+        if (layerNames != null) {
 
-	    	for (final String layerName : layerNames) {
+            for (final String layerName : layerNames) {
                 layersEnabled.put(layerName, "x");
             }
-    	}
+        }
 
         //flag it has been altered
-        changesMade=true;
+        changesMade = true;
     }
 
 
@@ -752,54 +760,54 @@ public class PdfLayerList {
      */
     public boolean decodeLayer(final String name, final boolean isID) {
 
-        if(layerCount==0) {
+        if (layerCount == 0) {
             return true;
         }
 
-        boolean isLayerVisible =false;
+        boolean isLayerVisible = false;
 
-        String layerName=name;
+        String layerName = name;
 
         //see if match found otherwise assume name
-        if(isID){
-            final String mappedName= streamToName.get(name);
+        if (isID) {
+            final String mappedName = streamToName.get(name);
 
-            if(mappedName!=null) {
+            if (mappedName != null) {
                 layerName = mappedName;
             }
         }
 
-        if(layerName ==null) {
+        if (layerName == null) {
             return false;
-        } else{
+        } else {
 
             //if multiple layers  them comma separated list
-            if(layerName.indexOf(',')==-1){
-                isLayerVisible =layersEnabled.containsKey(layerName);
+            if (layerName.indexOf(',') == -1) {
+                isLayerVisible = layersEnabled.containsKey(layerName);
 
-                if(isLayerVisible) {
+                if (isLayerVisible) {
                     isLayerVisible = hiddenByParent(isLayerVisible, layerName);
                 }
 
-            }else{
-                final StringTokenizer names=new StringTokenizer(layerName,",");
-                while(names.hasMoreTokens()){
+            } else {
+                final StringTokenizer names = new StringTokenizer(layerName, ",");
+                while (names.hasMoreTokens()) {
 
-                    final String nextName=names.nextToken();
-                    isLayerVisible =layersEnabled.containsKey(nextName);
+                    final String nextName = names.nextToken();
+                    isLayerVisible = layersEnabled.containsKey(nextName);
 
-                    if(isLayerVisible) {
+                    if (isLayerVisible) {
                         isLayerVisible = hiddenByParent(isLayerVisible, nextName);
                     }
 
-                    if(isLayerVisible) //exit on first match
+                    if (isLayerVisible) //exit on first match
                     {
                         break;
                     }
                 }
             }
 
-            if(debug) {
+            if (debug) {
                 System.out.println("[isVisible] " + name + " decode=" + isLayerVisible + " enabled=" + layersEnabled + " layerName=" + layerName + " isEnabled=" + this.layersEnabled);
             }
             //System.out.println("stream="+streamToName);
@@ -811,71 +819,72 @@ public class PdfLayerList {
     //check not disabled by Parent up tree        
     private boolean hiddenByParent(boolean layerVisible, String layerName) {
 
-        int id=layerName.indexOf(deliminator);
+        int id = layerName.indexOf(deliminator);
 
-        if(layerVisible && id!=-1){
+        if (layerVisible && id != -1) {
 
-            String parent= layerName.substring(id+1,layerName.length());
+            String parent = layerName.substring(id + 1, layerName.length());
 
-            while(parent!=null && layerVisible && isLayerName(parent)){
+            while (parent != null && layerVisible && isLayerName(parent)) {
 
-                layerVisible =decodeLayer(parent,false);
+                layerVisible = decodeLayer(parent, false);
 
-                layerName=parent;
-                id=layerName.indexOf(deliminator);
-                if(id==-1) {
+                layerName = parent;
+                id = layerName.indexOf(deliminator);
+                if (id == -1) {
                     parent = null;
                 } else {
                     parent = layerName.substring(id + 1, layerName.length());
                 }
             }
         }
-        
+
         return layerVisible;
     }
 
     /**
      * Switch on/off layers based on Zoom.
+     *
      * @param scaling is of type float
      * @return is of type boolean
      */
     public boolean setZoom(final float scaling) {
 
         String layerName;
-        final Iterator<String> minZoomLayers=minScale.keySet().iterator();
-        while(minZoomLayers.hasNext()){
+        final Iterator<String> minZoomLayers = minScale.keySet().iterator();
+        while (minZoomLayers.hasNext()) {
 
-            layerName= minZoomLayers.next();
-            final Float minScalingValue= minScale.get(layerName);
+            layerName = minZoomLayers.next();
+            final Float minScalingValue = minScale.get(layerName);
 
             //Zoom off
-            if(minScalingValue!=null){
+            if (minScalingValue != null) {
 
                 //System.out.println(layerName+" "+scaling+" "+minScalingValue);
 
-                if(scaling< minScalingValue){
+                if (scaling < minScalingValue) {
                     layersEnabled.remove(layerName);
-                    changesMade=true;
-                }else if(!layersEnabled.containsKey(layerName)){
-                    layersEnabled.put(layerName,"x");
-                    changesMade=true;
+                    changesMade = true;
+                } else if (!layersEnabled.containsKey(layerName)) {
+                    layersEnabled.put(layerName, "x");
+                    changesMade = true;
                 }
             }
         }
 
 
-        final Iterator<String> maxZoomLayers=maxScale.keySet().iterator();
-        while(maxZoomLayers.hasNext()){
+        final Iterator<String> maxZoomLayers = maxScale.keySet().iterator();
+        while (maxZoomLayers.hasNext()) {
 
-            layerName= minZoomLayers.next();
-            final Float maxScalingValue= maxScale.get(layerName);
-            if(maxScalingValue!=null){
-                if(scaling> maxScalingValue){
+            layerName = minZoomLayers.next();
+            final Float maxScalingValue = maxScale.get(layerName);
+            if (maxScalingValue != null) {
+                if (scaling > maxScalingValue) {
                     layersEnabled.remove(layerName);
-                    changesMade=true;
-                }else if(!layersEnabled.containsKey(layerName)){
-                    layersEnabled.put(layerName,"x");
-                    changesMade=true;
+                    changesMade = true;
+                } else if (!layersEnabled.containsKey(layerName)) {
+                    layersEnabled.put(layerName, "x");
+                    changesMade = true;
                 }
             }
         }
@@ -890,27 +899,27 @@ public class PdfLayerList {
 
     public void setVisiblity(final String layerName, final boolean isVisible) {
 
-        if(debug) {
+        if (debug) {
             System.out.println("[layer] setVisiblity=" + layerName + " isVisible=" + isVisible);
         }
 
-        if(isVisible){
-            layersEnabled.put(layerName,"x");
+        if (isVisible) {
+            layersEnabled.put(layerName, "x");
 
             //disable any other layers
-            final String layersToDisable= RBconstraints.get(layerName);
-            if(layersToDisable!=null){
-                final StringTokenizer layers=new StringTokenizer(layersToDisable,",");
-                while(layers.hasMoreTokens()) {
+            final String layersToDisable = RBconstraints.get(layerName);
+            if (layersToDisable != null) {
+                final StringTokenizer layers = new StringTokenizer(layersToDisable, ",");
+                while (layers.hasMoreTokens()) {
                     layersEnabled.remove(layers.nextToken());
                 }
             }
-        }else {
+        } else {
             layersEnabled.remove(layerName);
         }
 
         //flag it has been altered
-        changesMade=true;
+        changesMade = true;
     }
 
     public boolean isVisible(final PdfObject XObject) {
@@ -923,39 +932,39 @@ public class PdfLayerList {
 
         if (layerObj != null) {
 
-            String layerName=null;
-            
-            final PdfObject OCGs_as_dictionary=layerObj.getDictionary(PdfDictionary.OCGs);
-            if(OCGs_as_dictionary!=null){ //look at viewtate first
+            String layerName = null;
+
+            final PdfObject OCGs_as_dictionary = layerObj.getDictionary(PdfDictionary.OCGs);
+            if (OCGs_as_dictionary != null) { //look at viewtate first
                 
                 /*
                  * NOTE!!!! Print and other modes not implemented yet
                  * (just added what I needed to fix 17584)
                  */
-                
+
                 //check viewmode flag
-                final PdfObject usage=OCGs_as_dictionary.getDictionary(PdfDictionary.Usage);
-                if(usage!=null){
-                    final PdfObject viewState=usage.getDictionary(PdfDictionary.View);
-                    if(viewState!=null){
-                        isVisible=viewState.getNameAsConstant(PdfDictionary.ViewState)==PdfDictionary.ON;
+                final PdfObject usage = OCGs_as_dictionary.getDictionary(PdfDictionary.Usage);
+                if (usage != null) {
+                    final PdfObject viewState = usage.getDictionary(PdfDictionary.View);
+                    if (viewState != null) {
+                        isVisible = viewState.getNameAsConstant(PdfDictionary.ViewState) == PdfDictionary.ON;
                     }
                 }
-            }else{
+            } else {
                 final byte[][] OCGS = layerObj.getKeyArray(PdfDictionary.OCGs);
-                
-                if(OCGS!=null){
+
+                if (OCGS != null) {
                     for (final byte[] OCG : OCGS) {
                         final String ref = new String(OCG);
                         layerName = getNameFromRef(ref);
                     }
                 }
-                
-                if(layerName==null) {
+
+                if (layerName == null) {
                     layerName = layerObj.getTextStreamValue(PdfDictionary.Name);
                 }
-                
-                if (layerName != null  && isLayerName(layerName)) {
+
+                if (layerName != null && isLayerName(layerName)) {
                     isVisible = isVisible(layerName);
                 }
             }
@@ -965,8 +974,8 @@ public class PdfLayerList {
     }
 
     public boolean isLocked(final String layerName) {
-        
-        return layerLocks.containsKey(layerName);  
+
+        return layerLocks.containsKey(layerName);
     }
 
     /**
@@ -1006,62 +1015,63 @@ public class PdfLayerList {
 //        this.scaling=scaling;
 //    }
 
-	/**JS
-	 * Gets an array of OCG objects found on a specified page.
-	 *
-	 * @return - An array of OCG objects or null if no OCGs are present.
-	 */
-	public Object[] getOCGs(){
+    /**
+     * JS
+     * Gets an array of OCG objects found on a specified page.
+     *
+     * @return - An array of OCG objects or null if no OCGs are present.
+     */
+    public Object[] getOCGs() {
 
         //return once initialised
-        if(layers!=null) {
+        if (layers != null) {
             return layers;
         }
 
-        final int count=layerNames.size();
+        final int count = layerNames.size();
 
         //create array of values with access to this so we can reset
-        final Layer[] layers=new Layer[count];
+        final Layer[] layers = new Layer[count];
 
-        final Iterator<String> layersIt=layerNames.keySet().iterator();
-        int ii=0;
+        final Iterator<String> layersIt = layerNames.keySet().iterator();
+        int ii = 0;
         String name;
-        while(layersIt.hasNext()){
-            name= layersIt.next();
-            
-            layers[ii]=new Layer(name,this);
+        while (layersIt.hasNext()) {
+            name = layersIt.next();
+
+            layers[ii] = new Layer(name, this);
             ii++;
         }
-		
-		return layers;
-	}
+
+        return layers;
+    }
 
 
     public void addJScommand(final String name, final String js) {
 
-        if(jsCommands==null) {
+        if (jsCommands == null) {
             jsCommands = new HashMap<String, String>();
         }
-                
+
         //add to list to execute
-        jsCommands.put(name,js);
+        jsCommands.put(name, js);
     }
 
     public Iterator<String> getJSCommands() {
 
-        if(jsCommands!=null){
-            final Iterator<String> names= this.jsCommands.keySet().iterator();
-            final Map<String, String> visibleJSCommands=new HashMap<String, String>();
-        	
-            while(names.hasNext()){
-            	final String name= names.next();
-            	if(this.isVisible(name)){
-            		visibleJSCommands.put(jsCommands.get(name), "x");
-            	}
+        if (jsCommands != null) {
+            final Iterator<String> names = this.jsCommands.keySet().iterator();
+            final Map<String, String> visibleJSCommands = new HashMap<String, String>();
+
+            while (names.hasNext()) {
+                final String name = names.next();
+                if (this.isVisible(name)) {
+                    visibleJSCommands.put(jsCommands.get(name), "x");
+                }
             }
-            
+
             return visibleJSCommands.keySet().iterator();
-        }else {
+        } else {
             return null;
         }
     }

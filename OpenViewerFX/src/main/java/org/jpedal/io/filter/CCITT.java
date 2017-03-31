@@ -35,6 +35,7 @@ package org.jpedal.io.filter;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.util.Map;
+
 import org.jpedal.io.filter.ccitt.CCITT2D;
 import org.jpedal.io.filter.ccitt.CCITTMix;
 import org.jpedal.objects.raw.PdfDictionary;
@@ -53,8 +54,8 @@ public class CCITT extends BaseFilter implements PdfFilter {
 
         super(decodeParms);
 
-        this.width=width;
-        this.height=height;
+        this.width = width;
+        this.height = height;
 
     }
 
@@ -82,31 +83,31 @@ public class CCITT extends BaseFilter implements PdfFilter {
 
         final byte[] data;
 
-        int K= 0;
-        if(decodeParms!=null){
+        int K = 0;
+        if (decodeParms != null) {
             K = decodeParms.getInt(PdfDictionary.K);
         }
-        
+
         //new CCITT decoder - encodes runs of black or white pixels
         //always assumes white to start
-        org.jpedal.io.filter.ccitt.CCITTDecoder ccitt=null;
+        org.jpedal.io.filter.ccitt.CCITTDecoder ccitt = null;
 
-        if(K==0){
+        if (K == 0) {
 
             //Pure 1D decoding, group3
             ccitt = new org.jpedal.io.filter.ccitt.CCITT1D(rawData, width, height, decodeParms);
 
             //K<0 case
             //Pure 2D, group 4
-        }else if (K<0){
+        } else if (K < 0) {
 
-            ccitt= new CCITT2D(rawData, width, height, decodeParms);
+            ccitt = new CCITT2D(rawData, width, height, decodeParms);
 
-        }else if (K>0){
+        } else if (K > 0) {
             //Mixed 1/2 D encoding we can use either for maximum compression
             // A 1D line can be followed by up to K-1 2D lines
 
-            ccitt= new CCITTMix(rawData, width, height, decodeParms);
+            ccitt = new CCITTMix(rawData, width, height, decodeParms);
         }
 
         data = ccitt.decode();

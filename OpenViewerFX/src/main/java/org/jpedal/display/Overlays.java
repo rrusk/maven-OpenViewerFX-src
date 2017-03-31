@@ -35,6 +35,7 @@ package org.jpedal.display;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.render.DynamicVectorRenderer;
 
@@ -63,12 +64,11 @@ public class Overlays {
         } else { //store for printing and add if items already there
 
 
-
             final int[] oldType = overlayType.get(key);
-            if (oldType == null){
+            if (oldType == null) {
                 overlayType.put(key, type);
 
-            }else { //merge items
+            } else { //merge items
 
                 final int oldLength = oldType.length;
                 final int newLength = type.length;
@@ -130,10 +130,10 @@ public class Overlays {
         } else { //store for printing and add if items already there
 
             final int[] oldType = overlayTypeG.get(key);
-            if (oldType == null){
+            if (oldType == null) {
                 overlayTypeG.put(key, type);
 
-            }else { //merge items
+            } else { //merge items
 
                 final int oldLength = oldType.length;
                 final int newLength = type.length;
@@ -181,6 +181,7 @@ public class Overlays {
             }
         }
     }
+
     public void clear() {
 
         //flush arrays

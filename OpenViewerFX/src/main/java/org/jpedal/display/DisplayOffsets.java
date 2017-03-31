@@ -36,89 +36,94 @@ import java.awt.Point;
 
 public class DisplayOffsets {
 
-    /** Whether the left page drag or right page drag is drawing */
+    /**
+     * Whether the left page drag or right page drag is drawing
+     */
     protected boolean dragLeft;
     protected boolean dragTop;
 
-    
-    /**allow user to displace display*/
-    private int userOffsetX, userOffsetY,userPrintOffsetX, userPrintOffsetY;
+
+    /**
+     * allow user to displace display
+     */
+    private int userOffsetX, userOffsetY, userPrintOffsetX, userPrintOffsetY;
 
     //store cursor position for facing drag
-    private int facingCursorX=10000, facingCursorY=10000;
+    private int facingCursorX = 10000, facingCursorY = 10000;
 
-    public DisplayOffsets() {}
+    public DisplayOffsets() {
+    }
 
     public void setUserOffsets(final int x, final int y, final int h, final int mode) {
-         switch(mode){
+        switch (mode) {
 
             case org.jpedal.external.OffsetOptions.DISPLAY:
-                userOffsetX=x;
-                userOffsetY=y;
+                userOffsetX = x;
+                userOffsetY = y;
                 break;
 
             case org.jpedal.external.OffsetOptions.PRINTING:
-                userPrintOffsetX=x;
-                userPrintOffsetY=-y; //make it negative so both work in same direction
+                userPrintOffsetX = x;
+                userPrintOffsetY = -y; //make it negative so both work in same direction
                 break;
 
             case org.jpedal.external.OffsetOptions.INTERNAL_DRAG_BLANK:
                 facingCursorX = 0;
                 facingCursorY = h;
-                
+
                 setDragCorner(mode);
-                
+
                 break;
 
             case org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_LEFT:
-                facingCursorX=x;
-                facingCursorY=y;
-                
+                facingCursorX = x;
+                facingCursorY = y;
+
                 setDragCorner(mode);
-                
+
                 break;
 
             case org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_RIGHT:
-                facingCursorX=x;
-                facingCursorY=y;
-                
+                facingCursorX = x;
+                facingCursorY = y;
+
                 setDragCorner(mode);
-                
+
                 break;
 
             case org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_TOP_LEFT:
-                facingCursorX=x;
-                facingCursorY=y;
-                
+                facingCursorX = x;
+                facingCursorY = y;
+
                 setDragCorner(mode);
-                
+
                 break;
 
             case org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_TOP_RIGHT:
-                facingCursorX=x;
-                facingCursorY=y;
-                
+                facingCursorX = x;
+                facingCursorY = y;
+
                 setDragCorner(mode);
-                
+
                 break;
-            
+
             default:
                 throw new RuntimeException("No such mode - look in org.jpedal.external.OffsetOptions for valid values");
         }
     }
-   
+
     public Point getUserOffsets(final int mode) {
 
-        switch(mode){
+        switch (mode) {
 
             case org.jpedal.external.OffsetOptions.DISPLAY:
-                return new Point(userOffsetX,userOffsetY);
+                return new Point(userOffsetX, userOffsetY);
 
             case org.jpedal.external.OffsetOptions.PRINTING:
-                return new Point(userPrintOffsetX,userPrintOffsetY);
+                return new Point(userPrintOffsetX, userPrintOffsetY);
 
             case org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_RIGHT:
-                return new Point(facingCursorX,facingCursorY);
+                return new Point(facingCursorX, facingCursorY);
 
             default:
                 throw new RuntimeException("No such mode - look in org.jpedal.external.OffsetOptions for valid values");
@@ -140,7 +145,7 @@ public class DisplayOffsets {
     public int getUserOffsetY() {
         return userOffsetY;
     }
-    
+
     public void setDragCorner(final int a) {
         dragLeft = a == org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_BOTTOM_LEFT ||
                 a == org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_TOP_LEFT ||
@@ -149,7 +154,7 @@ public class DisplayOffsets {
         dragTop = a == org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_TOP_LEFT ||
                 a == org.jpedal.external.OffsetOptions.INTERNAL_DRAG_CURSOR_TOP_RIGHT;
     }
-    
+
     public boolean getDragLeft() {
         return dragLeft;
     }

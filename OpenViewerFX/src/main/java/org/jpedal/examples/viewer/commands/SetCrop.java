@@ -34,6 +34,7 @@ package org.jpedal.examples.viewer.commands;
 
 import java.awt.Component;
 import javax.swing.JOptionPane;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.display.GUIThumbnailPanel;
 import org.jpedal.examples.viewer.Values;
@@ -46,22 +47,22 @@ import org.jpedal.objects.PdfPageData;
 import org.jpedal.utils.Messages;
 
 /**
- * This class provides a method that will set the crop rectangle for 
+ * This class provides a method that will set the crop rectangle for
  * the pages of your PDF document. It uses itext function setCrop.
  */
-@SuppressWarnings({"UnusedAssignment","PMD"})
+@SuppressWarnings({"UnusedAssignment", "PMD"})
 public class SetCrop {
 
     public static void execute(final Object[] args, final Values commonValues, final GUISearchWindow searchFrame,
-            final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
-            final GUIThumbnailPanel thumbnails) {
+                               final GUIFactory currentGUI, final PdfDecoderInt decode_pdf, final PropertiesFile properties,
+                               final GUIThumbnailPanel thumbnails) {
         if (args == null) {
             if (commonValues.getSelectedFile() == null) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewer.NoFile"));
             } else {
                 //get values from user
                 final CropPDFPages cropPage = new CropPDFPages(commonValues.getInputDir(), commonValues.getPageCount(), commonValues.getCurrentPage());
-                final int cropPageChoice = cropPage.display((Component)currentGUI.getFrame(), Messages.getMessage("PdfViewerTooltip.PDFCropPages"));
+                final int cropPageChoice = cropPage.display((Component) currentGUI.getFrame(), Messages.getMessage("PdfViewerTooltip.PDFCropPages"));
 
                 //get parameters and call if YES
                 if (cropPageChoice == JOptionPane.OK_OPTION) {

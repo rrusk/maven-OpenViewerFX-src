@@ -42,23 +42,23 @@ import org.jpedal.gui.GUIFactory;
  * stays in JavaFXGUI, keeping GUI.java generic.
  */
 public interface GUIButtons {
-    
+
     GUIButton getButton(int ID);
-    
+
     void setBackNavigationButtonsEnabled(boolean flag);
-    
+
     void setForwardNavigationButtonsEnabled(boolean flag);
-    
+
     void checkButtonSeparators();
-    
+
     void setVisible(boolean set);
-    
+
     void setEnabled(boolean set);
-    
+
     void hideRedundentNavButtons(GUIFactory currentGUI);
-    
+
     void alignLayoutMenuOption(int mode);
-    
+
     void setPageLayoutButtonsEnabled(boolean flag);
-    
+
 }

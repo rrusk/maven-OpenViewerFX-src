@@ -61,7 +61,7 @@ public class ShadingUtils {
         final double div = yD2 * xD1 - xD2 * yD1;
         final double ua = (xD2 * yD3 - yD2 * xD3) / div;
         //ub = (xD1 * yD3 - yD1 * xD3) / div;
-        
+
         return new Point2D.Double((p1.getX() + ua * xD1), (p1.getY() + ua * yD1));
     }
 
@@ -111,7 +111,7 @@ public class ShadingUtils {
     /**
      * method used to find any point in given distance in cubic bezier curve
      *
-     * @param t please note t varies between 0 -- 1
+     * @param t  please note t varies between 0 -- 1
      * @param sp starting point
      * @param c1 control point
      * @param c2 control point
@@ -155,15 +155,15 @@ public class ShadingUtils {
                     pdfY = (scaling * (pageHeight - (yStart + y - offY)));
                     return new float[]{pdfX, pdfY};
                 case 90:
-                    pdfY = (scaling * ((x + xStart)+minX-offX));
-                    pdfX = (scaling * ((y + yStart)-(pageHeight+offY)));
+                    pdfY = (scaling * ((x + xStart) + minX - offX));
+                    pdfX = (scaling * ((y + yStart) - (pageHeight + offY)));
                     return new float[]{pdfX, pdfY};
                 case 180:
                     pdfX = (scaling * (offX - (x + xStart + minX)));
                     pdfY = (scaling * ((y + yStart) - (pageHeight + offY)));
                     return new float[]{pdfX, pdfY};
                 case -90: //270 degrees
-                    pdfY = (scaling * (pageHeight-(x + xStart+2)));
+                    pdfY = (scaling * (pageHeight - (x + xStart + 2)));
                     pdfX = (scaling * ((y + yStart)));
                     return new float[]{pdfX, pdfY};
             }
@@ -174,8 +174,8 @@ public class ShadingUtils {
         }
         return new float[]{0, 0};
     }
-    
-    public static GeneralPath getPathFromBBox(final float[] rawBBox){
+
+    public static GeneralPath getPathFromBBox(final float[] rawBBox) {
         final GeneralPath rawPath = new GeneralPath();
         rawPath.moveTo(rawBBox[0], rawBBox[1]);
         rawPath.lineTo(rawBBox[2], rawBBox[1]);
@@ -185,7 +185,7 @@ public class ShadingUtils {
         rawPath.closePath();
         return rawPath;
     }
-    
+
     public static float[] getPdfCoords(final AffineTransform inversedAffine, final int x, final int y, final int xStart, final int yStart) {
         final float[] ff = new float[2];
         ff[0] = x + xStart;
@@ -193,7 +193,7 @@ public class ShadingUtils {
         inversedAffine.transform(ff, 0, ff, 0, 1);
         return ff;
     }
-    
+
 //    /**
 //     * 
 //     * @param t in the range 0-1

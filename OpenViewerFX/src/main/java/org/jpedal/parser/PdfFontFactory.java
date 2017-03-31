@@ -35,6 +35,7 @@ package org.jpedal.parser;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.exception.PdfFontException;
 import org.jpedal.external.ErrorTracker;
@@ -54,64 +55,72 @@ import org.jpedal.utils.StringUtils;
  */
 public class PdfFontFactory {
 
-    /**flag to show embedded fonts present*/
+    /**
+     * flag to show embedded fonts present
+     */
     private boolean hasEmbeddedFonts;
 
-    /**flag to show if non-embedded CID fonts*/
+    /**
+     * flag to show if non-embedded CID fonts
+     */
     private boolean hasNonEmbeddedCIDFonts;
 
-    /**list of fonts used for display*/
+    /**
+     * list of fonts used for display
+     */
     private String fontsInFile;
 
-    /**and the list of CID fonts*/
-    private final StringBuilder nonEmbeddedCIDFonts=new StringBuilder(200);
+    /**
+     * and the list of CID fonts
+     */
+    private final StringBuilder nonEmbeddedCIDFonts = new StringBuilder(200);
 
-    private String baseFont="",rawFontName,subFont;
+    private String baseFont = "", rawFontName, subFont;
     private int origfontType;
 
     //only load 1 instance of any 1 font
-    private final HashMap<String, org.jpedal.fonts.glyph.PdfJavaGlyphs> fontsLoaded=new HashMap<String, org.jpedal.fonts.glyph.PdfJavaGlyphs>(50);
+    private final HashMap<String, org.jpedal.fonts.glyph.PdfJavaGlyphs> fontsLoaded = new HashMap<String, org.jpedal.fonts.glyph.PdfJavaGlyphs>(50);
 
     final PdfObjectReader currentPdfFile;
 
     public PdfFontFactory(final PdfObjectReader currentPdfFile) {
-        this.currentPdfFile=currentPdfFile;
+        this.currentPdfFile = currentPdfFile;
     }
 
     public PdfFont createFont(final boolean fallbackToArial, final PdfObject pdfObject, final String font_id, final ObjectStore objectStoreStreamRef,
                               final boolean renderPage, final ErrorTracker errorTracker,
-                              final boolean isPrinting, final boolean isHTML) throws PdfException {
+                              final boolean isHTML) throws PdfException {
 
-        PdfFont currentFontData=null;
+        PdfFont currentFontData = null;
 
-        baseFont="";
-        rawFontName=null;
-        subFont=null;
+        baseFont = "";
+        rawFontName = null;
+        subFont = null;
 
-        int fontType= PdfDictionary.Unknown;
-        origfontType=PdfDictionary.Unknown;
+        int fontType = PdfDictionary.Unknown;
+        origfontType = PdfDictionary.Unknown;
 
-        final PdfObject descendantFont=pdfObject.getDictionary(PdfDictionary.DescendantFonts);
+        final PdfObject descendantFont = pdfObject.getDictionary(PdfDictionary.DescendantFonts);
 
-        boolean isEmbedded= isFontEmbedded(pdfObject);
+        boolean isEmbedded = isFontEmbedded(pdfObject);
 
-        if(isHTML && !isEmbedded){
-            if(inlineLiberationFontForHTML(pdfObject, font_id, descendantFont)) {
+        if (isHTML && !isEmbedded) {
+            if (inlineLiberationFontForHTML(pdfObject, font_id, descendantFont)) {
                 fontType = StandardFonts.TRUETYPE;
                 isEmbedded = true;
             }
         }
 
-        boolean isFontBroken=true; //ensure enters once
+        boolean isFontBroken = true; //ensure enters once
 
-        while(isFontBroken){ //will try to sub font if error in embedded
-            isFontBroken=false;
+        while (isFontBroken) { //will try to sub font if error in embedded
+            isFontBroken = false;
 
             /*
              * handle any font remapping but not on CID fonts or Type3 and gets too messy
              **/
-            if(FontMappings.fontSubstitutionTable!=null && !isEmbedded &&
-                    pdfObject.getParameterConstant(PdfDictionary.Subtype)!= StandardFonts.TYPE3) {
+            if (FontMappings.fontSubstitutionTable != null && !isEmbedded &&
+                    pdfObject.getParameterConstant(PdfDictionary.Subtype) != StandardFonts.TYPE3) {
 
                 final String rawFont = getFontName(pdfObject, font_id, descendantFont);
 
@@ -119,89 +128,89 @@ public class PdfFontFactory {
             }
 
             //get subtype if not set above
-            if(fontType==PdfDictionary.Unknown){
-                fontType=pdfObject.getParameterConstant(PdfDictionary.Subtype);
+            if (fontType == PdfDictionary.Unknown) {
+                fontType = pdfObject.getParameterConstant(PdfDictionary.Subtype);
 
                 /*handle CID fonts where /Subtype stored inside sub object*/
-                if (fontType==StandardFonts.TYPE0) {
+                if (fontType == StandardFonts.TYPE0) {
 
                     //get CID type and use in preference to Type0 on CID fonts
-                    final PdfObject desc=pdfObject.getDictionary(PdfDictionary.DescendantFonts);
-                    fontType=desc.getParameterConstant(PdfDictionary.Subtype);
+                    final PdfObject desc = pdfObject.getDictionary(PdfDictionary.DescendantFonts);
+                    fontType = desc.getParameterConstant(PdfDictionary.Subtype);
 
-                    origfontType=fontType;
+                    origfontType = fontType;
 
                 }
             }
 
-            if(fontType==PdfDictionary.Unknown){
+            if (fontType == PdfDictionary.Unknown) {
 
-            	LogWriter.writeLog("Font type not supported");
-                
-                currentFontData=new PdfFont(currentPdfFile);
+                LogWriter.writeLog("Font type not supported");
+
+                currentFontData = new PdfFont(currentPdfFile);
             }
 
             /*
              * check for OpenType fonts and reassign type
              */
-            final int rawFontType=fontType;
-            if(fontType==StandardFonts.TYPE1 || fontType==StandardFonts.CIDTYPE0) {
+            final int rawFontType = fontType;
+            if (fontType == StandardFonts.TYPE1 || fontType == StandardFonts.CIDTYPE0) {
                 fontType = scanForOpenType(pdfObject, currentPdfFile, fontType);
             }
 
-            if(!isEmbedded && subFont==null && fallbackToArial && fontType!=StandardFonts.TYPE3){
-                String replacementFont="arial";
-                
-                String testFont=pdfObject.getName(PdfDictionary.BaseFont);
+            if (!isEmbedded && subFont == null && fallbackToArial && fontType != StandardFonts.TYPE3) {
+                String replacementFont = "arial";
 
-                if(testFont!=null){ //try to match
-                    
-                    testFont=testFont.toLowerCase();
-                    
-                    if(testFont.contains("bolditalic")){
-                        replacementFont="arial bold italic";
-                    }else if(testFont.contains("italic")){
-                        replacementFont="arial italic";
-                    }else if(testFont.contains("bold")){
-                        replacementFont="arial bold";
+                String testFont = pdfObject.getName(PdfDictionary.BaseFont);
+
+                if (testFont != null) { //try to match
+
+                    testFont = testFont.toLowerCase();
+
+                    if (testFont.contains("bolditalic")) {
+                        replacementFont = "arial bold italic";
+                    } else if (testFont.contains("italic")) {
+                        replacementFont = "arial italic";
+                    } else if (testFont.contains("bold")) {
+                        replacementFont = "arial bold";
                     }
                 }
-                
-                subFont= FontMappings.fontSubstitutionLocation.get(replacementFont);
 
-                if(subFont==null){
-                    subFont=useLiberationFont(testFont, "LiberationSans", "liberation-sans");
+                subFont = FontMappings.fontSubstitutionLocation.get(replacementFont);
+
+                if (subFont == null) {
+                    subFont = useLiberationFont(testFont, "LiberationSans", "liberation-sans");
                 }
-                
-                fontType=StandardFonts.TRUETYPE;
-                
-            }  
 
-            try{
-                currentFontData=FontFactory.createFont(fontType,currentPdfFile,subFont, isPrinting);
+                fontType = StandardFonts.TRUETYPE;
 
-                if(rawFontType==StandardFonts.CIDTYPE0 && fontType==StandardFonts.CIDTYPE2) {
+            }
+
+            try {
+                currentFontData = FontFactory.createFont(fontType, currentPdfFile, subFont);
+
+                if (rawFontType == StandardFonts.CIDTYPE0 && fontType == StandardFonts.CIDTYPE2) {
                     currentFontData.getGlyphData().setRemappedCFFFont(true);
                 }
 
                 /*set an alternative to Lucida*/
-                if(FontMappings.defaultFont!=null) {
+                if (FontMappings.defaultFont != null) {
                     currentFontData.setDefaultDisplayFont(FontMappings.defaultFont);
                 }
 
-                currentFontData.createFont(pdfObject, font_id,renderPage, objectStoreStreamRef, fontsLoaded);
+                currentFontData.createFont(pdfObject, font_id, renderPage, objectStoreStreamRef, fontsLoaded);
 
                 //track non-embedded, non-substituted CID fonts
-                if((fontType==StandardFonts.CIDTYPE0 || fontType==StandardFonts.CIDTYPE2) && !isEmbedded && subFont==null) {
+                if ((fontType == StandardFonts.CIDTYPE0 || fontType == StandardFonts.CIDTYPE2) && !isEmbedded && subFont == null) {
 
                     //allow for it being substituted
-                    subFont=currentFontData.getSubstituteFont();
-                    if(subFont==null){
+                    subFont = currentFontData.getSubstituteFont();
+                    if (subFont == null) {
 
-                        hasNonEmbeddedCIDFonts=true;
+                        hasNonEmbeddedCIDFonts = true;
 
                         //track list
-                        if(nonEmbeddedCIDFonts.length()>0) {
+                        if (nonEmbeddedCIDFonts.length() > 0) {
                             nonEmbeddedCIDFonts.append(',');
                         }
                         nonEmbeddedCIDFonts.append(baseFont);
@@ -212,27 +221,27 @@ public class PdfFontFactory {
                 currentFontData.setRawFontName(rawFontName);
 
                 //fix for odd file
-                if(fontType==StandardFonts.TYPE1 && currentFontData.is1C() && pdfObject.getInt(PdfDictionary.FirstChar)==32 &&
-                        pdfObject.getInt(PdfDictionary.FirstChar)==pdfObject.getInt(PdfDictionary.LastChar)){
+                if (fontType == StandardFonts.TYPE1 && currentFontData.is1C() && pdfObject.getInt(PdfDictionary.FirstChar) == 32 &&
+                        pdfObject.getInt(PdfDictionary.FirstChar) == pdfObject.getInt(PdfDictionary.LastChar)) {
 
-                    if(isEmbedded){
-                        isFontBroken=true;
-                        isEmbedded=false;
-                    }else{
-                        currentFontData.isFontEmbedded=false;
+                    if (isEmbedded) {
+                        isFontBroken = true;
+                        isEmbedded = false;
+                    } else {
+                        currentFontData.isFontEmbedded = false;
                     }
                 }
 
                 //see if we failed and loop round to substitute
-                if(!currentFontData.isFontEmbedded && isEmbedded){
-                    isFontBroken=true;
-                    isEmbedded=false;
+                if (!currentFontData.isFontEmbedded && isEmbedded) {
+                    isFontBroken = true;
+                    isEmbedded = false;
                 }
 
-            }catch(final Exception e){
+            } catch (final Exception e) {
 
-            	LogWriter.writeLog("[PDF] Problem " + e + " reading Font  type " + StandardFonts.getFontypeAsString(fontType));
-                
+                LogWriter.writeLog("[PDF] Problem " + e + " reading Font  type " + StandardFonts.getFontypeAsString(fontType));
+
                 errorTracker.addPageFailureMessage("Problem " + e + " reading Font type " + StandardFonts.getFontypeAsString(fontType));
             }
         }
@@ -248,16 +257,16 @@ public class PdfFontFactory {
     boolean inlineLiberationFontForHTML(final PdfObject pdfObject, final String font_id, final PdfObject descendantFont) {
 
         final String rawFont = getFontName(pdfObject, font_id, descendantFont);
-        final String test=rawFont.toLowerCase();
-        String libFont=null;
+        final String test = rawFont.toLowerCase();
+        String libFont = null;
 
-        if(test.contains("timesnewroman")) {
-            libFont=useLiberationFont(test,"LiberationSerif", "liberation-serif");
-        }else if(test.contains("arial")) {
-            libFont=useLiberationFont(test,"LiberationSans", "liberation-sans");
+        if (test.contains("timesnewroman")) {
+            libFont = useLiberationFont(test, "LiberationSerif", "liberation-serif");
+        } else if (test.contains("arial")) {
+            libFont = useLiberationFont(test, "LiberationSans", "liberation-sans");
         }
 
-        if(libFont!=null) {
+        if (libFont != null) {
 
             if (libFont != null) {
                 final RandomAccessFile f;
@@ -275,7 +284,7 @@ public class PdfFontFactory {
 
                     final PdfObject pdfFontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
 
-                    if (pdfFontDescriptor != null){
+                    if (pdfFontDescriptor != null) {
                         pdfFontDescriptor.setDictionary(PdfDictionary.FontFile2, fontObj);
                     }
                 } catch (final Exception e) {
@@ -285,26 +294,26 @@ public class PdfFontFactory {
             }
         }
 
-        return libFont!=null;
+        return libFont != null;
     }
 
     public String useLiberationFont(final String testFont, final String family, final String path) {
 
-        String subFont=null;
-        String replacementFont;//add Liberation Sans for if all else fails
-        try{
+        String subFont = null;
+        String replacementFont; //add Liberation Sans for if all else fails
+        try {
             FontMappings.addLiberationAsFallBackFont(family, path);
 
-            replacementFont="-Regular";
+            replacementFont = "-Regular";
 
-            if(testFont.contains("bolditalic")){
-                replacementFont="-BoldItalic";
-            }else if(testFont.contains("italic")){
-                replacementFont="-Italic";
-            }else if(testFont.contains("bold")){
-                replacementFont="-Bold";
+            if (testFont.contains("bolditalic")) {
+                replacementFont = "-BoldItalic";
+            } else if (testFont.contains("italic")) {
+                replacementFont = "-Italic";
+            } else if (testFont.contains("bold")) {
+                replacementFont = "-Bold";
             }
-            subFont= FontMappings.fontSubstitutionLocation.get(family+replacementFont);
+            subFont = FontMappings.fontSubstitutionLocation.get(family + replacementFont);
 
         } catch (final Exception e) {
             LogWriter.writeLog("Unable to read liberation fonts " + e.getMessage());
@@ -314,28 +323,28 @@ public class PdfFontFactory {
     }
 
     private void setDetails(final String font_id, final PdfFont currentFontData, final int fontType, final PdfObject descendantFont) {
-        String name=currentFontData.getFontName();
+        String name = currentFontData.getFontName();
 
         //deal with odd chars
-        if(name.indexOf('#')!=-1) {
+        if (name.indexOf('#') != -1) {
             name = StringUtils.convertHexChars(name);
         }
 
         final String details;
-        if(currentFontData.isFontSubstituted()){
-            details=font_id+"  "+name+"  "+ StandardFonts.getFontypeAsString(origfontType)+"  Substituted ("+subFont+ ' ' +StandardFonts.getFontypeAsString(fontType)+ ')';
-        }else if(currentFontData.isFontEmbedded){
-            hasEmbeddedFonts=true;
-            if(currentFontData.is1C() && descendantFont==null) {
+        if (currentFontData.isFontSubstituted()) {
+            details = font_id + "  " + name + "  " + StandardFonts.getFontypeAsString(origfontType) + "  Substituted (" + subFont + ' ' + StandardFonts.getFontypeAsString(fontType) + ')';
+        } else if (currentFontData.isFontEmbedded) {
+            hasEmbeddedFonts = true;
+            if (currentFontData.is1C() && descendantFont == null) {
                 details = font_id + "  " + name + " Type1C  Embedded";
             } else {
                 details = font_id + "  " + name + "  " + StandardFonts.getFontypeAsString(fontType) + "  Embedded";
             }
-        }else {
+        } else {
             details = font_id + "  " + name + "  " + StandardFonts.getFontypeAsString(fontType);
         }
 
-        if(fontsInFile==null) {
+        if (fontsInFile == null) {
             fontsInFile = details;
         } else {
             fontsInFile = details + '\n' + fontsInFile;
@@ -344,44 +353,44 @@ public class PdfFontFactory {
 
     private static int scanForOpenType(final PdfObject pdfObject, final PdfObjectReader currentPdfFile, int fontType) {
 
-        if(fontType==StandardFonts.CIDTYPE0){
-            final PdfObject desc=pdfObject.getDictionary(PdfDictionary.DescendantFonts);
+        if (fontType == StandardFonts.CIDTYPE0) {
+            final PdfObject desc = pdfObject.getDictionary(PdfDictionary.DescendantFonts);
 
-            if(pdfObject!=null){
-                final PdfObject FontDescriptor=desc.getDictionary(PdfDictionary.FontDescriptor);
+            if (pdfObject != null) {
+                final PdfObject FontDescriptor = desc.getDictionary(PdfDictionary.FontDescriptor);
 
-                if(FontDescriptor!=null){
-                    PdfObject FontFile2=FontDescriptor.getDictionary(PdfDictionary.FontFile2);
+                if (FontDescriptor != null) {
+                    PdfObject FontFile2 = FontDescriptor.getDictionary(PdfDictionary.FontFile2);
 
-                    if(FontFile2==null) { //must be present for OTTF font
-                        FontFile2=FontDescriptor.getDictionary(PdfDictionary.FontFile3);
+                    if (FontFile2 == null) { //must be present for OTTF font
+                        FontFile2 = FontDescriptor.getDictionary(PdfDictionary.FontFile3);
                     }
 
-                    if(FontFile2!=null){ //must be present for OTTF font
+                    if (FontFile2 != null) { //must be present for OTTF font
 
                         //get data
-                        final byte[] stream=currentPdfFile.readStream(FontFile2,true,true,false, false,false, FontFile2.getCacheName(currentPdfFile.getObjectReader()));
+                        final byte[] stream = currentPdfFile.readStream(FontFile2, true, true, false, false, false, FontFile2.getCacheName(currentPdfFile.getObjectReader()));
 
                         //check first 4 bytes
-                        if(stream!=null && stream.length>3 && stream[0]==79 && stream[1]==84 && stream[2]==84 && stream[3]==79) {
+                        if (stream != null && stream.length > 3 && stream[0] == 79 && stream[1] == 84 && stream[2] == 84 && stream[3] == 79) {
                             fontType = StandardFonts.CIDTYPE2; //put it through our TT handler which also does OT
                         }
 
                     }
                 }
             }
-        }else{
-            final PdfObject FontDescriptor=pdfObject.getDictionary(PdfDictionary.FontDescriptor);
-            if(FontDescriptor!=null){
+        } else {
+            final PdfObject FontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
+            if (FontDescriptor != null) {
 
-                final PdfObject FontFile3=FontDescriptor.getDictionary(PdfDictionary.FontFile3);
-                if(FontFile3!=null){ //must be present for OTTF font
+                final PdfObject FontFile3 = FontDescriptor.getDictionary(PdfDictionary.FontFile3);
+                if (FontFile3 != null) { //must be present for OTTF font
 
                     //get data
-                    final byte[] stream=currentPdfFile.readStream(FontFile3,true,true,false, false,false, FontFile3.getCacheName(currentPdfFile.getObjectReader()));
+                    final byte[] stream = currentPdfFile.readStream(FontFile3, true, true, false, false, false, FontFile3.getCacheName(currentPdfFile.getObjectReader()));
 
                     //check first 4 bytes
-                    if(stream!=null && stream.length>3 && stream[0]==79 && stream[1]==84 && stream[2]==84 && stream[3]==79) {
+                    if (stream != null && stream.length > 3 && stream[0] == 79 && stream[1] == 84 && stream[2] == 84 && stream[3] == 79) {
                         fontType = StandardFonts.TRUETYPE; //put it through our TT handler which also does OT
                     }
 
@@ -395,20 +404,20 @@ public class PdfFontFactory {
     private int getFontMapping(final PdfObject pdfObject, final String rawFont, int fontType, final PdfObject descendantFont) throws PdfException {
 
         String newSubtype = getFontSub(rawFont);
-        
+
         //Case 24809 ie WingDings-regular needs to use WingDing(s)
-        if(newSubtype==null &&  rawFont.startsWith("Wingdings")){
-            if(DecoderOptions.isRunningOnMac){
+        if (newSubtype == null && rawFont.startsWith("Wingdings")) {
+            if (DecoderOptions.isRunningOnMac) {
                 newSubtype = getFontSub("WingDings");
-            }else{
+            } else {
                 newSubtype = getFontSub("WingDing");
             }
         }
 
-        if(newSubtype!=null && descendantFont==null){
+        if (newSubtype != null && descendantFont == null) {
 
             //convert String to correct int value
-            if (newSubtype.equals("/Type1")|| newSubtype.equals("/Type1C")|| newSubtype.equals("/MMType1")) {
+            if (newSubtype.equals("/Type1") || newSubtype.equals("/Type1C") || newSubtype.equals("/MMType1")) {
                 fontType = StandardFonts.TYPE1;
             } else if (newSubtype.equals("/TrueType")) {
                 fontType = StandardFonts.TRUETYPE;
@@ -418,13 +427,13 @@ public class PdfFontFactory {
                 throw new RuntimeException("Unknown font type " + newSubtype + " used for font substitution");
             }
 
-            origfontType=pdfObject.getParameterConstant(PdfDictionary.Subtype);
+            origfontType = pdfObject.getParameterConstant(PdfDictionary.Subtype);
 
-        }else if(FontMappings.enforceFontSubstitution){
+        } else if (FontMappings.enforceFontSubstitution) {
 
             LogWriter.writeLog("baseFont=" + baseFont + " fonts added= " + FontMappings.fontSubstitutionTable);
-            
-            throw new PdfFontException("No substitute Font found for font="+baseFont+ '<');
+
+            throw new PdfFontException("No substitute Font found for font=" + baseFont + '<');
         }
         return fontType;
     }
@@ -432,72 +441,72 @@ public class PdfFontFactory {
     private String getFontName(final PdfObject pdfObject, final String font_id, final PdfObject descendantFont) {
         String rawFont;
 
-        if(descendantFont==null) {
+        if (descendantFont == null) {
             rawFont = pdfObject.getName(PdfDictionary.BaseFont);
         } else {
             rawFont = descendantFont.getName(PdfDictionary.BaseFont);
         }
 
-        if(rawFont==null) {
+        if (rawFont == null) {
             rawFont = pdfObject.getName(PdfDictionary.Name);
         }
 
-        if(rawFont==null) {
+        if (rawFont == null) {
             rawFont = font_id;
         }
         return rawFont;
     }
 
     public String getFontSub(String rawFont) throws PdfException {
-        if(rawFont.indexOf('#')!=-1) {
+        if (rawFont.indexOf('#') != -1) {
             rawFont = StringUtils.convertHexChars(rawFont);
         }
 
         //save in case we need later
-        rawFontName=rawFont;
+        rawFontName = rawFont;
 
-        baseFont=(rawFont).toLowerCase();
+        baseFont = (rawFont).toLowerCase();
 
         //strip any postscript
-        final int pointer=baseFont.indexOf('+');
-        if(pointer==6) {
+        final int pointer = baseFont.indexOf('+');
+        if (pointer == 6) {
             baseFont = baseFont.substring(7);
         }
 
-        String testFont=baseFont, nextSubType;
+        String testFont = baseFont, nextSubType;
 
-        subFont= FontMappings.fontSubstitutionLocation.get(testFont);
+        subFont = FontMappings.fontSubstitutionLocation.get(testFont);
 
-        String newSubtype= FontMappings.fontSubstitutionTable.get(testFont);
+        String newSubtype = FontMappings.fontSubstitutionTable.get(testFont);
 
         //do not replace on MAC as default does not have certain values we need
-        if(DecoderOptions.isRunningOnMac && testFont.equals("zapfdingbats")) {
+        if (DecoderOptions.isRunningOnMac && testFont.equals("zapfdingbats")) {
             testFont = "No match found";
         }
 
         //check aliases
-        if(newSubtype==null){
+        if (newSubtype == null) {
             //check for mapping
-            final HashSet<String> fontsMapped=new HashSet<String>(50);
+            final HashSet<String> fontsMapped = new HashSet<String>(50);
             String nextFont;
-            while(true){
-                nextFont= FontMappings.fontSubstitutionAliasTable.get(testFont);
+            while (true) {
+                nextFont = FontMappings.fontSubstitutionAliasTable.get(testFont);
 
-                if(nextFont==null) {
+                if (nextFont == null) {
                     break;
                 }
 
-                testFont=nextFont;
+                testFont = nextFont;
 
-                nextSubType= FontMappings.fontSubstitutionTable.get(testFont);
+                nextSubType = FontMappings.fontSubstitutionTable.get(testFont);
 
-                if(nextSubType!=null){
-                    newSubtype=nextSubType;
-                    subFont= FontMappings.fontSubstitutionLocation.get(testFont);
+                if (nextSubType != null) {
+                    newSubtype = nextSubType;
+                    subFont = FontMappings.fontSubstitutionLocation.get(testFont);
                 }
 
-                if(fontsMapped.contains(testFont)){
-                	//use string buffer and stringbuilder does not exist in java ME
+                if (fontsMapped.contains(testFont)) {
+                    //use string buffer and stringbuilder does not exist in java ME
                     final StringBuilder errorMessage = new StringBuilder("[PDF] Circular font mapping for fonts");
                     for (final Object o : fontsMapped.toArray()) {
                         errorMessage.append(' ');
@@ -517,16 +526,16 @@ public class PdfFontFactory {
     public static boolean isFontEmbedded(PdfObject pdfObject) {
 
         //ensure we are looking in DescendantFonts object if CID
-        final int fontType=pdfObject.getParameterConstant(PdfDictionary.Subtype);
-        if (fontType==StandardFonts.TYPE0) {
+        final int fontType = pdfObject.getParameterConstant(PdfDictionary.Subtype);
+        if (fontType == StandardFonts.TYPE0) {
             pdfObject = pdfObject.getDictionary(PdfDictionary.DescendantFonts);
         }
 
 
-        final PdfObject descFontObj=pdfObject.getDictionary(PdfDictionary.FontDescriptor);
+        final PdfObject descFontObj = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
 
 
-        if(descFontObj==null) {
+        if (descFontObj == null) {
             return false;
         } else {
             return descFontObj.hasStream();
@@ -543,7 +552,7 @@ public class PdfFontFactory {
     }
 
     public void resetfontsInFile() {
-        fontsInFile="";
+        fontsInFile = "";
     }
 
     public boolean hasEmbeddedFonts() {

@@ -40,6 +40,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.*;
+
 import org.jpedal.PdfDecoderInt;
 import org.jpedal.examples.handlers.DefaultImageHelper;
 import org.jpedal.examples.viewer.Values;
@@ -59,15 +60,15 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
     public static void execute(final Values commonValues, final GUIFactory currentGUI, final PdfDecoderInt decode_pdf) {
         extractSelectedScreenAsImage(commonValues, currentGUI, decode_pdf); //Calls the generic code.
 
-        if(snapShot == null){
+        if (snapShot == null) {
             return;
         }
-        
+
         final Container frame = (Container) currentGUI.getFrame();
         final JDialog displayFrame = new JDialog((Frame) null, true);
         final JPanel image_display = new JPanel();
 
-        
+
         //Set up dialog
         displayFrame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         if (commonValues.getModeOfOperation() != Values.RUNNING_APPLET) {
@@ -75,7 +76,7 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
             displayFrame.setLocation(frame.getLocationOnScreen().x + 10, frame.getLocationOnScreen().y + 10);
         }
 
-        
+
         //Set up imagedisplay
         String propValue = currentGUI.getProperties().getValue("replacePdfDisplayBackground");
         if (!propValue.isEmpty()
@@ -97,15 +98,15 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                 image_display.setBackground(new Color(190, 190, 190));
             }
         }
-        
+
         final IconiseImage icon_image = new IconiseImage(snapShot);
         image_display.add(new JLabel(icon_image), BorderLayout.CENTER);
-        
-        
+
+
         //Set up button bar
         final JPanel buttonBar = new JPanel();
         buttonBar.setBackground(image_display.getBackground());
-        
+
         final JButton copy = new JButton(Messages.getMessage("PdfSnapshotPreview.Copy"));
         copy.setFont(new Font("SansSerif", Font.PLAIN, 12));
         buttonBar.add(copy, BorderLayout.EAST);
@@ -170,8 +171,8 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                         if (file.exists()) {
 
                             final int n = currentGUI.showConfirmDialog(fileToSave.append('\n')
-                                    + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + ".\n"
-                                    + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
+                                            + Messages.getMessage("PdfViewerMessage.FileAlreadyExists") + ".\n"
+                                            + Messages.getMessage("PdfViewerMessage.ConfirmResave"),
                                     Messages.getMessage("PdfViewerMessage.Resave"), JOptionPane.YES_NO_OPTION);
                             if (n == 1) {
                                 continue;
@@ -211,8 +212,8 @@ public class ExtractSelectionAsImage extends GUIExtractSelectionAsImage {
                 displayFrame.dispose();
             }
         });
-        
-        
+
+
         //Add all components to dialog
         displayFrame.setTitle(Messages.getMessage("PdfViewerMessage.SaveImage"));
         displayFrame.getContentPane().add(image_display, BorderLayout.CENTER);
