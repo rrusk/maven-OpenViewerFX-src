@@ -147,7 +147,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable {
             strokeWidth = -strokeWidth;
         }
 
-        if (useHinting) {
+        if (hasHinting()) {
             //Scale down glyph
             g2.scale(1 / 100d, 1 / 100d);
 
@@ -177,7 +177,7 @@ public class TTGlyph extends BaseTTGlyph implements Serializable {
             }
         }
 
-        if (useHinting) {
+        if (hasHinting()) {
             //Restore stroke width and scaling
             g2.setStroke(oldStroke);
             g2.setTransform(restore);

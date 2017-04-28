@@ -30,12 +30,13 @@
  * OneBitDownSampler.java
  * ---------------
  */
-
 package org.jpedal.parser.image.downsample;
 
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.DeviceRGBColorSpace;
 import org.jpedal.color.GenericColorSpace;
+import org.jpedal.images.SamplingFactory;
+import org.jpedal.parser.image.PdfImageTypes;
 import org.jpedal.parser.image.data.ImageData;
 
 /**
@@ -48,7 +49,7 @@ class OneBitDownSampler {
         final byte[] data = imageData.getObjectData();
 
         final int[] flag = {1, 2, 4, 8, 16, 32, 64, 128};
-        
+
         /* if(sampling>2){
             
             System.out.println("downSample ="+sampling);
@@ -103,7 +104,6 @@ class OneBitDownSampler {
         
         System.out.println("downSample ="+sampling);
         /**/
-
         final int newW = imageData.getWidth() / sampling;
         final int newH = imageData.getHeight() / sampling;
 
@@ -151,7 +151,6 @@ class OneBitDownSampler {
         //suggest you add kernel sharpening here
         //@bethan
         //imageData=KernelUtils.sharpenGrayScale(imageData,w,h);
-
         //remap Separation as already converted here
         if (decodeColorData.getID() == ColorSpaces.Separation || decodeColorData.getID() == ColorSpaces.DeviceN) {
             decodeColorData = new DeviceRGBColorSpace();
@@ -167,6 +166,57 @@ class OneBitDownSampler {
         return decodeColorData;
     }
 
+    static void downSampleAs1Bit(final int sampling, final ImageData imageData, GenericColorSpace decodeColorData) {
+
+        final byte[] data = imageData.getObjectData();
+
+        final int[] flag = {1, 2, 4, 8, 16, 32, 64, 128};
+
+        final int newW = imageData.getWidth() / sampling;
+        final int newH = imageData.getHeight() / sampling;
+
+        final int size = newW * newH;
+
+        final byte[] newData = new byte[size];
+
+        final int origLineLength = (imageData.getWidth() + 7) >> 3;
+
+        //scan all pixels and down-sample
+        for (int y = 0; y < newH; y++) {
+            for (int x = 0; x < newW; x++) {
+
+                //allow for edges in number of pixels left
+                int wCount = sampling, hCount = sampling;
+                final int wGapLeft = imageData.getWidth() - x;
+                final int hGapLeft = imageData.getHeight() - y;
+                if (wCount > wGapLeft) {
+                    wCount = wGapLeft;
+                }
+                if (hCount > hGapLeft) {
+                    hCount = hGapLeft;
+                }
+
+                //count pixels in sample we will make into a pixel (ie 2x2 is 4 pixels , 4x4 is 16 pixels)
+                final int bytes = getPixelSetCount(sampling, false, data, flag, origLineLength, y, x, wCount, hCount);
+
+                final int count = (wCount * hCount);
+
+                //set value as white or average of pixels
+                final int offset = x + (newW * y);
+
+                if (bytes / count > 0.5f) {
+                    newData[offset] = (byte) (newData[offset] | (flag[7 - ((x & 7))]));
+                }
+            }
+        }
+
+        imageData.setWidth(newW);
+        imageData.setHeight(newH);
+
+        imageData.setObjectData(newData);
+
+    }
+
     private static void invertBytes(final byte[] newData) {
         final int count = newData.length;
         for (int aa = 0; aa < count; aa++) {
@@ -174,17 +224,14 @@ class OneBitDownSampler {
         }
     }
 
-    public static GenericColorSpace downSampleMask(final int sampling, final ImageData imageData,
-                                                   final byte[] maskCol, GenericColorSpace decodeColorData) {
+    public static void downsampleTo8Bit(final int sampling, final ImageData imageData) {
 
         final byte[] data = imageData.getObjectData();
 
         final int newW = imageData.getWidth() / sampling;
         final int newH = imageData.getHeight() / sampling;
 
-        final int size = newW * newH * 4;
-
-        maskCol[3] = (byte) 255;
+        final int size = newW * newH;
 
         final byte[] newData = new byte[size];
 
@@ -216,14 +263,51 @@ class OneBitDownSampler {
                 final int offset = x + (newW * y);
 
                 if (count > 0) {
-                    for (int ii = 0; ii < 4; ii++) {
-                        newData[(offset * 4) + ii] = (byte) ((((maskCol[ii] & 255) * bytes) / count));
-                    }
-                } else {
+                    newData[offset] = (byte) (255 * bytes / count);
+                }
+            }
+        }
 
-                    for (int ii = 0; ii < 3; ii++) {
-                        newData[(offset * 4) + ii] = (byte) 0;
-                    }
+        imageData.setWidth(newW);
+        imageData.setHeight(newH);
+        imageData.setObjectData(newData);
+
+        imageData.setDepth(8);
+        imageData.setCompCount(1);
+
+    }
+
+    static void convertToARGB(final ImageData imageData, final byte[] maskCol, final boolean scaleTransparency) {
+
+        final byte[] data = imageData.getObjectData();
+
+        final int newW = imageData.getWidth();
+        final int newH = imageData.getHeight();
+
+        final int size = newW * newH * 4;
+
+        final byte[] newData = new byte[size];
+
+        //scan all pixels and down-sample
+        for (int y = 0; y < newH; y++) {
+            for (int x = 0; x < newW; x++) {
+
+                //set value as white or average of pixels
+                final int offset = x + (newW * y);
+
+                final int bytes = data[offset] & 255;
+
+                int ptr = 4;
+
+                if (bytes < 128) {
+                    ptr = 0;
+                }
+
+                System.arraycopy(maskCol, 0 + ptr, newData, (offset * 4) + 0, 3);
+                if (scaleTransparency) {
+                    newData[(offset * 4) + 3] = (byte) (((maskCol[3 + ptr] & 255) * bytes) >> 8);
+                } else {
+                    newData[(offset * 4) + 3] = maskCol[3 + ptr];
                 }
             }
         }
@@ -231,24 +315,14 @@ class OneBitDownSampler {
         imageData.setWidth(newW);
         imageData.setHeight(newH);
 
-        //remap Separation as already converted here
-        if (decodeColorData.getID() == ColorSpaces.Separation || decodeColorData.getID() == ColorSpaces.DeviceN) {
-            decodeColorData = new DeviceRGBColorSpace();
-
-            imageData.setCompCount(1);
-            invertBytes(newData);
-        }
-
         imageData.setObjectData(newData);
 
         imageData.setDepth(8);
 
-        return decodeColorData;
     }
 
-
     public static GenericColorSpace downSampleIndexed(final int sampling, final ImageData imageData,
-                                                      final byte[] index, GenericColorSpace decodeColorData) {
+            final byte[] index, GenericColorSpace decodeColorData) {
 
         final byte[] data = imageData.getObjectData();
 
@@ -330,7 +404,7 @@ class OneBitDownSampler {
     }
 
     private static int getPixelSetCount(final int sampling, final boolean imageMask, final byte[] data, final int[] flag, final int origLineLength,
-                                        final int y, final int x, final int wCount, final int hCount) {
+            final int y, final int x, final int wCount, final int hCount) {
 
         byte currentByte;
         int bit;
@@ -360,5 +434,48 @@ class OneBitDownSampler {
             }
         }
         return bytes;
+    }
+
+    public static GenericColorSpace downSample(GenericColorSpace decodeColorData, final byte[] maskCol, final int sampling, ImageData imageData) {
+
+        byte[] index = decodeColorData.getIndexedMap();
+
+        final boolean needsSharpening = (SamplingFactory.kernelSharpen
+                || SamplingFactory.downsampleLevel == SamplingFactory.mediumAndSharpen
+                || SamplingFactory.downsampleLevel == SamplingFactory.highAndSharpen);
+
+        byte[] colIndex = null;
+
+        boolean scaleTransparency = true;
+        if (index != null) {
+            index = decodeColorData.convertIndexToRGB(index);
+
+            colIndex = new byte[]{index[3], index[4], index[5], (byte) 255, index[0], index[1], index[2], (byte) 255};
+            decodeColorData = new DeviceRGBColorSpace();
+
+            scaleTransparency = false;
+
+        } else if (maskCol != null) {
+            colIndex = new byte[]{0, 0, 0, (byte) 255, maskCol[0], maskCol[1], maskCol[2], (byte) 255};
+        }
+        if (colIndex != null) {
+
+            OneBitDownSampler.downsampleTo8Bit(sampling, imageData);
+            if (needsSharpening && sampling < 8) {
+                KernelUtils.applyKernel(imageData);
+            }
+
+            OneBitDownSampler.convertToARGB(imageData, colIndex, scaleTransparency);
+            imageData.setIsConvertedToARGB(true);
+
+        } else {
+            decodeColorData = OneBitDownSampler.downSample(sampling, imageData, decodeColorData);
+            imageData.setImageType(PdfImageTypes.Binary);
+
+            if (needsSharpening && sampling < 8) {
+                KernelUtils.applyKernel(imageData);
+            }
+        }
+        return decodeColorData;
     }
 }

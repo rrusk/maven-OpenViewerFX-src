@@ -252,9 +252,6 @@ public class JavaFXCommands extends Commands {
                 case OPENURL:
                     JavaFXOpenFile.executeOpenURL(args, commonValues, searchFrame, currentGUI, decode_pdf, properties, thumbnails);
                     break;
-                case RSS:
-                    JavaFXRSSyndication.execute(args);
-                    break;
                 case EXIT:
                     JavaFXExit.execute(args, thumbnails, currentGUI, commonValues, decode_pdf, properties);
                     break;

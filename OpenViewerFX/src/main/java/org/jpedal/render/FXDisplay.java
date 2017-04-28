@@ -59,7 +59,6 @@ import org.jpedal.color.*;
 import org.jpedal.exception.PdfException;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.glyph.PdfGlyph;
-import org.jpedal.fonts.tt.TTGlyph;
 import org.jpedal.function.FunctionFactory;
 import org.jpedal.function.PDFFunction;
 import org.jpedal.io.ObjectStore;
@@ -601,7 +600,7 @@ public class FXDisplay extends GUIDisplay {
             } else {
                 final double r = 1d / 100d;
 
-                if (!TTGlyph.useHinting) {
+                if (!embeddedGlyph.hasHinting()) {
                     path.getTransforms().setAll(Transform.affine(textScaling[0], textScaling[1], textScaling[2], textScaling[3], textScaling[4], textScaling[5]));
                 } else {
                     path.getTransforms().setAll(Transform.affine(textScaling[0] * r, textScaling[1] * r, textScaling[2] * r, textScaling[3] * r, textScaling[4], textScaling[5]));

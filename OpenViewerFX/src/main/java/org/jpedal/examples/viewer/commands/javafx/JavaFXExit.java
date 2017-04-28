@@ -120,7 +120,7 @@ public class JavaFXExit {
         }
 
         //formClickTest needs this so that it does not exit after first test.
-        if (org.jpedal.DevFlags.GUITESTINGINPROGRESS || !SharedViewer.exitOnClose) {
+        if (!SharedViewer.exitOnClose) {
             currentGUI.dispose();
 
         } else {

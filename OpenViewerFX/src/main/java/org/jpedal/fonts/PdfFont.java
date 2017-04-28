@@ -33,10 +33,12 @@
 package org.jpedal.fonts;
 
 //standard java
-
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -58,552 +60,582 @@ import org.jpedal.utils.NumberUtils;
  */
 public class PdfFont implements Serializable {
 
-    PdfObject ToUnicode;
+	PdfObject ToUnicode;
 
-    String truncatedName;
+	String truncatedName;
 
-    private boolean isArial;
+	private boolean isArial;
 
-    private boolean isWidthVertical;
+	private boolean isWidthVertical;
 
-    private Rectangle BBox;
+	private Rectangle BBox;
 
-    public String CMapName;
+	public String CMapName;
 
-    boolean handleOddSapFontMapping;
+	boolean handleOddSapFontMapping;
 
-    /**
-     * used to track if CID font is double byte or not by looking at first 2 values
-     */
-    boolean isFirstScan = true;
+	/**
+	 * used to track if CID font is double byte or not by looking at first 2
+	 * values
+	 */
+	boolean isFirstScan = true;
 
-    int isDouble = -1; //-1=unset
+	int isDouble = -1; //-1=unset
 
-    //value to use if no width set for this
-    private static final int noWidth = -1;
+	//value to use if no width set for this
+	private static final int noWidth = -1;
 
-    //workaroud for type3 fonts which contain both Hex and Denary Differences tables
-    protected boolean containsHexNumbers, allNumbers;
+	//workaroud for type3 fonts which contain both Hex and Denary Differences tables
+	protected boolean containsHexNumbers, allNumbers;
 
-    protected String embeddedFontName, embeddedFamilyName, copyright;
+	protected String embeddedFontName, embeddedFamilyName, copyright;
 
-    private int objID;
+	private int objID;
 
-    private float missingWidth = noWidth;
+	private float missingWidth = noWidth;
 
-    boolean isSingleByte;
+	boolean isSingleByte;
 
-    protected boolean isFontVertical;
+	protected boolean isFontVertical;
 
-    /**
-     * cached value for last width value returned
-     */
-    private float lastWidth = noWidth;
+	/**
+	 * cached value for last width value returned
+	 */
+	private float lastWidth = noWidth;
 
-    public PdfJavaGlyphs glyphs = new PdfJavaGlyphs();
+	public PdfJavaGlyphs glyphs = new PdfJavaGlyphs();
 
-    /**
-     * cache for translate values
-     */
-    private String[] cachedValue = new String[256];
+	/**
+	 * cache for translate values
+	 */
+	private String[] cachedValue = new String[256];
 
-    //unmapped font name
-    private String rawFontName;
+	//unmapped font name
+	private String rawFontName;
 
-    //used by HTML to translate non-standard glyfs to correct values
-    final Map<String, Integer> nonStandardMappings = new HashMap<String, Integer>(256);
+	//used by HTML to translate non-standard glyfs to correct values
+	final Map<String, Integer> nonStandardMappings = new HashMap<String, Integer>(256);
 
-    public boolean hasDoubleBytes;
+	public boolean hasDoubleBytes;
 
-    static {
-        setStandardFontMappings();
-    }
+	/**
+	 * adobe specified cmaps used in encoding
+	 */
+	public CmapSpec encodingCmapSpec;
 
-    public PdfFont() {
-    }
+	static {
+		setStandardFontMappings();
+	}
 
-    /**
-     * get handles onto Reader so we can access the file
-     */
-    public PdfFont(final PdfObjectReader current_pdf_file) {
+	public PdfFont() {
+	}
 
-        init(current_pdf_file);
+	/**
+	 * get handles onto Reader so we can access the file
+	 */
+	public PdfFont(final PdfObjectReader current_pdf_file) {
 
-    }
+		init(current_pdf_file);
 
-    public String getTruncatedName() {
-        return truncatedName;
-    }
+	}
 
-    private static void setStandardFontMappings() {
+	public String getTruncatedName() {
+		return truncatedName;
+	}
 
-        final int count = StandardFonts.files_names.length;
+	private static void setStandardFontMappings() {
 
-        for (int i = 0; i < count; i++) {
-            final String key = StandardFonts.files_names_bis[i].toLowerCase();
-            final String value = StandardFonts.javaFonts[i].toLowerCase();
+		final int count = StandardFonts.files_names.length;
 
-            if ((!key.equals(value)) && (!FontMappings.fontSubstitutionAliasTable.containsKey(key))) {
-                FontMappings.fontSubstitutionAliasTable.put(key, value);
-            }
+		for (int i = 0; i < count; i++) {
+			final String key = StandardFonts.files_names_bis[i].toLowerCase();
+			final String value = StandardFonts.javaFonts[i].toLowerCase();
 
-        }
+			if ((!key.equals(value)) && (!FontMappings.fontSubstitutionAliasTable.containsKey(key))) {
+				FontMappings.fontSubstitutionAliasTable.put(key, value);
+			}
 
-        for (int i = 0; i < count; i++) {
+		}
 
-            final String key = StandardFonts.files_names[i].toLowerCase();
-            final String value = StandardFonts.javaFonts[i].toLowerCase();
-            if ((!key.equals(value)) && (!FontMappings.fontSubstitutionAliasTable.containsKey(key))) {
-                FontMappings.fontSubstitutionAliasTable.put(key, value);
-            }
-            StandardFonts.javaFontList.put(StandardFonts.files_names[i], "x");
-        }
+		for (int i = 0; i < count; i++) {
 
-
-    }
-
-
-    protected String substituteFont;
-
-    protected boolean renderPage;
-
-    private static final float xscale = (float) 0.001;
-
-    /**
-     * embedded encoding
-     */
-    protected int embeddedEnc = StandardFonts.STD;
-
-    /**
-     * holds lookup to map char differences in embedded font
-     */
-    protected String[] diffs;
-
-    /**
-     * flag to show if Font included embedded data
-     */
-    public boolean isFontEmbedded;
-
-    /*show if font stream CID*/
-    protected boolean TTstreamisCID;
-
-    /**
-     * String used to reference font (ie F1)
-     */
-    protected String fontID = "";
-
-    /**
-     * number of glyphs - 65536 for CID fonts
-     */
-    protected int maxCharCount = 256;
-
-    /**
-     * show if encoding set
-     */
-    protected boolean hasEncoding = true;
-
-    /**
-     * font type
-     */
-    protected int fontTypes;
-
-    protected String substituteFontFile;
-
-    /**
-     * lookup to track which char is space. -1 means none set
-     */
-    private int spaceChar = -1;
-
-    /**
-     * holds lookup to map char differences
-     */
-    String[] diffTable;
-
-    protected final Map<String, Integer> rawDiffKeys = new HashMap<String, Integer>();
-
-    private int[] diffCharTable;
-
-    /**
-     * lookup for which of each char for embedded fonts which we can flush
-     */
-    private float[] widthTable;
-
-    /**
-     * size to use for space if not defined (-1 is no setting)
-     */
-    private float possibleSpaceWidth = noWidth;
-
-    /**
-     * handle onto file access
-     */
-    protected PdfObjectReader currentPdfFile;
-
-    /**
-     * loader to load data from jar
-     */
-    protected final ClassLoader loader = this.getClass().getClassLoader();
-
-    /**
-     * FontBBox for font
-     */
-    public double[] FontMatrix = {0.001d, 0d, 0d, 0.001d, 0, 0};
-
-    /**
-     * font bounding box
-     */
-    public float[] FontBBox = {0f, 0f, 1000f, 1000f};
-
-    /**
-     * flag to show
-     * Gxxx, Bxxx, Cxxx.
-     */
-    protected boolean isHex;
-
-    /**
-     * holds lookup to map char values
-     */
-    private String[] unicodeMappings;
-
-    /**
-     * encoding pattern used for font. -1 means not set
-     */
-    protected int fontEnc = -1;
-
-    /**
-     * flag to show type of font
-     */
-    protected boolean isCIDFont;
-
-    /**
-     * lookup CID index mappings
-     */
-    private String[] CMAP;
-    private int[] rawCMAP;
-
-    /**
-     * CID font encoding
-     */
-    private String CIDfontEncoding;
-
-    /**
-     * default width for font
-     */
-    private float defaultWidth = -1f;
-
-    protected boolean isFontSubstituted;
-
-    protected int italicAngle;
-
-    private byte[] stream;
-
-    private int[] CIDToGIDMap;
-
-    boolean hasCIDToGIDMap;
-
-    /**
-     * used to show truetype used for type 0 CID
-     */
-    public boolean isFontSubstituted() {
-        return isFontSubstituted;
-    }
-
-    /**
-     * Method to add the widths of a CID font
-     */
-    private void setCIDFontWidths(final Object[] values) {
-
-        widthTable = new float[65536];
-
-        //set all values to -1 so I can spot ones with no value
-        for (int ii = 0; ii < 65536; ii++) {
-            widthTable[ii] = noWidth;
-        }
-
-        int ptr = 0;
-        final int count = values.length;
-        int start;
-        int end;
-        float nextWidth;
-        byte[] nextNumber = null, rawNextWidth;
-        Object o;
-        for (int i = 0; i < count; i++) {
-
-            o = values[i];
-            if (o instanceof byte[]) {
-
-                if (nextNumber != null) { //part of a range
-                    start = ptr;
-                    nextNumber = ((byte[]) o);
-                    end = NumberUtils.parseInt(0, nextNumber.length, nextNumber);
-
-                    //we also need to read last value of series
-                    i++;
-                    nextNumber = ((byte[]) values[i]);
-
-                    nextWidth = NumberUtils.parseFloat(0, nextNumber.length, nextNumber) / 1000f;
-
-                    for (int i2 = start; i2 <= end; i2++) {
-                        widthTable[i2] = nextWidth;
-                    }
-                    // final byte[] decodeByteData= (byte[]) DecodeParmsArray[i];
-
-                    nextNumber = null;
-                } else { //single value
-                    nextNumber = ((byte[]) o);
-
-                    ptr = NumberUtils.parseInt(0, nextNumber.length, nextNumber);
-                }
-            } else {
-
-                nextNumber = null;
-                for (final Object widths : (Object[]) o) {
-                    rawNextWidth = ((byte[]) widths);
-                    nextWidth = NumberUtils.parseFloat(0, rawNextWidth.length, rawNextWidth) / 1000f;
-                    widthTable[ptr] = nextWidth;
-                    ptr++;
-                }
-            }
-        }
-    }
-
-    /**
-     * flag if CID font
-     */
-    public final boolean isCIDFont() {
-
-        return isCIDFont;
-    }
-
-    /**
-     * set number of glyphs to 256 or 65536
-     */
-    protected final void init(final PdfObjectReader current_pdf_file) {
-
-        this.currentPdfFile = current_pdf_file;
-
-        //setup font size and initialise objects
-        if (isCIDFont) {
-            maxCharCount = 65536;
-        }
-
-        glyphs.init(maxCharCount, isCIDFont);
-    }
-
-
-    /**
-     * return unicode value for this index value
-     */
-    public final String getUnicodeMapping(final int char_int) {
-        if (unicodeMappings == null || char_int >= unicodeMappings.length) {
-            return null;
-        } else {
-            return unicodeMappings[char_int];
-        }
-    }
-
-    /**
-     * store encoding and load required mappings
-     */
-    public final void putFontEncoding(int enc) {
-
-        if (enc == StandardFonts.WIN && getBaseFontName().equals("Symbol")) {
-            putFontEncoding(StandardFonts.SYMBOL);
-            enc = StandardFonts.SYMBOL;
-        }
-
-        fontEnc = enc;
-
-        StandardFonts.checkLoaded(enc);
-
-    }
-
-
-    /**
-     * return the mapped character
-     */
-    public final String getUnicodeValue(final String displayValue, final int rawInt) {
-
-        String textValue = getUnicodeMapping(rawInt);
-
-        if (textValue == null) {
-            textValue = displayValue;
-        }
-
-        //map out lignatures
-        if (!displayValue.isEmpty()) {
-            final int displayChar = displayValue.charAt(0);
-
-            switch (displayChar) {
-
-                case 173:
-                    if (fontEnc == StandardFonts.WIN || fontEnc == StandardFonts.STD) {
-                        textValue = "-";
-                    }
-                    break;
-
-                case 64256:
-                    textValue = "ff";
-                    break;
-
-                case 64257:
-                    textValue = "fi";
-                    break;
-
-                case 64260:
-                    textValue = "ffl";
-                    break;
-            }
-        }
-
-        return textValue;
-    }
-
-    /**
-     * convert value read from TJ operand into correct glyph<br>Also check to
-     * see if mapped onto unicode value
-     */
-    public final String getGlyphValue(final int rawInt) {
-
-        if (cachedValue[rawInt] != null) {
-            return cachedValue[rawInt];
-        }
-
-        String return_value = null;
-
-        if (isCIDFont) {
-
-            //	test for unicode
-            final String unicodeMappings = getUnicodeMapping(rawInt);
-            if (unicodeMappings != null) {
-                return_value = unicodeMappings;
-            }
-
-            if (return_value == null) {
-
-                //get font encoding
-                final String fontEncoding = CIDfontEncoding;
-
-                if (diffTable != null) {
-                    return_value = diffTable[rawInt];
-                } else if (fontEncoding != null) {
-                    if (fontEncoding.startsWith("Identity-")) {
-                        return_value = String.valueOf((char) rawInt);
-                    } else if (CMAP != null) {
-                        final String newChar = CMAP[rawInt];
-
-                        if (newChar != null) {
-                            return_value = newChar;
-                        }
-                    }
-                    //probably a bit of a hack to fix /PDFdata/baseline_screens/12dec/de0009797407_factsheets_b2c-voll_de_de_31102012_1360767414.pdf
-                } else if (fontEncoding == null && CMAP != null && CMapName != null && !CMapName.endsWith("-V") && !CMapName.endsWith("-H")) {
-                    final String newChar = CMAP[rawInt];
-
-                    if (newChar != null) {
-                        return_value = newChar;
-                    }
-                }
-
-                if (return_value == null) {
-                    return_value = String.valueOf(((char) rawInt));
-                }
-            }
-
-        } else {
-            return_value = getStandardGlyphValue(rawInt);
-        }
-
-        //save value for next time
-        cachedValue[rawInt] = return_value;
-
-        return return_value;
-
-    }
-
-
-    /**
-     * read translation table
-     *
-     * @throws PdfFontException
-     */
-    private String handleCIDEncoding(final PdfObject Encoding, final PdfObject fontObject) {
-        BufferedReader CIDstream = null;
-
-        final int encodingType = Encoding.getGeneralType(PdfDictionary.Encoding);
-        String encodingName = CIDEncodings.getNameForEncoding(encodingType);
-        //see if any general value (ie /UniCNS-UTF16-H not predefined in spec)
-        if (encodingName == null) {
-            if (encodingType == PdfDictionary.Identity_H) {
-                encodingName = "Identity-H";
-            } else if (encodingType == PdfDictionary.Identity_V) {
-                encodingName = "Identity-V";
-                isFontVertical = true;
-            } else {
-                encodingName = Encoding.getGeneralStringValue();
-            }
-        }
-
-        CMapName = Encoding.getName(PdfDictionary.CMapName);
-        if (CMapName != null) {
-
-            stream = currentPdfFile.readStream(Encoding, true, true, false, false, false, Encoding.getCacheName(currentPdfFile.getObjectReader()));
-            encodingName = CMapName;
-            
-            /*
+			final String key = StandardFonts.files_names[i].toLowerCase();
+			final String value = StandardFonts.javaFonts[i].toLowerCase();
+			if ((!key.equals(value)) && (!FontMappings.fontSubstitutionAliasTable.containsKey(key))) {
+				FontMappings.fontSubstitutionAliasTable.put(key, value);
+			}
+			StandardFonts.javaFontList.put(StandardFonts.files_names[i], "x");
+		}
+
+	}
+
+	protected String substituteFont;
+
+	protected boolean renderPage;
+
+	private static final float xscale = (float) 0.001;
+
+	/**
+	 * embedded encoding
+	 */
+	protected int embeddedEnc = StandardFonts.STD;
+
+	/**
+	 * holds lookup to map char differences in embedded font
+	 */
+	protected String[] diffs;
+
+	/**
+	 * flag to show if Font included embedded data
+	 */
+	public boolean isFontEmbedded;
+
+	/*show if font stream CID*/
+	protected boolean TTstreamisCID;
+
+	/**
+	 * String used to reference font (ie F1)
+	 */
+	protected String fontID = "";
+
+	/**
+	 * number of glyphs - 65536 for CID fonts
+	 */
+	protected int maxCharCount = 256;
+
+	/**
+	 * show if encoding set
+	 */
+	protected boolean hasEncoding = true;
+
+	/**
+	 * font type
+	 */
+	protected int fontTypes;
+
+	protected String substituteFontFile;
+
+	/**
+	 * lookup to track which char is space. -1 means none set
+	 */
+	private int spaceChar = -1;
+
+	/**
+	 * holds lookup to map char differences
+	 */
+	String[] diffTable;
+
+	protected final Map<String, Integer> rawDiffKeys = new HashMap<String, Integer>();
+
+	private int[] diffCharTable;
+
+	/**
+	 * lookup for which of each char for embedded fonts which we can flush
+	 */
+	private float[] widthTable;
+
+	/**
+	 * size to use for space if not defined (-1 is no setting)
+	 */
+	private float possibleSpaceWidth = noWidth;
+
+	/**
+	 * handle onto file access
+	 */
+	protected PdfObjectReader currentPdfFile;
+
+	/**
+	 * loader to load data from jar
+	 */
+	protected final ClassLoader loader = this.getClass().getClassLoader();
+
+	/**
+	 * FontBBox for font
+	 */
+	public double[] FontMatrix = {0.001d, 0d, 0d, 0.001d, 0, 0};
+
+	/**
+	 * font bounding box
+	 */
+	public float[] FontBBox = {0f, 0f, 1000f, 1000f};
+
+	/**
+	 * flag to show Gxxx, Bxxx, Cxxx.
+	 */
+	protected boolean isHex;
+
+	/**
+	 * holds lookup to map char values
+	 */
+	private String[] unicodeMappings;
+
+	/**
+	 * encoding pattern used for font. -1 means not set
+	 */
+	protected int fontEnc = -1;
+
+	/**
+	 * flag to show type of font
+	 */
+	protected boolean isCIDFont;
+
+	/**
+	 * lookup CID index mappings
+	 */
+	private String[] CMAP;
+	private int[] rawCMAP;
+
+	/**
+	 * CID font encoding
+	 */
+	private String CIDfontEncoding;
+
+	/**
+	 * default width for font
+	 */
+	private float defaultWidth = -1f;
+
+	protected boolean isFontSubstituted;
+
+	protected int italicAngle;
+
+	private byte[] stream;
+
+	private int[] CIDToGIDMap;
+
+	boolean hasCIDToGIDMap;
+
+	/**
+	 * used to show truetype used for type 0 CID
+	 */
+	public boolean isFontSubstituted() {
+		return isFontSubstituted;
+	}
+
+	/**
+	 * Method to add the widths of a CID font
+	 */
+	private void setCIDFontWidths(final Object[] values) {
+
+		widthTable = new float[65536];
+
+		//set all values to -1 so I can spot ones with no value
+		for (int ii = 0; ii < 65536; ii++) {
+			widthTable[ii] = noWidth;
+		}
+
+		int ptr = 0;
+		final int count = values.length;
+		int start;
+		int end;
+		float nextWidth;
+		byte[] nextNumber = null, rawNextWidth;
+		Object o;
+		for (int i = 0; i < count; i++) {
+
+			o = values[i];
+			if (o instanceof byte[]) {
+
+				if (nextNumber != null) { //part of a range
+					start = ptr;
+					nextNumber = ((byte[]) o);
+					end = NumberUtils.parseInt(0, nextNumber.length, nextNumber);
+
+					//we also need to read last value of series
+					i++;
+					nextNumber = ((byte[]) values[i]);
+
+					nextWidth = NumberUtils.parseFloat(0, nextNumber.length, nextNumber) / 1000f;
+
+					for (int i2 = start; i2 <= end; i2++) {
+						widthTable[i2] = nextWidth;
+					}
+					// final byte[] decodeByteData= (byte[]) DecodeParmsArray[i];
+
+					nextNumber = null;
+				} else { //single value
+					nextNumber = ((byte[]) o);
+
+					ptr = NumberUtils.parseInt(0, nextNumber.length, nextNumber);
+				}
+			} else {
+
+				nextNumber = null;
+				for (final Object widths : (Object[]) o) {
+					rawNextWidth = ((byte[]) widths);
+					nextWidth = NumberUtils.parseFloat(0, rawNextWidth.length, rawNextWidth) / 1000f;
+					widthTable[ptr] = nextWidth;
+					ptr++;
+				}
+			}
+		}
+	}
+
+	/**
+	 * flag if CID font
+	 */
+	public final boolean isCIDFont() {
+
+		return isCIDFont;
+	}
+
+	/**
+	 * set number of glyphs to 256 or 65536
+	 */
+	protected final void init(final PdfObjectReader current_pdf_file) {
+
+		this.currentPdfFile = current_pdf_file;
+
+		//setup font size and initialise objects
+		if (isCIDFont) {
+			maxCharCount = 65536;
+		}
+
+		glyphs.init(maxCharCount, isCIDFont);
+	}
+
+	/**
+	 * return unicode value for this index value
+	 */
+	public final String getUnicodeMapping(final int char_int) {
+		if (unicodeMappings == null || char_int >= unicodeMappings.length) {
+			return null;
+		} else {
+			return unicodeMappings[char_int];
+		}
+	}
+
+	/**
+	 * store encoding and load required mappings
+	 */
+	public final void putFontEncoding(int enc) {
+
+		if (enc == StandardFonts.WIN && getBaseFontName().equals("Symbol")) {
+			putFontEncoding(StandardFonts.SYMBOL);
+			enc = StandardFonts.SYMBOL;
+		}
+
+		fontEnc = enc;
+
+		StandardFonts.checkLoaded(enc);
+
+	}
+
+	/**
+	 * return the mapped character
+	 */
+	public final String getUnicodeValue(final String displayValue, final int rawInt) {
+
+		String textValue = getUnicodeMapping(rawInt);
+
+		if (textValue == null) {
+			textValue = displayValue;
+		}
+
+		//map out lignatures
+		if (!displayValue.isEmpty()) {
+			final int displayChar = displayValue.charAt(0);
+
+			switch (displayChar) {
+
+				case 173:
+					if (fontEnc == StandardFonts.WIN || fontEnc == StandardFonts.STD) {
+						textValue = "-";
+					}
+					break;
+
+				case 64256:
+					textValue = "ff";
+					break;
+
+				case 64257:
+					textValue = "fi";
+					break;
+
+				case 64260:
+					textValue = "ffl";
+					break;
+			}
+		}
+
+		return textValue;
+	}
+
+	/**
+	 * convert value read from TJ operand into correct glyph<br>Also check to
+	 * see if mapped onto unicode value
+	 */
+	public final String getGlyphValue(final int rawInt) {
+
+		if (cachedValue[rawInt] != null) {
+			return cachedValue[rawInt];
+		}
+
+		String return_value = null;
+
+		if (isCIDFont) {
+
+			//	test for unicode
+			final String unicodeMappings = getUnicodeMapping(rawInt);
+			if (unicodeMappings != null) {
+				return_value = unicodeMappings;
+			}
+
+			if (return_value == null) {
+
+				//get font encoding
+				final String fontEncoding = CIDfontEncoding;
+
+				if (diffTable != null) {
+					return_value = diffTable[rawInt];
+				} else if (fontEncoding != null) {
+					if (fontEncoding.startsWith("Identity-")) {
+						return_value = String.valueOf((char) rawInt);
+					} else if (CMAP != null) {
+						final String newChar = CMAP[rawInt];
+
+						if (newChar != null) {
+							return_value = newChar;
+						}
+					}
+					//probably a bit of a hack to fix /PDFdata/baseline_screens/12dec/de0009797407_factsheets_b2c-voll_de_de_31102012_1360767414.pdf
+				} else if (fontEncoding == null && CMAP != null && CMapName != null && !CMapName.endsWith("-V") && !CMapName.endsWith("-H")) {
+					final String newChar = CMAP[rawInt];
+
+					if (newChar != null) {
+						return_value = newChar;
+					}
+				}
+
+				if (return_value == null) {
+					return_value = String.valueOf(((char) rawInt));
+				}
+			}
+
+		} else {
+			return_value = getStandardGlyphValue(rawInt);
+		}
+
+		//save value for next time
+		cachedValue[rawInt] = return_value;
+
+		return return_value;
+
+	}
+
+	/**
+	 * read translation table
+	 *
+	 * @throws PdfFontException
+	 */
+	private String handleCIDEncoding(final PdfObject Encoding, final PdfObject fontObject) {
+		BufferedReader CIDstream = null;
+
+		final int encodingType = Encoding.getGeneralType(PdfDictionary.Encoding);
+		String suppliedEncodingName = CIDEncodings.getNameForEncoding(encodingType);
+		String encodingName = suppliedEncodingName;
+		//see if any general value (ie /UniCNS-UTF16-H not predefined in spec)
+		if (encodingName == null) {
+			if (encodingType == PdfDictionary.Identity_H) {
+				encodingName = "Identity-H";
+			} else if (encodingType == PdfDictionary.Identity_V) {
+				encodingName = "Identity-V";
+				isFontVertical = true;
+			} else {
+				encodingName = Encoding.getGeneralStringValue();
+			}
+		}
+		CMapName = Encoding.getName(PdfDictionary.CMapName);
+		if (CMapName != null) {
+
+			stream = currentPdfFile.readStream(Encoding, true, true, false, false, false, Encoding.getCacheName(currentPdfFile.getObjectReader()));
+			encodingName = CMapName;
+
+			/*
              * tidy up stream so it works nicely with
              * our simple Parser
-             */
-            String CMAPstream = new String(stream);
-            CMAPstream = CMAPstream.replaceAll(" begincidchar ", "\nbegincidchar\n");
-            CMAPstream = CMAPstream.replaceAll(" endcidchar", "\nendcidchar");
-            CMAPstream = CMAPstream.replaceAll(" begincidrange ", "\begincidrange\n");
-            CMAPstream = CMAPstream.replaceAll(" endcidrange", "\nendcidrange");
+			 */
+			String CMAPstream = new String(stream);
+			CMAPstream = CMAPstream.replaceAll(" begincidchar ", "\nbegincidchar\n");
+			CMAPstream = CMAPstream.replaceAll(" endcidchar", "\nendcidchar");
+			CMAPstream = CMAPstream.replaceAll(" begincidrange ", "\begincidrange\n");
+			CMAPstream = CMAPstream.replaceAll(" endcidrange", "\nendcidrange");
 
-            CIDstream = new BufferedReader(new StringReader(CMAPstream));
-        }
+			CIDstream = new BufferedReader(new StringReader(CMAPstream));
+		} else if (suppliedEncodingName != null) {
+//			System.out.println(encodingName);
+			if (encodingName.equals("90ms-RKSJ-H")
+					|| encodingName.equals("90msp-RKSJ-H")
+					|| encodingName.equals("78-RKSJ-H")
+					|| encodingName.equals("78ms-RKSJ-H")
+					|| encodingName.equals("83pv-RKSJ-H")
+					|| encodingName.equals("90pv-RKSJ-H")
+					|| encodingName.equals("ADD-RKSJ-H")
+					|| encodingName.equals("Ext-RKSJ-H")) {
+				BufferedReader input_stream = new BufferedReader(
+						new InputStreamReader(loader.getResourceAsStream("org/jpedal/res/cmaps/" + encodingName)));
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				String line;
+				try {
+					while (true) {
+						line = input_stream.readLine();
+						if (line == null) {
+							break;
+						} else {
+							bos.write(line.getBytes());
+							bos.write(10);
+						}
+					}
+					byte[] data = bos.toByteArray();
+					if (data.length > 0) {
+						encodingCmapSpec = new CmapSpec(data);
+						encodingCmapSpec.setCmapEncoding(new EncodingSJIS());
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
-        boolean isIdentity = (encodingType == PdfDictionary.Identity_H || encodingType == PdfDictionary.Identity_V);
+		boolean isIdentity = (encodingType == PdfDictionary.Identity_H || encodingType == PdfDictionary.Identity_V);
 
-        //System.out.println("Name="+encodingName+" "+encodingType);
+		//System.out.println("Name="+encodingName+" "+encodingType);
+		/*allow for odd file created by SAP*/
+		//baseline_screens/idoq/UAT 9001001438 INV_I58234.pdf
+		if (!isIdentity && fontObject != null) {
+			final String name = fontObject.getName(PdfDictionary.BaseFont);
+			if (encodingType != -1 && name != null && name.contains("Identity")) {
+				isIdentity = true;
+				handleOddSapFontMapping = true;
+				isSingleByte = true;
+			}
+
+		}
+
+		//investigate for daeja/Armando
+		//flag up some single file CIDs (bit of a hack for the moment)
+		//if(encodingType==CIDEncodings.CMAP_90ms_RKSJ_H){
+		//isSingleByte=true;
+		//}
         
-        /*allow for odd file created by SAP*/
-        //baseline_screens/idoq/UAT 9001001438 INV_I58234.pdf
+		/* put encoding in lookup table*/
+		if (CIDstream == null) {
+			CIDfontEncoding = encodingName;
+		}
 
-        if (!isIdentity && fontObject != null) {
-            final String name = fontObject.getName(PdfDictionary.BaseFont);
-            if (encodingType != -1 && name != null && name.contains("Identity")) {
-                isIdentity = true;
-                handleOddSapFontMapping = true;
-                isSingleByte = true;
-            }
-
-        }
-
-        //investigate for daeja/Armando
-        //flag up some single file CIDs (bit of a hack for the moment)
-        //if(encodingType==CIDEncodings.CMAP_90ms_RKSJ_H){
-        //isSingleByte=true;
-        //}
-        
-        /* put encoding in lookup table*/
-        if (CIDstream == null) {
-            CIDfontEncoding = encodingName;
-        }
-        
-        /* if not 2 standard encodings
+		/* if not 2 standard encodings
          * 	load CMAP
-         */
-        if (isIdentity) {
+		 */
+		if (isIdentity) {
 
-            glyphs.setIsIdentity(true);
+			glyphs.setIsIdentity(true);
 
-        } else {
+		} else {
 
-            //there are a large number of CMAP vtables provided by Adobe which I have put in cid.jar
-            //this code detects if present and reads the required table
-            //I also put a font in cid.jar which I think is probably a mistake now (we do not need it)
-
-            //test if cid.jar present on first time needed and throw exception if not
+			//there are a large number of CMAP vtables provided by Adobe which I have put in cid.jar
+			//this code detects if present and reads the required table
+			//I also put a font in cid.jar which I think is probably a mistake now (we do not need it)
+			//test if cid.jar present on first time needed and throw exception if not
 //            if(!isCidJarPresent  && CIDstream==null && StandardFonts.isAdobeCMAP(encodingName)){
 //                isCidJarPresent=true;
 //
@@ -618,1417 +650,1393 @@ public class PdfFont implements Serializable {
 //                    }
 //                }
 //            }
+			glyphs.setIsIdentity(false);
 
-            glyphs.setIsIdentity(false);
+			CMAP = new String[65536];
+			rawCMAP = new int[65536];
 
-            CMAP = new String[65536];
-            rawCMAP = new int[65536];
+			glyphs.CMAP_Translate = new int[65536];
 
-            glyphs.CMAP_Translate = new int[65536];
-
-            //load standard if not embedded
-            //try{
-
-            //20120718 commented out by Mark as cid.jar now works (and breaks existing files like customers3/japanese.pdf)
-            //if(CIDstream==null)
-            //CIDstream =new BufferedReader
-            //(new InputStreamReader(loader.getResourceAsStream("org/jpedal/res/cid/" + encodingName), "Cp1252"));
+			//load standard if not embedded
+			//try{
+			//20120718 commented out by Mark as cid.jar now works (and breaks existing files like customers3/japanese.pdf)
+			//if(CIDstream==null)
+			//CIDstream =new BufferedReader
+			//(new InputStreamReader(loader.getResourceAsStream("org/jpedal/res/cid/" + encodingName), "Cp1252"));
 //            } catch (Exception e) {
 //                e.printStackTrace(System.out);
 //                if(LogWriter.isOutput())
 //                    LogWriter.writeLog("1.Problem reading encoding for CID font "+fontID+" encoding="+encodingName+" Check CID.jar installed");
 //            }
-
-            //read values into lookup table
-            if (CIDstream != null) {
-                readCIDCMap(CIDstream);
-            }
-        }
-
-        if (CIDstream != null) {
-            try {
-                CIDstream.close();
-            } catch (final Exception e) {
-                LogWriter.writeLog("2.Problem reading encoding for CID font " + fontID + ' ' + encodingName + " Check CID.jar installed " + e);
-            }
-        }
-
-        return CMapName;
-    }
-
-    private void readCIDCMap(final BufferedReader CIDstream) {
-
-        String line = "";
-        int begin, end, entry;
-        boolean inDefinition = false, inMap = false;
-
-        while (true) {
-
-            try {
-                line = CIDstream.readLine();
-                //System.out.println(line);
-            } catch (final Exception e) {
-                LogWriter.writeLog("[PDF] Error reading line from font " + e.getMessage());
-            }
-
-            if (line == null) {
-                break;
-            }
-
-            if (line.contains("endcidrange")) {
-                inDefinition = false;
-            } else if (line.contains("endcidchar")) {
-                inMap = false;
-            }
-
-            if (inDefinition) {
-                final StringTokenizer CIDentry = new StringTokenizer(line, " <>[]");
-
-                //flag if multiple values
-                boolean multiple_values = false;
-                if (line.indexOf('[') != -1) {
-                    multiple_values = true;
-                }
-
-                //first 2 values define start and end
-                begin = Integer.parseInt(CIDentry.nextToken(), 16);
-                end = Integer.parseInt(CIDentry.nextToken(), 16);
-
-                //can be hex or base10
-                final String value = CIDentry.nextToken();
-                final int charCount = value.length();
-
-                //assume false and try to disprove - exit on first hex char
-                boolean isHex = false;
-                for (int ptr = 0; ptr < charCount; ptr++) {
-                    final char c = value.charAt(ptr);
-                    if (c >= 48 && c <= 57) {
-                    } else {
-                        isHex = true;
-                        ptr = charCount;
-                    }
-                }
-
-                if (isHex) {
-                    entry = Integer.parseInt(value, 16);
-                } else {
-                    entry = Integer.parseInt(value, 10);
-                }
-
-                //put into array
-                for (int i = begin; i < end + 1; i++) {
-                    if (multiple_values) {
-                        //put either single values or range
-                        entry = Integer.parseInt(CIDentry.nextToken(), 16);
-                        rawCMAP[i] = entry;
-                        CMAP[i] = String.valueOf((char) entry);
-                    } else {
-                        CMAP[i] = String.valueOf((char) entry);
-                        rawCMAP[i] = entry;
-                        entry++;
-                    }
-                }
-            } else if (inMap) {
-
-                try {
-                    final StringTokenizer CIDentry = new StringTokenizer(line, " <>[]");
-
-                    //System.out.println("line="+line+" "+CIDentry.countTokens());
-                    if (CIDentry.countTokens() == 2) {
-                        //flag if multiple values
-                        //boolean multiple_values = false;
-                        //if (line.indexOf('[') != -1)
-                        //	multiple_values = true;
-
-                        //first 2 values define start and end
-                        begin = Integer.parseInt(CIDentry.nextToken(), 16);
-                        end = Integer.parseInt(CIDentry.nextToken());
-                        //entry = Integer.parseInt(CIDentry.nextToken(), 16);
-
-                        //put into array
-                        //for (int i = begin; i < end + 1; i++) {
-                        //if (multiple_values == true) {
-                        //put either single values or range
-                        //entry =Integer.parseInt(CIDentry.nextToken(), 16);
-                        //CMAP[i]= String.valueOf((char) entry);
-                        //} else {
-
-                        rawCMAP[begin] = end;
-                        glyphs.CMAP_Translate[begin] = end;
-                        //entry++;
-                        //}
-                        //}
-                    }
-                } catch (final Exception ef) {
-                    LogWriter.writeLog("Exception " + ef);
-                }
-            }
-
-
-            if (line.contains("begincidrange")) {
-                inDefinition = true;
-            } else if (line.contains("begincidchar")) {
-                inMap = true;
-            }
-        }
-    }
-
-    /**
-     * convert value read from TJ operand into correct glyph<br> Also check to
-     * see if mapped onto unicode value
-     */
-    private String getStandardGlyphValue(final int char_int) {
-
-        //get possible unicode values
-        final String unicode_char = getUnicodeMapping(char_int);
-
-        //handle if unicode
-        if (unicode_char != null) { // & (mapped_char==null))
-            return unicode_char;
-        }
-
-        //not unicode so get mapped char
-        String return_value = "", mapped_char;
-
-        //get font encoding
-        final int font_encoding = getFontEncoding(true);
-
-        mapped_char = getMappedChar(char_int, true);
-
-        // handle if differences first then standard mappings
-        if (mapped_char != null) { //convert name into character
-
-            // First check if the char has been mapped specifically for this
-            String char_mapping = null;
-
-            if (this.fontEnc != -1) { //ignore if no encoding set
-                StandardFonts.getUnicodeName(this.fontEnc + mapped_char);
-            }
-
-            if (char_mapping != null) {
-                return_value = char_mapping;
-            } else {
-
-                char_mapping = StandardFonts.getUnicodeName(mapped_char);
-
-                if (char_mapping != null) {
-                    return_value = char_mapping;
-                } else {
-
-                    if (mapped_char.length() == 1) {
-                        return_value = mapped_char;
-                    } else if (mapped_char.length() > 1) {
-                        final char c = mapped_char.charAt(0);
-                        final char c2 = mapped_char.charAt(1);
-                        if (c == 'B' || c == 'C' || c == 'c' || c == 'G') {
-                            mapped_char = mapped_char.substring(1);
-                            try {
-                                final int val = (isHex)
-                                        ? Integer.valueOf(mapped_char, 16) : Integer.parseInt(mapped_char);
-                                return_value = String.valueOf((char) val);
-                            } catch (final Exception e) {
-                                LogWriter.writeLog("Exception in handling char value " + e);
-
-                                return_value = "";
-                            }
-                        } else {
-                            return_value = "";
-                        }
-
-                        //allow for hex number
-                        final boolean isHex = ((c >= 48 && c <= 57) || (c >= 97 && c <= 102) || (c >= 65 && c <= 70)) &&
-                                ((c2 >= 48 && c2 <= 57) || (c2 >= 97 && c2 <= 102) || (c2 >= 65 && c2 <= 70));
-
-                        if (return_value.isEmpty() && this.fontTypes == StandardFonts.TYPE3 && mapped_char.length() == 2 && isHex) {
-
-                            return_value = String.valueOf((char) Integer.parseInt(mapped_char, 16));
-
-                        }
-
-                        //handle some odd mappings in Type3 and other cases
-                        if (return_value.isEmpty()) {
-
-                            if (fontTypes == StandardFonts.TYPE3) { // && !StandardFonts.isValidGlyphName(char_mapping))
-                                return_value = String.valueOf((char) char_int);
-                            } else if (diffTable != null && diffTable[char_int] != null && fontEnc == StandardFonts.WIN) { //hack for odd file
-
-                                return_value = diffTable[char_int];
-                                if (return_value.indexOf('_') != -1) {
-                                    return_value = return_value.replaceAll("_", "");
-                                }
-                            }
-                        }
-
-                    } else {
-                        return_value = "";
-                    }
-                }
-            }
-        } else if (font_encoding > -1) { //handle encoding
-            return_value = StandardFonts.getEncodedChar(font_encoding, char_int);
-        }
-
-        return return_value;
-    }
-
-
-    /**
-     * set the font used for default from Java fonts on system
-     * - check it is a valid font (otherwise it will default to Lucida anyway)
-     */
-    public final void setDefaultDisplayFont(final String fontName) {
-
-        glyphs.defaultFont = fontName;
-
-    }
-
-    /**
-     * Returns the java font, initializing it first if it hasn't been used before.
-     */
-    public final Font getJavaFontX(final int size) {
-
-        //allow user to totally over-ride
-        //passing in this allows user to reset any global variables
-        //set in this method as well.
-        //Helper is a static instance of the inteface JPedalHelper
-        if (DecoderOptions.Helper != null) {
-            final Font f = DecoderOptions.Helper.getJavaFontX(this, size);
-            //if you want to implement JPedalHelper but not
-            //use this function, just return null
-            if (f != null) {
-                return f;
-            }
-
-        }
-
-        //noinspection MagicConstant
-        return new Font(glyphs.font_family_name, glyphs.style, size);
-
-    }
-
-    /**
-     * get font name as a string from ID (ie Tf /F1) and load if one of Adobe 14
-     */
-    public final String getFontName() {
-
-        //check if one of 14 standard fonts and load if needed
-        StandardFonts.loadStandardFontWidth(glyphs.fontName);
-
-        return glyphs.fontName;
-    }
-
-    /**
-     * get the copyright information
-     */
-    public final String getCopyright() {
-        return copyright;
-    }
-
-    /**
-     * get raw font name which may include +xxxxxx
-     */
-    public final String getBaseFontName() {
-
-        return glyphs.getBaseFontName();
-    }
-
-
-    /**
-     * get width of a space
-     */
-    public final float getCurrentFontSpaceWidth() {
-
-        float width;
-
-        //allow for space mapped onto other value
-        final int space_value = spaceChar;
-
-        if (space_value != -1) {
-            width = getWidth(space_value);
-        } else {
-            width = possibleSpaceWidth; //use shortest width as a guess
-        }
-
-        //allow for no value
-        if (width == noWidth || width == 0) {
-
-            width = 0.3f;
-            //Kept original in case new value shows issue in the future
-            //width = 0.2f;
-        }
-
-        return width;
-    }
-
-
-    /**
-     * get width of a space for HTML
-     */
-    public final float getSpaceWidthHTML() {
-
-        float width = 0;
-
-        if (spaceChar != -1) {
-            width = getWidth(spaceChar);
-        }
-
-        //allow for no value
-        if (width == noWidth || width == 0) {
-            width = 0.25f; // In HTML we use fontSize/4 - this is the same value that Chrome's reader (pdfium) uses
-        }
-
-        return width;
-    }
-
-    public final int getFontEncoding(final boolean notNull) {
-        int result = fontEnc;
-
-        if (result == -1 && notNull) {
-            result = StandardFonts.STD;
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns width of the specified character<br>
-     * Allows for no value set
-     */
-    public final float getWidth(final int charInt) {
-
-        //if -1 return last value fetched
-        if (charInt == -1) {
-            return lastWidth;
-        }
-
-        //try embedded font first (indexed by number)
-        float width = noWidth;
-
-        if (widthTable != null && charInt != -1 && charInt < maxCharCount) { // last check needed see case 17607
-            width = widthTable[charInt];
-        }
-
-        if (isCIDFont && rawCMAP != null && (width == noWidth || (hasCIDToGIDMap && isArial))) { //case 25600 - fudge until we have more exmaples
-            final int ptr = rawCMAP[charInt];
-            if (ptr > 0) {
-                width = widthTable[ptr];
-            }
-        }
-
-        if (width == noWidth) {
-
-            if (isCIDFont) {
-                width = defaultWidth;
-
-            } else {
-
-                //try standard values which are indexed under NAME of char
-                String charName = getMappedChar(charInt, false);
-
-                if ((charName != null) && (charName.equals(".notdef"))) {
-                    charName = StandardFonts.getUnicodeChar(getFontEncoding(true), charInt);
-                }
-
-                Float value = StandardFonts.getStandardWidth(glyphs.logicalfontName, charName);
-
-                //allow for remapping of base 14 with no width
-                if (value == null && rawFontName != null) {
-
-                    //check loaded
-                    StandardFonts.loadStandardFontWidth(rawFontName);
-
-                    //try again
-                    value = StandardFonts.getStandardWidth(rawFontName, charName);
-
-                }
-
-                if (value != null) {
-                    width = value;
-                } else {
-                    if (missingWidth != noWidth) {
-                        width = missingWidth * xscale;
-                    } else {
-                        width = 0;
-                    }
-                }
-            }
-        }
-
-        //cache value so we can reread
-        lastWidth = width;
-
-        return width;
-    }
-
-    /**
-     * generic CID code
-     *
-     * @throws PdfFontException
-     */
-    public void createCIDFont(final PdfObject pdfObject, final PdfObject Descendent) throws PdfFontException {
-
-        cachedValue = new String[65536];
-
-        String CMapName = null;
-
-        final PdfObject Encoding = pdfObject.getDictionary(PdfDictionary.Encoding);
-        if (Encoding != null) {
-            CMapName = handleCIDEncoding(Encoding, pdfObject);
-        }
-
-        //handle to unicode mapping
-        ToUnicode = pdfObject.getDictionary(PdfDictionary.ToUnicode);
-        if (ToUnicode != null) {
-            final UnicodeReader uniReader = new UnicodeReader(currentPdfFile.readStream(ToUnicode, true, true, false, false, false, ToUnicode.getCacheName(currentPdfFile.getObjectReader())));
-            unicodeMappings = uniReader.readUnicode();
-            hasDoubleBytes = uniReader.hasDoubleByteValues();
-        }
-
-        Object[] widths = Descendent.getObjectArray(PdfDictionary.W);
-
-        //allow for vertical
-        final Object[] verticalWidths = Descendent.getObjectArray(PdfDictionary.W2);
-        if (verticalWidths != null) {
-            widths = verticalWidths;
-            isWidthVertical = true;
-        }
-
-        if (widths != null) {
-            setCIDFontWidths(widths);
-            defaultWidth = 1f;
-        }
-
-        final int Width = Descendent.getInt(PdfDictionary.DW);
-        if (Width >= 0) {
-            defaultWidth = (Width) / 1000f;
-        }
-
-        final int[] VerticalWidth = Descendent.getIntArray(PdfDictionary.DW2);
-        if (VerticalWidth != null) { //may need more detailed implementation of vertical spacing (se PDFspec chapter 5)
-            isWidthVertical = true;
-            defaultWidth = (VerticalWidth[1]) / 1000f;
-        }
-
-        //it looks like in this case it uses average of values
-        //but not enough data
-        if (handleOddSapFontMapping) {
-            defaultWidth = .5f;
-        }
-
-        final PdfObject FontDescriptor = Descendent.getDictionary(PdfDictionary.FontDescriptor);
-
-        //allow for no value set (when we use 1)
-        if (FontDescriptor != null && defaultWidth == -1) {
-            final int AvgWidth = FontDescriptor.getInt(PdfDictionary.AvgWidth);
-
-            if (AvgWidth != -1) {
-                defaultWidth = 1;
-            }
-        }
-        final PdfObject CIDToGID = Descendent.getDictionary(PdfDictionary.CIDToGIDMap);
-        if (CIDToGID != null) {
-            final byte[] stream = currentPdfFile.readStream(CIDToGID, true, true, false, false, false, null);
-
-            if (stream != null) {
-
-                int j = 0;
-                final int count = stream.length;
-                CIDToGIDMap = new int[count / 2];
-                for (int i = 0; i < count; i += 2) {
-                    CIDToGIDMap[j] = (((stream[i] & 255) << 8) + (stream[i + 1] & 255));
-                    j++;
-                }
-                glyphs.setGIDtoCID(CIDToGIDMap);
-            } else { // must be identity
-
-                //only set if not also a /value
-                if (CIDToGID.getParameterConstant(PdfDictionary.CIDToGIDMap) == PdfDictionary.Unknown) {
-                    CMapName = handleCIDEncoding(new FontObject(PdfDictionary.Identity_H), null);
-                }
-            }
-            hasCIDToGIDMap = true;
-        }
-
-        //code is unfinished by MArk - I was originally going to map onto font in
-        //cid.jar but now think that is wrong
-        //
-        //Needs researching and doing properly
-
-        String ordering = null;
-        final PdfObject CIDSystemInfo = Descendent.getDictionary(PdfDictionary.CIDSystemInfo);
-        if (CIDSystemInfo != null) {
-            ordering = CIDSystemInfo.getTextStreamValue(PdfDictionary.Ordering);
-        }
-
-        if (ordering != null) {
-            if (CIDToGID == null && ordering.contains("Identity")) {
-
-            } else if (FontDescriptor.getDictionary(PdfDictionary.CIDSet) != null && ordering.contains("CNS1")) {
-                //Case 23149 - something of a hack to fix Zinio issue and will probably need more work
-                hasDoubleBytes = true;
-            } else if (ordering.contains("Japan")) {
-
+			//read values into lookup table
+			if (CIDstream != null) {
+				readCIDCMap(CIDstream);
+			}
+		}
+
+		if (CIDstream != null) {
+			try {
+				CIDstream.close();
+			} catch (final Exception e) {
+				LogWriter.writeLog("2.Problem reading encoding for CID font " + fontID + ' ' + encodingName + " Check CID.jar installed " + e);
+			}
+		}
+
+		return CMapName;
+	}
+
+	private void readCIDCMap(final BufferedReader CIDstream) {
+
+		String line = "";
+		int begin, end, entry;
+		boolean inDefinition = false, inMap = false;
+
+		while (true) {
+
+			try {
+				line = CIDstream.readLine();
+				//System.out.println(line);
+			} catch (final Exception e) {
+				LogWriter.writeLog("[PDF] Error reading line from font " + e.getMessage());
+			}
+
+			if (line == null) {
+				break;
+			}
+
+			if (line.contains("endcidrange")) {
+				inDefinition = false;
+			} else if (line.contains("endcidchar")) {
+				inMap = false;
+			}
+
+			if (inDefinition) {
+				final StringTokenizer CIDentry = new StringTokenizer(line, " <>[]");
+
+				//flag if multiple values
+				boolean multiple_values = false;
+				if (line.indexOf('[') != -1) {
+					multiple_values = true;
+				}
+
+				//first 2 values define start and end
+				begin = Integer.parseInt(CIDentry.nextToken(), 16);
+				end = Integer.parseInt(CIDentry.nextToken(), 16);
+
+				//can be hex or base10
+				final String value = CIDentry.nextToken();
+				final int charCount = value.length();
+
+				//assume false and try to disprove - exit on first hex char
+				boolean isHex = false;
+				for (int ptr = 0; ptr < charCount; ptr++) {
+					final char c = value.charAt(ptr);
+					if (c >= 48 && c <= 57) {
+					} else {
+						isHex = true;
+						ptr = charCount;
+					}
+				}
+
+				if (isHex) {
+					entry = Integer.parseInt(value, 16);
+				} else {
+					entry = Integer.parseInt(value, 10);
+				}
+
+				//put into array
+				for (int i = begin; i < end + 1; i++) {
+					if (multiple_values) {
+						//put either single values or range
+						entry = Integer.parseInt(CIDentry.nextToken(), 16);
+						rawCMAP[i] = entry;
+						CMAP[i] = String.valueOf((char) entry);
+					} else {
+						CMAP[i] = String.valueOf((char) entry);
+						rawCMAP[i] = entry;
+						entry++;
+					}
+				}
+			} else if (inMap) {
+
+				try {
+					final StringTokenizer CIDentry = new StringTokenizer(line, " <>[]");
+
+					//System.out.println("line="+line+" "+CIDentry.countTokens());
+					if (CIDentry.countTokens() == 2) {
+						//flag if multiple values
+						//boolean multiple_values = false;
+						//if (line.indexOf('[') != -1)
+						//	multiple_values = true;
+
+						//first 2 values define start and end
+						begin = Integer.parseInt(CIDentry.nextToken(), 16);
+						end = Integer.parseInt(CIDentry.nextToken());
+						//entry = Integer.parseInt(CIDentry.nextToken(), 16);
+
+						//put into array
+						//for (int i = begin; i < end + 1; i++) {
+						//if (multiple_values == true) {
+						//put either single values or range
+						//entry =Integer.parseInt(CIDentry.nextToken(), 16);
+						//CMAP[i]= String.valueOf((char) entry);
+						//} else {
+						rawCMAP[begin] = end;
+						glyphs.CMAP_Translate[begin] = end;
+						//entry++;
+						//}
+						//}
+					}
+				} catch (final Exception ef) {
+					LogWriter.writeLog("Exception " + ef);
+				}
+			}
+
+			if (line.contains("begincidrange")) {
+				inDefinition = true;
+			} else if (line.contains("begincidchar")) {
+				inMap = true;
+			}
+		}
+	}
+
+	/**
+	 * convert value read from TJ operand into correct glyph<br> Also check to
+	 * see if mapped onto unicode value
+	 */
+	private String getStandardGlyphValue(final int char_int) {
+
+		//get possible unicode values
+		final String unicode_char = getUnicodeMapping(char_int);
+
+		//handle if unicode
+		if (unicode_char != null) { // & (mapped_char==null))
+			return unicode_char;
+		}
+
+		//not unicode so get mapped char
+		String return_value = "", mapped_char;
+
+		//get font encoding
+		final int font_encoding = getFontEncoding(true);
+
+		mapped_char = getMappedChar(char_int, true);
+
+		// handle if differences first then standard mappings
+		if (mapped_char != null) { //convert name into character
+
+			// First check if the char has been mapped specifically for this
+			String char_mapping = null;
+
+			if (this.fontEnc != -1) { //ignore if no encoding set
+				StandardFonts.getUnicodeName(this.fontEnc + mapped_char);
+			}
+
+			if (char_mapping != null) {
+				return_value = char_mapping;
+			} else {
+
+				char_mapping = StandardFonts.getUnicodeName(mapped_char);
+
+				if (char_mapping != null) {
+					return_value = char_mapping;
+				} else {
+
+					if (mapped_char.length() == 1) {
+						return_value = mapped_char;
+					} else if (mapped_char.length() > 1) {
+						final char c = mapped_char.charAt(0);
+						final char c2 = mapped_char.charAt(1);
+						if (c == 'B' || c == 'C' || c == 'c' || c == 'G') {
+							mapped_char = mapped_char.substring(1);
+							try {
+								final int val = (isHex)
+										? Integer.valueOf(mapped_char, 16) : Integer.parseInt(mapped_char);
+								return_value = String.valueOf((char) val);
+							} catch (final Exception e) {
+								LogWriter.writeLog("Exception in handling char value " + e);
+
+								return_value = "";
+							}
+						} else {
+							return_value = "";
+						}
+
+						//allow for hex number
+						final boolean isHex = ((c >= 48 && c <= 57) || (c >= 97 && c <= 102) || (c >= 65 && c <= 70))
+								&& ((c2 >= 48 && c2 <= 57) || (c2 >= 97 && c2 <= 102) || (c2 >= 65 && c2 <= 70));
+
+						if (return_value.isEmpty() && this.fontTypes == StandardFonts.TYPE3 && mapped_char.length() == 2 && isHex) {
+
+							return_value = String.valueOf((char) Integer.parseInt(mapped_char, 16));
+
+						}
+
+						//handle some odd mappings in Type3 and other cases
+						if (return_value.isEmpty()) {
+
+							if (fontTypes == StandardFonts.TYPE3) { // && !StandardFonts.isValidGlyphName(char_mapping))
+								return_value = String.valueOf((char) char_int);
+							} else if (diffTable != null && diffTable[char_int] != null && fontEnc == StandardFonts.WIN) { //hack for odd file
+
+								return_value = diffTable[char_int];
+								if (return_value.indexOf('_') != -1) {
+									return_value = return_value.replaceAll("_", "");
+								}
+							}
+						}
+
+					} else {
+						return_value = "";
+					}
+				}
+			}
+		} else if (font_encoding > -1) { //handle encoding
+			return_value = StandardFonts.getEncodedChar(font_encoding, char_int);
+		}
+
+		return return_value;
+	}
+
+	/**
+	 * set the font used for default from Java fonts on system - check it is a
+	 * valid font (otherwise it will default to Lucida anyway)
+	 */
+	public final void setDefaultDisplayFont(final String fontName) {
+
+		glyphs.defaultFont = fontName;
+
+	}
+
+	/**
+	 * Returns the java font, initializing it first if it hasn't been used
+	 * before.
+	 */
+	public final Font getJavaFontX(final int size) {
+
+		//allow user to totally over-ride
+		//passing in this allows user to reset any global variables
+		//set in this method as well.
+		//Helper is a static instance of the inteface JPedalHelper
+		if (DecoderOptions.Helper != null) {
+			final Font f = DecoderOptions.Helper.getJavaFontX(this, size);
+			//if you want to implement JPedalHelper but not
+			//use this function, just return null
+			if (f != null) {
+				return f;
+			}
+
+		}
+
+		//noinspection MagicConstant
+		return new Font(glyphs.font_family_name, glyphs.style, size);
+
+	}
+
+	/**
+	 * get font name as a string from ID (ie Tf /F1) and load if one of Adobe 14
+	 */
+	public final String getFontName() {
+
+		//check if one of 14 standard fonts and load if needed
+		StandardFonts.loadStandardFontWidth(glyphs.fontName);
+
+		return glyphs.fontName;
+	}
+
+	/**
+	 * get the copyright information
+	 */
+	public final String getCopyright() {
+		return copyright;
+	}
+
+	/**
+	 * get raw font name which may include +xxxxxx
+	 */
+	public final String getBaseFontName() {
+
+		return glyphs.getBaseFontName();
+	}
+
+	/**
+	 * get width of a space
+	 */
+	public final float getCurrentFontSpaceWidth() {
+
+		float width;
+
+		//allow for space mapped onto other value
+		final int space_value = spaceChar;
+
+		if (space_value != -1) {
+			width = getWidth(space_value);
+		} else {
+			width = possibleSpaceWidth; //use shortest width as a guess
+		}
+
+		//allow for no value
+		if (width == noWidth || width == 0) {
+
+			width = 0.3f;
+			//Kept original in case new value shows issue in the future
+			//width = 0.2f;
+		}
+
+		return width;
+	}
+
+	/**
+	 * get width of a space for HTML
+	 */
+	public final float getSpaceWidthHTML() {
+
+		float width = 0;
+
+		if (spaceChar != -1) {
+			width = getWidth(spaceChar);
+		}
+
+		//allow for no value
+		if (width == noWidth || width == 0) {
+			width = 0.25f; // In HTML we use fontSize/4 - this is the same value that Chrome's reader (pdfium) uses
+		}
+
+		return width;
+	}
+
+	public final int getFontEncoding(final boolean notNull) {
+		int result = fontEnc;
+
+		if (result == -1 && notNull) {
+			result = StandardFonts.STD;
+		}
+
+		return result;
+	}
+
+	/**
+	 * Returns width of the specified character<br>
+	 * Allows for no value set
+	 */
+	public final float getWidth(final int charInt) {
+
+		//if -1 return last value fetched
+		if (charInt == -1) {
+			return lastWidth;
+		}
+
+		//try embedded font first (indexed by number)
+		float width = noWidth;
+
+		if (widthTable != null && charInt != -1 && charInt < maxCharCount) { // last check needed see case 17607
+			width = widthTable[charInt];
+		}
+
+		if (isCIDFont && rawCMAP != null && (width == noWidth || (hasCIDToGIDMap && isArial))) { //case 25600 - fudge until we have more exmaples
+			final int ptr = rawCMAP[charInt];
+			if (ptr > 0) {
+				width = widthTable[ptr];
+			}
+		}
+
+		if (width == noWidth) {
+
+			if (isCIDFont) {
+				width = defaultWidth;
+
+			} else {
+
+				//try standard values which are indexed under NAME of char
+				String charName = getMappedChar(charInt, false);
+
+				if ((charName != null) && (charName.equals(".notdef"))) {
+					charName = StandardFonts.getUnicodeChar(getFontEncoding(true), charInt);
+				}
+
+				Float value = StandardFonts.getStandardWidth(glyphs.logicalfontName, charName);
+
+				//allow for remapping of base 14 with no width
+				if (value == null && rawFontName != null) {
+
+					//check loaded
+					StandardFonts.loadStandardFontWidth(rawFontName);
+
+					//try again
+					value = StandardFonts.getStandardWidth(rawFontName, charName);
+
+				}
+
+				if (value != null) {
+					width = value;
+				} else {
+					if (missingWidth != noWidth) {
+						width = missingWidth * xscale;
+					} else {
+						width = 0;
+					}
+				}
+			}
+		}
+
+		//cache value so we can reread
+		lastWidth = width;
+
+		return width;
+	}
+
+	/**
+	 * generic CID code
+	 *
+	 * @throws PdfFontException
+	 */
+	public void createCIDFont(final PdfObject pdfObject, final PdfObject Descendent) throws PdfFontException {
+
+		cachedValue = new String[65536];
+
+		String CMapName = null;
+
+		final PdfObject Encoding = pdfObject.getDictionary(PdfDictionary.Encoding);
+		if (Encoding != null) {
+			CMapName = handleCIDEncoding(Encoding, pdfObject);
+		}
+
+		//handle to unicode mapping
+		ToUnicode = pdfObject.getDictionary(PdfDictionary.ToUnicode);
+		if (ToUnicode != null) {
+			final UnicodeReader uniReader = new UnicodeReader(currentPdfFile.readStream(ToUnicode, true, true, false, false, false, ToUnicode.getCacheName(currentPdfFile.getObjectReader())));
+			unicodeMappings = uniReader.readUnicode();
+			hasDoubleBytes = uniReader.hasDoubleByteValues();
+		}
+
+		Object[] widths = Descendent.getObjectArray(PdfDictionary.W);
+
+		//allow for vertical
+		final Object[] verticalWidths = Descendent.getObjectArray(PdfDictionary.W2);
+		if (verticalWidths != null) {
+			widths = verticalWidths;
+			isWidthVertical = true;
+		}
+
+		if (widths != null) {
+			setCIDFontWidths(widths);
+			defaultWidth = 1f;
+		}
+
+		final int Width = Descendent.getInt(PdfDictionary.DW);
+		if (Width >= 0) {
+			defaultWidth = (Width) / 1000f;
+		}
+
+		final int[] VerticalWidth = Descendent.getIntArray(PdfDictionary.DW2);
+		if (VerticalWidth != null) { //may need more detailed implementation of vertical spacing (se PDFspec chapter 5)
+			isWidthVertical = true;
+			defaultWidth = (VerticalWidth[1]) / 1000f;
+		}
+
+		//it looks like in this case it uses average of values
+		//but not enough data
+		if (handleOddSapFontMapping) {
+			defaultWidth = .5f;
+		}
+
+		final PdfObject FontDescriptor = Descendent.getDictionary(PdfDictionary.FontDescriptor);
+
+		//allow for no value set (when we use 1)
+		if (FontDescriptor != null && defaultWidth == -1) {
+			final int AvgWidth = FontDescriptor.getInt(PdfDictionary.AvgWidth);
+
+			if (AvgWidth != -1) {
+				defaultWidth = 1;
+			}
+		}
+		final PdfObject CIDToGID = Descendent.getDictionary(PdfDictionary.CIDToGIDMap);
+		if (CIDToGID != null) {
+			final byte[] stream = currentPdfFile.readStream(CIDToGID, true, true, false, false, false, null);
+
+			if (stream != null) {
+
+				int j = 0;
+				final int count = stream.length;
+				CIDToGIDMap = new int[count / 2];
+				for (int i = 0; i < count; i += 2) {
+					CIDToGIDMap[j] = (((stream[i] & 255) << 8) + (stream[i + 1] & 255));
+					j++;
+				}
+				glyphs.setGIDtoCID(CIDToGIDMap);
+			} else { // must be identity
+
+				//only set if not also a /value
+				if (CIDToGID.getParameterConstant(PdfDictionary.CIDToGIDMap) == PdfDictionary.Unknown) {
+					CMapName = handleCIDEncoding(new FontObject(PdfDictionary.Identity_H), null);
+				}
+			}
+			hasCIDToGIDMap = true;
+		}
+
+		//code is unfinished by MArk - I was originally going to map onto font in
+		//cid.jar but now think that is wrong
+		//
+		//Needs researching and doing properly
+		String ordering = null;
+		String registry = null;
+		final PdfObject CIDSystemInfo = Descendent.getDictionary(PdfDictionary.CIDSystemInfo);
+		if (CIDSystemInfo != null) {
+			ordering = CIDSystemInfo.getTextStreamValue(PdfDictionary.Ordering);
+			registry = CIDSystemInfo.getTextStreamValue(PdfDictionary.Registry);
+		}
+
+		if (ordering != null) {
+			if (CIDToGID == null && ordering.contains("Identity")) {
+
+			} else if (FontDescriptor.getDictionary(PdfDictionary.CIDSet) != null && ordering.contains("CNS1")) {
+				//Case 23149 - something of a hack to fix Zinio issue and will probably need more work
+				hasDoubleBytes = true;
+			} else if (ordering.contains("Japan")) {
+
+				if (registry != null && registry.equals("Adobe") && ordering.equals("Japan1")) {
+//					cmap reading based process goes here
+				}
 //                char[] c=new char[]{12498,12521,12462,12494,35282,12468,32,80,114,111,32,87,54};
 //
 //				substituteFontName=new String(c);
 //                substituteFontFile="/Library/Fonts/"+substituteFontName+".otf";
 //
-                // substituteFontFile="/Users/markee/Library/Fonts/MS Mincho.ttf";
-                // System.out.println(substituteFontFile);
+				// substituteFontFile="/Users/markee/Library/Fonts/MS Mincho.ttf";
+				// System.out.println(substituteFontFile);
 
-                this.TTstreamisCID = false;
+				this.TTstreamisCID = false;
 
-                //System.err.println("Unsupported font encoding "+ordering);
+				//System.err.println("Unsupported font encoding "+ordering);
+			} else if (ordering.contains("Korean")) {
+				//System.err.println("Unsupported font encoding "+ordering);
 
-            } else if (ordering.contains("Korean")) {
-                //System.err.println("Unsupported font encoding "+ordering);
+			} else if (ordering.contains("Chinese")) {
+				//System.err.println("Chinese "+ordering);
+			} else if (ordering.equals("Identity") && (CMapName == null || CMapName.contains("Ident"))) {
 
-            } else if (ordering.contains("Chinese")) {
-                //System.err.println("Chinese "+ordering);
-            } else if (ordering.equals("Identity") && (CMapName == null || CMapName.contains("Ident"))) {
+				glyphs.setIsIdentity(true);
+			}
 
-                glyphs.setIsIdentity(true);
-            }
+			if (substituteFontFile != null) {
+				LogWriter.writeLog("Using font " + substituteFontFile + " for " + ordering);
+			}
 
-            if (substituteFontFile != null) {
-                LogWriter.writeLog("Using font " + substituteFontFile + " for " + ordering);
-            }
+		}
 
-        }
+		if (FontDescriptor != null) {
+			setBoundsAndMatrix(FontDescriptor);
+			setName(FontDescriptor);
+		}
 
-        if (FontDescriptor != null) {
-            setBoundsAndMatrix(FontDescriptor);
-            setName(FontDescriptor);
-        }
+	}
 
-    }
+	/**
+	 * read in width values
+	 */
+	public void readWidths(final PdfObject pdfObject, final boolean setSpace) throws Exception {
 
-    /**
-     * read in width values
-     */
-    public void readWidths(final PdfObject pdfObject, final boolean setSpace) throws Exception {
+		// place font data in fonts array
+		//variable to get shortest width as guess for space
+		float shortestWidth = 0;
+		int count = 0;
 
-        // place font data in fonts array
+		//read first,last char, widths and put last into array for fast access
+		final float[] floatWidthValues = pdfObject.getFloatArray(PdfDictionary.Widths);
 
-        //variable to get shortest width as guess for space
-        float shortestWidth = 0;
-        int count = 0;
+		if (floatWidthValues != null && floatWidthValues.length > 0) {
 
-        //read first,last char, widths and put last into array for fast access
-        final float[] floatWidthValues = pdfObject.getFloatArray(PdfDictionary.Widths);
+			widthTable = new float[maxCharCount];
 
-        if (floatWidthValues != null && floatWidthValues.length > 0) {
+			//set all values to noWidth so I can spot ones with no value
+			for (int ii = 0; ii < maxCharCount; ii++) {
+				widthTable[ii] = noWidth;
+			}
 
-            widthTable = new float[maxCharCount];
+			final int firstCharNumber = pdfObject.getInt(PdfDictionary.FirstChar);
+			final int lastCharNumber = pdfObject.getInt(PdfDictionary.LastChar);
 
-            //set all values to noWidth so I can spot ones with no value
-            for (int ii = 0; ii < maxCharCount; ii++) {
-                widthTable[ii] = noWidth;
-            }
+			//scaling factor to convert type 3 to 1000 spacing
+			float ratio = (float) (1f / FontMatrix[0]);
+			if (ratio < 0) {
+				ratio = -ratio;
+			}
 
-            final int firstCharNumber = pdfObject.getInt(PdfDictionary.FirstChar);
-            final int lastCharNumber = pdfObject.getInt(PdfDictionary.LastChar);
+			float nextValue, widthValue;
 
-            //scaling factor to convert type 3 to 1000 spacing
-            float ratio = (float) (1f / FontMatrix[0]);
-            if (ratio < 0) {
-                ratio = -ratio;
-            }
+			int j = 0;
+			final int widthCount = floatWidthValues.length;
 
-            float nextValue, widthValue;
+			for (int i = firstCharNumber; i < lastCharNumber + 1; i++) {
 
-            int j = 0;
-            final int widthCount = floatWidthValues.length;
+				if (j < widthCount) {
 
-            for (int i = firstCharNumber; i < lastCharNumber + 1; i++) {
+					nextValue = floatWidthValues[j];
 
-                if (j < widthCount) {
+					if (fontTypes == StandardFonts.TYPE3) { //convert to 1000 scale unit
+						widthValue = nextValue / ratio;
+					} else {
+						widthValue = nextValue * xscale;
+					}
 
-                    nextValue = floatWidthValues[j];
+					//track shortest width
+					if (widthValue > 0) {
+						shortestWidth += widthValue;
+						count++;
+					}
 
-                    if (fontTypes == StandardFonts.TYPE3) { //convert to 1000 scale unit
-                        widthValue = nextValue / ratio;
-                    } else {
-                        widthValue = nextValue * xscale;
-                    }
+					widthTable[i] = widthValue;
 
+				} else {
+					widthTable[i] = 0;
+				}
 
-                    //track shortest width
-                    if (widthValue > 0) {
-                        shortestWidth += widthValue;
-                        count++;
-                    }
+				j++;
+			}
+		}
 
-                    widthTable[i] = widthValue;
+		//save guess for space as half average char
+		if (setSpace && count > 0) {
+			possibleSpaceWidth = shortestWidth / (2 * count);
+		}
 
-                } else {
-                    widthTable[i] = 0;
-                }
+	}
 
+	/**
+	 * read in a font and its details from the pdf file
+	 */
+	public void createFont(final PdfObject pdfObject, final String fontID, final boolean renderPage, final ObjectStore objectStore, final Map<String, PdfJavaGlyphs> substitutedFonts) throws Exception {
 
-                j++;
-            }
-        }
+		//generic setup
+		init(fontID, renderPage);
 
-        //save guess for space as half average char
-        if (setSpace && count > 0) {
-            possibleSpaceWidth = shortestWidth / (2 * count);
-        }
+		// get FontDescriptor object - if present contains metrics on glyphs
+		final PdfObject pdfFontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
 
-    }
+		setName(pdfObject);
+		setEncoding(pdfObject, pdfFontDescriptor);
 
-    /**
-     * read in a font and its details from the pdf file
-     */
-    public void createFont(final PdfObject pdfObject, final String fontID, final boolean renderPage, final ObjectStore objectStore, final Map<String, PdfJavaGlyphs> substitutedFonts) throws Exception {
+	}
 
-        //generic setup
-        init(fontID, renderPage);
+	protected void setName(final PdfObject pdfObject) {
 
-        // get FontDescriptor object - if present contains metrics on glyphs
-        final PdfObject pdfFontDescriptor = pdfObject.getDictionary(PdfDictionary.FontDescriptor);
+		// Get fontName
+		String baseFontName = pdfObject.getName(PdfDictionary.BaseFont);
+		if (baseFontName == null) {
+			baseFontName = pdfObject.getName(PdfDictionary.FontName);
+		}
+		if (baseFontName == null) {
+			baseFontName = this.fontID;
+			//if(PdfStreamDecoder.runningStoryPad) //remove spaces and unwanted chars
+		}
+		if (baseFontName.contains("#20")) {
+			baseFontName = cleanupFontName(baseFontName);
+			//System.out.println("baseFontName="+baseFontName);
+		}
+		glyphs.setBaseFontName(baseFontName);
 
-        setName(pdfObject);
-        setEncoding(pdfObject, pdfFontDescriptor);
+		objID = pdfObject.getObjectRefID();
+		glyphs.setObjID(objID);
 
-    }
+		// get name less any suffix (needs abcdef+ removed from start)
+		truncatedName = pdfObject.getStringValue(PdfDictionary.BaseFont, PdfDictionary.REMOVEPOSTSCRIPTPREFIX);
+		if (truncatedName == null) {
+			truncatedName = pdfObject.getStringValue(PdfDictionary.FontName, PdfDictionary.REMOVEPOSTSCRIPTPREFIX);
+		}
+		if (truncatedName == null) {
+			truncatedName = this.fontID;
+		}
 
-    protected void setName(final PdfObject pdfObject) {
+		if (truncatedName.contains("#20") || truncatedName.contains("#2D")) {
+			truncatedName = cleanupFontName(truncatedName);
+			//if(PdfStreamDecoder.runningStoryPad) //remove spaces and unwanted chars
+			//	truncatedName= cleanupFontName(truncatedName);
+		}
+		glyphs.fontName = truncatedName;
 
-        // Get fontName
-        String baseFontName = pdfObject.getName(PdfDictionary.BaseFont);
-        if (baseFontName == null) {
-            baseFontName = pdfObject.getName(PdfDictionary.FontName);
-        }
-        if (baseFontName == null) {
-            baseFontName = this.fontID;
-            //if(PdfStreamDecoder.runningStoryPad) //remove spaces and unwanted chars
-        }
-        if (baseFontName.contains("#20")) {
-            baseFontName = cleanupFontName(baseFontName);
-            //System.out.println("baseFontName="+baseFontName);
-        }
-        glyphs.setBaseFontName(baseFontName);
+		if (truncatedName.equals("Arial-BoldMT")) {
+			glyphs.logicalfontName = "Arial,Bold";
+			StandardFonts.loadStandardFontWidth(glyphs.logicalfontName);
+		} else if (truncatedName.equals("ArialMT")) {
+			glyphs.logicalfontName = "Arial";
+			StandardFonts.loadStandardFontWidth(glyphs.logicalfontName);
+		} else {
+			glyphs.logicalfontName = truncatedName;
+		}
 
-        objID = pdfObject.getObjectRefID();
-        glyphs.setObjID(objID);
+		if (glyphs.logicalfontName.equals("Arial")) {
+			isArial = true;
+		}
 
-        // get name less any suffix (needs abcdef+ removed from start)
-        truncatedName = pdfObject.getStringValue(PdfDictionary.BaseFont, PdfDictionary.REMOVEPOSTSCRIPTPREFIX);
-        if (truncatedName == null) {
-            truncatedName = pdfObject.getStringValue(PdfDictionary.FontName, PdfDictionary.REMOVEPOSTSCRIPTPREFIX);
-        }
-        if (truncatedName == null) {
-            truncatedName = this.fontID;
-        }
+	}
 
-        if (truncatedName.contains("#20") || truncatedName.contains("#2D")) {
-            truncatedName = cleanupFontName(truncatedName);
-            //if(PdfStreamDecoder.runningStoryPad) //remove spaces and unwanted chars
-            //	truncatedName= cleanupFontName(truncatedName);
-        }
-        glyphs.fontName = truncatedName;
+	/**
+	 * used by PDF2HTML to replace unsuitable characters and make sure unique
+	 *
+	 * @param newName
+	 */
+	public void resetNameForHTML(final String newName) {
+		glyphs.fontName = newName;
+		glyphs.baseFontName = newName;
+	}
 
-        if (truncatedName.equals("Arial-BoldMT")) {
-            glyphs.logicalfontName = "Arial,Bold";
-            StandardFonts.loadStandardFontWidth(glyphs.logicalfontName);
-        } else if (truncatedName.equals("ArialMT")) {
-            glyphs.logicalfontName = "Arial";
-            StandardFonts.loadStandardFontWidth(glyphs.logicalfontName);
-        } else {
-            glyphs.logicalfontName = truncatedName;
-        }
+	public int getObjID() {
+		return objID;
+	}
 
-        if (glyphs.logicalfontName.equals("Arial")) {
-            isArial = true;
-        }
+	protected void setEncoding(final PdfObject pdfObject, final PdfObject pdfFontDescriptor) {
 
-    }
+		//handle to unicode mapping
+		final PdfObject ToUnicode = pdfObject.getDictionary(PdfDictionary.ToUnicode);
 
-    /**
-     * used by PDF2HTML to replace unsuitable characters and make sure unique
-     *
-     * @param newName
-     */
-    public void resetNameForHTML(final String newName) {
-        glyphs.fontName = newName;
-        glyphs.baseFontName = newName;
-    }
+		if (ToUnicode != null) {
+			unicodeMappings = new UnicodeReader(currentPdfFile.readStream(ToUnicode, true, true, false, false, false, ToUnicode.getCacheName(currentPdfFile.getObjectReader()))).readUnicode();
+		}
 
-    public int getObjID() {
-        return objID;
-    }
+		//handle encoding
+		final PdfObject Encoding = pdfObject.getDictionary(PdfDictionary.Encoding);
 
-    protected void setEncoding(final PdfObject pdfObject, final PdfObject pdfFontDescriptor) {
+		if (Encoding != null) {
+			handleFontEncoding(pdfObject, Encoding);
+		} else {
+			handleNoEncoding(0, pdfObject);
+		}
 
+		if (pdfFontDescriptor != null) {
 
-        //handle to unicode mapping
-        final PdfObject ToUnicode = pdfObject.getDictionary(PdfDictionary.ToUnicode);
+			//set missingWidth
+			missingWidth = pdfFontDescriptor.getInt(PdfDictionary.MissingWidth);
 
-        if (ToUnicode != null) {
-            unicodeMappings = new UnicodeReader(currentPdfFile.readStream(ToUnicode, true, true, false, false, false, ToUnicode.getCacheName(currentPdfFile.getObjectReader()))).readUnicode();
-        }
+		}
+	}
 
-        //handle encoding
-        final PdfObject Encoding = pdfObject.getDictionary(PdfDictionary.Encoding);
+	private float descent;
 
-        if (Encoding != null) {
-            handleFontEncoding(pdfObject, Encoding);
-        } else {
-            handleNoEncoding(0, pdfObject);
-        }
+	public float getDescent() {
+		return descent;
+	}
 
-        if (pdfFontDescriptor != null) {
+	protected void setBoundsAndMatrix(final PdfObject pdfFontDescriptor) {
 
-            //set missingWidth
-            missingWidth = pdfFontDescriptor.getInt(PdfDictionary.MissingWidth);
+		if (pdfFontDescriptor != null) {
+			final double[] newFontmatrix = pdfFontDescriptor.getDoubleArray(PdfDictionary.FontMatrix);
+			if (newFontmatrix != null) {
+				FontMatrix = newFontmatrix;
+			}
 
-        }
-    }
+			final float[] newFontBBox = pdfFontDescriptor.getFloatArray(PdfDictionary.FontBBox);
+			if (newFontBBox != null) {
+				FontBBox = newFontBBox;
 
-    private float descent;
-
-    public float getDescent() {
-        return descent;
-    }
-
-    protected void setBoundsAndMatrix(final PdfObject pdfFontDescriptor) {
-
-        if (pdfFontDescriptor != null) {
-            final double[] newFontmatrix = pdfFontDescriptor.getDoubleArray(PdfDictionary.FontMatrix);
-            if (newFontmatrix != null) {
-                FontMatrix = newFontmatrix;
-            }
-
-            final float[] newFontBBox = pdfFontDescriptor.getFloatArray(PdfDictionary.FontBBox);
-            if (newFontBBox != null) {
-                FontBBox = newFontBBox;
-
-                //set ascent and descent
+				//set ascent and descent
 //            float value=pdfFontDescriptor.getFloatNumber(PdfDictionary.Ascent);
 //            if(value!=0)
 //                ascent=value;
 //
-                descent = pdfFontDescriptor.getFloatNumber(PdfDictionary.Descent);
+				descent = pdfFontDescriptor.getFloatNumber(PdfDictionary.Descent);
 //            if(value!=0)
 //                descent=value;
-            } else {
-                descent = 0;
-            }
-        }
-    }
+			} else {
+				descent = 0;
+			}
+		}
+	}
 
+	protected void init(final String fontID, final boolean renderPage) {
 
-    protected void init(final String fontID, final boolean renderPage) {
+		this.fontID = fontID;
+		this.renderPage = renderPage;
+	}
 
-        this.fontID = fontID;
-        this.renderPage = renderPage;
-    }
+	/**
+	 *
+	 */
+	private int handleNoEncoding(int encValue, final PdfObject pdfObject) {
 
-    /**
-     *
-     */
-    private int handleNoEncoding(int encValue, final PdfObject pdfObject) {
+		final int enc = pdfObject.getGeneralType(PdfDictionary.Encoding);
 
-        final int enc = pdfObject.getGeneralType(PdfDictionary.Encoding);
+		if (enc == StandardFonts.ZAPF || (!PdfFontFactory.isFontEmbedded(pdfObject) && getFontName().equals("Wingdings"))) {
+			putFontEncoding(StandardFonts.ZAPF);
+			glyphs.defaultFont = "Zapf Dingbats"; //replace with single default
+			StandardFonts.checkLoaded(StandardFonts.ZAPF);
 
-        if (enc == StandardFonts.ZAPF || (!PdfFontFactory.isFontEmbedded(pdfObject) && getFontName().equals("Wingdings"))) {
-            putFontEncoding(StandardFonts.ZAPF);
-            glyphs.defaultFont = "Zapf Dingbats"; //replace with single default
-            StandardFonts.checkLoaded(StandardFonts.ZAPF);
+			encValue = StandardFonts.ZAPF;
 
-            encValue = StandardFonts.ZAPF;
+		} else if (enc == StandardFonts.SYMBOL) {
+			putFontEncoding(StandardFonts.SYMBOL);
+			encValue = StandardFonts.SYMBOL;
+		} else {
+			putFontEncoding(StandardFonts.STD); //default to standard
+		}
 
-        } else if (enc == StandardFonts.SYMBOL) {
-            putFontEncoding(StandardFonts.SYMBOL);
-            encValue = StandardFonts.SYMBOL;
-        } else {
-            putFontEncoding(StandardFonts.STD); //default to standard
-        }
+		hasEncoding = false;
 
-        hasEncoding = false;
+		return encValue;
+	}
 
-        return encValue;
-    }
+	///////////////////////////////////////////////////////////////////////
+	/**
+	 * handle font encoding and store information
+	 */
+	private void handleFontEncoding(final PdfObject pdfObject, final PdfObject Encoding) {
 
-    ///////////////////////////////////////////////////////////////////////
+		final int subType = pdfObject.getParameterConstant(PdfDictionary.Subtype);
 
-    /**
-     * handle font encoding and store information
-     */
-    private void handleFontEncoding(final PdfObject pdfObject, final PdfObject Encoding) {
+		int encValue = getFontEncoding(false);
+		if (encValue == -1) {
+			if (subType == StandardFonts.TRUETYPE) {
+				encValue = StandardFonts.MAC;
+			} else {
+				encValue = StandardFonts.STD;
+			}
+		}
 
-        final int subType = pdfObject.getParameterConstant(PdfDictionary.Subtype);
-
-        int encValue = getFontEncoding(false);
-        if (encValue == -1) {
-            if (subType == StandardFonts.TRUETYPE) {
-                encValue = StandardFonts.MAC;
-            } else {
-                encValue = StandardFonts.STD;
-            }
-        }
-        
-        
-        /*
+		/*
          * handle differences from main encoding
-         */
-        final PdfArrayIterator Diffs = Encoding.getMixedArray(PdfDictionary.Differences);
-        if (Diffs != null && Diffs.getTokenCount() > 0) {
+		 */
+		final PdfArrayIterator Diffs = Encoding.getMixedArray(PdfDictionary.Differences);
+		if (Diffs != null && Diffs.getTokenCount() > 0) {
+
+			glyphs.setIsSubsetted(true);
+
+			//needed to workout if values hex of base10
+			//as we have examples with both
+			//guess if hex or base10 by looking for numbers
+			//if it has a number it must be base10
+			byte[][] rawData = null;
 
-            glyphs.setIsSubsetted(true);
-
-            //needed to workout if values hex of base10
-            //as we have examples with both
-
-            //guess if hex or base10 by looking for numbers
-            //if it has a number it must be base10
-            byte[][] rawData = null;
-
-            if (Encoding != null) {
-                rawData = Encoding.getByteArray(PdfDictionary.Differences);
-            }
-
-
-            if (rawData != null) {
-
-                containsHexNumbers = true;
-                allNumbers = true;
-                for (final byte[] aRawData : rawData) {
-
-                    if (aRawData != null && aRawData[0] == '/') {
-
-                        final int length = aRawData.length;
-                        char c, charCount = 0;
-
-                        if (length == 3 && containsHexNumbers) {
-                            for (int jj = 1; jj < 3; jj++) {
-
-                                c = (char) aRawData[jj];
-                                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F')) {
-                                    charCount++;
-                                }
-                            }
-                        }
-                        if (charCount != 2) {
-                            containsHexNumbers = false;
-                            //System.out.println("Failed on="+new String(data)+"<");
-                            //ii=rawData.length;
-                        }
-
-
-                        if ((allNumbers) && (length < 4)) {
-                            for (int jj = 2; jj < length; jj++) {
-
-                                c = (char) aRawData[jj];
-                                if ((c >= '0' && c <= '9')) {
-                                } else {
-                                    allNumbers = false;
-                                    jj = length;
-                                }
-                            }
-                        }
-
-
-                        //exit if poss
-                        //if(!containsHexNumbers){
-                        //    ii=rawData.length;
-                        //}
-                        /**/
-                    }
-                }
-            }
-
-
-            int pointer = 0, type;
-            while (Diffs.hasMoreTokens()) {
-
-                type = Diffs.getNextValueType();
-
-                if (type == PdfArrayIterator.TYPE_KEY_INTEGER) {
-                    pointer = Diffs.getNextValueAsInteger();
-                } else {
-
-                    if (type == PdfArrayIterator.TYPE_VALUE_INTEGER) {
-
-                        if (diffCharTable == null) {
-                            diffCharTable = new int[maxCharCount];
-                        }
-
-                        //save so we can rempa glyph to get correct value for embedded font
-                        diffCharTable[pointer] = Diffs.getNextValueAsInteger(false);
-
-                    }
-
-                    final String rawKey = Diffs.getNextValueAsString(false);
-
-                    //   System.out.println(rawKey+" "+pointer);
-                    rawDiffKeys.put(rawKey.substring(1), pointer);
-
-                    putMappedChar(pointer, Diffs.getNextValueAsFontChar(pointer, containsHexNumbers, allNumbers));
-                    pointer++;
-                }
-            }
-
-            //get flag
-            isHex = Diffs.hasHexChars();
-
-            //pick up space
-            final int spaceChar = Diffs.getSpaceChar();
-            if (spaceChar != -1) {
-                this.spaceChar = spaceChar;
-            }
-        }
-
-        int EncodingType = PdfDictionary.Unknown;
-
-        if (Encoding != null) {
-            hasEncoding = true;
-
-            //see if general value first ie /WinAnsiEncoding
-            int newEncodingType = Encoding.getGeneralType(PdfDictionary.Encoding);
-
-            //check object for value
-            if (newEncodingType == PdfDictionary.Unknown) {
-                if (getBaseFontName().equals("ZapfDingbats")) {
-                    newEncodingType = StandardFonts.ZAPF;
-                } else {
-                    newEncodingType = Encoding.getParameterConstant(PdfDictionary.BaseEncoding);
-                }
-            }
-
-            if (newEncodingType != PdfDictionary.Unknown) {
-                EncodingType = newEncodingType;
-            } else {
-                EncodingType = handleNoEncoding(encValue, pdfObject);
-            }
-
-            if (spaceChar == -1 && (newEncodingType == StandardFonts.WIN || newEncodingType == StandardFonts.PDF || newEncodingType == StandardFonts.MAC)) {
-                spaceChar = 32;
-            }
-
-        }
-
-        putFontEncoding(EncodingType);
-
-    }
-
-    /**
-     * used by PDF2HTML5 where encoding different from index in TJ command and we need to remap via glyf  name
-     * (ie sample_pdf_htmls/thoughtcorp/Simple Relational Contracts.pdf)
-     *
-     * @param glypName
-     * @return
-     */
-    public final int getDiffChar(final String glypName) {
-
-        int value = -1;
-
-        final Integer newVal = nonStandardMappings.get(glypName);
-        if (newVal != null) {
-            value = newVal;
-        }
-
-        return value;
-    }
-
-    /**
-     * Insert a new mapped char in the name mapping table
-     */
-    protected final void putMappedChar(final int charInt, final String mappedChar) {
-
-        if (diffTable == null) {
-            diffTable = new String[maxCharCount];
-        }
-
-        if (charInt > 255 && maxCharCount == 256) { //hack for odd file
-            //System.out.println(charInt+" mappedChar="+mappedChar+"<");
-
-            //if(1==1)
-            //throw new RuntimeException("xxx");
-
-        } else if (diffTable[charInt] == null && mappedChar != null && !mappedChar.startsWith("glyph")) {
-
-            diffTable[charInt] = mappedChar;
-        }
-    }
-
-    /**
-     * return char mapped onto value in Differences or null
-     *
-     * @param charInt
-     * @return
-     */
-    public String getDiffMapping(final int charInt) {
-        if (diffTable == null) {
-            return null;
-        } else {
-            return diffTable[charInt];
-        }
-    }
-
-    /**
-     * Returns the char glyph corresponding to the specified code for the specified font.
-     */
-    public final String getMappedChar(final int charInt, final boolean remap) {
-
-        String result = null;
-
-        //check differences
-        if (diffTable != null) {
-            result = diffTable[charInt];
-        }
-
-        if ((remap) && (result != null) && (result.equals(".notdef"))) {
-            result = " ";
-        }
-
-        //check standard encoding
-        if (result == null && charInt < 335) {
-            result = StandardFonts.getUnicodeChar(getFontEncoding(true), charInt);
-        }
-
-        //all unused win values over 40 map to bullet
-        if (result == null && charInt > 40 && getFontEncoding(true) == StandardFonts.WIN) {
-            if (charInt == 173) {
-                result = "hyphen";
-            } else {
-                result = "bullet";
-            }
-        }
-
-        //check embedded stream as not in baseFont encoding
-        if (isFontEmbedded && result == null) {
-
-            //diffs from embedded 1C file
-            if (diffs != null) {
-                result = diffs[charInt];
-            }
-
-
-            //Embedded encoding (which can be different from the encoding!)
-            if (result == null && charInt < 335) {
-                result = StandardFonts.getUnicodeChar(this.embeddedEnc, charInt);
-            }
-
-        }
-
-        return result;
-    }
-
-    public final String getEmbeddedChar(final int charInt) {
-
-        String embeddedResult = null;
-
-        //check embedded stream as not in baseFont encoding
-        if (isFontEmbedded) {
-
-            //diffs from embedded 1C file
-            if (diffs != null) {
-                embeddedResult = diffs[charInt];
-            }
-
-            //Embedded encoding (which can be different from the encoding!)
-            if ((embeddedResult == null) && charInt < 256) {
-                embeddedResult = StandardFonts.getUnicodeChar(this.embeddedEnc, charInt);
-            }
-
-        }
-
-        return embeddedResult;
-    }
-
-    /**
-     * gets type of font (ie 3 ) so we can call type
-     * specific code.
-     *
-     * @return int of type
-     */
-    public final int getFontType() {
-        return fontTypes;
-    }
-
-    /**
-     * name of font and Path used to display
-     */
-    public String getSubstituteFont() {
-        return this.substituteFontFile;
-    }
-
-    /**
-     * used in generic renderer
-     */
-    public float getGlyphWidth(final String charGlyph, final int rawInt, final String displayValue) {
-
-        float currentWidth = 0;
-
-        if (this.fontTypes == StandardFonts.TRUETYPE && isFontEmbedded) { //use embedded CMAP
-            currentWidth = glyphs.getTTWidth(charGlyph, rawInt, displayValue, false);
-        } else if (!isFontEmbedded) { //this should cascade gracefully and always give a sensible number
-
-            if (rawInt < 255) {
-                currentWidth = getWidth(rawInt);
-            }
-
-            if (currentWidth == 0) { //failsafe
-                final Float value = StandardFonts.getStandardWidth("Arial", charGlyph);
-                currentWidth = value != null ? value : 0.0f;
-            }
-        }
-
-        return currentWidth;
-    }
-
-    public PdfJavaGlyphs getGlyphData() {
-
-        //glyphs.setHasWidths(this.hasWidths());
-        glyphs.setHasWidths(true);
-        return glyphs;
-    }
-
-    public void setFont(final String font, final int textSize) {
-        glyphs.setFont(font, textSize);
-    }
-
-    public boolean is1C() {
-        return glyphs.is1C();
-    }
-
-    public boolean isFontSubsetted() {
-        return glyphs.isSubsetted;
-    }
-
-    public void setValuesForGlyph(final int rawInt, final String charGlyph, final String displayValue, final String embeddedChar) {
-        glyphs.setValuesForGlyph(rawInt, charGlyph, displayValue, embeddedChar);
-
-    }
-
-    /**
-     * remove unwanted chars from string name
-     */
-    private static String cleanupFontName(final String baseFontName) {
-
-
-        // baseFontName=baseFontName.toLowerCase();
-
-        final int length = baseFontName.length();
-
-        final StringBuilder cleanedName = new StringBuilder(length);
-        char c;
-
-        for (int aa = 0; aa < length; aa++) {
-            c = baseFontName.charAt(aa);
-
-            if (c == ' ' || c == '-') {
-
-            } else if (c == '#' && baseFontName.charAt(aa + 1) == '2' && (baseFontName.charAt(aa + 2) == '0' || baseFontName.charAt(aa + 2) == 'D')) {
-
-                //add in the hyphen
-                if (baseFontName.charAt(aa + 2) == 'D') {
-                    cleanedName.append('-');
-                }
-
-                aa += 2;
-
-            } else {
-                cleanedName.append(c);
-            }
-        }
-
-        //if(baseFontName.indexOf("#20")!=-1)
-        //System.out.println(baseFontName+"<>"+cleanedName.toString());
-
-        return cleanedName.toString();
-    }
-
-    /**
-     * get bounding box to highlight
-     *
-     * @return
-     */
-    public Rectangle getBoundingBox() {
+			if (Encoding != null) {
+				rawData = Encoding.getByteArray(PdfDictionary.Differences);
+			}
+
+			if (rawData != null) {
+
+				containsHexNumbers = true;
+				allNumbers = true;
+				for (final byte[] aRawData : rawData) {
+
+					if (aRawData != null && aRawData[0] == '/') {
+
+						final int length = aRawData.length;
+						char c, charCount = 0;
+
+						if (length == 3 && containsHexNumbers) {
+							for (int jj = 1; jj < 3; jj++) {
+
+								c = (char) aRawData[jj];
+								if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F')) {
+									charCount++;
+								}
+							}
+						}
+						if (charCount != 2) {
+							containsHexNumbers = false;
+							//System.out.println("Failed on="+new String(data)+"<");
+							//ii=rawData.length;
+						}
+
+						if ((allNumbers) && (length < 4)) {
+							for (int jj = 2; jj < length; jj++) {
+
+								c = (char) aRawData[jj];
+								if ((c >= '0' && c <= '9')) {
+								} else {
+									allNumbers = false;
+									jj = length;
+								}
+							}
+						}
+
+						//exit if poss
+						//if(!containsHexNumbers){
+						//    ii=rawData.length;
+						//}
+						/**/
+					}
+				}
+			}
+
+			int pointer = 0, type;
+			while (Diffs.hasMoreTokens()) {
+
+				type = Diffs.getNextValueType();
+
+				if (type == PdfArrayIterator.TYPE_KEY_INTEGER) {
+					pointer = Diffs.getNextValueAsInteger();
+				} else {
+
+					if (type == PdfArrayIterator.TYPE_VALUE_INTEGER) {
+
+						if (diffCharTable == null) {
+							diffCharTable = new int[maxCharCount];
+						}
+
+						//save so we can rempa glyph to get correct value for embedded font
+						diffCharTable[pointer] = Diffs.getNextValueAsInteger(false);
+
+					}
+
+					final String rawKey = Diffs.getNextValueAsString(false);
+
+					//   System.out.println(rawKey+" "+pointer);
+					rawDiffKeys.put(rawKey.substring(1), pointer);
+
+					putMappedChar(pointer, Diffs.getNextValueAsFontChar(pointer, containsHexNumbers, allNumbers));
+					pointer++;
+				}
+			}
+
+			//get flag
+			isHex = Diffs.hasHexChars();
+
+			//pick up space
+			final int spaceChar = Diffs.getSpaceChar();
+			if (spaceChar != -1) {
+				this.spaceChar = spaceChar;
+			}
+		}
+
+		int EncodingType = PdfDictionary.Unknown;
+
+		if (Encoding != null) {
+			hasEncoding = true;
+
+			//see if general value first ie /WinAnsiEncoding
+			int newEncodingType = Encoding.getGeneralType(PdfDictionary.Encoding);
+
+			//check object for value
+			if (newEncodingType == PdfDictionary.Unknown) {
+				if (getBaseFontName().equals("ZapfDingbats")) {
+					newEncodingType = StandardFonts.ZAPF;
+				} else {
+					newEncodingType = Encoding.getParameterConstant(PdfDictionary.BaseEncoding);
+				}
+			}
+
+			if (newEncodingType != PdfDictionary.Unknown) {
+				EncodingType = newEncodingType;
+			} else {
+				EncodingType = handleNoEncoding(encValue, pdfObject);
+			}
+
+			if (spaceChar == -1 && (newEncodingType == StandardFonts.WIN || newEncodingType == StandardFonts.PDF || newEncodingType == StandardFonts.MAC)) {
+				spaceChar = 32;
+			}
+
+		}
+
+		putFontEncoding(EncodingType);
+
+	}
+
+	/**
+	 * used by PDF2HTML5 where encoding different from index in TJ command and
+	 * we need to remap via glyf name (ie sample_pdf_htmls/thoughtcorp/Simple
+	 * Relational Contracts.pdf)
+	 *
+	 * @param glypName
+	 * @return
+	 */
+	public final int getDiffChar(final String glypName) {
+
+		int value = -1;
+
+		final Integer newVal = nonStandardMappings.get(glypName);
+		if (newVal != null) {
+			value = newVal;
+		}
+
+		return value;
+	}
+
+	/**
+	 * Insert a new mapped char in the name mapping table
+	 */
+	protected final void putMappedChar(final int charInt, final String mappedChar) {
+
+		if (diffTable == null) {
+			diffTable = new String[maxCharCount];
+		}
+
+		if (charInt > 255 && maxCharCount == 256) { //hack for odd file
+			//System.out.println(charInt+" mappedChar="+mappedChar+"<");
+
+			//if(1==1)
+			//throw new RuntimeException("xxx");
+		} else if (diffTable[charInt] == null && mappedChar != null && !mappedChar.startsWith("glyph")) {
+
+			diffTable[charInt] = mappedChar;
+		}
+	}
+
+	/**
+	 * return char mapped onto value in Differences or null
+	 *
+	 * @param charInt
+	 * @return
+	 */
+	public String getDiffMapping(final int charInt) {
+		if (diffTable == null) {
+			return null;
+		} else {
+			return diffTable[charInt];
+		}
+	}
+
+	/**
+	 * Returns the char glyph corresponding to the specified code for the
+	 * specified font.
+	 */
+	public final String getMappedChar(final int charInt, final boolean remap) {
+
+		String result = null;
+
+		//check differences
+		if (diffTable != null) {
+			result = diffTable[charInt];
+		}
+
+		if ((remap) && (result != null) && (result.equals(".notdef"))) {
+			result = " ";
+		}
+
+		//check standard encoding
+		if (result == null && charInt < 335) {
+			result = StandardFonts.getUnicodeChar(getFontEncoding(true), charInt);
+		}
+
+		//all unused win values over 40 map to bullet
+		if (result == null && charInt > 40 && getFontEncoding(true) == StandardFonts.WIN) {
+			if (charInt == 173) {
+				result = "hyphen";
+			} else {
+				result = "bullet";
+			}
+		}
+
+		//check embedded stream as not in baseFont encoding
+		if (isFontEmbedded && result == null) {
+
+			//diffs from embedded 1C file
+			if (diffs != null) {
+				result = diffs[charInt];
+			}
+
+			//Embedded encoding (which can be different from the encoding!)
+			if (result == null && charInt < 335) {
+				result = StandardFonts.getUnicodeChar(this.embeddedEnc, charInt);
+			}
+
+		}
+
+		return result;
+	}
+
+	public final String getEmbeddedChar(final int charInt) {
+
+		String embeddedResult = null;
+
+		//check embedded stream as not in baseFont encoding
+		if (isFontEmbedded) {
+
+			//diffs from embedded 1C file
+			if (diffs != null) {
+				embeddedResult = diffs[charInt];
+			}
+
+			//Embedded encoding (which can be different from the encoding!)
+			if ((embeddedResult == null) && charInt < 256) {
+				embeddedResult = StandardFonts.getUnicodeChar(this.embeddedEnc, charInt);
+			}
+
+		}
+
+		return embeddedResult;
+	}
+
+	/**
+	 * gets type of font (ie 3 ) so we can call type specific code.
+	 *
+	 * @return int of type
+	 */
+	public final int getFontType() {
+		return fontTypes;
+	}
+
+	/**
+	 * name of font and Path used to display
+	 */
+	public String getSubstituteFont() {
+		return this.substituteFontFile;
+	}
+
+	/**
+	 * used in generic renderer
+	 */
+	public float getGlyphWidth(final String charGlyph, final int rawInt, final String displayValue) {
+
+		float currentWidth = 0;
+
+		if (this.fontTypes == StandardFonts.TRUETYPE && isFontEmbedded) { //use embedded CMAP
+			currentWidth = glyphs.getTTWidth(charGlyph, rawInt, displayValue, false);
+		} else if (!isFontEmbedded) { //this should cascade gracefully and always give a sensible number
+
+			if (rawInt < 255) {
+				currentWidth = getWidth(rawInt);
+			}
+
+			if (currentWidth == 0) { //failsafe
+				final Float value = StandardFonts.getStandardWidth("Arial", charGlyph);
+				currentWidth = value != null ? value : 0.0f;
+			}
+		}
+
+		return currentWidth;
+	}
+
+	public PdfJavaGlyphs getGlyphData() {
+
+		//glyphs.setHasWidths(this.hasWidths());
+		glyphs.setHasWidths(true);
+		return glyphs;
+	}
+
+	public void setFont(final String font, final int textSize) {
+		glyphs.setFont(font, textSize);
+	}
+
+	public boolean is1C() {
+		return glyphs.is1C();
+	}
+
+	public boolean isFontSubsetted() {
+		return glyphs.isSubsetted;
+	}
+
+	public void setValuesForGlyph(final int rawInt, final String charGlyph, final String displayValue, final String embeddedChar) {
+		glyphs.setValuesForGlyph(rawInt, charGlyph, displayValue, embeddedChar);
+
+	}
+
+	/**
+	 * remove unwanted chars from string name
+	 */
+	private static String cleanupFontName(final String baseFontName) {
+
+		// baseFontName=baseFontName.toLowerCase();
+		final int length = baseFontName.length();
+
+		final StringBuilder cleanedName = new StringBuilder(length);
+		char c;
+
+		for (int aa = 0; aa < length; aa++) {
+			c = baseFontName.charAt(aa);
+
+			if (c == ' ' || c == '-') {
+
+			} else if (c == '#' && baseFontName.charAt(aa + 1) == '2' && (baseFontName.charAt(aa + 2) == '0' || baseFontName.charAt(aa + 2) == 'D')) {
+
+				//add in the hyphen
+				if (baseFontName.charAt(aa + 2) == 'D') {
+					cleanedName.append('-');
+				}
+
+				aa += 2;
+
+			} else {
+				cleanedName.append(c);
+			}
+		}
+
+		//if(baseFontName.indexOf("#20")!=-1)
+		//System.out.println(baseFontName+"<>"+cleanedName.toString());
+		return cleanedName.toString();
+	}
+
+	/**
+	 * get bounding box to highlight
+	 *
+	 * @return
+	 */
+	public Rectangle getBoundingBox() {
 
 //        if(BBox==null){
-        //if one of standard fonts, use value from afm file
-        final float[] standardBB = StandardFonts.getFontBounds(getFontName());
+		//if one of standard fonts, use value from afm file
+		final float[] standardBB = StandardFonts.getFontBounds(getFontName());
 
-        if (standardBB == null) {
-            if (!isFontEmbedded) { //use default as we are displaying in Lucida
-                BBox = new Rectangle(0, 0, 1000, 1000);
-            } else {
-                BBox = new Rectangle((int) (FontBBox[0]), (int) (FontBBox[1]), (int) (FontBBox[2] - FontBBox[0]), (int) (FontBBox[3] - FontBBox[1]));
-            }
-        } else {
-            BBox = new Rectangle((int) (standardBB[0]), (int) (standardBB[1]), (int) (standardBB[2] - standardBB[0]), (int) (standardBB[3] - standardBB[1]));
-        }
+		if (standardBB == null) {
+			if (!isFontEmbedded) { //use default as we are displaying in Lucida
+				BBox = new Rectangle(0, 0, 1000, 1000);
+			} else {
+				BBox = new Rectangle((int) (FontBBox[0]), (int) (FontBBox[1]), (int) (FontBBox[2] - FontBBox[0]), (int) (FontBBox[3] - FontBBox[1]));
+			}
+		} else {
+			BBox = new Rectangle((int) (standardBB[0]), (int) (standardBB[1]), (int) (standardBB[2] - standardBB[0]), (int) (standardBB[3] - standardBB[1]));
+		}
 //        }
 
-        return BBox;
-    }
+		return BBox;
+	}
 
-    public void setRawFontName(final String baseFont) {
-        rawFontName = baseFont;
-    }
+	public void setRawFontName(final String baseFont) {
+		rawFontName = baseFont;
+	}
 
-    /**
-     * workout spaces (if any) to add into content for a gap
-     * from user settings, space info in pdf
-     */
-    public static String getSpaces(
-            float currentGap,
-            final float spaceWidth,
-            final float currentThreshold) {
-        String space = "";
+	/**
+	 * workout spaces (if any) to add into content for a gap from user settings,
+	 * space info in pdf
+	 */
+	public static String getSpaces(
+			float currentGap,
+			final float spaceWidth,
+			final float currentThreshold) {
+		String space = "";
 
-        if (spaceWidth > 0) { //avoid silly huge gaps as well in data
-            if ((currentGap > spaceWidth) && (currentGap / spaceWidth < 300) && (currentThreshold < 1 || currentGap > spaceWidth * currentThreshold)) {
-                while (currentGap >= spaceWidth) {
-                    space = ' ' + space;
-                    currentGap -= spaceWidth;
-                }
-            } else if (currentGap > spaceWidth * currentThreshold) {
-                //ensure a gap of at least space_thresh_hold
-                space += ' ';
-            }
-        }
+		if (spaceWidth > 0) { //avoid silly huge gaps as well in data
+			if ((currentGap > spaceWidth) && (currentGap / spaceWidth < 300) && (currentThreshold < 1 || currentGap > spaceWidth * currentThreshold)) {
+				while (currentGap >= spaceWidth) {
+					space = ' ' + space;
+					currentGap -= spaceWidth;
+				}
+			} else if (currentGap > spaceWidth * currentThreshold) {
+				//ensure a gap of at least space_thresh_hold
+				space += ' ';
+			}
+		}
 
+		return space;
+	}
 
-        return space;
-    }
+	public int getDiffChar(final int index) {
+		if (diffCharTable == null) {
+			return 0;
+		} else {
+			return diffCharTable[index];
+		}
+	}
 
-    public int getDiffChar(final int index) {
-        if (diffCharTable == null) {
-            return 0;
-        } else {
-            return diffCharTable[index];
-        }
-    }
+	public float[] getFontBounds() {
+		return this.FontBBox;
+	}
 
-    public float[] getFontBounds() {
-        return this.FontBBox;
-    }
+	public boolean isFontVertical() {
+		return isFontVertical;
+	}
 
-    public boolean isFontVertical() {
-        return isFontVertical;
-    }
+	/**
+	 * @param lastWidth
+	 */
+	public void setLastWidth(final float lastWidth) {
+		this.lastWidth = lastWidth;
+	}
 
-    /**
-     * @param lastWidth
-     */
-    public void setLastWidth(final float lastWidth) {
-        this.lastWidth = lastWidth;
-    }
+	public String getFontID() {
+		return fontID;
+	}
 
-    public String getFontID() {
-        return fontID;
-    }
+	public boolean isSingleByte() {
+		return isSingleByte;
+	}
 
-    public boolean isSingleByte() {
-        return isSingleByte;
-    }
+	/**
+	 * workaround to handle issue with some odd SAP files Please do not use.
+	 *
+	 * @return
+	 */
+	public boolean isBrokenFont() {
+		return this.handleOddSapFontMapping;
+	}
 
-    /**
-     * workaround to handle issue with some odd SAP files
-     * Please do not use.
-     *
-     * @return
-     */
-    public boolean isBrokenFont() {
-        return this.handleOddSapFontMapping;
-    }
+	/**
+	 * Used by HTML code to tell whether to use CID range remapping or not
+	 *
+	 * @return Whether a 'ToUnicode' dictionary is provided.
+	 */
+	public boolean hasToUnicode() {
+		return unicodeMappings != null;
+	}
 
-    /**
-     * Used by HTML code to tell whether to use CID range remapping or not
-     *
-     * @return Whether a 'ToUnicode' dictionary is provided.
-     */
-    public boolean hasToUnicode() {
-        return unicodeMappings != null;
-    }
+	/**
+	 * returns width or value in widthTable (-1 if no width set) idx=-1 returns
+	 * default
+	 */
+	public float getDefaultWidth(final int idx) {
+		if (idx == -1) {
+			return defaultWidth;
+		} else {
 
-    /**
-     * returns width or value in widthTable (-1 if no width set)
-     * idx=-1 returns default
-     */
-    public float getDefaultWidth(final int idx) {
-        if (idx == -1) {
-            return defaultWidth;
-        } else {
+			if (widthTable == null) {
+				return -1;
+			} else {
+				return widthTable[idx];
+			}
+		}
+	}
 
-            if (widthTable == null) {
-                return -1;
-            } else {
-                return widthTable[idx];
-            }
-        }
-    }
+	/**
+	 * work out if 1 or 2 bytes for each char
+	 *
+	 * @param firstVal
+	 * @param secondByte
+	 * @param secondByteIsEscaped
+	 * @return 0=false 1=true -1=unset
+	 */
+	public int isDoubleBytes(final int firstVal, final int secondByte, final boolean secondByteIsEscaped) {
 
-    /**
-     * work out if 1 or 2 bytes for each char
-     *
-     * @param firstVal
-     * @param secondByte
-     * @param secondByteIsEscaped
-     * @return 0=false
-     * 1=true
-     * -1=unset
-     */
-    public int isDoubleBytes(final int firstVal, final int secondByte, final boolean secondByteIsEscaped) {
+		if (hasDoubleBytes) {
+			return 1;
+		} else if (isFirstScan) { //don't bother with test if we have figured it out already
 
-        if (hasDoubleBytes) {
-            return 1;
-        } else if (isFirstScan) { //don't bother with test if we have figured it out already
+			if ((firstVal == secondByte && firstVal > 0) || (!isHex && secondByte == 41 && !secondByteIsEscaped) || (getMappedChar(firstVal, true) != null && getMappedChar(secondByte, true) != null)) {
+				isDouble = 0;
+			} else {
+				isDouble = 1;
+			}
 
-            if ((firstVal == secondByte && firstVal > 0) || (!isHex && secondByte == 41 && !secondByteIsEscaped) || (getMappedChar(firstVal, true) != null && getMappedChar(secondByte, true) != null)) {
-                isDouble = 0;
-            } else {
-                isDouble = 1;
-            }
+			isFirstScan = false;
+		}
 
-            isFirstScan = false;
-        }
+		return isDouble;
+	}
 
-        return isDouble;
-    }
+	/**
+	 * flag to show if double (1), single (0) or unset (-1)
+	 *
+	 * @return
+	 */
+	public int isDoubleBytes() {
+		return isDouble;
+	}
 
-    /**
-     * flag to show if double (1), single (0) or unset (-1)
-     *
-     * @return
-     */
-    public int isDoubleBytes() {
-        return isDouble;
-    }
+	public PdfObject getToUnicode() {
 
-    public PdfObject getToUnicode() {
+		return ToUnicode;
+	}
 
-        return ToUnicode;
-    }
+	public int[] getCIDToGIDMap() {
+		return CIDToGIDMap;
+	}
 
-    public int[] getCIDToGIDMap() {
-        return CIDToGIDMap;
-    }
+	/**
+	 * looks up ptr in any CID CMAP in font
+	 *
+	 * @param ptr
+	 * @return -1 if no CMAP, otherwise value
+	 */
+	public int getEncodedCMAPValue(final int ptr) {
 
-    /**
-     * looks up ptr in any CID CMAP in font
-     *
-     * @param ptr
-     * @return -1 if no CMAP, otherwise value
-     */
-    public int getEncodedCMAPValue(final int ptr) {
+		if (rawCMAP == null || ptr > rawCMAP.length) {
+			return -1;
+		} else {
+			return rawCMAP[ptr];
+		}
+	}
 
-        if (rawCMAP == null || ptr > rawCMAP.length) {
-            return -1;
-        } else {
-            return rawCMAP[ptr];
-        }
-    }
+	public String[] getCMAP() {
+		return CMAP;
+	}
 
-    public String[] getCMAP() {
-        return CMAP;
-    }
-
-    public boolean isWidthVertical() {
-        return isWidthVertical;
-    }
+	public boolean isWidthVertical() {
+		return isWidthVertical;
+	}
 }

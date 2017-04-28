@@ -111,8 +111,6 @@ public class JavaFXPreferences {
     public static void execute(final Object[] args, final GUIFactory currentGUI) {
         if (args == null) {
             showPreferenceWindow(currentGUI);
-        } else {
-
         }
     }
 
@@ -1299,8 +1297,18 @@ public class JavaFXPreferences {
         }
     }
 
+
     private static void loadSettings() {
 
+        loadGeneralSettings();
+        loadPageLayoutSettings();
+        loadInterfaceSettings();
+        loadPrintingSettings();
+        loadColorSettings();
+
+    }
+
+    private static void loadGeneralSettings() {
         /*
          * Load General Settings.
          */
@@ -1346,10 +1354,14 @@ public class JavaFXPreferences {
             openDocCB.setSelected(false);
         }
 
+    }
+
+    private static void loadPageLayoutSettings() {
+
         /*
          * Load Page Layout Settings.
          */
-        propValue = properties.getValue("enhancedViewerMode");
+        String propValue = properties.getValue("enhancedViewerMode");
         if (!propValue.isEmpty() && propValue.equals("true")) {
             enhancedViewerCB.setSelected(true);
         } else {
@@ -1403,10 +1415,15 @@ public class JavaFXPreferences {
             scrollableThumbsCB.setSelected(false);
         }
 
+
+    }
+
+    private static void loadInterfaceSettings() {
+
         /*
          * Load Interface Settings.
          */
-        propValue = properties.getValue("windowTitle");
+        String propValue = properties.getValue("windowTitle");
         if (propValue != null && !propValue.isEmpty()) {
             winTitleTF.setText(propValue);
         }
@@ -1478,12 +1495,16 @@ public class JavaFXPreferences {
         if (!propValue.isEmpty()) {
             transitionSelect.getSelectionModel().select(propValue);
         }
-        
+
+    }
+
+    private static void loadPrintingSettings() {
+
         /*
          * Load Printing Settings.
          */
 
-        propValue = properties.getValue("defaultPrinter");
+        String propValue = properties.getValue("defaultPrinter");
         if (propValue != null && !propValue.isEmpty()) {
             printerCombo.setValue(propValue);
         } else {
@@ -1509,11 +1530,15 @@ public class JavaFXPreferences {
         if (propValue != null && !propValue.isEmpty()) {
             blackListTF.setText(propValue);
         }
-        
+
+
+    }
+
+    private static void loadColorSettings() {
         /*
          * Load Color Settings.
          */
-        propValue = properties.getValue("highlightBoxColor");
+        String propValue = properties.getValue("highlightBoxColor");
         int hBoxColor;
         if (!propValue.isEmpty()) {
             hBoxColor = Integer.parseInt(propValue);
@@ -1581,7 +1606,6 @@ public class JavaFXPreferences {
             hBoxColor = Integer.parseInt(propValue);
         }
         displayBGColorPicker = new ColorPicker(shiftColorSpaceToFX(hBoxColor));
-
 
     }
 }

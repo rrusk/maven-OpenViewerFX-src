@@ -62,6 +62,19 @@ public class SamplingFactory {
     public static final int print_disable = 4;
 
     /**
+     * medium will make sure images larger than page are reduced in size (often large scanned tiffs)
+     */
+    public static final int mediumAndSharpen = 5;
+
+    /**
+     * (default setting) high will agressively reduce images bigger than twice their drawn size at 100% so a image
+     * which appears as 100x100 on the PDF but whose raw images is 250x250 will be stored as 125x125 image
+     * and not a 250x250 image
+     */
+    public static final int highAndSharpen = 6;
+
+
+    /**
      * current setting - do not set directly
      */
     public static int downsampleLevel = high;
@@ -117,7 +130,7 @@ public class SamplingFactory {
     @SuppressWarnings("UnusedDeclaration")
     public static void setDownsampleMode(final int newLevel) {
 
-        if (newLevel == high || newLevel == medium || newLevel == none) {
+        if (newLevel == high || newLevel == highAndSharpen || newLevel == medium || newLevel == mediumAndSharpen || newLevel == none) {
             downsampleLevel = newLevel;
         } else if (newLevel == print_disable) {
             isPrintDownsampleEnabled = false;

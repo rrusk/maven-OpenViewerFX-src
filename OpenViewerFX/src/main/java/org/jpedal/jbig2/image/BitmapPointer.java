@@ -2,29 +2,29 @@
  * ===========================================
  * Java Pdf Extraction Decoding Access Library
  * ===========================================
- *
+ * <p>
  * Project Info:  http://www.idrsolutions.com
  * Help section for developers at http://www.idrsolutions.com/java-pdf-library-support/
- *
+ * <p>
  * (C) Copyright 1997-2008, IDRsolutions and Contributors.
  * Main Developer: Simon Barnett
- *
- * 	This file is part of JPedal
- *
+ * <p>
+ * This file is part of JPedal
+ * <p>
  * Copyright (c) 2008, IDRsolutions
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the IDRsolutions nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the IDRsolutions nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY IDRsolutions ``AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,16 +35,16 @@
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * <p>
  * Other JBIG2 image decoding implementations include
  * jbig2dec (http://jbig2dec.sourceforge.net/)
  * xpdf (http://www.foolabs.com/xpdf/)
- * 
+ * <p>
  * The final draft JBIG2 specification can be found at http://www.jpeg.org/public/fcd14492.pdf
- * 
+ * <p>
  * All three of the above resources were used in the writing of this software, with methodologies,
  * processes and inspiration taken from all three.
- *
+ * <p>
  * ---------------
  * BitmapPointer.java
  * ---------------
@@ -52,26 +52,26 @@
 package org.jpedal.jbig2.image;
 
 public class BitmapPointer {
-	private int x, y, width, height, bits, count;
-	private JBIG2Bitmap bitmap;
+    private int x, y, width, height, bits, count;
+    private JBIG2Bitmap bitmap;
 
-	public BitmapPointer(JBIG2Bitmap bitmap) {
-		this.bitmap = bitmap;
-		this.height = bitmap.getHeight();
-		this.width = bitmap.getWidth();
-	}
+    public BitmapPointer(JBIG2Bitmap bitmap) {
+        this.bitmap = bitmap;
+        this.height = bitmap.getHeight();
+        this.width = bitmap.getWidth();
+    }
 
-	public void setPointer(int x, int y) {
-		this.x = x;
-		this.y = y;
-		count = 0;
-	}
+    public void setPointer(int x, int y) {
+        this.x = x;
+        this.y = y;
+        count = 0;
+    }
 
-	public int nextPixel() {
+    public int nextPixel() {
 
-		// fairly certain the byte can be cached here - seems to work fine. only
-		// problem would be if cached pixel was modified, and the modified
-		// version needed.
+        // fairly certain the byte can be cached here - seems to work fine. only
+        // problem would be if cached pixel was modified, and the modified
+        // version needed.
 //		if (y < 0 || y >= height || x >= width) {
 //			return 0;
 //		} else if (x < 0) {
@@ -98,18 +98,18 @@ public class BitmapPointer {
 //		x++;
 //
 //		return pixel;
-		
-		if (y < 0 || y >= height || x >= width) {
-			return 0;
-		} else if (x < 0) {
-			x++;
-			return 0;
-		}
 
-		int pixel = bitmap.getPixel(x, y);
+        if (y < 0 || y >= height || x >= width) {
+            return 0;
+        } else if (x < 0) {
+            x++;
+            return 0;
+        }
 
-		x++;
+        int pixel = bitmap.getPixel(x, y);
 
-		return pixel;
-	}
+        x++;
+
+        return pixel;
+    }
 }

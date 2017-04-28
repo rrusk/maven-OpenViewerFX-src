@@ -96,10 +96,6 @@ public class PdfTextExtractionUtils {
     //lookup table used to sort into correct order for table
     private Vector_Int lineY2;
 
-    //marker char used in content (we bury location for each char so we can split)
-    private static final String MARKER = PdfData.marker;
-    private static final char MARKER2 = MARKER.charAt(0);
-
     //counters for cols and rows and pointer to final object we merge into
     private int max_rows, master;
 
@@ -111,8 +107,6 @@ public class PdfTextExtractionUtils {
 
     //amount we resize arrays holding content with if no space
     private static final int CONTENT_ARRAY_INCREMENT = 100;
-
-    private static boolean useUnrotatedCoords;
 
     private boolean isXMLExtraction = true;
 
@@ -500,13 +494,15 @@ public class PdfTextExtractionUtils {
      */
     private StringBuilder removeHiddenMarkers(final int c) {
 
+        final String marker = PdfData.marker;
+
         //make sure has markers and ignore if not
-        if (content[c].indexOf(MARKER) == -1) {
+        if (content[c].indexOf(marker) == -1) {
             return content[c];
         }
 
         //strip the markers
-        final StringTokenizer tokens = new StringTokenizer(content[c].toString(), MARKER, true);
+        final StringTokenizer tokens = new StringTokenizer(content[c].toString(), marker, true);
         String temp;
         StringBuilder processedData = new StringBuilder();
 
@@ -516,7 +512,7 @@ public class PdfTextExtractionUtils {
             //strip encoding in data
             temp = tokens.nextToken(); //see if first marker
 
-            if (temp.equals(MARKER)) {
+            if (temp.equals(marker)) {
                 tokens.nextToken(); //point character starts
                 tokens.nextToken(); //second marker
                 tokens.nextToken(); //width
@@ -543,6 +539,8 @@ public class PdfTextExtractionUtils {
 
         //hold counters on all x values
         final HashMap<Integer, Integer> xLines = new HashMap<Integer, Integer>();
+
+        final String marker = PdfData.marker;
 
         //counter on most popular item
         int most_frequent = 0;
@@ -591,7 +589,7 @@ public class PdfTextExtractionUtils {
             if ((x1 > minX - .5) && (x2 < maxX + .5) && (y2 > minY - .5) && (y1 < maxY + .5)) {
 
                 //run though the string extracting our markers to get x values
-                final StringTokenizer tokens = new StringTokenizer(raw, MARKER, true);
+                final StringTokenizer tokens = new StringTokenizer(raw, marker, true);
                 String value, lastValue = "";
                 Object currentValue;
 
@@ -599,7 +597,7 @@ public class PdfTextExtractionUtils {
 
                     //encoding in data
                     value = tokens.nextToken(); //see if first marker
-                    if (value.equals(MARKER)) {
+                    if (value.equals(marker)) {
 
                         value = tokens.nextToken(); //point character starts
 
@@ -716,6 +714,8 @@ public class PdfTextExtractionUtils {
 
         final boolean debugSplit = false;
 
+        final char MARKER2 = PdfGroupingAlgorithms.MARKER2;
+
         //initialise local arrays allow for extra space
         int count = pdf_data.getRawTextElementCount() + CONTENT_ARRAY_INCREMENT;
 
@@ -774,7 +774,7 @@ public class PdfTextExtractionUtils {
                 String value, textValue = "", pt_reached;
 
                 //allow for no tokens and return all text fragment
-                if (!fragment.getRawData().contains(MARKER)) {
+                if (!fragment.getRawData().contains(PdfData.marker)) {
                     text = new StringBuilder(fragment.getRawData());
                 }
 
@@ -2091,6 +2091,8 @@ public class PdfTextExtractionUtils {
         y1 = v[1];
         x2 = v[2];
         y2 = v[3];
+
+        final boolean useUnrotatedCoords = PdfGroupingAlgorithms.useUnrotatedCoords;
 
         //extract the raw fragments (Note order or parameters passed)
         if (breakFragments) {

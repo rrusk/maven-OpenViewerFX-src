@@ -32,10 +32,7 @@
  */
 package org.jpedal.parser.image.downsample;
 
-import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
-import org.jpedal.images.SamplingFactory;
-import org.jpedal.parser.image.PdfImageTypes;
 import org.jpedal.parser.image.data.ImageData;
 
 /**
@@ -44,36 +41,23 @@ import org.jpedal.parser.image.data.ImageData;
 public class DownSampler {
 
     public static GenericColorSpace downSampleImage(GenericColorSpace decodeColorData,
-                                                    ImageData imageData, final byte[] maskCol, final int sampling) {
+            ImageData imageData, final byte[] maskCol, final int sampling) {
 
         if (sampling > 1) { //safety check
 
             imageData.setIsDownsampled(true);
 
-            byte[] index = decodeColorData.getIndexedMap();
+            switch (imageData.getDepth()) {
+                case 1:
 
-            if (imageData.getDepth() == 1 && (decodeColorData.getID() != ColorSpaces.DeviceRGB || index == null)) {
+                    decodeColorData = OneBitDownSampler.downSample(decodeColorData, maskCol, sampling, imageData);
+                    break;
 
-                imageData.setImageType(PdfImageTypes.Binary);
-                //make 1 bit indexed flat
-                if (index != null) {
-                    index = decodeColorData.convertIndexToRGB(index);
-                    decodeColorData.setIndex(index, index.length / 3);
-                    decodeColorData = OneBitDownSampler.downSampleIndexed(sampling, imageData, index, decodeColorData);
+                case 8:
+                    decodeColorData = EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
+                    break;
 
-                } else if (maskCol != null) {
-                    decodeColorData = OneBitDownSampler.downSampleMask(sampling, imageData, maskCol, decodeColorData);
-                } else {
-                    decodeColorData = OneBitDownSampler.downSample(sampling, imageData, decodeColorData);
-                }
-            } else if (imageData.getDepth() == 8) {
-                decodeColorData = EightBitDownSampler.downSample(imageData, decodeColorData, sampling);
             }
-
-            if (SamplingFactory.kernelSharpen && imageData.getImageType().equals(PdfImageTypes.Binary)) {
-                imageData = KernelUtils.applyKernel(imageData);
-            }
-
         }
         return decodeColorData;
     }

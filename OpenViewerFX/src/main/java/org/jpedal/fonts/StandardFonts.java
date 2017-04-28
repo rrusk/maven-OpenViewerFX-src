@@ -258,6 +258,16 @@ public class StandardFonts {
      */
     public static boolean usesGlyphlist;
 
+    public static String show() {
+        String a = "";
+
+        if (PDF_char_encoding_table != null) {
+            a = a + "98=" + PDF_char_encoding_table[98];
+        }
+
+        return a;
+    }
+
     public static void dispose() {
 
         unicode_name_mapping_table = null;

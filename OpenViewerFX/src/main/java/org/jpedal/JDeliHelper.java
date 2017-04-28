@@ -1,52 +1,52 @@
 /**
-* ===========================================
-* Java Pdf Extraction Decoding Access Library
-* ===========================================
-*
-* Project Info:  http://www.jpedal.org
-* (C) Copyright 1997-2008, IDRsolutions and Contributors.
-* Main Developer: Simon Barnett
-*
-* 	This file is part of JPedal
-*
-* Copyright (c) 2008, IDRsolutions
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * Neither the name of the IDRsolutions nor the
-*       names of its contributors may be used to endorse or promote products
-*       derived from this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY IDRsolutions ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL IDRsolutions BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*
-* Other JBIG2 image decoding implementations include
-* jbig2dec (http://jbig2dec.sourceforge.net/)
-* xpdf (http://www.foolabs.com/xpdf/)
-* 
-* The final draft JBIG2 specification can be found at http://www.jpeg.org/public/fcd14492.pdf
-* 
-* All three of the above resources were used in the writing of this software, with methodologies,
-* processes and inspiration taken from all three.
-*
-* ---------------
-* JDeliHelper.java
-* ---------------
-*/
+ * ===========================================
+ * Java Pdf Extraction Decoding Access Library
+ * ===========================================
+ * <p>
+ * Project Info:  http://www.jpedal.org
+ * (C) Copyright 1997-2008, IDRsolutions and Contributors.
+ * Main Developer: Simon Barnett
+ * <p>
+ * This file is part of JPedal
+ * <p>
+ * Copyright (c) 2008, IDRsolutions
+ * All rights reserved.
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the IDRsolutions nor the
+ * names of its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written permission.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY IDRsolutions ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL IDRsolutions BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * Other JBIG2 image decoding implementations include
+ * jbig2dec (http://jbig2dec.sourceforge.net/)
+ * xpdf (http://www.foolabs.com/xpdf/)
+ * <p>
+ * The final draft JBIG2 specification can be found at http://www.jpeg.org/public/fcd14492.pdf
+ * <p>
+ * All three of the above resources were used in the writing of this software, with methodologies,
+ * processes and inspiration taken from all three.
+ * <p>
+ * ---------------
+ * JDeliHelper.java
+ * ---------------
+ */
 package org.jpedal;
 
 import java.awt.image.BufferedImage;
@@ -59,6 +59,7 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
 import org.jpedal.exception.PdfException;
 import org.jpedal.utils.LogWriter;
 
@@ -67,11 +68,11 @@ import org.jpedal.utils.LogWriter;
  * @author markee
  */
 public class JDeliHelper {
-    
-    
+
+
     public static void processJPEG(int dim, byte[] data, int p, int[] maskArray, int[] output) {
     }
-    
+
     /**
      * convert byte[] datastream JPEG to an image in RGB
      * @throws PdfException
@@ -80,105 +81,105 @@ public class JDeliHelper {
 
         return null;
     }
-    
-     public static BufferedImage getDicomImage(byte[] data) throws Exception{
+
+    public static BufferedImage getDicomImage(byte[] data) throws Exception {
         return null;
     }
-    
+
     public static int[] convertCMYKtoRGB(int cc, int mm, int yy, int kk) {
-       return null;
-    }    
-     
+        return null;
+    }
+
     public static byte[] convertCMYK2RGB(final int w, final int h, int pixelCount, final byte[] data) {
-        
+
         return null;
     }
-    
+
     public static byte[] getBytesFromJPEG(boolean isInverted, final byte[] data, boolean isMask) throws Exception {
-        
+
         return null;
     }
-    
+
     public static byte[] getUnconvertedBytesFromJPEG2000(final byte[] data) throws Exception {
-        
+
         return null;
     }
-    
+
     public static byte[] getUnconvertedBytesFromJPEG(final byte[] data) throws Exception {
         return null;
-    } 
-    
+    }
+
     public static byte[] getUnconvertedBytesFromJPEG(final byte[] data, int adobeColorTransform) throws Exception {
         return null;
     }
-    
+
     public static byte[] getBytesFromJPEG(final byte[] data) throws Exception {
-        
-        Raster ras= getRasterFromJPEG2000(data);
-        
-        return ((DataBufferByte)ras.getDataBuffer()).getData();
-        
+
+        Raster ras = getRasterFromJPEG2000(data);
+
+        return ((DataBufferByte) ras.getDataBuffer()).getData();
+
     }
-    
-     
+
+
     private static Raster getRasterFromJPEG2000(final byte[] data) {
-        
+
         final ByteArrayInputStream in;
-        
-        ImageReader iir=null;
+
+        ImageReader iir = null;
         final ImageInputStream iin;
-        
-        Raster ras=null;
-        
+
+        Raster ras = null;
+
         try {
-            
+
             //read the image data
             in = new ByteArrayInputStream(data);
-            
+
             //suggestion from Carol
             final Iterator iterator = ImageIO.getImageReadersByFormatName("JPEG2000");
-            
-            while (iterator.hasNext()){
+
+            while (iterator.hasNext()) {
                 final Object o = iterator.next();
                 iir = (ImageReader) o;
                 if (iir.canReadRaster()) {
                     break;
                 }
             }
-            
+
             ImageIO.setUseCache(false);
             iin = ImageIO.createImageInputStream((in));
             iir.setInput(iin, true);
-            ras=iir.read(0).getRaster();
-            
+            ras = iir.read(0).getRaster();
+
             in.close();
             iir.dispose();
             iin.close();
-            
-        }catch(final Exception ee){
+
+        } catch (final Exception ee) {
             LogWriter.writeLog("Problem closing  " + ee);
         }
-        
+
         return ras;
     }
-    
+
     public static BufferedImage getTiffImage(final int tiffImageToLoad, final String file) {
         return null;
     }
-    
-    public static BufferedImage getPsdImage(final String fileName){
+
+    public static BufferedImage getPsdImage(final String fileName) {
         return null;
     }
-    
+
     public static int getTiffPageCount(final String file) {
-        
+
         return 0;
     }
-    
+
     public static void write(BufferedImage image, String type, String file_name, boolean fasterPNG) throws IOException {
-        ImageIO.write(image,type,new File(file_name));
+        ImageIO.write(image, type, new File(file_name));
     }
-        
+
     public static int getDicomFrameCount(final String fn) {
         return 0;
     }
@@ -186,25 +187,25 @@ public class JDeliHelper {
     public static BufferedImage getDicomImage(String fn, int frameNumber) throws Exception {
         return null;
     }
-	
-	public static byte[] getScaledBytes(byte[] src, int srcWidth, int srcHeight, int dstWidth, int dstHeight, int nComp) {
-		return null;
-	}
-	
-	public static BufferedImage getScaledImage(BufferedImage srcImage, int dstWidth, int dstHeight){
-		return null;
-	}
-	
-	public static BufferedImage getSGIImage(byte[] data) throws Exception {
-		return null;
-	}
-        
+
+    public static byte[] getScaledBytes(byte[] src, int srcWidth, int srcHeight, int dstWidth, int dstHeight, int nComp) {
+        return null;
+    }
+
+    public static BufferedImage getScaledImage(BufferedImage srcImage, int dstWidth, int dstHeight) {
+        return null;
+    }
+
+    public static BufferedImage getSGIImage(byte[] data) throws Exception {
+        return null;
+    }
+
     public static BufferedImage getSGIImage(File data) throws Exception {
-		return null;
-	}
-	
-	public static BufferedImage read(File f) throws Exception{
-		return ImageIO.read(f);
-	}
-	
+        return null;
+    }
+
+    public static BufferedImage read(File f) throws Exception {
+        return ImageIO.read(f);
+    }
+
 }

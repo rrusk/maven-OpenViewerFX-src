@@ -221,13 +221,9 @@ public class FixImageIcon extends CustomImageIcon implements SwingConstants {
                     hs = drawHeight / (float) image.getHeight(null);
                 }
 
-                if (ws < hs) {
-                    drawWidth = (int) (ws * image.getWidth(null));
-                    drawHeight = (int) (ws * image.getHeight(null));
-                } else {
-                    drawWidth = (int) (hs * image.getWidth(null));
-                    drawHeight = (int) (hs * image.getHeight(null));
-                }
+                drawWidth = (int) (ws * image.getWidth(null));
+                drawHeight = (int) (hs * image.getHeight(null));
+
             }
 
             //now work out the x,y position to keep the icon in the centre of the icon

@@ -81,7 +81,7 @@ public class Exit {
          */
         if (LogWriter.isRunningFromIDE) {
             final int choice;
-            if (!org.jpedal.DevFlags.GUITESTINGINPROGRESS && currentGUI.confirmClose()) {
+            if (currentGUI.confirmClose()) {
                 choice = javax.swing.JOptionPane.showConfirmDialog(null, new javax.swing.JLabel(Messages.getMessage("PdfViewerExiting")),
                         Messages.getMessage("PdfViewerprogramExit"), javax.swing.JOptionPane.OK_CANCEL_OPTION, javax.swing.JOptionPane.PLAIN_MESSAGE);
             } else {
@@ -140,7 +140,7 @@ public class Exit {
         }
 
         //formClickTest needs this so that it does not exit after first test.
-        if (org.jpedal.DevFlags.GUITESTINGINPROGRESS || !SharedViewer.exitOnClose) {
+        if (!SharedViewer.exitOnClose) {
 
             ((Component) currentGUI.getFrame()).setVisible(false);
             if (currentGUI.getFrame() instanceof JFrame) {

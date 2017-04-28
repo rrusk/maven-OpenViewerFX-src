@@ -357,10 +357,10 @@ public class AnnotationFactory {
             }
         }
 
-        bounds.x *= scaling;
-        bounds.y *= scaling;
-        bounds.width *= scaling;
-        bounds.height *= scaling;
+        bounds.x = (int) ((bounds.x * scaling) + 0.5f);
+        bounds.y = (int) ((bounds.y * scaling) + 0.5f);
+        bounds.width = (int) ((bounds.width * scaling) + 0.5f);
+        bounds.height = (int) ((bounds.height * scaling) + 0.5f);
 
         return bounds;
     }
@@ -540,6 +540,11 @@ public class AnnotationFactory {
                 }
             }
         }
+
+        if (borderWidth < 1) {
+            borderWidth = 1;
+        }
+
         return borderWidth;
     }
 

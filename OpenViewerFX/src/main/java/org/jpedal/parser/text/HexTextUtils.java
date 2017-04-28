@@ -30,9 +30,9 @@
  * HexTextUtils.java
  * ---------------
  */
-
 package org.jpedal.parser.text;
 
+import org.jpedal.fonts.CmapSpec;
 import org.jpedal.fonts.PdfFont;
 import org.jpedal.fonts.StandardFonts;
 import org.jpedal.fonts.glyph.T1GlyphFactory;
@@ -43,151 +43,184 @@ import org.jpedal.parser.ParserOptions;
  */
 class HexTextUtils {
 
-    static int getHexValue(final byte[] stream, int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions) {
-        //'<'=60
+	static int getHexValueFromNonEmbedAdobeCMAP(final byte[] stream, int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions) {
+		CmapSpec cmap = glyphData.getEncodingCMAP();
+		int nn = 0;
+		int start = i;
+		int b1, b2;
+		int v = 0;
+		while (nn < 8) {
+			b1 = stream[start + nn];
+			b2 = stream[start + nn + 1];
+			if (b1 == 62) {
+				break;
+			} else if (b2 == 62) {
+				break;
+			}
+			nn += 2;
+			b1 = (b1 | 32) % 39 - 9; // fast way to convert hex to int value
+			b2 = (b2 | 32) % 39 - 9; // fast way to convert hex to int value
+			v = (v << 8) | ((b1 << 4) | b2);
+			if (cmap.isInCodeSpaceRange(v)) {
+				break;
+			}
+		}
+		
+		int uni = cmap.getCmapEncoding().getUnicodeValue(v);
+		glyphData.setRawInt(uni);
+		glyphData.setRawChar((char) uni);
+		glyphData.setDisplayValue("" + (char) uni);
+		return i + nn - 1; // the parent code increasing by 1 so reduce 1 here
+	}
 
-        int chars = 0, nextInt, start = i;
+	static int getHexValue(final byte[] stream, int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions) {
+		//'<'=60
 
-        int charSize = glyphData.getCharSize();
-        //get number of chars
-        for (int i2 = 1; i2 < charSize; i2++) {
-            nextInt = stream[start + i2];
+		int chars = 0, nextInt, start = i;
 
-            if (nextInt == 62) { //allow for less than 4 chars at end of stream (ie 6c>)
-                i2 = 4;
-                charSize = 2;
-                glyphData.setCharSize(2);
-            } else if (nextInt == 10 || nextInt == 13) { //avoid any returns
-                start++;
-                i2--;
-            } else {
-                chars++;
-            }
-        }
+		int charSize = glyphData.getCharSize();
+		//get number of chars
+		for (int i2 = 1; i2 < charSize; i2++) {
+			nextInt = stream[start + i2];
 
-        i = getValue(chars, stream, i, glyphData) - 1;
+			if (nextInt == 62) { //allow for less than 4 chars at end of stream (ie 6c>)
+				i2 = 4;
+				charSize = 2;
+				glyphData.setCharSize(2);
+			} else if (nextInt == 10 || nextInt == 13) { //avoid any returns
+				start++;
+				i2--;
+			} else {
+				chars++;
+			}
+		}
 
-        return setValue(glyphData, glyphData.getPossibleValue(), i, currentFontData, parserOptions);
-    }
+		i = getValue(chars, stream, i, glyphData) - 1;
 
-    static int getHexCIDValue(final byte[] stream, final int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions) {
+		return setValue(glyphData, glyphData.getPossibleValue(), i, currentFontData, parserOptions);
+	}
 
-        //'<'=60
+	static int getHexCIDValue(final byte[] stream, final int i, final GlyphData glyphData, final PdfFont currentFontData, final ParserOptions parserOptions) {
 
-        final int oneByteEndPtr;
-        int twoByteEndPtr = 0;
+		//'<'=60
+		final int oneByteEndPtr;
+		int twoByteEndPtr = 0;
 
-        //single value
+		//single value
+		oneByteEndPtr = getValue(1, stream, i, glyphData);
 
-        oneByteEndPtr = getValue(1, stream, i, glyphData);
+		int val = glyphData.getPossibleValue();
 
-        int val = glyphData.getPossibleValue();
+		//System.out.println("getHexCIDValue val="+val);
+		setValue(glyphData, val, i, currentFontData, parserOptions);
 
-        //System.out.println("getHexCIDValue val="+val);
-        setValue(glyphData, val, i, currentFontData, parserOptions);
+		//  int firstVal=val;
+		//lazy init if needed
+		if (StandardFonts.CMAP == null) {
+			StandardFonts.readCMAP();
+		}
 
-
-        //  int firstVal=val;
-
-        //lazy init if needed
-        if (StandardFonts.CMAP == null) {
-            StandardFonts.readCMAP();
-        }
-
-        // String firstValue = StandardFonts.CMAP[val];
-       
-        /*
+		// String firstValue = StandardFonts.CMAP[val];
+		/*
          * read second byte if needed (we always read first time to see if double byte or single)
-         */
-        // final boolean isEmbedded =currentFontData.isFontEmbedded;
+		 */
+		// final boolean isEmbedded =currentFontData.isFontEmbedded;
+		//also check if mapped in Charstring
+		final boolean hasCharString = glyphData.getRawInt() > 0 && currentFontData.CMapName != null && currentFontData.getFontType() == StandardFonts.CIDTYPE0 && currentFontData.getGlyphData().getCharStrings().containsKey(String.valueOf(glyphData.getRawInt()));
 
-        //also check if mapped in Charstring
-        final boolean hasCharString = glyphData.getRawInt() > 0 && currentFontData.CMapName != null && currentFontData.getFontType() == StandardFonts.CIDTYPE0 && currentFontData.getGlyphData().getCharStrings().containsKey(String.valueOf(glyphData.getRawInt()));
+		final boolean debug = false;
 
-        final boolean debug = false;
+		boolean isMultiByte = false;
+		//ignore these cases
+		if (currentFontData.CMapName != null && currentFontData.getUnicodeMapping(glyphData.getRawInt()) != null || stream[i] == '>') {
 
-        boolean isMultiByte = false;
-        //ignore these cases
-        if (currentFontData.CMapName != null && currentFontData.getUnicodeMapping(glyphData.getRawInt()) != null || stream[i] == '>') {
+			if (debug) {
+				System.out.println("ignore currentFontData.CMapName=" + currentFontData + ' ' + currentFontData.CMapName + " stream[i+2]=" + (char) stream[i] + ' ' + (char) stream[i + 1] + ' ' + (char) stream[i + 2]);
+			}
 
-            if (debug) {
-                System.out.println("ignore currentFontData.CMapName=" + currentFontData + ' ' + currentFontData.CMapName + " stream[i+2]=" + (char) stream[i] + ' ' + (char) stream[i + 1] + ' ' + (char) stream[i + 2]);
-            }
+		} else if (!hasCharString) { //not sure if really needed
 
-        } else if (!hasCharString) { //not sure if really needed
+			twoByteEndPtr = getValue(3, stream, i, glyphData);
 
-            twoByteEndPtr = getValue(3, stream, i, glyphData);
+			final char combinedVal = (char) glyphData.getPossibleValue();
 
-            final char combinedVal = (char) glyphData.getPossibleValue();
+			final int isDouble = currentFontData.isDoubleBytes(val, combinedVal & 255, false);
 
-            final int isDouble = currentFontData.isDoubleBytes(val, combinedVal & 255, false);
+			//if the combined value has a glyph, assume a 4 byte CID value
+			if (isDouble == 1 || currentFontData.glyphs.getEmbeddedGlyph(new T1GlyphFactory(false), null, null, combinedVal, "", -1, null) != null) {
+				isMultiByte = true;
+				val = combinedVal;
 
-            //if the combined value has a glyph, assume a 4 byte CID value
-            if (isDouble == 1 || currentFontData.glyphs.getEmbeddedGlyph(new T1GlyphFactory(false), null, null, combinedVal, "", -1, null) != null) {
-                isMultiByte = true;
-                val = combinedVal;
+				if (debug) {
+					System.out.println("use 2 values=" + Integer.toHexString(combinedVal));
+				}
+			}
+		}
 
-                if (debug) {
-                    System.out.println("use 2 values=" + Integer.toHexString(combinedVal));
-                }
-            }
-        }
+		if (isMultiByte) {
+			return setValue(glyphData, val, twoByteEndPtr - 1, currentFontData, parserOptions);
+		} else {
+			return oneByteEndPtr - 1;
+		}
+	}
 
-        if (isMultiByte) {
-            return setValue(glyphData, val, twoByteEndPtr - 1, currentFontData, parserOptions);
-        } else {
-            return oneByteEndPtr - 1;
-        }
-    }
+	private static int setValue(final GlyphData glyphData, final int val, final int i, final PdfFont currentFontData, final ParserOptions parserOptions) {
 
-    private static int setValue(final GlyphData glyphData, final int val, final int i, final PdfFont currentFontData, final ParserOptions parserOptions) {
+		//System.out.println("setValue="+val+" "+i+" "+charSize);
+		glyphData.setRawInt(val);
+		//i = i + charSize-1; //move offset
+		glyphData.setRawChar((char) val);
+		glyphData.setDisplayValue(currentFontData.getGlyphValue(val));
+		if (currentFontData.isCIDFont() && currentFontData.getCMAP() != null && currentFontData.getUnicodeMapping(val) == null) {
+			glyphData.setRawChar(glyphData.getDisplayValue().charAt(0));
+			glyphData.setRawInt(glyphData.getRawChar());
+		}
+		if (parserOptions.isTextExtracted()) {
+			glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), glyphData.getRawInt()));
+		}
 
-        //System.out.println("setValue="+val+" "+i+" "+charSize);
+		return i;
+	}
 
-        glyphData.setRawInt(val);
-        //i = i + charSize-1; //move offset
-        glyphData.setRawChar((char) val);
-        glyphData.setDisplayValue(currentFontData.getGlyphValue(val));
-        if (currentFontData.isCIDFont() && currentFontData.getCMAP() != null && currentFontData.getUnicodeMapping(val) == null) {
-            glyphData.setRawChar(glyphData.getDisplayValue().charAt(0));
-            glyphData.setRawInt(glyphData.getRawChar());
-        }
-        if (parserOptions.isTextExtracted()) {
-            glyphData.setUnicodeValue(currentFontData.getUnicodeValue(glyphData.getDisplayValue(), glyphData.getRawInt()));
-        }
+	private static int getValue(final int chars, final byte[] stream, int i, final GlyphData glyphData) {
 
-        return i;
-    }
+		int topHex, val = 0, charsToFind = chars;
 
-    private static int getValue(final int chars, final byte[] stream, int i, final GlyphData glyphData) {
+		while (charsToFind > -1) {
 
-        int topHex, val = 0, charsToFind = chars;
+			topHex = stream[i];
 
-        while (charsToFind > -1) {
+			//convert to number
+			if (topHex >= 'A' && topHex <= 'F') {
+				topHex -= 55;
+			} else if (topHex >= 'a' && topHex <= 'f') {
+				topHex -= 87;
+			} else if (topHex >= '0' && topHex <= '9') {
+				topHex -= 48;
+			} else {    //ignore 'bum' values
+				topHex = -1;
+			}
 
-            topHex = stream[i];
+			if (topHex > -1) {
+				val += (topHex << TD.multiply16[charsToFind]);
+				charsToFind--;
+			}
 
-            //convert to number
-            if (topHex >= 'A' && topHex <= 'F') {
-                topHex -= 55;
-            } else if (topHex >= 'a' && topHex <= 'f') {
-                topHex -= 87;
-            } else if (topHex >= '0' && topHex <= '9') {
-                topHex -= 48;
-            } else {    //ignore 'bum' values
-                topHex = -1;
-            }
+			i++;
+		}
 
-            if (topHex > -1) {
-                val += (topHex << TD.multiply16[charsToFind]);
-                charsToFind--;
-            }
+		glyphData.setPossibleValue(val);
 
-            i++;
-        }
-
-        glyphData.setPossibleValue(val);
-
-        return i;
-    }
+		return i;
+	}
+//	public static int getFastHEX(int v) {
+//		if (v >= 65 && v <= 70) {
+//			return v - 55;
+//		} else if (v >= 97 && v <= 102) {
+//			return v - 87;
+//		} else if (v >= 48 && v <= 57) {
+//			return v - 48;
+//		}
+//		return 0;
+//	}
 }

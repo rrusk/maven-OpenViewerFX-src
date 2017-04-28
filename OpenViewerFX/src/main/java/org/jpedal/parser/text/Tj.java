@@ -344,8 +344,12 @@ public class Tj extends BaseDecoder {
         startCommand = StreamReaderUtils.skipSpaces(stream, startCommand);
 
         /*set character size */
-        glyphData.setDefaultCharSize(currentFontData);
-
+		if (currentFontData.encodingCmapSpec != null) {
+			glyphData.setEncodingCMAP(currentFontData.encodingCmapSpec);
+		} else {
+			glyphData.setDefaultCharSize(currentFontData);
+		}
+        
         charSpacing = currentTextState.getCharacterSpacing() / TFS;
         final float wordSpacing = currentTextState.getWordSpacing() / TFS;
 
@@ -689,42 +693,46 @@ public class Tj extends BaseDecoder {
 
     private int getNextValue(final byte[] stream, int i, final boolean isCID) {
 
-        char lastTextChar = glyphData.getRawChar(); //remember last char so we can avoid a rollon at end if its a space
+		char lastTextChar = glyphData.getRawChar(); //remember last char so we can avoid a rollon at end if its a space
 
-        //convert escape or turn index into correct glyph allow for stream
-        if (glyphData.getOpenChar() == 60) {
+		//convert escape or turn index into correct glyph allow for stream
+		if (glyphData.getOpenChar() == 60) {
 
-            //check /PDFdata/test_data/baseline_screens/14jan/ASTA invoice - $275.pdf  if you alter this code
-            if (isCID && !currentFontData.isFontSubstituted() && currentFontData.isFontEmbedded && (stream[i] != '0')) {
-                i = HexTextUtils.getHexCIDValue(stream, i, glyphData, currentFontData, parserOptions);
-            } else {
-                i = HexTextUtils.getHexValue(stream, i, glyphData, currentFontData, parserOptions);
-            }
+			//check /PDFdata/test_data/baseline_screens/14jan/ASTA invoice - $275.pdf  if you alter this code
+			if (isCID && !currentFontData.isFontSubstituted() && currentFontData.isFontEmbedded && (stream[i] != '0')) {
+				i = HexTextUtils.getHexCIDValue(stream, i, glyphData, currentFontData, parserOptions);
+			} else {
+				if (glyphData.getEncodingCMAP() != null && !currentFontData.isFontEmbedded) {
+					i = HexTextUtils.getHexValueFromNonEmbedAdobeCMAP(stream, i, glyphData, currentFontData, parserOptions);
+				} else {
+					i = HexTextUtils.getHexValue(stream, i, glyphData, currentFontData, parserOptions);
+				}
+			}
 
-        } else if (lastTextChar == 92 && !isCID) {
-            i = EscapedTextUtils.getEscapedValue(i, stream, glyphData, currentFontData, streamLength, parserOptions, current);
-        } else if (isCID) {  //could be nonCID cid
-            i = CIDTextUtils.getCIDCharValues(i, stream, streamLength, glyphData, currentFontData, parserOptions);
-        } else {
-            lastTextChar = getValue(lastTextChar, glyphData, currentFontData, current);
-        }
+		} else if (lastTextChar == 92 && !isCID) {
+			i = EscapedTextUtils.getEscapedValue(i, stream, glyphData, currentFontData, streamLength, parserOptions, current);
+		} else if (isCID) {  //could be nonCID cid
+			i = CIDTextUtils.getCIDCharValues(i, stream, streamLength, glyphData, currentFontData, parserOptions);
+		} else {
+			lastTextChar = getValue(lastTextChar, glyphData, currentFontData, current);
+		}
 
-        glyphData.setLastTextChar(lastTextChar);
+		glyphData.setLastTextChar(lastTextChar);
 
-        //Handle extracting CID Identity fonts
-        if (isHTML && !currentFontData.hasToUnicode()
-                && currentFontData.getFontType() == StandardFonts.CIDTYPE0
-                && currentFontData.getGlyphData().isIdentity()) {
-            setHTMLValue();
-        }
+		//Handle extracting CID Identity fonts
+		if (isHTML && !currentFontData.hasToUnicode()
+				&& currentFontData.getFontType() == StandardFonts.CIDTYPE0
+				&& currentFontData.getGlyphData().isIdentity()) {
+			setHTMLValue();
+		}
 
-        //Itext likes to use Tabs!
-        if (!isTabRemapped && glyphData.getRawInt() == 9 && currentFontData.isFontSubstituted()) {
-            glyphData.setRawInt(32);
-            glyphData.set(" ");
-        }
-        return i;
-    }
+		//Itext likes to use Tabs!
+		if (!isTabRemapped && glyphData.getRawInt() == 9 && currentFontData.isFontSubstituted()) {
+			glyphData.setRawInt(32);
+			glyphData.set(" ");
+		}
+		return i;
+	}
 
     private void setHTMLValue() {
         //Check if proper char has been stored instead
@@ -1001,7 +1009,7 @@ public class Tj extends BaseDecoder {
                          * if TT font larger
                          * (see 13jun/20130031.pdf or case 14645
                          */
-                        if (TTGlyph.useHinting && glyph instanceof TTGlyph) {
+                        if (glyph.hasHinting() && glyph instanceof TTGlyph) {
 
                             glyphShape.transform(AffineTransform.getScaleInstance(0.01, 0.01));
                         }

@@ -42,6 +42,14 @@ import org.jpedal.color.PdfPaint;
  */
 public abstract class PdfGlyph {
 
+    public boolean failedOnHinting;
+
+    public boolean isHinted;
+
+    public boolean isFailedOnHinting() {
+        return failedOnHinting;
+    }
+
     private int glyphNumber = -1;
 
     public final int getGlyphNumber() {
@@ -117,5 +125,13 @@ public abstract class PdfGlyph {
 
     public boolean hasHintingApplied() {
         return false;
+    }
+
+    public boolean failedOnHinting() {
+        return failedOnHinting;
+    }
+
+    public boolean hasHinting() {
+        return isHinted;
     }
 }

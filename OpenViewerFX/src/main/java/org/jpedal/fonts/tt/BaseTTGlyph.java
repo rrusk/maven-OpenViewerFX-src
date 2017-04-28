@@ -125,9 +125,6 @@ public abstract class BaseTTGlyph extends PdfGlyph {
         }
     }
 
-    public static boolean redecodePage;
-
-    boolean isHinted;
 
     private TTVM vm;
 
@@ -158,8 +155,10 @@ public abstract class BaseTTGlyph extends PdfGlyph {
 
             this.vm = vm;
 
-            //if(!useFX)
-            createGlyph(isHinted);
+            if (createGlyph(isHinted)) {
+                failedOnHinting = true;
+                isHinted = false;
+            }
         }
 
     }
@@ -197,13 +196,19 @@ public abstract class BaseTTGlyph extends PdfGlyph {
     }
 
 
-    void createGlyph(final boolean isHinted) {
+    boolean createGlyph(final boolean isHinted) {
+
+        boolean failed = false;
 
         if (isHinted) {
-            createHintedGlyph();
+            if (createHintedGlyph()) {
+                failed = true;
+            }
         } else {
             createUnhintedGlyph();
         }
+
+        return failed;
     }
 
     void createUnhintedGlyph() {
@@ -635,13 +640,13 @@ public abstract class BaseTTGlyph extends PdfGlyph {
                     //Convert x
                     //pX[i] = convertX(lX,lY);
                     if (!isComposite) {
-                        if (!useHinting) {
+                        if (!hasHinting()) {
                             pX[i] = (int) (lX / unitsPerEm);
                         } else {
                             pX[i] = lX;
                         }
                     } else {
-                        if (!useHinting) {
+                        if (!hasHinting()) {
                             pX[i] = (int) ((((lX * xscale) + (lY * scale10)) + xtranslate) / unitsPerEm);
                         } else {
                             pX[i] = (int) ((((lX * xscale) + (lY * scale10)) + xtranslate));
@@ -652,13 +657,13 @@ public abstract class BaseTTGlyph extends PdfGlyph {
                     //Convert Y
                     //pY[i] = convertY(lX,lY);
                     if (!isComposite) {
-                        if (!useHinting) {
+                        if (!hasHinting()) {
                             pY[i] = (int) (lY / unitsPerEm);
                         } else {
                             pY[i] = lY;
                         }
                     } else {
-                        if (!useHinting) {
+                        if (!hasHinting()) {
                             pY[i] = (int) ((((lX * scale01) + (lY * yscale)) + ytranslate) / unitsPerEm);
                         } else {
                             pY[i] = (int) ((((lX * scale01) + (lY * yscale)) + ytranslate));
@@ -768,8 +773,10 @@ public abstract class BaseTTGlyph extends PdfGlyph {
         return this.containsBrokenGlyfData;
     }
 
-    void createHintedGlyph() {
+    boolean createHintedGlyph() {
 
+        boolean failedOnHinting = false;
+        
         /*create glyphs the first time*/
         for (int i = 0; i < this.compCount; i++) {
 
@@ -867,7 +874,9 @@ public abstract class BaseTTGlyph extends PdfGlyph {
 
         //prepare VM and process glyph
         vm.setScaleVars(scaler, pixelSize, (pixelSize * 72) / 96);
-        vm.processGlyph(instructions, allX, allY, allOnCurve, allEndOfContour);
+        if (vm.processGlyph(instructions, allX, allY, allOnCurve, allEndOfContour)) {
+            failedOnHinting = true;
+        }
 
         hasHintingApplied = true;
 
@@ -892,6 +901,7 @@ public abstract class BaseTTGlyph extends PdfGlyph {
             offset += componentLengths[i];
         }
 
+        return failedOnHinting;
     }
 
     @Override

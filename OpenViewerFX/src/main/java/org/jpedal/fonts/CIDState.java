@@ -27,23 +27,20 @@
 
  *
  * ---------------
- * CIDEncoding.java
+ * CIDState.java
  * ---------------
  */
 package org.jpedal.fonts;
 
-public class CIDEncoding {
+public class CIDState {
 
-	public final boolean predefined;
-	public final int format;
-	public final int[] encoding;
-	public final byte[] raw;
-
-	public CIDEncoding(boolean predefined, int format, int[] encoding, byte[] raw) {
-		this.predefined = predefined;
-		this.format = format;
-		this.encoding = encoding;
-		this.raw = raw;
-	}
+	public int callDepths;
+	public int stackSize;
+	public double[] stack = new double[500];
+	public boolean undefStack = true;
+	public int hints;
+	public boolean firstStackClearing = true;
+	public double[] seac;
+	public Double width;
 
 }

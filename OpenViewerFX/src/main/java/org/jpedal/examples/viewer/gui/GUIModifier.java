@@ -303,9 +303,6 @@ public class GUIModifier {
             case PropertyTags.HELPBUTTON:
                 setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.HELP, set);
                 break;
-            case PropertyTags.RSSBUTTON:
-                setButtonEnabledAndVisible(currentGUI.getButtons(), Commands.RSS, set);
-                break;
             case PropertyTags.CURSORBUTTON:
                 currentGUI.enableCursor(set, set);
                 break;

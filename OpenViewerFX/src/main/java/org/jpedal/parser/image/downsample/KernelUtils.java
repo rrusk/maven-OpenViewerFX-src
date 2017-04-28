@@ -40,7 +40,7 @@ import org.jpedal.parser.image.data.ImageData;
  */
 class KernelUtils {
 
-    protected static ImageData applyKernel(final ImageData imageData) {
+    protected static void applyKernel(final ImageData imageData) {
 
         final double[][] kernel = SamplingFactory.getSharpenKernel();
 
@@ -64,36 +64,36 @@ class KernelUtils {
 
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
-                for (int comp = 0; comp < compCount; comp++) {
+                //for (int comp = 0; comp < compCount; comp++) {
 
-                    //multiply by nxn matrix to get new pixel value
-                    for (int i = 0; i < matrixSize; i++) {
-                        for (int j = 0; j < matrixSize; j++) {
+                //multiply by nxn matrix to get new pixel value
+                for (int i = 0; i < matrixSize; i++) {
+                    for (int j = 0; j < matrixSize; j++) {
 
-                            imageX = (x - matrixSize / 2 + i + w) % w;
-                            imageY = (y - matrixSize / 2 + j + h) % h;
+                        imageX = (x - matrixSize / 2 + i + w) % w;
+                        imageY = (y - matrixSize / 2 + j + h) % h;
 
-                            currentPixel = input[(imageY * lineBytes) + (imageX * compCount) + comp] & 255;
-                            value += (currentPixel * kernel[i][j]);
-                        }
+                        currentPixel = input[(imageY * lineBytes) + imageX] & 255;
+                        // currentPixel = input[(imageY * lineBytes) + (imageX * compCount) + comp] & 255;
+                        value += (currentPixel * kernel[i][j]);
                     }
-
-                    if (value < 0) { //ensure in range
-                        value = 0;
-                    } else if (value > 255) {
-                        value = 255;
-                    }
-
-                    output[(y * lineBytes) + (x * compCount) + comp] = (byte) value;
-
-                    value = 0; //reset for next calculation
                 }
+
+                if (value < 0) { //ensure in range
+                    value = 0;
+                } else if (value > 255) {
+                    value = 255;
+                }
+
+                // output[(y * lineBytes) + (x * compCount) + comp] = (byte) value;
+                output[(y * lineBytes) + x] = (byte) value;
+
+                value = 0; //reset for next calculation
+                //}
             }
         }
 
         imageData.setObjectData(output);
-
-        return imageData;
 
     }
 

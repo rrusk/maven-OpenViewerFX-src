@@ -27,15 +27,26 @@
 
  *
  * ---------------
- * CIDValidator.java
+ * CIDFDSelect.java
  * ---------------
  */
 package org.jpedal.fonts;
 
-public class CIDValidator {
+public class CIDFDSelect {
 
-    public static void validateType2() {
+	public int[] fdSelect;
+	public byte[] raw;
 
-    }
+	public CIDFDSelect(int[] fdSelect, byte[] raw) {
+		this.fdSelect = fdSelect;
+		this.raw = raw;
+	}
+
+	public int getFDIndex(int glyphIndex) {
+		if (glyphIndex < 0 || glyphIndex >= fdSelect.length) {
+			return -1;
+		}
+		return fdSelect[glyphIndex];
+	}
 
 }

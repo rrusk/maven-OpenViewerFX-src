@@ -1135,9 +1135,6 @@ public class AcroRenderer {
             endPage++;
 
             compData.displayComponents(startPage, endPage);
-
-            //used in tests
-            org.jpedal.DevFlags.formsLoaded = true;
         }
     }
 

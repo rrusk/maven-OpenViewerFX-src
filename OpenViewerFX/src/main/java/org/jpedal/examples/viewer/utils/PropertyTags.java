@@ -130,7 +130,6 @@ public class PropertyTags {
     public static final int ROTATELEFTBUTTON = 947170772;
     public static final int ROTATERIGHTBUTTON = 1915459539;
     public static final int HELPBUTTON = -649945645;
-    public static final int RSSBUTTON = 7632868;
     public static final int CURSORBUTTON = -2082069944;
     public static final int MOUSEMODEBUTTON = -655864550;
     public static final int DISPLAYOPTIONSMENU = -1942802661;

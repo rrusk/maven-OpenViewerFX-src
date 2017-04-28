@@ -70,7 +70,7 @@ public class Matrix {
     }
 
     /**
-     * Calculates the inverse of a 3 * 3 matrix  return result
+     * Calculates the inverse of a 3 * 3 matrix return result
      */
     public static final float[][] inverse(final float[][] input_matrix) {
 
@@ -113,8 +113,8 @@ public class Matrix {
      */
     public static float[][] toMatrix(final AffineTransform xform) {
         return new float[][]{{(float) xform.getScaleX(), (float) xform.getShearX(), 0},
-                {(float) xform.getShearY(), (float) xform.getScaleY(), 0},
-                {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}};
+        {(float) xform.getShearY(), (float) xform.getScaleY(), 0},
+        {(float) xform.getTranslateX(), (float) xform.getTranslateY(), 1}};
     }
 
     /**
@@ -132,7 +132,6 @@ public class Matrix {
     }
 
     //////////////////////////////////////////////////////////////////////////
-
     /**
      * show matrix (used to debug)
      */
@@ -141,6 +140,16 @@ public class Matrix {
         for (int row = 0; row < 3; row++) {
             LogWriter.writeLog(row + "((" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " ))");
             // System.out.println( row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )" );
+        }
+    }
+
+    /**
+     * show matrix (used to debug)
+     */
+    public static final void print(final float[][] matrix1) {
+        //show lines
+        for (int row = 0; row < 3; row++) {
+            System.out.println(row + "(" + matrix1[row][0] + " , " + matrix1[row][1] + " , " + matrix1[row][2] + " )");
         }
     }
 
@@ -178,6 +187,5 @@ public class Matrix {
         }
         return mResult;
     }
-
 
 }

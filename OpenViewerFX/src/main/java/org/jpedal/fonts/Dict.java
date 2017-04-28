@@ -35,20 +35,24 @@ package org.jpedal.fonts;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Dict {
 
 	private int pos = 0;
 	private final byte[] data;
-	public Map<Integer, Number[]> entries = new LinkedHashMap<Integer, Number[]>();
+	public LinkedHashMap<Integer, Number[]> entries = new LinkedHashMap<Integer, Number[]>();
 
 	public Dict privateDict = null;
-	public int[] charStringIndex = null;
-	public int ascent = 800;
-	public int descent = -200;
+	public Dict[] fontDicts = null;
+	public byte[][] subrsIndexData = null;
+	public int ascent = 1000;
+	public int descent = 0;
+	public int[] widths = null;
 	public CIDCharset charset = null;
 	public CIDEncoding encoding = null;
+	public CIDFDSelect fdSelect = null;
+
+	public LinkedHashMap<Integer, Integer> trackers = new LinkedHashMap<Integer, Integer>();
 
 	Dict(byte[] data) {
 		List<Number> operands = new ArrayList<Number>();
@@ -115,7 +119,14 @@ public class Dict {
 			}
 			str.append(lookup[b2]);
 		}
-		return Float.parseFloat(str.toString());
+		String res = str.toString();
+			
+		if (res.isEmpty()) {
+			return 0;
+		} else if (res.startsWith("E")) {
+			res = "1" + res;
+		}
+		return Float.parseFloat(res);
 	}
 
 }

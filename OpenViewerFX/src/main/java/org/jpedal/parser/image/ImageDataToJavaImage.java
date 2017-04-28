@@ -35,7 +35,10 @@ package org.jpedal.parser.image;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.Kernel;
+import java.awt.image.Raster;
 
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.GenericColorSpace;
@@ -94,6 +97,7 @@ public class ImageDataToJavaImage {
         byte[] data = imageData.getObjectData();
         final int ID = decodeColorData.getID();
 
+        boolean isConverted = imageData.isConvertedToARGB();
         final byte[] index = decodeColorData.getIndexedMap();
 
         //ensure correct size
@@ -103,9 +107,16 @@ public class ImageDataToJavaImage {
 
         BufferedImage image = null;
 
-        if (index != null) {
-            image = IndexedImage.make(w, h, decodeColorData, index, d, data);
+        if (isConverted) {
+            final DataBuffer db = new DataBufferByte(data, data.length);
 
+            final int[] bands = {0, 1, 2, 3};
+            image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            final Raster raster = Raster.createInterleavedRaster(db, w, h, w * 4, 4, bands, null);
+            image.setData(raster);
+
+        } else if (index != null) {
+            image = IndexedImage.make(w, h, decodeColorData, index, d, data);
         } else if (d == 1) {
             image = BinaryImage.make(w, h, data, decodeColorData, d);
 
@@ -145,7 +156,6 @@ public class ImageDataToJavaImage {
         final int d = imageData.getDepth();
         final byte[] data = imageData.getObjectData();
 
-
         BufferedImage image = null;
         /*
          * allow for 1 x 1 pixels scaled up or fine lines
@@ -170,14 +180,14 @@ public class ImageDataToJavaImage {
         // A 3x3 kernel that sharpens an image
         Kernel kernel = new Kernel(3, 3,
                 new float[]{
-                        -1, -1, -1,
-                        -1, 9, -1,
-                        -1, -1, -1});
+                    -1, -1, -1,
+                    -1, 9, -1,
+                    -1, -1, -1});
 
         float[] sharpKernel = {
-                0.0f, -1.0f, 0.0f,
-                -1.0f, 5.0f, -1.0f,
-                0.0f, -1.0f, 0.0f
+            0.0f, -1.0f, 0.0f,
+            -1.0f, 5.0f, -1.0f,
+            0.0f, -1.0f, 0.0f
         };
 
         BufferedImageOp sharpen = new ConvolveOp(new Kernel(3, 3, sharpKernel), ConvolveOp.EDGE_NO_OP, null);

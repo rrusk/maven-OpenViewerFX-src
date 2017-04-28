@@ -172,7 +172,7 @@ public abstract class GUI implements GUIFactory {
     //flag if generated so we setup once for each file
     protected boolean bookmarksGenerated;
     protected GUISearchWindow searchFrame;
-    protected String pageTitle, bookmarksTitle, signaturesTitle, layersTitle, annotationTitle;
+    protected String pageTitle, bookmarksTitle, signaturesTitle, layersTitle, annotationTitle, attachmentsTitle;
 
     /**
      * handle for internal use
@@ -1286,6 +1286,7 @@ public abstract class GUI implements GUIFactory {
         layersTitle = Messages.getMessage("PdfViewerJPanel.layers");
         signaturesTitle = Messages.getMessage("PdfViewerJPanel.signatures");
         annotationTitle = Messages.getMessage("PdfViewerJPanel.annotations");
+        attachmentsTitle = Messages.getMessage("PdfViewerJPanel.attachments");
     }
 
     /**

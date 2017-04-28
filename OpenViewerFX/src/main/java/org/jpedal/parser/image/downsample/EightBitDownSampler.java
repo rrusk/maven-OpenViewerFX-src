@@ -29,13 +29,13 @@
 * ---------------
 * EightBitDownSampler.java
 * ---------------
-*/
-
+ */
 package org.jpedal.parser.image.downsample;
 
 import org.jpedal.color.ColorSpaces;
 import org.jpedal.color.DeviceRGBColorSpace;
 import org.jpedal.color.GenericColorSpace;
+import org.jpedal.images.SamplingFactory;
 import org.jpedal.parser.image.PdfImageTypes;
 import org.jpedal.parser.image.data.ImageData;
 
@@ -48,9 +48,7 @@ class EightBitDownSampler {
 
         byte[] index = decodeColorData.getIndexedMap();
 
-        final boolean hasIndex = decodeColorData.getIndexedMap() != null &&
-                (decodeColorData.getID() == ColorSpaces.DeviceRGB || decodeColorData.getID() == ColorSpaces.CalRGB ||
-                        decodeColorData.getID() == ColorSpaces.DeviceCMYK || decodeColorData.getID() == ColorSpaces.ICC || decodeColorData.getID() == ColorSpaces.DeviceN);
+        final boolean hasIndex = index != null;
 
         int comp;
 
@@ -73,7 +71,6 @@ class EightBitDownSampler {
         } else {
             comp = decodeColorData.getColorComponentCount();
         }
-
 
         final int newW = imageData.getWidth() / sampling;
         final int newH = imageData.getHeight() / sampling;
@@ -129,6 +126,7 @@ class EightBitDownSampler {
                             if (ptr < oldSize) {
                                 if (!hasIndex) {
                                     byteTotal += (data[ptr] & 255);
+                                    isBinary = isBinary && (data[ptr] == 0 || data[ptr] == (byte) 255);
                                 } else {
                                     for (int aa = 0; aa < indexCount; aa++) {
                                         byteValue = index[(((data[ptr] & 255) * indexCount) + aa)] & 255;
@@ -165,6 +163,13 @@ class EightBitDownSampler {
         imageData.setWidth(newW);
         imageData.setHeight(newH);
 
+        final boolean needsSharpening = (SamplingFactory.kernelSharpen
+                || SamplingFactory.downsampleLevel == SamplingFactory.mediumAndSharpen
+                || SamplingFactory.downsampleLevel == SamplingFactory.highAndSharpen);
+
+        if (needsSharpening && imageData.getImageType().equals(PdfImageTypes.Binary) && sampling < 8) {
+            KernelUtils.applyKernel(imageData);
+        }
         return decodeColorData;
     }
 }

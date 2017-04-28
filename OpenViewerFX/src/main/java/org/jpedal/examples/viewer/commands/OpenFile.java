@@ -176,10 +176,10 @@ public class OpenFile {
         //reset value to null
         inputStream = null;
 
-        if (args == null) {
+        //warn user on forms
+        SaveFile.handleUnsaveForms(currentGUI, commonValues);
 
-            //warn user on forms
-            SaveFile.handleUnsaveForms(currentGUI, commonValues);
+        if (args == null) {
 
             if (org.jpedal.examples.viewer.utils.Printer.isPrinting()) {
                 currentGUI.showMessageDialog(Messages.getMessage("PdfViewerPrintWait.message"));

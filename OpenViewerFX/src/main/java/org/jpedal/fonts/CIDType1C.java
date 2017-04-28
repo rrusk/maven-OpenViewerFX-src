@@ -27,23 +27,22 @@
 
  *
  * ---------------
- * CIDEncoding.java
+ * CIDType1C.java
  * ---------------
  */
 package org.jpedal.fonts;
 
-public class CIDEncoding {
+public class CIDType1C {
 
-	public final boolean predefined;
-	public final int format;
-	public final int[] encoding;
-	public final byte[] raw;
-
-	public CIDEncoding(boolean predefined, int format, int[] encoding, byte[] raw) {
-		this.predefined = predefined;
-		this.format = format;
-		this.encoding = encoding;
-		this.raw = raw;
-	}
+	public int headerMajor;
+	public int headerMinor;
+	public int headerSize;
+	public int headerOffsize;
+	public String[] nameIndexData;
+	public Dict[] topDicts;
+	public String[] stringIndexData;
+	public byte[][] globalSubrsIndexData;
+	public byte[][] charStringIndexData;
+	public int[][] glyphWidths;
 
 }

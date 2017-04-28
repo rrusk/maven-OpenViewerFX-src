@@ -54,9 +54,6 @@ public class PdfSearchUtils {
 
     private boolean includeHTMLtags;
 
-    private static final String MARKER = PdfData.marker;
-    private static final char MARKER2 = MARKER.charAt(0);
-
     private final List<String> multipleTermTeasers = new ArrayList<String>();
 
     //Hold data from pdf so we can create local version
@@ -91,7 +88,7 @@ public class PdfSearchUtils {
      * [2]=result x2 coord<br>
      * [3]=result y2 coord<br>
      * [4]=either -101 to show that the next text area is the remainder of this word on another line else any other value is ignored.<br>
-     * @throws PdfException
+     * @throws PdfException if the page content being search contains invalid data that the search can not recover from
      */
     @SuppressWarnings("UnusedParameters")
     protected final float[] findText(
@@ -137,7 +134,7 @@ public class PdfSearchUtils {
 
             //if not lines for writing mode, ignore
             if (unsorted[mode] != 0) {
-                searchWritingMode(mode, searchType, terms, true, resultCoords, resultTeasers);
+                searchWritingMode(mode, searchType, terms, resultCoords, resultTeasers);
             }
 
         }
@@ -168,6 +165,8 @@ public class PdfSearchUtils {
 
         int currentPoint = 0;
 
+        final String marker = PdfData.marker;
+
         //set values
         for (int i = 0; i < count; i++) {
 
@@ -178,13 +177,13 @@ public class PdfSearchUtils {
 
                 localFragments[currentPoint] = new Line(pdf_data, i);
 
-                final StringBuilder startTags = new StringBuilder(localFragments[currentPoint].getRawData().substring(0, localFragments[currentPoint].getRawData().indexOf(MARKER)));
-                final String contentText = localFragments[currentPoint].getRawData().substring(localFragments[currentPoint].getRawData().indexOf(MARKER), localFragments[currentPoint].getRawData().indexOf('<', localFragments[currentPoint].getRawData().lastIndexOf(MARKER)));
-                String endTags = localFragments[currentPoint].getRawData().substring(localFragments[currentPoint].getRawData().lastIndexOf(MARKER));
+                final StringBuilder startTags = new StringBuilder(localFragments[currentPoint].getRawData().substring(0, localFragments[currentPoint].getRawData().indexOf(marker)));
+                final String contentText = localFragments[currentPoint].getRawData().substring(localFragments[currentPoint].getRawData().indexOf(marker), localFragments[currentPoint].getRawData().indexOf('<', localFragments[currentPoint].getRawData().lastIndexOf(marker)));
+                String endTags = localFragments[currentPoint].getRawData().substring(localFragments[currentPoint].getRawData().lastIndexOf(marker));
                 //Skips last section of text
                 endTags = endTags.substring(endTags.indexOf('<'));
 
-                final StringTokenizer tokenizer = new StringTokenizer(contentText, MARKER);
+                final StringTokenizer tokenizer = new StringTokenizer(contentText, marker);
                 boolean setX1 = true;
                 float width = 0;
 
@@ -225,13 +224,13 @@ public class PdfSearchUtils {
                         }
                     }
                     if (storeValues) {
-                        startTags.append(MARKER);
+                        startTags.append(marker);
                         startTags.append(xCoord); //Add X Coord
 
-                        startTags.append(MARKER);
+                        startTags.append(marker);
                         startTags.append(width); //Add Width
 
-                        startTags.append(MARKER);
+                        startTags.append(marker);
                         startTags.append(character); //Add Letter
 
 
@@ -335,7 +334,7 @@ public class PdfSearchUtils {
      * [2]=result x2 coord<br>
      * [3]=result y2 coord<br>
      * [4]=either -101 to show that the next text area is the remainder of this word on another line else any other value is ignored.<br>
-     * @throws PdfException
+     * @throws PdfException if the page content being search contains invalid data that the search can not recover from
      */
     protected final float[] findText(
             final String[] terms,
@@ -369,7 +368,7 @@ public class PdfSearchUtils {
             final int mode = writingModes[u];
 
             if (unsorted[mode] != 0) {
-                searchWritingMode(mode, searchType, terms, true, resultCoords, resultTeasers);
+                searchWritingMode(mode, searchType, terms, resultCoords, resultTeasers);
             }
         }
         //Return coord data for search results
@@ -378,7 +377,7 @@ public class PdfSearchUtils {
     }
 
 
-    private void searchWritingMode(final int mode, final int searchType, final String[] terms, final boolean includeTease, final Vector_Float resultCoords, final Vector_String resultTeasers) throws PdfException {
+    private void searchWritingMode(final int mode, final int searchType, final String[] terms, final Vector_Float resultCoords, final Vector_String resultTeasers) throws PdfException {
 
         //Flags to control the different search options
         boolean firstOccuranceOnly = false;
@@ -515,6 +514,8 @@ public class PdfSearchUtils {
         float currentX;
         float width;
 
+        final char MARKER2 = PdfGroupingAlgorithms.MARKER2;
+
         //Track point in text data line (without coord data)
         int pointInLine = -1;
 
@@ -522,7 +523,9 @@ public class PdfSearchUtils {
         int lineCounter = 0;
 
         //Skip null values and value not in the correct writing mode to ensure correct result coords
-        while (lines[lineCounter].getRawData() == null || mode != lines[lineCounter].getWritingMode()) {
+        while (lines[lineCounter].getRawData() == null ||
+                Strip.stripXML(lines[lineCounter].getRawData(), true).toString().isEmpty() ||
+                mode != lines[lineCounter].getWritingMode()) {
             lineCounter++;
         }
 
@@ -624,7 +627,9 @@ public class PdfSearchUtils {
                 lineCounter++;
 
                 //If current content pointed at is null or not the correct writing mode, skip value until data is found
-                while (lineCounter < lines.length && (lines[lineCounter].getRawData() == null || mode != lines[lineCounter].getWritingMode())) {
+                while (lineCounter < lines.length && (lines[lineCounter].getRawData() == null ||
+                        Strip.stripXML(lines[lineCounter].getRawData(), true).toString().isEmpty() ||
+                        mode != lines[lineCounter].getWritingMode())) {
                     lineCounter++;
                 }
             }
@@ -1312,7 +1317,7 @@ public class PdfSearchUtils {
      * sets if we include HTML in teasers
      * (do we want this is <b>word</b> or this is word as teaser)
      *
-     * @param value
+     * @param value True to include HTML, otherwise false
      */
     protected void setIncludeHTML(final boolean value) {
         includeHTMLtags = value;

@@ -940,7 +940,7 @@ public class JavaFxGUI extends GUI {
         //setup combo boxes
         setupComboBoxes();
 
-        if (LogWriter.isRunningFromIDE || org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
+        if (LogWriter.isRunningFromIDE) {
             nameElements();
         }
 
@@ -994,9 +994,6 @@ public class JavaFxGUI extends GUI {
         }
 
         //addButton(GUIFactory.BUTTONBAR,Messages.getMessage("PdfViewerToolbarTooltip.buy"),iconLocation+"buy.png",Commands.BUY);
-        if (includeExtraMenus && commonValues.getModeOfOperation() != Values.RUNNING_PLUGIN) {
-            fxButtons.addButton(GUIFactory.BUTTONBAR, "RSS", "rss.gif", Commands.RSS, menuItems, this, currentCommandListener, pagesToolBar, navToolBar);
-        }
 
         //add cursor location
         initMultiBox();
@@ -1110,10 +1107,8 @@ public class JavaFxGUI extends GUI {
 
         pageCounter2.setId("pageCounter");
 
-        if (org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
             rotationBox.setName("rotationBox");
             scalingBox.setName("scalingBox");
-        }
     }
 
     /**

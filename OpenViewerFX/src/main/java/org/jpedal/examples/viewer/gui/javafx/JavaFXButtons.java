@@ -97,7 +97,7 @@ public class JavaFXButtons implements GUIButtons {
     //Buttons to navigate pages in the document
     private GUIButton first, fback, back, forward, fforward, last;
 
-    private GUIButton buyButton, helpButton, rssButton;
+    private GUIButton buyButton, helpButton;
 
     /**
      * Initialises the buttons
@@ -124,7 +124,6 @@ public class JavaFXButtons implements GUIButtons {
 
         buyButton = new JavaFXButton();
         helpButton = new JavaFXButton();
-        rssButton = new JavaFXButton();
 
         singleButton = new JavaFXButton();
         continuousButton = new JavaFXButton();
@@ -154,8 +153,6 @@ public class JavaFXButtons implements GUIButtons {
         switch (ID) {
             case Commands.SNAPSHOT:
                 return snapshotButton;
-            case Commands.RSS:
-                return rssButton;
             case Commands.HELP:
                 return helpButton;
             case Commands.BUY:
@@ -228,7 +225,6 @@ public class JavaFXButtons implements GUIButtons {
 
         buyButton = null;
         helpButton = null;
-        rssButton = null;
 
         layoutGroup = null;
 
@@ -398,15 +394,9 @@ public class JavaFXButtons implements GUIButtons {
             case Commands.HELP:
                 newButton = getButton(Commands.HELP);
                 break;
-
-            case Commands.RSS:
-                newButton = getButton(Commands.RSS);
-                break;
-
             case Commands.BUY:
                 newButton = getButton(Commands.BUY);
                 break;
-
             case Commands.FIRSTPAGE:
                 newButton = getButton(Commands.FIRSTPAGE);
                 break;

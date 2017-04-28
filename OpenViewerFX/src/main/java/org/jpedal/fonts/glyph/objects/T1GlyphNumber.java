@@ -119,7 +119,14 @@ public class T1GlyphNumber {
                     buf[i++] = '-';
                 }
             }
-            x = Double.valueOf(new String(buf, 0, i));
+			String bufStr = new String(buf, 0, i);
+			if (bufStr.isEmpty()) {
+				values[valuePointer] = 0;
+				return pos;
+			} else if (bufStr.toLowerCase().startsWith("e")) {
+				bufStr = "1" + bufStr;
+			}
+            x = Double.valueOf(bufStr);
 
         } else if (b0 < 247) { //-107 +107
             x = b0 - 139;

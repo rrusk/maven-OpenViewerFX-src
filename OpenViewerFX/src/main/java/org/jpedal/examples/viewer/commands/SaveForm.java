@@ -139,15 +139,12 @@ public class SaveForm {
      */
     public static void handleUnsaveForms(final GUIFactory currentGUI, final Values commonValues, final PdfDecoderInt decode_pdf) {
 
-        if (!org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
+        //OLD FORM CHANGE CODE
+        if (commonValues.isFormsChanged()) {
+            final int n = currentGUI.showConfirmDialog(Messages.getMessage("PdfViewerFormsUnsavedOptions.message"), Messages.getMessage("PdfViewerFormsUnsavedWarning.message"), JOptionPane.YES_NO_OPTION);
 
-            //OLD FORM CHANGE CODE
-            if (commonValues.isFormsChanged()) {
-                final int n = currentGUI.showConfirmDialog(Messages.getMessage("PdfViewerFormsUnsavedOptions.message"), Messages.getMessage("PdfViewerFormsUnsavedWarning.message"), JOptionPane.YES_NO_OPTION);
-
-                if (n == JOptionPane.YES_OPTION) {
-                    SaveForm.saveChangedForm(currentGUI, decode_pdf, commonValues);
-                }
+            if (n == JOptionPane.YES_OPTION) {
+                SaveForm.saveChangedForm(currentGUI, decode_pdf, commonValues);
             }
         }
 

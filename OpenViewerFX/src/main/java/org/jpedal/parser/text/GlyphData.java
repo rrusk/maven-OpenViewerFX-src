@@ -33,6 +33,7 @@
 
 package org.jpedal.parser.text;
 
+import org.jpedal.fonts.CmapSpec;
 import org.jpedal.fonts.PdfFont;
 
 /**
@@ -72,6 +73,8 @@ public class GlyphData {
     private int possibleVal;
 
     private char lastTextChar = 'x';
+	
+	private CmapSpec encodingCMAP = null;
 
     public int getRawInt() {
         return rawInt;
@@ -367,4 +370,14 @@ public class GlyphData {
     public char getLastTextChar() {
         return lastTextChar;
     }
+
+	public CmapSpec getEncodingCMAP() {
+		return encodingCMAP;
+	}
+
+	public void setEncodingCMAP(CmapSpec encodingCMAP) {
+		this.encodingCMAP = encodingCMAP;
+	}
+	
+	
 }

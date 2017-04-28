@@ -55,10 +55,16 @@ public class JavaFXSupportImpl extends JavaFXSupport {
     @Override
     public PdfGlyph getGlyph(final Glyf currentGlyf, final FontFile2 fontTable, final Hmtx currentHmtx, final int idx, final float unitsPerEm, final TTVM vm, final String baseFontName) {
 
-        final PdfGlyph currentGlyph;
+        PdfGlyph currentGlyph;
 
         if (TTGlyph.useHinting) {
             currentGlyph = new TTGlyphFX(currentGlyf, fontTable, currentHmtx, idx, unitsPerEm, vm);
+
+            if (currentGlyph.failedOnHinting()) {
+
+                //some issue so use non-hinted version
+                currentGlyph = new TTGlyphFX(currentGlyf, fontTable, currentHmtx, idx, unitsPerEm, baseFontName);
+            }
         } else {
             currentGlyph = new TTGlyphFX(currentGlyf, fontTable, currentHmtx, idx, unitsPerEm, baseFontName);
         }

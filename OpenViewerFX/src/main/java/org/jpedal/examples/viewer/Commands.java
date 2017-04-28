@@ -204,7 +204,6 @@ public class Commands {
     //700-899 handled in executeViewerFunctionalityCommands(final int ID, Object[] args)
 
     //997-999 handled in executeDemoVersionCommands(final int ID, Object[] args)
-    public static final int RSS = 997;
     public static final int HELP = 998;
     public static final int BUY = 999;
     //997-999 handled in executeDemoVersionCommands(final int ID, Object[] args)

@@ -177,7 +177,6 @@ public class PropertiesFile {
             "Show the Rotate left button on the button bar", "RotateLeftbutton", "true",
             "Show the Rotate right button on the button bar", "RotateRightbutton", "true",
             "Show the help button on the button bar", "Helpbutton", "true",
-            "Show the rss feed button on the button bar", "RSSbutton", "true",
             "Show the cursor button on the button bar", "CursorButton", "true",
             "Show the mouse mode button on the button bar", "MouseModeButton", "true",
             "Show the open in system default button on the button bar", "OpenSystemDefault", "false",
@@ -209,6 +208,7 @@ public class PropertiesFile {
             "Show the layers tab, when applicable, on the side tab bar", "Layerstab", "true",
             "Show the signatures tab, when applicable, on the side tab bar", "Signaturestab", "true",
             "Show the annotations tab, when applicable, on the side tab bar", "AnnotationTab", "true",
+            "Show the attachments tab, when applicable, on the side tab bar", "AttachmentsTab", "true",
             "ENDCHILDREN",
             "This removes the menu bar entirely if set to false", "ShowMenubar", "true",
             "This removes the button bar entirely if set to false", "ShowButtons", "true",
@@ -804,7 +804,7 @@ public class PropertiesFile {
                     } else {
 
                         // Is it running in the IDE
-                        if (properties[position + 1].equals("7.11.31")) {
+                        if (properties[position + 1].equals("7.12.28")) {
                             // Do nothing as we are in the IDE
                             // Refactor for testing purposes
                             //refactorProperties  = true;

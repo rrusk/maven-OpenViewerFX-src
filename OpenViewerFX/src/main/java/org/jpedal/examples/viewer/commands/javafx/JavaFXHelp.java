@@ -32,9 +32,6 @@
  */
 package org.jpedal.examples.viewer.commands.javafx;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -51,6 +48,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import org.jpedal.examples.viewer.gui.javafx.dialog.FXDialog;
 import org.jpedal.utils.BrowserLauncher;
+import org.jpedal.utils.LogWriter;
 
 /**
  * This class will load a Pop-Up which points the user to our Support and
@@ -102,7 +100,7 @@ public class JavaFXHelp {
                     BrowserLauncher.openURL("http://idrsolutions.com/java-pdf-library-support/");
                     newDialog.close();
                 } catch (final Exception ex) {
-                    Logger.getLogger(JavaFXRSSyndication.class.getName()).log(Level.SEVERE, null, ex);
+                    LogWriter.writeLog("Exception " + ex.getMessage());
                 }
             }
         });
@@ -113,7 +111,8 @@ public class JavaFXHelp {
                 try {
                     newDialog.close();
                 } catch (final Exception ex) {
-                    Logger.getLogger(JavaFXRSSyndication.class.getName()).log(Level.SEVERE, null, ex);
+                    LogWriter.writeLog("Exception " + ex.getMessage());
+                   
                 }
             }
         });

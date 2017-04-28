@@ -180,6 +180,13 @@ public class TTGlyphs extends PdfJavaGlyphs {
 
                     } else if (TTGlyph.useHinting) {
                         currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), vm);
+
+                        if (currentGlyph.failedOnHinting()) {
+
+                            //some issue so use non-hinted version
+                            currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), baseFontName);
+                        }
+
                     } else {
                         currentGlyph = new TTGlyph(currentGlyf, fontTable, currentHmtx, idx, (unitsPerEm / 1000f), baseFontName);
                     }

@@ -27,23 +27,12 @@
 
  *
  * ---------------
- * CIDEncoding.java
+ * CmapEncoding.java
  * ---------------
  */
 package org.jpedal.fonts;
 
-public class CIDEncoding {
-
-	public final boolean predefined;
-	public final int format;
-	public final int[] encoding;
-	public final byte[] raw;
-
-	public CIDEncoding(boolean predefined, int format, int[] encoding, byte[] raw) {
-		this.predefined = predefined;
-		this.format = format;
-		this.encoding = encoding;
-		this.raw = raw;
-	}
-
+public interface CmapEncoding {
+	
+	public int getUnicodeValue(int cid);
 }

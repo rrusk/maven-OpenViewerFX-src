@@ -45,46 +45,51 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import javax.swing.*;
 
-import org.jpedal.fonts.tt.BaseTTGlyph;
 import org.jpedal.fonts.tt.FontFile2;
 import org.jpedal.fonts.tt.Maxp;
 import org.jpedal.utils.LogWriter;
 
 public class TTVM implements Serializable {
+
     protected static final int TWILIGHT_ZONE = 0;
     protected static final int GLYPH_ZONE = 1;
     protected static final int ORIGINAL = 2;                //Use as modifier (GLYPH_ZONE + ORIGINAL)
 
     //debug flags
-
     /**
-     * Activates the Hinting Debugger. This lets you step through the font program of a glyph, seeing what's
-     * done exactly where. Again, I'd recommend isolating the glyph in TTGlyph's constructor before using this flag.
+     * Activates the Hinting Debugger. This lets you step through the font
+     * program of a glyph, seeing what's done exactly where. Again, I'd
+     * recommend isolating the glyph in TTGlyph's constructor before using this
+     * flag.
      */
     private static final boolean showDebugWindow = false;
 
     /**
-     * Enabling this flag will print the instructions before executing the glyph program. As it executes it will also
-     * print out the functions it's calling. I'd recommend you isolate the glyph you're looking at in TTGlyph's
-     * constructor first!
+     * Enabling this flag will print the instructions before executing the glyph
+     * program. As it executes it will also print out the functions it's
+     * calling. I'd recommend you isolate the glyph you're looking at in
+     * TTGlyph's constructor first!
      */
     private static final boolean printGlyphInstructions = false;
 
     /**
-     * This flag prints out the line number, name of instruction just executed, and a list of the coordinates of each
-     * point in the glyph as it is now and in the original outline. The format is designed to be pasted into a
-     * spreadsheet - the first column is the point number, then it's current x and y, then original x and y. Use a
-     * scatter graph to see what's happening. Again, I'd recommend isolating the glyph in TTGlyph's constructor before
-     * using this flag!
+     * This flag prints out the line number, name of instruction just executed,
+     * and a list of the coordinates of each point in the glyph as it is now and
+     * in the original outline. The format is designed to be pasted into a
+     * spreadsheet - the first column is the point number, then it's current x
+     * and y, then original x and y. Use a scatter graph to see what's
+     * happening. Again, I'd recommend isolating the glyph in TTGlyph's
+     * constructor before using this flag!
      */
     private static final boolean printCoordsAfterEachInstruction = false;
 
     /**
-     * This flag makes it such that the full coordinates are printed out immediately after the watch point is changed.
-     * In order to place this in context the glyph program's execution path is printed with it. Again, I'd recommend
-     * isolating the glyph in TTGlyph's constructor before using this flag.
+     * This flag makes it such that the full coordinates are printed out
+     * immediately after the watch point is changed. In order to place this in
+     * context the glyph program's execution path is printed with it. Again, I'd
+     * recommend isolating the glyph in TTGlyph's constructor before using this
+     * flag.
      */
-
     private static boolean watchAPoint = true;
 
     static {
@@ -112,10 +117,10 @@ public class TTVM implements Serializable {
     private final java.util.Stack<Integer> numberStack = new java.util.Stack<Integer>();
 
     /**
-     * Prints the name and a brief description of an instruction when it is executed.
+     * Prints the name and a brief description of an instruction when it is
+     * executed.
      */
     private boolean printOut;
-
 
     //Font-wide programs
     private final int[] preProgram;
@@ -131,7 +136,6 @@ public class TTVM implements Serializable {
     //These will currently always be false since we generate once irrespective of the transform
 //    private final boolean isRotated=false;
 //    private final boolean isStretched=false;
-
     //Arrays for holding the data of the current glyph
     private final int[][] x, y;
     private final boolean[][] curve, contour;
@@ -323,145 +327,145 @@ public class TTVM implements Serializable {
     private static final int MIRP = 0xE0;
 
     private static final String[] OPCODE_DESCRIPTIONS = {
-            "SVTCAy    - Set both vectors to y",
-            "SVTCAx    - Set both vectors to x",
-            "SPVTCAy   - Sets projection vector to y",
-            "SPVTCAx   - Sets projection vector to x",
-            "SFVTCAy   - Sets freedom vector to y",
-            "SFVTCAx   - Sets freedom vector to x",
-            "SPVTL0    - Set projection vector to line",
-            "SPVTL1    - Set projection vector perpendicular to line",
-            "SFVTL0    - Set freedom vector to line",
-            "SFVTL1    - Set freedom vector perpendicular to line",
-            "SPVFS     - Sets the projection vector from the stack",
-            "SFVFS     - Sets the freedom vector from the stack",
-            "GPV       - Gets the projection vector onto the stack",
-            "GFV       - Gets the freedom vector onto the stack",
-            "SFVTPV    - Sets freedom vector to projection vector",
-            "ISECT     - Set point to intersection of lines",
-            "SRP0      - Set rp0",
-            "SRP1      - Set rp1",
-            "SRP2      - Set rp2",
-            "SZP0      - Sets zp0",
-            "SZP1      - Sets zp1",
-            "SZP2      - Sets zp2",
-            "SZPS      - Sets all zone pointers",
-            "SLOOP     - Sets loop variable",
-            "RTG       - Sets round state to grid",
-            "RTHG      - Sets round state to half grid",
-            "SMD       - Sets minimum distance",
-            "ELSE      - ELSE",
-            "JMPR      - Jump",
-            "SCVTCI    - Set control value table cut in",
-            "SSWCI     - Set single width cut in",
-            "SSW       - Set single width",
-            "DUP       - Duplicate the top stack element",
-            "POP       - Remove the top stack element",
-            "CLEAR     - Clear the stack",
-            "SWAP      - Swap the top two stack elements",
-            "DEPTH     - Returns depth of stack",
-            "CINDEX    - Copy Indexed element to top of stack",
-            "MINDEX    - Move Indexed element to top of stack",
-            "ALIGNPTS  - Move points along fv to average of their pv positions", "",
-            "UTP       - Untouch point",
-            "LOOPCALL  - Call a function many times",
-            "CALL      - Call a function",
-            "FDEF      - Define a function",
-            "ENDF      - End a function definition",
-            "MDAP0     - Sets a point as touched",
-            "MDAP1     - Rounds a point along the pV and marks as touched",
-            "IUPy      - Interpolate untouched points in the y axis",
-            "IUPx      - Interpolate untouched points on the x axis",
-            "SHP0      - Shift point using RP2",
-            "SHP1      - Shift point using RP1",
-            "SHC0      - Shift a contour using RP2",
-            "SHC1      - Shift a contour using RP1",
-            "SHZ0      - Shift a zone using RP2",
-            "SHZ1      - Shift a zone using RP1",
-            "SHPIX     - Move point along freedom vector",
-            "IP        - Interpolate point",
-            "MSIRP0    - Move stack indirect relative point",
-            "MSIRP1    - Move stack indirect relative point",
-            "ALIGNRP   - Align point to RP0",
-            "RTDG      - Sets round state to double grid",
-            "MIAP0     - Move point to CVT value",
-            "MIAP1     - Move point to CVT using cut in and round",
-            "NPUSHB    - Push N bytes from IS to stack",
-            "NPUSHW    - Push N words from IS to stack",
-            "WS        - Write Store",
-            "RS        - Read Store",
-            "WCVTP     - Write Control Value Table in Pixels",
-            "RCVT      - Read Control Value Table",
-            "GC0       - Get coords on the pv",
-            "GC1       - Get original coords on the pv",
-            "SCFS",
-            "MD0       - Measure current distance",
-            "MD1       - Measure original distance",
-            "MPPEM     - Measure pixels per em in the direction of the projection vector",
-            "MPS",
-            "FLIPON    - Sets autoflip to true",
-            "FLIPOFF   - Sets autoflip to false",
-            "DEBUG     - Shouldn't be in live fonts",
-            "LT        - Less Than",
-            "LTEQ      - Less Than or Equal",
-            "GT        - Greater Than",
-            "GTEQ      - Greater Than or Equal",
-            "EQ        - Equal",
-            "NEQ       - Not Equal",
-            "ODD       - Rounds, truncates, and returns if odd.",
-            "EVEN      - Rounds, truncates, and returns if even",
-            "IF        - IF",
-            "EIF       - End IF",
-            "AND       - Logical AND",
-            "OR        - Logical OR",
-            "NOT       - Logical NOT",
-            "DELTAP1   - Delta exception p1",
-            "SDB       - Set delta base",
-            "SDS       - Set delta shift",
-            "ADD       - Add two F26Dot6 numbers",
-            "SUB       - Subtract a number from another",
-            "DIV       - Divide two F26Dot6 numbers",
-            "MUL       - Multiply two F26Dot6 numbers",
-            "ABS       - Return the absolute value of a F26Dot6 number",
-            "NEG       - Negate a number",
-            "FLOOR     - Round a number down if it has a fractional component",
-            "CEILING   - Round a number up if it has a fractional component",
-            "ROUND00   - Round a number",
-            "ROUND01   - Round a number",
-            "ROUND10   - Round a number",
-            "ROUND11   - Round a number",
-            "NROUND00  - Compensate for engine characteristics",
-            "NROUND01  - Compensate for engine characteristics",
-            "NROUND10  - Compensate for engine characteristics",
-            "NROUND11  - Compensate for engine characteristics",
-            "WCVTF",
-            "DELTAP2   - Delta exception p2",
-            "DELTAP3   - Delta exception p3",
-            "DELTAC1   - Delta exception c1",
-            "DELTAC2   - Delta exception c2",
-            "DELTAC3   - Delta exception c3",
-            "SROUND    - Sets the roundState specifically",
-            "S45ROUND  - Sets the round state for working at 45degrees",
-            "JROT      - Jump Relative On True",
-            "JROF      - Jump Relative On False",
-            "ROFF      - Set round state to off", "",
-            "RUTG      - Set round state to up to grid",
-            "RDTG      - Set round state to down to grid",
-            "SANGW     - deprecated",
-            "AA        - deprecated",
-            "FLIPPT    - Flips a number of points on/off the curve",
-            "FLIPRGON  - Flips a range of points onto the curve",
-            "FLIPRGOFF - Flips a range of points off the curve", "", "",
-            "SCANCTRL  - We don't scan convert, so only pops a value",
-            "SDPVTL0   - Sets dual projection vector to line",
-            "SDPVTL1   - Sets dual projection vector perpendicular to line",
-            "GETINFO   - Gets info about current glyph & font engine",
-            "IDEF      - Define an instruction",
-            "ROLL      - Roll the top three stack elements",
-            "MAX       - Returns the maximum of two values",
-            "MIN       - Returns the minimum of two values",
-            "SCANTYPE  - We don't scan convert, so only pops a value",
-            "INSTCTRL  - Allows for setting flags to do with glyph execution"
+        "SVTCAy    - Set both vectors to y",
+        "SVTCAx    - Set both vectors to x",
+        "SPVTCAy   - Sets projection vector to y",
+        "SPVTCAx   - Sets projection vector to x",
+        "SFVTCAy   - Sets freedom vector to y",
+        "SFVTCAx   - Sets freedom vector to x",
+        "SPVTL0    - Set projection vector to line",
+        "SPVTL1    - Set projection vector perpendicular to line",
+        "SFVTL0    - Set freedom vector to line",
+        "SFVTL1    - Set freedom vector perpendicular to line",
+        "SPVFS     - Sets the projection vector from the stack",
+        "SFVFS     - Sets the freedom vector from the stack",
+        "GPV       - Gets the projection vector onto the stack",
+        "GFV       - Gets the freedom vector onto the stack",
+        "SFVTPV    - Sets freedom vector to projection vector",
+        "ISECT     - Set point to intersection of lines",
+        "SRP0      - Set rp0",
+        "SRP1      - Set rp1",
+        "SRP2      - Set rp2",
+        "SZP0      - Sets zp0",
+        "SZP1      - Sets zp1",
+        "SZP2      - Sets zp2",
+        "SZPS      - Sets all zone pointers",
+        "SLOOP     - Sets loop variable",
+        "RTG       - Sets round state to grid",
+        "RTHG      - Sets round state to half grid",
+        "SMD       - Sets minimum distance",
+        "ELSE      - ELSE",
+        "JMPR      - Jump",
+        "SCVTCI    - Set control value table cut in",
+        "SSWCI     - Set single width cut in",
+        "SSW       - Set single width",
+        "DUP       - Duplicate the top stack element",
+        "POP       - Remove the top stack element",
+        "CLEAR     - Clear the stack",
+        "SWAP      - Swap the top two stack elements",
+        "DEPTH     - Returns depth of stack",
+        "CINDEX    - Copy Indexed element to top of stack",
+        "MINDEX    - Move Indexed element to top of stack",
+        "ALIGNPTS  - Move points along fv to average of their pv positions", "",
+        "UTP       - Untouch point",
+        "LOOPCALL  - Call a function many times",
+        "CALL      - Call a function",
+        "FDEF      - Define a function",
+        "ENDF      - End a function definition",
+        "MDAP0     - Sets a point as touched",
+        "MDAP1     - Rounds a point along the pV and marks as touched",
+        "IUPy      - Interpolate untouched points in the y axis",
+        "IUPx      - Interpolate untouched points on the x axis",
+        "SHP0      - Shift point using RP2",
+        "SHP1      - Shift point using RP1",
+        "SHC0      - Shift a contour using RP2",
+        "SHC1      - Shift a contour using RP1",
+        "SHZ0      - Shift a zone using RP2",
+        "SHZ1      - Shift a zone using RP1",
+        "SHPIX     - Move point along freedom vector",
+        "IP        - Interpolate point",
+        "MSIRP0    - Move stack indirect relative point",
+        "MSIRP1    - Move stack indirect relative point",
+        "ALIGNRP   - Align point to RP0",
+        "RTDG      - Sets round state to double grid",
+        "MIAP0     - Move point to CVT value",
+        "MIAP1     - Move point to CVT using cut in and round",
+        "NPUSHB    - Push N bytes from IS to stack",
+        "NPUSHW    - Push N words from IS to stack",
+        "WS        - Write Store",
+        "RS        - Read Store",
+        "WCVTP     - Write Control Value Table in Pixels",
+        "RCVT      - Read Control Value Table",
+        "GC0       - Get coords on the pv",
+        "GC1       - Get original coords on the pv",
+        "SCFS",
+        "MD0       - Measure current distance",
+        "MD1       - Measure original distance",
+        "MPPEM     - Measure pixels per em in the direction of the projection vector",
+        "MPS",
+        "FLIPON    - Sets autoflip to true",
+        "FLIPOFF   - Sets autoflip to false",
+        "DEBUG     - Shouldn't be in live fonts",
+        "LT        - Less Than",
+        "LTEQ      - Less Than or Equal",
+        "GT        - Greater Than",
+        "GTEQ      - Greater Than or Equal",
+        "EQ        - Equal",
+        "NEQ       - Not Equal",
+        "ODD       - Rounds, truncates, and returns if odd.",
+        "EVEN      - Rounds, truncates, and returns if even",
+        "IF        - IF",
+        "EIF       - End IF",
+        "AND       - Logical AND",
+        "OR        - Logical OR",
+        "NOT       - Logical NOT",
+        "DELTAP1   - Delta exception p1",
+        "SDB       - Set delta base",
+        "SDS       - Set delta shift",
+        "ADD       - Add two F26Dot6 numbers",
+        "SUB       - Subtract a number from another",
+        "DIV       - Divide two F26Dot6 numbers",
+        "MUL       - Multiply two F26Dot6 numbers",
+        "ABS       - Return the absolute value of a F26Dot6 number",
+        "NEG       - Negate a number",
+        "FLOOR     - Round a number down if it has a fractional component",
+        "CEILING   - Round a number up if it has a fractional component",
+        "ROUND00   - Round a number",
+        "ROUND01   - Round a number",
+        "ROUND10   - Round a number",
+        "ROUND11   - Round a number",
+        "NROUND00  - Compensate for engine characteristics",
+        "NROUND01  - Compensate for engine characteristics",
+        "NROUND10  - Compensate for engine characteristics",
+        "NROUND11  - Compensate for engine characteristics",
+        "WCVTF",
+        "DELTAP2   - Delta exception p2",
+        "DELTAP3   - Delta exception p3",
+        "DELTAC1   - Delta exception c1",
+        "DELTAC2   - Delta exception c2",
+        "DELTAC3   - Delta exception c3",
+        "SROUND    - Sets the roundState specifically",
+        "S45ROUND  - Sets the round state for working at 45degrees",
+        "JROT      - Jump Relative On True",
+        "JROF      - Jump Relative On False",
+        "ROFF      - Set round state to off", "",
+        "RUTG      - Set round state to up to grid",
+        "RDTG      - Set round state to down to grid",
+        "SANGW     - deprecated",
+        "AA        - deprecated",
+        "FLIPPT    - Flips a number of points on/off the curve",
+        "FLIPRGON  - Flips a range of points onto the curve",
+        "FLIPRGOFF - Flips a range of points off the curve", "", "",
+        "SCANCTRL  - We don't scan convert, so only pops a value",
+        "SDPVTL0   - Sets dual projection vector to line",
+        "SDPVTL1   - Sets dual projection vector perpendicular to line",
+        "GETINFO   - Gets info about current glyph & font engine",
+        "IDEF      - Define an instruction",
+        "ROLL      - Roll the top three stack elements",
+        "MAX       - Returns the maximum of two values",
+        "MIN       - Returns the minimum of two values",
+        "SCANTYPE  - We don't scan convert, so only pops a value",
+        "INSTCTRL  - Allows for setting flags to do with glyph execution"
     };
 
     //parameters for MDRP/MIRP
@@ -496,14 +500,15 @@ public class TTVM implements Serializable {
 
     }
 
-
     /**
-     * Sets the scale variables for a font - if it's changed, the CVT needs to be rescaled, and the PreProgram
-     * (sometimes called CVT program) must be run again. As it's always called before a glyph is processed, it's also
-     * the ideal place to ensure that the font program has been run before anything else.
+     * Sets the scale variables for a font - if it's changed, the CVT needs to
+     * be rescaled, and the PreProgram (sometimes called CVT program) must be
+     * run again. As it's always called before a glyph is processed, it's also
+     * the ideal place to ensure that the font program has been run before
+     * anything else.
      *
      * @param scaler The value to multiply any unscaled values by
-     * @param ppem   The number of pixels per em square
+     * @param ppem The number of pixels per em square
      * @param ptSize The point size of the text
      */
     public void setScaleVars(final double scaler, final double ppem, final double ptSize) {
@@ -525,17 +530,19 @@ public class TTVM implements Serializable {
         }
     }
 
-
     /**
-     * Takes the information about a glyph specified and modifies it according to the instructions provided.
+     * Takes the information about a glyph specified and modifies it according
+     * to the instructions provided.
      *
      * @param instructions The instructions to execute
-     * @param glyfX        A list of scaled X coordinates for the points
-     * @param glyfY        A list of scaled Y coordinates for the points
-     * @param curves       Whether each point is on the curve or not
-     * @param contours     Whether each point is the last in a contour
+     * @param glyfX A list of scaled X coordinates for the points
+     * @param glyfY A list of scaled Y coordinates for the points
+     * @param curves Whether each point is on the curve or not
+     * @param contours Whether each point is the last in a contour
      */
-    public void processGlyph(final int[] instructions, final int[] glyfX, final int[] glyfY, final boolean[] curves, final boolean[] contours) {
+    public boolean processGlyph(final int[] instructions, final int[] glyfX, final int[] glyfY, final boolean[] curves, final boolean[] contours) {
+
+        boolean failedOnHinting;
 
         if (printCoordsAfterEachInstruction || watchAPoint) {
             printOut = true;
@@ -584,7 +591,7 @@ public class TTVM implements Serializable {
 
         //Disable glyph instructions if previously set by INSTCTRL
         if (gs.instructControl != 0) {
-            return;
+            return false;
         }
 
         //record starting position of watch point
@@ -598,7 +605,7 @@ public class TTVM implements Serializable {
             programToDebugIsData = getInstructionStreamIsData(programToDebug);
         }
 
-        execute(instructions, gs);
+        failedOnHinting = execute(instructions, gs);
 
         if (printCoordsAfterEachInstruction || watchAPoint) {
             printOut = false;
@@ -613,18 +620,22 @@ public class TTVM implements Serializable {
             };
             t.start();
         }
-    }
 
+        return failedOnHinting;
+    }
 
     /**
      * Execute a section of code
      *
      * @param program The code to execute
-     * @param gs      The graphics state to use
+     * @param gs The graphics state to use
      */
-    private void execute(final int[] program, final TTGraphicsState gs) {
+    private boolean execute(final int[] program, final TTGraphicsState gs) {
+
+        boolean failedOnHinting = false;
+
         if (program == null) {
-            return;
+            return false;
         }
 
         if (showDebugWindow && stepInto && debugWindow != null && debugWindow.isVisible()) {
@@ -632,7 +643,7 @@ public class TTVM implements Serializable {
             numberStack.push(debugPointer);
             functionsLineCount += program.length;
             setCurrentCodeForDebug(program, -1, !debuggerRunningInBackground);
-            return;
+            return false;
         }
 
         for (int currentPointer = 0; currentPointer < program.length; currentPointer++) {
@@ -641,9 +652,14 @@ public class TTVM implements Serializable {
             }
             currentPointer = process(program[currentPointer], currentPointer, program, gs);
 
+            if (currentPointer < 0) { //negative value used as boolean flag
+                currentPointer = -currentPointer;
+                failedOnHinting = true;
+            }
+
             //Check for change in position of watch point
-            if (watchAPoint &&
-                    (watchX != x[GLYPH_ZONE][watchPoint] || watchY != y[GLYPH_ZONE][watchPoint])) {
+            if (watchAPoint
+                    && (watchX != x[GLYPH_ZONE][watchPoint] || watchY != y[GLYPH_ZONE][watchPoint])) {
                 final int diffX = x[GLYPH_ZONE][watchPoint] - watchX;
                 final int diffY = y[GLYPH_ZONE][watchPoint] - watchY;
                 watchX = x[GLYPH_ZONE][watchPoint];
@@ -678,29 +694,32 @@ public class TTVM implements Serializable {
             }
 
             //Check if errors have been encountered and cease execution if they have
-            if (BaseTTGlyph.redecodePage) {
-                return;
+            if (failedOnHinting) {
+                return true;
             }
         }
 
+        return false;
     }
-
 
     /**
      * Process a command
      *
-     * @param code           The command to process
-     * @param currentPointer The location in the program (passed in so can be modified and passed out)
-     * @param program        The program
-     * @param gs             The graphics state to use
+     * @param code The command to process
+     * @param currentPointer The location in the program (passed in so can be
+     * modified and passed out)
+     * @param program The program
+     * @param gs The graphics state to use
      * @return The (possibly modified) location in the program
      */
     @SuppressWarnings("OverlyLongMethod")
     private int process(int code, int currentPointer, final int[] program, final TTGraphicsState gs) {
 
+        boolean failedOnHinting = false, failed;
+
         //Warning supressed as originalPointer is used by debug code
-        @SuppressWarnings("UnusedAssignment") final
-        int originalPointer = currentPointer;
+        @SuppressWarnings("UnusedAssignment")
+        final int originalPointer = currentPointer;
 
         //If it's reading data find how much to read & redirect to first command
         int bytesToRead = 0;
@@ -753,7 +772,6 @@ public class TTVM implements Serializable {
 
                     //Note: The MS and Apple documentation disagree on which zone pointers to use - Apple
                     //matches Freetype so we're using that for now.
-
                     double xdiff = getDoubleFromF26Dot6(x[gs.zp2][p2] - x[gs.zp1][p1]);
                     double ydiff = getDoubleFromF26Dot6(y[gs.zp2][p2] - y[gs.zp1][p1]);
                     final double factor = Math.sqrt((xdiff * xdiff) + (ydiff * ydiff));
@@ -769,7 +787,6 @@ public class TTVM implements Serializable {
 
                     //Note: The MS and Apple documentation disagree on which zone pointers to use - Apple
                     //matches Freetype so we're using that for now.
-
                     double xdiff = getDoubleFromF26Dot6(x[gs.zp2][p2] - x[gs.zp1][p1]);
                     double ydiff = getDoubleFromF26Dot6(y[gs.zp2][p2] - y[gs.zp1][p1]);
                     final double factor = Math.sqrt((xdiff * xdiff) + (ydiff * ydiff));
@@ -1091,7 +1108,10 @@ public class TTVM implements Serializable {
                     }
 
                     for (int i = 0; i < count; i++) {
-                        execute(function, gs);
+                        failed = execute(function, gs);
+                        if (failed) {
+                            failedOnHinting = true;
+                        }
                     }
                     if (printOut) {
                         System.out.println("LOOPCALL finished");
@@ -1109,7 +1129,10 @@ public class TTVM implements Serializable {
                         System.out.println("");
                     }
 
-                    execute(function, gs);
+                    failed = execute(function, gs);
+                    if (failed) {
+                        failedOnHinting = true;
+                    }
                     if (printOut) {
                         System.out.println("CALL finished");
                     }
@@ -1252,7 +1275,6 @@ public class TTVM implements Serializable {
                     //Note: The spec doesn't clearly say how a contour is identified - for now we are finding
                     //all of the contours and using the cth one, but another possibility is that you use the
                     //contour point c is a part of.
-
                     //get start and length of contours
                     final int[] contourLengths = new int[contour[GLYPH_ZONE].length];
                     final int[] contourStarts = new int[contour[GLYPH_ZONE].length];
@@ -1288,7 +1310,6 @@ public class TTVM implements Serializable {
                     //Note: The spec doesn't clearly say how a contour is identified - for now we are finding
                     //all of the contours and using the cth one, but another possibility is that you use the
                     //contour point c is a part of.
-
                     //get start and length of contours
                     final int[] contourLengths = new int[contour[GLYPH_ZONE].length];
                     final int[] contourStarts = new int[contour[GLYPH_ZONE].length];
@@ -1416,10 +1437,9 @@ public class TTVM implements Serializable {
                     final int d = stack.pop();
                     final int p = stack.pop();
 
-
                     //move to rp0 + d
-                    final int[] shift = gs.getFVMoveforPVDistance(d -
-                            (TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p], y[gs.zp1][p]) - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][gs.rp0], y[gs.zp0][gs.rp0])));
+                    final int[] shift = gs.getFVMoveforPVDistance(d
+                            - (TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p], y[gs.zp1][p]) - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][gs.rp0], y[gs.zp0][gs.rp0])));
                     x[gs.zp1][p] += shift[0];
                     y[gs.zp1][p] += shift[1];
 
@@ -1442,8 +1462,8 @@ public class TTVM implements Serializable {
                     final int p = stack.pop();
 
                     //move to rp0 + d
-                    final int[] shift = gs.getFVMoveforPVDistance(d -
-                            (TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p], y[gs.zp1][p]) - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][gs.rp0], y[gs.zp0][gs.rp0])));
+                    final int[] shift = gs.getFVMoveforPVDistance(d
+                            - (TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p], y[gs.zp1][p]) - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][gs.rp0], y[gs.zp0][gs.rp0])));
                     x[gs.zp1][p] += shift[0];
                     y[gs.zp1][p] += shift[1];
 
@@ -1603,16 +1623,16 @@ public class TTVM implements Serializable {
                 case MD0: {
                     final int p1 = stack.pop();
                     final int p2 = stack.pop();
-                    final int distance = TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p2], y[gs.zp1][p2]) -
-                            TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][p1], y[gs.zp0][p1]);
+                    final int distance = TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp1][p2], y[gs.zp1][p2])
+                            - TTGraphicsState.getCoordsOnVector(gs.projectionVector, x[gs.zp0][p1], y[gs.zp0][p1]);
                     stack.push(distance);
                     break;
                 }
                 case MD1: {
                     final int p1 = stack.pop();
                     final int p2 = stack.pop();
-                    final int distance = TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp1][p2], y[ORIGINAL + gs.zp1][p2]) -
-                            TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp0][p1], y[ORIGINAL + gs.zp0][p1]);
+                    final int distance = TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp1][p2], y[ORIGINAL + gs.zp1][p2])
+                            - TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp0][p1], y[ORIGINAL + gs.zp0][p1]);
                     stack.push(distance);
                     break;
                 }
@@ -2196,7 +2216,6 @@ public class TTVM implements Serializable {
 //
 //                    if ((selector & 4) == 4 && isStretched)
 //                        result += 0x200;
-
                     stack.push(result);
                     break;
                 }
@@ -2310,8 +2329,8 @@ public class TTVM implements Serializable {
                         final int p = stack.pop();
 
                         //get original distance
-                        int originalDistance = TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp1][p], y[ORIGINAL + gs.zp1][p]) -
-                                TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp0][gs.rp0], y[ORIGINAL + gs.zp0][gs.rp0]);
+                        int originalDistance = TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp1][p], y[ORIGINAL + gs.zp1][p])
+                                - TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp0][gs.rp0], y[ORIGINAL + gs.zp0][gs.rp0]);
 
                         //check single width cut in
                         if (Math.abs(originalDistance) < gs.singleWidthCutIn) {
@@ -2387,8 +2406,8 @@ public class TTVM implements Serializable {
                         final int p = stack.pop();
 
                         //Get original distance
-                        int distance = TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp1][p], y[ORIGINAL + gs.zp1][p]) -
-                                TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp0][gs.rp0], y[ORIGINAL + gs.zp0][gs.rp0]);
+                        int distance = TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp1][p], y[ORIGINAL + gs.zp1][p])
+                                - TTGraphicsState.getCoordsOnVector(gs.dualProjectionVector, x[ORIGINAL + gs.zp0][gs.rp0], y[ORIGINAL + gs.zp0][gs.rp0]);
 
                         //Check single width cutin
                         if (Math.abs(distance - gs.singleWidthValue) < gs.singleWidthCutIn) {
@@ -2453,7 +2472,10 @@ public class TTVM implements Serializable {
                         if (printOut) {
                             System.out.println("I 0x" + Integer.toHexString(code) + "    - Custom Instruction");
                         }
-                        execute(instructions.get(code), gs);
+                        failed = execute(instructions.get(code), gs);
+                        if (failed) {
+                            failedOnHinting = true;
+                        }
                         if (printOut) {
                             System.out.println("I 0x" + Integer.toHexString(code) + " finished");
                         }
@@ -2466,8 +2488,8 @@ public class TTVM implements Serializable {
 
             LogWriter.writeLog("Exception: " + e.getMessage() + " at line " + currentPointer + "- hinting turned off");
 
-            BaseTTGlyph.useHinting = false;
-            BaseTTGlyph.redecodePage = true;
+            //  BaseTTGlyph.useHinting = false;
+            failedOnHinting = true;
         }
 
         if (showDebugWindow && debugWindow != null && debugWindow.isVisible()) {
@@ -2478,15 +2500,20 @@ public class TTVM implements Serializable {
             }
         }
 
-        return currentPointer;
+        if (failedOnHinting) {
+            return -currentPointer;
+        } else {
+            return currentPointer;
+        }
     }
 
-
     /**
-     * Goes through the glyph contour by contour finding pairs of touched points and moving the points between them to
-     * preserve the shape of the original outline.
+     * Goes through the glyph contour by contour finding pairs of touched points
+     * and moving the points between them to preserve the shape of the original
+     * outline.
      *
-     * @param direction Whether to interpolate in the x or y axis (value is originating instruction)
+     * @param direction Whether to interpolate in the x or y axis (value is
+     * originating instruction)
      */
     private void interpolateUntouchedPoints(final int direction) {
 
@@ -2522,9 +2549,7 @@ public class TTVM implements Serializable {
                     touchedCount++;
                 }
                 point++;
-            }
-            while (!contour[GLYPH_ZONE][contourStart + point - 1] && (contourStart + point) < contour[GLYPH_ZONE].length);
-
+            } while (!contour[GLYPH_ZONE][contourStart + point - 1] && (contourStart + point) < contour[GLYPH_ZONE].length);
 
             //process points
             if (touchedCount == 1) {
@@ -2550,22 +2575,23 @@ public class TTVM implements Serializable {
                 }
             }
 
-
             //Move to start of next contour
             contourStart += point;
         }
     }
 
     /**
-     * Interpolates the values of a range of points using two reference points. If the points coordinates were
-     * originally between those of the two reference points, the relationship is maintained. If not, it is shifted by
-     * the same shift which has been applied to the nearest of the two reference points.
+     * Interpolates the values of a range of points using two reference points.
+     * If the points coordinates were originally between those of the two
+     * reference points, the relationship is maintained. If not, it is shifted
+     * by the same shift which has been applied to the nearest of the two
+     * reference points.
      *
-     * @param start    The first point to be interpolated
-     * @param end      The last point to be interpolated
-     * @param ref1     The first reference point
-     * @param ref2     The second reference point
-     * @param points   The current coordinates of all points
+     * @param start The first point to be interpolated
+     * @param end The last point to be interpolated
+     * @param ref1 The first reference point
+     * @param ref2 The second reference point
+     * @param points The current coordinates of all points
      * @param original The original coordinates of all points
      */
     private static void interpolateRange(final int start, final int end, final int ref1, final int ref2, final int[] points, final int[] original) {
@@ -2600,11 +2626,11 @@ public class TTVM implements Serializable {
         }
     }
 
-
     /**
-     * Doesn't currently do anything - should compensate for large dot sizes on some printers
+     * Doesn't currently do anything - should compensate for large dot sizes on
+     * some printers
      *
-     * @param num             Number to compensate
+     * @param num Number to compensate
      * @param characteristics Type of compensation to use
      * @return Compensated number
      */
@@ -2616,10 +2642,10 @@ public class TTVM implements Serializable {
     /**
      * Reads data from the Input Stream and puts it on the stack
      *
-     * @param number         How many items to read
-     * @param readWord       Whether you're reading a word or a byte
+     * @param number How many items to read
+     * @param readWord Whether you're reading a word or a byte
      * @param currentPointer The current location in the stream
-     * @param program        The current input stream
+     * @param program The current input stream
      * @return The final location in the stream
      */
     private int readFromIS(final int number, final boolean readWord, int currentPointer, final int[] program) {
@@ -2642,17 +2668,17 @@ public class TTVM implements Serializable {
         return currentPointer;
     }
 
-
     /**
-     * Takes two Uint8s containing 8 bits of data each and converts them to
-     * a signed integer.
+     * Takes two Uint8s containing 8 bits of data each and converts them to a
+     * signed integer.
      *
      * @param high first int
-     * @param low  second int
+     * @param low second int
      * @return signed int
      */
     protected static int getIntFrom2Uint8(final int high, final int low) {
-        return ((high << 8) + low) +        //main concatenation
+        return ((high << 8) + low)
+                + //main concatenation
                 ((high >> 7 & 1) * -65536);   //account for negative option
     }
 
@@ -2696,12 +2722,11 @@ public class TTVM implements Serializable {
         return (int) ((a * 16384) + 0.5);
     }
 
-
     /**
      * Reads a program from a table in the font file.
      *
      * @param currentFontFile Font file to use
-     * @param table           Table ID
+     * @param table Table ID
      * @return The program
      */
     private static int[] readProgramTable(final FontFile2 currentFontFile, final int table) {
@@ -2724,11 +2749,11 @@ public class TTVM implements Serializable {
         return program;
     }
 
-
     /**
      * Stack used by programs
      */
     private static class Stack implements Serializable {
+
         private int pointer;
         private int[] stack;
 
@@ -2990,24 +3015,20 @@ public class TTVM implements Serializable {
                 yScale = (double) h / yRange;
                 scale = xScale < yScale ? xScale : yScale;
 
-
                 //Apply transform
                 g2.translate(0, h);
                 g2.scale(scale, -scale);
 
                 g2.translate(-minX, -minY);
 
-
                 //Fill with white
                 g2.setPaint(Color.WHITE);
                 g2.fillRect(minX, minY, (int) (w / scale), (int) (h / scale));
-
 
                 //Draw axes
                 g2.setPaint(new Color(180, 180, 255));
                 g2.drawLine(0, minY, 0, (int) (h / scale));
                 g2.drawLine(minX, 0, (int) (w / scale), 0);
-
 
                 //Draw points
                 final int len = (int) (3 / scale);
@@ -3035,7 +3056,6 @@ public class TTVM implements Serializable {
                     g2.setTransform(store);
                 }
 
-
                 //Draw interpolated shadow
                 if (showInterpolatedShadow.isSelected()) {
                     final int c = x[GLYPH_ZONE].length;
@@ -3059,7 +3079,6 @@ public class TTVM implements Serializable {
                     System.arraycopy(curveStore, 0, curve[GLYPH_ZONE], 0, c);
                     System.arraycopy(contourStore, 0, contour[GLYPH_ZONE], 0, c);
                 }
-
 
                 //Draw glyph
                 final GeneralPath shape = getPathFromPoints(x[GLYPH_ZONE], y[GLYPH_ZONE], curve[GLYPH_ZONE], contour[GLYPH_ZONE]);
@@ -3175,9 +3194,6 @@ public class TTVM implements Serializable {
         glyphPanel.add(BorderLayout.NORTH, showInterpolatedShadow);
 
         debugWindow.add(BorderLayout.CENTER, glyphPanel);
-
-
-
 
         /*
          * Right panel
@@ -3371,7 +3387,6 @@ public class TTVM implements Serializable {
 
         debugWindow.add(BorderLayout.SOUTH, statePanel);
 
-
         try {
             dGS = (TTGraphicsState) graphicsState.clone();
         } catch (final CloneNotSupportedException e) {
@@ -3411,7 +3426,8 @@ public class TTVM implements Serializable {
     /**
      * DEBUG METHOD -
      * <p>
-     * Creates paths for a given set of points, making sure not to modify any of the values passed in.
+     * Creates paths for a given set of points, making sure not to modify any of
+     * the values passed in.
      *
      * @param x
      * @param y
@@ -3633,7 +3649,6 @@ public class TTVM implements Serializable {
                     current_path.closePath();
                 }
 
-
                 if (isEnd) {
                     current_path.moveTo(xs, ys);
                     isEnd = false;
@@ -3646,8 +3661,9 @@ public class TTVM implements Serializable {
     /**
      * DEBUG METHOD -
      * <p>
-     * Runs the debugger such that it is at a specified point in the current code. This may be less than the current
-     * number, in which case the glyph program is restarted and run to that point.
+     * Runs the debugger such that it is at a specified point in the current
+     * code. This may be less than the current number, in which case the glyph
+     * program is restarted and run to that point.
      *
      * @param targetPointer
      */
@@ -3686,6 +3702,11 @@ public class TTVM implements Serializable {
         while (instructionsExecuted < target + (skipFunctions ? (functionsLineCount - startLineCount) : 0)) {
             stepInto = true;
             debugPointer = process(programToDebug[debugPointer], debugPointer, programToDebug, dGS);
+
+            if (debugPointer < 0) { //negative value used as boolean flag
+                debugPointer = -debugPointer;
+            }
+
             debugPointer++;
 
             if (debugPointer == programToDebug.length && !codeStack.empty()) {
@@ -3699,7 +3720,6 @@ public class TTVM implements Serializable {
         stepInto = false;
         instructionsExecuted = target;
     }
-
 
     /**
      * DEBUG METHOD -
@@ -3742,7 +3762,8 @@ public class TTVM implements Serializable {
     /**
      * DEBUG METHOD -
      * <p>
-     * Process the current instruction, update the display, and move the debugger onto the next.
+     * Process the current instruction, update the display, and move the
+     * debugger onto the next.
      *
      * @param stepIntoCall
      */
@@ -3753,6 +3774,11 @@ public class TTVM implements Serializable {
                 public void run() {
                     stepInto = stepIntoCall;
                     debugPointer = process(programToDebug[debugPointer], debugPointer, programToDebug, dGS);
+
+                    if (debugPointer < 0) { //negative value used as boolean flag
+                        debugPointer = -debugPointer;
+                    }
+
                     stepInto = false;
                     debugPointer++;
 
@@ -3818,7 +3844,6 @@ public class TTVM implements Serializable {
         }
         currentInstructionList.ensureIndexIsVisible(start);
 
-
         stackList.setListData(stack.toStringArray());
         cvtList.setListData(cvt.getCVTForDebug());
         storageList.setListData(getStorageAsArray());
@@ -3865,11 +3890,11 @@ public class TTVM implements Serializable {
         currentCode.setText(function);
     }
 
-
     /**
      * DEBUG METHOD -
      * <p>
-     * Prints out all of the coordinates in a form well suited to pasting into a spreadsheet
+     * Prints out all of the coordinates in a form well suited to pasting into a
+     * spreadsheet
      */
     private void printCoords() {
         for (int i = 0; i < x[GLYPH_ZONE].length; i++) {
@@ -3883,11 +3908,11 @@ public class TTVM implements Serializable {
         System.out.println("");
     }
 
-
     /**
      * DEBUG METHOD -
      * <p>
-     * Prints out a set of instructions without executing them. It's not a quick method, as it uses reflection to do so!
+     * Prints out a set of instructions without executing them. It's not a quick
+     * method, as it uses reflection to do so!
      *
      * @param program Instructions to print
      */
@@ -3906,7 +3931,8 @@ public class TTVM implements Serializable {
     /**
      * DEBUG METHOD -
      * <p>
-     * Converts an array of instructions in bytecode into a human-readable string array for display.
+     * Converts an array of instructions in bytecode into a human-readable
+     * string array for display.
      *
      * @param program
      * @return
@@ -4008,7 +4034,8 @@ public class TTVM implements Serializable {
     /**
      * DEBUG METHOD -
      * <p>
-     * Converts an instruction stream into a boolean array indicating whether a line is an instruction or data.
+     * Converts an instruction stream into a boolean array indicating whether a
+     * line is an instruction or data.
      *
      * @param program
      * @return

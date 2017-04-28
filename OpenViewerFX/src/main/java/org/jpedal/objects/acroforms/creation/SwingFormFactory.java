@@ -38,7 +38,6 @@ import java.awt.image.BufferedImage;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -512,11 +511,6 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory 
             comboBox.setEnabled(false);
         }
 
-        if (org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
-            final javax.swing.text.Caret c = ((JTextComponent) comboBox.getEditor().getEditorComponent()).getCaret();
-            c.setBlinkRate(0);
-        }
-
         //listener to keep synced
         comboBox.addItemListener(new ComboListener(comboBox, form));
 
@@ -960,11 +954,6 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory 
             textcomp.setHorizontalAlignment(form.getAlignment());
         }
 
-        if (org.jpedal.DevFlags.GUITESTINGINPROGRESS) {
-            final javax.swing.text.Caret c = textcomp.getCaret();
-            c.setBlinkRate(0);
-        }
-        
         /*
          * ensure we sync back to FormObject if altered
          */
@@ -1255,10 +1244,6 @@ public class SwingFormFactory extends GenericFormFactory implements FormFactory 
 
         setupMouseListener(comp, form);
 
-        if (org.jpedal.DevFlags.GUITESTINGINPROGRESS && comp instanceof javax.swing.text.JTextComponent) {
-            final javax.swing.text.Caret c = ((javax.swing.text.JTextComponent) comp).getCaret();
-            c.setBlinkRate(0);
-        }
     }
 
     /**

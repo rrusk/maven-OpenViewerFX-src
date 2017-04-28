@@ -891,7 +891,9 @@ public class ImageDecoder extends BaseDecoder {
             imageData.setpX(pageData.getCropBoxWidth(parserOptions.getPageNumber()) * 4);
             imageData.setpY(pageData.getCropBoxHeight(parserOptions.getPageNumber()) * 4);
 
-        } else if (SamplingFactory.downsampleLevel == SamplingFactory.high || getSamplingOnly) { // && w>500 && h>500){ // ignore small items
+        } else if (SamplingFactory.downsampleLevel == SamplingFactory.high ||
+                SamplingFactory.downsampleLevel == SamplingFactory.highAndSharpen ||
+                getSamplingOnly) { // && w>500 && h>500){ // ignore small items
 
             //ensure all positive for comparison
             final float[][] CTM = new float[3][3];
@@ -924,7 +926,8 @@ public class ImageDecoder extends BaseDecoder {
 
             }
 
-        } else if (SamplingFactory.downsampleLevel == SamplingFactory.medium) {
+        } else if (SamplingFactory.downsampleLevel == SamplingFactory.medium ||
+                SamplingFactory.downsampleLevel == SamplingFactory.mediumAndSharpen) {
             imageData.setpX(pageData.getCropBoxWidth(parserOptions.getPageNumber()));
             imageData.setpY(pageData.getCropBoxHeight(parserOptions.getPageNumber()));
         }

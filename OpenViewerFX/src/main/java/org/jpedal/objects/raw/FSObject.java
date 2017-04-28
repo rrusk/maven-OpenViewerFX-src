@@ -34,9 +34,9 @@ package org.jpedal.objects.raw;
 
 public class FSObject extends FormObject {
 
-    byte[] rawUF, rawDesc;
+    byte[] rawUF, rawDesc, rawF;
 
-    String UF, Desc;
+    String UF, Desc, FString;
 
     private byte[][] Names;
 
@@ -143,6 +143,10 @@ public class FSObject extends FormObject {
                 rawUF = value;
                 break;
 
+            case PdfDictionary.F:
+                rawF = value;
+                break;
+
             default:
                 super.setTextStreamValue(id, value);
 
@@ -172,6 +176,15 @@ public class FSObject extends FormObject {
 
                 return UF;
 
+            case PdfDictionary.F:
+
+                //setup first time
+                if (FString == null && rawF != null) {
+                    FString = new String(rawF);
+                }
+
+                return FString;
+
             default:
                 return super.getTextStreamValue(id);
 
@@ -188,6 +201,9 @@ public class FSObject extends FormObject {
 
             case PdfDictionary.UF:
                 return rawUF;
+
+            case PdfDictionary.F:
+                return rawF;
 
             default:
                 return super.getTextStreamValueAsByte(id);

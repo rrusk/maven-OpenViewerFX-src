@@ -37,11 +37,11 @@ public class CMYKtoRGB {
     }
 
     private static BufferedImage decode(final byte[] rasData, final int w, final int h) {
-        
+
         final BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         int[] imageData = ((java.awt.image.DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        
-        
+
+
         final java.awt.color.ColorSpace CMYK = DeviceCMYKColorSpace.getColorSpaceInstance();
         int dim = w * h;
         int p = 0;
@@ -59,6 +59,6 @@ public class CMYKtoRGB {
             imageData[i] = (r << 16) | (g << 8) | b;
         }
         return image;
-        
+
     }
 }

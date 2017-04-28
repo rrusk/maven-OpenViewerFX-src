@@ -258,7 +258,9 @@ public class FileAccess {
 
             this.filename = "ImageInputStream" + System.currentTimeMillis();
 
-            org.jpedal.DevFlags.currentFile = this.filename;
+            if (LogWriter.isRunningFromIDE) {
+                System.out.println("open " + filename);
+            }
 
             res.flush();
             res.flushObjects();
@@ -288,7 +290,9 @@ public class FileAccess {
 
         isOpen = false;
 
-        org.jpedal.DevFlags.currentFile = filename;
+        if (LogWriter.isRunningFromIDE) {
+            System.out.println("open " + filename);
+        }
 
         this.filename = filename;
         res.flush();
@@ -945,9 +949,6 @@ public class FileAccess {
                 // pass handle into renderer
                 if (formRenderer != null) {
                     pageCount = formRenderer.openFile(pageCount, options.getInsetW(), options.getInsetH(), pageData, currentPdfFile, res.getPdfObject(PdfResources.AcroFormObj));
-
-                    DevFlags.formsLoaded = false;
-
                 }
 
                 pageData.setPageCount(pageCount);
@@ -980,9 +981,9 @@ public class FileAccess {
 
         isOpen = false;
 
-        org.jpedal.DevFlags.currentFile = filename;
-
-        //System.out.println(filename);
+        if (LogWriter.isRunningFromIDE) {
+            System.out.println("open " + filename);
+        }
 
         this.filename = filename;
         res.flush();

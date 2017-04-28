@@ -59,6 +59,7 @@ public class ImageData {
     private boolean removed;
     private float[] decodeArray;
     private PdfImageTypes rawType = PdfImageTypes.Other;
+    private boolean isConvertedToARGB;
 
     public ImageData(final byte[] objectData) {
         this.objectData = objectData;
@@ -80,7 +81,6 @@ public class ImageData {
         imageMask = XObject.getBoolean(PdfDictionary.ImageMask);
 
         // decodeArray=XObject.getFloatArray(PdfDictionary.Decode);
-
     }
 
     public ImageData(final int mode) {
@@ -192,7 +192,6 @@ public class ImageData {
 
         decodeArray = XObject.getFloatArray(PdfDictionary.Decode);
 
-
         return Filters;
     }
 
@@ -257,5 +256,13 @@ public class ImageData {
      */
     public PdfImageTypes getImageType() {
         return rawType;
+    }
+
+    public void setIsConvertedToARGB(boolean b) {
+        isConvertedToARGB = b;
+    }
+
+    public boolean isConvertedToARGB() {
+        return isConvertedToARGB;
     }
 }

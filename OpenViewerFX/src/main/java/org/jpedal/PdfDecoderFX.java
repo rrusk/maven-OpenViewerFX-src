@@ -396,10 +396,6 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
         } catch (final NumberFormatException e) {
             LogWriter.writeLog("Exception: " + e.getMessage());
         }
-
-        if (LogWriter.isRunningFromIDE) {
-            org.jpedal.DevFlags.addShutdownHook();
-        }
     }
 
     /**
@@ -1890,12 +1886,7 @@ public class PdfDecoderFX extends Pane implements Printable, Pageable, PdfDecode
     @Override
     public boolean getPageDecodeStatus(final int status) {
 
-        if (DevFlags.testing && status == (org.jpedal.parser.DecodeStatus.NonEmbeddedCIDFonts)) {
-            return false;
-        }
-
         return resultsFromDecode.getPageDecodeStatus(status);
-
     }
 
     @Override

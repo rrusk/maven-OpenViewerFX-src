@@ -47,7 +47,6 @@ import org.jpedal.external.ErrorTracker;
 import org.jpedal.external.ExternalHandlers;
 import org.jpedal.external.Options;
 import org.jpedal.fonts.FontMappings;
-import org.jpedal.fonts.tt.TTGlyph;
 import org.jpedal.grouping.PdfGroupingAlgorithms;
 import org.jpedal.io.ColorSpaceConvertor;
 import org.jpedal.io.ObjectStore;
@@ -370,16 +369,6 @@ public class Parser {
 
                 image = pdfToImageConvertor.convert(resultsFromDecode, displayRotation, res, externalHandlers, renderMode, pageData, externalHandlers.getFormRenderer(), scaling, getIO(), pageIndex, imageIsTransparent, currentPageOffset);
 
-                //Check for exceptions in TrueType hinting and re decode if neccessary
-                if (TTGlyph.redecodePage) {
-
-                    //the software may well have flagged forms on page as decoded and will ignore this second attempt. So set back to not decoded.
-                    this.externalHandlers.getFormRenderer().getCompData().setListForPage(pageIndex, null, true);
-
-                    TTGlyph.redecodePage = false;
-                    return getPageAsImage(pageIndex, imageIsTransparent);
-                }
-
                 multiplyer = pdfToImageConvertor.getMultiplyer();
 
             }
@@ -630,8 +619,6 @@ public class Parser {
 
     void decodePage(int rawPage) {
 
-        TTGlyph.redecodePage = false;
-
         //flag if decoding started
         final Object customErrorTracker = externalHandlers.getExternalHandler(Options.ErrorTracker);
 
@@ -709,8 +696,6 @@ public class Parser {
                 fileAcces.setLastPageDecoded(page);
 
                 decodeStatus = "";
-
-                DevFlags.currentPage = page;
 
                 currentDisplay.writeCustom(DynamicVectorRenderer.FLUSH, null);
 
@@ -827,19 +812,12 @@ public class Parser {
                 Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 
-                DevFlags.fileLoaded = true;
-
                 fileAcces.setDecoding(false);
 
                 if (statusBar != null) {
                     statusBar.percentageDone = 100;
                 }
             }
-        }
-
-        //Check for exceptions in TrueType hinting and re decode if neccessary
-        if (TTGlyph.redecodePage) {
-            decodePage(rawPage);
         }
 
         if (customErrorTracker != null) {
