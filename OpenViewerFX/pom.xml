@@ -63,6 +63,23 @@
     
     <build>
         <plugins>
+
+	  <plugin>
+	    <!-- Build an executable JAR -->
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-jar-plugin</artifactId>
+	    <version>3.0.2</version>
+	    <configuration>
+              <archive>
+		<manifest>
+		  <addClasspath>true</addClasspath>
+		  <classpathPrefix>lib/</classpathPrefix>
+		  <mainClass>org.jpedal.examples.baseviewer.BaseViewerFX</mainClass>
+		</manifest>
+              </archive>
+	    </configuration>
+	  </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>

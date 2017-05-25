@@ -3,6 +3,9 @@
 
 <h3>Description</h3>
 
+***Update***
+Made jar file executable by modifying OpenViewerFX/pom.xml to add META-INF/MANIFEST.MF to the jar.  Build jar using 'mvn clean package' in OpenViewerFX folder.  Then test jar by going into target folder and executing 'java -jar OpenViewerFX-7.12.28.jar'.
+
 OpenViewerFX, an innovative Open Source JavaFX PDF Viewer. It combines the power of JavaFX with IDRsolutions industry leading PDF library to deliver a complete cross-platform PDF Reader/Viewer under the friendly LGPL Open Source license.<br>
 It can easily be integerated into your existing Java application or can be used a as stand-alone application.
 
